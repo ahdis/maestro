@@ -1,0 +1,69 @@
+# Define templates
+include:
+  - project: 'gazelle/private/gitlab-ci-templates'
+    file: 'extends-v2.yaml'
+    ref: 'master'
+
+# Define stages
+stages:
+  - build
+  - predeploy
+  - deploy
+  - test
+  - publish
+  - release
+  - upgrade
+  - clean
+
+# Define global variables
+variables:
+  P_MAVEN_IMAGE_TAG: "3.9.6-openjdk-21-slim"
+
+compile/unit-test:
+  stage: build
+  extends:
+    - .buildJavaMavenTest
+
+package:
+  stage: build
+  extends:
+    - .buildJavaMavenPackage
+  variables:
+    P_MAVEN_EXTRA_ARGS: "-Pci -DskipTests"
+  needs:
+    - job: compile/unit-test
+      artifacts: true
+
+static-analysis:
+  stage: test
+  extends:
+    - .testJavaMavenSonarAnalysis
+  variables:
+    P_MAVEN_IMAGE_TAG: "3.9.6-openjdk-21-slim"
+  needs:
+    - job: compile/unit-test
+      artifacts: true
+
+install-cache-repo:
+  stage: publish
+  extends:
+    - .publishJavaMavenInstall
+  needs:
+    - job: package
+      artifacts: true
+
+publish-code:
+  stage: publish
+  extends:
+    - .publishJavaMavenDeploy
+  needs:
+    - job: package
+      artifacts: true
+    - job: static-analysis
+      artifacts: false
+
+release/code:
+  stage: release
+  extends:
+    - .releaseCodeForService
+  when: manual
