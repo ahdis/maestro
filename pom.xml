@@ -13,6 +13,13 @@
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.version>3.9.1</quarkus.platform.version>
+        <!-- Quarkus Build-->
+        <quarkus.container-image.build>true</quarkus.container-image.build>
+        <quarkus.container-image.group>gazelle-snapshot</quarkus.container-image.group>
+        <quarkus.container-image.name>app/maestro</quarkus.container-image.name>
+        <quarkus.container-image.registry>rg.fr-par.scw.cloud</quarkus.container-image.registry>
+        <quarkus.container-image.tag>${project.version}</quarkus.container-image.tag>
+
         <skipITs>true</skipITs>
         <surefire-plugin.version>3.2.5</surefire-plugin.version>
     </properties>
@@ -40,6 +47,15 @@
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>validation-client</artifactId>
             <version>1.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-container-image-docker</artifactId>
+        </dependency>
+        <!-- Healthcheck dependency -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-smallrye-health</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
