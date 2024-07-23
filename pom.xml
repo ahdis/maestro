@@ -22,7 +22,19 @@
 
         <skipITs>true</skipITs>
         <surefire-plugin.version>3.2.5</surefire-plugin.version>
+        <!--git-->
+        <git.user.name>gitlab-ci</git.user.name>
+        <git.user.token>changeit</git.user.token>
+        <git.project.url>
+            https://${git.user.name}:${git.user.token}@gitlab.inria.fr/gazelle/private/kereval/maestro.git
+        </git.project.url>
     </properties>
+    <scm>
+        <connection>scm:git:${git.project.url}</connection>
+        <url>scm:git:${git.project.url}</url>
+        <developerConnection>scm:git:${git.project.url}</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
 
     <dependencyManagement>
         <dependencies>
