@@ -27,9 +27,9 @@ compile/unit-test:
 package:
   stage: build
   extends:
-    - .buildJavaMavenPackage
+    - .buildJavaMavenPackageWithQuarkus
   variables:
-    P_MAVEN_EXTRA_ARGS: "-Pci -DskipTests"
+    P_MAVEN_EXTRA_ARGS: "-DskipTests"
   needs:
     - job: compile/unit-test
       artifacts: true
@@ -65,5 +65,10 @@ publish-code:
 release/code:
   stage: release
   extends:
-    - .releaseCodeForService
-  when: manual
+    - .releaseCodeForQuarkus
+
+release/dockerImage:
+  stage: release
+  extends:
+    - .releaseDockerWithQuarkus
+  needs: [ "release/code" ]
