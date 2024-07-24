@@ -1,6 +1,6 @@
-package net.ihe.gazelle.business.engine.runner;
+package net.ihe.gazelle.step_runner;
 
-import net.ihe.gazelle.business.step.Step;
+import net.ihe.gazelle.step.Step;
 
 public interface StepRunnerFactory {
 
