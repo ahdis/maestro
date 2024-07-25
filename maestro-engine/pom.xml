@@ -6,7 +6,7 @@
     <parent>
         <groupId>net.ihe.gazelle</groupId>
         <artifactId>maestro</artifactId>
-        <version>0.1.1-SNAPSHOT</version>
+        <version>0.1.1-MAES-44-SNAPSHOT</version>
     </parent>
 
     <artifactId>maestro-engine</artifactId>
@@ -26,7 +26,7 @@
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>maestro-api</artifactId>
-            <version>0.1.1-SNAPSHOT</version>
+            <version>0.1.1-MAES-44-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
