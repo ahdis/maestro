@@ -11,7 +11,7 @@ public class TestImpl implements Test {
 
     @Override
     public List<Step> getSteps() {
-        return steps;
+        return new ArrayList<>(steps);
     }
 
     @Override

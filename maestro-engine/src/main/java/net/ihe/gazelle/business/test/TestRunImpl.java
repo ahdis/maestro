@@ -5,6 +5,7 @@ import net.ihe.gazelle.test.Test;
 import net.ihe.gazelle.test.TestRun;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,7 +19,7 @@ public class TestRunImpl implements TestRun {
     private final Map<String, Object> report = new ConcurrentHashMap<>();
 
     public Map<String, Object> getReport() {
-        return report;
+        return new HashMap<>(report);
     }
 
     public void setReport(Map<String, Object> report) {
@@ -27,12 +28,14 @@ public class TestRunImpl implements TestRun {
 
     @Override
     public Test getTest() {
-        return test;
+        Test res = new TestImpl();
+        res.addAllSteps(test.getSteps());
+        return res;
     }
 
     @Override
     public List<Input> getInputs() {
-        return inputs;
+        return new ArrayList<>(inputs);
     }
 
     @Override
