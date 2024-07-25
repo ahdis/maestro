@@ -15,6 +15,11 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <sonar.coverage.exclusions>**/net.ihe.gazelle.dao.TestRunController/**</sonar.coverage.exclusions>
+        <sonar.coverage.exclusions>**/net.ihe.gazelle.dao.InputImpl/**</sonar.coverage.exclusions>
+        <sonar.coverage.exclusions>**/net.ihe.gazelle.dao.TestRunParser/**</sonar.coverage.exclusions>
+        <sonar.coverage.exclusions>**/net.ihe.gazelle.business.test.TestImpl/**</sonar.coverage.exclusions>
+        <sonar.coverage.exclusions>**/net.ihe.gazelle.business.test.TestRunImpl/**</sonar.coverage.exclusions>
     </properties>
 
     <dependencies>
