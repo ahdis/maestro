@@ -2,8 +2,8 @@ package net.ihe.gazelle.business.engine;
 
 import net.ihe.gazelle.business.exception.DuplicatedStepsException;
 import net.ihe.gazelle.business.exception.MissingArgumentException;
-import net.ihe.gazelle.business.test.TestRun;
 import net.ihe.gazelle.step.Step;
+import net.ihe.gazelle.test.TestRun;
 
 import java.util.ArrayList;
 import java.util.List;

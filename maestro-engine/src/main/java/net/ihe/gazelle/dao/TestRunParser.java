@@ -7,10 +7,11 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import net.ihe.gazelle.business.engine.marshaller.StepMarshallerProvider;
 import net.ihe.gazelle.business.exception.MissingArgumentException;
 import net.ihe.gazelle.business.exception.ParsingErrorException;
-import net.ihe.gazelle.business.test.Test;
-import net.ihe.gazelle.business.test.TestRun;
+import net.ihe.gazelle.business.test.TestImpl;
+import net.ihe.gazelle.business.test.TestRunImpl;
 import net.ihe.gazelle.marshaller.StepMarshaller;
 import net.ihe.gazelle.step.Step;
+import net.ihe.gazelle.test.Input;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,7 +20,7 @@ import java.util.List;
 
 public class TestRunParser{
 
-    public List<TestRun> convertInputStreamToTestRuns(InputStream inputStream) throws IOException, MissingArgumentException {
+    public List<TestRunImpl> convertInputStreamToTestRuns(InputStream inputStream) throws IOException, MissingArgumentException {
         try{
             ObjectMapper mapper = new ObjectMapper();
             return parseTestRuns(inputStream, mapper);
@@ -28,26 +29,26 @@ public class TestRunParser{
         }
     }
 
-    private static List<TestRun> parseTestRuns(InputStream inputStream, ObjectMapper mapper) throws IOException, MissingArgumentException {
+    private static List<TestRunImpl> parseTestRuns(InputStream inputStream, ObjectMapper mapper) throws IOException, MissingArgumentException {
         try {
             ArrayNode testRunNodes = (ArrayNode) mapper.readTree(inputStream);
-            List<TestRun> testRuns = new ArrayList<>();
+            List<TestRunImpl> testRunImpls = new ArrayList<>();
             for(JsonNode testRunNode : testRunNodes) {
-                TestRun testRun = new TestRun();
-                testRun.setTest(parseTest(testRunNode));
-                testRun.addAllInputs(parseInputs(testRunNode, mapper));
-                testRuns.add(testRun);
+                TestRunImpl testRunImpl = new TestRunImpl();
+                testRunImpl.setTest(parseTest(testRunNode));
+                testRunImpl.addAllInputs(parseInputs(testRunNode, mapper));
+                testRunImpls.add(testRunImpl);
             }
-            return testRuns;
+            return testRunImpls;
         } catch (NullPointerException | MissingArgumentException e){
             throw new MissingArgumentException(e);
         }
     }
 
-    private static Test parseTest(JsonNode testRunNode) throws MissingArgumentException {
+    private static TestImpl parseTest(JsonNode testRunNode) throws MissingArgumentException {
         JsonNode testNode = testRunNode.get("test");
         try {
-            Test test = new Test();
+            TestImpl test = new TestImpl();
             test.addAllSteps(parseSteps(testNode));
             return test;
         } catch (NullPointerException e){
@@ -76,7 +77,7 @@ public class TestRunParser{
         List<Input> inputs = new ArrayList<>();
         for(JsonNode inputNode : inputsNodes) {
             try{
-                inputs.add(mapper.readValue(inputNode.toString(), Input.class));
+                inputs.add(mapper.readValue(inputNode.toString(), InputImpl.class));
             } catch (NullPointerException e){
                 throw new MissingArgumentException("Argument inputs is missing in testRun");
             }

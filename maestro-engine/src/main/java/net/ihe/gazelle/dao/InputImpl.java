@@ -1,9 +1,12 @@
 package net.ihe.gazelle.dao;
 
-public class Input {
+import net.ihe.gazelle.test.Input;
+
+public class InputImpl implements Input {
     private String name;
     private Object value;
 
+    @Override
     public String getName() {
         return name;
     }
@@ -12,6 +15,7 @@ public class Input {
         this.name = name;
     }
 
+    @Override
     public Object getValue() {
         return value;
     }
@@ -20,10 +24,10 @@ public class Input {
         this.value = value;
     }
 
-    public Input() {
+    public InputImpl() {
     }
 
-    public Input(String name, Object value) {
+    public InputImpl(String name, Object value) {
         this.name = name;
         this.value = value;
     }

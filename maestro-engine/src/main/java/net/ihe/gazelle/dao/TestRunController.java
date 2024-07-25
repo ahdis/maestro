@@ -6,11 +6,11 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import net.ihe.gazelle.business.engine.TestEngine;
+import net.ihe.gazelle.business.engine.EngineImpl;
 import net.ihe.gazelle.business.exception.InvalidTestRunException;
 import net.ihe.gazelle.business.exception.MissingArgumentException;
 import net.ihe.gazelle.business.exception.ParsingErrorException;
-import net.ihe.gazelle.business.test.TestRun;
+import net.ihe.gazelle.business.test.TestRunImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +21,7 @@ import java.util.List;
 @Path("/testRun")
 public class TestRunController {
 
-    private final static Logger LOG = LoggerFactory.getLogger(TestRunController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TestRunController.class);
 
     public TestRunController() {/*Empty Constructor*/}
 
@@ -31,14 +31,14 @@ public class TestRunController {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response run(InputStream bodyStream) throws IOException {
         try {
-            List<TestRun> testRuns = new TestRunParser().convertInputStreamToTestRuns(bodyStream);
+            List<TestRunImpl> testRunImpls = new TestRunParser().convertInputStreamToTestRuns(bodyStream);
 
-            TestEngine testEngine = new TestEngine();
-            for (TestRun testRun : testRuns) {
-                testEngine.run(testRun);
-                testRun.setReport(testEngine.getReports());
+            EngineImpl engineImpl = new EngineImpl();
+            for (TestRunImpl testRunImpl : testRunImpls) {
+                engineImpl.run(testRunImpl);
+                testRunImpl.setReport(engineImpl.getReports());
             }
-            return Response.ok(testRuns).build();
+            return Response.ok(testRunImpls).build();
         } catch (IOException | ParsingErrorException | MissingArgumentException e) {
             LOG.debug("Parsing error", e);
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode(), "the request doesn't match expected syntax " + e).build();

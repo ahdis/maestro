@@ -2,26 +2,28 @@ package net.ihe.gazelle.business.engine;
 
 import net.ihe.gazelle.business.exception.InvalidTestRunException;
 import net.ihe.gazelle.business.exception.MissingArgumentException;
+import net.ihe.gazelle.engine.Engine;
 import net.ihe.gazelle.observer.Subscriber;
-import net.ihe.gazelle.business.test.Test;
-import net.ihe.gazelle.business.test.TestRun;
 import net.ihe.gazelle.context.Context;
-import net.ihe.gazelle.dao.Input;
 import net.ihe.gazelle.business.engine.runner.StepRunnerProvider;
 import net.ihe.gazelle.step.Step;
 import net.ihe.gazelle.step_runner.StepRunner;
+import net.ihe.gazelle.test.Input;
+import net.ihe.gazelle.test.Test;
+import net.ihe.gazelle.test.TestRun;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class TestEngine implements Subscriber {
+public class EngineImpl implements Subscriber, Engine {
 
     StepRunnerProvider stepRunnerFactory = new StepRunnerProvider();
     Map<String, Object> reports = new ConcurrentHashMap<>();
     StepRunner stepRunner = null;
     Test test = null;
 
+    @Override
     public Map<String, Object> getReports() {
         return reports;
     }
@@ -32,6 +34,7 @@ public class TestEngine implements Subscriber {
      * @param testRun the testRun containing automated steps to execute
      * @throws IllegalArgumentException if testRun isn't valid
      */
+    @Override
     public void run(TestRun testRun) throws MissingArgumentException {
 
         // Add validation of testRun structure

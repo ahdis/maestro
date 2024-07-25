@@ -34,6 +34,14 @@ package:
     - job: compile/unit-test
       artifacts: true
 
+security/dependenciesWithOwaspDependencyCheck:
+  stage: test
+  extends:
+    - .testSecurityDependenciesForJavaWithOwaspDependencyCheck
+  needs:
+    - job: compile/unit-test
+      artifacts: false
+
 static-analysis:
   stage: test
   extends:
