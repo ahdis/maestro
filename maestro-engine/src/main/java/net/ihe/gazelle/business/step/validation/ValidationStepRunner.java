@@ -21,8 +21,10 @@ public class ValidationStepRunner implements StepRunner, Subscriber, Publisher {
     @Override
     public void run(Step step, Context context) {
         ValidationStep validationStep = (ValidationStep) step;
-        ValidationHandler validationHandler = new ValidationHandler((String) context.get(validationStep.getValidationService()));
-        ValidationRequest validationRequest = ValidationRequestMapper.createValidationRequest((ValidationStep) step, context);
+        ValidationHandler validationHandler =
+                new ValidationHandler((String) context.get(validationStep.getValidationService()));
+        ValidationRequest validationRequest =
+                ValidationRequestMapper.createValidationRequest((ValidationStep) step, context);
         ValidationReport validationReport = validationHandler.validate(validationRequest);
         context.put(step.getName() + ".REPORT", validationReport);
         notifySubscribers(context);

@@ -4,6 +4,10 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import net.ihe.gazelle.context.Context;
 import net.ihe.gazelle.step.Step;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class AssertionStep implements Step {
 
     @JsonSubTypes.Type(AssertionStep.class)
@@ -11,6 +15,7 @@ public class AssertionStep implements Step {
     private final String assertion;
     private final String assertionService;
     private final String name;
+    private Map<String, String> properties;
 
     public AssertionStep(String name,
                          String assertion,
@@ -28,6 +33,21 @@ public class AssertionStep implements Step {
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public Map<String, String> getProperties() {
+        return new HashMap<>(properties);
+    }
+
+    @Override
+    public void setProperties(Map<String, String> properties) {
+        this.properties = new HashMap<>(properties);
+    }
+
+    @Override
+    public List<String> getMandatoryKeys() {
+        return List.of();
     }
 
     public String getAssertion(){

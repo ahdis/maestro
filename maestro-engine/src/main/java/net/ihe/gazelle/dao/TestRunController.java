@@ -9,6 +9,7 @@ import jakarta.ws.rs.core.Response;
 import net.ihe.gazelle.business.engine.EngineImpl;
 import net.ihe.gazelle.business.exception.InvalidTestRunException;
 import net.ihe.gazelle.business.exception.MissingArgumentException;
+import net.ihe.gazelle.business.exception.NotInitializedReferenceException;
 import net.ihe.gazelle.business.exception.ParsingErrorException;
 import net.ihe.gazelle.business.test.TestRunImpl;
 import org.slf4j.Logger;
@@ -45,8 +46,10 @@ public class TestRunController {
         } catch (InvalidTestRunException e){
             LOG.debug("TestRun format Exception", e);
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode(), "the request contains a testRun with bad format" + e).build();
-        }
-        catch (Exception e) {
+        } catch (NotInitializedReferenceException e){
+            LOG.error("A variable isn't initialized");
+            return Response.status(Response.Status.BAD_REQUEST.getStatusCode(), "Your script contains a variable not initialized" + e).build();
+        } catch (Exception e) {
             LOG.error("Unknown error", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "an error occurred during execution: " + e).build();
         } finally {

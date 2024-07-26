@@ -10,7 +10,7 @@ import net.ihe.gazelle.business.step.validation.ValidationStep;
 import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
-class TestRunControllerTestImpl {
+class TestRunControllerTest {
 
 
     @org.junit.jupiter.api.Test

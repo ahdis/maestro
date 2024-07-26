@@ -22,6 +22,7 @@ public class EngineImpl implements Subscriber, Engine {
     Map<String, Object> reports = new ConcurrentHashMap<>();
     StepRunner stepRunner = null;
     Test test = null;
+    PropertiesExtractor extractor = new PropertiesExtractor();
 
     @Override
     public Map<String, Object> getReports() {
@@ -49,9 +50,13 @@ public class EngineImpl implements Subscriber, Engine {
         // create context
         Context context = extractInputs(inputs);
         context.setTestRun(testRun);
+
+        Step step = test.getSteps().getFirst();
+        step.setProperties(extractor.extractProperties(step.getProperties(), context));
+
         // iterate of steps
-        context.setStep(test.getSteps().getFirst());
-        runStep(context, test.getSteps().getFirst());
+        context.setStep(step);
+        runStep(context, step);
     }
 
     @Override
@@ -60,11 +65,13 @@ public class EngineImpl implements Subscriber, Engine {
         if(steps.getLast().equals(step)){
             extractReports(context);
         }else {
-            for (int i = 0; i < steps.size(); i++) {
+            boolean found = false;
+            for (int i = 0; (i < steps.size()) && !found; i++) {
                 if (steps.get(i).equals(step)) {
+                    step.setProperties(extractor.extractProperties(step.getProperties(), context));
                     context.setStep(steps.get(i + 1));
                     runStep(context, steps.get(i + 1));
-                    i=steps.size();
+                    found = true;
                 }
             }
         }
