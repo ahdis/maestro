@@ -132,6 +132,22 @@
         </plugins>
     </build>
 
+    <repositories>
+        <repository>
+            <id>IHE</id>
+            <name>IHE Public Maven Repository Group</name>
+            <url>https://gazelle.ihe.net/nexus/content/groups/public/</url>
+            <layout>default</layout>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
     <distributionManagement>
         <repository>
             <id>nexus-releases</id>
