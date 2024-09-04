@@ -1,6 +1,7 @@
 package net.ihe.gazelle.technical.factory;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Default;
 import jakarta.ws.rs.Produces;
 import net.ihe.gazelle.business.engine.EngineImpl;
 import net.ihe.gazelle.business.engine.runner.StepRunnerProvider;
@@ -17,6 +18,7 @@ public class MaestroFactory {
     }
 
     @Produces
+    @Default
     Engine getEngine() {
         return new EngineImpl(getStepRunnerProvider());
     }
