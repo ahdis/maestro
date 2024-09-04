@@ -37,13 +37,13 @@
         <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
         <sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>
         <sonar.coverage.exclusions>
-            **/business/engine/NotInitializedReferenceException.java,
-            **/business/step/NotProvidedStep.java,
-            **/business/validation/DuplicatedStepsException.java,
-            **/business/validation/InvalidTestRunException.java,
-            **/technical/ws/MissingArgumentException.java,
-            **/technical/ws/ParsingErrorException.java,
-            **/context/*
+            **/gazelle/business/engine/NotInitializedReferenceException.java,
+            **/gazelle/business/step/NotProvidedStep.java,
+            **/gazelle/business/validation/DuplicatedStepsException.java,
+            **/gazelle/business/validation/InvalidTestRunException.java,
+            **/gazelle/technical/ws/MissingArgumentException.java,
+            **/gazelle/technical/ws/ParsingErrorException.java,
+            **/gazelle/context/*
         </sonar.coverage.exclusions>
     </properties>
     <scm>
