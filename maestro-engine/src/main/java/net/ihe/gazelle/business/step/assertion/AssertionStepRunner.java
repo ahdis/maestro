@@ -3,7 +3,7 @@ package net.ihe.gazelle.business.step.assertion;
 import net.ihe.gazelle.context.Context;
 import net.ihe.gazelle.observer.Subscriber;
 import net.ihe.gazelle.step.Step;
-import net.ihe.gazelle.step_runner.StepRunner;
+import net.ihe.gazelle.runner.StepRunner;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -16,7 +16,7 @@ public class AssertionStepMarshaller implements StepMarshaller {
 
     @Override
     public String getSupportedStep() {
-        return "net.ihe.gazelle.step.assertion.AssertionStep";
+        return "net.ihe.gazelle.business.step.assertion.AssertionStep";
     }
 
     private String getNodeValueOrNull(JsonNode parent, String attributeName) {

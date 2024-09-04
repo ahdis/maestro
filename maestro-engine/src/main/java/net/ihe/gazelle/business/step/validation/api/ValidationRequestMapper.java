@@ -12,8 +12,8 @@ public class ValidationRequestMapper {
 
     public static ValidationRequest createValidationRequest(ValidationStep validationStep, Context context) {
         ValidationRequest validationRequest = new ValidationRequest();
-        validationRequest.setValidationProfileId(validationStep.getValidationProfile());
-        validationRequest.setValidationServiceName(validationStep.getValidationService());
+        validationRequest.setValidationProfileId(validationStep.getProperties().get(ValidationStep.VALIDATION_PROFILE));
+        validationRequest.setValidationServiceName(validationStep.getProperties().get(ValidationStep.VALIDATION_SERVICE));
         validationRequest.setValidationItems(getItems(validationStep, context));
         return validationRequest;
     }
@@ -21,8 +21,8 @@ public class ValidationRequestMapper {
     public static List<ValidationItem> getItems(ValidationStep validationStep, Context context) {
         List<ValidationItem> items = new ArrayList<>();
         ValidationItem item = new ValidationItem();
-        item.setItemId(validationStep.getContentToValidate());
-        item.setContent(context.getContent(validationStep.getContentToValidate()).toString().getBytes());
+        item.setItemId(validationStep.getProperties().get(ValidationStep.CONTENT_TO_VALIDATE));
+        item.setContent(validationStep.getProperties().get(ValidationStep.CONTENT_TO_VALIDATE).getBytes());
         item.setRole("?");
         item.setLocation("?");
         items.add(item);

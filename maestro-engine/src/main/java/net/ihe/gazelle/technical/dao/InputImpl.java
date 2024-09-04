@@ -1,4 +1,4 @@
-package net.ihe.gazelle.dao;
+package net.ihe.gazelle.technical.dao;
 
 import net.ihe.gazelle.test.Input;
 

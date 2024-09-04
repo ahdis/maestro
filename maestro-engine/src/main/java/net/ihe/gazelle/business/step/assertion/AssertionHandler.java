@@ -1,7 +1,7 @@
 package net.ihe.gazelle.business.step.assertion;
 
 import net.ihe.gazelle.context.Context;
-import net.ihe.gazelle.handler.Handler;
+import net.ihe.gazelle.runner.Handler;
 
 public class AssertionHandler implements Handler {
 

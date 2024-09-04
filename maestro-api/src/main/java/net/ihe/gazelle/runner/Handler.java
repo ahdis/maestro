@@ -1,4 +1,4 @@
-package net.ihe.gazelle.handler;
+package net.ihe.gazelle.runner;
 
 
 public interface Handler {

@@ -14,37 +14,13 @@ public class ValidationStep implements Step {
     @JsonSubTypes.Type(ValidationStep.class)
     public static String type;
     private String name;
-    private String validationService;
-    private String validationProfile;
-    private String contentToValidate;
     private Map<String, String> properties;
 
-    protected static final String VALIDATION_SERVICE  = "validationService";
-    protected static final String VALIDATION_PROFILE  = "validationProfile";
-    protected static final String CONTENT_TO_VALIDATE = "contentToValidate";
+    public static final String VALIDATION_SERVICE  = "validationService";
+    public static final String VALIDATION_PROFILE  = "validationProfile";
+    public static final String CONTENT_TO_VALIDATE = "contentToValidate";
 
-    public String getValidationService() {
-        return validationService;
-    }
-
-
-    public String getValidationProfile() {
-        return validationProfile;
-    }
-
-    public String getContentToValidate() {
-        return contentToValidate;
-    }
-
-    public ValidationStep(String name,
-                          String validationService,
-                          String validationProfile,
-                          String contentToValidate) {
-        this.name = name;
-        this.validationService = validationService;
-        this.validationProfile = validationProfile;
-        this.contentToValidate = contentToValidate;
-    }
+    public ValidationStep(){}
 
     public ValidationStep(String name, Map<String, String> properties){
         this.name = name;
@@ -58,6 +34,10 @@ public class ValidationStep implements Step {
     @Override
     public String getName() {
         return name;
+    }
+
+    public void setName(String name){
+        this.name = name;
     }
 
     @Override

@@ -1,4 +1,4 @@
-package net.ihe.gazelle.business.exception;
+package net.ihe.gazelle.business.engine;
 
 public class NotInitializedReferenceException extends RuntimeException{
     public NotInitializedReferenceException(){super();}

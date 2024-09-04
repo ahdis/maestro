@@ -1,6 +1,6 @@
 package net.ihe.gazelle.business.step.validation;
 
-import net.ihe.gazelle.handler.Handler;
+import net.ihe.gazelle.runner.Handler;
 import net.ihe.gazelle.validation.api.application.ValidationService;
 import net.ihe.gazelle.validation.api.domain.metadata.structure.ValidationProfile;
 import net.ihe.gazelle.validation.api.domain.report.structure.ValidationReport;
@@ -14,6 +14,10 @@ import java.util.List;
 public class ValidationHandler implements Handler, ValidationService {
 
     private ValidationServiceRestClient validationServiceRestClient;
+
+    protected ValidationHandler(){
+        /*Empty constructor used for mocking*/
+    }
 
     public ValidationHandler(String serverUrl){
         try {

@@ -1,6 +1,5 @@
 package net.ihe.gazelle.context;
 
-import io.smallrye.common.constraint.NotNull;
 import net.ihe.gazelle.step.Step;
 
 import java.util.*;
@@ -43,7 +42,7 @@ public class Context implements Map<String, Object> {
     }
 
     @Override
-    public Object put(@NotNull String s, Object o) {
+    public Object put(String s, Object o) {
         return contextMap.put(s, o);
     }
 
@@ -54,7 +53,7 @@ public class Context implements Map<String, Object> {
     }
 
     @Override
-    public void putAll(@NotNull Map<? extends String, ?> map) {
+    public void putAll(Map<? extends String, ?> map) {
         contextMap.putAll(map);
     }
 

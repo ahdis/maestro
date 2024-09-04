@@ -1,6 +1,9 @@
-package net.ihe.gazelle.step_runner;
+package net.ihe.gazelle.runner;
 
 import net.ihe.gazelle.step.Step;
+
+import java.util.Map;
+import java.util.Set;
 
 public interface StepRunnerFactory {
 
@@ -9,9 +12,11 @@ public interface StepRunnerFactory {
      */
     String getSupportedStep();
 
+    Map<String, Class<? extends Handler>> getRequiredServices(Step step);
+
     /**
      * @param step step to run
      * @return an instance of corresponding testRunner
      */
-    StepRunner createStepRunner(Step step);
+    StepRunner createStepRunner(Step step, Set<Handler> handlers);
 }

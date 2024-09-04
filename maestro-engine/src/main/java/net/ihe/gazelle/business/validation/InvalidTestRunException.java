@@ -1,4 +1,4 @@
-package net.ihe.gazelle.business.exception;
+package net.ihe.gazelle.business.validation;
 
 public class InvalidTestRunException extends RuntimeException{
     public InvalidTestRunException() {

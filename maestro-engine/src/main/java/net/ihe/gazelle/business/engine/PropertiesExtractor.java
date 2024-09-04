@@ -1,6 +1,5 @@
 package net.ihe.gazelle.business.engine;
 
-import net.ihe.gazelle.business.exception.NotInitializedReferenceException;
 import net.ihe.gazelle.context.Context;
 
 import java.util.Iterator;

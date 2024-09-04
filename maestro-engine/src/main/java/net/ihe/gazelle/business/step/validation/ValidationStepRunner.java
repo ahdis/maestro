@@ -5,7 +5,7 @@ import net.ihe.gazelle.observer.Publisher;
 import net.ihe.gazelle.observer.Subscriber;
 import net.ihe.gazelle.business.step.validation.api.ValidationRequestMapper;
 import net.ihe.gazelle.step.Step;
-import net.ihe.gazelle.step_runner.StepRunner;
+import net.ihe.gazelle.runner.StepRunner;
 import net.ihe.gazelle.validation.api.domain.report.structure.ValidationReport;
 import net.ihe.gazelle.validation.api.domain.request.structure.ValidationRequest;
 
@@ -15,14 +15,14 @@ import java.util.List;
 public class ValidationStepRunner implements StepRunner, Subscriber, Publisher {
 
     private final List<Subscriber> subscribers = new ArrayList<>();
+    private ValidationHandler validationHandler;
 
-    public ValidationStepRunner(){/*Empty Constructor*/}
+    public ValidationStepRunner(ValidationHandler validationHandler) {
+        this.validationHandler = validationHandler;
+    }
 
     @Override
     public void run(Step step, Context context) {
-        ValidationStep validationStep = (ValidationStep) step;
-        ValidationHandler validationHandler =
-                new ValidationHandler((String) context.get(validationStep.getValidationService()));
         ValidationRequest validationRequest =
                 ValidationRequestMapper.createValidationRequest((ValidationStep) step, context);
         ValidationReport validationReport = validationHandler.validate(validationRequest);

@@ -1,17 +1,18 @@
-package net.ihe.gazelle.dao;
+package net.ihe.gazelle.technical.ws;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import net.ihe.gazelle.business.engine.EngineImpl;
-import net.ihe.gazelle.business.exception.InvalidTestRunException;
-import net.ihe.gazelle.business.exception.MissingArgumentException;
-import net.ihe.gazelle.business.exception.NotInitializedReferenceException;
-import net.ihe.gazelle.business.exception.ParsingErrorException;
+import net.ihe.gazelle.business.engine.NotInitializedReferenceException;
+import net.ihe.gazelle.business.step.NotProvidedStep;
 import net.ihe.gazelle.business.test.TestRunImpl;
+import net.ihe.gazelle.business.validation.InvalidTestRunException;
+import net.ihe.gazelle.engine.Engine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,11 +21,15 @@ import java.io.InputStream;
 import java.util.List;
 
 @Path("/testRun")
+@ApplicationScoped
 public class TestRunController {
 
     private static final Logger LOG = LoggerFactory.getLogger(TestRunController.class);
 
     public TestRunController() {/*Empty Constructor*/}
+
+    @Inject
+    Engine engine;
 
     @POST
     @Path("/run")
@@ -34,10 +39,10 @@ public class TestRunController {
         try {
             List<TestRunImpl> testRunImpls = new TestRunParser().convertInputStreamToTestRuns(bodyStream);
 
-            EngineImpl engineImpl = new EngineImpl();
+
             for (TestRunImpl testRunImpl : testRunImpls) {
-                engineImpl.run(testRunImpl);
-                testRunImpl.setReport(engineImpl.getReports());
+                engine.run(testRunImpl);
+                testRunImpl.setReport(engine.getReports());
             }
             return Response.ok(testRunImpls).build();
         } catch (IOException | ParsingErrorException | MissingArgumentException e) {
@@ -49,7 +54,11 @@ public class TestRunController {
         } catch (NotInitializedReferenceException e){
             LOG.error("A variable isn't initialized");
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode(), "Your script contains a variable not initialized" + e).build();
-        } catch (Exception e) {
+        } catch (NotProvidedStep e){
+            LOG.error(e.getMessage());
+            return Response.status(Response.Status.BAD_REQUEST.getStatusCode(), "Your script contains a non provided step" + e).build();
+        }
+        catch (Exception e) {
             LOG.error("Unknown error", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "an error occurred during execution: " + e).build();
         } finally {

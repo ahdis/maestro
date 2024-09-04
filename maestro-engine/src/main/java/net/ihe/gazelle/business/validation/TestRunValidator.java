@@ -1,7 +1,6 @@
-package net.ihe.gazelle.business.engine;
+package net.ihe.gazelle.business.validation;
 
-import net.ihe.gazelle.business.exception.DuplicatedStepsException;
-import net.ihe.gazelle.business.exception.MissingArgumentException;
+import net.ihe.gazelle.technical.ws.MissingArgumentException;
 import net.ihe.gazelle.step.Step;
 import net.ihe.gazelle.test.TestRun;
 

@@ -1,6 +1,6 @@
 package net.ihe.gazelle;
 
-import net.ihe.gazelle.dao.InputImpl;
+import net.ihe.gazelle.technical.dao.InputImpl;
 import org.junit.jupiter.api.Test;
 
 class InputImplTest {

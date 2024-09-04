@@ -1,13 +1,14 @@
 package net.ihe.gazelle.business.engine;
 
-import net.ihe.gazelle.business.exception.InvalidTestRunException;
-import net.ihe.gazelle.business.exception.MissingArgumentException;
+import net.ihe.gazelle.business.validation.TestRunValidator;
+import net.ihe.gazelle.business.validation.InvalidTestRunException;
+import net.ihe.gazelle.technical.ws.MissingArgumentException;
 import net.ihe.gazelle.engine.Engine;
 import net.ihe.gazelle.observer.Subscriber;
 import net.ihe.gazelle.context.Context;
 import net.ihe.gazelle.business.engine.runner.StepRunnerProvider;
 import net.ihe.gazelle.step.Step;
-import net.ihe.gazelle.step_runner.StepRunner;
+import net.ihe.gazelle.runner.StepRunner;
 import net.ihe.gazelle.test.Input;
 import net.ihe.gazelle.test.Test;
 import net.ihe.gazelle.test.TestRun;
@@ -18,11 +19,15 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class EngineImpl implements Subscriber, Engine {
 
-    StepRunnerProvider stepRunnerFactory = new StepRunnerProvider();
+    final StepRunnerProvider stepRunnerFactory;
     Map<String, Object> reports = new ConcurrentHashMap<>();
     StepRunner stepRunner = null;
     Test test = null;
     PropertiesExtractor extractor = new PropertiesExtractor();
+
+    public EngineImpl(StepRunnerProvider stepRunnerProvider) {
+        this.stepRunnerFactory = stepRunnerProvider;
+    }
 
     @Override
     public Map<String, Object> getReports() {

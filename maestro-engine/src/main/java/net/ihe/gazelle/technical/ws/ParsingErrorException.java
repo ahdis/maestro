@@ -1,4 +1,4 @@
-package net.ihe.gazelle.business.exception;
+package net.ihe.gazelle.technical.ws;
 
 public class ParsingErrorException extends RuntimeException{
     public ParsingErrorException() {
