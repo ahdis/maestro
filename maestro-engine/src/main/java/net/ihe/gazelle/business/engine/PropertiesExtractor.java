@@ -20,7 +20,7 @@ public class PropertiesExtractor {
         return properties;
     }
 
-    private String expandProperty(String property, Context context){
+    private String expandProperty(String property, Context context) throws NotInitializedReferenceException{
         if(property.matches(PROPERTY_EXPANSION_REGEXP)){
             if(context.containsKey(property)){
                 return (String)context.get(property);

@@ -35,6 +35,16 @@
             https://${git.user.name}:${git.user.token}@gitlab.inria.fr/gazelle/private/kereval/maestro.git
         </git.project.url>
         <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
+        <sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>
+        <sonar.coverage.exclusions>
+            **/business/engine/NotInitializedReferenceException.java,
+            **/business/step/NotProvidedStep.java,
+            **/business/validation/DuplicatedStepsException.java,
+            **/business/validation/InvalidTestRunException.java,
+            **/technical/ws/MissingArgumentException.java,
+            **/technical/ws/ParsingErrorException.java,
+            **/context/*
+        </sonar.coverage.exclusions>
     </properties>
     <scm>
         <connection>scm:git:${git.project.url}</connection>
@@ -88,6 +98,13 @@
                         </execution>
                     </executions>
                 </plugin>
+
+                <plugin>
+                    <groupId>org.sonarsource.scanner.maven</groupId>
+                    <artifactId>sonar-maven-plugin</artifactId>
+                    <version>${sonar-maven-plugin.version}</version>
+                </plugin>
+
             </plugins>
         </pluginManagement>
         <plugins>
