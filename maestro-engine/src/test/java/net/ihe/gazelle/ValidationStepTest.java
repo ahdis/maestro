@@ -18,6 +18,12 @@ class ValidationStepTest {
     }
 
     @Test
+    void getNullProperties(){
+        ValidationStep validationStep = new ValidationStep();
+        org.junit.jupiter.api.Assertions.assertEquals(new HashMap<>(), validationStep.getProperties());
+    }
+
+    @Test
     void setName(){
         ValidationStep validationStep = new ValidationStep();
         validationStep.setName("dummyTest");

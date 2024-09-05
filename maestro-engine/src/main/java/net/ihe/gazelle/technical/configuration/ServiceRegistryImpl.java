@@ -4,9 +4,12 @@ import net.ihe.gazelle.servicemetadata.api.domain.structure.Service;
 import net.ihe.gazelle.technical.ServiceRegistry;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Scanner;
 
 public class ServiceRegistryImpl implements ServiceRegistry {
 
@@ -24,7 +27,11 @@ public class ServiceRegistryImpl implements ServiceRegistry {
     }
 
     private List<Service> loadFile(String servicesFilePath) {
-        return new ArrayList<>();
+        try (Scanner s = new Scanner(new File(servicesFilePath))){
+            return new ArrayList<>();
+        } catch (FileNotFoundException e) {
+            throw new IncorrectFilePath("File path " + servicesFilePath + "can't be resolve", e.getCause());
+        }
     }
 
     @Override
