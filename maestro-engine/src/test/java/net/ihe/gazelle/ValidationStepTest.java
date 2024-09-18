@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 class ValidationStepTest {
 
     @Test
@@ -14,20 +16,20 @@ class ValidationStepTest {
         properties.put("validationProfile", "Parameters");
         properties.put("contentToValidate", "saucisse");
         ValidationStep validationStep = new ValidationStep("dummyStep", properties);
-        org.junit.jupiter.api.Assertions.assertEquals(properties, validationStep.getProperties());
+        assertEquals(properties, validationStep.getProperties());
     }
 
     @Test
     void getNullProperties(){
         ValidationStep validationStep = new ValidationStep();
-        org.junit.jupiter.api.Assertions.assertEquals(new HashMap<>(), validationStep.getProperties());
+        assertEquals(new HashMap<>(), validationStep.getProperties());
     }
 
     @Test
     void setName(){
         ValidationStep validationStep = new ValidationStep();
         validationStep.setName("dummyTest");
-        org.junit.jupiter.api.Assertions.assertEquals("dummyTest", validationStep.getName());
+        assertEquals("dummyTest", validationStep.getName());
     }
 
     @Test
@@ -39,7 +41,7 @@ class ValidationStepTest {
         expected.add("validationProfile");
         expected.add("contentToValidate");
 
-        org.junit.jupiter.api.Assertions.assertEquals(new HashSet<>(keys), new HashSet<>(expected));
+        assertEquals(new HashSet<>(keys), new HashSet<>(expected));
 
     }
 }

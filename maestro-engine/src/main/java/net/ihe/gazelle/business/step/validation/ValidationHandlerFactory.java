@@ -13,7 +13,7 @@ public class ValidationHandlerFactory implements HandlerFactory {
 
     @Override
     public Handler createHandler(Service service) {
-        //TODO To refactore with validation service api v2
+        //TODO To refactor with validation service api v2
         RestBinding binding = (RestBinding)service.getProvidedInterfaces().getFirst().getBindings().getFirst();
 
         return new ValidationHandler(binding.getServiceUrl());

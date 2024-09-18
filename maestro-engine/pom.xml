@@ -13,11 +13,6 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <sonar.coverage.exclusions>**/net.ihe.gazelle.business.test.TestRunImpl/**</sonar.coverage.exclusions>
-        <sonar.coverage.exclusions>**/net.ihe.gazelle.dao.InputImpl/**</sonar.coverage.exclusions>
-        <sonar.coverage.exclusions>**/net.ihe.gazelle.dao.TestRunParser/**</sonar.coverage.exclusions>
-        <sonar.coverage.exclusions>**/net.ihe.gazelle.business.test.TestImpl/**</sonar.coverage.exclusions>
-        <sonar.coverage.exclusions>**/net.ihe.gazelle.business.test.TestRunImpl/**</sonar.coverage.exclusions>
     </properties>
 
     <build>
@@ -94,16 +89,27 @@
             <artifactId>quarkus-junit5</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.eclipse/yasson -->
-        <dependency>
-            <groupId>io.rest-assured</groupId>
-            <artifactId>rest-assured</artifactId>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>org.eclipse.microprofile.reactive.messaging</groupId>
             <artifactId>microprofile-reactive-messaging-api</artifactId>
             <version>3.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wiremock</groupId>
+            <artifactId>wiremock</artifactId>
+            <version>3.8.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>5.5.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest</artifactId>
+            <version>2.1</version>
         </dependency>
     </dependencies>
 

@@ -4,34 +4,28 @@ import net.ihe.gazelle.servicemetadata.api.domain.structure.Service;
 import net.ihe.gazelle.technical.ServiceRegistry;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Scanner;
 
 public class ServiceRegistryImpl implements ServiceRegistry {
 
-    @ConfigProperty(name = "SERVICE_REGISTRY_FILE_PATH", defaultValue = "/opt/maestro/services.json")
-    private String servicesFilePath;
+    @ConfigProperty(name = "service.registry.file.path", defaultValue = "/opt/maestro/services.json")
+    String servicesFilePath;
+
+    private final ServiceRegistryDAO serviceRegistryDAO;
 
     private List<Service> services = null;
+
+    public ServiceRegistryImpl(ServiceRegistryDAO serviceRegistryDAO){
+        this.serviceRegistryDAO = serviceRegistryDAO;
+    }
 
     @Override
     public List<Service> getServices() {
         if(services == null) {
-            services = loadFile(servicesFilePath);
+            services = serviceRegistryDAO.loadFile(servicesFilePath);
         }
         return services;
-    }
-
-    private List<Service> loadFile(String servicesFilePath) {
-        try (Scanner s = new Scanner(new File(servicesFilePath))){
-            return new ArrayList<>();
-        } catch (FileNotFoundException e) {
-            throw new IncorrectFilePath("File path " + servicesFilePath + "can't be resolve", e.getCause());
-        }
     }
 
     @Override
