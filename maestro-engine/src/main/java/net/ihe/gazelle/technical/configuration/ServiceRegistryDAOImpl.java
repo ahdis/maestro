@@ -2,6 +2,7 @@ package net.ihe.gazelle.technical.configuration;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.enterprise.context.ApplicationScoped;
 import net.ihe.gazelle.servicemetadata.api.domain.structure.Service;
 
 import java.io.File;
@@ -9,6 +10,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.List;
 
+@ApplicationScoped
 public class ServiceRegistryDAOImpl implements ServiceRegistryDAO {
 
     @Override
