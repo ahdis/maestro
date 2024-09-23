@@ -9,6 +9,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import net.ihe.gazelle.business.engine.NotInitializedReferenceException;
+import net.ihe.gazelle.business.engine.NullPropertyValue;
 import net.ihe.gazelle.business.step.NotProvidedStep;
 import net.ihe.gazelle.business.test.TestRunImpl;
 import net.ihe.gazelle.business.validation.InvalidTestRunException;
@@ -47,20 +48,23 @@ public class TestRunController {
             return Response.ok(testRunImpls).build();
         } catch (IOException | ParsingErrorException | MissingArgumentException e) {
             LOG.debug("Parsing error", e);
-            return Response.status(Response.Status.BAD_REQUEST.getStatusCode(), "the request doesn't match expected syntax " + e).build();
+            return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity("the request doesn't match expected syntax " + e).build();
         } catch (InvalidTestRunException e){
             LOG.debug("TestRun format Exception", e);
-            return Response.status(Response.Status.BAD_REQUEST.getStatusCode(), "the request contains a testRun with bad format" + e).build();
+            return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity("the request contains a testRun with bad format" + e).build();
         } catch (NotInitializedReferenceException e){
             LOG.error("A variable isn't initialized");
-            return Response.status(Response.Status.BAD_REQUEST.getStatusCode(), "Your script contains a variable not initialized" + e).build();
+            return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity("Your script contains a variable not initialized" + e).build();
         } catch (NotProvidedStep e){
             LOG.error(e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST.getStatusCode(), "Your script contains a non provided step" + e).build();
+            return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity("Your script contains a non provided step" + e).build();
+        } catch (NullPropertyValue e){
+            LOG.error(e.getMessage());
+            return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity("One of the property has a null value" +e).build();
         }
         catch (Exception e) {
             LOG.error("Unknown error", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "an error occurred during execution: " + e).build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).entity("an error occurred during execution: " + e).build();
         } finally {
             bodyStream.close();
         }

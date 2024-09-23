@@ -18,14 +18,14 @@ public class ServiceRegistryDAOImpl implements ServiceRegistryDAO {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             File jsonFile = new File(servicesFilePath);
-            return objectMapper.readValue(jsonFile.toString(), new TypeReference<List<Service>>() {
+            return objectMapper.readValue(jsonFile, new TypeReference<>() {
                 @Override
                 public Type getType() {
                     return super.getType();
                 }
             });
         } catch (IOException e) {
-            throw new IncorrectFilePath("File path " + servicesFilePath + " can't be resolve", e.getCause());
+            throw new ReadingFileException("cannot read " + servicesFilePath, e);
         }
     }
 
