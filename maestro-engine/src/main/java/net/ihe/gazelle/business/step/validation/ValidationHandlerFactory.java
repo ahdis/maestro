@@ -21,8 +21,8 @@ public class ValidationHandlerFactory implements HandlerFactory {
         //TODO To refactor with validation service api v2
         RestBinding binding = (RestBinding)service.getProvidedInterfaces().getFirst().getBindings().getFirst();
 
-        return new ValidationHandlerMock();
-//        return new ValidationHandler(binding.getServiceUrl());
+//        return new ValidationHandlerMock();
+        return new ValidationHandler(binding.getServiceUrl());
     }
     static class ValidationHandlerMock extends ValidationHandler {
 

@@ -5,7 +5,7 @@ import net.ihe.gazelle.validation.api.application.ValidationService;
 import net.ihe.gazelle.validation.api.domain.metadata.structure.ValidationProfile;
 import net.ihe.gazelle.validation.api.domain.report.structure.ValidationReport;
 import net.ihe.gazelle.validation.api.domain.request.structure.ValidationRequest;
-import net.ihe.gazelle.validation.client.ValidationServiceRestClient;
+import net.ihe.gazelle.validation.client.ValidationServiceHttpClient;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -13,7 +13,7 @@ import java.util.List;
 
 public class ValidationHandler implements Handler, ValidationService {
 
-    private ValidationServiceRestClient validationServiceRestClient;
+    private ValidationServiceHttpClient validationServiceHttpClient;
 
     protected ValidationHandler(){
         /*Empty constructor used for mocking*/
@@ -22,7 +22,7 @@ public class ValidationHandler implements Handler, ValidationService {
     public ValidationHandler(String serverUrl){
         try {
             URI uri = new URI(serverUrl);
-            this.validationServiceRestClient = new ValidationServiceRestClient(uri);
+            this.validationServiceHttpClient = new ValidationServiceHttpClient(uri);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
@@ -35,8 +35,8 @@ public class ValidationHandler implements Handler, ValidationService {
 
     @Override
     public ValidationReport validate(ValidationRequest validationRequest) {
-        if(validationServiceRestClient != null) {
-            return validationServiceRestClient.validate(validationRequest);
+        if(validationServiceHttpClient != null) {
+            return validationServiceHttpClient.validate(validationRequest);
         } else {
             throw new RuntimeException("validationServiceRestClient not set");
         }
@@ -44,8 +44,8 @@ public class ValidationHandler implements Handler, ValidationService {
 
     @Override
     public List<ValidationProfile> getValidationProfiles() {
-        if(validationServiceRestClient != null) {
-            return validationServiceRestClient.getValidationProfiles();
+        if(validationServiceHttpClient != null) {
+            return validationServiceHttpClient.getValidationProfiles();
         } else {
             throw new RuntimeException("validationServiceRestClient not set");
         }
