@@ -5,12 +5,11 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import net.ihe.gazelle.business.step.validation.ValidationHandler;
 import net.ihe.gazelle.handler.HandlerProviderSPI;
 import net.ihe.gazelle.runner.Handler;
-import net.ihe.gazelle.servicemetadata.api.domain.structure.Interface;
+import net.ihe.gazelle.servicemetadata.api.domain.structure.ProvidedInterface;
 import net.ihe.gazelle.servicemetadata.api.domain.structure.RestBinding;
 import net.ihe.gazelle.servicemetadata.api.domain.structure.Service;
 import net.ihe.gazelle.technical.configuration.ServiceRegistryDAO;
 import net.ihe.gazelle.technical.configuration.ServiceRegistryImpl;
-import net.ihe.gazelle.validation.api.domain.metadata.structure.ValidationInterface;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
@@ -54,15 +53,16 @@ class HandlerProviderSPITest {
     }
 
     public class ServiceRegistryDAOMock implements ServiceRegistryDAO{
-
         @Override
-        public List<Service> loadFile(String servicesFilePath) {
+        public List<Service> loadFile() {
 
             Service service = new Service();
             service.setName("matchbox");
 
-            List<Interface> interfaces = new ArrayList<>();
-            Interface inter = new ValidationInterface();
+            List<ProvidedInterface> interfaces = new ArrayList<>();
+            ProvidedInterface inter = new ProvidedInterface();
+            inter.setInterfaceName("matchbox");
+            inter.setInterfaceVersion("1.0");
             RestBinding restBinding = new RestBinding();
             restBinding.setServiceUrl(wireMockServer.url("/validate"));
             inter.addBinding(restBinding);

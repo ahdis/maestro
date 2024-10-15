@@ -47,6 +47,7 @@
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>service-metadata-api</artifactId>
+            <version>1.0.1-FRAME-76-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
@@ -115,6 +116,12 @@
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest</artifactId>
             <version>2.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.achachraf</groupId>
+            <artifactId>typeson</artifactId>
+            <version>LATEST</version> <!-- Replace LATEST with the latest version -->
         </dependency>
     </dependencies>
 

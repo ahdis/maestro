@@ -3,16 +3,12 @@ package net.ihe.gazelle.technical.configuration;
 import jakarta.enterprise.context.ApplicationScoped;
 import net.ihe.gazelle.servicemetadata.api.domain.structure.Service;
 import net.ihe.gazelle.technical.ServiceRegistry;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 
 @ApplicationScoped
 public class ServiceRegistryImpl implements ServiceRegistry {
-
-    @ConfigProperty(name = "service.registry.file.path", defaultValue = "/opt/maestro/services.json")
-    String servicesFilePath;
 
     private final ServiceRegistryDAO serviceRegistryDAO;
 
@@ -25,7 +21,7 @@ public class ServiceRegistryImpl implements ServiceRegistry {
     @Override
     public List<Service> getServices() {
         if(services == null) {
-            services = serviceRegistryDAO.loadFile(servicesFilePath);
+            services = serviceRegistryDAO.loadFile();
         }
         return services;
     }

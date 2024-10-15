@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface ServiceRegistryDAO {
 
-    List<Service> loadFile(String servicesFilePath);
+    List<Service> loadFile();
 
 }
