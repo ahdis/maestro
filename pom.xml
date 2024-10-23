@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.ihe.gazelle</groupId>
     <artifactId>maestro</artifactId>
-    <version>0.1.1-MAES-44-SNAPSHOT</version>
+    <version>0.1.1-MAES-46-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
         <module>maestro-api</module>
@@ -58,12 +58,12 @@
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-api</artifactId>
-                <version>0.1.1-MAES-44-SNAPSHOT</version>
+                <version>0.1.1-MAES-46-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-engine</artifactId>
-                <version>0.1.1-MAES-44-SNAPSHOT</version>
+                <version>0.1.1-MAES-46-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>${quarkus.platform.group-id}</groupId>
