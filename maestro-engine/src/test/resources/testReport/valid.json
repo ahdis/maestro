@@ -1,0 +1,28 @@
+{
+    "uuid": "c9f7053d-248f-4600-9757-d510811b29a4",
+    "dateTime": "2024-11-08T11:19:36.385+0000",
+    "result": "PASSED",
+    "testCounters": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "undefined": 0,
+        "unexpectedErrors": 0
+    },
+    "testRuns": [
+        {
+            "dateTime": "2024-11-08T11:19:36.387+0000",
+            "result": "PASSED",
+            "test": {
+                "id": "testId"
+            },
+            "stepRuns": [
+                {
+                    "stepId": "stepId",
+                    "type": "validation",
+                    "result": "PASSED"
+                }
+            ]
+        }
+    ]
+}
