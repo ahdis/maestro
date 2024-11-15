@@ -1,16 +1,17 @@
 package net.ihe.gazelle.context;
 
+import net.ihe.gazelle.report.model.StepRunReport;
 import net.ihe.gazelle.test.Test;
 
-import java.util.Map;
+import java.util.List;
 
 public class SessionStore {
 
     private Context context;
     private Test test;
-    private Map<String, String> stepReports;
+    private List<StepRunReport> stepReports;
 
-    public SessionStore(Context context, Map<String, String> stepReports) {
+    public SessionStore(Context context, List<StepRunReport> stepReports) {
         this.context = context;
         this.stepReports = stepReports;
     }
@@ -31,11 +32,11 @@ public class SessionStore {
         this.test = test;
     }
 
-    public Map<String, String> getStepReports() {
+    public List<StepRunReport> getStepReports() {
         return stepReports;
     }
 
-    public void setStepReports(Map<String, String> stepReports) {
+    public void setStepReports(List<StepRunReport> stepReports) {
         this.stepReports = stepReports;
     }
 }

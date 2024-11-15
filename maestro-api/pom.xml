@@ -6,7 +6,7 @@
     <parent>
         <groupId>net.ihe.gazelle</groupId>
         <artifactId>maestro</artifactId>
-        <version>0.1.1-MAES-48-SNAPSHOT</version>
+        <version>0.1.1-MAES-50-SNAPSHOT</version>
     </parent>
 
     <artifactId>maestro-api</artifactId>
@@ -25,6 +25,13 @@
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-resteasy-reactive-jackson</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.9.3</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
