@@ -27,7 +27,7 @@ class TestReportBuilderTest {
         TestReport testReport = new TestReportBuilder(validatorBuilderFactory)
                 .setUuid()
                 .setDateTime(new Date())
-                .addTestRun(new TestRunBuilder(validatorBuilderFactory)
+                .addTestRunReport(new TestRunReportBuilder(validatorBuilderFactory)
                         .setDateTime(new Date())
                         .setTest(
                                 new TestBuilder(validatorBuilderFactory)
@@ -44,15 +44,15 @@ class TestReportBuilderTest {
 
     @org.junit.jupiter.api.Test
     void testReport_builder_with_subReports_passed() {
-        TestRunBuilder testRunBuilder = createTestRunBuilder();
+        TestRunReportBuilder testRunReportBuilder = createTestRunBuilder();
 
         TestReportBuilder subReportBuilder = createTestReportBuilder()
-                .addTestRun(testRunBuilder);
+                .addTestRunReport(testRunReportBuilder);
 
         TestReport testReport = new TestReportBuilder(validatorBuilderFactory)
                 .setUuid()
                 .setDateTime(new Date())
-                .addTestRun(createTestRunBuilder())
+                .addTestRunReport(createTestRunBuilder())
                 .addSubReport(subReportBuilder)
                 .build();
 
@@ -64,19 +64,19 @@ class TestReportBuilderTest {
 
     @org.junit.jupiter.api.Test
     void testReport_builder_with_subReports_failed() {
-        TestRunBuilder testRunBuilder = createTestRunBuilder();
-        testRunBuilder.addStepRun(new StepRunBuilder(validatorBuilderFactory)
+        TestRunReportBuilder testRunReportBuilder = createTestRunBuilder();
+        testRunReportBuilder.addStepRun(new StepRunReportBuilder(validatorBuilderFactory)
                 .setStepId("stepId")
                 .setType("validation")
                 .setResult(StepResult.FAILED));
 
         TestReportBuilder subReportBuilder = createTestReportBuilder()
-                .addTestRun(testRunBuilder);
+                .addTestRunReport(testRunReportBuilder);
 
         TestReport testReport = new TestReportBuilder(validatorBuilderFactory)
                 .setUuid()
                 .setDateTime(new Date())
-                .addTestRun(createTestRunBuilder())
+                .addTestRunReport(createTestRunBuilder())
                 .addSubReport(subReportBuilder)
                 .build();
 
@@ -88,23 +88,23 @@ class TestReportBuilderTest {
 
     @org.junit.jupiter.api.Test
     void testReport_builder_with_subReports_undefined() {
-        TestRunBuilder testRunBuilder = createTestRunBuilder();
-        testRunBuilder.addStepRun(new StepRunBuilder(validatorBuilderFactory)
+        TestRunReportBuilder testRunReportBuilder = createTestRunBuilder();
+        testRunReportBuilder.addStepRun(new StepRunReportBuilder(validatorBuilderFactory)
                 .setStepId("stepId")
                 .setType("validation")
                 .setResult(StepResult.FAILED));
-        testRunBuilder.addStepRun(new StepRunBuilder(validatorBuilderFactory)
+        testRunReportBuilder.addStepRun(new StepRunReportBuilder(validatorBuilderFactory)
                 .setStepId("stepId")
                 .setType("validation")
                 .setResult(StepResult.UNDEFINED));
 
         TestReportBuilder subReportBuilder = createTestReportBuilder()
-                .addTestRun(testRunBuilder);
+                .addTestRunReport(testRunReportBuilder);
 
         TestReport testReport = new TestReportBuilder(validatorBuilderFactory)
                 .setUuid()
                 .setDateTime(new Date())
-                .addTestRun(createTestRunBuilder())
+                .addTestRunReport(createTestRunBuilder())
                 .addSubReport(subReportBuilder)
                 .build();
 
@@ -116,22 +116,22 @@ class TestReportBuilderTest {
 
     @org.junit.jupiter.api.Test
     void testReport_builder_with_subReports_error() {
-        TestRunBuilder testRunBuilder = createTestRunBuilder();
-        testRunBuilder.addStepRun(new StepRunBuilder(validatorBuilderFactory)
+        TestRunReportBuilder testRunReportBuilder = createTestRunBuilder();
+        testRunReportBuilder.addStepRun(new StepRunReportBuilder(validatorBuilderFactory)
                 .setStepId("stepId")
                 .setType("validation")
                 .setResult(StepResult.FAILED));
-        testRunBuilder.addUnexpectedError(new UnexpectedErrorBuilder(validatorBuilderFactory)
+        testRunReportBuilder.addUnexpectedError(new UnexpectedErrorBuilder(validatorBuilderFactory)
                 .setName("error")
                 .setMessage("error"));
 
         TestReportBuilder subReportBuilder = createTestReportBuilder()
-                .addTestRun(testRunBuilder);
+                .addTestRunReport(testRunReportBuilder);
 
         TestReport testReport = new TestReportBuilder(validatorBuilderFactory)
                 .setUuid()
                 .setDateTime(new Date())
-                .addTestRun(createTestRunBuilder())
+                .addTestRunReport(createTestRunBuilder())
                 .addSubReport(subReportBuilder)
                 .build();
 
@@ -143,19 +143,19 @@ class TestReportBuilderTest {
 
     @org.junit.jupiter.api.Test
     void testReport_builder_with_run_failed() {
-        TestRunBuilder testRunBuilder = createTestRunBuilder();
-        testRunBuilder.addStepRun(new StepRunBuilder(validatorBuilderFactory)
+        TestRunReportBuilder testRunReportBuilder = createTestRunBuilder();
+        testRunReportBuilder.addStepRun(new StepRunReportBuilder(validatorBuilderFactory)
                 .setStepId("stepId")
                 .setType("validation")
                 .setResult(StepResult.FAILED));
 
         TestReportBuilder subReportBuilder = createTestReportBuilder();
-        subReportBuilder.addTestRun(createTestRunBuilder());
+        subReportBuilder.addTestRunReport(createTestRunBuilder());
 
         TestReport testReport = new TestReportBuilder(validatorBuilderFactory)
                 .setUuid()
                 .setDateTime(new Date())
-                .addTestRun(testRunBuilder)
+                .addTestRunReport(testRunReportBuilder)
                 .addSubReport(subReportBuilder)
                 .build();
 
@@ -165,11 +165,11 @@ class TestReportBuilderTest {
         assertEquals(1, testReport.getTestCounters().getFailed());
     }
 
-    private TestRunBuilder createTestRunBuilder() {
-        return new TestRunBuilder(validatorBuilderFactory)
+    private TestRunReportBuilder createTestRunBuilder() {
+        return new TestRunReportBuilder(validatorBuilderFactory)
                 .setDateTime(new Date())
                 .setTest(new TestBuilder(validatorBuilderFactory).setId("testId"))
-                .addStepRun(new StepRunBuilder(validatorBuilderFactory)
+                .addStepRun(new StepRunReportBuilder(validatorBuilderFactory)
                         .setStepId("stepId")
                         .setType("validation")
                         .setResult(StepResult.PASSED)

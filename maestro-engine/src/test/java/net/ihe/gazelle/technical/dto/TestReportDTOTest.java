@@ -5,10 +5,10 @@ import net.ihe.gazelle.framework.modelvalidator.interlay.adapter.BValidatorBuild
 import net.ihe.gazelle.modelmarshaller.application.StructureMapper;
 import net.ihe.gazelle.modelmarshaller.interlay.factory.JsonObjectMapperBuilder;
 import net.ihe.gazelle.modelmarshaller.interlay.mapper.JsonStructureMapper;
-import net.ihe.gazelle.report.builder.StepRunBuilder;
+import net.ihe.gazelle.report.builder.StepRunReportBuilder;
 import net.ihe.gazelle.report.builder.TestBuilder;
 import net.ihe.gazelle.report.builder.TestReportBuilder;
-import net.ihe.gazelle.report.builder.TestRunBuilder;
+import net.ihe.gazelle.report.builder.TestRunReportBuilder;
 import net.ihe.gazelle.report.model.StepResult;
 import net.ihe.gazelle.report.model.TestReport;
 import net.ihe.gazelle.technical.dto.report.TestReportDTO;
@@ -37,11 +37,11 @@ class TestReportDTOTest {
         assertTrue(testReport.isValid());
     }
 
-    private TestRunBuilder createTestRunBuilder() {
-        return new TestRunBuilder(validatorBuilderFactory)
+    private TestRunReportBuilder createTestRunBuilder() {
+        return new TestRunReportBuilder(validatorBuilderFactory)
                 .setDateTime(new Date())
                 .setTest(new TestBuilder(validatorBuilderFactory).setId("testId"))
-                .addStepRun(new StepRunBuilder(validatorBuilderFactory)
+                .addStepRun(new StepRunReportBuilder(validatorBuilderFactory)
                         .setStepId("stepId")
                         .setType("validation")
                         .setResult(StepResult.PASSED)
@@ -53,7 +53,7 @@ class TestReportDTOTest {
                 .setUuid()
                 .setReportVersion()
                 .setDateTime(new Date())
-                .addTestRun(createTestRunBuilder())
+                .addTestRunReport(createTestRunBuilder())
                 .build();
     }
 }

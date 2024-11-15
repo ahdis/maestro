@@ -3,8 +3,8 @@ package net.ihe.gazelle.report.model;
 import java.util.Objects;
 
 /**
- * Business rules
- * at least 0 for every int
+ * Business rules <br>
+ * at least 0 for every int <br>
  * total = sum(passed, failed, undefined)
  */
 public class TestCounters {

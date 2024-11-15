@@ -17,7 +17,7 @@ public class TestReportBuilderVisitor implements BuilderVisitor {
         SystemUnderTestBuilderVisitor.INSTANCE.visit(rootValidatorBuilder, validatorBuilderFactory);
         TestCountersBuilderVisitor.INSTANCE.visit(rootValidatorBuilder, validatorBuilderFactory);
         //TestReportBuilderVisitor.INSTANCE.visit(rootValidatorBuilder, validatorBuilderFactory);
-        TestRunBuilderVisitor.INSTANCE.visit(rootValidatorBuilder, validatorBuilderFactory);
+        TestRunReportBuilderVisitor.INSTANCE.visit(rootValidatorBuilder, validatorBuilderFactory);
         UnexpectedErrorBuilderVisitor.INSTANCE.visit(rootValidatorBuilder, validatorBuilderFactory);
     }
 }

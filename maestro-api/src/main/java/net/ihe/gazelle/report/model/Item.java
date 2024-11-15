@@ -4,9 +4,9 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * Business rules
- * name is mandatory
- * content xor reference
+ * Business rules: <br>
+ * name is mandatory <br>
+ * content xor reference <br>
  */
 public class Item {
 

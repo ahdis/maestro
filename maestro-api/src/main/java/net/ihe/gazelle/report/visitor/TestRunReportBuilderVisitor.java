@@ -3,19 +3,19 @@ package net.ihe.gazelle.report.visitor;
 import net.ihe.gazelle.framework.modelvalidator.domain.BuilderVisitor;
 import net.ihe.gazelle.framework.modelvalidator.domain.RootValidatorBuilder;
 import net.ihe.gazelle.framework.modelvalidator.domain.ValidatorBuilderFactory;
-import net.ihe.gazelle.report.model.TestRun;
-import net.ihe.gazelle.report.validator.supplier.TestRunValidatorBuilderSupplier;
+import net.ihe.gazelle.report.model.TestRunReport;
+import net.ihe.gazelle.report.validator.supplier.TestRunReportValidatorBuilderSupplier;
 
-public class TestRunBuilderVisitor implements BuilderVisitor {
+public class TestRunReportBuilderVisitor implements BuilderVisitor {
 
-    public static final TestRunBuilderVisitor INSTANCE = new TestRunBuilderVisitor();
+    public static final TestRunReportBuilderVisitor INSTANCE = new TestRunReportBuilderVisitor();
 
     @Override
     public void visit(RootValidatorBuilder<?> rootValidatorBuilder, ValidatorBuilderFactory validatorBuilderFactory) {
-        rootValidatorBuilder.addValidatorBuilder(TestRun.class, new TestRunValidatorBuilderSupplier(validatorBuilderFactory));
+        rootValidatorBuilder.addValidatorBuilder(TestRunReport.class, new TestRunReportValidatorBuilderSupplier(validatorBuilderFactory));
         TestBuilderVisitor.INSTANCE.visit(rootValidatorBuilder, validatorBuilderFactory);
         ItemBuilderVisitor.INSTANCE.visit(rootValidatorBuilder, validatorBuilderFactory);
-        StepRunBuilderVisitor.INSTANCE.visit(rootValidatorBuilder, validatorBuilderFactory);
+        StepRunReportBuilderVisitor.INSTANCE.visit(rootValidatorBuilder, validatorBuilderFactory);
         UnexpectedErrorBuilderVisitor.INSTANCE.visit(rootValidatorBuilder, validatorBuilderFactory);
     }
 }

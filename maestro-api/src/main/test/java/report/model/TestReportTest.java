@@ -17,7 +17,7 @@ class TestReportTest {
         assertEquals("1.0", testReport.getReportVersion());
         assertEquals("service", testReport.getTestService().getServiceIdentification().getName());
         assertEquals(1, testReport.getSystemsUnderTest().size());
-        assertEquals(1, testReport.getTestRuns().size());
+        assertEquals(1, testReport.getTestRunReports().size());
         assertEquals(Result.PASSED, testReport.getResult());
         assertTrue(testReport.isValid());
     }
@@ -27,18 +27,18 @@ class TestReportTest {
         TestReport testReport = buildTestReport();
         assertEquals(Result.PASSED, testReport.getResult());
         assertEquals(1, testReport.getTestCounters().getTotal());
-        TestRun testRun1 = buildTestRun();
-        testRun1.addStepRun(new StepRun("id", "type", StepResult.FAILED));
-        testRun1.computeResult();
-        testReport.addTestRun(testRun1);
+        TestRunReport testRunReport1 = buildTestRun();
+        testRunReport1.addStepRunReport(new StepRunReport("id", "type", StepResult.FAILED));
+        testRunReport1.computeResult();
+        testReport.addTestRunReport(testRunReport1);
         testReport.computeResult();
         testReport.computeCounters();
         assertEquals(Result.FAILED, testReport.getResult());
         assertEquals(2, testReport.getTestCounters().getTotal());
-        TestRun testRun2 = buildTestRun();
-        testRun2.addStepRun(new StepRun("id", "type", StepResult.UNDEFINED));
-        testRun2.computeResult();
-        testReport.addTestRun(testRun2);
+        TestRunReport testRunReport2 = buildTestRun();
+        testRunReport2.addStepRunReport(new StepRunReport("id", "type", StepResult.UNDEFINED));
+        testRunReport2.computeResult();
+        testReport.addTestRunReport(testRunReport2);
         testReport.computeResult();
         testReport.computeCounters();
         assertEquals(Result.UNDEFINED, testReport.getResult());
@@ -51,11 +51,11 @@ class TestReportTest {
     @Test
     void testReport_compute_sub_reports_valid() {
         TestReport testReport = buildTestReport();
-        TestRun testRun = buildTestRun();
-        testRun.addStepRun(new StepRun("id", "type", StepResult.FAILED));
-        testRun.computeResult();
+        TestRunReport testRunReport = buildTestRun();
+        testRunReport.addStepRunReport(new StepRunReport("id", "type", StepResult.FAILED));
+        testRunReport.computeResult();
         TestReport subReport = buildTestReport();
-        subReport.addTestRun(testRun);
+        subReport.addTestRunReport(testRunReport);
         subReport.computeResult();
         subReport.computeCounters();
         testReport.addSubReport(subReport);
@@ -65,11 +65,11 @@ class TestReportTest {
         assertEquals(3, testReport.getTestCounters().getTotal());
         assertEquals(2, testReport.getTestCounters().getPassed());
         assertEquals(1, testReport.getTestCounters().getFailed());
-        TestRun testRun2 = buildTestRun();
-        testRun2.addStepRun(new StepRun("id", "type", StepResult.UNDEFINED));
-        testRun2.computeResult();
+        TestRunReport testRunReport2 = buildTestRun();
+        testRunReport2.addStepRunReport(new StepRunReport("id", "type", StepResult.UNDEFINED));
+        testRunReport2.computeResult();
         TestReport subReport2 = buildTestReport();
-        subReport2.addTestRun(testRun2);
+        subReport2.addTestRunReport(testRunReport2);
         subReport2.computeResult();
         subReport2.computeCounters();
         testReport.addSubReport(subReport2);
@@ -83,11 +83,11 @@ class TestReportTest {
     void testReport_compute_sub_with_error() {
         TestReport testReport = buildTestReport();
         assertEquals(Result.PASSED, testReport.getResult());
-        TestRun testRun = buildTestRun();
-        testRun.addUnexpectedError(new UnexpectedError().setName("name").setMessage("message"));
-        testRun.computeResult();
+        TestRunReport testRunReport = buildTestRun();
+        testRunReport.addUnexpectedError(new UnexpectedError().setName("name").setMessage("message"));
+        testRunReport.computeResult();
         TestReport subReport = buildTestReport();
-        subReport.addTestRun(testRun);
+        subReport.addTestRunReport(testRunReport);
         subReport.computeResult();
         subReport.computeCounters();
         testReport.addSubReport(subReport);
@@ -115,22 +115,22 @@ class TestReportTest {
                 .setTestCounters(new TestCounters())
                 .setNote("note")
                 .setUrlToTestSuiteResult("urlToTestSuiteResult")
-                .addTestRun(buildTestRun());
+                .addTestRunReport(buildTestRun());
         testReport.computeCounters();
         testReport.computeResult();
         return testReport;
     }
 
-    private TestRun buildTestRun() {
-        TestRun testRun = new  TestRun()
+    private TestRunReport buildTestRun() {
+        TestRunReport testRunReport = new TestRunReport()
                 .setRunId("id")
                 .setDateTime(new Date())
                 .setTest(new net.ihe.gazelle.report.model.Test("id"))
                 .addInput(new Item("input", "reference"))
                 .addOutput(new Item("output", "reference"))
-                .addStepRun(new StepRun("id", "type", StepResult.PASSED))
+                .addStepRunReport(new StepRunReport("id", "type", StepResult.PASSED))
                 .setUrlToTestRun("urlToTestRun");
-        testRun.computeResult();
-        return testRun;
+        testRunReport.computeResult();
+        return testRunReport;
     }
 }

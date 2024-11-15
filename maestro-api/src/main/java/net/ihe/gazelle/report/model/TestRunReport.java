@@ -3,11 +3,11 @@ package net.ihe.gazelle.report.model;
 import java.util.*;
 
 /**
- * Business rules
+ * Business rules <br>
  * mandatory fields : dateTime, result, test
  *
  */
-public class TestRun {
+public class TestRunReport {
 
     private String runId;
     private Date dateTime;
@@ -15,19 +15,19 @@ public class TestRun {
     private Test test;
     private List<Item> inputs;
     private List<Item> outputs;
-    private List<StepRun> stepRuns;
+    private List<StepRunReport> stepRunReports;
     private String urlToTestRun;
     private List<UnexpectedError> unexpectedErrors;
 
-    public TestRun() {
+    public TestRunReport() {
         result = Result.UNDEFINED;
         inputs = new ArrayList<>();
         outputs = new ArrayList<>();
-        stepRuns = new ArrayList<>();
+        stepRunReports = new ArrayList<>();
         unexpectedErrors = new ArrayList<>();
     }
 
-    public TestRun(TestRun copy) {
+    public TestRunReport(TestRunReport copy) {
         this();
         this.runId = copy.getRunId();
         this.dateTime = copy.getDateTime();
@@ -35,7 +35,7 @@ public class TestRun {
         this.test = copy.getTest();
         this.inputs = new ArrayList<>(copy.getInputs());
         this.outputs = new ArrayList<>(copy.getOutputs());
-        this.stepRuns = new ArrayList<>(copy.getStepRuns());
+        this.stepRunReports = new ArrayList<>(copy.getStepRunReports());
         this.urlToTestRun = copy.getUrlToTestRun();
         this.unexpectedErrors = new ArrayList<>(copy.getUnexpectedErrors());
     }
@@ -44,7 +44,7 @@ public class TestRun {
         return runId;
     }
 
-    public TestRun setRunId(String runId) {
+    public TestRunReport setRunId(String runId) {
         this.runId = runId;
         return this;
     }
@@ -53,7 +53,7 @@ public class TestRun {
         return dateTime;
     }
 
-    public TestRun setDateTime(Date dateTime) {
+    public TestRunReport setDateTime(Date dateTime) {
         this.dateTime = dateTime;
         return this;
     }
@@ -62,7 +62,7 @@ public class TestRun {
         return test;
     }
 
-    public TestRun setTest(Test test) {
+    public TestRunReport setTest(Test test) {
         this.test = test;
         return this;
     }
@@ -71,17 +71,17 @@ public class TestRun {
         return new ArrayList<>(inputs);
     }
 
-    public TestRun setInputs(List<Item> inputs) {
+    public TestRunReport setInputs(List<Item> inputs) {
         this.inputs = new ArrayList<>(inputs);
         return this;
     }
 
-    public TestRun addInput(Item input) {
+    public TestRunReport addInput(Item input) {
         inputs.add(input);
         return this;
     }
 
-    public TestRun addInputs(List<Item> inputs) {
+    public TestRunReport addInputs(List<Item> inputs) {
         this.inputs.addAll(inputs);
         return this;
     }
@@ -90,17 +90,17 @@ public class TestRun {
         return new ArrayList<>(outputs);
     }
 
-    public TestRun setOutputs(List<Item> outputs) {
+    public TestRunReport setOutputs(List<Item> outputs) {
         this.outputs = new ArrayList<>(outputs);
         return this;
     }
 
-    public TestRun addOutput(Item output) {
+    public TestRunReport addOutput(Item output) {
         outputs.add(output);
         return this;
     }
 
-    public TestRun addOutputs(List<Item> outputs) {
+    public TestRunReport addOutputs(List<Item> outputs) {
         this.outputs.addAll(outputs);
         return this;
     }
@@ -109,27 +109,27 @@ public class TestRun {
         return result;
     }
 
-    public TestRun setResult(Result result) {
+    public TestRunReport setResult(Result result) {
         this.result = result;
         return this;
     }
 
-    public List<StepRun> getStepRuns() {
-        return new ArrayList<>(stepRuns);
+    public List<StepRunReport> getStepRunReports() {
+        return new ArrayList<>(stepRunReports);
     }
 
-    public TestRun setStepRuns(List<StepRun> stepRuns) {
-        this.stepRuns = new ArrayList<>(stepRuns);
+    public TestRunReport setStepRunReports(List<StepRunReport> stepRunReports) {
+        this.stepRunReports = new ArrayList<>(stepRunReports);
         return this;
     }
 
-    public TestRun addStepRun(StepRun stepRun) {
-        stepRuns.add(stepRun);
+    public TestRunReport addStepRunReport(StepRunReport stepRunReport) {
+        stepRunReports.add(stepRunReport);
         return this;
     }
 
-    public TestRun addStepRuns(List<StepRun> stepRuns) {
-        this.stepRuns.addAll(stepRuns);
+    public TestRunReport addStepRunReports(List<StepRunReport> stepRunReports) {
+        this.stepRunReports.addAll(stepRunReports);
         return this;
     }
 
@@ -137,7 +137,7 @@ public class TestRun {
         return urlToTestRun;
     }
 
-    public TestRun setUrlToTestRun(String urlToTestRun) {
+    public TestRunReport setUrlToTestRun(String urlToTestRun) {
         this.urlToTestRun = urlToTestRun;
         return this;
     }
@@ -146,17 +146,17 @@ public class TestRun {
         return new ArrayList<>(unexpectedErrors);
     }
 
-    public TestRun setUnexpectedErrors(List<UnexpectedError> unexpectedErrors) {
+    public TestRunReport setUnexpectedErrors(List<UnexpectedError> unexpectedErrors) {
         this.unexpectedErrors = new ArrayList<>(unexpectedErrors);
         return this;
     }
 
-    public TestRun addUnexpectedError(UnexpectedError unexpectedError) {
+    public TestRunReport addUnexpectedError(UnexpectedError unexpectedError) {
         unexpectedErrors.add(unexpectedError);
         return this;
     }
 
-    public TestRun addUnexpectedErrors(List<UnexpectedError> unexpectedErrors) {
+    public TestRunReport addUnexpectedErrors(List<UnexpectedError> unexpectedErrors) {
         this.unexpectedErrors.addAll(unexpectedErrors);
         return this;
     }
@@ -165,8 +165,8 @@ public class TestRun {
         if (!unexpectedErrors.isEmpty()) {
             result = Result.UNDEFINED;
         } else {
-            Optional<StepResult> globalStepResult = stepRuns.stream()
-                    .map(StepRun::getResult)
+            Optional<StepResult> globalStepResult = stepRunReports.stream()
+                    .map(StepRunReport::getResult)
                     .filter(Objects::nonNull)
                     .max(StepResult::compareTo);
 
@@ -186,7 +186,7 @@ public class TestRun {
     }
 
     public boolean isResultValid() {
-        TestRun tmp = new TestRun(this);
+        TestRunReport tmp = new TestRunReport(this);
         tmp.computeResult();
         return tmp.getResult().equals(result);
     }
@@ -209,20 +209,20 @@ public class TestRun {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof TestRun testRun)) return false;
-        return Objects.equals(runId, testRun.runId)
-                && Objects.equals(dateTime, testRun.dateTime)
-                && result == testRun.result
-                && Objects.equals(test, testRun.test)
-                && Objects.equals(inputs, testRun.inputs)
-                && Objects.equals(outputs, testRun.outputs)
-                && Objects.equals(stepRuns, testRun.stepRuns)
-                && Objects.equals(urlToTestRun, testRun.urlToTestRun)
-                && Objects.equals(unexpectedErrors, testRun.unexpectedErrors);
+        if (!(o instanceof TestRunReport testRunReport)) return false;
+        return Objects.equals(runId, testRunReport.runId)
+                && Objects.equals(dateTime, testRunReport.dateTime)
+                && result == testRunReport.result
+                && Objects.equals(test, testRunReport.test)
+                && Objects.equals(inputs, testRunReport.inputs)
+                && Objects.equals(outputs, testRunReport.outputs)
+                && Objects.equals(stepRunReports, testRunReport.stepRunReports)
+                && Objects.equals(urlToTestRun, testRunReport.urlToTestRun)
+                && Objects.equals(unexpectedErrors, testRunReport.unexpectedErrors);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(runId, dateTime, result, test, inputs, outputs, stepRuns, urlToTestRun, unexpectedErrors);
+        return Objects.hash(runId, dateTime, result, test, inputs, outputs, stepRunReports, urlToTestRun, unexpectedErrors);
     }
 }

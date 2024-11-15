@@ -31,7 +31,7 @@ public class TestReportValidatorBuilderSupplier extends AbstractValidatorBuilder
                 .addMember("systemsUnderTest", TestReport::getSystemsUnderTest, SystemUnderTest.class)
                 .addMember("testCounters", TestReport::getTestCounters, TestCounters.class)
                 .addMember("subReports", TestReport::getSubReports, TestReport.class)
-                .addMember("testRuns", TestReport::getTestRuns, TestRun.class)
+                .addMember("testRuns", TestReport::getTestRunReports, TestRunReport.class)
                 .addMember("unexpectedErrors", TestReport::getUnexpectedErrors, UnexpectedError.class);
     }
 }

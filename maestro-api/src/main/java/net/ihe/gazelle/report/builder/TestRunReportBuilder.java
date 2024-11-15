@@ -3,120 +3,120 @@ package net.ihe.gazelle.report.builder;
 import net.ihe.gazelle.framework.modelvalidator.domain.AbstractBuilder;
 import net.ihe.gazelle.framework.modelvalidator.domain.BuilderVisitor;
 import net.ihe.gazelle.framework.modelvalidator.domain.ValidatorBuilderFactory;
-import net.ihe.gazelle.report.model.TestRun;
-import net.ihe.gazelle.report.visitor.TestRunBuilderVisitor;
+import net.ihe.gazelle.report.model.TestRunReport;
+import net.ihe.gazelle.report.visitor.TestRunReportBuilderVisitor;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class TestRunBuilder extends AbstractBuilder<TestRun> {
+public class TestRunReportBuilder extends AbstractBuilder<TestRunReport> {
 
     private String runId;
     private Date dateTime;
     private TestBuilder test;
     private List<ItemBuilder> inputs;
     private List<ItemBuilder> outputs;
-    private List<StepRunBuilder> stepRuns;
+    private List<StepRunReportBuilder> stepRunReports;
     private String urlToTestRun;
     private List<UnexpectedErrorBuilder> unexpectedErrors;
 
-    public TestRunBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
+    public TestRunReportBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
         super(validatorBuilderFactory);
         inputs = new ArrayList<>();
         outputs = new ArrayList<>();
-        stepRuns = new ArrayList<>();
+        stepRunReports = new ArrayList<>();
         unexpectedErrors = new ArrayList<>();
     }
 
-    public TestRunBuilder setRunId(String runId) {
+    public TestRunReportBuilder setRunId(String runId) {
         this.runId = runId;
         return this;
     }
 
-    public TestRunBuilder setDateTime(Date dateTime) {
+    public TestRunReportBuilder setDateTime(Date dateTime) {
         this.dateTime = dateTime;
         return this;
     }
 
-    public TestRunBuilder setTest(TestBuilder test) {
+    public TestRunReportBuilder setTest(TestBuilder test) {
         this.test = test;
         return this;
     }
 
-    public TestRunBuilder setInputs(List<ItemBuilder> inputs) {
+    public TestRunReportBuilder setInputs(List<ItemBuilder> inputs) {
         this.inputs = inputs;
         return this;
     }
 
-    public TestRunBuilder addInput(ItemBuilder input) {
+    public TestRunReportBuilder addInput(ItemBuilder input) {
         inputs.add(input);
         return this;
     }
 
-    public TestRunBuilder addInputs(List<ItemBuilder> inputs) {
+    public TestRunReportBuilder addInputs(List<ItemBuilder> inputs) {
         this.inputs.addAll(inputs);
         return this;
     }
 
-    public TestRunBuilder setOutputs(List<ItemBuilder> outputs) {
+    public TestRunReportBuilder setOutputs(List<ItemBuilder> outputs) {
         this.outputs = outputs;
         return this;
     }
 
-    public TestRunBuilder addOutput(ItemBuilder output) {
+    public TestRunReportBuilder addOutput(ItemBuilder output) {
         outputs.add(output);
         return this;
     }
 
-    public TestRunBuilder addOutputs(List<ItemBuilder> outputs) {
+    public TestRunReportBuilder addOutputs(List<ItemBuilder> outputs) {
         this.outputs.addAll(outputs);
         return this;
     }
 
-    public TestRunBuilder setStepRuns(List<StepRunBuilder> stepRuns) {
-        this.stepRuns = stepRuns;
+    public TestRunReportBuilder setStepRunReports(List<StepRunReportBuilder> stepRunReports) {
+        this.stepRunReports = stepRunReports;
         return this;
     }
 
-    public TestRunBuilder addStepRun(StepRunBuilder stepRun) {
-        this.stepRuns.add(stepRun);
+    public TestRunReportBuilder addStepRun(StepRunReportBuilder stepRun) {
+        this.stepRunReports.add(stepRun);
         return this;
     }
 
-    public TestRunBuilder addStepRuns(List<StepRunBuilder> stepRuns) {
-        this.stepRuns.addAll(stepRuns);
+    public TestRunReportBuilder addStepRuns(List<StepRunReportBuilder> stepRuns) {
+        this.stepRunReports.addAll(stepRuns);
         return this;
     }
 
-    public TestRunBuilder setUrlToTestRun(String urlToTestRun) {
+    public TestRunReportBuilder setUrlToTestRun(String urlToTestRun) {
         this.urlToTestRun = urlToTestRun;
         return this;
     }
 
-    public TestRunBuilder setUnexpectedErrors(List<UnexpectedErrorBuilder> unexpectedErrors) {
+    public TestRunReportBuilder setUnexpectedErrors(List<UnexpectedErrorBuilder> unexpectedErrors) {
         this.unexpectedErrors = unexpectedErrors;
         return this;
     }
 
-    public TestRunBuilder addUnexpectedError(UnexpectedErrorBuilder unexpectedError) {
+    public TestRunReportBuilder addUnexpectedError(UnexpectedErrorBuilder unexpectedError) {
         this.unexpectedErrors.add(unexpectedError);
         return this;
     }
 
-    public TestRunBuilder addUnexpectedErrors(List<UnexpectedErrorBuilder> unexpectedErrors) {
+    public TestRunReportBuilder addUnexpectedErrors(List<UnexpectedErrorBuilder> unexpectedErrors) {
         this.unexpectedErrors.addAll(unexpectedErrors);
         return this;
     }
 
     @Override
     protected BuilderVisitor getBuilderVisitor() {
-        return TestRunBuilderVisitor.INSTANCE;
+        return TestRunReportBuilderVisitor.INSTANCE;
     }
 
     @Override
-    protected Class<? extends TestRun> getParameterClass() {
-        return TestRun.class;
+    protected Class<? extends TestRunReport> getParameterClass() {
+        return TestRunReport.class;
     }
 
     @Override
@@ -135,8 +135,8 @@ public class TestRunBuilder extends AbstractBuilder<TestRun> {
                                 .map(AbstractBuilder::buildField)
                                 .toList() : new ArrayList<>()
                 )
-                .setStepRuns(
-                        !stepRuns.isEmpty() ? stepRuns.stream()
+                .setStepRunReports(
+                        !stepRunReports.isEmpty() ? stepRunReports.stream()
                                 .map(AbstractBuilder::buildField)
                                 .toList() : new ArrayList<>()
                 )

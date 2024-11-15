@@ -4,62 +4,62 @@ import net.ihe.gazelle.framework.modelvalidator.domain.AbstractBuilder;
 import net.ihe.gazelle.framework.modelvalidator.domain.BuilderVisitor;
 import net.ihe.gazelle.framework.modelvalidator.domain.ValidatorBuilderFactory;
 import net.ihe.gazelle.report.model.StepResult;
-import net.ihe.gazelle.report.model.StepRun;
-import net.ihe.gazelle.report.visitor.StepRunBuilderVisitor;
+import net.ihe.gazelle.report.model.StepRunReport;
+import net.ihe.gazelle.report.visitor.StepRunReportBuilderVisitor;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class StepRunBuilder extends AbstractBuilder<StepRun> {
+public class StepRunReportBuilder extends AbstractBuilder<StepRunReport> {
 
     private String stepId;
     private String type;
     private StepResult result;
     private List<ItemBuilder> outputs;
 
-    public StepRunBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
+    public StepRunReportBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
         super(validatorBuilderFactory);
         outputs = new ArrayList<>();
     }
 
-    public StepRunBuilder setStepId(String stepId) {
+    public StepRunReportBuilder setStepId(String stepId) {
         this.stepId = stepId;
         return this;
     }
 
-    public StepRunBuilder setType(String type) {
+    public StepRunReportBuilder setType(String type) {
         this.type = type;
         return this;
     }
 
-    public StepRunBuilder setResult(StepResult result) {
+    public StepRunReportBuilder setResult(StepResult result) {
         this.result = result;
         return this;
     }
 
-    public StepRunBuilder setOutputs(List<ItemBuilder> outputs) {
+    public StepRunReportBuilder setOutputs(List<ItemBuilder> outputs) {
         this.outputs = new ArrayList<>(outputs);
         return this;
     }
 
-    public StepRunBuilder addOutput(ItemBuilder item) {
+    public StepRunReportBuilder addOutput(ItemBuilder item) {
         this.outputs.add(item);
         return this;
     }
 
-    public StepRunBuilder addOutputs(List<ItemBuilder> outputs) {
+    public StepRunReportBuilder addOutputs(List<ItemBuilder> outputs) {
         this.outputs.addAll(outputs);
         return this;
     }
 
     @Override
     protected BuilderVisitor getBuilderVisitor() {
-        return StepRunBuilderVisitor.INSTANCE;
+        return StepRunReportBuilderVisitor.INSTANCE;
     }
 
     @Override
-    protected Class<? extends StepRun> getParameterClass() {
-        return StepRun.class;
+    protected Class<? extends StepRunReport> getParameterClass() {
+        return StepRunReport.class;
     }
 
     @Override

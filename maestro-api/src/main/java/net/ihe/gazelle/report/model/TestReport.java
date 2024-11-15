@@ -6,26 +6,28 @@ import static net.ihe.gazelle.report.model.Result.UNDEFINED;
 
 
 /**
- * Business rules
- * required fields : uuid -> generation in builder random uuid
- *                   dateTime
- *                   result
- *                   testCounters
- *                   at least 1 subReport or 1 testRun or 1 unexpectedError
+ * Business rules <br>
+ * required fields :
+ * uuid -> generation in builder random uuid <br>
+ * dateTime <br>
+ * result <br>
+ * testCounters <br>
+ * at least 1 subReport or 1 testRun or 1 unexpectedError <br>
  *
- * Result computation to be done here:
- * if 0 unexpectedError and 0 FAILED and 0 PASSED and 0 UNDEFINED -> UNDEFINED
- * if 1 unexpectedError -> UNDEFINED
- * if 1 UNDEFINED -> UNDEFINED
- * if 0 unexpectedError and 0 UNDEFINED and at least 1 FAILED -> FAILED
- * if 0 unexpectedError and 0 UNDEFINED and 0 FAILED and at least 1 PASSED -> PASSED
+ * Result computation to be done here: <br>
+ * if 0 unexpectedError and 0 FAILED and 0 PASSED and 0 UNDEFINED -> UNDEFINED <br>
+ * if 1 unexpectedError -> UNDEFINED <br>
+ * if 1 UNDEFINED -> UNDEFINED <br>
+ * if 0 unexpectedError and 0 UNDEFINED and at least 1 FAILED -> FAILED <br>
+ * if 0 unexpectedError and 0 UNDEFINED and 0 FAILED and at least 1 PASSED -> PASSED <br>
  *
- * Counters computation
- * count all testRun result + all sub report counters
- * count all unexpectedErrors in testRuns + root + subReport error counters,
+ * Counters computation: <br>
+ * count all testRun result + all sub report counters <br>
+ * count all unexpectedErrors in testRuns + root + subReport error counters, <br>
  *
  * Counters must be valid
  */
+
 public class TestReport {
 
     public static final String REPORT_VERSION = "1.0";
@@ -41,7 +43,7 @@ public class TestReport {
     private String note;
     private String urlToTestSuiteResult;
     private List<TestReport> subReports;
-    private List<TestRun> testRuns;
+    private List<TestRunReport> testRunReports;
     private List<UnexpectedError> unexpectedErrors;
 
     public TestReport() {
@@ -49,7 +51,7 @@ public class TestReport {
         result = Result.UNDEFINED;
         systemsUnderTest = new ArrayList<>();
         subReports = new ArrayList<>();
-        testRuns = new ArrayList<>();
+        testRunReports = new ArrayList<>();
         unexpectedErrors = new ArrayList<>();
     }
 
@@ -66,7 +68,7 @@ public class TestReport {
         setNote(copy.getNote());
         setUrlToTestSuiteResult(copy.getUrlToTestSuiteResult());
         setSubReports(copy.getSubReports());
-        setTestRuns(copy.getTestRuns());
+        setTestRunReports(copy.getTestRunReports());
         setUnexpectedErrors(copy.getUnexpectedErrors());
     }
 
@@ -189,22 +191,22 @@ public class TestReport {
         return this;
     }
 
-    public List<TestRun> getTestRuns() {
-        return new ArrayList<>(testRuns);
+    public List<TestRunReport> getTestRunReports() {
+        return new ArrayList<>(testRunReports);
     }
 
-    public TestReport setTestRuns(List<TestRun> testRuns) {
-        this.testRuns = new ArrayList<>(testRuns);
+    public TestReport setTestRunReports(List<TestRunReport> testRunReports) {
+        this.testRunReports = new ArrayList<>(testRunReports);
         return this;
     }
 
-    public TestReport addTestRun(TestRun testRun) {
-        testRuns.add(testRun);
+    public TestReport addTestRunReport(TestRunReport testRunReport) {
+        testRunReports.add(testRunReport);
         return this;
     }
 
-    public TestReport addTestRuns(List<TestRun> testRuns) {
-        this.testRuns.addAll(testRuns);
+    public TestReport addTestRunReports(List<TestRunReport> testRunReports) {
+        this.testRunReports.addAll(testRunReports);
         return this;
     }
 
@@ -235,8 +237,8 @@ public class TestReport {
                     .filter(Objects::nonNull)
                     .forEach(testCounters::addNumbersFromSubCounters);
         }
-        if (testRuns != null) {
-            testRuns.forEach(this::incrementCounterForATestRun);
+        if (testRunReports != null) {
+            testRunReports.forEach(this::incrementCounterForATestRun);
         }
         if (unexpectedErrors != null) {
             unexpectedErrors.forEach(error -> testCounters.incrementUnexpectedErrors());
@@ -263,10 +265,10 @@ public class TestReport {
     }
 
     public Optional<Result> getTestRunsResult() {
-        return testRuns.isEmpty()
+        return testRunReports.isEmpty()
                 ? Optional.empty()
-                : testRuns.stream()
-                        .map(TestRun::getResult)
+                : testRunReports.stream()
+                        .map(TestRunReport::getResult)
                         .filter(Objects::nonNull)
                         .max(Result::compareTo);
     }
@@ -280,14 +282,14 @@ public class TestReport {
                         .max(Result::compareTo);
     }
 
-    public void incrementCounterForATestRun(TestRun testRun) {
-        switch (testRun.getResult()) {
+    public void incrementCounterForATestRun(TestRunReport testRunReport) {
+        switch (testRunReport.getResult()) {
             case FAILED    -> testCounters.incrementFailed();
             case PASSED    -> testCounters.incrementPassed();
             case UNDEFINED -> {
                 testCounters.incrementUndefined();
-                if (!testRun.getUnexpectedErrors().isEmpty()) {
-                    testCounters.incrementUnexpectedErrors(testRun.getUnexpectedErrors().size());
+                if (!testRunReport.getUnexpectedErrors().isEmpty()) {
+                    testCounters.incrementUnexpectedErrors(testRunReport.getUnexpectedErrors().size());
                 }
             }
         }
@@ -326,7 +328,7 @@ public class TestReport {
     }
 
     public boolean hasAtLeastOneResult() {
-        return !(subReports.isEmpty() && testRuns.isEmpty() && unexpectedErrors.isEmpty());
+        return !(subReports.isEmpty() && testRunReports.isEmpty() && unexpectedErrors.isEmpty());
     }
 
     public boolean isValid() {
@@ -354,12 +356,12 @@ public class TestReport {
                 && Objects.equals(note, that.note)
                 && Objects.equals(urlToTestSuiteResult, that.urlToTestSuiteResult)
                 && Objects.equals(subReports, that.subReports)
-                && Objects.equals(testRuns, that.testRuns)
+                && Objects.equals(testRunReports, that.testRunReports)
                 && Objects.equals(unexpectedErrors, that.unexpectedErrors);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(reportVersion, uuid, dateTime, testService, systemsUnderTest, result, testSuiteName, testCounters, note, urlToTestSuiteResult, subReports, testRuns, unexpectedErrors);
+        return Objects.hash(reportVersion, uuid, dateTime, testService, systemsUnderTest, result, testSuiteName, testCounters, note, urlToTestSuiteResult, subReports, testRunReports, unexpectedErrors);
     }
 }

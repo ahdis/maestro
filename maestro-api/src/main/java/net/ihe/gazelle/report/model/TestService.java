@@ -3,8 +3,8 @@ package net.ihe.gazelle.report.model;
 import java.util.Objects;
 
 /**
- * Business rules
- * all mandatory
+ * Business rules <br>
+ * all mandatory <br>
  * serviceIdentification.version mandatory (version "unknown" is accepted)
  */
 public class TestService {

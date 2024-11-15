@@ -4,13 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import net.ihe.gazelle.report.model.StepRun;
+import net.ihe.gazelle.report.model.StepRunReport;
 
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({"stepId", "type", "result", "outputs"})
-public record StepRunDTO(StepRun domain) {
+public record StepRunReportDTO(StepRunReport domain) {
 
     @JsonProperty(value = "stepId")
     public String getStepId() {

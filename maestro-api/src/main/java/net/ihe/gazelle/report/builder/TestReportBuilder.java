@@ -22,14 +22,14 @@ public class TestReportBuilder extends AbstractBuilder<TestReport> {
     private String note;
     private String urlToTestSuiteResult;
     private List<TestReportBuilder> subReports;
-    private List<TestRunBuilder> testRuns;
+    private List<TestRunReportBuilder> testRunReports;
     private List<UnexpectedErrorBuilder> unexpectedErrors;
 
     public TestReportBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
         super(validatorBuilderFactory);
         systemsUnderTest = new ArrayList<>();
         subReports = new ArrayList<>();
-        testRuns = new ArrayList<>();
+        testRunReports = new ArrayList<>();
         unexpectedErrors = new ArrayList<>();
     }
 
@@ -98,18 +98,18 @@ public class TestReportBuilder extends AbstractBuilder<TestReport> {
         return this;
     }
 
-    public TestReportBuilder setTestRuns(List<TestRunBuilder> testRuns) {
-        this.testRuns = testRuns;
+    public TestReportBuilder setTestRunReports(List<TestRunReportBuilder> testRunReports) {
+        this.testRunReports = testRunReports;
         return this;
     }
 
-    public TestReportBuilder addTestRun(TestRunBuilder testRun) {
-        this.testRuns.add(testRun);
+    public TestReportBuilder addTestRunReport(TestRunReportBuilder testRunReport) {
+        this.testRunReports.add(testRunReport);
         return this;
     }
 
-    public TestReportBuilder addTestRuns(List<TestRunBuilder> testRuns) {
-        this.testRuns.addAll(testRuns);
+    public TestReportBuilder addTestRunReports(List<TestRunReportBuilder> testRunReports) {
+        this.testRunReports.addAll(testRunReports);
         return this;
     }
 
@@ -158,8 +158,8 @@ public class TestReportBuilder extends AbstractBuilder<TestReport> {
                                 .map(AbstractBuilder::buildField)
                                 .toList() : new ArrayList<>()
                 )
-                .setTestRuns(
-                        !testRuns.isEmpty() ? testRuns.stream()
+                .setTestRunReports(
+                        !testRunReports.isEmpty() ? testRunReports.stream()
                                 .map(AbstractBuilder::buildField)
                                 .toList() : new ArrayList<>()
                 )

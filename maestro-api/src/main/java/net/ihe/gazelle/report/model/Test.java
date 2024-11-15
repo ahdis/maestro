@@ -3,7 +3,7 @@ package net.ihe.gazelle.report.model;
 import java.util.Objects;
 
 /**
- * Business rules
+ * Business rules <br>
  * id is mandatory
  */
 public class Test {

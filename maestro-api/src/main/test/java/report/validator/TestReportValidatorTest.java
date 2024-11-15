@@ -3,9 +3,9 @@ package report.validator;
 import net.ihe.gazelle.framework.modelvalidator.domain.result.ObjectResult;
 import net.ihe.gazelle.framework.modelvalidator.interlay.adapter.BValidatorBuilderFactory;
 import net.ihe.gazelle.report.model.StepResult;
-import net.ihe.gazelle.report.model.StepRun;
+import net.ihe.gazelle.report.model.StepRunReport;
 import net.ihe.gazelle.report.model.TestReport;
-import net.ihe.gazelle.report.model.TestRun;
+import net.ihe.gazelle.report.model.TestRunReport;
 import net.ihe.gazelle.report.validator.TestReportValidator;
 import org.junit.jupiter.api.Test;
 
@@ -30,10 +30,10 @@ class TestReportValidatorTest {
     @Test
     void test_report_validator_invalid() {
         TestReport testReport = getTestReport();
-        testReport.addTestRun(new TestRun()
+        testReport.addTestRunReport(new TestRunReport()
                 .setDateTime(new Date())
                 .setTest(new net.ihe.gazelle.report.model.Test("id"))
-                .addStepRun(new StepRun()
+                .addStepRunReport(new StepRunReport()
                         .setStepId("id")
                         .setType("type")
                         .setResult(StepResult.PASSED)
@@ -45,21 +45,21 @@ class TestReportValidatorTest {
     }
 
     private TestReport getTestReport() {
-        TestRun testRun = new TestRun()
+        TestRunReport testRunReport = new TestRunReport()
                 .setDateTime(new Date())
                 .setTest(new net.ihe.gazelle.report.model.Test("id"))
-                .addStepRun(new StepRun()
+                .addStepRunReport(new StepRunReport()
                         .setStepId("id")
                         .setType("type")
                         .setResult(StepResult.PASSED)
                 );
-        testRun.computeResult();
+        testRunReport.computeResult();
 
         TestReport testReport = new TestReport()
                 .setReportVersion("version")
                 .setUuid(UUID.randomUUID().toString())
                 .setDateTime(new Date())
-                .addTestRun(testRun);
+                .addTestRunReport(testRunReport);
         testReport.computeResult();
         testReport.computeCounters();
         return testReport;

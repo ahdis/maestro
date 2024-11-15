@@ -9,7 +9,7 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
         "modelVersion", "uuid", "dateTime", "testService", "systemsUnderTest", "result", "testSuiteName",
-        "testCounters", "note", "urlToTestSuiteResult", "subReports", "testRuns", "unexpectedErrors"
+        "testCounters", "note", "urlToTestSuiteResult", "testRunReports", "subReports", "unexpectedErrors"
 })
 public record TestReportDTO(TestReport domain) {
 
@@ -72,17 +72,17 @@ public record TestReportDTO(TestReport domain) {
         return domain.getUrlToTestSuiteResult();
     }
 
+    @JsonProperty(value = "testRunReports")
+    public List<TestRunReportDTO> getTestRunReports() {
+        return domain.getTestRunReports().stream()
+                .map(TestRunReportDTO::new)
+                .toList();
+    }
+
     @JsonProperty(value = "subReports")
     public List<TestReportDTO> getSubReports() {
         return domain.getSubReports().stream()
                 .map(TestReportDTO::new)
-                .toList();
-    }
-
-    @JsonProperty(value = "testRuns")
-    public List<TestRunDTO> getTestRuns() {
-        return domain.getTestRuns().stream()
-                .map(TestRunDTO::new)
                 .toList();
     }
 

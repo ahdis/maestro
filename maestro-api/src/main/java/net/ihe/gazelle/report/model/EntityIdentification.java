@@ -3,7 +3,7 @@ package net.ihe.gazelle.report.model;
 import java.util.Objects;
 
 /**
- * Business rules
+ * Business rules: <br>
  * name is mandatory
  */
 public class EntityIdentification {

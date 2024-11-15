@@ -8,19 +8,19 @@ import java.util.Objects;
  * mandatory fields : stepId, type, result
  *
  */
-public class StepRun {
+public class StepRunReport {
 
     private String stepId;
     private String type;
     private StepResult result;
     private List<Item> outputs;
 
-    public StepRun() {
+    public StepRunReport() {
         result = StepResult.UNDEFINED;
         outputs = new ArrayList<>();
     }
 
-    public StepRun(String stepId, String type, StepResult result) {
+    public StepRunReport(String stepId, String type, StepResult result) {
         this();
         this.stepId = stepId;
         this.type = type;
@@ -31,7 +31,7 @@ public class StepRun {
         return stepId;
     }
 
-    public StepRun setStepId(String stepId) {
+    public StepRunReport setStepId(String stepId) {
         this.stepId = stepId;
         return this;
     }
@@ -40,7 +40,7 @@ public class StepRun {
         return type;
     }
 
-    public StepRun setType(String type) {
+    public StepRunReport setType(String type) {
         this.type = type;
         return this;
     }
@@ -49,7 +49,7 @@ public class StepRun {
         return result;
     }
 
-    public StepRun setResult(StepResult result) {
+    public StepRunReport setResult(StepResult result) {
         this.result = result;
         return this;
     }
@@ -58,17 +58,17 @@ public class StepRun {
         return new ArrayList<>(outputs);
     }
 
-    public StepRun setOutputs(List<Item> outputs) {
+    public StepRunReport setOutputs(List<Item> outputs) {
         this.outputs = new ArrayList<>(outputs);
         return this;
     }
 
-    public StepRun addOutput(Item item) {
+    public StepRunReport addOutput(Item item) {
         outputs.add(item);
         return this;
     }
 
-    public StepRun addOutputs(List<Item> outputs) {
+    public StepRunReport addOutputs(List<Item> outputs) {
         this.outputs.addAll(outputs);
         return this;
     }
@@ -92,11 +92,11 @@ public class StepRun {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof StepRun stepRun)) return false;
-        return Objects.equals(stepId, stepRun.stepId)
-                && Objects.equals(type, stepRun.type)
-                && result == stepRun.result
-                && Objects.equals(outputs, stepRun.outputs);
+        if (!(o instanceof StepRunReport stepRunReport)) return false;
+        return Objects.equals(stepId, stepRunReport.stepId)
+                && Objects.equals(type, stepRunReport.type)
+                && result == stepRunReport.result
+                && Objects.equals(outputs, stepRunReport.outputs);
     }
 
     @Override

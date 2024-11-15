@@ -1,16 +1,16 @@
 package net.ihe.gazelle.technical.dto.report;
 
 import com.fasterxml.jackson.annotation.*;
-import net.ihe.gazelle.report.model.TestRun;
+import net.ihe.gazelle.report.model.TestRunReport;
 
 import java.util.Date;
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
-        "runId", "dateTime", "result", "test", "inputs", "outputs", "stepRuns", "urlToTestRun", "unexpectedErrors"
+        "runId", "dateTime", "result", "test", "inputs", "outputs", "stepRunReports", "urlToTestRun", "unexpectedErrors"
 })
-public record TestRunDTO(TestRun domain) {
+public record TestRunReportDTO(TestRunReport domain) {
 
     public static final String ISO_8601_DATETIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 
@@ -49,10 +49,10 @@ public record TestRunDTO(TestRun domain) {
                 .toList();
     }
 
-    @JsonProperty(value = "stepRuns")
-    public List<StepRunDTO> getStepRuns() {
-        return domain.getStepRuns().stream()
-                .map(StepRunDTO::new)
+    @JsonProperty(value = "stepRunReports")
+    public List<StepRunReportDTO> getStepRunReports() {
+        return domain.getStepRunReports().stream()
+                .map(StepRunReportDTO::new)
                 .toList();
     }
 
