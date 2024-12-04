@@ -1,7 +1,9 @@
 # Define templates
 include:
   - project: 'gazelle/private/gitlab-ci-templates'
-    file: 'extends-v2.yaml'
+    file:
+      - 'extends-v2.yaml'
+      - 'stages/schedule.yaml'
     ref: 'master'
 
 # Define stages
@@ -14,6 +16,8 @@ stages:
   - release
   - upgrade
   - clean
+  - schedule
+  - scheduled-jobs
 
 # Define global variables
 variables:
@@ -80,3 +84,13 @@ release/dockerImage:
   extends:
     - .releaseDockerWithQuarkus
   needs: [ "release/code" ]
+
+mutator-schedule:
+  stage: schedule
+  extends:
+    - .createMutationNightlyPipeline
+  needs:
+    - job: static-analysis
+  variables:
+    CRON_SCHEDULE: "05 01 * * *"
+  allow_failure: false

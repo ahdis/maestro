@@ -1,0 +1,35 @@
+[
+  {
+    "name": "http-validator",
+    "version": "1.0.0",
+    "instanceId": "instanceId",
+    "replicaId": "replicaId",
+    "providedInterfaces": [
+      {
+        "interfaceName": "httpval",
+        "interfaceVersion": "3.0.0",
+        "bindings": [
+          {
+            "type": "restBinding",
+            "serviceUrl": "http://localhost:18088/http-validator/rest/validation"
+          }
+        ]
+      }
+    ],
+    "consumedInterfaces": [
+      {
+        "interfaceName": "ConsumedInterfaceName",
+        "supportedVersions": [
+          "1.0.0"
+        ],
+        "required": true,
+        "bindings": [
+          {
+            "type": "restBinding",
+            "serviceUrl": "http://localhost:8151"
+          }
+        ]
+      }
+    ]
+  }
+]

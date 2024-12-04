@@ -1,0 +1,36 @@
+package net.ihe.gazelle.maestro.business.step.validation;
+
+import net.ihe.gazelle.maestro.Property;
+import net.ihe.gazelle.maestro.Step;
+import net.ihe.gazelle.maestro.business.step.assertion.AssertionStep;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class ValidationStepRunnerFactoryTest {
+
+    ValidationStepRunnerFactory validationStepRunnerFactory;
+
+    @BeforeEach
+    void setUp() {
+        validationStepRunnerFactory = new ValidationStepRunnerFactory();
+    }
+
+    @Test
+    void canonicalNameTest(){
+        assertEquals(ValidationStep.class.getCanonicalName(), validationStepRunnerFactory.getSupportedStep());
+    }
+
+    @Test
+    void getRequiredServicesOfAssertionStep(){
+        Step assertionStep = new AssertionStep(
+                "saucisse",
+                new Property<>(AssertionStep.ASSERTION, "equals(puré)".getBytes()),
+                new Property<>(AssertionStep.ASSERTION_SERVICE, "cuisine")
+                );
+        assertTrue(validationStepRunnerFactory.getRequiredServices(assertionStep).isEmpty());
+    }
+
+}

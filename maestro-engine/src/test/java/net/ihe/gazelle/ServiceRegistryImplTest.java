@@ -1,7 +1,7 @@
 package net.ihe.gazelle;
 
-import net.ihe.gazelle.technical.configuration.ServiceRegistryDAOImpl;
-import net.ihe.gazelle.technical.configuration.ServiceRegistryImpl;
+import net.ihe.gazelle.maestro.technical.configuration.ServiceRegistryDAOImpl;
+import net.ihe.gazelle.maestro.technical.configuration.ServiceRegistryImpl;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
