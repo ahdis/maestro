@@ -11,20 +11,20 @@ import java.util.List;
  */
 public class AssertionStep implements Step {
 
-    public static final  String ASSERTION = "assertion";
+    public static final String ASSERTION = "assertion";
     public static final String ASSERTION_SERVICE = "assertionService";
 
 
     public static final String TYPE = "ASSERTION";
 
     private final String name;
-    private Property<byte[]> assertion;
+    private Property<byte[]> currentAssertion;
     private Property<String> assertionService;
 
     public AssertionStep(String name,
-                         Property<byte[]> assertion,
+                         Property<byte[]> currentAssertion,
                          Property<String> assertionService) {
-        this.assertion = assertion;
+        this.currentAssertion = currentAssertion;
         this.assertionService = assertionService;
         this.name = name;
     }
@@ -37,7 +37,7 @@ public class AssertionStep implements Step {
     @Override
     public List<Property<?>> getProperties() {
         List<Property<?>> props = new ArrayList<>();
-        props.add(assertion);
+        props.add(currentAssertion);
         props.add(assertionService);
         return props;
     }
@@ -49,8 +49,10 @@ public class AssertionStep implements Step {
         }
         properties.forEach(property -> {
             switch (property.getName()) {
-                case ASSERTION -> assertion = (Property<byte[]>) property;
+                case ASSERTION -> currentAssertion = (Property<byte[]>) property;
                 case ASSERTION_SERVICE -> assertionService = (Property<String>) property;
+                default -> throw new IllegalArgumentException("property " + property.getName()
+                        + " is not an assertion step property");
             }
         });
     }
