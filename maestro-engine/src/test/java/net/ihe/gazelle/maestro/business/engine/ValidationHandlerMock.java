@@ -1,0 +1,31 @@
+package net.ihe.gazelle.maestro.business.engine;
+
+import net.ihe.gazelle.maestro.business.step.validation.ValidationHandler;
+import net.ihe.gazelle.validation.api.domain.metadata.structure.ValidationProfile;
+import net.ihe.gazelle.validation.api.domain.report.structure.ValidationReport;
+import net.ihe.gazelle.validation.api.domain.request.structure.ValidationRequest;
+
+import java.util.List;
+
+public class ValidationHandlerMock extends ValidationHandler {
+
+
+    public ValidationHandlerMock() {
+        /*Empty constructor used for mocking*/
+    }
+
+    @Override
+    public boolean isAvailable() {
+        return true;
+    }
+
+    @Override
+    public ValidationReport validate(ValidationRequest validationRequest) {
+        return new ValidationReport();
+    }
+
+    @Override
+    public List<ValidationProfile> getValidationProfiles() {
+        return List.of();
+    }
+}

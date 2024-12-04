@@ -1,20 +1,17 @@
 package net.ihe.gazelle;
 
-import net.ihe.gazelle.business.step.validation.ValidationStep;
-import net.ihe.gazelle.business.test.TestImpl;
-import org.junit.jupiter.api.Test;
+import net.ihe.gazelle.maestro.business.step.validation.ValidationStep;
+import net.ihe.gazelle.maestro.Test;
 
-import java.util.HashMap;
-import java.util.Map;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TestImplTest {
-    @Test
+    @org.junit.jupiter.api.Test
     void addStep(){
-        TestImpl test = new TestImpl();
-        Map<String, String> d = new HashMap<>();
-        d.put("b","c");
-        ValidationStep step = new ValidationStep("a",d);
+        Test test = new Test();
+        ValidationStep step = new ValidationStep("a",null, null, null);
         test.addStep(step);
-        org.junit.jupiter.api.Assertions.assertEquals(step, test.getSteps().getFirst());
+
+        assertEquals(step, test.getSteps().getFirst());
     }
 }

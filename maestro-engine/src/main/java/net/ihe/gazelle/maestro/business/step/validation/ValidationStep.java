@@ -1,0 +1,100 @@
+package net.ihe.gazelle.maestro.business.step.validation;
+
+import net.ihe.gazelle.maestro.Property;
+import net.ihe.gazelle.maestro.Step;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * <p>
+ * A Validation Step is an automated step used to validate some content with validation service.
+ * This step has 3 properties :
+ *  <p>
+ *         <b>VALIDATION_SERVICE</b> String name of validation service name.
+ *          ServiceRegistryDAO will return a list of services with a name field.
+ *          VALIDATION_SERVICE must be in this list.
+ *  </p>
+ *  <p>
+ *          <b>VALIDATION_PROFILE</b> String name of validation Profile provided by validation service
+ *  </p>
+ *  <p>
+ *          <b>CONTENT_TO_VALIDATE</b> Byte array of content to validate with validation profile on validation service
+ *  </p>
+ * </p>
+ */
+public class ValidationStep implements Step {
+
+    public static final String VALIDATION_SERVICE = "validationService";
+    public static final String VALIDATION_PROFILE = "validationProfile";
+    public static final String CONTENT_TO_VALIDATE = "contentToValidate";
+
+    public static final String TYPE = "VALIDATION";
+
+    private String name;
+    private Property<String> validationService;
+    private Property<String> validationProfile;
+    private Property<byte[]> contentToValidate;
+
+    public ValidationStep() {
+    }
+
+    public ValidationStep(String name, Property<String> validationService, Property<String> validationProfile, Property<byte[]> contentToValidate) {
+        this.name = name;
+        this.validationService = validationService;
+        this.validationProfile = validationProfile;
+        this.contentToValidate = contentToValidate;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Property<String> getValidationService() {
+        return validationService;
+    }
+
+    public Property<String> getValidationProfile() {
+        return validationProfile;
+    }
+
+    public Property<byte[]> getContentToValidate() {
+        return contentToValidate;
+    }
+
+    @Override
+    public List<Property<?>> getProperties() {
+        List<Property<?>> props = new ArrayList<>();
+        props.add(validationService);
+        props.add(validationProfile);
+        props.add(contentToValidate);
+        return props;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void setProperty(List<Property<?>> properties) {
+        if (properties == null) {
+            throw new IllegalArgumentException("property shouldn't be null");
+        }
+        properties.forEach(property -> {
+            switch (property.getName()) {
+                case VALIDATION_SERVICE -> validationService = (Property<String>) property;
+                case VALIDATION_PROFILE -> validationProfile = (Property<String>) property;
+                case CONTENT_TO_VALIDATE -> contentToValidate = (Property<byte[]>) property;
+                default -> throw new IllegalArgumentException("property " + property.getName()
+                        + " is not a validation step property");
+            }
+        });
+    }
+
+    @Override
+    public String getType() {
+        return TYPE;
+    }
+}

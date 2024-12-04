@@ -6,14 +6,14 @@
     <parent>
         <groupId>net.ihe.gazelle</groupId>
         <artifactId>maestro</artifactId>
-        <version>0.1.1-MAES-46-SNAPSHOT</version>
+        <version>0.1.1-MAES-43-SNAPSHOT</version>
     </parent>
 
     <artifactId>maestro-api</artifactId>
 
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -22,15 +22,25 @@
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>service-metadata-api</artifactId>
         </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-resteasy-reactive-jackson</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.9.3</version>
+            <version>5.10.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.10.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>5.10.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
