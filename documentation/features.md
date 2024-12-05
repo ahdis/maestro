@@ -74,6 +74,7 @@ Entries from properties list and input list contains 3 field :
 - date
 
 A reference is a string field following this syntax : ${INPUT_NAME}. An entry from inputs list will contains INPUT_NAME as name.
+
 ### Implemented step types
 **ValidationStep**
 
@@ -127,6 +128,14 @@ failed test runs, undefined test runs, and number of unexpected errors.
 #### Step run result
 - If there is if at least one unexpected error, the result is UNDEFINED
 - If no unexpected error, the step run result is computed from the result of the validation report inside the list of outputs
+
+#### WARNING
+There is a slight difference between Step possible Result (PASSED, FAILED, UNDEFINED, DONE) and Test possible Result (PASSED, FAILED, UNDEFINED).
+This is because a Step in the Maestro context can end with an output report that does not contain any PASSED or FAILED global result.
+For example a step that does not trigger validation service but only some task that doesn't return any report. 
+These steps, when finished, will have a DONE status to tell that it has been done without any problem.
+The Step Result DONE status is not taken in account in the Test Result computation except all Steps in Test are with DONE status.
+In that case, as described below, the Test Result will be set to UNDEFINED as we cannot conclude to a PASSED or FAILED Result.
 
 #### Test run result
 - If there are no step is the Test run, the test run Result is UNDEFINED
