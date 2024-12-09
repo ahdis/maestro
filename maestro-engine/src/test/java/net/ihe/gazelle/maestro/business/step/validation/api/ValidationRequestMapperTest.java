@@ -20,7 +20,7 @@ class ValidationRequestMapperTest {
         ValidationStep step = new ValidationStep("validationStep",
                 new Property<>(ValidationStep.VALIDATION_SERVICE, "matchbox"),
                 new Property<>(ValidationStep.VALIDATION_PROFILE, "default"),
-                new Property<>(ValidationStep.CONTENT_TO_VALIDATE, "saucisse".getBytes()));
+                new Property<>(ValidationStep.CONTENT_TO_VALIDATE, "content".getBytes()));
         ValidationRequest request = ValidationRequestMapper.createValidationRequest(step, new BValidatorBuilderFactory());
         assertNotNull(request);
         assertEquals(step.getValidationProfile().getValue(), request.getValidationProfileId());
@@ -29,9 +29,8 @@ class ValidationRequestMapperTest {
         ValidationItem item = request.getValidationItems().getFirst();
         assertNotNull(item);
         assertNull(item.getItemId());
-        String expectedContent = new String(Base64.getEncoder().encode(step.getContentToValidate().getValue()), StandardCharsets.UTF_8);
         String actualContent = new String(item.getContent(), StandardCharsets.UTF_8);
-        assertEquals(expectedContent, actualContent);
+        assertEquals("content", actualContent);
         assertNull(item.getRole());
         assertNull(item.getLocation());
     }
