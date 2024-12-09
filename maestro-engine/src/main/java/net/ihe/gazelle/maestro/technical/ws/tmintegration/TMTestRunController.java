@@ -16,7 +16,7 @@ public interface TMTestRunController {
 
     /**
      * The post method that run Maestro from a TM call
-     * @param jsonNode The TM script received
+     * @param tmTestRunScript The TM script received
      * @return status code representing if the run is well started
      */
     @POST

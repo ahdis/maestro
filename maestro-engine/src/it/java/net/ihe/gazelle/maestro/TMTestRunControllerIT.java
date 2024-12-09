@@ -49,7 +49,7 @@ class TMTestRunControllerIT implements QuarkusTestProfile {
 
     @Test
     void runPASSEDTestFromTM() throws IOException {
-        wireMockServer.stubFor(get(urlPathMatching("/http-validator/rest/validation/profiles")).willReturn(ok().withBody("[]")));
+        wireMockServer.stubFor(get(urlPathMatching("/http-validator/rest/metadata")).willReturn(ok().withBody("[]")));
         wireMockServer.stubFor(post(urlPathMatching("/http-validator/rest/validation/validate")).willReturn(ok().withBody(readJsonString("src/it/resources/tmintegration/passed_response.json"))));
         wireMockServer.stubFor(post(urlPathMatching("/mock/gazelle/rest")).willReturn(ok()));
 
@@ -74,7 +74,7 @@ class TMTestRunControllerIT implements QuarkusTestProfile {
 
     @Test
     void runFAILEDTestFromTM() throws IOException {
-        wireMockServer.stubFor(get(urlPathMatching("/http-validator/rest/validation/profiles")).willReturn(ok().withBody("[]")));
+        wireMockServer.stubFor(get(urlPathMatching("/http-validator/rest/metadata")).willReturn(ok().withBody("[]")));
         wireMockServer.stubFor(post(urlPathMatching("/http-validator/rest/validation/validate")).willReturn(ok().withBody(readJsonString("src/it/resources/tmintegration/failed_response.json"))));
         wireMockServer.stubFor(post(urlPathMatching("/mock/gazelle/rest")).willReturn(ok()));
 

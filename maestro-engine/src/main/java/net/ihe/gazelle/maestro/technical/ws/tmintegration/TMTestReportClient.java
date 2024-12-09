@@ -3,13 +3,17 @@ package net.ihe.gazelle.maestro.technical.ws.tmintegration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.MediaType;
 import net.ihe.gazelle.maestro.technical.dto.report.TestReportDTO;
 import net.ihe.gazelle.testreport.TestReport;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
+import org.apache.hc.client5.http.impl.classic.BasicHttpClientResponseHandler;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This client is used to send the Test Report to TM once test set run execution ends
@@ -18,25 +22,26 @@ import org.apache.http.impl.client.HttpClients;
 @ApplicationScoped
 public class TMTestReportClient {
 
+    private static final Logger LOG = LoggerFactory.getLogger(TMTestReportClient.class);
+
     public void sendTestReport(String callBackAuthorization, String callBackUrl, TestReport testReport) {
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             HttpPost httpPost = new HttpPost(callBackUrl);
-
-            // Set headers
-            httpPost.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
             httpPost.setHeader(HttpHeaders.AUTHORIZATION, callBackAuthorization);
 
-            // Convert DTO to JSON
             ObjectMapper mapper = new ObjectMapper();
             String json = mapper.writeValueAsString(new TestReportDTO(testReport));
 
-            // Set JSON as request body
-            httpPost.setEntity(new StringEntity(json));
+            HttpEntity multipartEntity = MultipartEntityBuilder.create()
+                    .addTextBody("json report", json, ContentType.APPLICATION_JSON)
+                    .build();
 
-            // Execute the request
-            client.execute(httpPost);
+            httpPost.setEntity(multipartEntity);
+
+            client.execute(httpPost, new BasicHttpClientResponseHandler());
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
         }
     }
+
 }

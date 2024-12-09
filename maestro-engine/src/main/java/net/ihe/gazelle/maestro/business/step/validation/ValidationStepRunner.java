@@ -40,11 +40,11 @@ public class ValidationStepRunner implements StepRunner {
     @Override
     public StepRunReportBuilder run(StepRun stepRun) {
         ValidationRequest validationRequest = ValidationRequestMapper.
-                createValidationRequest((ValidationStep) stepRun.step());
+                createValidationRequest((ValidationStep) stepRun.step(), validatorBuilderFactory);
         ValidationReport validationReport = validationHandler.validate(validationRequest);
         ItemBuilder itemBuilder = new ItemBuilder(validatorBuilderFactory)
                 .setContent(serializer.toByteArray(validationReport))
-                .setName(stepRun.step().getName());
+                .setName("validationReport");
         StepRunReportBuilder stepRunReportBuilder = new StepRunReportBuilder(validatorBuilderFactory)
                 .setOutputs(List.of(itemBuilder))
                 .setStepId(stepRun.step().getName())

@@ -11,10 +11,8 @@ import net.ihe.gazelle.maestro.technical.dto.PropertyDTO;
 import net.ihe.gazelle.maestro.technical.dto.ReferenceParser;
 import net.ihe.gazelle.maestro.technical.ws.MissingArgumentException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 /**
  * This class is temporary, used for converting TM script to maestro script

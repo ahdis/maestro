@@ -32,11 +32,11 @@ class TestReportDTOTest {
     @Test
     void testDTOmarshalling() {
         String json = structureMapper.marshall(new TestReportDTO(createTestReport(createTestServiceBuilder())));
-        TestReport testReport = structureMapper.unmarshall(json, TestReport.class);
+        TestReport testReport = structureMapper.unmarshall(json, TestReportDTO.class).getDomain();
         assertTrue(testReport.isValid());
 
         json = structureMapper.marshall(new TestReportDTO(createTestReport(null)));
-        testReport = structureMapper.unmarshall(json, TestReport.class);
+        testReport = structureMapper.unmarshall(json, TestReportDTO.class).getDomain();
         assertTrue(testReport.isValid());
     }
 

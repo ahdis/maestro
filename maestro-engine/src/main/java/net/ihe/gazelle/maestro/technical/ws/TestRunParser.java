@@ -20,7 +20,7 @@ import java.util.List;
 public class TestRunParser {
 
     public List<TestRun> convertJsonToTestRuns(JsonNode node) throws IOException, MissingArgumentException {
-        try{
+        try {
             ObjectMapper mapper = new ObjectMapper();
             return parseTestRuns(node, mapper);
         } catch (Exception e) {
@@ -31,7 +31,7 @@ public class TestRunParser {
     private static List<TestRun> parseTestRuns(JsonNode node, ObjectMapper mapper) throws IOException, MissingArgumentException {
         try {
             ArrayNode testRunNodes;
-            if(node.isArray()){
+            if (node.isArray()) {
                 testRunNodes = (ArrayNode) node;
             } else {
                 throw new MissingArgumentException("Argument testRuns is missing in testRun");
@@ -44,7 +44,7 @@ public class TestRunParser {
                 testRuns.add(testRun);
             }
             return testRuns;
-        } catch (NullPointerException | MissingArgumentException e){
+        } catch (NullPointerException | MissingArgumentException e) {
             throw new MissingArgumentException(e);
         }
     }
@@ -57,7 +57,7 @@ public class TestRunParser {
             getName(test, testNode);
             test.setSteps(parseSteps(testNode));
             return test;
-        } catch (NullPointerException e){
+        } catch (NullPointerException e) {
             throw new MissingArgumentException("Argument test is missing in testRun");
         }
     }
@@ -89,7 +89,7 @@ public class TestRunParser {
                 steps.add(step);
             }
             return steps;
-        }catch (NullPointerException e){
+        } catch (NullPointerException e) {
             throw new MissingArgumentException("Argument steps is missing in test");
         }
     }
@@ -98,15 +98,15 @@ public class TestRunParser {
         ArrayNode inputsNodes = (ArrayNode) testRunNode.get("inputs");
         List<Property<?>> inputs = new ArrayList<>();
         ReferenceParser parser = new ReferenceParser();
-        for(JsonNode inputNode : inputsNodes) {
-            try{
+        for (JsonNode inputNode : inputsNodes) {
+            try {
                 PropertyDTO dto = mapper.readValue(inputNode.toString(), PropertyDTO.class);
-                if((dto.getValue() instanceof String string) && parser.isReference(string)){
+                if ((dto.getValue() instanceof String string) && parser.isReference(string)) {
                     inputs.add(new PropertyRef<>(dto.getName(), parser.getReference(string)));
                 } else {
                     inputs.add(new Property<>(dto.getName(), dto.getValue()));
                 }
-            } catch (NullPointerException e){
+            } catch (NullPointerException e) {
                 throw new MissingArgumentException("Argument inputs is missing in testRun");
             }
         }

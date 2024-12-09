@@ -9,7 +9,7 @@ import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
-        "modelVersion", "uuid", "dateTime", "testService", "systemsUnderTest", "result", "testSuiteName",
+        "modelVersion", "uuid", "date", "testService", "systemsUnderTest", "status", "testSuiteName",
         "testCounters", "note", "urlToTestSuiteResult", "testRunReports", "subReports", "unexpectedErrors"
 })
 public class TestReportDTO {
@@ -24,7 +24,7 @@ public class TestReportDTO {
     }
 
     public TestReportDTO(TestReport domain) {
-        this.domain = domain;
+         this.domain = domain;
     }
 
     @JsonGetter(value = "reportVersion")
@@ -47,13 +47,13 @@ public class TestReportDTO {
         domain.setUuid(uuid);
     }
 
-    @JsonGetter(value = "dateTime")
+    @JsonGetter(value = "date")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = ISO_8601_DATETIME_PATTERN) // ISO 8601
     public Date getDateTime() {
         return domain.getDateTime();
     }
 
-    @JsonSetter(value = "dateTime")
+    @JsonSetter(value = "date")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = ISO_8601_DATETIME_PATTERN) // ISO 8601
     public void setDateTime(Date dateTime) {
         domain.setDateTime(dateTime);
@@ -87,12 +87,12 @@ public class TestReportDTO {
                 .toList());
     }
 
-    @JsonGetter(value = "result")
+    @JsonGetter(value = "status")
     public String getResult() {
         return domain.getResult().name();
     }
 
-    @JsonSetter(value = "result")
+    @JsonSetter(value = "status")
     public void setResult(String result) {
         domain.setResult(Result.valueOf(result));
     }
