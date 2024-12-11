@@ -8,6 +8,7 @@ import net.ihe.gazelle.maestro.runner.StepRunner;
 import net.ihe.gazelle.testreport.ItemBuilder;
 import net.ihe.gazelle.testreport.StepResult;
 import net.ihe.gazelle.testreport.StepRunReportBuilder;
+import net.ihe.gazelle.testreport.UnexpectedErrorBuilder;
 import net.ihe.gazelle.validation.api.application.report.validator.ValidationReportValidator;
 import net.ihe.gazelle.validation.api.domain.report.structure.ValidationReport;
 import net.ihe.gazelle.validation.api.domain.report.structure.ValidationTestResult;
@@ -16,14 +17,14 @@ import net.ihe.gazelle.validation.api.domain.request.structure.ValidationRequest
 import java.util.List;
 
 /**
- * A StepRunner is an object used to run ValidationStep
- * @see ValidationStep
- * Translate ValidationStep into ValidationRequest via ValidationRequestMapper
- * @see ValidationRequestMapper
- * Use ValidationHandler to validate content which return a ValidationReport
- * @see ValidationHandler
- * Assert ValidationReport to extract result and build a ValidationReportBuildert
- * @see net.ihe.gazelle.validation.api.domain.report.structure.ValidationReportBuilder
+ * A StepRunner is an object used to run ValidationStep {@link ValidationStep}
+ * <br>
+ * Translate ValidationStep into ValidationRequest via ValidationRequestMapper {@link ValidationRequestMapper}
+ * <br>
+ * Use ValidationHandler to validate content which return a ValidationReport {@link ValidationHandler}
+ * <br>
+ * Assert ValidationReport to extract result and build a ValidationReportBuilder {@link net.ihe.gazelle.validation.api.domain.report.structure.ValidationReportBuilder}
+ * <br>
  */
 public class ValidationStepRunner implements StepRunner {
 
@@ -58,9 +59,16 @@ public class ValidationStepRunner implements StepRunner {
      * @param validationReport The received validation report
      * @param stepRunReportBuilder An object to build the Step run report
      */
-    private static void computeResult(ValidationReport validationReport, StepRunReportBuilder stepRunReportBuilder) {
+    private void computeResult(ValidationReport validationReport, StepRunReportBuilder stepRunReportBuilder) {
         ValidationReportValidator validator = new ValidationReportValidator(new BValidatorBuilderFactory());
-        if (!validator.isValid(validationReport) || ValidationTestResult.UNDEFINED.equals(validationReport.getOverallResult())) {
+        validator.validate(validationReport).getInvalidRules().forEach(
+                ruleResult -> stepRunReportBuilder.addUnexpectedError(
+                        new UnexpectedErrorBuilder(validatorBuilderFactory)
+                                .setName(ruleResult.getId())
+                                .setMessage(ruleResult.getDescription())
+                )
+        );
+        if (ValidationTestResult.UNDEFINED.equals(validationReport.getOverallResult())) {
             stepRunReportBuilder.setResult(StepResult.UNDEFINED);
         } else if (ValidationTestResult.FAILED.equals(validationReport.getOverallResult())) {
             stepRunReportBuilder.setResult(StepResult.FAILED);

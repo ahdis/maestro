@@ -1,35 +1,21 @@
 [
   {
-    "name": "http-validator",
+    "name": "matchbox",
     "version": "1.0.0",
-    "instanceId": "instanceId",
-    "replicaId": "replicaId",
+    "instanceId": "FIXME must be extracted from ENV var",
+    "replicaId": "FIXME must be extracted from ENV var",
     "providedInterfaces": [
       {
-        "interfaceName": "httpval",
-        "interfaceVersion": "3.0.0",
+        "interfaceName": "Validation Service",
+        "interfaceVersion": "1.1.0",
         "bindings": [
           {
             "type": "restBinding",
-            "serviceUrl": "http://localhost:18088/http-validator/rest/validation"
+            "serviceUrl": "https://gazelle.ihe.net/matchboxv3/gazelle/validation"
           }
         ]
       }
     ],
-    "consumedInterfaces": [
-      {
-        "interfaceName": "ConsumedInterfaceName",
-        "supportedVersions": [
-          "1.0.0"
-        ],
-        "required": true,
-        "bindings": [
-          {
-            "type": "restBinding",
-            "serviceUrl": "http://localhost:8151"
-          }
-        ]
-      }
-    ]
+    "consumedInterfaces": null
   }
 ]

@@ -39,7 +39,7 @@ public class TMTestRunControllerImpl implements TMTestRunController {
             LOG.debug("TestRun format Exception", e);
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity("the request contains a testRun with bad format" + e).build();
         } catch (NotProvidedStep e) {
-            LOG.error(e.getMessage());
+            LOG.debug(e.getMessage());
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity("Your script contains a non provided testreport" + e).build();
         } catch (Exception e) {
             LOG.error("Unknown error", e);

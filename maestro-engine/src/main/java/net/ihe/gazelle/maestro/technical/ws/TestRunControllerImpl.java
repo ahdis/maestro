@@ -1,6 +1,7 @@
 package net.ihe.gazelle.maestro.technical.ws;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import io.vertx.core.VertxOptions;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
@@ -42,7 +43,7 @@ public class TestRunControllerImpl implements TestRunController {
             LOG.debug("TestRun format Exception", e);
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity("the request contains a testRun with bad format" + e).build();
         } catch (NotProvidedStep e) {
-            LOG.error(e.getMessage());
+            LOG.debug(e.getMessage());
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity("Your script contains a non provided testreport" + e).build();
         } catch (Exception e) {
             LOG.error("Unknown error", e);

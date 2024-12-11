@@ -34,24 +34,16 @@ public class SynchronousMaestro {
     private static final Logger LOG = LoggerFactory.getLogger(SynchronousMaestro.class);
     public static final String TIMEOUT_MESSAGE = "The test execution timed out. Either the test was too long for a synchronous call, either something fatal happened and you may need to contact an administrator";
 
-    @ConfigProperty(name = "gzl.maestro.timeout")
-    int defaultTimeout;
+    private final Map<String, CompletableFuture<TestReport>> completableFutures = new ConcurrentHashMap<>();
+
+    private final int defaultTimeout;
 
     private final Emitter<TestRunEvent> emitter;
 
     @Inject
-    public SynchronousMaestro(@Channel("test-run") Emitter<TestRunEvent> emitter) {
+    public SynchronousMaestro(@Channel("test-run") Emitter<TestRunEvent> emitter, @ConfigProperty(name = "gzl.maestro.timeout", defaultValue = "60") int defaultTimeout) {
         this.emitter = emitter;
-    }
-
-    private final Map<String, CompletableFuture<TestReport>> completableFuture = new ConcurrentHashMap<>();
-
-    public CompletableFuture<TestReport> startTestSet(List<TestRun> testRuns) {
-        TestSetRun testSetRun = new TestSetRun(UUID.randomUUID().toString(), testRuns);
-        CompletableFuture<TestReport> future = new CompletableFuture<>();
-        completableFuture.put(testSetRun.testSetId(), future);
-        emitter.send(new StartTestSetCommand(testSetRun));
-        return future;
+        this.defaultTimeout = defaultTimeout;
     }
 
     public TestReport executeTestSet(List<TestRun> testRuns) throws ExecutionException, InterruptedException {
@@ -68,7 +60,17 @@ public class SynchronousMaestro {
                 .get();
     }
 
+    private CompletableFuture<TestReport> startTestSet(List<TestRun> testRuns) {
+        TestSetRun testSetRun = new TestSetRun(UUID.randomUUID().toString(), testRuns);
+        CompletableFuture<TestReport> future = new CompletableFuture<>();
+        completableFutures.put(testSetRun.testSetId(), future);
+        emitter.send(new StartTestSetCommand(testSetRun));
+        return future;
+    }
+
+
+
     public void completeFuture(FinishTestSetEvent finishTestSetEvent) {
-        completableFuture.get(finishTestSetEvent.getTestSetRun().testSetId()).complete(finishTestSetEvent.getTestReport());
+        completableFutures.get(finishTestSetEvent.getTestSetRun().testSetId()).complete(finishTestSetEvent.getTestReport());
     }
 }

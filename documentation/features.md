@@ -54,7 +54,6 @@ It consumes a JsonArray for inputs following this syntax :
     ]
   }
 ]
-
 ```
 There should be at least one TestRun in the Array. 
 Each TestRun contains at least one step.

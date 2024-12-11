@@ -1,8 +1,10 @@
 package net.ihe.gazelle.maestro.business.engine;
 
-import jakarta.ws.rs.core.Response;
 import net.ihe.gazelle.framework.modelvalidator.interlay.adapter.BValidatorBuilderFactory;
-import net.ihe.gazelle.maestro.*;
+import net.ihe.gazelle.maestro.Property;
+import net.ihe.gazelle.maestro.PropertyRef;
+import net.ihe.gazelle.maestro.Step;
+import net.ihe.gazelle.maestro.TestRun;
 import net.ihe.gazelle.maestro.business.step.assertion.AssertionStep;
 import net.ihe.gazelle.maestro.business.step.validation.ValidationStep;
 import net.ihe.gazelle.maestro.technical.SessionStoreContextImpl;
@@ -20,7 +22,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -39,7 +41,7 @@ class MaestroImplTest {
                 new MicroprofileMaestroProducer(testRunMockEmitter, stepMockEmitter),
                 new SessionStoreContextImpl()
         );
-        synchronousMaestro = new SynchronousMaestro(testRunMockEmitter);
+        synchronousMaestro = new SynchronousMaestro(testRunMockEmitter, 60);
         StepRunnerJob stepRunnerJob = new StepRunnerJob(
                 new StepRunnerProviderSPI(new HandlerProviderMock()),
                 stepMockEmitter
@@ -54,11 +56,7 @@ class MaestroImplTest {
     @Test
     void testMaestroValidationStep() throws ExecutionException, InterruptedException {
         List<TestRun> testRuns = getTestRunsWithOneValidationStep();
-        CompletableFuture<TestReport> future = synchronousMaestro.startTestSet(testRuns);
-        Response response = Response.ok(future.get()).build();
-        assertNotNull(response);
-        assertEquals(200, response.getStatus());
-        TestReport report = (TestReport) response.getEntity();
+        TestReport report = synchronousMaestro.executeTestSet(testRuns);
         assertEquals(Result.UNDEFINED, report.getResult());
         List<TestRunReport> testRunReports = report.getTestRunReports();
         assertEquals(1, testRunReports.size());
@@ -70,11 +68,7 @@ class MaestroImplTest {
     @Test
     void testMaestroValidationAndAssertionStep() throws ExecutionException, InterruptedException {
         List<TestRun> testRuns = getTestRunsWithValidationStepAndAssertionStepWithReference();
-        CompletableFuture<TestReport> future = synchronousMaestro.startTestSet(testRuns);
-        Response response = Response.ok(future.get()).build();
-        assertNotNull(response);
-        assertEquals(200, response.getStatus());
-        TestReport report = (TestReport) response.getEntity();
+        TestReport report = synchronousMaestro.executeTestSet(testRuns);
         assertEquals(Result.UNDEFINED, report.getResult());
         List<TestRunReport> testRunReports = report.getTestRunReports();
         assertEquals(2, testRunReports.size());
@@ -93,11 +87,7 @@ class MaestroImplTest {
                 new Property<>(ValidationStep.CONTENT_TO_VALIDATE, "liyvfgljv".getBytes())
         );
         testRuns.getFirst().getTest().addStep(validationStep);
-        CompletableFuture<TestReport> future = synchronousMaestro.startTestSet(testRuns);
-        Response response = Response.ok(future.get()).build();
-        assertNotNull(response);
-        assertEquals(200, response.getStatus());
-        TestReport report = (TestReport) response.getEntity();
+        TestReport report = synchronousMaestro.executeTestSet(testRuns);
         assertEquals(Result.UNDEFINED, report.getResult());
         List<TestRunReport> testRunReports = report.getTestRunReports();
         assertEquals(1, testRunReports.size());
@@ -116,11 +106,7 @@ class MaestroImplTest {
                 new Property<>(ValidationStep.CONTENT_TO_VALIDATE, "liyvfgljv".getBytes())
         );
         testRuns.getFirst().getTest().addStep(validationStep);
-        CompletableFuture<TestReport> future = synchronousMaestro.startTestSet(testRuns);
-        Response response = Response.ok(future.get()).build();
-        assertNotNull(response);
-        assertEquals(200, response.getStatus());
-        TestReport report = (TestReport) response.getEntity();
+        TestReport report = synchronousMaestro.executeTestSet(testRuns);
         assertEquals(Result.UNDEFINED, report.getResult());
         List<TestRunReport> testRunReports = report.getTestRunReports();
         assertEquals(1, testRunReports.size());
@@ -138,14 +124,10 @@ class MaestroImplTest {
     void testMaestroWithNullTestRun() throws ExecutionException, InterruptedException {
         List<TestRun> testRuns = new ArrayList<>();
         testRuns.add(null);
-        CompletableFuture<TestReport> future = synchronousMaestro.startTestSet(testRuns);
-        Response response = Response.ok(future.get()).build();
-        assertNotNull(response);
-        assertEquals(200, response.getStatus());
-        TestReport testReport = (TestReport) response.getEntity();
-        assertNotNull(testReport);
-        assertEquals(1, testReport.getUnexpectedErrors().size());
-        assertEquals(IllegalArgumentException.class.getSimpleName(), testReport.getUnexpectedErrors().getFirst().getName());
+        TestReport report = synchronousMaestro.executeTestSet(testRuns);
+        assertNotNull(report);
+        assertEquals(1, report.getUnexpectedErrors().size());
+        assertEquals(IllegalArgumentException.class.getSimpleName(), report.getUnexpectedErrors().getFirst().getName());
     }
 
     private static List<TestRun> getTestRunsWithOneValidationStep() {

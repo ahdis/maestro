@@ -35,18 +35,18 @@ public class TMTestRunMaestro {
     }
 
     public void startTestSet(JsonNode testRunNodes) {
-        TMTestRunStore service = new TMTestRunStore();
-        List<TestRun> testRuns = TMScriptMapper.convertToTestRun(testRunNodes, service);
+        TMTestRunStore store = new TMTestRunStore();
+        List<TestRun> testRuns = TMScriptMapper.convertToTestRun(testRunNodes, store);
         TestSetRun testSetRun = new TestSetRun(UUID.randomUUID().toString(), testRuns);
-        tmRunningServices.put(testSetRun.testSetId(), service);
+        tmRunningServices.put(testSetRun.testSetId(), store);
         emitter.send(new StartTestSetCommand(testSetRun));
     }
 
     public void callbackTM(FinishTestSetEvent finishTestSetEvent) {
-        TMTestRunStore service = tmRunningServices.get(finishTestSetEvent.getTestSetRun().testSetId());
+        TMTestRunStore store = tmRunningServices.get(finishTestSetEvent.getTestSetRun().testSetId());
         client.sendTestReport(
-                service.getCallbackAuthorization(),
-                service.getClientCallback(),
+                store.getCallbackAuthorization(),
+                store.getClientCallback(),
                 finishTestSetEvent.getTestReport()
         );
     }
