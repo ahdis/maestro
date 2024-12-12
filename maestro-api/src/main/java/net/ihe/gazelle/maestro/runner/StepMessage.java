@@ -9,10 +9,10 @@ package net.ihe.gazelle.maestro.runner;
  * <p>
  * This abstract class should not be used directly to send message. Use inheritors class instead :
  *  <p>
- * @see FinishedStepEvent
+ * {@link FinishedStepEvent}
  *  </p>
  *  <p>
- * @see StartStepCommand
+ * {@link StartStepCommand}
  *  </p>
  * </p>
  */

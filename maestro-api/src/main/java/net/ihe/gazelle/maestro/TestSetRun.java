@@ -4,7 +4,7 @@ import java.util.List;
 
 /**
  * A TestSetRun is a structure containing several TestRun that will be executed iteratively.
- * @see TestRun
+ * {@link TestRun}
  * @param testSetId an id that will be spread to each element of testRuns
  * @param testRuns the list of testRuns to execute
  */

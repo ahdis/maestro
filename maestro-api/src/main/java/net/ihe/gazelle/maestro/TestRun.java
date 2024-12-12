@@ -7,11 +7,9 @@ import java.util.Objects;
 /**
  * A structure contains in a TestSet, defining all the data to execute an automated step suit
  * <p>
- *     - <b>testSetId</b> the testSet's id
- *     - <b>test</b> structure containing step suit
- * @see Test
- *     - <b>inputs</b> a list of properties that can be referenced in each step
- * @see Property
+ *     - <b>testSetId</b> the testSet's id <br>
+ *     - <b>test</b> structure containing step suit {@link Test} <br>
+ *     - <b>inputs</b> a list of properties that can be referenced in each step {@link Property}
  * </p>
  */
 public class TestRun {

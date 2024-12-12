@@ -9,8 +9,8 @@ import java.util.NoSuchElementException;
 /**
  * A ResolvablePropertyRef is a PropertyRef knowing TestRun's Context,
  * so it can resolve its reference and return the actual value
- * @see PropertyRef
- * @see Context
+ * {@link PropertyRef}
+ * {@link Context}
  * @param <T>
  */
 public class ResolvablePropertyRef<T> extends PropertyRef<T> {

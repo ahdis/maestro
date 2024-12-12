@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Define an automated step to execute with all its required information.
  * A step contains has some properties representing its different required inputs.
- * @see Property
+ * {@link Property}
  */
 public interface Step {
 

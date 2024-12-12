@@ -5,8 +5,8 @@ import java.util.regex.Pattern;
 
 /**
  * <p>In Maestro context, a reference is the name of a Property store in TestRun inputs or TestRunSessionStore context
- * @see net.ihe.gazelle.maestro.TestRun
- * @see net.ihe.gazelle.maestro.context.TestRunSessionStore
+ * {@link net.ihe.gazelle.maestro.TestRun}
+ * {@link net.ihe.gazelle.maestro.context.TestRunSessionStore}
  * To recognize if a String is a reference, it shall follow syntax describ in PATTERN field.
  * </p>
  * <p>

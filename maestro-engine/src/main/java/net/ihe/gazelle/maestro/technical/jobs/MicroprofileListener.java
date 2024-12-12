@@ -1,9 +1,5 @@
 package net.ihe.gazelle.maestro.technical.jobs;
 
-import io.vertx.core.Vertx;
-import io.vertx.core.VertxOptions;
-import io.vertx.core.impl.ContextInternal;
-import io.vertx.core.impl.btc.BlockedThreadChecker;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
@@ -38,13 +34,10 @@ public class MicroprofileListener implements TestRunEventListener, StepRunEventL
     }
 
     /**
-     * Listener method for testRun messages send by different producers :
-     *  - SynchronousMaestro
-     * @see SynchronousMaestro
-     *  - MicroprofileListener
-     * @see MicroprofileListener
-     *  - TMTestRunMaestro
-     * @see TMTestRunMaestro
+     * Listener method for testRun messages send by different producers : <br>
+     *  - SynchronousMaestro {@link SynchronousMaestro} <br>
+     *  - MicroprofileListener {@link MicroprofileListener} <br>
+     *  - TMTestRunMaestro {@link TMTestRunMaestro} <br>
      *
      * <p>
      *     Treatment will depend on event type :
@@ -96,11 +89,9 @@ public class MicroprofileListener implements TestRunEventListener, StepRunEventL
     }
 
     /**
-     * Listener method for StepRun messages send by different producers :
-     * - MaestroProducer
-     * @see net.ihe.gazelle.maestro.business.engine.MaestroProducer
-     * - StepRunnerJob
-     * @see StepRunnerJob
+     * Listener method for StepRun messages send by different producers : <br>
+     * - MaestroProducer {@link net.ihe.gazelle.maestro.business.engine.MaestroProducer} <br>
+     * - StepRunnerJob {@link StepRunnerJob} <br>
      *
      * <p>
      *     Treatment will depend on event type :

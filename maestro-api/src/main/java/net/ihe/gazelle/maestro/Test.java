@@ -10,7 +10,7 @@ import java.util.List;
  *     - <b>name</b> a string of test name
  *     - <b>steps</b> a list of step
  * </p>
- * @see Step
+ * {@link Step}
  */
 public class Test {
 

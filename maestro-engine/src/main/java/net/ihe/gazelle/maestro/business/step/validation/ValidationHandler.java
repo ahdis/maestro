@@ -32,8 +32,7 @@ public class ValidationHandler implements Handler, ValidationService {
     }
 
     /**
-     * Override from Handler Interface
-     * @see Handler
+     * Override from {@link Handler} Interface
      */
     @Override
     public boolean isAvailable() {
@@ -41,8 +40,7 @@ public class ValidationHandler implements Handler, ValidationService {
     }
 
     /**
-     * Override from ValidationService
-     * @see ValidationService
+     * Override from {@link ValidationService}
      */
     @Override
     public ValidationReport validate(ValidationRequest validationRequest) {
@@ -54,8 +52,7 @@ public class ValidationHandler implements Handler, ValidationService {
     }
 
     /**
-     * Override from ValidationService
-     * @see ValidationService
+     * Override from {@link ValidationService}
      */
     @Override
     public List<ValidationProfile> getValidationProfiles() {

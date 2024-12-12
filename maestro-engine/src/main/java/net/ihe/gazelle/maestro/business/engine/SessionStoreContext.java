@@ -10,11 +10,11 @@ import net.ihe.gazelle.maestro.context.TestSetSessionStore;
  * It contains 2 maps :
  * <p>
  *     - <b>SESSION_CONTEXT</b> containing context of a session, the set of TestRunSessionStore
- * @see TestRunSessionStore
+ * {@link TestRunSessionStore}
  * </p>
  * <p>
  *     - <b>TEST_SET_CONTEXT</b> containing context of TestSet, the set of TestSetSessionStore
- * @see TestSetSessionStore
+ * {@link TestSetSessionStore}
  * </p>
  * </p>
  *

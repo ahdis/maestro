@@ -11,10 +11,11 @@ public interface Maestro {
 
     /**
      * Start execution of a TestRun by initializing a testRun session.
-     * @see net.ihe.gazelle.maestro.context.TestRunSessionStore
+     * {@link net.ihe.gazelle.maestro.context.TestRunSessionStore}
+     * <br>
      * Create a new context containing TestRun's inputs and run first test step of testRun if it's valid.
-     * @see net.ihe.gazelle.maestro.context.Context
-     * @see TestRun
+     * {@link net.ihe.gazelle.maestro.context.Context}
+     * {@link TestRun}
      * <p>
      * If testRun is null, it emits an exception.
      * If testRun is not null, but is not valid, it sends a report with undefined result containing an unexpectedError
@@ -26,9 +27,11 @@ public interface Maestro {
 
     /**
      * Start execution of a test set by initializing a test set session.
-     * @see TestSetRun
+     * {@link TestSetRun}
+     * <br>
      * Instance a new TestSetSessionStore in SessionsStore.
-     * @see net.ihe.gazelle.maestro.context.TestSetSessionStore
+     * {@link net.ihe.gazelle.maestro.context.TestSetSessionStore}
+     * <br>
      * Run first testRun if it's valid.
      * <p>
      * If test set's id is null, it emits an InvalidTestSetException.

@@ -19,7 +19,7 @@ import java.util.List;
 
 public class TestRunParser {
 
-    public List<TestRun> convertJsonToTestRuns(JsonNode node) throws IOException, MissingArgumentException {
+    public List<TestRun> convertJsonToTestRuns(JsonNode node) throws MissingArgumentException {
         try {
             ObjectMapper mapper = new ObjectMapper();
             return parseTestRuns(node, mapper);
