@@ -1,0 +1,44 @@
+[
+  {
+    "clientCallback": "http://localhost:18088/mock/gazelle/rest",
+    "callbackAuthorization": "token",
+    "test": {
+      "name": "Test Case 01",
+      "steps": [
+        {
+          "id": "validationStep",
+          "@type": "VALIDATION",
+          "properties": [
+            {
+              "key": "validationService",
+              "value": "http-validator"
+            },
+            {
+              "key": "validationProfile",
+              "value": "parameters"
+            },
+            {
+              "key": "contentToValidate",
+              "value": "${inputFile1}"
+            }
+          ]
+        }
+      ],
+      "inputs": [
+        {
+          "key": "inputFile1",
+          "label": "request header",
+          "format": "We want xml file",
+          "type": "file",
+          "required": true
+        }
+      ]
+    },
+    "inputs": [
+      {
+        "key": "inputFile1",
+        "value": "oqrjhfoisderghusdgh"
+      }
+    ]
+  }
+]

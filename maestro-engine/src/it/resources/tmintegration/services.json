@@ -1,0 +1,21 @@
+[
+  {
+    "name": "matchbox",
+    "version": "1.0.0",
+    "instanceId": "FIXME must be extracted from ENV var",
+    "replicaId": "FIXME must be extracted from ENV var",
+    "providedInterfaces": [
+      {
+        "interfaceName": "Validation Service",
+        "interfaceVersion": "1.1.0",
+        "bindings": [
+          {
+            "type": "restBinding",
+            "serviceUrl": "https://gazelle.ihe.net/matchboxv3/gazelle/validation"
+          }
+        ]
+      }
+    ],
+    "consumedInterfaces": null
+  }
+]
