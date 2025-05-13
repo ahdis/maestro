@@ -1,7 +1,6 @@
 package net.ihe.gazelle.maestro.testreport.validator;
 
-import net.ihe.gazelle.framework.modelvalidator.domain.result.ObjectResult;
-import net.ihe.gazelle.framework.modelvalidator.interlay.adapter.BValidatorBuilderFactory;
+import net.ihe.gazelle.framework.modelvalidator.business.ObjectResult;
 import net.ihe.gazelle.testreport.StepResult;
 import net.ihe.gazelle.testreport.StepRunReport;
 import net.ihe.gazelle.testreport.TestReport;
@@ -17,14 +16,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TestReportValidatorTest {
 
-    private final TestReportValidator testReportValidator = new TestReportValidator(new BValidatorBuilderFactory());
+    private final TestReportValidator testReportValidator = new TestReportValidator();
 
     @Test
     void test_report_validator_valid() {
         ObjectResult result = testReportValidator.validate(getTestReport());
         assertTrue(result.isValid());
         testReportValidator.assertValid(getTestReport());
-        assertTrue(testReportValidator.isValid(getTestReport()));
     }
 
     @Test
@@ -41,7 +39,6 @@ class TestReportValidatorTest {
         );
         ObjectResult result = testReportValidator.validate(testReport);
         assertFalse(result.isValid());
-        assertFalse(testReportValidator.isValid(testReport));
     }
 
     private TestReport getTestReport() {

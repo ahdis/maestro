@@ -1,9 +1,9 @@
 package net.ihe.gazelle.maestro.business.step.validation;
 
 import net.ihe.gazelle.maestro.runner.Handler;
-import net.ihe.gazelle.servicemetadata.api.domain.structure.ProvidedInterface;
-import net.ihe.gazelle.servicemetadata.api.domain.structure.RestBinding;
-import net.ihe.gazelle.servicemetadata.api.domain.structure.Service;
+import net.ihe.gazelle.servicemetadata.api.business.HttpRestBinding;
+import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterface;
+import net.ihe.gazelle.servicemetadata.api.business.Service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -29,7 +29,7 @@ class ValidationHandlerFactoryTest {
 
     @Test
     void createHandlerTest(){
-        RestBinding binding = new RestBinding();
+        HttpRestBinding binding = new HttpRestBinding();
         binding.setServiceUrl("http://localhost:80");
         ProvidedInterface providedInterface = new ProvidedInterface();
         providedInterface.addBinding(binding);

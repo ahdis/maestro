@@ -1,9 +1,8 @@
 package net.ihe.gazelle.maestro.business.step.validation;
 
-import net.ihe.gazelle.framework.modelvalidator.domain.ValidatorBuilderFactory;
-import net.ihe.gazelle.validation.api.domain.request.builder.ValidationItemBuilder;
-import net.ihe.gazelle.validation.api.domain.request.builder.ValidationRequestBuilder;
-import net.ihe.gazelle.validation.api.domain.request.structure.ValidationRequest;
+import net.ihe.gazelle.validation.api.business.request.ValidationItemBuilder;
+import net.ihe.gazelle.validation.api.business.request.ValidationRequest;
+import net.ihe.gazelle.validation.api.business.request.ValidationRequestBuilder;
 
 /**
  * object used to create matching validation request with Validation API
@@ -14,11 +13,10 @@ public class ValidationRequestMapper {
         // Empty
     }
 
-    public static ValidationRequest createValidationRequest(ValidationStep validationStep, ValidatorBuilderFactory validatorBuilderFactory) {
-        ValidationRequestBuilder validationRequest = new ValidationRequestBuilder(validatorBuilderFactory)
+    public static ValidationRequest createValidationRequest(ValidationStep validationStep) {
+        ValidationRequestBuilder validationRequest = new ValidationRequestBuilder()
                 .setValidationProfileId(validationStep.getValidationProfile().getValue())
-                .setValidationServiceName(validationStep.getValidationService().getValue())
-                .addValidationItem(new ValidationItemBuilder(validatorBuilderFactory)
+                .addValidationItem(new ValidationItemBuilder()
                         .setContent(validationStep.getContentToValidate().getValue())
                         .build()
                 );

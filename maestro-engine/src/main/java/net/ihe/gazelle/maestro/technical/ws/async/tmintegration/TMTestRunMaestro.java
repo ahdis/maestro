@@ -1,13 +1,15 @@
-package net.ihe.gazelle.maestro.technical.ws.tmintegration;
+package net.ihe.gazelle.maestro.technical.ws.async.tmintegration;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import net.ihe.gazelle.maestro.TestRun;
 import net.ihe.gazelle.maestro.TestSetRun;
+import net.ihe.gazelle.maestro.technical.client.TestReportClient;
 import net.ihe.gazelle.maestro.technical.jobs.testrunevents.FinishTestSetEvent;
 import net.ihe.gazelle.maestro.technical.jobs.testrunevents.StartTestSetCommand;
 import net.ihe.gazelle.maestro.technical.jobs.testrunevents.TestRunEvent;
+import net.ihe.gazelle.maestro.technical.ws.async.TestRunStore;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 
@@ -23,19 +25,19 @@ import java.util.concurrent.ConcurrentHashMap;
 @ApplicationScoped
 public class TMTestRunMaestro {
 
-    private final Map<String, TMTestRunStore> tmRunningServices;
+    private final Map<String, TestRunStore> tmRunningServices;
     private final Emitter<TestRunEvent> emitter;
-    private final TMTestReportClient client;
+    private final TestReportClient client;
 
     @Inject
-    public TMTestRunMaestro(@Channel("test-run") Emitter<TestRunEvent> emitter, TMTestReportClient client) {
+    public TMTestRunMaestro(@Channel("test-run") Emitter<TestRunEvent> emitter, TestReportClient client) {
         this.tmRunningServices = new ConcurrentHashMap<>();
         this.emitter = emitter;
         this.client = client;
     }
 
     public void startTestSet(JsonNode testRunNodes) {
-        TMTestRunStore store = new TMTestRunStore();
+        TestRunStore store = new TestRunStore();
         List<TestRun> testRuns = TMScriptMapper.convertToTestRun(testRunNodes, store);
         TestSetRun testSetRun = new TestSetRun(UUID.randomUUID().toString(), testRuns);
         tmRunningServices.put(testSetRun.testSetId(), store);
@@ -43,7 +45,7 @@ public class TMTestRunMaestro {
     }
 
     public void callbackTM(FinishTestSetEvent finishTestSetEvent) {
-        TMTestRunStore store = tmRunningServices.get(finishTestSetEvent.getTestSetRun().testSetId());
+        TestRunStore store = tmRunningServices.get(finishTestSetEvent.getTestSetRun().testSetId());
         client.sendTestReport(
                 store.getCallbackAuthorization(),
                 store.getClientCallback(),

@@ -1,4 +1,4 @@
-package net.ihe.gazelle.maestro.technical.ws.tmintegration;
+package net.ihe.gazelle.maestro.technical.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -20,9 +20,9 @@ import org.slf4j.LoggerFactory;
  * <br> It uses the callback URL and authorization token stored
  */
 @ApplicationScoped
-public class TMTestReportClient {
+public class TestReportClient {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TMTestReportClient.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TestReportClient.class);
 
     public void sendTestReport(String callBackAuthorization, String callBackUrl, TestReport testReport) {
         try (CloseableHttpClient client = HttpClients.createDefault()) {

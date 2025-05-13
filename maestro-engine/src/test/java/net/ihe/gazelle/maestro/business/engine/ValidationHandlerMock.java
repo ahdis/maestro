@@ -1,9 +1,9 @@
 package net.ihe.gazelle.maestro.business.engine;
 
 import net.ihe.gazelle.maestro.business.step.validation.ValidationHandler;
-import net.ihe.gazelle.validation.api.domain.metadata.structure.ValidationProfile;
-import net.ihe.gazelle.validation.api.domain.report.structure.ValidationReport;
-import net.ihe.gazelle.validation.api.domain.request.structure.ValidationRequest;
+import net.ihe.gazelle.validation.api.business.profile.ValidationProfile;
+import net.ihe.gazelle.validation.api.business.report.ValidationReport;
+import net.ihe.gazelle.validation.api.business.request.ValidationRequest;
 
 import java.util.List;
 

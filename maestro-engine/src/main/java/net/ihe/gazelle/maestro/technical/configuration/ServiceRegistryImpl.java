@@ -2,8 +2,8 @@ package net.ihe.gazelle.maestro.technical.configuration;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import net.ihe.gazelle.servicemetadata.api.domain.structure.Service;
 import net.ihe.gazelle.maestro.technical.ServiceRegistry;
+import net.ihe.gazelle.servicemetadata.api.business.Service;
 
 import java.util.List;
 import java.util.NoSuchElementException;

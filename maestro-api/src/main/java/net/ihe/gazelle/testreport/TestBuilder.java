@@ -1,10 +1,9 @@
 package net.ihe.gazelle.testreport;
 
-import net.ihe.gazelle.framework.modelvalidator.domain.AbstractBuilder;
-import net.ihe.gazelle.framework.modelvalidator.domain.BuilderVisitor;
-import net.ihe.gazelle.framework.modelvalidator.domain.ValidatorBuilderFactory;
-import net.ihe.gazelle.testreport.visitor.TestBuilderVisitor;
-
+import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory;
+import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractBuilder;
+import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
+import net.ihe.gazelle.testreport.validator.TestValidator;
 
 public class TestBuilder extends AbstractBuilder<Test> {
 
@@ -12,6 +11,10 @@ public class TestBuilder extends AbstractBuilder<Test> {
     private String name;
     private String version;
     private String description;
+
+    public TestBuilder() {
+        super();
+    }
 
     public TestBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
         super(validatorBuilderFactory);
@@ -38,19 +41,18 @@ public class TestBuilder extends AbstractBuilder<Test> {
     }
 
     @Override
-    protected BuilderVisitor getBuilderVisitor() {
-        return TestBuilderVisitor.INSTANCE;
+    protected AbstractValidator<Test> instantiateValidator(ValidatorBuilderFactory validatorBuilderFactory) {
+        return new TestValidator(validatorBuilderFactory);
     }
 
     @Override
-    protected Class<? extends Test> getParameterClass() {
-        return Test.class;
+    protected Test instantiate() {
+        return new Test();
     }
 
     @Override
-    protected void make() {
-        this.getObjectToBuild()
-                .setId(id)
+    protected void make(Test test) {
+        test.setId(id)
                 .setName(name)
                 .setVersion(version)
                 .setDescription(description);

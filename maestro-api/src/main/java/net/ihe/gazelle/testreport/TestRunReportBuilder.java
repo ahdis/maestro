@@ -1,9 +1,9 @@
 package net.ihe.gazelle.testreport;
 
-import net.ihe.gazelle.framework.modelvalidator.domain.AbstractBuilder;
-import net.ihe.gazelle.framework.modelvalidator.domain.BuilderVisitor;
-import net.ihe.gazelle.framework.modelvalidator.domain.ValidatorBuilderFactory;
-import net.ihe.gazelle.testreport.visitor.TestRunReportBuilderVisitor;
+import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory;
+import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractBuilder;
+import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
+import net.ihe.gazelle.testreport.validator.TestRunReportValidator;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,6 +19,14 @@ public class TestRunReportBuilder extends AbstractBuilder<TestRunReport> {
     private List<StepRunReportBuilder> stepRunReports;
     private String urlToTestRun;
     private List<UnexpectedErrorBuilder> unexpectedErrors;
+
+    public TestRunReportBuilder() {
+        super();
+        inputs = new ArrayList<>();
+        outputs = new ArrayList<>();
+        stepRunReports = new ArrayList<>();
+        unexpectedErrors = new ArrayList<>();
+    }
 
     public TestRunReportBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
         super(validatorBuilderFactory);
@@ -109,42 +117,40 @@ public class TestRunReportBuilder extends AbstractBuilder<TestRunReport> {
     }
 
     @Override
-    protected BuilderVisitor getBuilderVisitor() {
-        return TestRunReportBuilderVisitor.INSTANCE;
+    protected AbstractValidator<TestRunReport> instantiateValidator(ValidatorBuilderFactory validatorBuilderFactory) {
+        return new TestRunReportValidator(validatorBuilderFactory);
     }
 
     @Override
-    protected Class<? extends TestRunReport> getParameterClass() {
-        return TestRunReport.class;
+    protected TestRunReport instantiate() {
+        return new TestRunReport();
     }
 
     @Override
-    protected void make() {
-        this.getObjectToBuild()
-                .setRunId(runId)
+    protected void make(TestRunReport testRunReport) {
+        testRunReport.setRunId(runId)
                 .setDateTime(dateTime)
-                .setTest(AbstractBuilder.buildField(test))
+                .setTest(AbstractBuilder.staticBuildWithoutValidation(test))
                 .setInputs(
                         !inputs.isEmpty() ? inputs.stream()
-                                .map(AbstractBuilder::buildField)
+                                .map(AbstractBuilder::staticBuildWithoutValidation)
                                 .toList() : new ArrayList<>()
                 )
                 .setOutputs(
                         !outputs.isEmpty() ? outputs.stream()
-                                .map(AbstractBuilder::buildField)
+                                .map(AbstractBuilder::staticBuildWithoutValidation)
                                 .toList() : new ArrayList<>()
                 )
                 .setStepRunReports(
                         !stepRunReports.isEmpty() ? stepRunReports.stream()
-                                .map(AbstractBuilder::buildField)
+                                .map(AbstractBuilder::staticBuildWithoutValidation)
                                 .toList() : new ArrayList<>()
                 )
                 .setUrlToTestRun(urlToTestRun)
                 .setUnexpectedErrors(
                         !unexpectedErrors.isEmpty() ? unexpectedErrors.stream()
-                                .map(AbstractBuilder::buildField)
+                                .map(AbstractBuilder::staticBuildWithoutValidation)
                                 .toList() : new ArrayList<>()
-                );
-        this.getObjectToBuild().computeResult();
+                ).computeResult();
     }
 }

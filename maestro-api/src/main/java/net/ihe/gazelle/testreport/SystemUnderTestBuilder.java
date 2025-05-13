@@ -1,9 +1,9 @@
 package net.ihe.gazelle.testreport;
 
-import net.ihe.gazelle.framework.modelvalidator.domain.AbstractBuilder;
-import net.ihe.gazelle.framework.modelvalidator.domain.BuilderVisitor;
-import net.ihe.gazelle.framework.modelvalidator.domain.ValidatorBuilderFactory;
-import net.ihe.gazelle.testreport.visitor.SystemUnderTestBuilderVisitor;
+import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory;
+import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractBuilder;
+import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
+import net.ihe.gazelle.testreport.validator.SystemUnderTestValidator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +14,13 @@ public class SystemUnderTestBuilder extends AbstractBuilder<SystemUnderTest> {
     private List<String> macAddresses;
     private List<String> ipAddresses;
     private List<String> hostNames;
+
+    public SystemUnderTestBuilder() {
+        super();
+        macAddresses = new ArrayList<>();
+        ipAddresses = new ArrayList<>();
+        hostNames = new ArrayList<>();
+    }
 
     public SystemUnderTestBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
         super(validatorBuilderFactory);
@@ -73,19 +80,19 @@ public class SystemUnderTestBuilder extends AbstractBuilder<SystemUnderTest> {
     }
 
     @Override
-    protected BuilderVisitor getBuilderVisitor() {
-        return SystemUnderTestBuilderVisitor.INSTANCE;
+    protected AbstractValidator<SystemUnderTest> instantiateValidator(ValidatorBuilderFactory validatorBuilderFactory) {
+        return new SystemUnderTestValidator(validatorBuilderFactory);
     }
 
     @Override
-    protected Class<? extends SystemUnderTest> getParameterClass() {
-        return SystemUnderTest.class;
+    protected SystemUnderTest instantiate() {
+        return new SystemUnderTest();
     }
 
     @Override
-    protected void make() {
-        this.getObjectToBuild()
-                .setSystemIdentification(AbstractBuilder.buildField(systemIdentification))
+    protected void make(SystemUnderTest systemUnderTest) {
+        systemUnderTest
+                .setSystemIdentification(AbstractBuilder.staticBuildWithoutValidation(systemIdentification))
                 .setMacAddresses(macAddresses)
                 .setIpAddresses(ipAddresses)
                 .setHostNames(hostNames);

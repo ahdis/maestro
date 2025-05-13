@@ -1,14 +1,18 @@
 package net.ihe.gazelle.testreport;
 
-import net.ihe.gazelle.framework.modelvalidator.domain.AbstractBuilder;
-import net.ihe.gazelle.framework.modelvalidator.domain.BuilderVisitor;
-import net.ihe.gazelle.framework.modelvalidator.domain.ValidatorBuilderFactory;
-import net.ihe.gazelle.testreport.visitor.EntityIdentificationBuilderVisitor;
+import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory;
+import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractBuilder;
+import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
+import net.ihe.gazelle.testreport.validator.EntityIdentificationValidator;
 
 public class EntityIdentificationBuilder extends AbstractBuilder<EntityIdentification> {
 
     private String version;
     private String name;
+
+    public EntityIdentificationBuilder() {
+        super();
+    }
 
     public EntityIdentificationBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
         super(validatorBuilderFactory);
@@ -25,19 +29,19 @@ public class EntityIdentificationBuilder extends AbstractBuilder<EntityIdentific
     }
 
     @Override
-    protected BuilderVisitor getBuilderVisitor() {
-        return EntityIdentificationBuilderVisitor.INSTANCE;
+    protected AbstractValidator<EntityIdentification> instantiateValidator(ValidatorBuilderFactory validatorBuilderFactory) {
+        return new EntityIdentificationValidator(validatorBuilderFactory);
     }
 
     @Override
-    protected Class<? extends EntityIdentification> getParameterClass() {
-        return EntityIdentification.class;
+    protected EntityIdentification instantiate() {
+        return new EntityIdentification();
     }
 
     @Override
-    protected void make() {
-        this.getObjectToBuild()
-                .setName(name)
-                .setVersion(version);
+    protected void make(EntityIdentification entityIdentification) {
+        entityIdentification
+                .setVersion(version)
+                .setName(name);
     }
 }

@@ -1,6 +1,5 @@
 package net.ihe.gazelle.maestro.business.step.assertion;
 
-import net.ihe.gazelle.framework.modelvalidator.interlay.adapter.BValidatorBuilderFactory;
 import net.ihe.gazelle.maestro.Step;
 import net.ihe.gazelle.maestro.runner.Handler;
 import net.ihe.gazelle.maestro.runner.StepRunner;
@@ -27,7 +26,7 @@ public class AssertionStepRunnerFactory implements StepRunnerFactory {
 
     @Override
     public StepRunner createStepRunner(Step step, Set<Handler> handlers) {
-        return new AssertionStepRunner(new BValidatorBuilderFactory(), new AssertionHandler());
+        return new AssertionStepRunner(new AssertionHandler());
     }
 
 }

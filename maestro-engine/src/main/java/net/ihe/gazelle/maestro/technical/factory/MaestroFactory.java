@@ -4,8 +4,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Produces;
-import net.ihe.gazelle.framework.modelvalidator.domain.ValidatorBuilderFactory;
-import net.ihe.gazelle.framework.modelvalidator.interlay.adapter.BValidatorBuilderFactory;
 import net.ihe.gazelle.maestro.Maestro;
 import net.ihe.gazelle.maestro.business.engine.MaestroImpl;
 import net.ihe.gazelle.maestro.business.engine.MaestroProducer;
@@ -25,8 +23,6 @@ public class MaestroFactory {
 
     SessionStoreContextImpl sessionStoreContext;
 
-    private final ValidatorBuilderFactory validatorBuilderFactory = new BValidatorBuilderFactory();
-
     @Inject
     public MaestroFactory(ServiceRegistry serviceRegistry, MaestroProducer maestroProducer, SessionStoreContextImpl sessionStoreContext) {
         this.serviceRegistry = serviceRegistry;
@@ -43,7 +39,7 @@ public class MaestroFactory {
     @Produces
     @Default
     Maestro getMaestro() {
-        return new MaestroImpl(validatorBuilderFactory, maestroProducer, sessionStoreContext);
+        return new MaestroImpl(maestroProducer, sessionStoreContext);
     }
 
 }

@@ -1,15 +1,20 @@
 package net.ihe.gazelle.testreport;
 
-import net.ihe.gazelle.framework.modelvalidator.domain.AbstractBuilder;
-import net.ihe.gazelle.framework.modelvalidator.domain.BuilderVisitor;
-import net.ihe.gazelle.framework.modelvalidator.domain.ValidatorBuilderFactory;
-import net.ihe.gazelle.testreport.visitor.UnexpectedErrorBuilderVisitor;
+import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory;
+import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractBuilder;
+import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
+import net.ihe.gazelle.lang.UnexpectedError;
+import net.ihe.gazelle.testreport.validator.UnexpectedErrorValidator;
 
 public class UnexpectedErrorBuilder extends AbstractBuilder<UnexpectedError> {
 
     private String name;
     private String message;
     private UnexpectedErrorBuilder cause;
+
+    public UnexpectedErrorBuilder() {
+        super();
+    }
 
     public UnexpectedErrorBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
         super(validatorBuilderFactory);
@@ -31,20 +36,20 @@ public class UnexpectedErrorBuilder extends AbstractBuilder<UnexpectedError> {
     }
 
     @Override
-    protected Class<? extends UnexpectedError> getParameterClass() {
-        return UnexpectedError.class;
+    protected AbstractValidator<UnexpectedError> instantiateValidator(ValidatorBuilderFactory validatorBuilderFactory) {
+        return new UnexpectedErrorValidator(validatorBuilderFactory);
     }
 
     @Override
-    protected BuilderVisitor getBuilderVisitor() {
-        return UnexpectedErrorBuilderVisitor.INSTANCE;
+    protected UnexpectedError instantiate() {
+        return new UnexpectedError();
     }
 
     @Override
-    protected void make() {
-        this.getObjectToBuild()
+    protected void make(UnexpectedError unexpectedError) {
+        unexpectedError
                 .setName(name)
                 .setMessage(message)
-                .setCause(AbstractBuilder.buildField(cause));
+                .setCause(AbstractBuilder.staticBuildWithoutValidation(cause));
     }
 }

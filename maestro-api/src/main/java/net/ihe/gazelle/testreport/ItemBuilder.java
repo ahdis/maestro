@@ -1,15 +1,20 @@
 package net.ihe.gazelle.testreport;
 
-import net.ihe.gazelle.framework.modelvalidator.domain.AbstractBuilder;
-import net.ihe.gazelle.framework.modelvalidator.domain.BuilderVisitor;
-import net.ihe.gazelle.framework.modelvalidator.domain.ValidatorBuilderFactory;
-import net.ihe.gazelle.testreport.visitor.ItemBuilderVisitor;
+
+import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory;
+import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractBuilder;
+import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
+import net.ihe.gazelle.testreport.validator.ItemValidator;
 
 public class ItemBuilder extends AbstractBuilder<Item> {
 
     private String name;
     private byte[] content;
     private String reference;
+
+    public ItemBuilder() {
+        super();
+    }
 
     public ItemBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
         super(validatorBuilderFactory);
@@ -31,19 +36,18 @@ public class ItemBuilder extends AbstractBuilder<Item> {
     }
 
     @Override
-    protected BuilderVisitor getBuilderVisitor() {
-        return ItemBuilderVisitor.INSTANCE;
+    protected AbstractValidator<Item> instantiateValidator(ValidatorBuilderFactory validatorBuilderFactory) {
+        return new ItemValidator(validatorBuilderFactory);
     }
 
     @Override
-    protected Class<? extends Item> getParameterClass() {
-        return Item.class;
+    protected Item instantiate() {
+        return new Item();
     }
 
     @Override
-    protected void make() {
-        this.getObjectToBuild()
-                .setName(name)
+    protected void make(Item item) {
+        item.setName(name)
                 .setContent(content)
                 .setReference(reference);
     }

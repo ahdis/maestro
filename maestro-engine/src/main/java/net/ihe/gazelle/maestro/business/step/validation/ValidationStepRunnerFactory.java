@@ -1,7 +1,5 @@
 package net.ihe.gazelle.maestro.business.step.validation;
 
-import net.ihe.gazelle.framework.modelvalidator.domain.ValidatorBuilderFactory;
-import net.ihe.gazelle.framework.modelvalidator.interlay.adapter.BValidatorBuilderFactory;
 import net.ihe.gazelle.maestro.Step;
 import net.ihe.gazelle.maestro.runner.Handler;
 import net.ihe.gazelle.maestro.runner.StepRunner;
@@ -29,11 +27,7 @@ public class ValidationStepRunnerFactory implements StepRunnerFactory {
     @Override
     public StepRunner createStepRunner(Step step, Set<Handler> handlers) {
         return handlers.stream().filter(ValidationHandler.class::isInstance).findFirst()
-                .map(handler -> new ValidationStepRunner(new ValidationReportSerializerImpl(), getValidatorBuilderFactory(), (ValidationHandler) handler))
+                .map(handler -> new ValidationStepRunner(new ValidationReportSerializerImpl(), (ValidationHandler) handler))
                 .orElseThrow(() -> new IllegalArgumentException("No validation handler provided"));
-    }
-
-    public ValidatorBuilderFactory getValidatorBuilderFactory() {
-        return new BValidatorBuilderFactory();
     }
 }

@@ -1,6 +1,6 @@
 package net.ihe.gazelle.maestro.business.engine;
 
-import net.ihe.gazelle.framework.modelvalidator.domain.ValidatorBuilderFactory;
+import net.ihe.gazelle.lang.UnexpectedError;
 import net.ihe.gazelle.maestro.Test;
 import net.ihe.gazelle.maestro.*;
 import net.ihe.gazelle.maestro.context.Context;
@@ -17,12 +17,10 @@ import java.util.UUID;
 
 public class MaestroImpl implements Maestro {
 
-    ValidatorBuilderFactory validatorBuilderFactory;
     MaestroProducer maestroProducer;
     SessionStoreContext sessionStoreContext;
 
-    public MaestroImpl(ValidatorBuilderFactory validatorBuilderFactory, MaestroProducer maestroProducer, SessionStoreContext sessionStoreContext) {
-        this.validatorBuilderFactory = validatorBuilderFactory;
+    public MaestroImpl(MaestroProducer maestroProducer, SessionStoreContext sessionStoreContext) {
         this.maestroProducer = maestroProducer;
         this.sessionStoreContext = sessionStoreContext;
     }
@@ -96,8 +94,7 @@ public class MaestroImpl implements Maestro {
         if (testSetRun.testRuns().getLast().equals(testRun)) {
             TestReport testReport;
             try {
-                testReport = new TestReportBuilder(validatorBuilderFactory)
-                        .generateUuid()
+                testReport = new TestReportBuilder()
                         .setDateTime(Date.from(Instant.now()))
                         .setTestRunReports(testSetSessionStore.getTestRunReportBuilders())
                         .build();
@@ -123,10 +120,10 @@ public class MaestroImpl implements Maestro {
         TestRun testRun = getTestRunFromStore(testRunId);
         addStepReportToStore(testRunId, stepRunReportBuilder);
         if (stepRun.step().isNameEquals(testRun.getTest().getSteps().getLast())) {
-            TestRunReportBuilder testRunReportBuilder = new TestRunReportBuilder(validatorBuilderFactory)
+            TestRunReportBuilder testRunReportBuilder = new TestRunReportBuilder()
                     .addStepRunReports(getStepReportsFromStore(testRunId))
                     .setDateTime(Date.from(Instant.now()))
-                    .setTest(new TestBuilder(validatorBuilderFactory)
+                    .setTest(new TestBuilder()
                             .setId(testRun.getTest().getId())
                             .setName(testRun.getTest().getName()));
             maestroProducer.returnTestRunReport(testRun, testRunReportBuilder);
@@ -140,8 +137,8 @@ public class MaestroImpl implements Maestro {
      * @return UnexpectedErrorBuilder containing e data
      */
     private UnexpectedErrorBuilder getUnexpectedErrorBuilder(Exception e) {
-        return new UnexpectedErrorBuilder(
-                validatorBuilderFactory).setName(e.getClass().getSimpleName())
+        return new UnexpectedErrorBuilder()
+                .setName(e.getClass().getSimpleName())
                 .setMessage(e.getMessage());
     }
 
@@ -166,8 +163,7 @@ public class MaestroImpl implements Maestro {
         if (!found) {
             Exception e = new InvalidTestSetException("TestRun " + testRun.getTest().getName() +
                     " not found in testSet " + testRun.getTestSetId() + " or is last element of set");
-            TestReport testReport = new TestReportBuilder(validatorBuilderFactory)
-                    .generateUuid()
+            TestReport testReport = new TestReportBuilder()
                     .setDateTime(Date.from(Instant.now()))
                     .setTestRunReports(testSetSessionStore.getTestRunReportBuilders())
                     .addUnexpectedError(getUnexpectedErrorBuilder(e))

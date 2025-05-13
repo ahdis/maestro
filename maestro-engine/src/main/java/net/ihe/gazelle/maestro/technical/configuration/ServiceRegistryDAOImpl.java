@@ -3,8 +3,8 @@ package net.ihe.gazelle.maestro.technical.configuration;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.github.achachraf.typeson.interlay.Typeson;
 import jakarta.enterprise.context.ApplicationScoped;
-import net.ihe.gazelle.servicemetadata.api.domain.structure.Service;
-import net.ihe.gazelle.servicemetadata.jaxrs.api.interlay.dto.ServiceDTO;
+import net.ihe.gazelle.servicemetadata.api.business.Service;
+import net.ihe.gazelle.servicemetadata.technical.jaxrs.ServiceDTO;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.io.IOException;
@@ -26,7 +26,7 @@ public class ServiceRegistryDAOImpl implements ServiceRegistryDAO {
             Path filePath = Path.of(servicesFilePath);
             String json = Files.readString(filePath, Charset.defaultCharset());
             List<Service> services = typeson.unmarshallList(json, new TypeReference<List<ServiceDTO>>(){}).stream().map(
-                    ServiceDTO::getDomainObject
+                    ServiceDTO::getBusinessObject
             ).toList();
             if (!services.isEmpty() && services.getFirst() != null) {
                 return services;

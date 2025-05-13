@@ -8,7 +8,8 @@ import net.ihe.gazelle.maestro.runner.FinishedStepEvent;
 import net.ihe.gazelle.maestro.runner.StartStepCommand;
 import net.ihe.gazelle.maestro.runner.StepMessage;
 import net.ihe.gazelle.maestro.technical.jobs.testrunevents.*;
-import net.ihe.gazelle.maestro.technical.ws.tmintegration.TMTestRunMaestro;
+import net.ihe.gazelle.maestro.technical.ws.async.AsynchronousMaestro;
+import net.ihe.gazelle.maestro.technical.ws.async.tmintegration.TMTestRunMaestro;
 import org.eclipse.microprofile.reactive.messaging.Acknowledgment;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.slf4j.Logger;
@@ -22,13 +23,15 @@ public class MicroprofileListener implements TestRunEventListener, StepRunEventL
 
     private final Maestro engine;
     private final SynchronousMaestro synchronousMaestro;
+    private final AsynchronousMaestro asynchronousMaestro;
     private final StepRunnerJob stepRunnerJob;
     private final TMTestRunMaestro tmTestRunMaestro;
 
     @Inject
-    public MicroprofileListener(Maestro engine, SynchronousMaestro synchronousMaestro, StepRunnerJob stepRunnerJob, TMTestRunMaestro tmTestRunMaestro) {
+    public MicroprofileListener(Maestro engine, SynchronousMaestro synchronousMaestro, AsynchronousMaestro asynchronousMaestro, StepRunnerJob stepRunnerJob, TMTestRunMaestro tmTestRunMaestro) {
         this.engine = engine;
         this.synchronousMaestro = synchronousMaestro;
+        this.asynchronousMaestro = asynchronousMaestro;
         this.stepRunnerJob = stepRunnerJob;
         this.tmTestRunMaestro = tmTestRunMaestro;
     }
@@ -76,7 +79,9 @@ public class MicroprofileListener implements TestRunEventListener, StepRunEventL
             engine.finishTest(finishTestRunEvent.getTestRun(), finishTestRunEvent.getTestRunReportBuilder());
         }
         if (event instanceof FinishTestSetEvent finishTestSetEvent) {
-            if (tmTestRunMaestro.isServiceRunning(finishTestSetEvent.getTestSetRun().testSetId())) {
+            if (asynchronousMaestro.isServiceRunning(finishTestSetEvent.getTestSetRun().testSetId())) {
+                asynchronousMaestro.callback(finishTestSetEvent);
+            } else if (tmTestRunMaestro.isServiceRunning(finishTestSetEvent.getTestSetRun().testSetId())) {
                 tmTestRunMaestro.callbackTM(finishTestSetEvent);
             } else {
                 synchronousMaestro.completeFuture(finishTestSetEvent);

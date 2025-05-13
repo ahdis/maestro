@@ -1,6 +1,6 @@
 package net.ihe.gazelle.maestro.business.engine;
 
-import net.ihe.gazelle.framework.modelvalidator.interlay.adapter.BValidatorBuilderFactory;
+import net.ihe.gazelle.lang.UnexpectedError;
 import net.ihe.gazelle.maestro.Property;
 import net.ihe.gazelle.maestro.PropertyRef;
 import net.ihe.gazelle.maestro.Step;
@@ -10,12 +10,12 @@ import net.ihe.gazelle.maestro.business.step.validation.ValidationStep;
 import net.ihe.gazelle.maestro.technical.SessionStoreContextImpl;
 import net.ihe.gazelle.maestro.technical.StepRunnerProviderSPI;
 import net.ihe.gazelle.maestro.technical.jobs.*;
-import net.ihe.gazelle.maestro.technical.ws.tmintegration.TMTestReportClient;
-import net.ihe.gazelle.maestro.technical.ws.tmintegration.TMTestRunMaestro;
+import net.ihe.gazelle.maestro.technical.client.TestReportClient;
+import net.ihe.gazelle.maestro.technical.ws.async.AsynchronousMaestro;
+import net.ihe.gazelle.maestro.technical.ws.async.tmintegration.TMTestRunMaestro;
 import net.ihe.gazelle.testreport.Result;
 import net.ihe.gazelle.testreport.TestReport;
 import net.ihe.gazelle.testreport.TestRunReport;
-import net.ihe.gazelle.testreport.UnexpectedError;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -31,25 +31,28 @@ class MaestroImplTest {
 
     private static SynchronousMaestro synchronousMaestro;
 
-
     @BeforeAll
     static void setUp() {
         TestRunMockEmitter testRunMockEmitter = new TestRunMockEmitter();
         StepMockEmitter stepMockEmitter = new StepMockEmitter();
         MaestroImpl maestro = new MaestroImpl(
-                new BValidatorBuilderFactory(),
                 new MicroprofileMaestroProducer(testRunMockEmitter, stepMockEmitter),
                 new SessionStoreContextImpl()
         );
         synchronousMaestro = new SynchronousMaestro(testRunMockEmitter, 60);
+        MicroprofileListener microprofileListener = createListener(testRunMockEmitter, stepMockEmitter, maestro);
+        testRunMockEmitter.addListener(microprofileListener);
+        stepMockEmitter.addListener(microprofileListener);
+    }
+
+    private static MicroprofileListener createListener(TestRunMockEmitter testRunMockEmitter, StepMockEmitter stepMockEmitter, MaestroImpl maestro) {
+        AsynchronousMaestro asynchronousMaestro = new AsynchronousMaestro(testRunMockEmitter, new TestReportClient());
         StepRunnerJob stepRunnerJob = new StepRunnerJob(
                 new StepRunnerProviderSPI(new HandlerProviderMock()),
                 stepMockEmitter
         );
-        TMTestRunMaestro tmTestRunMaestro = new TMTestRunMaestro(testRunMockEmitter, new TMTestReportClient());
-        MicroprofileListener microprofileListener = new MicroprofileListener(maestro, synchronousMaestro, stepRunnerJob, tmTestRunMaestro);
-        testRunMockEmitter.addListener(microprofileListener);
-        stepMockEmitter.addListener(microprofileListener);
+        TMTestRunMaestro tmTestRunMaestro = new TMTestRunMaestro(testRunMockEmitter, new TestReportClient());
+        return new MicroprofileListener(maestro, synchronousMaestro, asynchronousMaestro, stepRunnerJob, tmTestRunMaestro);
     }
 
 

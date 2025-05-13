@@ -5,7 +5,6 @@ import net.ihe.gazelle.maestro.PropertyRef;
 import net.ihe.gazelle.maestro.business.step.validation.ValidationHandler;
 import net.ihe.gazelle.maestro.business.step.validation.ValidationStep;
 import net.ihe.gazelle.maestro.Maestro;
-import net.ihe.gazelle.framework.modelvalidator.interlay.adapter.BValidatorBuilderFactory;
 import net.ihe.gazelle.maestro.technical.handler.HandlerProvider;
 import net.ihe.gazelle.maestro.runner.Handler;
 import net.ihe.gazelle.maestro.technical.SessionStoreContextImpl;
@@ -16,9 +15,9 @@ import net.ihe.gazelle.maestro.technical.ws.MissingArgumentException;
 import net.ihe.gazelle.maestro.Property;
 import net.ihe.gazelle.maestro.Test;
 import net.ihe.gazelle.maestro.TestRun;
-import net.ihe.gazelle.validation.api.domain.metadata.structure.ValidationProfile;
-import net.ihe.gazelle.validation.api.domain.report.structure.ValidationReport;
-import net.ihe.gazelle.validation.api.domain.request.structure.ValidationRequest;
+import net.ihe.gazelle.validation.api.business.profile.ValidationProfile;
+import net.ihe.gazelle.validation.api.business.report.ValidationReport;
+import net.ihe.gazelle.validation.api.business.request.ValidationRequest;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -51,7 +50,7 @@ class TestRunControllerTest {
     }
 
     private Maestro getEngine() {
-        return new MaestroImpl(new BValidatorBuilderFactory(), new MicroprofileMaestroProducer(new TestRunMockEmitter(), new StepMockEmitter()), new SessionStoreContextImpl());
+        return new MaestroImpl(new MicroprofileMaestroProducer(new TestRunMockEmitter(), new StepMockEmitter()), new SessionStoreContextImpl());
     }
 
     // test: verify testreport is ordered

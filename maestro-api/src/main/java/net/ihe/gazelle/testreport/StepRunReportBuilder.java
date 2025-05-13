@@ -1,9 +1,9 @@
 package net.ihe.gazelle.testreport;
 
-import net.ihe.gazelle.framework.modelvalidator.domain.AbstractBuilder;
-import net.ihe.gazelle.framework.modelvalidator.domain.BuilderVisitor;
-import net.ihe.gazelle.framework.modelvalidator.domain.ValidatorBuilderFactory;
-import net.ihe.gazelle.testreport.visitor.StepRunReportBuilderVisitor;
+import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory;
+import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractBuilder;
+import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
+import net.ihe.gazelle.testreport.validator.StepRunReportValidator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +15,12 @@ public class StepRunReportBuilder extends AbstractBuilder<StepRunReport> {
     private StepResult result;
     private List<ItemBuilder> outputs;
     private List<UnexpectedErrorBuilder> unexpectedErrors;
+
+    public StepRunReportBuilder() {
+        super();
+        outputs = new ArrayList<>();
+        unexpectedErrors = new ArrayList<>();
+    }
 
     public StepRunReportBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
         super(validatorBuilderFactory);
@@ -63,30 +69,29 @@ public class StepRunReportBuilder extends AbstractBuilder<StepRunReport> {
     }
 
     @Override
-    protected BuilderVisitor getBuilderVisitor() {
-        return StepRunReportBuilderVisitor.INSTANCE;
+    protected AbstractValidator<StepRunReport> instantiateValidator(ValidatorBuilderFactory validatorBuilderFactory) {
+        return new StepRunReportValidator(validatorBuilderFactory);
     }
 
     @Override
-    protected Class<? extends StepRunReport> getParameterClass() {
-        return StepRunReport.class;
+    protected StepRunReport instantiate() {
+        return new StepRunReport();
     }
 
     @Override
-    protected void make() {
-        this.getObjectToBuild()
-                .setStepId(stepId)
+    protected void make(StepRunReport stepRunReport) {
+        stepRunReport.setStepId(stepId)
                 .setType(type)
                 .setResult(result)
                 .setOutputs(
                         !outputs.isEmpty() ? outputs.stream()
-                                .map(AbstractBuilder::buildField)
+                                .map(AbstractBuilder::staticBuildWithoutValidation)
                                 .toList() : new ArrayList<>()
                 )
-                .setUnexpectedErrors(!unexpectedErrors.isEmpty() ?
-                                unexpectedErrors.stream().map(AbstractBuilder::buildField).toList() :
-                                new ArrayList<>()
-                )
-                .computeResult();
+                .setUnexpectedErrors(
+                        !unexpectedErrors.isEmpty() ? unexpectedErrors.stream()
+                                .map(AbstractBuilder::staticBuildWithoutValidation)
+                                .toList() : new ArrayList<>()
+                ).computeResult();
     }
 }

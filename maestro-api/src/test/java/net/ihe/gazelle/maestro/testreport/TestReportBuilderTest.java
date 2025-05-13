@@ -1,9 +1,6 @@
 package net.ihe.gazelle.maestro.testreport;
 
-import net.ihe.gazelle.framework.modelvalidator.domain.ValidatorBuilderFactory;
-import net.ihe.gazelle.framework.modelvalidator.interlay.adapter.BValidatorBuilderFactory;
 import net.ihe.gazelle.testreport.*;
-import org.junit.jupiter.api.BeforeAll;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -13,22 +10,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TestReportBuilderTest {
 
-    private static ValidatorBuilderFactory validatorBuilderFactory;
-
-    @BeforeAll
-    public static void setup() {
-        validatorBuilderFactory = new BValidatorBuilderFactory();
-    }
-
     @org.junit.jupiter.api.Test
     void testReport_builder_minimum_valid() {
-        TestReport testReport = new TestReportBuilder(validatorBuilderFactory)
-                .generateUuid()
+        TestReport testReport = new TestReportBuilder()
                 .setDateTime(new Date())
-                .addTestRunReport(new TestRunReportBuilder(validatorBuilderFactory)
+                .addTestRunReport(new TestRunReportBuilder()
                         .setDateTime(new Date())
                         .setTest(
-                                new TestBuilder(validatorBuilderFactory)
+                                new TestBuilder()
                                         .setId("id")
                         )
                 )
@@ -47,8 +36,7 @@ class TestReportBuilderTest {
         TestReportBuilder subReportBuilder = createTestReportBuilder()
                 .addTestRunReport(testRunReportBuilder);
 
-        TestReport testReport = new TestReportBuilder(validatorBuilderFactory)
-                .generateUuid()
+        TestReport testReport = new TestReportBuilder()
                 .setDateTime(new Date())
                 .addTestRunReport(createTestRunBuilder())
                 .addSubReport(subReportBuilder)
@@ -63,7 +51,7 @@ class TestReportBuilderTest {
     @org.junit.jupiter.api.Test
     void testReport_builder_with_subReports_failed() {
         TestRunReportBuilder testRunReportBuilder = createTestRunBuilder();
-        testRunReportBuilder.addStepRunReport(new StepRunReportBuilder(validatorBuilderFactory)
+        testRunReportBuilder.addStepRunReport(new StepRunReportBuilder()
                 .setStepId("stepId")
                 .setType("validation")
                 .setResult(StepResult.FAILED));
@@ -71,8 +59,7 @@ class TestReportBuilderTest {
         TestReportBuilder subReportBuilder = createTestReportBuilder()
                 .addTestRunReport(testRunReportBuilder);
 
-        TestReport testReport = new TestReportBuilder(validatorBuilderFactory)
-                .generateUuid()
+        TestReport testReport = new TestReportBuilder()
                 .setDateTime(new Date())
                 .addTestRunReport(createTestRunBuilder())
                 .addSubReport(subReportBuilder)
@@ -87,11 +74,11 @@ class TestReportBuilderTest {
     @org.junit.jupiter.api.Test
     void testReport_builder_with_subReports_undefined() {
         TestRunReportBuilder testRunReportBuilder = createTestRunBuilder();
-        testRunReportBuilder.addStepRunReport(new StepRunReportBuilder(validatorBuilderFactory)
+        testRunReportBuilder.addStepRunReport(new StepRunReportBuilder()
                 .setStepId("stepId")
                 .setType("validation")
                 .setResult(StepResult.FAILED));
-        testRunReportBuilder.addStepRunReport(new StepRunReportBuilder(validatorBuilderFactory)
+        testRunReportBuilder.addStepRunReport(new StepRunReportBuilder()
                 .setStepId("stepId")
                 .setType("validation")
                 .setResult(StepResult.UNDEFINED));
@@ -99,8 +86,7 @@ class TestReportBuilderTest {
         TestReportBuilder subReportBuilder = createTestReportBuilder()
                 .addTestRunReport(testRunReportBuilder);
 
-        TestReport testReport = new TestReportBuilder(validatorBuilderFactory)
-                .generateUuid()
+        TestReport testReport = new TestReportBuilder()
                 .setDateTime(new Date())
                 .addTestRunReport(createTestRunBuilder())
                 .addSubReport(subReportBuilder)
@@ -115,19 +101,18 @@ class TestReportBuilderTest {
     @org.junit.jupiter.api.Test
     void testReport_builder_with_subReports_error() {
         TestRunReportBuilder testRunReportBuilder = createTestRunBuilder();
-        testRunReportBuilder.addStepRunReport(new StepRunReportBuilder(validatorBuilderFactory)
+        testRunReportBuilder.addStepRunReport(new StepRunReportBuilder()
                 .setStepId("stepId")
                 .setType("validation")
                 .setResult(StepResult.FAILED));
-        testRunReportBuilder.addUnexpectedError(new UnexpectedErrorBuilder(validatorBuilderFactory)
+        testRunReportBuilder.addUnexpectedError(new UnexpectedErrorBuilder()
                 .setName("error")
                 .setMessage("error"));
 
         TestReportBuilder subReportBuilder = createTestReportBuilder()
                 .addTestRunReport(testRunReportBuilder);
 
-        TestReport testReport = new TestReportBuilder(validatorBuilderFactory)
-                .generateUuid()
+        TestReport testReport = new TestReportBuilder()
                 .setDateTime(new Date())
                 .addTestRunReport(createTestRunBuilder())
                 .addSubReport(subReportBuilder)
@@ -142,7 +127,7 @@ class TestReportBuilderTest {
     @org.junit.jupiter.api.Test
     void testReport_builder_with_run_failed() {
         TestRunReportBuilder testRunReportBuilder = createTestRunBuilder();
-        testRunReportBuilder.addStepRunReport(new StepRunReportBuilder(validatorBuilderFactory)
+        testRunReportBuilder.addStepRunReport(new StepRunReportBuilder()
                 .setStepId("stepId")
                 .setType("validation")
                 .setResult(StepResult.FAILED));
@@ -150,8 +135,7 @@ class TestReportBuilderTest {
         TestReportBuilder subReportBuilder = createTestReportBuilder();
         subReportBuilder.addTestRunReport(createTestRunBuilder());
 
-        TestReport testReport = new TestReportBuilder(validatorBuilderFactory)
-                .generateUuid()
+        TestReport testReport = new TestReportBuilder()
                 .setDateTime(new Date())
                 .addTestRunReport(testRunReportBuilder)
                 .addSubReport(subReportBuilder)
@@ -164,19 +148,19 @@ class TestReportBuilderTest {
     }
 
     private TestRunReportBuilder createTestRunBuilder() {
-        return new TestRunReportBuilder(validatorBuilderFactory)
+        return new TestRunReportBuilder()
                 .setDateTime(new Date())
-                .setTest(new TestBuilder(validatorBuilderFactory)
+                .setTest(new TestBuilder()
                         .setId("testId")
                         .setName("testName")
                         .setDescription("description")
                         .setVersion("1.0"))
                 .setOutputs(new ArrayList<>())
-                .addOutput(new ItemBuilder(validatorBuilderFactory)
+                .addOutput(new ItemBuilder()
                         .setName("name")
                         .setReference("reference"))
                 .setStepRunReports(new ArrayList<>())
-                .addStepRunReport(new StepRunReportBuilder(validatorBuilderFactory)
+                .addStepRunReport(new StepRunReportBuilder()
                         .setStepId("stepId")
                         .setType("validation")
                         .setResult(StepResult.PASSED)
@@ -186,18 +170,17 @@ class TestReportBuilderTest {
     }
 
     private TestReportBuilder createTestReportBuilder() {
-        return new TestReportBuilder(validatorBuilderFactory)
-                .generateUuid()
+        return new TestReportBuilder()
                 .setReportVersion()
                 .setDateTime(new Date())
-                .setTestService(new TestServiceBuilder(validatorBuilderFactory)
-                        .setServiceIdentification(new EntityIdentificationBuilder(validatorBuilderFactory)
+                .setTestService(new TestServiceBuilder()
+                        .setServiceIdentification(new EntityIdentificationBuilder()
                                 .setName("service")
                                 .setVersion("1.0"))
                         .setDisclaimer("disclaimer"))
                 .setSystemsUnderTest(new ArrayList<>())
-                .addSystemUnderTest(new SystemUnderTestBuilder(validatorBuilderFactory)
-                        .setSystemIdentification(new EntityIdentificationBuilder(validatorBuilderFactory)
+                .addSystemUnderTest(new SystemUnderTestBuilder()
+                        .setSystemIdentification(new EntityIdentificationBuilder()
                                 .setName("system")
                                 .setVersion("1.0"))
                         .setMacAddresses(new ArrayList<>())

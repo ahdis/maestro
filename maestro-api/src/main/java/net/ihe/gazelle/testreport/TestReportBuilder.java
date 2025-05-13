@@ -1,9 +1,9 @@
 package net.ihe.gazelle.testreport;
 
-import net.ihe.gazelle.framework.modelvalidator.domain.AbstractBuilder;
-import net.ihe.gazelle.framework.modelvalidator.domain.BuilderVisitor;
-import net.ihe.gazelle.framework.modelvalidator.domain.ValidatorBuilderFactory;
-import net.ihe.gazelle.testreport.visitor.TestReportBuilderVisitor;
+import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory;
+import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractBuilder;
+import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
+import net.ihe.gazelle.testreport.validator.TestReportValidator;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -13,7 +13,7 @@ import java.util.UUID;
 public class TestReportBuilder extends AbstractBuilder<TestReport> {
 
     private String reportVersion;
-    private String uuid;
+    private final String uuid;
     private Date dateTime;
     private TestServiceBuilder testService;
     private List<SystemUnderTestBuilder> systemsUnderTest;
@@ -24,8 +24,18 @@ public class TestReportBuilder extends AbstractBuilder<TestReport> {
     private List<TestRunReportBuilder> testRunReports;
     private List<UnexpectedErrorBuilder> unexpectedErrors;
 
+    public TestReportBuilder() {
+        super();
+        uuid = UUID.randomUUID().toString();
+        systemsUnderTest = new ArrayList<>();
+        subReports = new ArrayList<>();
+        testRunReports = new ArrayList<>();
+        unexpectedErrors = new ArrayList<>();
+    }
+
     public TestReportBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
         super(validatorBuilderFactory);
+        uuid = UUID.randomUUID().toString();
         systemsUnderTest = new ArrayList<>();
         subReports = new ArrayList<>();
         testRunReports = new ArrayList<>();
@@ -37,13 +47,8 @@ public class TestReportBuilder extends AbstractBuilder<TestReport> {
         return this;
     }
 
-    public TestReportBuilder generateUuid() {
-        this.uuid = UUID.randomUUID().toString();
-        return this;
-    }
-
     public TestReportBuilder setDateTime(Date dateTime) {
-        this.dateTime = dateTime;
+        this.dateTime = new Date(dateTime.getTime());
         return this;
     }
 
@@ -128,25 +133,25 @@ public class TestReportBuilder extends AbstractBuilder<TestReport> {
     }
 
     @Override
-    protected BuilderVisitor getBuilderVisitor() {
-        return TestReportBuilderVisitor.INSTANCE;
+    protected AbstractValidator<TestReport> instantiateValidator(ValidatorBuilderFactory validatorBuilderFactory) {
+        return new TestReportValidator(validatorBuilderFactory);
     }
 
     @Override
-    protected Class<? extends TestReport> getParameterClass() {
-        return TestReport.class;
+    protected TestReport instantiate() {
+        return new TestReport();
     }
 
     @Override
-    protected void make() {
-        this.getObjectToBuild()
+    protected void make(TestReport testReport) {
+        testReport
                 .setReportVersion(reportVersion)
                 .setUuid(uuid)
                 .setDateTime(dateTime)
-                .setTestService(AbstractBuilder.buildField(testService))
+                .setTestService(AbstractBuilder.staticBuildWithoutValidation(testService))
                 .setSystemsUnderTest(
                         !subReports.isEmpty() ? systemsUnderTest.stream()
-                                .map(AbstractBuilder::buildField)
+                                .map(AbstractBuilder::staticBuildWithoutValidation)
                                 .toList() : new ArrayList<>()
                 )
                 .setTestSuiteName(testSuiteName)
@@ -154,20 +159,20 @@ public class TestReportBuilder extends AbstractBuilder<TestReport> {
                 .setUrlToTestSuiteResult(urlToTestSuiteResult)
                 .setSubReports(
                         !subReports.isEmpty() ? subReports.stream()
-                                .map(AbstractBuilder::buildField)
+                                .map(AbstractBuilder::staticBuildWithoutValidation)
                                 .toList() : new ArrayList<>()
                 )
                 .setTestRunReports(
                         !testRunReports.isEmpty() ? testRunReports.stream()
-                                .map(AbstractBuilder::buildField)
+                                .map(AbstractBuilder::staticBuildWithoutValidation)
                                 .toList() : new ArrayList<>()
                 )
                 .setUnexpectedErrors(
                         !unexpectedErrors.isEmpty() ? unexpectedErrors.stream()
-                                .map(AbstractBuilder::buildField)
+                                .map(AbstractBuilder::staticBuildWithoutValidation)
                                 .toList() : new ArrayList<>()
                 );
-        this.getObjectToBuild().computeResult();
-        this.getObjectToBuild().computeCounters();
+        testReport.computeResult();
+        testReport.computeCounters();
     }
 }

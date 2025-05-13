@@ -1,4 +1,4 @@
-package net.ihe.gazelle.maestro.technical.ws.tmintegration;
+package net.ihe.gazelle.maestro.technical.ws.async.tmintegration;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -10,9 +10,12 @@ import net.ihe.gazelle.maestro.technical.StepFactoryProvider;
 import net.ihe.gazelle.maestro.technical.dto.PropertyDTO;
 import net.ihe.gazelle.maestro.technical.dto.ReferenceParser;
 import net.ihe.gazelle.maestro.technical.ws.MissingArgumentException;
+import net.ihe.gazelle.maestro.technical.ws.async.TestRunStore;
 
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This class is temporary, used for converting TM script to maestro script
@@ -20,7 +23,7 @@ import java.util.*;
  */
 public class TMScriptMapper {
 
-    public static List<TestRun> convertToTestRun(JsonNode jsonNode, TMTestRunStore testRunDAO) {
+    public static List<TestRun> convertToTestRun(JsonNode jsonNode, TestRunStore testRunDAO) {
         ArrayNode testRunNodes = (ArrayNode) jsonNode;
         List<TestRun> testRuns = new ArrayList<>();
         for (JsonNode testRunNode : testRunNodes) {

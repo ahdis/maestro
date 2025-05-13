@@ -1,7 +1,6 @@
 package net.ihe.gazelle.maestro.technical.ws;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.vertx.core.VertxOptions;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
@@ -29,9 +28,9 @@ public class TestRunControllerImpl implements TestRunController {
     }
 
     @Override
-    public Response run(JsonNode node) {
+    public Response run(JsonNode testRun) {
         try {
-            List<TestRun> testRuns = new TestRunParser().convertJsonToTestRuns(node);
+            List<TestRun> testRuns = new TestRunParser().convertJsonToTestRuns(testRun);
             TestReport testReport = maestro.executeTestSet(testRuns);
             return Response.ok(testReport).build();
         } catch (WebApplicationException e) {

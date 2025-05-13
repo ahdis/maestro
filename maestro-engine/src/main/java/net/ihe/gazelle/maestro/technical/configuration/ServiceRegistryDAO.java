@@ -1,6 +1,6 @@
 package net.ihe.gazelle.maestro.technical.configuration;
 
-import net.ihe.gazelle.servicemetadata.api.domain.structure.Service;
+import net.ihe.gazelle.servicemetadata.api.business.Service;
 
 import java.util.List;
 

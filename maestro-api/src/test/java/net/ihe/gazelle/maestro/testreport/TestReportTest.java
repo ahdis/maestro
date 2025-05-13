@@ -1,5 +1,6 @@
 package net.ihe.gazelle.maestro.testreport;
 
+import net.ihe.gazelle.lang.UnexpectedError;
 import net.ihe.gazelle.testreport.*;
 import org.junit.jupiter.api.Test;
 

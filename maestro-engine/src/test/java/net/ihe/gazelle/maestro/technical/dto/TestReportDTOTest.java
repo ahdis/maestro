@@ -1,16 +1,13 @@
 package net.ihe.gazelle.maestro.technical.dto;
 
-import net.ihe.gazelle.framework.modelvalidator.domain.ValidatorBuilderFactory;
-import net.ihe.gazelle.framework.modelvalidator.interlay.adapter.BValidatorBuilderFactory;
+import net.ihe.gazelle.lang.UnexpectedError;
 import net.ihe.gazelle.maestro.technical.dto.report.ItemDTO;
 import net.ihe.gazelle.maestro.technical.dto.report.SystemUnderTestDTO;
-import net.ihe.gazelle.maestro.technical.dto.report.UnexpectedErrorDTO;
-import net.ihe.gazelle.modelmarshaller.application.StructureMapper;
-import net.ihe.gazelle.modelmarshaller.interlay.factory.JsonObjectMapperBuilder;
-import net.ihe.gazelle.modelmarshaller.interlay.mapper.JsonStructureMapper;
-import net.ihe.gazelle.testreport.*;
 import net.ihe.gazelle.maestro.technical.dto.report.TestReportDTO;
-import org.junit.jupiter.api.BeforeAll;
+import net.ihe.gazelle.maestro.technical.dto.report.UnexpectedErrorDTO;
+import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
+import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
+import net.ihe.gazelle.testreport.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -20,96 +17,88 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TestReportDTOTest {
 
-    private static StructureMapper structureMapper;
-    private static ValidatorBuilderFactory validatorBuilderFactory;
-
-    @BeforeAll
-    public static void init(){
-        structureMapper = new JsonStructureMapper(new JsonObjectMapperBuilder().build());
-        validatorBuilderFactory = new BValidatorBuilderFactory();
-    }
+    private static final TextSerDes SER_DES = new JacksonSerDes();
 
     @Test
     void testDTOmarshalling() {
-        String json = structureMapper.marshall(new TestReportDTO(createTestReport(createTestServiceBuilder())));
-        TestReport testReport = structureMapper.unmarshall(json, TestReportDTO.class).getDomain();
+        String json = SER_DES.serializeAsString(new TestReportDTO(createTestReport(createTestServiceBuilder())));
+        TestReport testReport = SER_DES.deserialize(json, TestReportDTO.class).getDomain();
         assertTrue(testReport.isValid());
 
-        json = structureMapper.marshall(new TestReportDTO(createTestReport(null)));
-        testReport = structureMapper.unmarshall(json, TestReportDTO.class).getDomain();
+        json = SER_DES.serializeAsString(new TestReportDTO(createTestReport(null)));
+        testReport = SER_DES.deserialize(json, TestReportDTO.class).getDomain();
         assertTrue(testReport.isValid());
     }
 
     @Test
     void testSystemUnderTestDTO() {
-        String json = structureMapper.marshall(new SystemUnderTestDTO(
+        String json = SER_DES.serializeAsString(new SystemUnderTestDTO(
                 new SystemUnderTest()
                         .setSystemIdentification(new EntityIdentification()
                                 .setName("name")
                                 .setVersion("1.0")))
         );
-        SystemUnderTest systemUnderTest = structureMapper.unmarshall(json, SystemUnderTest.class);
+        SystemUnderTest systemUnderTest =  SER_DES.deserialize(json, SystemUnderTest.class);
         assertTrue(systemUnderTest.isValid());
     }
 
     @Test
     void testItemDTO() {
-        String json = structureMapper.marshall(new ItemDTO(
+        String json = SER_DES.serializeAsString(new ItemDTO(
                 new Item()
                         .setName("name")
                         .setContent("test".getBytes())
         ));
-        Item item = structureMapper.unmarshall(json, Item.class);
+        Item item =  SER_DES.deserialize(json, Item.class);
         assertTrue(item.isValid());
     }
 
     @Test
     void testUnexpectedErrorDTO() {
-        String json = structureMapper.marshall(
+        String json = SER_DES.serializeAsString(
                 new UnexpectedErrorDTO(
                         new UnexpectedError()
                                 .setName("name")
                                 .setMessage("message")
                 )
         );
-        UnexpectedError error = structureMapper.unmarshall(json, UnexpectedError.class);
+        UnexpectedError error =  SER_DES.deserialize(json, UnexpectedError.class);
         assertTrue(error.isValid());
     }
 
     private TestRunReportBuilder createTestRunBuilder() {
-        return new TestRunReportBuilder(validatorBuilderFactory)
+        return new TestRunReportBuilder()
                 .setDateTime(new Date())
-                .setTest(new TestBuilder(validatorBuilderFactory)
+                .setTest(new TestBuilder()
                         .setId("testId")
                         .setName("testName")
                         .setDescription("description")
                         .setVersion("1.0"))
-                .addOutput(new ItemBuilder(validatorBuilderFactory)
+                .addOutput(new ItemBuilder()
                         .setName("name")
                         .setReference("reference"))
                 .setStepRunReports(new ArrayList<>())
-                .addStepRunReport(new StepRunReportBuilder(validatorBuilderFactory)
+                .addStepRunReport(new StepRunReportBuilder()
                         .setStepId("stepId")
                         .setType("validation")
                         .setResult(StepResult.PASSED));
     }
 
     private TestServiceBuilder createTestServiceBuilder() {
-        return new TestServiceBuilder(validatorBuilderFactory)
-                .setServiceIdentification(new EntityIdentificationBuilder(validatorBuilderFactory)
+        return new TestServiceBuilder()
+                .setServiceIdentification(new EntityIdentificationBuilder()
                         .setName("service")
                         .setVersion("1.0"))
                 .setDisclaimer("disclaimer");
     }
 
     private TestReport createTestReport(TestServiceBuilder testServiceBuilder) {
-        return new TestReportBuilder(validatorBuilderFactory)
-                .generateUuid()
+        return new TestReportBuilder()
                 .setReportVersion()
                 .setDateTime(new Date())
                 .setTestService(testServiceBuilder)
-                .addSystemUnderTest(new SystemUnderTestBuilder(validatorBuilderFactory)
-                        .setSystemIdentification(new EntityIdentificationBuilder(validatorBuilderFactory)
+                .addSystemUnderTest(new SystemUnderTestBuilder()
+                        .setSystemIdentification(new EntityIdentificationBuilder()
                                 .setName("system")
                                 .setVersion("1.0"))
                         .addMacAddress("mac")

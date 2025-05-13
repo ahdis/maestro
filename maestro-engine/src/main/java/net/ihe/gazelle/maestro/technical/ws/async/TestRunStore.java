@@ -1,15 +1,15 @@
-package net.ihe.gazelle.maestro.technical.ws.tmintegration;
+package net.ihe.gazelle.maestro.technical.ws.async;
 
 /**
- * This class is temporary, it is a structure to store a callback URL and authorization token
+ * This class is a structure to store a callback URL and authorization token
  * for a given test set run execution received from TM
  */
-public class TMTestRunStore {
+public class TestRunStore {
 
     private String clientCallback;
     private String callbackAuthorization;
 
-    public TMTestRunStore() {
+    public TestRunStore() {
         // Empty constructor
     }
 

@@ -1,5 +1,7 @@
 package net.ihe.gazelle.testreport;
 
+import net.ihe.gazelle.lang.UnexpectedError;
+
 import java.util.*;
 
 import static net.ihe.gazelle.testreport.Result.UNDEFINED;

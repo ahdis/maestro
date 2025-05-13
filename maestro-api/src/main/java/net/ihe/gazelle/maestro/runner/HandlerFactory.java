@@ -1,6 +1,6 @@
 package net.ihe.gazelle.maestro.runner;
 
-import net.ihe.gazelle.servicemetadata.api.domain.structure.Service;
+import net.ihe.gazelle.servicemetadata.api.business.Service;
 
 public interface HandlerFactory {
 

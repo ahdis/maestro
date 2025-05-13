@@ -1,4 +1,4 @@
-package net.ihe.gazelle.maestro.technical.ws.tmintegration;
+package net.ihe.gazelle.maestro.technical.ws.async.tmintegration;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.enterprise.context.RequestScoped;

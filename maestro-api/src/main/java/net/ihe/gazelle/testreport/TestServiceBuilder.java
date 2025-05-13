@@ -1,14 +1,18 @@
 package net.ihe.gazelle.testreport;
 
-import net.ihe.gazelle.framework.modelvalidator.domain.AbstractBuilder;
-import net.ihe.gazelle.framework.modelvalidator.domain.BuilderVisitor;
-import net.ihe.gazelle.framework.modelvalidator.domain.ValidatorBuilderFactory;
-import net.ihe.gazelle.testreport.visitor.TestServiceBuilderVisitor;
+import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory;
+import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractBuilder;
+import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
+import net.ihe.gazelle.testreport.validator.TestServiceValidator;
 
 public class TestServiceBuilder extends AbstractBuilder<TestService> {
 
     private EntityIdentificationBuilder serviceIdentification;
     private String disclaimer;
+
+    public TestServiceBuilder() {
+        super();
+    }
 
     public TestServiceBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
         super(validatorBuilderFactory);
@@ -25,19 +29,18 @@ public class TestServiceBuilder extends AbstractBuilder<TestService> {
     }
 
     @Override
-    protected BuilderVisitor getBuilderVisitor() {
-        return TestServiceBuilderVisitor.INSTANCE;
+    protected AbstractValidator<TestService> instantiateValidator(ValidatorBuilderFactory validatorBuilderFactory) {
+        return new TestServiceValidator(validatorBuilderFactory);
     }
 
     @Override
-    protected Class<? extends TestService> getParameterClass() {
-        return TestService.class;
+    protected TestService instantiate() {
+        return new TestService();
     }
 
     @Override
-    protected void make() {
-        this.getObjectToBuild()
-                .setServiceIdentification(AbstractBuilder.buildField(serviceIdentification))
+    protected void make(TestService testService) {
+        testService.setServiceIdentification(AbstractBuilder.staticBuildWithoutValidation(serviceIdentification))
                 .setDisclaimer(disclaimer);
     }
 }

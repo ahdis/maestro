@@ -2,7 +2,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>net.ihe.gazelle</groupId>
+
+    <parent>
+        <groupId>net.ihe.gazelle</groupId>
+        <artifactId>parent-bom</artifactId>
+        <version>0.1.0</version>
+    </parent>
+
     <artifactId>maestro</artifactId>
     <version>0.2.1-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -11,32 +17,50 @@
         <module>maestro-engine</module>
     </modules>
 
+    <scm>
+        <connection>scm:git:${git.project.url}</connection>
+        <url>scm:git:${git.project.url}</url>
+        <developerConnection>scm:git:${git.project.url}</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
     <properties>
-        <compiler-plugin.version>3.12.1</compiler-plugin.version>
         <maven.compiler.release>21</maven.compiler.release>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <framework.version>1.1.0-SNAPSHOT</framework.version>
+        <lang.version>1.0.3</lang.version>
+        <validation.service.version>2.0.0-FRAME-74-SNAPSHOT</validation.service.version>
+        <equalsverifier.version>3.16.1</equalsverifier.version>
+
+        <!-- Quarkus Build-->
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.version>3.8.6</quarkus.platform.version>
-        <!-- Quarkus Build-->
         <quarkus.container-image.build>true</quarkus.container-image.build>
         <quarkus.container-image.registry>rg.fr-par.scw.cloud</quarkus.container-image.registry>
         <quarkus.container-image.group>gazelle-snapshot</quarkus.container-image.group>
         <quarkus.container-image.name>app/maestro</quarkus.container-image.name>
         <quarkus.container-image.tag>${project.version}</quarkus.container-image.tag>
 
-        <skipITs>true</skipITs>
+        <!-- Plugins version -->
         <surefire-plugin.version>3.2.5</surefire-plugin.version>
+        <compiler-plugin.version>3.12.1</compiler-plugin.version>
+        <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
+        <sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>
+        <docker-maven-plugin.version>0.45.0</docker-maven-plugin.version>
+
+        <skipITs>true</skipITs>
+
         <!--git-->
         <git.user.name>gitlab-ci</git.user.name>
         <git.user.token>changeit</git.user.token>
         <git.project.url>
             https://${git.user.name}:${git.user.token}@gitlab.inria.fr/gazelle/private/kereval/maestro.git
         </git.project.url>
-        <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
-        <sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>
-        <docker-maven-plugin.version>0.45.0</docker-maven-plugin.version>
+
         <sonar.coverage.exclusions>
             **/gazelle/business/engine/NotInitializedReferenceException.java,
             **/gazelle/business/step/NotProvidedStep.java,
@@ -47,25 +71,22 @@
             **/gazelle/context/*
         </sonar.coverage.exclusions>
     </properties>
-    <scm>
-        <connection>scm:git:${git.project.url}</connection>
-        <url>scm:git:${git.project.url}</url>
-        <developerConnection>scm:git:${git.project.url}</developerConnection>
-        <tag>HEAD</tag>
-    </scm>
 
     <dependencyManagement>
         <dependencies>
+            <!-- Simulation service API sub-modules dependencies -->
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-api</artifactId>
-                <version>${project.version}</version>
+                <version>0.2.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-engine</artifactId>
-                <version>${project.version}</version>
+                <version>0.2.1-SNAPSHOT</version>
             </dependency>
+
+            <!-- Stack BOM -->
             <dependency>
                 <groupId>${quarkus.platform.group-id}</groupId>
                 <artifactId>${quarkus.platform.artifact-id}</artifactId>
@@ -73,19 +94,34 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
+            <!-- Gazelle dependencies -->
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>framework</artifactId>
-                <version>1.0.1-FRAME-74-SNAPSHOT</version>
+                <version>${framework.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <artifactId>validation-service-api</artifactId>
                 <groupId>net.ihe.gazelle</groupId>
-                <version>1.1.1-MAES-45-SNAPSHOT</version>
+                <version>${validation.service.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>net.ihe.gazelle</groupId>
+                <artifactId>lang</artifactId>
+                <version>${lang.version}</version>
+            </dependency>
+
+            <!-- Test dependencies -->
+            <dependency>
+                <groupId>nl.jqno.equalsverifier</groupId>
+                <artifactId>equalsverifier</artifactId>
+                <version>${equalsverifier.version}</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -219,7 +255,7 @@
         <repository>
             <id>IHE</id>
             <name>IHE Public Maven Repository Group</name>
-            <url>https://gazelle.ihe.net/nexus/content/groups/public/</url>
+            <url>https://nexus.ihe-catalyst.net/repository/maven-public/</url>
             <layout>default</layout>
             <releases>
                 <enabled>true</enabled>
@@ -231,15 +267,30 @@
         </repository>
     </repositories>
 
-    <distributionManagement>
-        <repository>
-            <id>nexus-releases</id>
-            <url>https://gazelle.ihe.net/nexus/content/repositories/releases</url>
-        </repository>
-        <snapshotRepository>
-            <id>nexus-snapshots</id>
-            <url>https://gazelle.ihe.net/nexus/content/repositories/snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>IHE-plugins</id>
+            <name>IHE Plugins Public Maven Repository Group</name>
+            <url>https://nexus.ihe-catalyst.net/repository/maven-public/</url>
+            <layout>default</layout>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
 
+    <contributors>
+        <contributor>
+            <organization>IHE Catalyst</organization>
+            <organizationUrl>https://ihe-catalyst.net</organizationUrl>
+        </contributor>
+        <contributor>
+            <organization>Kereval</organization>
+            <organizationUrl>https://www.kereval.com</organizationUrl>
+        </contributor>
+    </contributors>
 </project>

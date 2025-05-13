@@ -10,13 +10,9 @@ import java.util.Objects;
 public class TestCounters {
 
     private int total;
-
     private int passed;
-
     private int failed;
-
     private int undefined;
-
     private int unexpectedErrors;
 
     public TestCounters() {

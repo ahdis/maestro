@@ -1,6 +1,5 @@
 package net.ihe.gazelle.maestro.context;
 
-import net.ihe.gazelle.framework.modelvalidator.interlay.adapter.BValidatorBuilderFactory;
 import net.ihe.gazelle.maestro.TestRun;
 import net.ihe.gazelle.testreport.StepRunReportBuilder;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,7 +31,7 @@ class TestRunSessionStoreTest {
 
     @Test
     void setStepReportTest(){
-        StepRunReportBuilder stepRunReportBuilder = new StepRunReportBuilder(new BValidatorBuilderFactory());
+        StepRunReportBuilder stepRunReportBuilder = new StepRunReportBuilder();
         List<StepRunReportBuilder> stepRunReportBuilders = new ArrayList<>();
         stepRunReportBuilders.add(stepRunReportBuilder);
         testRunSessionStore.setStepReports(stepRunReportBuilders);

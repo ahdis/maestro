@@ -1,7 +1,7 @@
 package net.ihe.gazelle.maestro.technical.dto.report;
 
 import com.fasterxml.jackson.annotation.*;
-import net.ihe.gazelle.testreport.UnexpectedError;
+import net.ihe.gazelle.lang.UnexpectedError;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({"name", "message", "cause"})

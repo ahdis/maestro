@@ -3,7 +3,6 @@ package net.ihe.gazelle.maestro.technical.jobs;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
-import net.ihe.gazelle.framework.modelvalidator.interlay.adapter.BValidatorBuilderFactory;
 import net.ihe.gazelle.maestro.runner.*;
 import net.ihe.gazelle.testreport.StepResult;
 import net.ihe.gazelle.testreport.StepRunReportBuilder;
@@ -53,11 +52,11 @@ public class StepRunnerJob {
      */
     private void returnUnexpectedError(Exception e, StepRun stepRun) {
         List<UnexpectedErrorBuilder> unexpectedErrorBuilders = List.of(
-                new UnexpectedErrorBuilder(new BValidatorBuilderFactory())
+                new UnexpectedErrorBuilder()
                     .setMessage(e.getMessage())
                     .setName("StepExecutionError")
         );
-        StepRunReportBuilder builder = new StepRunReportBuilder(new BValidatorBuilderFactory())
+        StepRunReportBuilder builder = new StepRunReportBuilder()
                 .setStepId(stepRun.step().getName())
                 .setType(stepRun.step().getType())
                 .setResult(StepResult.UNDEFINED)
