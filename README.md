@@ -1,56 +1,69 @@
-# maestro
+# Maestro
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+Maestro is a Core Java Application of the Gazelle test bed. It is responsible for executing automated tests by reaching the correct services.
 
-If you want to learn more about Quarkus, please visit its website: https://quarkus.io/ .
+## Requirements
 
-## Running the application in dev mode
+- JDK 21+/Maven 3.8.8+
+- Docker 27.0.2+
+- Docker-compose 2.18.+
 
-You can run your application in dev mode that enables live coding using:
-```shell script
-./mvnw compile quarkus:dev
+## Documentation
+
+- [Features](documentation/features.md)
+
+## Build artifacts
+
+It is possible to generate the artifacts with maven.
+
+```bash
+mvn clean package
 ```
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at http://localhost:8080/q/dev/.
+This command will directly build the docker image of the project :
+- rg.fr-par.scw.cloud/gazelle-snapshot/app/maestro:${project.version}
 
-## Packaging and running the application
+## Testing
 
-The application can be packaged using:
-```shell script
-./mvnw package
-```
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
+It is possible to run different types of test in this application :
 
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
+- Unit tests that are run with the following command, the jacoco results can be found in
+  module_path/target/site/jacoco/
 
-If you want to build an _über-jar_, execute the following command:
-```shell script
-./mvnw package -Dquarkus.package.jar.type=uber-jar
+```bash
+mvn clean test
 ```
 
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
+- Integration tests that can be run with the following command
 
-## Creating a native executable
-
-You can create a native executable using:
-```shell script
-./mvnw package -Dnative
+```bash
+mvn verify
 ```
 
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
-```shell script
-./mvnw package -Dnative -Dquarkus.native.container-build=true
+- Mutation tests that can be run with the following command, the results can be found in
+  module_path/target/pit-reports/
+
+  In keycloak-provider module, the mutation tests are skipped.
+
+```bash
+mvn test-compile org.pitest:pitest-maven:mutationCoverage
 ```
 
-You can then execute your native executable with: `./target/maestro-0.0.1-SNAPSHOT-runner`
+## License
 
-If you want to learn more about building native executables, please consult https://quarkus.io/guides/maven-tooling.
+```
+    Copyright 2022-2025 IHE International
+    
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    
+    http://www.apache.org/licenses/LICENSE-2.0
+    
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
 
-## Provided Code
-
-### REST
-
-Easily start your REST Web Services
-
-[Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)

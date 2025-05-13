@@ -1,1 +1,2 @@
 net.ihe.gazelle.maestro.business.step.validation.ValidationHandlerFactory
+net.ihe.gazelle.maestro.business.step.itb.ItbHandlerFactory
