@@ -19,7 +19,6 @@ import java.util.*;
 /**
  * Adapter to execute HTTP requests to ITB (Interoperability Test Bed)
  */
-@ApplicationScoped
 public class ItbHttpClient implements ItbClient {
 
     private Map<String, Object> map;

@@ -1,6 +1,6 @@
 package net.ihe.gazelle.maestro.business.step.itb;
 
-import net.ihe.gazelle.framework.modelvalidator.domain.ValidatorBuilderFactory;
+import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory;
 import net.ihe.gazelle.maestro.runner.StepRun;
 import net.ihe.gazelle.maestro.runner.StepRunner;
 import net.ihe.gazelle.testreport.StepResult;
