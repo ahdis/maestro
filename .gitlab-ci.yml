@@ -1,9 +1,9 @@
 # Define templates
 include:
-  - project: 'gazelle/private/gitlab-ci-templates'
+  - project: ${GITLAB_CI_TEMPLATES_PATH}
     file:
-      - 'extends-v2.yaml'
-      - 'stages/schedule.yaml'
+      - ${GITLAB_CI_TEMPLATES_FILE}
+      - 'CI/stages/schedule.yaml'
     ref: 'master'
 
 # Define stages
