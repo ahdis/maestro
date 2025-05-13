@@ -87,6 +87,14 @@ A validation step contains :
 - validationProfile : Validation Profile tu use io*n the validation service (String property)
 - contentToValidate : The content maestro will send to validationService (ByteArray property)
 
+**ITBStep**
+
+An ITB step will send inputs to an external ITB service which return a validation report.
+
+An ITB step contains :
+- A unique id
+- A unique name
+- A list of 6 properties
 ### Inputs
 
 When we send data to Maestro, we can store it in TestRun inputs instead of step's properties. 
