@@ -20,14 +20,15 @@ public class ServiceRegistryDAOImpl implements ServiceRegistryDAO {
     @ConfigProperty(name = "gzl.service.registry.file.path")
     String servicesFilePath;
 
-    TextSerDes serDes = new JacksonSerDes();
-
     @Override
     public List<Service> getServices() {
         try {
             Path filePath = Path.of(servicesFilePath);
+            TextSerDes serDes = new JacksonSerDes();
             String json = Files.readString(filePath, Charset.defaultCharset());
-            List<Service> services = Arrays.stream(serDes.deserialize(json, ServiceDTO[].class)).map(ServiceDTO::getBusinessObject).toList();
+            List<Service> services = Arrays.stream(serDes.deserialize(json, ServiceDTO[].class))
+                    .map(ServiceDTO::getBusinessObject)
+                    .toList();
             if (!services.isEmpty() && services.getFirst() != null) {
                 return services;
             }

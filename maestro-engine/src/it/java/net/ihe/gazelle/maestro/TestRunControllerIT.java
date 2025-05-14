@@ -6,7 +6,6 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.QuarkusTestProfile;
 import io.quarkus.test.junit.TestProfile;
 import io.restassured.response.Response;
-import io.restassured.response.ResponseBody;
 import jakarta.ws.rs.core.MediaType;
 import org.apache.http.HttpHeaders;
 import org.junit.jupiter.api.BeforeAll;
@@ -40,7 +39,8 @@ class TestRunControllerIT implements QuarkusTestProfile {
     @Test
     void launchTestSetWithOneValidation() {
         try {
-            wireMockServer.stubFor(post(urlPathMatching("matchboxv3/gazelle/validation")).willReturn(ok().withBody(getJson())));
+            wireMockServer.stubFor(get(urlPathMatching("/matchboxv3/gazelle/validation/v2/profiles")).willReturn(ok().withBody("[]")));
+            wireMockServer.stubFor(post(urlPathMatching("/matchboxv3/gazelle/validation/v2/validate")).willReturn(ok().withBody(getJson())));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -53,14 +53,8 @@ class TestRunControllerIT implements QuarkusTestProfile {
                 .then().statusCode(200)
                 .extract().response();
         assertNotNull(response);
-        ResponseBody body = response.getBody();
-        assertNotNull(body);
-        System.out.println(body.prettyPrint());
-
-//        JsonNode node = objectMapper.readTree(body.prettyPrint());
-//        TestReportDTO testReportDTO = objectMapper.treeToValue(node, TestReportDTO.class);
-//        TestReport report = testReportDTO.getDomain();
-//        assertNotNull(report);
+        String json = response.getBody().prettyPrint();
+        System.out.println(json);
     }
 
     private InputStream readJson() {

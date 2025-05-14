@@ -15,14 +15,8 @@ import java.util.Objects;
 public class TestRun {
 
     private String testSetId;
-
     private Test test = null;
-
     private List<Property<?>> inputs = new ArrayList<>();
-
-    public Test getTest() {
-        return test;
-    }
 
     public String getTestSetId() {
         return testSetId;
@@ -33,23 +27,27 @@ public class TestRun {
         return this;
     }
 
-    // Suppress generic wildcard warning
-    @SuppressWarnings("java:S1452")
-    public List<Property<?>> getInputs() {
-        return new ArrayList<>(inputs);
+    public Test getTest() {
+        return test;
     }
 
     public void setTest(Test test) {
         this.test = test;
     }
 
-    public TestRun addInputs(Property<?> property) {
-        inputs.add(property);
-        return this;
+    // Suppress generic wildcard warning
+    @SuppressWarnings("java:S1452")
+    public List<Property<?>> getInputs() {
+        return new ArrayList<>(inputs);
     }
 
     public TestRun setInputs(List<Property<?>> inputs) {
         this.inputs = new ArrayList<>(inputs);
+        return this;
+    }
+
+    public TestRun addInputs(Property<?> property) {
+        inputs.add(property);
         return this;
     }
 

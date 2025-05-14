@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import net.ihe.gazelle.maestro.PropertyRef;
 import net.ihe.gazelle.maestro.Property;
 import net.ihe.gazelle.maestro.Step;
 import net.ihe.gazelle.maestro.Test;
@@ -97,14 +96,14 @@ public class TestRunParser {
     private static List<Property<?>> parseInputs(JsonNode testRunNode, ObjectMapper mapper) throws JsonProcessingException, MissingArgumentException {
         ArrayNode inputsNodes = (ArrayNode) testRunNode.get("inputs");
         List<Property<?>> inputs = new ArrayList<>();
-        ReferenceParser parser = new ReferenceParser();
+        ReferenceParser referenceParser = new ReferenceParser();
         for (JsonNode inputNode : inputsNodes) {
             try {
-                PropertyDTO dto = mapper.readValue(inputNode.toString(), PropertyDTO.class);
-                if ((dto.getValue() instanceof String string) && parser.isReference(string)) {
-                    inputs.add(new PropertyRef<>(dto.getName(), parser.getReference(string)));
-                } else {
-                    inputs.add(new Property<>(dto.getName(), dto.getValue()));
+                PropertyDTO propertyDTO = mapper.readValue(inputNode.toString(), PropertyDTO.class);
+                if ((propertyDTO.getValue() instanceof String string) && referenceParser.isReference(string)) {
+                    inputs.add(propertyDTO.createPropertyRef(referenceParser.getReference(string)));
+                } else  {
+                    inputs.add(propertyDTO.createProperty());
                 }
             } catch (NullPointerException e) {
                 throw new MissingArgumentException("Argument inputs is missing in testRun");

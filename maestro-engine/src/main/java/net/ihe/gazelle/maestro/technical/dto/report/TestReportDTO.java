@@ -9,12 +9,12 @@ import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
-        "modelVersion", "uuid", "date", "testService", "systemsUnderTest", "status", "testSuiteName",
+        "modelVersion", "uuid", "dateTime", "testService", "systemsUnderTest", "status", "testSuiteName",
         "testCounters", "note", "urlToTestSuiteResult", "testRunReports", "subReports", "unexpectedErrors"
 })
 public class TestReportDTO {
 
-    public static final String ISO_8601_DATETIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+    public static final String ISO_8601_DATETIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
 
     @JsonIgnore
     private final TestReport domain;
@@ -47,13 +47,13 @@ public class TestReportDTO {
         domain.setUuid(uuid);
     }
 
-    @JsonGetter(value = "date")
+    @JsonGetter(value = "dateTime")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = ISO_8601_DATETIME_PATTERN) // ISO 8601
     public Date getDateTime() {
         return domain.getDateTime();
     }
 
-    @JsonSetter(value = "date")
+    @JsonSetter(value = "dateTime")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = ISO_8601_DATETIME_PATTERN) // ISO 8601
     public void setDateTime(Date dateTime) {
         domain.setDateTime(dateTime);

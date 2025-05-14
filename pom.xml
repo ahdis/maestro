@@ -30,7 +30,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <framework.version>1.1.0-SNAPSHOT</framework.version>
+        <framework.version>2.0.0-SNAPSHOT</framework.version>
         <lang.version>1.0.3</lang.version>
         <validation.service.version>2.0.0-FRAME-74-SNAPSHOT</validation.service.version>
         <equalsverifier.version>3.16.1</equalsverifier.version>
@@ -38,7 +38,7 @@
         <!-- Quarkus Build-->
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
-        <quarkus.platform.version>3.8.6</quarkus.platform.version>
+        <quarkus.platform.version>3.15.3</quarkus.platform.version>
         <quarkus.container-image.build>true</quarkus.container-image.build>
         <quarkus.container-image.registry>rg.fr-par.scw.cloud</quarkus.container-image.registry>
         <quarkus.container-image.group>gazelle-snapshot</quarkus.container-image.group>

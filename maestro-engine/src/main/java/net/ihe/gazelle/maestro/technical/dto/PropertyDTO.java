@@ -129,7 +129,27 @@ public class PropertyDTO {
      */
     @SuppressWarnings("java:S1452")
     public PropertyRef<?> createPropertyRef(String reference) {
-        return new PropertyRef<>(name, reference);
+        switch (type) {
+            case "string" -> {
+                return new PropertyRef<String>(name, reference);
+            }
+            case "integer" -> {
+                return new PropertyRef<Integer>(name, reference);
+            }
+            case "boolean" -> {
+                return new PropertyRef<Boolean>(name, reference);
+            }
+            case "double" -> {
+                return new PropertyRef<Double>(name, reference);
+            }
+            case "byteArray" -> {
+                return new PropertyRef<Byte[]>(name, reference);
+            }
+            case "date" -> {
+                return new PropertyRef<Date>(name, reference);
+            }
+            default -> throw new UnsupportedPropertyTypeException("Unsupported property type: " + type);
+        }
     }
 
 }

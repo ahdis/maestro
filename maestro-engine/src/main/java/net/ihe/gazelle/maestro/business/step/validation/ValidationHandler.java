@@ -15,13 +15,13 @@ public class ValidationHandler implements Handler, ValidationService {
 
     private ValidationServiceHttpClient validationServiceHttpClient;
 
-    protected ValidationHandler(){
+    protected ValidationHandler() {
         /*Empty constructor used for mocking*/
     }
 
-    public ValidationHandler(String serverUrl){
+    public ValidationHandler(String serverUrl) {
         try {
-            if(serverUrl == null || serverUrl.isBlank() || serverUrl.isEmpty()) {
+            if (serverUrl == null || serverUrl.isBlank() || serverUrl.isEmpty()) {
                 throw new IllegalArgumentException("serverUrl cannot be null, blank or empty");
             }
             URI uri = new URI(serverUrl);
@@ -44,7 +44,7 @@ public class ValidationHandler implements Handler, ValidationService {
      */
     @Override
     public ValidationReport validate(ValidationRequest validationRequest) {
-        if(validationServiceHttpClient != null) {
+        if (validationServiceHttpClient != null) {
             return validationServiceHttpClient.validate(validationRequest);
         } else {
             throw new ServiceClientException("validationServiceHttpClient not set");
@@ -56,7 +56,7 @@ public class ValidationHandler implements Handler, ValidationService {
      */
     @Override
     public List<ValidationProfile> getValidationProfiles() {
-        if(validationServiceHttpClient != null) {
+        if (validationServiceHttpClient != null) {
             return validationServiceHttpClient.getValidationProfiles();
         } else {
             throw new ServiceClientException("validationServiceHttpClient not set");

@@ -6,28 +6,26 @@
     "replicaId": "replicaId",
     "providedInterfaces": [
       {
-        "interfaceName": "interfaceName",
-        "interfaceVersion": "3.0.0",
+        "interfaceName": "Validation Service",
+        "interfaceVersion": "2.0.0",
         "bindings": [
           {
-            "type": "restBinding",
-            "serviceUrl": "http://localhost:18089/matchboxv3/gazelle/validation"
+            "@type": "REST",
+            "serviceUrl": "http://localhost:18089/matchboxv3/gazelle"
           }
         ]
       }
     ],
     "consumedInterfaces": [
       {
-        "interfaceName": "ConsumedInterfaceName",
-        "supportedVersions": [
-          "1.0.0"
-        ],
+        "interfaceName": "their-interface",
         "required": true,
-        "bindings": [
-          {
-            "type": "restBinding",
-            "serviceUrl": "http://localhost:18089"
-          }
+        "supportedVersions": [
+          "1.0",
+          "1.1"
+        ],
+        "supportedBindings": [
+          "REST"
         ]
       }
     ]
