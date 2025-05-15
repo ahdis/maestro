@@ -15,9 +15,9 @@ import net.ihe.gazelle.maestro.technical.ws.MissingArgumentException;
 import net.ihe.gazelle.maestro.Property;
 import net.ihe.gazelle.maestro.Test;
 import net.ihe.gazelle.maestro.TestRun;
-import net.ihe.gazelle.validation.api.business.profile.ValidationProfile;
-import net.ihe.gazelle.validation.api.business.report.ValidationReport;
-import net.ihe.gazelle.validation.api.business.request.ValidationRequest;
+import net.ihe.gazelle.validation.v2.api.business.profile.ValidationProfile;
+import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
+import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;

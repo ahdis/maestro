@@ -4,8 +4,8 @@ import net.ihe.gazelle.maestro.business.step.validation.spi.ValidationReportSeri
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.SerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.SerializationException;
-import net.ihe.gazelle.validation.api.business.report.ValidationReport;
-import net.ihe.gazelle.validation.api.technical.dto.report.ValidationReportDTO;
+import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
+import net.ihe.gazelle.validation.v2.api.technical.dto.report.ValidationReportDTO;
 
 /**
  * Provided implementation for serializing validation report in Validation Step runner

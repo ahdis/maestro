@@ -7,10 +7,10 @@ import net.ihe.gazelle.testreport.ItemBuilder;
 import net.ihe.gazelle.testreport.StepResult;
 import net.ihe.gazelle.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.testreport.UnexpectedErrorBuilder;
-import net.ihe.gazelle.validation.api.business.report.ValidationReport;
-import net.ihe.gazelle.validation.api.business.report.ValidationTestResult;
-import net.ihe.gazelle.validation.api.business.report.validator.ValidationReportValidator;
-import net.ihe.gazelle.validation.api.business.request.ValidationRequest;
+import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
+import net.ihe.gazelle.validation.v2.api.business.report.ValidationTestResult;
+import net.ihe.gazelle.validation.v2.api.business.report.validator.ValidationReportValidator;
+import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
 
 import java.util.List;
 

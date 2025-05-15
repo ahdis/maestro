@@ -1,6 +1,6 @@
 package net.ihe.gazelle.maestro.business.step.validation.spi;
 
-import net.ihe.gazelle.validation.api.business.report.ValidationReport;
+import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
 
 public interface ValidationReportSerializer {
 

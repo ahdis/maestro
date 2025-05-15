@@ -1,11 +1,11 @@
 package net.ihe.gazelle.maestro.business.step.validation;
 
 import net.ihe.gazelle.maestro.runner.Handler;
-import net.ihe.gazelle.validation.api.business.ValidationService;
-import net.ihe.gazelle.validation.api.business.profile.ValidationProfile;
-import net.ihe.gazelle.validation.api.business.report.ValidationReport;
-import net.ihe.gazelle.validation.api.business.request.ValidationRequest;
-import net.ihe.gazelle.validation.client.ValidationServiceHttpClient;
+import net.ihe.gazelle.validation.v2.api.business.ValidationService;
+import net.ihe.gazelle.validation.v2.api.business.profile.ValidationProfile;
+import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
+import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
+import net.ihe.gazelle.validation.v2.client.ValidationServiceHttpClient;
 
 import java.net.URI;
 import java.net.URISyntaxException;

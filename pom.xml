@@ -30,7 +30,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <framework.version>2.0.0-SNAPSHOT</framework.version>
+        <framework.version>2.0.0</framework.version>
         <lang.version>1.0.3</lang.version>
         <validation.service.version>2.0.0-FRAME-74-SNAPSHOT</validation.service.version>
         <equalsverifier.version>3.16.1</equalsverifier.version>

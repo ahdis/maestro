@@ -3,8 +3,8 @@ package net.ihe.gazelle.maestro.business.step.validation.api;
 import net.ihe.gazelle.maestro.Property;
 import net.ihe.gazelle.maestro.business.step.validation.ValidationRequestMapper;
 import net.ihe.gazelle.maestro.business.step.validation.ValidationStep;
-import net.ihe.gazelle.validation.api.business.request.ValidationItem;
-import net.ihe.gazelle.validation.api.business.request.ValidationRequest;
+import net.ihe.gazelle.validation.v2.api.business.request.ValidationItem;
+import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
