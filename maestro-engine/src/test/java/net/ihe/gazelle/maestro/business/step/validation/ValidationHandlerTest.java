@@ -8,26 +8,22 @@ class ValidationHandlerTest {
 
     @Test
     void initWithNullParams() {
-
-        assertThrows(IllegalArgumentException.class,() -> new ValidationHandler(null));
-
+        assertThrows(IllegalArgumentException.class,() -> new ValidationHandler(null,"2.0.0"));
     }
 
     @Test
     void initWithEmptyParams() {
-
-        assertThrows(IllegalArgumentException.class,() -> new ValidationHandler(""));
-
+        assertThrows(IllegalArgumentException.class,() -> new ValidationHandler("","2.0.0"));
     }
 
     @Test
     void initWithBlankParams() {
-        assertThrows(IllegalArgumentException.class,() -> new ValidationHandler(" "));
+        assertThrows(IllegalArgumentException.class,() -> new ValidationHandler(" ","2.0.0"));
     }
 
     @Test
     void initWithInvalidParams() {
-        assertThrows(ServiceClientException.class,() -> new ValidationHandler("h t t p : //"));
+        assertThrows(ServiceClientException.class,() -> new ValidationHandler("h t t p : //","2.0.0"));
     }
 
     @Test

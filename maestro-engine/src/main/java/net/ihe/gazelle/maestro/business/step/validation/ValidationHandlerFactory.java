@@ -15,7 +15,7 @@ public class ValidationHandlerFactory implements HandlerFactory {
     public Handler createHandler(Service service) throws IllegalArgumentException {
         try {
             HttpRestBinding binding = (HttpRestBinding) service.getProvidedInterfaces().getFirst().getBindings().getFirst();
-            return new ValidationHandler(binding.getServiceUrl());
+            return new ValidationHandler(binding.getServiceUrl(), service.getProvidedInterfaces().getFirst().getInterfaceVersion());
         } catch (NullPointerException e) {
             throw new IllegalArgumentException("Service " + service.getName() + " has no bindings");
         }

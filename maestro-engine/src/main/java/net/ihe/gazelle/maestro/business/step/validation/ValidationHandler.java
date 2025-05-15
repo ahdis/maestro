@@ -5,27 +5,30 @@ import net.ihe.gazelle.validation.v2.api.business.ValidationService;
 import net.ihe.gazelle.validation.v2.api.business.profile.ValidationProfile;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
 import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
-import net.ihe.gazelle.validation.v2.client.ValidationServiceHttpClient;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Objects;
 
 public class ValidationHandler implements Handler, ValidationService {
 
-    private ValidationServiceHttpClient validationServiceHttpClient;
+    private ValidationService validationServiceHttpClient;
 
     protected ValidationHandler() {
         /*Empty constructor used for mocking*/
     }
 
-    public ValidationHandler(String serverUrl) {
+    public ValidationHandler(String serverUrl, String interfaceVersion) {
         try {
             if (serverUrl == null || serverUrl.isBlank() || serverUrl.isEmpty()) {
                 throw new IllegalArgumentException("serverUrl cannot be null, blank or empty");
             }
             URI uri = new URI(serverUrl);
-            this.validationServiceHttpClient = new ValidationServiceHttpClient(uri);
+            if (interfaceVersion.startsWith("1."))
+                this.validationServiceHttpClient = new net.ihe.gazelle.validation.v1.client.ValidationServiceHttpClient(uri);
+            else
+                this.validationServiceHttpClient = new net.ihe.gazelle.validation.v2.client.ValidationServiceHttpClient(uri);
         } catch (URISyntaxException e) {
             throw new ServiceClientException("Can't initiate validation handler due to exception while creating client from server url " + serverUrl, e);
         }
