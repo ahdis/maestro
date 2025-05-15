@@ -25,7 +25,7 @@ public class ValidationHandler implements Handler, ValidationService {
                 throw new IllegalArgumentException("serverUrl cannot be null, blank or empty");
             }
             URI uri = new URI(serverUrl);
-            if (interfaceVersion.startsWith("1."))
+            if (interfaceVersion != null && interfaceVersion.startsWith("1."))
                 this.validationServiceHttpClient = new net.ihe.gazelle.validation.v1.client.ValidationServiceHttpClient(uri);
             else
                 this.validationServiceHttpClient = new net.ihe.gazelle.validation.v2.client.ValidationServiceHttpClient(uri);
