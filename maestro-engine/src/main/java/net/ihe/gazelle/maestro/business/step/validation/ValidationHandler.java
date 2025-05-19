@@ -1,6 +1,7 @@
 package net.ihe.gazelle.maestro.business.step.validation;
 
 import net.ihe.gazelle.maestro.runner.Handler;
+import net.ihe.gazelle.validation.v1.interlay.wrapper.ValidationServiceWrapper;
 import net.ihe.gazelle.validation.v2.api.business.ValidationService;
 import net.ihe.gazelle.validation.v2.api.business.profile.ValidationProfile;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
@@ -25,7 +26,7 @@ public class ValidationHandler implements Handler, net.ihe.gazelle.validation.v2
             }
             URI uri = new URI(serverUrl);
             if (interfaceVersion != null && interfaceVersion.startsWith("1."))
-                this.validationServiceHttpClient = new ValidationServiceV1Wrapper(new net.ihe.gazelle.validation.v1.client.ValidationServiceHttpClient(uri));
+                this.validationServiceHttpClient = new ValidationServiceWrapper(new net.ihe.gazelle.validation.v1.client.ValidationServiceHttpClient(uri));
             else
                 this.validationServiceHttpClient = new net.ihe.gazelle.validation.v2.client.ValidationServiceHttpClient(uri);
         } catch (URISyntaxException e) {
