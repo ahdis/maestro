@@ -1,5 +1,6 @@
 package net.ihe.gazelle.maestro.business.step.validation;
 
+import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -30,6 +31,6 @@ class ValidationHandlerTest {
     void validateWithClientNotSet(){
         ValidationHandler validationHandler = new ValidationHandler();
         assertThrows(ServiceClientException.class,
-                () -> validationHandler.validate(null));
+                () -> validationHandler.validate(new ValidationRequest()));
     }
 }

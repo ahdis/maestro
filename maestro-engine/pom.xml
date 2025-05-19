@@ -132,11 +132,19 @@
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
-            <artifactId>validation-api</artifactId>
+            <artifactId>validation-v1-api</artifactId>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
-            <artifactId>validation-rest-client</artifactId>
+            <artifactId>validation-v2-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>validation-v1-rest-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>validation-v2-rest-client</artifactId>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>

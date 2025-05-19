@@ -9,9 +9,8 @@ import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Objects;
 
-public class ValidationHandler implements Handler, ValidationService {
+public class ValidationHandler implements Handler, net.ihe.gazelle.validation.v2.api.business.ValidationService {
 
     private ValidationService validationServiceHttpClient;
 
@@ -21,12 +20,12 @@ public class ValidationHandler implements Handler, ValidationService {
 
     public ValidationHandler(String serverUrl, String interfaceVersion) {
         try {
-            if (serverUrl == null || serverUrl.isBlank() || serverUrl.isEmpty()) {
+            if (serverUrl == null || serverUrl.isBlank()) {
                 throw new IllegalArgumentException("serverUrl cannot be null, blank or empty");
             }
             URI uri = new URI(serverUrl);
             if (interfaceVersion != null && interfaceVersion.startsWith("1."))
-                this.validationServiceHttpClient = new net.ihe.gazelle.validation.v1.client.ValidationServiceHttpClient(uri);
+                this.validationServiceHttpClient = new ValidationServiceV1Wrapper(new net.ihe.gazelle.validation.v1.client.ValidationServiceHttpClient(uri));
             else
                 this.validationServiceHttpClient = new net.ihe.gazelle.validation.v2.client.ValidationServiceHttpClient(uri);
         } catch (URISyntaxException e) {
@@ -42,9 +41,6 @@ public class ValidationHandler implements Handler, ValidationService {
         return validationServiceHttpClient.getValidationProfiles() != null;
     }
 
-    /**
-     * Override from {@link ValidationService}
-     */
     @Override
     public ValidationReport validate(ValidationRequest validationRequest) {
         if (validationServiceHttpClient != null) {
@@ -54,9 +50,6 @@ public class ValidationHandler implements Handler, ValidationService {
         }
     }
 
-    /**
-     * Override from {@link ValidationService}
-     */
     @Override
     public List<ValidationProfile> getValidationProfiles() {
         if (validationServiceHttpClient != null) {
@@ -65,5 +58,4 @@ public class ValidationHandler implements Handler, ValidationService {
             throw new ServiceClientException("validationServiceHttpClient not set");
         }
     }
-
 }
