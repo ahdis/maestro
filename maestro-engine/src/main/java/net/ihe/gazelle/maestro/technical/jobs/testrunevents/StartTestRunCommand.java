@@ -1,7 +1,7 @@
 package net.ihe.gazelle.maestro.technical.jobs.testrunevents;
 
 
-import net.ihe.gazelle.maestro.TestRun;
+import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 
 /**
  * A message to start TestRun Execution

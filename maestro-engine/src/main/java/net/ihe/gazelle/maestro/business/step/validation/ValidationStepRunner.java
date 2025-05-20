@@ -1,12 +1,12 @@
 package net.ihe.gazelle.maestro.business.step.validation;
 
+import net.ihe.gazelle.maestro.api.business.testreport.ItemBuilder;
+import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
+import net.ihe.gazelle.maestro.api.business.testreport.UnexpectedErrorBuilder;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunner;
 import net.ihe.gazelle.maestro.business.step.validation.spi.ValidationReportSerializer;
-import net.ihe.gazelle.maestro.runner.StepRun;
-import net.ihe.gazelle.maestro.runner.StepRunner;
-import net.ihe.gazelle.testreport.ItemBuilder;
-import net.ihe.gazelle.testreport.StepResult;
-import net.ihe.gazelle.testreport.StepRunReportBuilder;
-import net.ihe.gazelle.testreport.UnexpectedErrorBuilder;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationTestResult;
 import net.ihe.gazelle.validation.v2.api.business.report.validator.ValidationReportValidator;
@@ -21,7 +21,7 @@ import java.util.List;
  * <br>
  * Use ValidationHandler to validate content which return a ValidationReport {@link ValidationHandler}
  * <br>
- * Assert ValidationReport to extract result and build a ValidationReportBuilder {@link net.ihe.gazelle.validation.api.business.report.ValidationReportBuilder}
+ * Assert ValidationReport to extract result and build a ValidationReportBuilder {@link net.ihe.gazelle.validation.v2.api.business.report.ValidationReportBuilder}
  * <br>
  */
 public class ValidationStepRunner implements StepRunner {

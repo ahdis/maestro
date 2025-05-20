@@ -1,9 +1,9 @@
 package net.ihe.gazelle.maestro.business.step.assertion;
 
-import net.ihe.gazelle.maestro.runner.StepRun;
-import net.ihe.gazelle.maestro.runner.StepRunner;
-import net.ihe.gazelle.testreport.StepResult;
-import net.ihe.gazelle.testreport.StepRunReportBuilder;
+import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunner;
 
 /**
  * Assertion Step is not implemented. It exists just for test purpose

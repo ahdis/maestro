@@ -1,7 +1,7 @@
 package net.ihe.gazelle.maestro.technical.dto.report;
 
 import com.fasterxml.jackson.annotation.*;
-import net.ihe.gazelle.testreport.SystemUnderTest;
+import net.ihe.gazelle.maestro.api.business.testreport.SystemUnderTest;
 
 import java.util.List;
 

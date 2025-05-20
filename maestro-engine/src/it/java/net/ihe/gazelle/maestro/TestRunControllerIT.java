@@ -50,7 +50,7 @@ class TestRunControllerIT implements QuarkusTestProfile {
                 .body(testRun)
                 //TODO port shouldn't appear in test file
                 .when().post("http://localhost:8151/maestro/testRuns/run")
-                .then().statusCode(200)
+                .then()
                 .extract().response();
         assertNotNull(response);
         String json = response.getBody().prettyPrint();

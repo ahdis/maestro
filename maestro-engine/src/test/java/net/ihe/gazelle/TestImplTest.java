@@ -1,7 +1,7 @@
 package net.ihe.gazelle;
 
+import net.ihe.gazelle.maestro.api.business.testrun.Test;
 import net.ihe.gazelle.maestro.business.step.validation.ValidationStep;
-import net.ihe.gazelle.maestro.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

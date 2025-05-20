@@ -1,10 +1,10 @@
 package net.ihe.gazelle.maestro.business.engine;
 
-import net.ihe.gazelle.maestro.TestRun;
-import net.ihe.gazelle.maestro.TestSetRun;
-import net.ihe.gazelle.maestro.runner.StepRun;
-import net.ihe.gazelle.testreport.TestReport;
-import net.ihe.gazelle.testreport.TestRunReportBuilder;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+import net.ihe.gazelle.maestro.api.business.testreport.TestRunReportBuilder;
+import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
+import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 
 /**
  * Producer is used to send message via a chanel to be caught by a listener of this chanel.

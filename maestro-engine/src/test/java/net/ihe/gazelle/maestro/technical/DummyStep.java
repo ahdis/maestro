@@ -1,14 +1,20 @@
 package net.ihe.gazelle.maestro.technical;
 
-import net.ihe.gazelle.maestro.Property;
-import net.ihe.gazelle.maestro.Step;
+import net.ihe.gazelle.maestro.api.business.testrun.Property;
+import net.ihe.gazelle.maestro.api.business.testrun.Step;
 
 import java.util.List;
 
 public class DummyStep implements Step {
+
     @Override
     public String getName() {
         return "";
+    }
+
+    @Override
+    public void setName(String name) {
+        //Empty mock method
     }
 
     @Override
@@ -17,8 +23,8 @@ public class DummyStep implements Step {
     }
 
     @Override
-    public void setProperty(List<Property<?>> properties) {
-        //Empty mock metho
+    public void setProperties(List<Property<?>> properties) {
+        //Empty mock method
     }
 
     @Override

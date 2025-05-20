@@ -1,17 +1,18 @@
 package net.ihe.gazelle.maestro.technical.dto;
 
 import net.ihe.gazelle.lang.UnexpectedError;
+import net.ihe.gazelle.maestro.api.business.testreport.*;
 import net.ihe.gazelle.maestro.technical.dto.report.ItemDTO;
 import net.ihe.gazelle.maestro.technical.dto.report.SystemUnderTestDTO;
 import net.ihe.gazelle.maestro.technical.dto.report.TestReportDTO;
 import net.ihe.gazelle.maestro.technical.dto.report.UnexpectedErrorDTO;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
-import net.ihe.gazelle.testreport.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -60,6 +61,9 @@ class TestReportDTOTest {
                         new UnexpectedError()
                                 .setName("name")
                                 .setMessage("message")
+                                .setCause(new UnexpectedError()
+                                        .setName("name")
+                                        .setMessage("message"))
                 )
         );
         UnexpectedError error =  SER_DES.deserialize(json, UnexpectedError.class);
@@ -68,6 +72,8 @@ class TestReportDTOTest {
 
     private TestRunReportBuilder createTestRunBuilder() {
         return new TestRunReportBuilder()
+                .setRunId("testRunId")
+                .setUrlToTestRun("url")
                 .setDateTime(new Date())
                 .setTest(new TestBuilder()
                         .setId("testId")
@@ -81,7 +87,17 @@ class TestReportDTOTest {
                 .addStepRunReport(new StepRunReportBuilder()
                         .setStepId("stepId")
                         .setType("validation")
-                        .setResult(StepResult.PASSED));
+                        .setResult(StepResult.PASSED))
+                .setInputs(List.of(
+                        new ItemBuilder()
+                                .setName("item")
+                                .setReference("reference")
+                ))
+                .setUnexpectedErrors(List.of(
+                        new UnexpectedErrorBuilder()
+                                .setName("unexpectedError")
+                                .setMessage("message")
+                ));
     }
 
     private TestServiceBuilder createTestServiceBuilder() {

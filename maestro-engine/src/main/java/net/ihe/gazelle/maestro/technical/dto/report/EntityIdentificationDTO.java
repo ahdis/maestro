@@ -1,7 +1,7 @@
 package net.ihe.gazelle.maestro.technical.dto.report;
 
 import com.fasterxml.jackson.annotation.*;
-import net.ihe.gazelle.testreport.EntityIdentification;
+import net.ihe.gazelle.maestro.api.business.testreport.EntityIdentification;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({"version", "name"})

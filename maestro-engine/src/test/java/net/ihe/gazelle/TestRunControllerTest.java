@@ -1,20 +1,16 @@
 package net.ihe.gazelle;
 
+import net.ihe.gazelle.maestro.api.business.testrun.*;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
 import net.ihe.gazelle.maestro.business.engine.MaestroImpl;
-import net.ihe.gazelle.maestro.PropertyRef;
 import net.ihe.gazelle.maestro.business.step.validation.ValidationHandler;
 import net.ihe.gazelle.maestro.business.step.validation.ValidationStep;
-import net.ihe.gazelle.maestro.Maestro;
-import net.ihe.gazelle.maestro.technical.handler.HandlerProvider;
-import net.ihe.gazelle.maestro.runner.Handler;
 import net.ihe.gazelle.maestro.technical.SessionStoreContextImpl;
+import net.ihe.gazelle.maestro.technical.handler.HandlerProvider;
 import net.ihe.gazelle.maestro.technical.jobs.MicroprofileMaestroProducer;
 import net.ihe.gazelle.maestro.technical.jobs.StepMockEmitter;
 import net.ihe.gazelle.maestro.technical.jobs.TestRunMockEmitter;
 import net.ihe.gazelle.maestro.technical.ws.MissingArgumentException;
-import net.ihe.gazelle.maestro.Property;
-import net.ihe.gazelle.maestro.Test;
-import net.ihe.gazelle.maestro.TestRun;
 import net.ihe.gazelle.validation.v2.api.business.profile.ValidationProfile;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
 import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
@@ -34,7 +30,7 @@ class TestRunControllerTest {
                         "iti78-request-validation",
                         new Property<>(ValidationStep.VALIDATION_SERVICE, "matchbox"),
                         new Property<>(ValidationStep.VALIDATION_PROFILE, "Parameters"),
-                        new PropertyRef<>(ValidationStep.CONTENT_TO_VALIDATE, "iti78-request")));
+                        new PropertyRef<>(ValidationStep.CONTENT_TO_VALIDATE, "iti78-request", byte[].class)));
 
         testRun.setTest(test);
 

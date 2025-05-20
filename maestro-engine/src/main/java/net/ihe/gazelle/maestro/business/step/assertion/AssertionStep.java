@@ -1,7 +1,7 @@
 package net.ihe.gazelle.maestro.business.step.assertion;
 
-import net.ihe.gazelle.maestro.Property;
-import net.ihe.gazelle.maestro.Step;
+import net.ihe.gazelle.maestro.api.business.testrun.Property;
+import net.ihe.gazelle.maestro.api.business.testrun.Step;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,9 +17,13 @@ public class AssertionStep implements Step {
 
     public static final String TYPE = "ASSERTION";
 
-    private final String name;
+    private String name;
     private Property<byte[]> currentAssertion;
     private Property<String> assertionService;
+
+    public AssertionStep() {
+        // Empty for serialization
+    }
 
     public AssertionStep(String name,
                          Property<byte[]> currentAssertion,
@@ -35,6 +39,11 @@ public class AssertionStep implements Step {
     }
 
     @Override
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
     public List<Property<?>> getProperties() {
         List<Property<?>> props = new ArrayList<>();
         props.add(currentAssertion);
@@ -43,7 +52,8 @@ public class AssertionStep implements Step {
     }
 
     @Override
-    public void setProperty(List<Property<?>> properties) {
+    @SuppressWarnings("unchecked")
+    public void setProperties(List<Property<?>> properties) {
         if (properties == null) {
             throw new IllegalArgumentException("property shouldn't be null");
         }

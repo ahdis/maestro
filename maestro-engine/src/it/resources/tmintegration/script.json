@@ -11,7 +11,7 @@
           "properties": [
             {
               "key": "validationService",
-              "value": "http-validator"
+              "value": "matchbox"
             },
             {
               "key": "validationProfile",

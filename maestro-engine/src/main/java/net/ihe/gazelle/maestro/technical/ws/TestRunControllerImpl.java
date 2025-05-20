@@ -1,15 +1,14 @@
 package net.ihe.gazelle.maestro.technical.ws;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
-import net.ihe.gazelle.maestro.InvalidTestRunException;
-import net.ihe.gazelle.maestro.TestRun;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+import net.ihe.gazelle.maestro.api.business.testrun.InvalidTestRunException;
 import net.ihe.gazelle.maestro.technical.NotProvidedStep;
+import net.ihe.gazelle.maestro.technical.dto.testrun.TestRunDTO;
 import net.ihe.gazelle.maestro.technical.jobs.SynchronousMaestro;
-import net.ihe.gazelle.testreport.TestReport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,10 +27,13 @@ public class TestRunControllerImpl implements TestRunController {
     }
 
     @Override
-    public Response run(JsonNode testRun) {
+    public Response run(List<TestRunDTO> testRuns) {
         try {
-            List<TestRun> testRuns = new TestRunParser().convertJsonToTestRuns(testRun);
-            TestReport testReport = maestro.executeTestSet(testRuns);
+            TestReport testReport = maestro.executeTestSet(
+                    testRuns.stream()
+                            .map(TestRunDTO::getDomain)
+                            .toList()
+            );
             return Response.ok(testReport).build();
         } catch (WebApplicationException e) {
             return Response.status(Response.Status.GATEWAY_TIMEOUT.getStatusCode()).entity(SynchronousMaestro.TIMEOUT_MESSAGE).build();
@@ -43,7 +45,7 @@ public class TestRunControllerImpl implements TestRunController {
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity("the request contains a testRun with bad format" + e).build();
         } catch (NotProvidedStep e) {
             LOG.debug(e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity("Your script contains a non provided testreport" + e).build();
+            return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity("Your script contains a non provided test report" + e).build();
         } catch (Exception e) {
             LOG.error("Unknown error", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).entity("an error occurred during execution: " + e).build();

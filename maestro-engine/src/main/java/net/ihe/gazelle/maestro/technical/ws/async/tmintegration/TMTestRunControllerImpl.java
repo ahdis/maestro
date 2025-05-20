@@ -5,7 +5,7 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
-import net.ihe.gazelle.maestro.InvalidTestRunException;
+import net.ihe.gazelle.maestro.api.business.testrun.InvalidTestRunException;
 import net.ihe.gazelle.maestro.technical.NotProvidedStep;
 import net.ihe.gazelle.maestro.technical.jobs.SynchronousMaestro;
 import net.ihe.gazelle.maestro.technical.ws.MissingArgumentException;

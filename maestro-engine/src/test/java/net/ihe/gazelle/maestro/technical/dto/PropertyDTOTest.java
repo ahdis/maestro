@@ -1,6 +1,7 @@
 package net.ihe.gazelle.maestro.technical.dto;
 
-import net.ihe.gazelle.maestro.Property;
+import net.ihe.gazelle.maestro.api.business.testrun.Property;
+import net.ihe.gazelle.maestro.technical.ws.async.tmintegration.PropertyDTO;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.jupiter.api.Test;
 

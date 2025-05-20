@@ -2,18 +2,18 @@ package net.ihe.gazelle.maestro.technical.jobs;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
-import net.ihe.gazelle.maestro.TestRun;
-import net.ihe.gazelle.maestro.TestSetRun;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+import net.ihe.gazelle.maestro.api.business.testreport.TestRunReportBuilder;
+import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
+import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.StartStepCommand;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.StepMessage;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 import net.ihe.gazelle.maestro.business.engine.MaestroProducer;
-import net.ihe.gazelle.maestro.runner.StartStepCommand;
-import net.ihe.gazelle.maestro.runner.StepMessage;
-import net.ihe.gazelle.maestro.runner.StepRun;
 import net.ihe.gazelle.maestro.technical.jobs.testrunevents.ErrorTestRunEvent;
 import net.ihe.gazelle.maestro.technical.jobs.testrunevents.FinishTestRunEvent;
 import net.ihe.gazelle.maestro.technical.jobs.testrunevents.FinishTestSetEvent;
 import net.ihe.gazelle.maestro.technical.jobs.testrunevents.TestRunEvent;
-import net.ihe.gazelle.testreport.TestReport;
-import net.ihe.gazelle.testreport.TestRunReportBuilder;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 

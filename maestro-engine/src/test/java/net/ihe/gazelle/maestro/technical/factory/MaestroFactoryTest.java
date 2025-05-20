@@ -1,6 +1,6 @@
 package net.ihe.gazelle.maestro.technical.factory;
 
-import net.ihe.gazelle.maestro.Maestro;
+import net.ihe.gazelle.maestro.api.business.testrun.Maestro;
 import net.ihe.gazelle.maestro.business.engine.MaestroImpl;
 import net.ihe.gazelle.maestro.technical.SessionStoreContextImpl;
 import net.ihe.gazelle.maestro.technical.StepRunnerProviderSPI;
@@ -13,7 +13,8 @@ import net.ihe.gazelle.maestro.technical.jobs.TestRunMockEmitter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class MaestroFactoryTest {
 

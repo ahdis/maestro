@@ -9,9 +9,10 @@ import io.quarkus.test.junit.QuarkusTestProfile;
 import io.quarkus.test.junit.TestProfile;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
+import net.ihe.gazelle.maestro.api.business.testreport.Result;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.technical.dto.report.TestReportDTO;
-import net.ihe.gazelle.testreport.Result;
-import net.ihe.gazelle.testreport.TestReport;
+import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,6 @@ import java.util.function.Function;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static io.restassured.RestAssured.given;
-
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -50,8 +50,8 @@ class TMTestRunControllerIT implements QuarkusTestProfile {
 
     @Test
     void runPASSEDTestFromTM() throws IOException {
-        wireMockServer.stubFor(get(urlPathMatching("/http-validator/rest/metadata")).willReturn(ok().withBody("[]")));
-        wireMockServer.stubFor(post(urlPathMatching("/http-validator/rest/validation/validate")).willReturn(ok().withBody(readJsonString("src/it/resources/tmintegration/passed_response.json"))));
+        wireMockServer.stubFor(get(urlPathMatching("/matchboxv3/gazelle/validation/profiles")).willReturn(ok().withBody("[]")));
+        wireMockServer.stubFor(post(urlPathMatching("/matchboxv3/gazelle/validation/validate")).willReturn(ok().withBody(readJsonString("src/it/resources/tmintegration/passed_response.json"))));
         wireMockServer.stubFor(post(urlPathMatching("/mock/gazelle/rest")).willReturn(ok()));
 
         JsonNode tmRequestBody = assertDoesNotThrow(() -> readJsonScript("tmintegration/script.json"));
@@ -62,21 +62,21 @@ class TMTestRunControllerIT implements QuarkusTestProfile {
                 .then().statusCode(200)
                 .extract().response();
 
-        byte[] content = await()
+        String content = await()
                 .atMost(60, TimeUnit.SECONDS)
                 .until(() -> {
                     List<LoggedRequest> matchingRequests = getMatchingRequests().apply(wireMockServer);
                     return !matchingRequests.isEmpty() ? matchingRequests : null;
-                }, Objects::nonNull).getFirst().getBody();
-        TestReport testReport = new ObjectMapper().readValue(content, TestReportDTO.class).getDomain();
+                }, Objects::nonNull).getFirst().getPart("json report").getBody().asString();
+        TestReport testReport = new JacksonSerDes().deserialize(content, TestReportDTO.class).getDomain();
         assertTrue(testReport.isValid());
         assertEquals(Result.PASSED, testReport.getResult());
     }
 
     @Test
     void runFAILEDTestFromTM() throws IOException {
-        wireMockServer.stubFor(get(urlPathMatching("/http-validator/rest/metadata")).willReturn(ok().withBody("[]")));
-        wireMockServer.stubFor(post(urlPathMatching("/http-validator/rest/validation/validate")).willReturn(ok().withBody(readJsonString("src/it/resources/tmintegration/failed_response.json"))));
+        wireMockServer.stubFor(get(urlPathMatching("/matchboxv3/gazelle/validation/profiles")).willReturn(ok().withBody("[]")));
+        wireMockServer.stubFor(post(urlPathMatching("/matchboxv3/gazelle/validation/validate")).willReturn(ok().withBody(readJsonString("src/it/resources/tmintegration/failed_response.json"))));
         wireMockServer.stubFor(post(urlPathMatching("/mock/gazelle/rest")).willReturn(ok()));
 
         JsonNode tmRequestBody = assertDoesNotThrow(() -> readJsonScript("tmintegration/script.json"));
@@ -87,13 +87,13 @@ class TMTestRunControllerIT implements QuarkusTestProfile {
                 .then().statusCode(200)
                 .extract().response();
 
-        byte[] content = await()
+        String content = await()
                 .atMost(60, TimeUnit.SECONDS)
                 .until(() -> {
                     List<LoggedRequest> matchingRequests = getMatchingRequests().apply(wireMockServer);
                     return !matchingRequests.isEmpty() ? matchingRequests : null;
-                }, Objects::nonNull).getFirst().getBody();
-        TestReport testReport = new ObjectMapper().readValue(content, TestReportDTO.class).getDomain();
+                }, Objects::nonNull).getFirst().getPart("json report").getBody().asString();
+        TestReport testReport = new JacksonSerDes().deserialize(content, TestReportDTO.class).getDomain();
         assertTrue(testReport.isValid());
         assertEquals(Result.FAILED, testReport.getResult());
     }

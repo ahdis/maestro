@@ -1,17 +1,15 @@
 package net.ihe.gazelle.maestro.technical.ws.async;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
-import net.ihe.gazelle.maestro.InvalidTestRunException;
-import net.ihe.gazelle.maestro.TestRun;
+import net.ihe.gazelle.maestro.api.business.testrun.InvalidTestRunException;
 import net.ihe.gazelle.maestro.technical.NotProvidedStep;
+import net.ihe.gazelle.maestro.technical.dto.testrun.TestRunDTO;
 import net.ihe.gazelle.maestro.technical.jobs.SynchronousMaestro;
 import net.ihe.gazelle.maestro.technical.ws.MissingArgumentException;
 import net.ihe.gazelle.maestro.technical.ws.ParsingErrorException;
-import net.ihe.gazelle.maestro.technical.ws.TestRunParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,10 +28,13 @@ public class AsyncTestRunControllerImpl implements AsyncTestRunController {
     }
 
     @Override
-    public Response run(JsonNode testRun) {
+    public Response run(List<TestRunDTO> testRuns) {
         try {
-            List<TestRun> testRuns = new TestRunParser().convertJsonToTestRuns(testRun);
-            asynchronousMaestro.startTestSet(testRuns);
+            asynchronousMaestro.executeTestSet(
+                    testRuns.stream()
+                            .map(TestRunDTO::getDomain)
+                            .toList()
+            );
             return Response.ok().build();
         } catch (WebApplicationException e) {
             return Response.status(Response.Status.GATEWAY_TIMEOUT.getStatusCode()).entity(SynchronousMaestro.TIMEOUT_MESSAGE).build();

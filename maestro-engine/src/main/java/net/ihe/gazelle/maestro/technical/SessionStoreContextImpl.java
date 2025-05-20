@@ -1,10 +1,10 @@
 package net.ihe.gazelle.maestro.technical;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
+import net.ihe.gazelle.maestro.api.business.testrun.context.TestRunSessionStore;
+import net.ihe.gazelle.maestro.api.business.testrun.context.TestSetSessionStore;
 import net.ihe.gazelle.maestro.business.engine.SessionStoreContext;
-import net.ihe.gazelle.maestro.context.TestRunSessionStore;
-import net.ihe.gazelle.maestro.context.TestSetSessionStore;
-import net.ihe.gazelle.maestro.TestSetRun;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

@@ -1,8 +1,8 @@
 package net.ihe.gazelle.maestro.business.engine;
 
-import net.ihe.gazelle.maestro.Property;
-import net.ihe.gazelle.maestro.PropertyRef;
-import net.ihe.gazelle.maestro.context.Context;
+import net.ihe.gazelle.maestro.api.business.testrun.Property;
+import net.ihe.gazelle.maestro.api.business.testrun.PropertyRef;
+import net.ihe.gazelle.maestro.api.business.testrun.context.Context;
 
 import java.util.NoSuchElementException;
 
@@ -17,8 +17,8 @@ public class ResolvablePropertyRef<T> extends PropertyRef<T> {
 
     private final Context context;
 
-    public ResolvablePropertyRef(PropertyRef<?> propertyRef, Context context) {
-        super(propertyRef.getName(), propertyRef.reference);
+    public ResolvablePropertyRef(PropertyRef<T> propertyRef, Context context) {
+        super(propertyRef.getName(), propertyRef.getReference(), propertyRef.getType());
         this.context = context;
     }
 

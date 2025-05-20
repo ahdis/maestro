@@ -1,6 +1,6 @@
 package net.ihe.gazelle.maestro.business.engine;
 
-import net.ihe.gazelle.maestro.runner.Handler;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
 import net.ihe.gazelle.maestro.technical.handler.HandlerProvider;
 
 public class HandlerProviderMock implements HandlerProvider {

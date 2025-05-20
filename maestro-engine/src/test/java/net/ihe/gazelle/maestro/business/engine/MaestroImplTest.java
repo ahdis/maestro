@@ -1,21 +1,21 @@
 package net.ihe.gazelle.maestro.business.engine;
 
 import net.ihe.gazelle.lang.UnexpectedError;
-import net.ihe.gazelle.maestro.Property;
-import net.ihe.gazelle.maestro.PropertyRef;
-import net.ihe.gazelle.maestro.Step;
-import net.ihe.gazelle.maestro.TestRun;
+import net.ihe.gazelle.maestro.api.business.testreport.Result;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
+import net.ihe.gazelle.maestro.api.business.testrun.Property;
+import net.ihe.gazelle.maestro.api.business.testrun.PropertyRef;
+import net.ihe.gazelle.maestro.api.business.testrun.Step;
+import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.business.step.assertion.AssertionStep;
 import net.ihe.gazelle.maestro.business.step.validation.ValidationStep;
 import net.ihe.gazelle.maestro.technical.SessionStoreContextImpl;
 import net.ihe.gazelle.maestro.technical.StepRunnerProviderSPI;
-import net.ihe.gazelle.maestro.technical.jobs.*;
 import net.ihe.gazelle.maestro.technical.client.TestReportClient;
+import net.ihe.gazelle.maestro.technical.jobs.*;
 import net.ihe.gazelle.maestro.technical.ws.async.AsynchronousMaestro;
 import net.ihe.gazelle.maestro.technical.ws.async.tmintegration.TMTestRunMaestro;
-import net.ihe.gazelle.testreport.Result;
-import net.ihe.gazelle.testreport.TestReport;
-import net.ihe.gazelle.testreport.TestRunReport;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -118,7 +118,7 @@ class MaestroImplTest {
         List<UnexpectedError> unexpectedErrors = testRunReport.getUnexpectedErrors();
         assertEquals(1, unexpectedErrors.size());
         assertEquals("Several steps has the same name : test-validation should be unique", unexpectedErrors.getFirst().getMessage());
-        net.ihe.gazelle.testreport.Test test = testRunReport.getTest();
+        net.ihe.gazelle.maestro.api.business.testreport.Test test = testRunReport.getTest();
         assertEquals("validationTest", test.getName());
         assertFalse(test.getId().isBlank());
     }
@@ -140,7 +140,7 @@ class MaestroImplTest {
                 new Property<>(ValidationStep.VALIDATION_PROFILE, "Parameters"),
                 new Property<>(ValidationStep.CONTENT_TO_VALIDATE, "liyvfgljv".getBytes())
         );
-        net.ihe.gazelle.maestro.Test test = new net.ihe.gazelle.maestro.Test().addStep(validationStep);
+        net.ihe.gazelle.maestro.api.business.testrun.Test test = new net.ihe.gazelle.maestro.api.business.testrun.Test().addStep(validationStep);
         test.setName("validationTest");
         test.setId(UUID.randomUUID().toString());
         TestRun testRun = new TestRun();
@@ -151,10 +151,10 @@ class MaestroImplTest {
 
     private static List<TestRun> getTestRunsWithValidationStepAndAssertionStepWithReference() {
         Step assertionStep = new AssertionStep("test-assertion",
-                new PropertyRef<>(AssertionStep.ASSERTION, "assertion"),
+                new PropertyRef<>(AssertionStep.ASSERTION, "assertion", byte[].class),
                 new Property<>(AssertionStep.ASSERTION_SERVICE, "toto")
         );
-        net.ihe.gazelle.maestro.Test test = new net.ihe.gazelle.maestro.Test().addStep(assertionStep);
+        net.ihe.gazelle.maestro.api.business.testrun.Test test = new net.ihe.gazelle.maestro.api.business.testrun.Test().addStep(assertionStep);
         test.setName("assertionTest");
         test.setId(UUID.randomUUID().toString());
         TestRun testRun = new TestRun();

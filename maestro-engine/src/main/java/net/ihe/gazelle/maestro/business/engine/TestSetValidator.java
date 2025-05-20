@@ -1,7 +1,7 @@
 package net.ihe.gazelle.maestro.business.engine;
 
-import net.ihe.gazelle.maestro.TestRun;
-import net.ihe.gazelle.maestro.TestSetRun;
+import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
+import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
 
 import java.util.List;
 
