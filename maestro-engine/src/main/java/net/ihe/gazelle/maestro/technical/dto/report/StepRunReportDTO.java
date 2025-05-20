@@ -1,8 +1,8 @@
 package net.ihe.gazelle.maestro.technical.dto.report;
 
 import com.fasterxml.jackson.annotation.*;
-import net.ihe.gazelle.testreport.StepResult;
-import net.ihe.gazelle.testreport.StepRunReport;
+import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 
 import java.util.List;
 

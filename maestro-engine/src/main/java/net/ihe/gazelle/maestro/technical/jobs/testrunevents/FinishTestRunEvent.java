@@ -1,7 +1,7 @@
 package net.ihe.gazelle.maestro.technical.jobs.testrunevents;
 
-import net.ihe.gazelle.testreport.TestRunReportBuilder;
-import net.ihe.gazelle.maestro.TestRun;
+import net.ihe.gazelle.maestro.api.business.testreport.TestRunReportBuilder;
+import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 
 /**
  * A Message to notify that a TestRun execution ended and to send a TestRunReportBuilder

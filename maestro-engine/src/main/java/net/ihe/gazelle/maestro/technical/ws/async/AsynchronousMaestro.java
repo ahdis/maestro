@@ -2,8 +2,8 @@ package net.ihe.gazelle.maestro.technical.ws.async;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import net.ihe.gazelle.maestro.TestRun;
-import net.ihe.gazelle.maestro.TestSetRun;
+import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
+import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
 import net.ihe.gazelle.maestro.technical.client.TestReportClient;
 import net.ihe.gazelle.maestro.technical.jobs.testrunevents.FinishTestSetEvent;
 import net.ihe.gazelle.maestro.technical.jobs.testrunevents.StartTestSetCommand;
@@ -30,7 +30,7 @@ public class AsynchronousMaestro {
         this.client = client;
     }
 
-    public void startTestSet(List<TestRun> testRuns) {
+    public void executeTestSet(List<TestRun> testRuns) {
         TestRunStore store = new TestRunStore();
         TestSetRun testSetRun = new TestSetRun(UUID.randomUUID().toString(), testRuns);
         runningServices.put(testSetRun.testSetId(), store);

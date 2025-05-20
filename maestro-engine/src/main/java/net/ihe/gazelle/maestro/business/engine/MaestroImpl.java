@@ -1,13 +1,13 @@
 package net.ihe.gazelle.maestro.business.engine;
 
 import net.ihe.gazelle.lang.UnexpectedError;
-import net.ihe.gazelle.maestro.Test;
-import net.ihe.gazelle.maestro.*;
-import net.ihe.gazelle.maestro.context.Context;
-import net.ihe.gazelle.maestro.context.TestRunSessionStore;
-import net.ihe.gazelle.maestro.context.TestSetSessionStore;
-import net.ihe.gazelle.maestro.runner.StepRun;
-import net.ihe.gazelle.testreport.*;
+import net.ihe.gazelle.maestro.api.business.testreport.Test;
+import net.ihe.gazelle.maestro.api.business.testreport.*;
+import net.ihe.gazelle.maestro.api.business.testrun.*;
+import net.ihe.gazelle.maestro.api.business.testrun.context.Context;
+import net.ihe.gazelle.maestro.api.business.testrun.context.TestRunSessionStore;
+import net.ihe.gazelle.maestro.api.business.testrun.context.TestSetSessionStore;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -41,7 +41,7 @@ public class MaestroImpl implements Maestro {
             isValid = false;
         }
         if (isValid) {
-            Test test = testRun.getTest();
+            net.ihe.gazelle.maestro.api.business.testrun.Test test = testRun.getTest();
             List<Property<?>> properties = testRun.getInputs();
             // create context
             Context context = extractInputs(properties);
@@ -226,7 +226,7 @@ public class MaestroImpl implements Maestro {
      * @throws InvalidTestRunException if step isn't contains in test step list or if it's the last element of the list
      */
     private void runNextStep(StepRun stepRun) {
-        Test test = getTestRunFromStore(stepRun.testRunId()).getTest();
+        net.ihe.gazelle.maestro.api.business.testrun.Test test = getTestRunFromStore(stepRun.testRunId()).getTest();
         Step previousStep = stepRun.step();
         List<Step> steps = test.getSteps();
         boolean found = false;
@@ -249,7 +249,7 @@ public class MaestroImpl implements Maestro {
      */
     private void runStep(StepRun stepRun) {
         String testRunId = stepRun.testRunId();
-        stepRun.step().setProperty(proxifyProperty(stepRun.step().getProperties(), getContextFromStore(testRunId)));
+        stepRun.step().setProperties(proxifyProperty(stepRun.step().getProperties(), getContextFromStore(testRunId)));
         maestroProducer.executeStep(stepRun);
     }
 
@@ -293,13 +293,13 @@ public class MaestroImpl implements Maestro {
     private void sendUndefinedTestReport(TestRun testRun, Exception e) {
         String id = "";
         String name = "";
-        Test testRunTest = testRun.getTest();
+        net.ihe.gazelle.maestro.api.business.testrun.Test testRunTest = testRun.getTest();
         if (testRunTest != null) {
             id = testRunTest.getId();
             name = testRunTest.getName();
         }
 
-        net.ihe.gazelle.testreport.Test test = new net.ihe.gazelle.testreport.Test()
+        Test test = new Test()
                 .setId(id)
                 .setName(name);
         TestRunReport testRunReport = new TestRunReport();

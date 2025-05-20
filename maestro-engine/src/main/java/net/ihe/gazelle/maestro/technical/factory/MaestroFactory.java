@@ -4,7 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Produces;
-import net.ihe.gazelle.maestro.Maestro;
+import net.ihe.gazelle.maestro.api.business.testrun.Maestro;
 import net.ihe.gazelle.maestro.business.engine.MaestroImpl;
 import net.ihe.gazelle.maestro.business.engine.MaestroProducer;
 import net.ihe.gazelle.maestro.technical.ServiceRegistry;

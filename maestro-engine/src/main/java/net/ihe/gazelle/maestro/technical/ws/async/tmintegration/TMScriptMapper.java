@@ -2,13 +2,11 @@ package net.ihe.gazelle.maestro.technical.ws.async.tmintegration;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import net.ihe.gazelle.maestro.Property;
-import net.ihe.gazelle.maestro.Step;
-import net.ihe.gazelle.maestro.Test;
-import net.ihe.gazelle.maestro.TestRun;
+import net.ihe.gazelle.maestro.api.business.testrun.Property;
+import net.ihe.gazelle.maestro.api.business.testrun.Step;
+import net.ihe.gazelle.maestro.api.business.testrun.Test;
+import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.technical.StepFactoryProvider;
-import net.ihe.gazelle.maestro.technical.dto.PropertyDTO;
-import net.ihe.gazelle.maestro.technical.dto.ReferenceParser;
 import net.ihe.gazelle.maestro.technical.ws.MissingArgumentException;
 import net.ihe.gazelle.maestro.technical.ws.async.TestRunStore;
 

@@ -7,9 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class AssertionStepTest {
 
     @Test
-    void setPropertyEmptyField(){
+    void setPropertiesEmptyField(){
         AssertionStep step = new AssertionStep("test", null, null);
-        assertThrows(IllegalArgumentException.class, () -> step.setProperty(null));
+        assertThrows(IllegalArgumentException.class, () -> step.setProperties(null));
     }
 
 }

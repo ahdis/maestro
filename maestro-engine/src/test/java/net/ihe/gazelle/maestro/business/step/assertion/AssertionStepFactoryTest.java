@@ -1,7 +1,7 @@
 package net.ihe.gazelle.maestro.business.step.assertion;
 
-import net.ihe.gazelle.maestro.Property;
-import net.ihe.gazelle.maestro.Step;
+import net.ihe.gazelle.maestro.api.business.testrun.Property;
+import net.ihe.gazelle.maestro.api.business.testrun.Step;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

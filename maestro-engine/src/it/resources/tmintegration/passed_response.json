@@ -50,13 +50,13 @@
       "assertionReports": [
         {
           "assertionID": null,
-          "assertionType": "Failed",
+          "assertionType": "pattern",
           "description": "cvc-elt.1.a : Déclaration de l'élément 'AAA' introuvable.",
           "subjectLocation": "line 1, column 6",
           "subjectValue": "cvc-elt.1.a : Déclaration de l'élément 'AAA' introuvable.",
           "requirementIDs": null,
-          "severity": "ERROR",
-          "priority": "MANDATORY",
+          "severity": "INFO",
+          "priority": "RECOMMENDED",
           "result": "PASSED",
           "unexpectedErrors": null
         }
@@ -64,7 +64,7 @@
       "subCounters": {
         "numberOfFailedWithInfos": 0,
         "numberOfFailedWithWarnings": 0,
-        "numberOfFailedWithErrors": 1,
+        "numberOfFailedWithErrors": 0,
         "numberOfUnexpectedErrors": 0,
         "numberOfAssertions": 1
       },
@@ -153,7 +153,7 @@
       ],
       "subCounters": {
         "numberOfFailedWithInfos": 0,
-        "numberOfFailedWithWarnings": 1,
+        "numberOfFailedWithWarnings": 0,
         "numberOfFailedWithErrors": 0,
         "numberOfUnexpectedErrors": 0,
         "numberOfAssertions": 6
@@ -163,8 +163,8 @@
   ],
   "counters": {
     "numberOfFailedWithInfos": 0,
-    "numberOfFailedWithWarnings": 1,
-    "numberOfFailedWithErrors": 1,
+    "numberOfFailedWithWarnings": 0,
+    "numberOfFailedWithErrors": 0,
     "numberOfUnexpectedErrors": 0,
     "numberOfAssertions": 8
   },

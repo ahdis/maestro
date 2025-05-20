@@ -15,7 +15,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <skipTests>false</skipTests>
-        <skipITs>true</skipITs>
+        <skipITs>false</skipITs>
     </properties>
 
     <build>
@@ -122,13 +122,20 @@
     </profiles>
 
     <dependencies>
+        <!-- Sub modules dependencies -->
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>maestro-api</artifactId>
         </dependency>
+
+        <!-- Gazelle dependencies -->
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>service-metadata-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>service-metadata-jaxrs-api</artifactId>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
@@ -145,10 +152,6 @@
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>validation-v2-rest-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.ihe.gazelle</groupId>
-            <artifactId>service-metadata-jaxrs-api</artifactId>
         </dependency>
 
         <!-- Quarkus -->

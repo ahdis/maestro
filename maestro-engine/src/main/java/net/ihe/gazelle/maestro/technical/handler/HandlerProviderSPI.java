@@ -1,10 +1,9 @@
 package net.ihe.gazelle.maestro.technical.handler;
 
-import net.ihe.gazelle.maestro.runner.Handler;
-import net.ihe.gazelle.maestro.runner.HandlerFactory;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.HandlerFactory;
 import net.ihe.gazelle.maestro.technical.ServiceRegistry;
 
-import java.util.Iterator;
 import java.util.ServiceLoader;
 
 public class HandlerProviderSPI implements HandlerProvider {

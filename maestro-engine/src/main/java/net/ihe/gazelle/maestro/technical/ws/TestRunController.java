@@ -1,12 +1,14 @@
 package net.ihe.gazelle.maestro.technical.ws;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import net.ihe.gazelle.maestro.technical.dto.testrun.TestRunDTO;
+
+import java.util.List;
 
 @Path("/testRuns")
 public interface TestRunController {
@@ -22,12 +24,12 @@ public interface TestRunController {
      *     - <b>Unknown Error occurred</b> : 500 + Exception
      *     - <b>Timeout exception</b> : 504 + message explaining why timeout occurred
      * </p>
-     * @param node A JsonNode containing a list of TestRun
+     * @param testRuns A list of TestRun
      * @return A response with a status code and a body containing TestReport or an exception
      */
     @POST
     @Path("/run")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    Response run(JsonNode node);
+    Response run(List<TestRunDTO> testRuns);
 }

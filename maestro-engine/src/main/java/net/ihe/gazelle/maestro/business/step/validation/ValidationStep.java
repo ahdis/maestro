@@ -1,7 +1,7 @@
 package net.ihe.gazelle.maestro.business.step.validation;
 
-import net.ihe.gazelle.maestro.Property;
-import net.ihe.gazelle.maestro.Step;
+import net.ihe.gazelle.maestro.api.business.testrun.Property;
+import net.ihe.gazelle.maestro.api.business.testrun.Step;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +51,7 @@ public class ValidationStep implements Step {
         return name;
     }
 
+    @Override
     public void setName(String name) {
         this.name = name;
     }
@@ -78,7 +79,7 @@ public class ValidationStep implements Step {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void setProperty(List<Property<?>> properties) {
+    public void setProperties(List<Property<?>> properties) {
         if (properties == null) {
             throw new IllegalArgumentException("property shouldn't be null");
         }

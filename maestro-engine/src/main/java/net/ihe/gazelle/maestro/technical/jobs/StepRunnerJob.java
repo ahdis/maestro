@@ -3,10 +3,10 @@ package net.ihe.gazelle.maestro.technical.jobs;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
-import net.ihe.gazelle.maestro.runner.*;
-import net.ihe.gazelle.testreport.StepResult;
-import net.ihe.gazelle.testreport.StepRunReportBuilder;
-import net.ihe.gazelle.testreport.UnexpectedErrorBuilder;
+import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
+import net.ihe.gazelle.maestro.api.business.testreport.UnexpectedErrorBuilder;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.*;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 

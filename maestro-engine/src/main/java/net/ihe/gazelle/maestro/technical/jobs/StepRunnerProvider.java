@@ -1,7 +1,7 @@
 package net.ihe.gazelle.maestro.technical.jobs;
 
-import net.ihe.gazelle.maestro.Step;
-import net.ihe.gazelle.maestro.runner.StepRunner;
+import net.ihe.gazelle.maestro.api.business.testrun.Step;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunner;
 
 public interface StepRunnerProvider {
     /**

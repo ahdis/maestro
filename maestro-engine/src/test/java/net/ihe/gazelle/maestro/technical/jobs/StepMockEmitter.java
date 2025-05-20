@@ -1,6 +1,6 @@
 package net.ihe.gazelle.maestro.technical.jobs;
 
-import net.ihe.gazelle.maestro.runner.StepMessage;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.StepMessage;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.eclipse.microprofile.reactive.messaging.Message;
 

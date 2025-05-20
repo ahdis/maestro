@@ -1,7 +1,7 @@
 package net.ihe.gazelle.maestro.business.step.validation;
 
-import net.ihe.gazelle.maestro.runner.Handler;
-import net.ihe.gazelle.maestro.runner.HandlerFactory;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.HandlerFactory;
 import net.ihe.gazelle.servicemetadata.api.business.HttpRestBinding;
 import net.ihe.gazelle.servicemetadata.api.business.Service;
 

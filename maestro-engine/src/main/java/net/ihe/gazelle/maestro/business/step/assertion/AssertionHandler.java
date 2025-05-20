@@ -1,7 +1,7 @@
 package net.ihe.gazelle.maestro.business.step.assertion;
 
-import net.ihe.gazelle.maestro.runner.Handler;
-import net.ihe.gazelle.testreport.StepRunReport;
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
 
 /**
  * Assertion Step is not implemented. It exists just for test purpose

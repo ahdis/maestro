@@ -7,11 +7,11 @@
     "providedInterfaces": [
       {
         "interfaceName": "Validation Service",
-        "interfaceVersion": "2.0.0",
+        "interfaceVersion": "1.0.0",
         "bindings": [
           {
             "@type": "REST",
-            "serviceUrl": "http://localhost:18089/matchboxv3/gazelle/validation"
+            "serviceUrl": "http://localhost:18088/matchboxv3/gazelle"
           }
         ]
       }

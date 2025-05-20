@@ -4,7 +4,8 @@ import net.ihe.gazelle.maestro.technical.configuration.ServiceRegistryDAOImpl;
 import net.ihe.gazelle.maestro.technical.configuration.ServiceRegistryImpl;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ServiceRegistryImplTest {
 

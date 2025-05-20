@@ -1,7 +1,7 @@
 package net.ihe.gazelle.maestro.technical.dto.report;
 
 import com.fasterxml.jackson.annotation.*;
-import net.ihe.gazelle.testreport.TestService;
+import net.ihe.gazelle.maestro.api.business.testreport.TestService;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({"serviceIdentification", "disclaimer"})

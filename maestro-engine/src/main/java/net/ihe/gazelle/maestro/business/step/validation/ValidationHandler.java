@@ -1,6 +1,6 @@
 package net.ihe.gazelle.maestro.business.step.validation;
 
-import net.ihe.gazelle.maestro.runner.Handler;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
 import net.ihe.gazelle.validation.v1.interlay.wrapper.ValidationServiceWrapper;
 import net.ihe.gazelle.validation.v2.api.business.ValidationService;
 import net.ihe.gazelle.validation.v2.api.business.profile.ValidationProfile;
