@@ -57,13 +57,13 @@ public class ValidationStepRunner implements StepRunner {
      */
     private void computeResult(ValidationReport validationReport, StepRunReportBuilder stepRunReportBuilder) {
         ValidationReportValidator validator = new ValidationReportValidator();
-        validator.validate(validationReport).getAllInvalidRules().forEach(
-                ruleResult -> stepRunReportBuilder.addUnexpectedError(
-                        new UnexpectedErrorBuilder()
-                                .setName(ruleResult.getId())
-                                .setMessage(ruleResult.getDescription())
-                )
-        );
+//        validator.validate(validationReport).getAllInvalidRules().forEach(
+//                ruleResult -> stepRunReportBuilder.addUnexpectedError(
+//                        new UnexpectedErrorBuilder()
+//                                .setName(ruleResult.getId())
+//                                .setMessage(ruleResult.getDescription())
+//                )
+//        );
         if (ValidationTestResult.UNDEFINED.equals(validationReport.getOverallResult())) {
             stepRunReportBuilder.setResult(StepResult.UNDEFINED);
         } else if (ValidationTestResult.FAILED.equals(validationReport.getOverallResult())) {

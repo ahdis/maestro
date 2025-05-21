@@ -1,6 +1,6 @@
 package net.ihe.gazelle.maestro.business.step.itb;
 
-import net.ihe.gazelle.maestro.runner.Handler;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
 
 public class ItbHandler implements Handler {
 

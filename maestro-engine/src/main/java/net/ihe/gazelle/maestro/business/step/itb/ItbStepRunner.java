@@ -1,10 +1,10 @@
 package net.ihe.gazelle.maestro.business.step.itb;
 
 import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory;
-import net.ihe.gazelle.maestro.runner.StepRun;
-import net.ihe.gazelle.maestro.runner.StepRunner;
-import net.ihe.gazelle.testreport.StepResult;
-import net.ihe.gazelle.testreport.StepRunReportBuilder;
+import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunner;
 
 public class ItbStepRunner implements StepRunner {
 
