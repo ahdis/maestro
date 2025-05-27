@@ -3,7 +3,6 @@ package net.ihe.gazelle.maestro.business.step.itb.gateway.client;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.enterprise.context.ApplicationScoped;
 import net.ihe.gazelle.maestro.business.step.itb.gateway.model.request.Parameter;
 import net.ihe.gazelle.maestro.business.step.itb.gateway.model.request.TestCase;
 import net.ihe.gazelle.maestro.business.step.itb.gateway.model.request.TestRequest;
@@ -199,12 +198,11 @@ public class ItbHttpClient implements ItbClient {
         // Convert our map with data request in ITB body request
         String body;
         try {
-            body = mapper
-                    .writeValueAsString(map);
+            body = mapper.writeValueAsString(map);
         } catch (JsonProcessingException e) {
             throw new ItbHttpClientException("Error parsing request body : " + e);
         }
-        return sendPOSTRequest(System.getenv("TEST_SERVICE") + "/api/rest/tests/start", "application/json", body);
+        return sendPOSTRequest(baseItbUrl + "/api/rest/tests/start", "application/json", body);
     }
 
     /**

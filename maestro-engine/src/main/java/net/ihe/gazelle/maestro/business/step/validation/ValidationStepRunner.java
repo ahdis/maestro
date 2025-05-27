@@ -6,6 +6,7 @@ import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.UnexpectedErrorBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunner;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.SyncStepRunner;
 import net.ihe.gazelle.maestro.business.step.validation.spi.ValidationReportSerializer;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationTestResult;
@@ -24,7 +25,7 @@ import java.util.List;
  * Assert ValidationReport to extract result and build a ValidationReportBuilder {@link net.ihe.gazelle.validation.v2.api.business.report.ValidationReportBuilder}
  * <br>
  */
-public class ValidationStepRunner implements StepRunner {
+public class ValidationStepRunner extends SyncStepRunner {
 
     private final ValidationReportSerializer serializer;
     private final ValidationHandler validationHandler;

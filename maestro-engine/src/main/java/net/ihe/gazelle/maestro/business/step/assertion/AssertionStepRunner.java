@@ -4,11 +4,12 @@ import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunner;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.SyncStepRunner;
 
 /**
  * Assertion Step is not implemented. It exists just for test purpose
  */
-public class AssertionStepRunner implements StepRunner {
+public class AssertionStepRunner extends SyncStepRunner {
 
     private final AssertionHandler handler;
 

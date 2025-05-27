@@ -1,28 +1,19 @@
 package net.ihe.gazelle.maestro.business.step.itb;
 
-import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory;
-import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
-import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.AsyncStepRunner;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunner;
 
-public class ItbStepRunner implements StepRunner {
+public class ItbStepRunner extends AsyncStepRunner {
 
-    private final ValidatorBuilderFactory validatorBuilderFactory;
     private final ItbHandler handler;
 
-    public ItbStepRunner(ValidatorBuilderFactory validatorBuilderFactory, ItbHandler itbHandler) {
-        this.validatorBuilderFactory = validatorBuilderFactory;
+    public ItbStepRunner(ItbHandler itbHandler) {
         this.handler = itbHandler;
     }
 
     @Override
-    public StepRunReportBuilder run(StepRun stepRun) {
+    public void runAsync(StepRun stepRun) {
         handler.handle((ItbStep) stepRun.step());
-        return new StepRunReportBuilder(validatorBuilderFactory)
-                .setStepId(stepRun.step().getName())
-                .setType(ItbStep.TYPE)
-                .setResult(StepResult.PASSED);
     }
 
     @Override

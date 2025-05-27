@@ -288,8 +288,8 @@ public class RunItbTestService {
         modifiedRequest.setTestSuite(validateTestSuite(ts));
         modifiedRequest.setTestCases(validateTestCases(tcs));
 
-        modifiedRequest.setCallbackURL(validateURL(request.getCallbackURL()));
-        modifiedRequest.setCallbackAuthorization(request.getCallbackAuthorization());
+//        modifiedRequest.setCallbackURL(validateURL(request.getCallbackURL()));
+//        modifiedRequest.setCallbackAuthorization(request.getCallbackAuthorization());
         return modifiedRequest;
     }
 }
