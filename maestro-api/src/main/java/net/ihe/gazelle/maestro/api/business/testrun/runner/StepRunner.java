@@ -11,6 +11,11 @@ public interface StepRunner {
     StepRunReportBuilder run(StepRun stepRun);
 
     /**
+     * @param stepRun contain step to run
+     */
+    void runAsync(StepRun stepRun);
+
+    /**
      * @return Canonical name of step that stepRunner can manage
      */
     String getSupportedStep();

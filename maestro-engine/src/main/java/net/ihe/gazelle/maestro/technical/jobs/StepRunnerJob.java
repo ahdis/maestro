@@ -37,7 +37,10 @@ public class StepRunnerJob {
         StepRun stepRun = startStepCommand.getStepRun();
         try {
             StepRunner runner = stepRunnerFactory.create(stepRun.step());
-            stepEnded(runner.run(stepRun), stepRun);
+            if (runner instanceof AsyncStepRunner)
+                runner.runAsync(stepRun);
+            if (runner instanceof SyncStepRunner)
+                stepEnded(runner.run(stepRun), stepRun);
         } catch (Exception e) {
             returnUnexpectedError(e, stepRun);
         }

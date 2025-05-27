@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
-import net.ihe.gazelle.maestro.business.step.itb.gateway.client.ItbHttpClient;
 import net.ihe.gazelle.maestro.business.step.itb.gateway.model.report.*;
 import net.ihe.gazelle.maestro.business.step.itb.gateway.service.CatchItbReportService;
 import net.ihe.gazelle.maestro.business.step.itb.gateway.service.CatchItbReportServiceException;
