@@ -15,6 +15,7 @@
     <modules>
         <module>maestro-api</module>
         <module>maestro-engine</module>
+        <module>mlang-converter</module>
     </modules>
 
     <scm>
@@ -82,6 +83,11 @@
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-engine</artifactId>
+                <version>0.2.1-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>net.ihe.gazelle</groupId>
+                <artifactId>mlang-converter</artifactId>
                 <version>0.2.1-SNAPSHOT</version>
             </dependency>
 
