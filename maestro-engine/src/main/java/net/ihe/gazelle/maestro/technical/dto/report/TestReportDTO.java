@@ -109,7 +109,7 @@ public class TestReportDTO {
 
     @JsonGetter(value = "testCounters")
     public TestCountersDTO getTestCounters() {
-        return new TestCountersDTO(domain.getTestCounters());
+        return domain.getTestCounters() != null ? new TestCountersDTO(domain.getTestCounters()) : new TestCountersDTO();
     }
 
     @JsonSetter(value = "testCounters")

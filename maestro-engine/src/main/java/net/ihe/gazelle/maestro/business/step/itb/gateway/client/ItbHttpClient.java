@@ -192,7 +192,7 @@ public class ItbHttpClient implements ItbClient {
     /**
      * Method to send ITB test request through the REST API
      *
-     * @return ITB response
+     * @return Created session ID
      */
     private String sendTestRequest() {
         // Convert our map with data request in ITB body request
@@ -226,11 +226,11 @@ public class ItbHttpClient implements ItbClient {
         try {
             HttpResponse<String> response = client.send(req, HttpResponse.BodyHandlers.ofString());
             String respBody = response.body();
+            JsonNode content = mapper.readTree(respBody);
             if (response.statusCode() == 400) {
-                JsonNode content = mapper.readTree(respBody);
                 throw new ItbHttpClientException("ITB request error : " + content.get("error_description"));
             }
-            return respBody;
+            return content.get("createdSessions").get(0).get("session").asText();
         } catch (InterruptedException | IOException e) {
             throw new ItbHttpClientException("Error request interrupted. Try again.");
         }

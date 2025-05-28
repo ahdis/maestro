@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
+import net.ihe.gazelle.maestro.business.step.itb.gateway.dao.TestExecutionDAOStatic;
 import net.ihe.gazelle.maestro.business.step.itb.gateway.model.report.*;
 import net.ihe.gazelle.maestro.business.step.itb.gateway.service.CatchItbReportService;
 import net.ihe.gazelle.maestro.business.step.itb.gateway.service.CatchItbReportServiceException;
@@ -20,11 +22,13 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.StringReader;
-import java.net.URISyntaxException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Adapter to push test report to TM
@@ -40,8 +44,22 @@ public class ItbTriggerCallbackController {
     private CatchItbReportService catchItbReportService;
 
     @Inject
-    public ItbTriggerCallbackController( CatchItbReportService catchItbReportService) {
+    public ItbTriggerCallbackController(CatchItbReportService catchItbReportService) {
         this.catchItbReportService = catchItbReportService;
+    }
+
+    /**
+     * Method to trigger report generation
+     */
+    @GET
+    @Path("/report")
+    @Consumes({"application/json"})
+    @Produces({"application/json"})
+    public Response triggerReportGeneration2(@QueryParam("sessionID") String sessionID) {
+        StepRun stepRun = catchItbReportService.getStepRun(sessionID);
+        catchItbReportService.pushReport(stepRun);
+        TestExecutionDAOStatic.deleteSession(sessionID);
+        return Response.ok("{\"sessionId\":\"" + sessionID + "\",\"testRunId\":\"" + stepRun.testRunId() + "\"}").build();
     }
 
     /**
@@ -59,32 +77,35 @@ public class ItbTriggerCallbackController {
             JsonNode inputs = mapper.readTree(json).get("inputs");
             JsonNode systemJson = inputs.get(0).get("item");
             JsonNode sessionJson = inputs.get(1).get("item");
-            JsonNode report = inputs.get(2).get("value");
-            String sutName = systemJson.get(2).get("value").asText();
-            String testSuite = sessionJson.get(0).get("value").asText();
             String sessionID = sessionJson.get(2).get("value").asText();
-            String testID = catchItbReportService.getTestID(sessionID);
-            outputs = new ArrayList<>();
-            pdfs.putIfAbsent(testID, new HashMap<>());
-            // modify database with test session report replacing test session identifier
-            TestReport tr = setUpReport(report, json, sutName, testSuite, sessionID);
-            catchItbReportService.setReport(tr, sessionID);
-            Map<String, byte[]> pdf = pdfs.get(testID);
-            pdf.put(sessionID + ".pdf", catchItbReportService.requestPDFReport(sessionID, tr.getOverview().getTestSuiteName()));
-            pdfs.replace(testID, pdf);
-            // when all test session reports have been recovered, merge in one report and push it
-            if (catchItbReportService.isFinished(testID)) {
-                List<TestReport> reports = catchItbReportService.getReportsByID(testID);
-                String[] callbackAndToken = catchItbReportService.getCallbackAndToken(testID);
-                TestReport internalReport = mergeReports(reports, testID, testSuite);
-                ResponseReport rr = new ResponseReport(internalReport.getResult(), internalReport.getDate(), setUpGlobalReport(internalReport));
-                catchItbReportService.pushReport(rr, callbackAndToken, pdfs.get(testID));
-                pdfs.remove(testID);
-            }
-            return Response.status(Response.Status.OK).build();
+            StepRun stepRun = catchItbReportService.getStepRun(sessionID);
+            catchItbReportService.pushReport(stepRun);
+            TestExecutionDAOStatic.deleteSession(sessionID);
+            return Response.ok("{\"sessionId\":\"" + sessionID + "\",\"testRunId\":\"" + stepRun.testRunId() + "\"}").build();
+
+//            JsonNode report = inputs.get(2).get("value");
+//            String sutName = systemJson.get(2).get("value").asText();
+//            String testSuite = sessionJson.get(0).get("value").asText();
+//            outputs = new ArrayList<>();
+//            pdfs.putIfAbsent(testID, new HashMap<>());
+//            // modify database with test session report replacing test session identifier
+//            TestReport tr = setUpReport(report, json, sutName, testSuite, sessionID);
+//            catchItbReportService.setReport(tr, sessionID);
+//            Map<String, byte[]> pdf = pdfs.get(testID);
+//            pdf.put(sessionID + ".pdf", catchItbReportService.requestPDFReport(sessionID, tr.getOverview().getTestSuiteName()));
+//            pdfs.replace(testID, pdf);
+//            // when all test session reports have been recovered, merge in one report and push it
+//            if (catchItbReportService.isFinished(testID)) {
+//                List<TestReport> reports = catchItbReportService.getReportsByID(testID);
+//                String[] callbackAndToken = catchItbReportService.getCallbackAndToken(testID);
+//                TestReport internalReport = mergeReports(reports, testID, testSuite);
+//                ResponseReport rr = new ResponseReport(internalReport.getResult(), internalReport.getDate(), setUpGlobalReport(internalReport));
+//                catchItbReportService.pushReport(rr, callbackAndToken, pdfs.get(testID));
+//                pdfs.remove(testID);
+//            }
         } catch (JsonProcessingException je) {
             return Response.status(Response.Status.BAD_REQUEST).entity("Bad format for json body. Error message : " + je.getMessage()).build();
-        } catch (IOException | ParserConfigurationException | SAXException | URISyntaxException e) {
+        } catch (IOException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity("Bad format for test bed xml report. Error message : " + e.getMessage()).build();
         } catch (CatchItbReportServiceException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity("Bad format for test report. Error message : " + e.getMessage()).build();
@@ -219,54 +240,54 @@ public class ItbTriggerCallbackController {
         return result;
     }
 
-    /**
-     * Method to merge all test session report in one
-     *
-     * @param reports   list of reports
-     * @param testID    TM test identifier
-     * @param testSuite name of the test suite
-     * @return final test report
-     * @throws JsonProcessingException if output conversion goes wrong
-     */
-    private TestReport mergeReports(List<TestReport> reports, String testID, String testSuite) throws JsonProcessingException {
-        // Set up common part
-        TestReport finalReport = new TestReport(testID, reports.getLast().getDate());
-        finalReport.setTestService(reports.getFirst().getTestService());
-        finalReport.setSut(reports.getFirst().getSut());
-        List<Result> completeResults = new ArrayList<>();
-        int passed = 0, failed = 0, undefined = 0, skipped = 0, run, total;
-        int instanceId = 0;
-        // For each test report
-        for (TestReport testReport : reports) {
-            // compute sum of test case steps
-            TestResultRecap trr = testReport.getOverview().getTestResultRecap();
-            passed += trr.getPassed();
-            failed += trr.getFailed();
-            undefined += trr.getUndefined();
-            skipped += trr.getSkipped();
-            // add instance id to every test case
-            List<Result> testCaseResults = testReport.getTestRuns();
-            for (int i = 0; i < testCaseResults.size(); i++) {
-                Result r = testCaseResults.get(i);
-                r.setInstanceId(instanceId++);
-                testCaseResults.set(i, r);
-            }
-            completeResults.addAll(testCaseResults);
-        }
-        // Compute test suite global result
-        run = passed + failed + undefined;
-        total = run + skipped;
-        String result = "PASSED";
-        if (reports.isEmpty() || undefined > 0) result = "UNDEFINED";
-        else if (failed > 0) result = "FAILED";
-        TestResultRecap finalTRR = new TestResultRecap(total, run, passed, failed, undefined, skipped);
-        ResultOverview overview = new ResultOverview(testSuite, finalTRR);
-        finalReport.setOverview(overview);
-        finalReport.setResult(result);
-        finalReport.setTestRuns(completeResults);
-        catchItbReportService.deleteEndedTest(testID);
-        return finalReport;
-    }
+//    /**
+//     * Method to merge all test session report in one
+//     *
+//     * @param reports   list of reports
+//     * @param testID    TM test identifier
+//     * @param testSuite name of the test suite
+//     * @return final test report
+//     * @throws JsonProcessingException if output conversion goes wrong
+//     */
+//    private TestReport mergeReports(List<TestReport> reports, String testID, String testSuite) throws JsonProcessingException {
+//        // Set up common part
+//        TestReport finalReport = new TestReport(testID, reports.getLast().getDate());
+//        finalReport.setTestService(reports.getFirst().getTestService());
+//        finalReport.setSut(reports.getFirst().getSut());
+//        List<Result> completeResults = new ArrayList<>();
+//        int passed = 0, failed = 0, undefined = 0, skipped = 0, run, total;
+//        int instanceId = 0;
+//        // For each test report
+//        for (TestReport testReport : reports) {
+//            // compute sum of test case steps
+//            TestResultRecap trr = testReport.getOverview().getTestResultRecap();
+//            passed += trr.getPassed();
+//            failed += trr.getFailed();
+//            undefined += trr.getUndefined();
+//            skipped += trr.getSkipped();
+//            // add instance id to every test case
+//            List<Result> testCaseResults = testReport.getTestRuns();
+//            for (int i = 0; i < testCaseResults.size(); i++) {
+//                Result r = testCaseResults.get(i);
+//                r.setInstanceId(instanceId++);
+//                testCaseResults.set(i, r);
+//            }
+//            completeResults.addAll(testCaseResults);
+//        }
+//        // Compute test suite global result
+//        run = passed + failed + undefined;
+//        total = run + skipped;
+//        String result = "PASSED";
+//        if (reports.isEmpty() || undefined > 0) result = "UNDEFINED";
+//        else if (failed > 0) result = "FAILED";
+//        TestResultRecap finalTRR = new TestResultRecap(total, run, passed, failed, undefined, skipped);
+//        ResultOverview overview = new ResultOverview(testSuite, finalTRR);
+//        finalReport.setOverview(overview);
+//        finalReport.setResult(result);
+//        finalReport.setTestRuns(completeResults);
+//        catchItbReportService.deleteEndedTest(testID);
+//        return finalReport;
+//    }
 
     private String convertUTCToLDT(String dateUTC) {
         ZonedDateTime utcDateTime = ZonedDateTime.parse(dateUTC, DateTimeFormatter.ISO_DATE_TIME);

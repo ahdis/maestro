@@ -1,27 +1,33 @@
 package net.ihe.gazelle.maestro.business.step.itb.gateway.service;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
+import net.ihe.gazelle.maestro.api.business.testreport.ItemBuilder;
+import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.FinishedStepEvent;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.StepMessage;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 import net.ihe.gazelle.maestro.business.step.itb.gateway.client.ItbHttpClient;
-import net.ihe.gazelle.maestro.business.step.itb.gateway.dao.TestExecutionDAO;
+import net.ihe.gazelle.maestro.business.step.itb.gateway.dao.TestExecutionDAOStatic;
 import net.ihe.gazelle.maestro.business.step.itb.gateway.model.report.*;
-import net.ihe.gazelle.maestro.technical.jobs.testrunevents.TestRunEvent;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.*;
 
-@ApplicationScoped
+@Dependent
+@Default
 public class CatchItbReportService {
 
-    private final Emitter<TestRunEvent> emitter;
+    private final Emitter<StepMessage> emitter;
     private final ItbHttpClient itbHttpClient;
-    private final TestExecutionDAO testExecutionDAO = null;
 
     @Inject
-    public CatchItbReportService(@Channel("test-run") Emitter<TestRunEvent> emitter, ItbHttpClient itbHttpClient) {
+    public CatchItbReportService(@Channel("step-run") Emitter<StepMessage> emitter, ItbHttpClient itbHttpClient) {
         this.itbHttpClient = itbHttpClient;
         this.emitter = emitter;
     }
@@ -174,28 +180,16 @@ public class CatchItbReportService {
         validateResults(report.getTestRuns());
     }
 
-    public TestExecutionDAO getTestExecutionDAO() {
-        return testExecutionDAO;
-    }
-
     public ItbHttpClient getItbClient() {
         return itbHttpClient;
     }
 
     public String getTestID(String sessionID) {
-        return getTestExecutionDAO().getTestID(sessionID);
+        return TestExecutionDAOStatic.getStepRun(sessionID).testRunId();
     }
 
-    public void setReport(TestReport testReport, String sessionID) throws URISyntaxException {
-        getTestExecutionDAO().setReport(testReport, sessionID);
-    }
-
-    public boolean isFinished(String testID) {
-        return getTestExecutionDAO().isFinished(testID);
-    }
-
-    public List<TestReport> getReportsByID(String testID) {
-        return getTestExecutionDAO().getReportsByID(testID);
+    public StepRun getStepRun(String sessionID) {
+        return TestExecutionDAOStatic.getStepRun(sessionID);
     }
 
     public byte[] requestPDFReport(String sessionID, String testCaseName) {
@@ -206,21 +200,33 @@ public class CatchItbReportService {
         return getItbClient().getTestLogs(sessionID);
     }
 
-    public void deleteEndedTest(String testID)  {
-        getTestExecutionDAO().deleteEndedTest(testID);
-    }
-
-    public String[] getCallbackAndToken(String testID)  {
-        return getTestExecutionDAO().getCallbackAndToken(testID);
-    }
-
     /**
      * Method to push report to the messaging channel
      * @param responseReport test report to push
      */
     public void pushReport(ResponseReport responseReport, String[] callbackAndToken, Map<String, byte[]> pdfs) throws IOException {
         validateReport(responseReport.getReport());
-//        emitter.send();
-//        pushReportStarter.sendReport(responseReport, callbackAndToken, pdfs);
+        StepRunReportBuilder stepRunReportBuilder = new StepRunReportBuilder()
+                .setResult(StepResult.PASSED);
+
+        for (Map.Entry<String, byte[]> entry : pdfs.entrySet()) {
+            String testCaseName = entry.getKey();
+            byte[] pdfContent = entry.getValue();
+            ItemBuilder itemBuilder = new ItemBuilder()
+                    .setContent(pdfContent)
+                    .setName(testCaseName);
+            stepRunReportBuilder.addOutput(itemBuilder);
+        }
+
+        TestExecutionDAOStatic.getStepRun(responseReport.getReport().getUuid());
+        StepRun stepRun = new StepRun(null,null);
+          emitter.send(new FinishedStepEvent(stepRunReportBuilder, stepRun));
+    }
+
+    public void pushReport(StepRun stepRun) {
+        StepRunReportBuilder stepRunReportBuilder = new StepRunReportBuilder()
+                .setResult(StepResult.PASSED);
+
+        emitter.send(new FinishedStepEvent(stepRunReportBuilder, stepRun));
     }
 }

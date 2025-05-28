@@ -2,6 +2,7 @@ package net.ihe.gazelle.maestro.business.step.itb;
 
 import net.ihe.gazelle.maestro.api.business.testrun.runner.AsyncStepRunner;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
+import net.ihe.gazelle.maestro.business.step.itb.gateway.dao.TestExecutionDAOStatic;
 
 public class ItbStepRunner extends AsyncStepRunner {
 
@@ -13,7 +14,8 @@ public class ItbStepRunner extends AsyncStepRunner {
 
     @Override
     public void runAsync(StepRun stepRun) {
-        handler.handle((ItbStep) stepRun.step());
+        String sessionId = handler.handle((ItbStep) stepRun.step());
+        TestExecutionDAOStatic.writeSessions(sessionId, stepRun);
     }
 
     @Override
