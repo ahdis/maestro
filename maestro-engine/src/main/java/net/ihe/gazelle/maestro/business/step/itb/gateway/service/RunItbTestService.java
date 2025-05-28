@@ -31,9 +31,7 @@ public class RunItbTestService {
      */
     public String runTests(TestRequest request) {
         TestRequest validRequest = validateRequest(request);
-        String response = itbHttpClient.startTest(validRequest);
-//        testSessionsRepository.writeSessions(validRequest.getTestID(), response, validRequest.getCallbackURL(), validRequest.getCallbackAuthorization());
-        return response;
+        return itbHttpClient.startTest(validRequest);
     }
 
     /**

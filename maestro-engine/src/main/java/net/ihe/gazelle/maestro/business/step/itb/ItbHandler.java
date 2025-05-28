@@ -19,14 +19,14 @@ public class ItbHandler implements Handler {
 
     protected ItbHandler() {    }
 
-    public void handle(ItbStep step) {
+    public String handle(ItbStep step) {
         String baseItbUrl = Objects.requireNonNull(ConfigProvider.getConfig().getValue("itb.api.url", String.class));
         String itbAuthorization = Objects.requireNonNull(ConfigProvider.getConfig().getValue("itb.api.key", String.class));
         ItbHttpClient itbHttpClient = new ItbHttpClient(baseItbUrl, itbAuthorization);
         RunItbTestService runItbTestService = new RunItbTestService(itbHttpClient);
 
         TestRequest testRequest = stepToTestRequestMapper(step);
-        runItbTestService.runTests(testRequest);
+        return runItbTestService.runTests(testRequest);
     }
 
     private TestRequest stepToTestRequestMapper(ItbStep step) {
@@ -41,7 +41,7 @@ public class ItbHandler implements Handler {
 
         List<Parameter> parameters = new ArrayList<>();
         for (Property property : step.getProperties()) {
-            Parameter parameter = new Parameter();
+                Parameter parameter = new Parameter();
             parameter.setName(property.getName());
             try {
                 parameter.setType(property.getValue() instanceof byte[] ? "file" : "text");

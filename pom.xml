@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>maestro</artifactId>
-    <version>0.2.1-NPD-1335-SNAPSHOT</version>
+    <version>0.3.0-NPD-1335-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
         <module>maestro-api</module>
@@ -77,12 +77,12 @@
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-api</artifactId>
-                <version>0.2.1-NPD-1335-SNAPSHOT</version>
+                <version>0.3.0-NPD-1335-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-engine</artifactId>
-                <version>0.2.1-NPD-1335-SNAPSHOT</version>
+                <version>0.3.0-NPD-1335-SNAPSHOT</version>
             </dependency>
 
             <!-- Stack BOM -->
