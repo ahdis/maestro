@@ -5,7 +5,7 @@ import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TestExecutionDAOStatic {
+public class ItbTestExecutionDBInMemory {
 
     private static Map<String, StepRun> sessions = new HashMap<>();
 

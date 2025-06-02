@@ -6,7 +6,7 @@ import net.ihe.gazelle.maestro.business.step.itb.gateway.client.ItbHttpClient;
 import net.ihe.gazelle.maestro.business.step.itb.gateway.model.request.Parameter;
 import net.ihe.gazelle.maestro.business.step.itb.gateway.model.request.TestCase;
 import net.ihe.gazelle.maestro.business.step.itb.gateway.model.request.TestRequest;
-import net.ihe.gazelle.maestro.business.step.itb.gateway.service.RunItbTestService;
+import net.ihe.gazelle.maestro.business.step.itb.gateway.service.runitbtest.RunItbTestService;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
