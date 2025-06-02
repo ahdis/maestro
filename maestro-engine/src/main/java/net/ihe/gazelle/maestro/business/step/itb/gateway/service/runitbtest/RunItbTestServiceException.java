@@ -1,4 +1,4 @@
-package net.ihe.gazelle.maestro.business.step.itb.gateway.service;
+package net.ihe.gazelle.maestro.business.step.itb.gateway.service.runitbtest;
 
 public class RunItbTestServiceException extends RuntimeException {
     public RunItbTestServiceException(String message) {
