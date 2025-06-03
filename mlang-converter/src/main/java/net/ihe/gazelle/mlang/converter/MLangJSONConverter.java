@@ -14,9 +14,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
 public class MLangJSONConverter implements Converter {
-    private int stepID;
-
-
     @Override
     public void convert(InputStreamReader is, OutputStreamWriter os) throws ConverterException, ParserException {
         try {
@@ -43,6 +40,7 @@ public class MLangJSONConverter implements Converter {
 
     private class MLangJSONVisitor extends MLANGParserBaseVisitor<Object> {
         private TestCaseDTO m_testCase;
+        private int stepID;
 
         public TestCaseDTO build(MLANGParser.TestFileContext testFile) {
             m_testCase = new TestCaseDTO();
