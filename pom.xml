@@ -14,8 +14,8 @@
     <packaging>pom</packaging>
     <modules>
         <module>maestro-api</module>
-        <module>maestro-engine</module>
         <module>mlang-converter</module>
+        <module>maestro-engine</module>
     </modules>
 
     <scm>

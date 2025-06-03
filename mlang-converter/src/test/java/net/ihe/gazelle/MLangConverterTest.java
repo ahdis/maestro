@@ -1,3 +1,5 @@
+package net.ihe.gazelle;
+
 import net.ihe.gazelle.mlang.converter.ConverterException;
 import net.ihe.gazelle.mlang.converter.JSONMLangConverter;
 import net.ihe.gazelle.mlang.converter.MLangJSONConverter;

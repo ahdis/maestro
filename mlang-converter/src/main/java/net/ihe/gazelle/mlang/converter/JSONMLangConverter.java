@@ -21,6 +21,7 @@ public class JSONMLangConverter implements Converter {
 
             MLangGeneratorVisitor visitor = new MLangGeneratorVisitor(os);
             test.accept(visitor);
+            os.flush();
         } catch (IOException e) {
             throw new ConverterException(e.getMessage());
         }
