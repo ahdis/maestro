@@ -14,6 +14,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
 public class MLangJSONConverter implements Converter {
+    private int stepID;
+
+
     @Override
     public void convert(InputStreamReader is, OutputStreamWriter os) throws ConverterException, ParserException {
         try {
@@ -57,6 +60,19 @@ public class MLangJSONConverter implements Converter {
         }
 
         @Override
+        public Object visitTest_comments(MLANGParser.Test_commentsContext ctx) {
+            StringBuilder builder = new StringBuilder();
+            if (!ctx.comments().isEmpty()) {
+                String str = ctx.comments(0).STRING().getText();
+                if (str.length() > 2) {
+                    builder.append(str, 1, str.length() - 1);
+                }
+            }
+            m_testCase.setDescription(builder.toString());
+            return super.visitTest_comments(ctx);
+        }
+
+        @Override
         public Object visitRequire_file(MLANGParser.Require_fileContext ctx) {
             InputDTO fileInput = new InputDTO();
             fileInput.setKey(ctx.ID().getText());
@@ -70,9 +86,16 @@ public class MLangJSONConverter implements Converter {
         }
 
         @Override
+        public Object visitStmt(MLANGParser.StmtContext ctx) {
+            if (ctx.NEWLINE() != null)
+                stepID++;
+            return super.visitStmt(ctx);
+        }
+
+        @Override
         public Object visitAssertValid(MLANGParser.AssertValidContext ctx) {
             ValidationStepDTO step = new ValidationStepDTO();
-            step.setId("Assertion valid");
+            step.setId("Assertion valid (Step " + stepID + ")");
 
             step.addProperty(buildPropertyDTO("validationService", ctx.serviceName.getText()));
             step.addProperty(buildPropertyDTO("validationProfile", deleteMLangStringQuote(ctx.profileName.getText())));
