@@ -1,38 +1,25 @@
 package net.ihe.gazelle.mlang.converter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kereval.mlang.parser.MLANGLexer;
+import com.kereval.mlang.converter.ConverterException;
+import com.kereval.mlang.converter.FromMLangConverter;
+import com.kereval.mlang.converter.ParserException;
 import com.kereval.mlang.parser.MLANGParser;
 import com.kereval.mlang.parser.MLANGParserBaseVisitor;
 import net.ihe.gazelle.model.*;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
-public class MLangJSONConverter implements Converter {
+public class MLangJSONConverter extends FromMLangConverter {
     @Override
-    public void convert(InputStreamReader is, OutputStreamWriter os) throws ConverterException, ParserException {
+    public void convert(MLANGParser.TestFileContext testFileContext, OutputStreamWriter outputStreamWriter) throws ConverterException, ParserException {
+        MLangJSONVisitor visitor = new MLangJSONVisitor();
+        TestCaseDTO testCase = visitor.build(testFileContext);
+
+        ObjectMapper mapper = new ObjectMapper();
         try {
-            CharStream charStream = CharStreams.fromReader(is);
-            MLANGLexer lexer = new MLANGLexer(charStream);
-            MLANGParser parser = new MLANGParser(new CommonTokenStream(lexer));
-
-            SyntaxErrorListener errorListener = new SyntaxErrorListener();
-            parser.addErrorListener(errorListener);
-
-            MLangJSONVisitor visitor = new MLangJSONVisitor();
-            TestCaseDTO testCase = visitor.build(parser.testFile());
-
-            if (!errorListener.getSyntaxErrors().isEmpty()) {
-                throw new ParserException(errorListener.getSyntaxErrors());
-            }
-
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.writerWithDefaultPrettyPrinter().writeValue(os, testCase);
+            mapper.writerWithDefaultPrettyPrinter().writeValue(outputStreamWriter, testCase);
         } catch (IOException e) {
             throw new ConverterException(e.getMessage());
         }

@@ -2,7 +2,9 @@ package net.ihe.gazelle.mlang.converter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kereval.mlang.api.model.*;
-import com.kereval.mlang.api.visitor.MLangGeneratorVisitor;
+import com.kereval.mlang.converter.ConverterException;
+import com.kereval.mlang.converter.ParserException;
+import com.kereval.mlang.converter.ToMLangConverter;
 import net.ihe.gazelle.model.*;
 
 import java.io.IOException;
@@ -11,21 +13,18 @@ import java.io.OutputStreamWriter;
 import java.util.List;
 import java.util.Optional;
 
-public class JSONMLangConverter implements Converter {
+public class JSONMLangConverter extends ToMLangConverter {
     @Override
-    public void convert(InputStreamReader is, OutputStreamWriter os) throws ConverterException, ParserException {
+    public MTest convert(InputStreamReader inputStreamReader) throws ConverterException, ParserException {
         ObjectMapper mapper = new ObjectMapper();
         try {
-            TestCaseDTO testCase = mapper.readValue(is, TestCaseDTO.class);
-            MTest test = buildTest(testCase);
-
-            MLangGeneratorVisitor visitor = new MLangGeneratorVisitor(os);
-            test.accept(visitor);
-            os.flush();
+            TestCaseDTO testCase = mapper.readValue(inputStreamReader, TestCaseDTO.class);
+            return buildTest(testCase);
         } catch (IOException e) {
             throw new ConverterException(e.getMessage());
         }
     }
+
 
     private MTest buildTest(TestCaseDTO testDTO) throws ConverterException {
         MTest test = new MTest(testDTO.getName());
