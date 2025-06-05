@@ -10,10 +10,13 @@ import net.ihe.gazelle.model.*;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class JSONMLangConverter extends ToMLangConverter {
+    private Stack<Transaction> transactions = new Stack<>();
+
     @Override
     public MTest convert(InputStreamReader inputStreamReader) throws ConverterException, ParserException {
         ObjectMapper mapper = new ObjectMapper();
@@ -52,7 +55,13 @@ public class JSONMLangConverter extends ToMLangConverter {
 
     private void convertStepDTO(MTest test, StepDTO stepDTO) throws ConverterException {
         if (stepDTO instanceof ValidationStepDTO) {
-            test.addStep(buildAssertValid((ValidationStepDTO) stepDTO));
+            if (transactions.empty())
+                test.addStep(buildAssertValid((ValidationStepDTO) stepDTO));
+            else
+                transactions.peek().addAction(new MStepTAction((buildAssertValid((ValidationStepDTO) stepDTO))));
+        }
+        else if (stepDTO instanceof InstructionStepDTO) {
+            convertInstruction(test, (InstructionStepDTO) stepDTO);
         }
         else {
             throw new ConverterException("Kind of Step DTO not handle by the converter detected");
@@ -89,5 +98,125 @@ public class JSONMLangConverter extends ToMLangConverter {
                 validationServiceProp.get().getValue(),
                 profileNameProp.get().getValue()
         );
+    }
+
+    private void convertInstruction(MTest test, InstructionStepDTO instructionStepDTO) throws ConverterException {
+        if (instructionStepDTO.getId().startsWith("Transaction preparation")) {
+            transactions.push(buildTransaction(instructionStepDTO));
+            test.addStep(transactions.peek());
+        }
+        else if (instructionStepDTO.getId().startsWith("Send message")) {
+            transactions.peek().addAction(buildSendMessageTAction(instructionStepDTO));
+        }
+        else if (instructionStepDTO.getId().startsWith("Waiting message")) {
+            transactions.peek().addAction(buildReceiveMessageTAction(instructionStepDTO));
+        }
+        else if (instructionStepDTO.getId().startsWith("Processing data")) {
+            if (transactions.empty())
+                test.addStep(buildProcessMStep(instructionStepDTO));
+            else
+                transactions.peek().addAction(new MStepTAction(buildProcessMStep(instructionStepDTO)));
+        }
+        else {
+            throw new ConverterException("Kind of instruction not handle by the converter");
+        }
+    }
+
+    private Transaction buildTransaction(InstructionStepDTO instructionStepDTO) throws ConverterException {
+        Pattern pattern = Pattern.compile("Transaction preparation (\\w+) from (\\w+) to (\\w+)");
+        Matcher matcher = pattern.matcher(instructionStepDTO.getDescription());
+
+        if (matcher.find()) {
+            String name = matcher.group(1);
+            String from = matcher.group(2);
+            String to = matcher.group(3);
+
+            return new Transaction(name, from, to);
+        }
+        else {
+            throw new ConverterException("Instruction which represent a Transaction is malformed");
+        }
+    }
+
+    private SendMessageTAction buildSendMessageTAction(InstructionStepDTO instructionStepDTO) throws ConverterException {
+        Pattern pattern = Pattern.compile(
+                "Sending message (\\w+) from (\\w+) to (\\w+)" +
+                        "(?: with parameters :\\s*((?:\\d+ as \\w+\\s*)+))?" +
+                        "(?:Message sent stored in (\\w+))?"
+                , Pattern.DOTALL
+        );
+        Matcher matcher = pattern.matcher(instructionStepDTO.getDescription());
+        if (matcher.find()) {
+            String name = matcher.group(1);
+            String from = matcher.group(2);
+            String to = matcher.group(3);
+            String paramsBlock = matcher.group(4);
+            String storein = matcher.group(5);
+
+            Map<String, Param> params = new HashMap<>();
+            if (paramsBlock != null) {
+                Pattern paramPattern = Pattern.compile("(\\d+) as (\\w+)");
+                Matcher paramMatcher = paramPattern.matcher(paramsBlock);
+                while (paramMatcher.find()) {
+                    params.put(paramMatcher.group(2), new VariableParam(paramMatcher.group(1)));
+                }
+            }
+
+            SendMessageTAction send = new SendMessageTAction(name, params);
+            if (storein != null) {
+                send.setStorein(storein);
+            }
+
+            return send;
+        }
+        else {
+            throw new ConverterException("Instruction which represent a Transaction is malformed");
+        }
+    }
+
+    private ReceiveMessageTAction buildReceiveMessageTAction(InstructionStepDTO instructionStepDTO) throws ConverterException {
+        Pattern pattern = Pattern.compile(
+                "Waiting message (\\w+) from (\\w+)" +
+                        "(?: and stored it in (\\w+))?"
+                , Pattern.DOTALL
+        );
+        Matcher matcher = pattern.matcher(instructionStepDTO.getDescription());
+        if (matcher.find()) {
+            String name = matcher.group(1);
+            String from = matcher.group(2);
+            String storein = matcher.group(3);
+
+            Map<String, Param> params = new HashMap<>();
+            ReceiveMessageTAction receive = new ReceiveMessageTAction(name, params);
+            if (storein != null) {
+                receive.setStorein(storein);
+            }
+
+            return receive;
+        } else {
+            throw new ConverterException("Instruction which represent a Transaction is malformed");
+        }
+    }
+
+    private ProcessMStep buildProcessMStep(InstructionStepDTO instructionStepDTO) throws ConverterException {
+        Pattern pattern = Pattern.compile(
+                "Processing data (\\w+) with processing service (\\w+)" +
+                        "(?: and stored it in (\\w+))?"
+                , Pattern.DOTALL
+        );
+        Matcher matcher = pattern.matcher(instructionStepDTO.getDescription());
+        if (matcher.find()) {
+            String data = matcher.group(1);
+            String with = matcher.group(2);
+            String storein = matcher.group(3);
+
+            ProcessMStep step = new ProcessMStep(data, with);
+            if (storein != null) {
+                step.setStorein(storein);
+            }
+            return step;
+        } else {
+            throw new ConverterException("Instruction which represent a Transaction is malformed");
+        }
     }
  }
