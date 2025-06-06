@@ -1,8 +1,8 @@
 package net.ihe.gazelle.mlang.converter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kereval.mlang.api.generator.MLangGeneratorVisitor;
 import com.kereval.mlang.api.model.*;
-import com.kereval.mlang.api.visitor.MLangGeneratorVisitor;
 import net.ihe.gazelle.model.*;
 
 import java.io.IOException;
