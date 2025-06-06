@@ -1,5 +1,8 @@
 package net.ihe.gazelle.technical.ws;
 
+import com.kereval.mlang.converter.Converter;
+import com.kereval.mlang.converter.ConverterException;
+import com.kereval.mlang.converter.ParserException;
 import jakarta.ws.rs.core.Response;
 import net.ihe.gazelle.mlang.converter.*;
 

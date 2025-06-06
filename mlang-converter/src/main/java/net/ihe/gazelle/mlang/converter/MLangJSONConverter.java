@@ -1,38 +1,25 @@
 package net.ihe.gazelle.mlang.converter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kereval.mlang.parser.MLANGLexer;
+import com.kereval.mlang.converter.ConverterException;
+import com.kereval.mlang.converter.FromMLangConverter;
+import com.kereval.mlang.converter.ParserException;
 import com.kereval.mlang.parser.MLANGParser;
 import com.kereval.mlang.parser.MLANGParserBaseVisitor;
 import net.ihe.gazelle.model.*;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
-public class MLangJSONConverter implements Converter {
+public class MLangJSONConverter extends FromMLangConverter {
     @Override
-    public void convert(InputStreamReader is, OutputStreamWriter os) throws ConverterException, ParserException {
+    public void convert(MLANGParser.TestFileContext testFileContext, OutputStreamWriter outputStreamWriter) throws ConverterException, ParserException {
+        MLangJSONVisitor visitor = new MLangJSONVisitor();
+        TestCaseDTO testCase = visitor.build(testFileContext);
+
+        ObjectMapper mapper = new ObjectMapper();
         try {
-            CharStream charStream = CharStreams.fromReader(is);
-            MLANGLexer lexer = new MLANGLexer(charStream);
-            MLANGParser parser = new MLANGParser(new CommonTokenStream(lexer));
-
-            SyntaxErrorListener errorListener = new SyntaxErrorListener();
-            parser.addErrorListener(errorListener);
-
-            MLangJSONVisitor visitor = new MLangJSONVisitor();
-            TestCaseDTO testCase = visitor.build(parser.testFile());
-
-            if (!errorListener.getSyntaxErrors().isEmpty()) {
-                throw new ParserException(errorListener.getSyntaxErrors());
-            }
-
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.writerWithDefaultPrettyPrinter().writeValue(os, testCase);
+            mapper.writerWithDefaultPrettyPrinter().writeValue(outputStreamWriter, testCase);
         } catch (IOException e) {
             throw new ConverterException(e.getMessage());
         }
@@ -42,12 +29,19 @@ public class MLangJSONConverter implements Converter {
         private TestCaseDTO m_testCase;
         private int stepID;
 
+        private MLANGParser.Transaction_stmtContext currentTransaction = null;
+
+
         public TestCaseDTO build(MLANGParser.TestFileContext testFile) {
             m_testCase = new TestCaseDTO();
 
             testFile.accept(this);
 
             return m_testCase;
+        }
+
+        private int getStepID() {
+            return stepID++;
         }
 
         @Override
@@ -84,21 +78,92 @@ public class MLangJSONConverter implements Converter {
         }
 
         @Override
-        public Object visitStmt(MLANGParser.StmtContext ctx) {
-            if (ctx.NEWLINE() != null)
-                stepID++;
-            return super.visitStmt(ctx);
+        public Object visitTransaction_stmt(MLANGParser.Transaction_stmtContext ctx) {
+            InstructionStepDTO step = new InstructionStepDTO();
+            step.setId("Transaction preparation (Step " + this.getStepID() + ")");
+            String description = "Transaction preparation " + ctx.ID().getText() +
+                    " from " + ctx.from().ID().getText() +
+                    " to " + ctx.to().ID().getText();
+            step.setDescription(description);
+            m_testCase.addStep(step);
+            MLANGParser.Transaction_stmtContext save = this.currentTransaction;
+            this.currentTransaction = ctx;
+            Object ret = super.visitTransaction_stmt(ctx);
+            this.currentTransaction = save;
+            return ret;
+        }
+
+        @Override
+        public Object visitSend_message(MLANGParser.Send_messageContext ctx) {
+            InstructionStepDTO step = new InstructionStepDTO();
+            step.setId("Send message (Step " + this.getStepID() + ")");
+            StringBuilder builder = new StringBuilder();
+
+            builder.append("Sending message ").append(ctx.ID().getText())
+                    .append(" from ").append(this.currentTransaction.from().ID().getText())
+                    .append(" to ").append(this.currentTransaction.to().ID().getText());
+            if (ctx.send_message_param() != null) {
+                builder.append(" with parameters :\n");
+                for (int i = 0 ; i < ctx.send_message_param().value_name.size() ; i++) {
+                    String name = ctx.send_message_param().value_name.get(i).getText();
+                    String value = ctx.send_message_param().value.get(i).getText();
+                    if (value.length() <= 2) {
+                        builder.append("  UNDEFINEDVALUE as ").append(name);
+                    }
+                    else {
+                        builder.append("  ").append(value, 1, value.length() - 1).append(" as ").append(name);
+                    }
+                }
+
+                for (int i = 0 ; i < ctx.send_message_param().variable_name.size() ; i++) {
+                    String name = ctx.send_message_param().variable_name.get(i).getText();
+                    String value = ctx.send_message_param().variable.get(i).getText();
+                    if (value.isEmpty()) {
+                        builder.append("  UNDEFINEDVALUE as ").append(name);
+                    }
+                    else {
+                        builder.append("  ").append(value).append(" as ").append(name);
+                    }
+                }
+
+                builder.append("\n");
+            }
+
+            if (ctx.storein() != null) {
+                builder.append("Message sent stored in ").append(ctx.storein().name.getText());
+            }
+
+            step.setDescription(builder.toString());
+            m_testCase.addStep(step);
+            return super.visitSend_message(ctx);
+        }
+
+        @Override
+        public Object visitReceive_message(MLANGParser.Receive_messageContext ctx) {
+            InstructionStepDTO step = new InstructionStepDTO();
+            step.setId("Waiting message (Step " + this.getStepID() + ")");
+            StringBuilder builder = new StringBuilder();
+
+            builder.append("Waiting message ").append(ctx.ID().getText())
+                    .append(" from ").append(this.currentTransaction.from().ID().getText());
+            if (ctx.storein() != null) {
+                builder.append(" and stored it in ").append(ctx.storein().name.getText());
+            }
+
+            step.setDescription(builder.toString());
+            m_testCase.addStep(step);
+            return super.visitReceive_message(ctx);
         }
 
         @Override
         public Object visitAssertValid(MLANGParser.AssertValidContext ctx) {
             ValidationStepDTO step = new ValidationStepDTO();
-            step.setId("Assertion valid (Step " + stepID + ")");
+            step.setId("Assertion valid (Step " + this.getStepID() + ")");
 
             step.addProperty(buildPropertyDTO("validationService", ctx.serviceName.getText()));
             step.addProperty(buildPropertyDTO("validationProfile", deleteMLangStringQuote(ctx.profileName.getText())));
 
-            StringBuilder description = new StringBuilder(("this step will validate"));
+            StringBuilder description = new StringBuilder("This step will validate");
             for (var param : ctx.assertParams) {
                 description.append(" ").append(param.ID().getText());
                 step.addProperty(buildPropertyDTO("contentToValidate", "${" + param.ID().getText() + "}"));
@@ -109,6 +174,22 @@ public class MLangJSONConverter implements Converter {
 
             m_testCase.addStep(step);
             return super.visitAssertValid(ctx);
+        }
+
+        @Override
+        public Object visitProcess_stmt(MLANGParser.Process_stmtContext ctx) {
+            InstructionStepDTO step = new InstructionStepDTO();
+            step.setId("Processing data (Step " + this.getStepID() + ")");
+
+            StringBuilder builder = new StringBuilder();
+            builder.append("Processing data ").append(ctx.data.getText())
+                    .append(" with processing service ").append(ctx.processingService.getText());
+            if (ctx.storein() != null) {
+                builder.append(" and stored it in ").append(ctx.storein().name.getText());
+            }
+            step.setDescription(builder.toString());
+            m_testCase.addStep(step);
+            return super.visitProcess_stmt(ctx);
         }
 
         private static PropertyDTO buildPropertyDTO(String key, String value) {
