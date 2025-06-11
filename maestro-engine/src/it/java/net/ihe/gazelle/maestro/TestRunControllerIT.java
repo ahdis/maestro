@@ -1,67 +1,96 @@
 package net.ihe.gazelle.maestro;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tomakehurst.wiremock.WireMockServer;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.QuarkusTestProfile;
 import io.quarkus.test.junit.TestProfile;
 import io.restassured.response.Response;
 import jakarta.ws.rs.core.MediaType;
+import net.ihe.gazelle.maestro.api.business.testreport.Result;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+import net.ihe.gazelle.maestro.technical.dto.report.TestReportDTO;
 import org.apache.http.HttpHeaders;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.util.stream.Stream;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static io.restassured.RestAssured.given;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 @TestProfile(TestRunControllerProfile.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TestRunControllerIT implements QuarkusTestProfile {
 
-    static WireMockServer wireMockServer;
-    static ObjectMapper objectMapper;
+    @ConfigProperty(name = "gzl.it-port")
+    int port;
 
     @BeforeAll
-    static void setUp() {
-        wireMockServer = new WireMockServer(18089);
-        wireMockServer.start();
-        configureFor(wireMockServer.port());
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> wireMockServer.stop()));
-        objectMapper = new ObjectMapper();
+    public void setUp() throws IOException {
+        WireMockSingleton.startServer(port);
+        WireMockSingleton.mockCallback();
+        WireMockSingleton.mockServiceRegistry();
+        WireMockSingleton.mockGetProfiles();
+        WireMockSingleton.mockValidate();
     }
 
     @Test
-    void launchTestSetWithOneValidation() {
-        try {
-            wireMockServer.stubFor(get(urlPathMatching("/matchboxv3/gazelle/validation/v2/profiles")).willReturn(ok().withBody("[]")));
-            wireMockServer.stubFor(post(urlPathMatching("/matchboxv3/gazelle/validation/v2/validate")).willReturn(ok().withBody(getJson())));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        InputStream testRun = readJson();
-
+    void synchronous_test_run_with_one_validation() throws IOException {
+        String testRun = WireMockSingleton.getResourceAsString("/Testrun.json");
         Response response = given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                 .body(testRun)
-                //TODO port shouldn't appear in test file
-                .when().post("http://localhost:8151/maestro/testRuns/run")
+                .when().post("/testRuns/run")
                 .then()
                 .extract().response();
         assertNotNull(response);
-        String json = response.getBody().prettyPrint();
-        System.out.println(json);
+
+        TestReport testReport = response.as(TestReportDTO.class).getDomain();
+        assertTrue(testReport.isValid());
+        assertEquals(Result.FAILED, testReport.getResult());
     }
 
-    private InputStream readJson() {
-        return Thread.currentThread().getContextClassLoader().getResourceAsStream("Testrun.json");
+    @Test
+    void asynchronous_test_run_with_one_validations() throws IOException {
+        String testRun = WireMockSingleton.getResourceAsString("/Testrun.json");
+        String callback = "http://localhost:" + port + "/mock/gazelle/rest";
+        given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .body(testRun)
+                .when().post("/testRuns/run?callback=" + callback)
+                .then()
+                .statusCode(202);
+
+        TestReport testReport = WireMockSingleton.awaitTestReport();
+        assertTrue(testReport.isValid());
+        assertEquals(Result.FAILED, testReport.getResult());
     }
 
-    private static String getJson() throws IOException {
-        return new String(Files.readAllBytes(Paths.get("src/it/resources/response.json")));
+    @ParameterizedTest
+    @MethodSource("invalidTestRunProvider")
+    void should_fail_deserialization(String filePath, String expectedMessage) throws IOException {
+        String testRun = WireMockSingleton.getResourceAsString(filePath);
+        String response = given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .body(testRun)
+                .when().post("/testRuns/run")
+                .then()
+                .statusCode(400)
+                .extract().response()
+                .body().asString();
+
+        assertTrue(response.contains(expectedMessage), "Expected message not found in response:\n" + response);
+    }
+
+    private static Stream<Arguments> invalidTestRunProvider() {
+        return Stream.of(
+                Arguments.of("/invalid_step_type.json", "Could not resolve type id"),
+                Arguments.of("/invalid_property_type.json", "Unsupported property type"),
+                Arguments.of("/invalid_property_name.json", "is not a validation step property"),
+                Arguments.of("/invalid_structure.json", "Unable to parse TestRun structure")
+        );
     }
 }

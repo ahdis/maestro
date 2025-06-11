@@ -30,8 +30,9 @@ public class AsynchronousMaestro {
         this.client = client;
     }
 
-    public void executeTestSet(List<TestRun> testRuns) {
+    public void executeTestSet(String callback, List<TestRun> testRuns) {
         TestRunStore store = new TestRunStore();
+        store.setClientCallback(callback);
         TestSetRun testSetRun = new TestSetRun(UUID.randomUUID().toString(), testRuns);
         runningServices.put(testSetRun.testSetId(), store);
         emitter.send(new StartTestSetCommand(testSetRun));

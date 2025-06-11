@@ -26,7 +26,7 @@ class DTOTest {
 
     @Test
     void should_deserialize_serialize() {
-        List<TestRun> testRuns = assertDoesNotThrow(() -> Arrays.stream(SER_DES.deserialize(getTestRun("testRun"), TestRunDTO[].class))
+        List<TestRun> testRuns = assertDoesNotThrow(() -> Arrays.stream(SER_DES.deserialize(getTestRun("valid"), TestRunDTO[].class))
                 .map(TestRunDTO::getDomain)
                 .toList());
 
@@ -39,11 +39,11 @@ class DTOTest {
 
     @Test
     void should_throw_unsupported_property_type_on_deserialization() throws IOException {
-        String json = getTestRun("testRun_wrongType");
+        String json = getTestRun("wrong_property_type");
         DeserializationException de = assertThrows(DeserializationException.class, () -> SER_DES.deserialize(json, TestRunDTO[].class));
         assertEquals(UnsupportedPropertyTypeException.class, de.getCause().getCause().getClass());
         UnsupportedPropertyTypeException upe = (UnsupportedPropertyTypeException) de.getCause().getCause();
-        assertTrue(upe.getMessage().contains("Unsupported property type on deserialization"));
+        assertTrue(upe.getMessage().contains("Unsupported property type"));
     }
 
     @Test
@@ -52,7 +52,7 @@ class DTOTest {
                 .setName("testProperty")
                 .setValue(new PropertyDTO());
         UnsupportedPropertyTypeException upe = assertThrows(UnsupportedPropertyTypeException.class, () -> new PropertyDTO(property));
-        assertTrue(upe.getMessage().contains("Unsupported property type for constructor"));
+        assertTrue(upe.getMessage().contains("Unsupported property type"));
     }
 
     @Test

@@ -64,7 +64,7 @@ public class PropertyDTO {
                 value = formatter.format(date);
                 type = DATE;
             } else {
-                throw new UnsupportedPropertyTypeException("Unsupported property type for constructor: " + domain.getValue().getClass().getName());
+                throw new UnsupportedPropertyTypeException("Unsupported property type : " + domain.getValue().getClass().getName());
             }
         }
         this.domain = domain;
@@ -128,7 +128,7 @@ public class PropertyDTO {
                     Date.class,
                     () -> new Property<>(this.getName(), parseDate(value))
             );
-            default -> throw new UnsupportedPropertyTypeException("Unsupported property type on deserialization " + type);
+            default -> throw new UnsupportedPropertyTypeException("Unsupported property type : " + type);
         }
         return domain;
     }
