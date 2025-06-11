@@ -81,14 +81,14 @@ public class ValidationStep implements Step {
     @SuppressWarnings("unchecked")
     public void setProperties(List<Property<?>> properties) {
         if (properties == null) {
-            throw new IllegalArgumentException("property shouldn't be null");
+            throw new IllegalArgumentException("Property shouldn't be null");
         }
         properties.forEach(property -> {
             switch (property.getName()) {
                 case VALIDATION_SERVICE -> validationService = (Property<String>) property;
                 case VALIDATION_PROFILE -> validationProfile = (Property<String>) property;
                 case CONTENT_TO_VALIDATE -> contentToValidate = (Property<byte[]>) property;
-                default -> throw new IllegalArgumentException("property " + property.getName()
+                default -> throw new IllegalArgumentException("Property " + property.getName()
                         + " is not a validation step property");
             }
         });

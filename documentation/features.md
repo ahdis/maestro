@@ -11,7 +11,11 @@ At the end of execution, Maestro return a TestReport containing sub report.
 
 ## Input data
 
-The Maestro rest API endpoint is at https://FQDN/maestro/testRun/run
+The Maestro rest API endpoint is at https://FQDN/maestro/testRun/run?callback=callbackUri
+This endpoint can run Synchronously or Asynchronously depending on the presence of a callback URI as a query parameter :
+* If the callback query parameter is not set, this will run synchronously and directly send the Test report as a response.
+* If the callback query parameter is set, this will run asynchronously and will send the Test report to the specified callback URI later on.
+
 It consumes a JsonArray for inputs following this syntax :
 
 ```json

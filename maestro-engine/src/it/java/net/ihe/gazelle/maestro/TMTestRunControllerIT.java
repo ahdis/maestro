@@ -58,17 +58,10 @@ class TMTestRunControllerIT implements QuarkusTestProfile {
 
         given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                 .body(tmRequestBody)
-                .when().post("http://localhost:8151/maestro/v0/run")
-                .then().statusCode(200)
-                .extract().response();
+                .when().post("/v0/run")
+                .then().statusCode(200);
 
-        String content = await()
-                .atMost(60, TimeUnit.SECONDS)
-                .until(() -> {
-                    List<LoggedRequest> matchingRequests = getMatchingRequests().apply(wireMockServer);
-                    return !matchingRequests.isEmpty() ? matchingRequests : null;
-                }, Objects::nonNull).getFirst().getPart("json report").getBody().asString();
-        TestReport testReport = new JacksonSerDes().deserialize(content, TestReportDTO.class).getDomain();
+        TestReport testReport = awaitTestReport();
         assertTrue(testReport.isValid());
         assertEquals(Result.PASSED, testReport.getResult());
     }
@@ -83,19 +76,22 @@ class TMTestRunControllerIT implements QuarkusTestProfile {
 
         given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                 .body(tmRequestBody)
-                .when().post("http://localhost:8151/maestro/v0/run")
-                .then().statusCode(200)
-                .extract().response();
+                .when().post("/v0/run")
+                .then().statusCode(200);
 
+        TestReport testReport = awaitTestReport();
+        assertTrue(testReport.isValid());
+        assertEquals(Result.FAILED, testReport.getResult());
+    }
+
+    private TestReport awaitTestReport() {
         String content = await()
                 .atMost(60, TimeUnit.SECONDS)
                 .until(() -> {
                     List<LoggedRequest> matchingRequests = getMatchingRequests().apply(wireMockServer);
                     return !matchingRequests.isEmpty() ? matchingRequests : null;
                 }, Objects::nonNull).getFirst().getPart("json report").getBody().asString();
-        TestReport testReport = new JacksonSerDes().deserialize(content, TestReportDTO.class).getDomain();
-        assertTrue(testReport.isValid());
-        assertEquals(Result.FAILED, testReport.getResult());
+        return new JacksonSerDes().deserialize(content, TestReportDTO.class).getDomain();
     }
 
     private Function<WireMockServer, List<LoggedRequest>> getMatchingRequests() {
