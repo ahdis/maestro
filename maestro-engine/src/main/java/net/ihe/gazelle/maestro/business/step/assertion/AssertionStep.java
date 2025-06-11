@@ -55,13 +55,13 @@ public class AssertionStep implements Step {
     @SuppressWarnings("unchecked")
     public void setProperties(List<Property<?>> properties) {
         if (properties == null) {
-            throw new IllegalArgumentException("property shouldn't be null");
+            throw new IllegalArgumentException("Property shouldn't be null");
         }
         properties.forEach(property -> {
             switch (property.getName()) {
                 case ASSERTION -> currentAssertion = (Property<byte[]>) property;
                 case ASSERTION_SERVICE -> assertionService = (Property<String>) property;
-                default -> throw new IllegalArgumentException("property " + property.getName()
+                default -> throw new IllegalArgumentException("Property " + property.getName()
                         + " is not an assertion step property");
             }
         });
