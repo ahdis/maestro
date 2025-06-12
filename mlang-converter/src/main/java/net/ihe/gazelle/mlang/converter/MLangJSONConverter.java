@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 
 public class MLangJSONConverter extends FromMLangConverter {
+    private final String HTML_TAB = "&nbsp;&nbsp;&nbsp;";
+
     @Override
     public void convert(MLANGParser.TestFileContext testFileContext, OutputStreamWriter outputStreamWriter) throws ConverterException, ParserException {
         MLangJSONVisitor visitor = new MLangJSONVisitor();
@@ -82,8 +84,8 @@ public class MLangJSONConverter extends FromMLangConverter {
             InstructionStepDTO step = new InstructionStepDTO();
             step.setId("Transaction preparation (Step " + this.getStepID() + ")");
             String description = "Transaction preparation " + ctx.ID().getText() +
-                    " from " + ctx.from().ID().getText() +
-                    " to " + ctx.to().ID().getText();
+                    " from " + boldify(ctx.from().ID().getText()) +
+                    " to " + boldify(ctx.to().ID().getText());
             step.setDescription(description);
             m_testCase.addStep(step);
             MLANGParser.Transaction_stmtContext save = this.currentTransaction;
@@ -100,18 +102,24 @@ public class MLangJSONConverter extends FromMLangConverter {
             StringBuilder builder = new StringBuilder();
 
             builder.append("Sending message ").append(ctx.ID().getText())
-                    .append(" from ").append(this.currentTransaction.from().ID().getText())
-                    .append(" to ").append(this.currentTransaction.to().ID().getText());
+                    .append(" from ").append(boldify(this.currentTransaction.from().ID().getText()))
+                    .append(" to ").append(boldify(this.currentTransaction.to().ID().getText()));
             if (ctx.send_message_param() != null) {
-                builder.append(" with parameters :\n");
+                builder.append(" with parameters :<br/>");
                 for (int i = 0 ; i < ctx.send_message_param().value_name.size() ; i++) {
                     String name = ctx.send_message_param().value_name.get(i).getText();
                     String value = ctx.send_message_param().value.get(i).getText();
                     if (value.length() <= 2) {
-                        builder.append("  UNDEFINEDVALUE as ").append(name);
+                        builder.append(HTML_TAB)
+                                .append(boldify("UNDEFINEDVALUE"))
+                                .append(" as ")
+                                .append(boldify(name));
                     }
                     else {
-                        builder.append("  ").append(value, 1, value.length() - 1).append(" as ").append(name);
+                        builder.append(HTML_TAB)
+                                .append(boldify(value.substring(1, value.length() - 1)))
+                                .append(" as ")
+                                .append(boldify(name));
                     }
                 }
 
@@ -119,17 +127,24 @@ public class MLangJSONConverter extends FromMLangConverter {
                     String name = ctx.send_message_param().variable_name.get(i).getText();
                     String value = ctx.send_message_param().variable.get(i).getText();
                     if (value.isEmpty()) {
-                        builder.append("  UNDEFINEDVALUE as ").append(name);
+                        builder.append(HTML_TAB)
+                                .append(boldify("UNDEFINEDVALUE"))
+                                .append(" as ")
+                                .append(boldify(name));
                     }
                     else {
-                        builder.append("  ").append(value).append(" as ").append(name);
+                        builder.append(HTML_TAB)
+                                .append(boldify(value))
+                                .append(" as ")
+                                .append(boldify(name));
                     }
                 }
             }
 
             if (ctx.storein() != null) {
-                builder.append("\n");
-                builder.append("Message sent stored in ").append(ctx.storein().name.getText());
+                builder.append("<br/>");
+                builder.append("Message sent stored in ")
+                        .append(boldify(ctx.storein().name.getText()));
             }
 
             step.setDescription(builder.toString());
@@ -143,10 +158,10 @@ public class MLangJSONConverter extends FromMLangConverter {
             step.setId("Waiting message (Step " + this.getStepID() + ")");
             StringBuilder builder = new StringBuilder();
 
-            builder.append("Waiting message ").append(ctx.ID().getText())
-                    .append(" from ").append(this.currentTransaction.from().ID().getText());
+            builder.append("Waiting message ").append(boldify(ctx.ID().getText()))
+                    .append(" from ").append(boldify(this.currentTransaction.from().ID().getText()));
             if (ctx.storein() != null) {
-                builder.append(" and stored it in ").append(ctx.storein().name.getText());
+                builder.append(" and stored it in ").append(boldify(ctx.storein().name.getText()));
             }
 
             step.setDescription(builder.toString());
@@ -164,11 +179,14 @@ public class MLangJSONConverter extends FromMLangConverter {
 
             StringBuilder description = new StringBuilder("This step will validate");
             for (var param : ctx.assertParams) {
-                description.append(" ").append(param.ID().getText());
+                description.append(" ").append(boldify(param.ID().getText()));
                 step.addProperty(buildPropertyDTO("contentToValidate", "${" + param.ID().getText() + "}"));
 
             }
-            description.append(" against the validator ").append(ctx.serviceName.getText()).append(" with the profile ").append(deleteMLangStringQuote(ctx.profileName.getText()));
+            description.append(" against the validator ")
+                    .append(boldify(ctx.serviceName.getText()))
+                    .append(" with the profile ")
+                    .append(boldify(deleteMLangStringQuote(ctx.profileName.getText())));
             step.setDescription(description.toString());
 
             m_testCase.addStep(step);
@@ -181,19 +199,28 @@ public class MLangJSONConverter extends FromMLangConverter {
             step.setId("Processing data (Step " + this.getStepID() + ")");
 
             StringBuilder builder = new StringBuilder();
-            builder.append("Processing data ").append(ctx.data.getText())
-                    .append(" with processing service ").append(ctx.processingService.getText());
+            builder.append("Processing data ")
+                    .append(boldify(ctx.data.getText()))
+                    .append(" with processing service ")
+                    .append(boldify(ctx.processingService.getText()));
+
 
             if (ctx.send_message_param() != null) {
-                builder.append(" with parameters :\n");
+                builder.append(" with parameters :<br/>");
                 for (int i = 0 ; i < ctx.send_message_param().value_name.size() ; i++) {
                     String name = ctx.send_message_param().value_name.get(i).getText();
                     String value = ctx.send_message_param().value.get(i).getText();
                     if (value.length() <= 2) {
-                        builder.append("  UNDEFINEDVALUE as ").append(name);
+                        builder.append(HTML_TAB)
+                                .append(boldify("UNDEFINEDVALUE"))
+                                .append(" as ")
+                                .append(boldify(name));
                     }
                     else {
-                        builder.append("  ").append(value, 1, value.length() - 1).append(" as ").append(name);
+                        builder.append(HTML_TAB)
+                                .append(boldify(value.substring(1, value.length() - 1)))
+                                .append(" as ")
+                                .append(name);
                     }
                 }
 
@@ -201,17 +228,23 @@ public class MLangJSONConverter extends FromMLangConverter {
                     String name = ctx.send_message_param().variable_name.get(i).getText();
                     String value = ctx.send_message_param().variable.get(i).getText();
                     if (value.isEmpty()) {
-                        builder.append("  UNDEFINEDVALUE as ").append(name);
+                        builder.append(HTML_TAB)
+                                .append(boldify("UNDEFINEDVALUE"))
+                                .append(" as ")
+                                .append(boldify(name));
                     }
                     else {
-                        builder.append("  ").append(value).append(" as ").append(name);
+                        builder.append(HTML_TAB)
+                                .append(boldify(value))
+                                .append(" as ")
+                                .append(boldify(name));
                     }
                 }
             }
 
             if (ctx.storein() != null) {
-                builder.append("\n");
-                builder.append("Result stored it in ").append(ctx.storein().name.getText());
+                builder.append("<br/");
+                builder.append("Result stored it in ").append(boldify(ctx.storein().name.getText()));
             }
             step.setDescription(builder.toString());
             m_testCase.addStep(step);
@@ -233,5 +266,9 @@ public class MLangJSONConverter extends FromMLangConverter {
                 return str;
             }
         }
+    }
+
+    private String boldify(String value) {
+        return "<b>" + value + "</b>";
     }
 }

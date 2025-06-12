@@ -125,7 +125,7 @@ public class JSONMLangConverter extends ToMLangConverter {
 
     private Transaction buildTransaction(InstructionStepDTO instructionStepDTO) throws ConverterException {
         Pattern pattern = Pattern.compile("Transaction preparation (\\w+) from (\\w+) to (\\w+)");
-        Matcher matcher = pattern.matcher(instructionStepDTO.getDescription());
+        Matcher matcher = pattern.matcher(removeHtmlTags(instructionStepDTO.getDescription()));
 
         if (matcher.find()) {
             String name = matcher.group(1);
@@ -146,7 +146,7 @@ public class JSONMLangConverter extends ToMLangConverter {
                         "(?:Message sent stored in (\\w+))?"
                 , Pattern.DOTALL
         );
-        Matcher matcher = pattern.matcher(instructionStepDTO.getDescription());
+        Matcher matcher = pattern.matcher(removeHtmlTags(instructionStepDTO.getDescription()));
         if (matcher.find()) {
             String name = matcher.group(1);
             String from = matcher.group(2);
@@ -181,7 +181,7 @@ public class JSONMLangConverter extends ToMLangConverter {
                         "(?: and stored it in (\\w+))?"
                 , Pattern.DOTALL
         );
-        Matcher matcher = pattern.matcher(instructionStepDTO.getDescription());
+        Matcher matcher = pattern.matcher(removeHtmlTags(instructionStepDTO.getDescription()));
         if (matcher.find()) {
             String name = matcher.group(1);
             String from = matcher.group(2);
@@ -205,7 +205,7 @@ public class JSONMLangConverter extends ToMLangConverter {
                         "(?: and stored it in (\\w+))?"
                 , Pattern.DOTALL
         );
-        Matcher matcher = pattern.matcher(instructionStepDTO.getDescription());
+        Matcher matcher = pattern.matcher(removeHtmlTags(instructionStepDTO.getDescription()));
         if (matcher.find()) {
             String data = matcher.group(1);
             String with = matcher.group(2);
@@ -219,5 +219,10 @@ public class JSONMLangConverter extends ToMLangConverter {
         } else {
             throw new ConverterException("Instruction which represent a Transaction is malformed");
         }
+    }
+
+    private static String removeHtmlTags(String input) {
+        if (input == null) return null;
+        return input.replaceAll("<[^>]*>", "");
     }
  }
