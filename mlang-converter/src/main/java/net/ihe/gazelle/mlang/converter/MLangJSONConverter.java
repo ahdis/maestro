@@ -125,11 +125,10 @@ public class MLangJSONConverter extends FromMLangConverter {
                         builder.append("  ").append(value).append(" as ").append(name);
                     }
                 }
-
-                builder.append("\n");
             }
 
             if (ctx.storein() != null) {
+                builder.append("\n");
                 builder.append("Message sent stored in ").append(ctx.storein().name.getText());
             }
 
@@ -184,8 +183,35 @@ public class MLangJSONConverter extends FromMLangConverter {
             StringBuilder builder = new StringBuilder();
             builder.append("Processing data ").append(ctx.data.getText())
                     .append(" with processing service ").append(ctx.processingService.getText());
+
+            if (ctx.send_message_param() != null) {
+                builder.append(" with parameters :\n");
+                for (int i = 0 ; i < ctx.send_message_param().value_name.size() ; i++) {
+                    String name = ctx.send_message_param().value_name.get(i).getText();
+                    String value = ctx.send_message_param().value.get(i).getText();
+                    if (value.length() <= 2) {
+                        builder.append("  UNDEFINEDVALUE as ").append(name);
+                    }
+                    else {
+                        builder.append("  ").append(value, 1, value.length() - 1).append(" as ").append(name);
+                    }
+                }
+
+                for (int i = 0 ; i < ctx.send_message_param().variable_name.size() ; i++) {
+                    String name = ctx.send_message_param().variable_name.get(i).getText();
+                    String value = ctx.send_message_param().variable.get(i).getText();
+                    if (value.isEmpty()) {
+                        builder.append("  UNDEFINEDVALUE as ").append(name);
+                    }
+                    else {
+                        builder.append("  ").append(value).append(" as ").append(name);
+                    }
+                }
+            }
+
             if (ctx.storein() != null) {
-                builder.append(" and stored it in ").append(ctx.storein().name.getText());
+                builder.append("\n");
+                builder.append("Result stored it in ").append(ctx.storein().name.getText());
             }
             step.setDescription(builder.toString());
             m_testCase.addStep(step);
