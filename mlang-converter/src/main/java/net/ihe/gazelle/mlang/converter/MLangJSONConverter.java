@@ -83,7 +83,7 @@ public class MLangJSONConverter extends FromMLangConverter {
         public Object visitTransaction_stmt(MLANGParser.Transaction_stmtContext ctx) {
             InstructionStepDTO step = new InstructionStepDTO();
             step.setId("Transaction preparation (Step " + this.getStepID() + ")");
-            String description = "Transaction preparation " + ctx.ID().getText() +
+            String description = "Transaction preparation " + boldify(ctx.ID().getText()) +
                     " from " + boldify(ctx.from().ID().getText()) +
                     " to " + boldify(ctx.to().ID().getText());
             step.setDescription(description);
@@ -101,7 +101,7 @@ public class MLangJSONConverter extends FromMLangConverter {
             step.setId("Send message (Step " + this.getStepID() + ")");
             StringBuilder builder = new StringBuilder();
 
-            builder.append("Sending message ").append(ctx.ID().getText())
+            builder.append("Sending message ").append(boldify(ctx.ID().getText()))
                     .append(" from ").append(boldify(this.currentTransaction.from().ID().getText()))
                     .append(" to ").append(boldify(this.currentTransaction.to().ID().getText()));
             if (ctx.send_message_param() != null) {
@@ -121,6 +121,10 @@ public class MLangJSONConverter extends FromMLangConverter {
                                 .append(" as ")
                                 .append(boldify(name));
                     }
+
+                    if (i + 1 < ctx.send_message_param().value_name.size()) {
+                        builder.append("<br/>");
+                    }
                 }
 
                 for (int i = 0 ; i < ctx.send_message_param().variable_name.size() ; i++) {
@@ -137,6 +141,10 @@ public class MLangJSONConverter extends FromMLangConverter {
                                 .append(boldify(value))
                                 .append(" as ")
                                 .append(boldify(name));
+                    }
+
+                    if (i + 1 < ctx.send_message_param().variable_name.size()) {
+                        builder.append("<br/>");
                     }
                 }
             }
@@ -222,6 +230,10 @@ public class MLangJSONConverter extends FromMLangConverter {
                                 .append(" as ")
                                 .append(name);
                     }
+
+                    if (i + 1 < ctx.send_message_param().value_name.size()) {
+                        builder.append("<br/>");
+                    }
                 }
 
                 for (int i = 0 ; i < ctx.send_message_param().variable_name.size() ; i++) {
@@ -239,11 +251,15 @@ public class MLangJSONConverter extends FromMLangConverter {
                                 .append(" as ")
                                 .append(boldify(name));
                     }
+
+                    if (i + 1 < ctx.send_message_param().variable_name.size()) {
+                        builder.append("<br/>");
+                    }
                 }
             }
 
             if (ctx.storein() != null) {
-                builder.append("<br/");
+                builder.append("<br/>");
                 builder.append("Result stored it in ").append(boldify(ctx.storein().name.getText()));
             }
             step.setDescription(builder.toString());
