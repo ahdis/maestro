@@ -102,17 +102,17 @@ public class JSONMLangConverter extends ToMLangConverter {
     }
 
     private void convertInstruction(MTest test, InstructionStepDTO instructionStepDTO) throws ConverterException {
-        if (instructionStepDTO.getId().startsWith("Transaction preparation")) {
+        if (instructionStepDTO.getName().startsWith("Transaction preparation")) {
             transactions.push(buildTransaction(instructionStepDTO));
             test.addStep(transactions.peek());
         }
-        else if (instructionStepDTO.getId().startsWith("Send message")) {
+        else if (instructionStepDTO.getName().startsWith("Send message")) {
             transactions.peek().addAction(buildSendMessageTAction(instructionStepDTO));
         }
-        else if (instructionStepDTO.getId().startsWith("Waiting message")) {
+        else if (instructionStepDTO.getName().startsWith("Waiting message")) {
             transactions.peek().addAction(buildReceiveMessageTAction(instructionStepDTO));
         }
-        else if (instructionStepDTO.getId().startsWith("Processing data")) {
+        else if (instructionStepDTO.getName().startsWith("Processing data")) {
             if (transactions.empty())
                 test.addStep(buildProcessMStep(instructionStepDTO));
             else
