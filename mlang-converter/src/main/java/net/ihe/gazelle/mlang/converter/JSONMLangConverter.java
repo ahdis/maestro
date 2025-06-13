@@ -142,9 +142,9 @@ public class JSONMLangConverter extends ToMLangConverter {
     private SendMessageTAction buildSendMessageTAction(InstructionStepDTO instructionStepDTO) throws ConverterException {
         Pattern pattern = Pattern.compile(
                 "Sending message (\\w+) from (\\w+) to (\\w+)" +
-                        "(?: with parameters :\\s*((?:\\d+ as \\w+\\s*)+))?" +
-                        "(?:Message sent stored in (\\w+))?"
-                , Pattern.DOTALL
+                        "(?: with parameters :\\s*((?:\\S+\\s+as\\s+\\S+\\s*)+))?" +
+                        "(?:Message sent stored in (\\w+))?",
+                Pattern.DOTALL
         );
         Matcher matcher = pattern.matcher(removeHtmlTags(instructionStepDTO.getDescription()));
         if (matcher.find()) {
@@ -156,7 +156,7 @@ public class JSONMLangConverter extends ToMLangConverter {
 
             Map<String, Param> params = new HashMap<>();
             if (paramsBlock != null) {
-                Pattern paramPattern = Pattern.compile("(\\d+) as (\\w+)");
+                Pattern paramPattern = Pattern.compile("(\\S+)\\s+as\\s+(\\S+)");
                 Matcher paramMatcher = paramPattern.matcher(paramsBlock);
                 while (paramMatcher.find()) {
                     params.put(paramMatcher.group(2), new VariableParam(paramMatcher.group(1)));
@@ -202,16 +202,27 @@ public class JSONMLangConverter extends ToMLangConverter {
     private ProcessMStep buildProcessMStep(InstructionStepDTO instructionStepDTO) throws ConverterException {
         Pattern pattern = Pattern.compile(
                 "Processing data (\\w+) with processing service (\\w+)" +
-                        "(?: and stored it in (\\w+))?"
+                        "(?: with parameters :\\s*((?:\\S+\\s+as\\s+\\S+\\s*)+))?" +
+                        "(?:Result stored it in (\\w+))?"
                 , Pattern.DOTALL
         );
         Matcher matcher = pattern.matcher(removeHtmlTags(instructionStepDTO.getDescription()));
         if (matcher.find()) {
             String data = matcher.group(1);
             String with = matcher.group(2);
-            String storein = matcher.group(3);
+            String paramsBlock = matcher.group(3);
+            String storein = matcher.group(4);
 
-            ProcessMStep step = new ProcessMStep(data, with);
+            Map<String, Param> params = new HashMap<>();
+            if (paramsBlock != null) {
+                Pattern paramPattern = Pattern.compile("(\\S+)\\s+as\\s+(\\S+)");
+                Matcher paramMatcher = paramPattern.matcher(paramsBlock);
+                while (paramMatcher.find()) {
+                    params.put(paramMatcher.group(2), new VariableParam(paramMatcher.group(1)));
+                }
+            }
+
+            ProcessMStep step = new ProcessMStep(data, with, params);
             if (storein != null) {
                 step.setStorein(storein);
             }
@@ -223,6 +234,6 @@ public class JSONMLangConverter extends ToMLangConverter {
 
     private static String removeHtmlTags(String input) {
         if (input == null) return null;
-        return input.replaceAll("<[^>]*>", "");
+        return input.replaceAll("<br/>", " ").replaceAll("<[^>]*>", "").replaceAll("&[^;]+;", " ");
     }
  }

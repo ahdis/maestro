@@ -118,7 +118,7 @@ public class MLangJSONConverter extends FromMLangConverter {
                     }
                     else {
                         builder.append(HTML_TAB)
-                                .append(boldify(value.substring(1, value.length() - 1)))
+                                .append(boldify(value))
                                 .append(" as ")
                                 .append(boldify(name));
                     }
@@ -230,7 +230,7 @@ public class MLangJSONConverter extends FromMLangConverter {
                     }
                     else {
                         builder.append(HTML_TAB)
-                                .append(boldify(value.substring(1, value.length() - 1)))
+                                .append(boldify(value))
                                 .append(" as ")
                                 .append(name);
                     }
