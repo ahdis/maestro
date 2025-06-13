@@ -13,12 +13,17 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 })
 public abstract class StepDTO {
     private String id;
+    private String name;
     private String description;
 
     // Getters et Setters
     @JsonGetter("id")
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
+
+    @JsonGetter("name")
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
     @JsonGetter("description")
     public String getDescription() { return description; }

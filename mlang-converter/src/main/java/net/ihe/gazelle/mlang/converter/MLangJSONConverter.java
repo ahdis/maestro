@@ -29,6 +29,9 @@ public class MLangJSONConverter extends FromMLangConverter {
 
     private class MLangJSONVisitor extends MLANGParserBaseVisitor<Object> {
         private TestCaseDTO m_testCase;
+        private int stepId = 1;
+
+        private int getStepId() { return stepId++; }
 
         private MLANGParser.Transaction_stmtContext currentTransaction = null;
 
@@ -77,7 +80,9 @@ public class MLangJSONConverter extends FromMLangConverter {
         @Override
         public Object visitTransaction_stmt(MLANGParser.Transaction_stmtContext ctx) {
             InstructionStepDTO step = new InstructionStepDTO();
-            step.setId("Transaction preparation");
+            step.setName("Transaction preparation");
+            step.setId(Integer.toString(getStepId()));
+
             String description = "Transaction preparation " + boldify(ctx.ID().getText()) +
                     " from " + boldify(ctx.from().ID().getText()) +
                     " to " + boldify(ctx.to().ID().getText());
@@ -93,7 +98,8 @@ public class MLangJSONConverter extends FromMLangConverter {
         @Override
         public Object visitSend_message(MLANGParser.Send_messageContext ctx) {
             InstructionStepDTO step = new InstructionStepDTO();
-            step.setId("Send message");
+            step.setName("Send message");
+            step.setId(Integer.toString(getStepId()));
             StringBuilder builder = new StringBuilder();
 
             builder.append("Sending message ").append(boldify(ctx.ID().getText()))
@@ -158,7 +164,8 @@ public class MLangJSONConverter extends FromMLangConverter {
         @Override
         public Object visitReceive_message(MLANGParser.Receive_messageContext ctx) {
             InstructionStepDTO step = new InstructionStepDTO();
-            step.setId("Waiting message");
+            step.setName("Waiting message");
+            step.setId(Integer.toString(getStepId()));
             StringBuilder builder = new StringBuilder();
 
             builder.append("Waiting message ").append(boldify(ctx.ID().getText()))
@@ -175,7 +182,8 @@ public class MLangJSONConverter extends FromMLangConverter {
         @Override
         public Object visitAssertValid(MLANGParser.AssertValidContext ctx) {
             ValidationStepDTO step = new ValidationStepDTO();
-            step.setId("Assertion valid");
+            step.setName("Assertion valid");
+            step.setId(Integer.toString(getStepId()));
 
             step.addProperty(buildPropertyDTO("validationService", ctx.serviceName.getText()));
             step.addProperty(buildPropertyDTO("validationProfile", deleteMLangStringQuote(ctx.profileName.getText())));
@@ -199,7 +207,8 @@ public class MLangJSONConverter extends FromMLangConverter {
         @Override
         public Object visitProcess_stmt(MLANGParser.Process_stmtContext ctx) {
             InstructionStepDTO step = new InstructionStepDTO();
-            step.setId("Processing data");
+            step.setName("Processing data");
+            step.setId(Integer.toString(getStepId()));
 
             StringBuilder builder = new StringBuilder();
             builder.append("Processing data ")
