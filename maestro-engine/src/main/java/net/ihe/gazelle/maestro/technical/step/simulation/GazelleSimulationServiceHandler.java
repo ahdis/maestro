@@ -1,6 +1,5 @@
 package net.ihe.gazelle.maestro.technical.step.simulation;
 
-import io.smallrye.common.annotation.Blocking;
 import net.ihe.gazelle.maestro.business.step.simulation.SimulationHandler;
 import net.ihe.gazelle.simulation.business.callback.SimulationReport;
 import net.ihe.gazelle.simulation.business.sequence.SimulationSequence;

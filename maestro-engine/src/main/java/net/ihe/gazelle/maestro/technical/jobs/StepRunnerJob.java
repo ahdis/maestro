@@ -1,14 +1,13 @@
 package net.ihe.gazelle.maestro.technical.jobs;
 
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.event.Event;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.UnexpectedErrorBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.*;
-import org.eclipse.microprofile.reactive.messaging.Channel;
-import org.eclipse.microprofile.reactive.messaging.Emitter;
 
 import java.util.List;
 
@@ -20,13 +19,12 @@ import java.util.List;
 public class StepRunnerJob {
 
     private final StepRunnerProvider stepRunnerFactory;
-    private final Emitter<StepMessage> stepMessageEmitter;
+    private final Event<StepMessage> stepMessageEvent;
 
     @Inject
-    public StepRunnerJob(StepRunnerProvider stepRunnerFactory,
-                         @Channel("step-run") Emitter<StepMessage> stepMessageEmitter) {
+    public StepRunnerJob(StepRunnerProvider stepRunnerFactory, Event<StepMessage> stepMessageEvent) {
         this.stepRunnerFactory = stepRunnerFactory;
-        this.stepMessageEmitter = stepMessageEmitter;
+        this.stepMessageEvent = stepMessageEvent;
     }
 
     /**
@@ -44,9 +42,9 @@ public class StepRunnerJob {
     }
 
     /**
-     * Send a message to StepRunEventListener containing a step and a StepReportBuilder with one UnexpectedErrorBuilder containing data from an
+     * Fire an event to EventListener containing a step and a StepReportBuilder with one UnexpectedErrorBuilder containing data from an
      * exception
-     * @see StepRunEventListener
+     * @see EventListener
      * @param e an exception that occurred during step execution
      * @param stepRun Previously executed step
      */
@@ -65,13 +63,13 @@ public class StepRunnerJob {
     }
 
     /**
-     * Emit a message containing StepRunReportBuilder and StepRun to StepRunEventListener
-     * @see StepRunEventListener
+     * Fire an event containing StepRunReportBuilder and StepRun to EventListener
+     * @see EventListener
      * @param stepRunReportBuilder A StepReportBuilder containing data of stepRun execution
      * @param stepRun StepRun previously executed
      */
     private void stepEnded(StepRunReportBuilder stepRunReportBuilder, StepRun stepRun) {
-        stepMessageEmitter.send(new FinishedStepEvent(stepRunReportBuilder, stepRun));
+        stepMessageEvent.fireAsync(new FinishedStepEvent(stepRunReportBuilder, stepRun));
     }
 
 }

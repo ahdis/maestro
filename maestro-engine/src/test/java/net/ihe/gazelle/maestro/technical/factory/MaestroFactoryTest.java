@@ -6,10 +6,10 @@ import net.ihe.gazelle.maestro.technical.SessionStoreContextImpl;
 import net.ihe.gazelle.maestro.technical.StepRunnerProviderSPI;
 import net.ihe.gazelle.maestro.technical.configuration.ServiceRegistryDAOImpl;
 import net.ihe.gazelle.maestro.technical.configuration.ServiceRegistryImpl;
-import net.ihe.gazelle.maestro.technical.jobs.MicroprofileMaestroProducer;
-import net.ihe.gazelle.maestro.technical.jobs.StepMockEmitter;
+import net.ihe.gazelle.maestro.technical.jobs.EventMaestroProducer;
+import net.ihe.gazelle.maestro.technical.jobs.StepMockEvent;
 import net.ihe.gazelle.maestro.technical.jobs.StepRunnerProvider;
-import net.ihe.gazelle.maestro.technical.jobs.TestRunMockEmitter;
+import net.ihe.gazelle.maestro.technical.jobs.TestRunMockEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -22,10 +22,10 @@ class MaestroFactoryTest {
 
     @BeforeEach
     public void setUp() {
-        TestRunMockEmitter testRunMockEmitter = new TestRunMockEmitter();
-        StepMockEmitter stepMockEmitter = new StepMockEmitter();
+        TestRunMockEvent testRunMockEvent = new TestRunMockEvent();
+        StepMockEvent stepMockEvent = new StepMockEvent();
         maestroFactory = new MaestroFactory(new ServiceRegistryImpl(new ServiceRegistryDAOImpl()),
-                new MicroprofileMaestroProducer(testRunMockEmitter, stepMockEmitter),
+                new EventMaestroProducer(testRunMockEvent, stepMockEvent),
                 new SessionStoreContextImpl(),
                 null);
     }
