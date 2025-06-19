@@ -27,6 +27,7 @@ public class TestReportBuilder extends AbstractBuilder<TestReport> {
     public TestReportBuilder() {
         super();
         uuid = UUID.randomUUID().toString();
+        dateTime = new Date();
         systemsUnderTest = new ArrayList<>();
         subReports = new ArrayList<>();
         testRunReports = new ArrayList<>();
@@ -36,6 +37,7 @@ public class TestReportBuilder extends AbstractBuilder<TestReport> {
     public TestReportBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
         super(validatorBuilderFactory);
         uuid = UUID.randomUUID().toString();
+        dateTime = new Date();
         systemsUnderTest = new ArrayList<>();
         subReports = new ArrayList<>();
         testRunReports = new ArrayList<>();

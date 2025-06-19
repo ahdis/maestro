@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -30,7 +31,7 @@ public class ServiceRegistryDAOImpl implements ServiceRegistryDAO {
                     .map(ServiceDTO::getBusinessObject)
                     .toList();
             if (!services.isEmpty() && services.getFirst() != null) {
-                return services;
+                return new ArrayList<>(services);
             }
             throw new ReadingFileException(servicesFilePath + " return an empty service list");
         } catch (IOException e) {

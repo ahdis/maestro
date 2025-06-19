@@ -25,11 +25,11 @@ import java.util.List;
  */
 public class ValidationStep implements Step {
 
+    public static final String TYPE = "VALIDATION";
+
     public static final String VALIDATION_SERVICE = "validationService";
     public static final String VALIDATION_PROFILE = "validationProfile";
     public static final String CONTENT_TO_VALIDATE = "contentToValidate";
-
-    public static final String TYPE = "VALIDATION";
 
     private String name;
     private Property<String> validationService;

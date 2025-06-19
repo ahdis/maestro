@@ -4,7 +4,7 @@
     <parent>
         <groupId>net.ihe.gazelle</groupId>
         <artifactId>maestro</artifactId>
-        <version>0.2.1-SNAPSHOT</version>
+        <version>0.2.1-GZL-5507-SNAPSHOT</version>
     </parent>
 
     <artifactId>maestro-engine</artifactId>
@@ -153,6 +153,14 @@
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>validation-v2-rest-client</artifactId>
         </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>simulation-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>simulation-jaxrs-api</artifactId>
+        </dependency>
 
         <!-- Quarkus -->
         <dependency>
@@ -173,7 +181,7 @@
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-rest-client-reactive</artifactId>
+            <artifactId>quarkus-rest-client</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
@@ -185,7 +193,7 @@
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-smallrye-reactive-messaging</artifactId>
+            <artifactId>quarkus-messaging</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>

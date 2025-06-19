@@ -26,7 +26,8 @@ class MaestroFactoryTest {
         StepMockEmitter stepMockEmitter = new StepMockEmitter();
         maestroFactory = new MaestroFactory(new ServiceRegistryImpl(new ServiceRegistryDAOImpl()),
                 new MicroprofileMaestroProducer(testRunMockEmitter, stepMockEmitter),
-                new SessionStoreContextImpl());
+                new SessionStoreContextImpl(),
+                null);
     }
 
     @Test

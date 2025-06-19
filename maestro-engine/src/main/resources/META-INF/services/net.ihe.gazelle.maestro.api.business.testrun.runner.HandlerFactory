@@ -1,1 +1,3 @@
-net.ihe.gazelle.maestro.business.step.validation.ValidationHandlerFactory
+net.ihe.gazelle.maestro.technical.step.validation.GazelleValidationServiceHandlerFactory
+net.ihe.gazelle.maestro.technical.step.simulation.GazelleSimulationServiceHandlerFactory
+net.ihe.gazelle.maestro.technical.step.userinteract.UserInteractionHandlerFactory

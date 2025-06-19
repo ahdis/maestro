@@ -50,6 +50,7 @@ public class TestReport {
 
     public TestReport() {
         reportVersion = REPORT_VERSION;
+        dateTime = new Date();
         result = Result.UNDEFINED;
         systemsUnderTest = new ArrayList<>();
         subReports = new ArrayList<>();

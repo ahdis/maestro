@@ -6,7 +6,6 @@ import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.api.business.testrun.Step;
 import net.ihe.gazelle.maestro.api.business.testrun.Test;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
-import net.ihe.gazelle.maestro.technical.StepFactoryProvider;
 import net.ihe.gazelle.maestro.technical.ws.MissingArgumentException;
 import net.ihe.gazelle.maestro.technical.ws.async.TestRunStore;
 

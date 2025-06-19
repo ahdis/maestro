@@ -6,7 +6,7 @@ import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.UnexpectedErrorBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunner;
-import net.ihe.gazelle.maestro.business.step.validation.spi.ValidationReportSerializer;
+import net.ihe.gazelle.maestro.business.step.spi.ReportSerialization;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationTestResult;
 import net.ihe.gazelle.validation.v2.api.business.report.validator.ValidationReportValidator;
@@ -26,10 +26,10 @@ import java.util.List;
  */
 public class ValidationStepRunner implements StepRunner {
 
-    private final ValidationReportSerializer serializer;
+    private final ReportSerialization serializer;
     private final ValidationHandler validationHandler;
 
-    public ValidationStepRunner(ValidationReportSerializer serializer, ValidationHandler validationHandler) {
+    public ValidationStepRunner(ReportSerialization serializer, ValidationHandler validationHandler) {
         this.serializer = serializer;
         this.validationHandler = validationHandler;
     }
@@ -40,7 +40,7 @@ public class ValidationStepRunner implements StepRunner {
                 createValidationRequest((ValidationStep) stepRun.step());
         ValidationReport validationReport = validationHandler.validate(validationRequest);
         ItemBuilder itemBuilder = new ItemBuilder()
-                .setContent(serializer.toByteArray(validationReport))
+                .setContent(serializer.validationReportToByteArray(validationReport))
                 .setName("validationReport");
         StepRunReportBuilder stepRunReportBuilder = new StepRunReportBuilder()
                 .setOutputs(List.of(itemBuilder))
@@ -64,12 +64,12 @@ public class ValidationStepRunner implements StepRunner {
                                 .setMessage(ruleResult.getDescription())
                 )
         );
-        if (ValidationTestResult.UNDEFINED.equals(validationReport.getOverallResult())) {
-            stepRunReportBuilder.setResult(StepResult.UNDEFINED);
+        if (ValidationTestResult.PASSED.equals(validationReport.getOverallResult())) {
+            stepRunReportBuilder.setResult(StepResult.PASSED);
         } else if (ValidationTestResult.FAILED.equals(validationReport.getOverallResult())) {
             stepRunReportBuilder.setResult(StepResult.FAILED);
         } else {
-            stepRunReportBuilder.setResult(StepResult.PASSED);
+            stepRunReportBuilder.setResult(StepResult.UNDEFINED);
         }
     }
 

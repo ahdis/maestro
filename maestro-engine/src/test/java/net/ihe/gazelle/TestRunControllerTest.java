@@ -3,7 +3,7 @@ package net.ihe.gazelle;
 import net.ihe.gazelle.maestro.api.business.testrun.*;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
 import net.ihe.gazelle.maestro.business.engine.MaestroImpl;
-import net.ihe.gazelle.maestro.business.step.validation.ValidationHandler;
+import net.ihe.gazelle.maestro.technical.step.validation.GazelleValidationServiceHandler;
 import net.ihe.gazelle.maestro.business.step.validation.ValidationStep;
 import net.ihe.gazelle.maestro.technical.SessionStoreContextImpl;
 import net.ihe.gazelle.maestro.technical.handler.HandlerProvider;
@@ -57,7 +57,7 @@ class TestRunControllerTest {
         }
     }
 
-    static class ValidationHandlerMock extends ValidationHandler {
+    static class ValidationHandlerMock extends GazelleValidationServiceHandler {
 
 
         public ValidationHandlerMock() {
