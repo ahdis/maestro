@@ -36,9 +36,4 @@ public class GazelleSimulationServiceHandler implements SimulationHandler {
     public void simulate(SimulationRequest simulationRequest, Consumer<AdditionalInstructions> instructionHandler, Consumer<SimulationReport> reportConsumer) {
         simulationClient.simulate(simulationRequest, instructionHandler, reportConsumer);
     }
-
-    @Override
-    public void notifySimulation(String sessionId, SimulationReport report) {
-        simulationClient.notifySimulation(sessionId, report);
-    }
 }

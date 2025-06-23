@@ -5,7 +5,7 @@ import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.SerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.SerializationException;
 import net.ihe.gazelle.simulation.business.callback.SimulationReport;
-import net.ihe.gazelle.simulation.technical.jaxrs.dto.callback.SimulationReportDTO;
+import net.ihe.gazelle.simulation.jaxrs.api.technical.dto.callback.SimulationReportDTO;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
 import net.ihe.gazelle.validation.v2.api.technical.dto.report.ValidationReportDTO;
 
