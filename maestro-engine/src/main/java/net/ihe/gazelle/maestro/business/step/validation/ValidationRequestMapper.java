@@ -18,7 +18,6 @@ public class ValidationRequestMapper {
                 .setValidationProfileId(validationStep.getValidationProfile().getValue())
                 .addValidationItem(new ValidationItemBuilder()
                         .setContent(validationStep.getContentToValidate().getValue())
-                        .build()
                 );
         return validationRequest.build();
     }

@@ -1,0 +1,47 @@
+package net.ihe.gazelle.maestro.technical.websocket;
+
+import jakarta.websocket.ClientEndpoint;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.OnOpen;
+import jakarta.websocket.Session;
+import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
+import net.ihe.gazelle.modelmarshaller.technical.jackson.ObjectMapperBuilder;
+import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
+
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
+
+@ClientEndpoint
+public class WebSocketTestClient {
+
+        private final LinkedBlockingDeque<String> messages = new LinkedBlockingDeque<>();
+        private final TextSerDes serDes = new JacksonSerDes(new ObjectMapperBuilder().build());
+        private Session session;
+
+        @OnOpen
+        public void onOpen(Session session) {
+                this.session = session;
+        }
+
+        @OnMessage
+        public void onMessage(String message) {
+                messages.add(message);
+        }
+
+        public void sendMessage(String message) {
+                session.getAsyncRemote().sendText(message);
+        }
+
+        public String pollLastMessage(long timeoutMs) throws InterruptedException {
+                return messages.poll(timeoutMs, TimeUnit.MILLISECONDS);
+        }
+
+        public void sendWSMessage(WSMessageDTO message) {
+                try {
+                        String jsonMessage = serDes.serializeAsString(message);
+                        session.getAsyncRemote().sendText(jsonMessage);
+                } catch (Exception e) {
+                        throw new RuntimeException("Erreur lors de la sérialisation du message", e);
+                }
+        }
+}

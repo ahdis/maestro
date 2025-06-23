@@ -8,6 +8,7 @@ import net.ihe.gazelle.maestro.api.business.testrun.runner.FinishedStepEvent;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StartStepCommand;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepMessage;
 import net.ihe.gazelle.maestro.technical.jobs.testrunevents.*;
+import net.ihe.gazelle.maestro.technical.websocket.client.TestRunSocketClient;
 import net.ihe.gazelle.maestro.technical.ws.async.AsynchronousMaestro;
 import net.ihe.gazelle.maestro.technical.ws.async.tmintegration.TMTestRunMaestro;
 import org.eclipse.microprofile.reactive.messaging.Acknowledgment;
@@ -26,6 +27,7 @@ public class MicroprofileListener implements TestRunEventListener, StepRunEventL
     private final AsynchronousMaestro asynchronousMaestro;
     private final StepRunnerJob stepRunnerJob;
     private final TMTestRunMaestro tmTestRunMaestro;
+    private final TestRunSocketClient testRunSocketClient = new TestRunSocketClient();
 
     @Inject
     public MicroprofileListener(Maestro engine, SynchronousMaestro synchronousMaestro, AsynchronousMaestro asynchronousMaestro, StepRunnerJob stepRunnerJob, TMTestRunMaestro tmTestRunMaestro) {
@@ -76,6 +78,7 @@ public class MicroprofileListener implements TestRunEventListener, StepRunEventL
             engine.run(testSetEvent.getTestSetRun());
         }
         if (event instanceof FinishTestRunEvent finishTestRunEvent) {
+            testRunSocketClient.sendTestRunCompleted(finishTestRunEvent.getTestRun().getTestSetId(),finishTestRunEvent.getTestRunReportBuilder().build());
             engine.finishTest(finishTestRunEvent.getTestRun(), finishTestRunEvent.getTestRunReportBuilder());
         }
         if (event instanceof FinishTestSetEvent finishTestSetEvent) {
@@ -118,6 +121,7 @@ public class MicroprofileListener implements TestRunEventListener, StepRunEventL
             stepRunnerJob.launchStepExecution(startStepCommand);
         }
         if (stepMessage instanceof FinishedStepEvent finishedStepEvent) {
+            testRunSocketClient.sendTestStepCompleted(finishedStepEvent.getStepRun().testRunId(),finishedStepEvent.getStepRunReport().build());
             engine.finishStep(finishedStepEvent.getStepRun(), finishedStepEvent.getStepRunReport());
         }
     }
