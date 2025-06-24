@@ -92,7 +92,8 @@ class MaestroImplTest {
         assertEquals(1, testRunReports.getFirst().getStepRunReports().size());
         assertEquals(1, testRunReports.getLast().getStepRunReports().size());
         assertEquals(2, report.getTestCounters().getTotal());
-        assertEquals(2, report.getTestCounters().getUndefined());
+        assertEquals(1, report.getTestCounters().getPassed());
+        assertEquals(1, report.getTestCounters().getUndefined());
     }
 
     @Test
