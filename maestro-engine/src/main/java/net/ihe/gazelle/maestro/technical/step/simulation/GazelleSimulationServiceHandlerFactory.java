@@ -13,6 +13,7 @@ import net.ihe.gazelle.simulation.client.technical.SimulationServiceClientImpl;
 import net.ihe.gazelle.simulation.jaxrs.api.technical.ws.SimulationAPI;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 public class GazelleSimulationServiceHandlerFactory implements HandlerFactory {
 
@@ -31,7 +32,7 @@ public class GazelleSimulationServiceHandlerFactory implements HandlerFactory {
                             SimulationCallbackFactory.getSimulationSessionDAO()
                     )
             );
-        } catch (NullPointerException e) {
+        } catch (NullPointerException | NoSuchElementException e) {
             throw new IllegalArgumentException("Service " + providedInterface.getInterfaceName() + " has no bindings");
         }
     }

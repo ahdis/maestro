@@ -4,7 +4,7 @@ public class UserInteractionHandlerImpl implements UserInteractionHandler {
 
     @Override
     public void displayMessage(String message) {
-
+        // Not yet implemented
     }
 
     @Override

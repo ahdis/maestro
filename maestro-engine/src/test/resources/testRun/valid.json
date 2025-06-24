@@ -99,6 +99,32 @@
           ]
         },
         {
+          "type": "SIMULATION",
+          "name": "simulationStep",
+          "properties": [
+            {
+              "name": "simulationService",
+              "value": "MCSD",
+              "type": "string"
+            },
+            {
+              "name": "sequenceId",
+              "value": "MCSD_Sequence",
+              "type": "string"
+            },
+            {
+              "name": "timeoutSeconds",
+              "value": 60,
+              "type": "integer"
+            },
+            {
+              "name": "Patient Id",
+              "value": "1.1.1",
+              "type": "string"
+            }
+          ]
+        },
+        {
           "type": "ASSERTION",
           "name": "step2",
           "properties": [

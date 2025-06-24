@@ -23,8 +23,9 @@ public class ValidationStepRunnerFactory implements StepRunnerFactory {
     @Override
     public Map<String, Class<? extends Handler>> getRequiredServices(Step step) {
         Map<String, Class<? extends Handler>> requiredHandlers = new HashMap<>();
-        if(step instanceof ValidationStep validationStep)
+        if (step instanceof ValidationStep validationStep) {
             requiredHandlers.put(validationStep.getValidationService().getValue(), ValidationHandler.class);
+        }
         return requiredHandlers;
     }
 

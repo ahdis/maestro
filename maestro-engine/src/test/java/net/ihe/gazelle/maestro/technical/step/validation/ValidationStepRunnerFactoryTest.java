@@ -25,7 +25,7 @@ class ValidationStepRunnerFactoryTest {
     }
 
     @Test
-    void getRequiredServicesOfAssertionStep(){
+    void getRequiredServicesOfAssertionStep() {
         Step assertionStep = new AssertionStep(
                 "saucisse",
                 new Property<>(AssertionStep.ASSERTION, "equals(puré)".getBytes()),
