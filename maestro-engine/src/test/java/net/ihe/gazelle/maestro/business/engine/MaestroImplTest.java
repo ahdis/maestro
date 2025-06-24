@@ -9,10 +9,12 @@ import net.ihe.gazelle.maestro.api.business.testrun.PropertyRef;
 import net.ihe.gazelle.maestro.api.business.testrun.Step;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.business.step.assertion.AssertionStep;
+import net.ihe.gazelle.maestro.business.step.simulation.SimulationStep;
 import net.ihe.gazelle.maestro.business.step.validation.ValidationStep;
 import net.ihe.gazelle.maestro.technical.SessionStoreContextImpl;
 import net.ihe.gazelle.maestro.technical.StepRunnerProviderSPI;
 import net.ihe.gazelle.maestro.technical.client.TestReportClient;
+import net.ihe.gazelle.maestro.technical.handler.HandlerProviderMock;
 import net.ihe.gazelle.maestro.technical.jobs.*;
 import net.ihe.gazelle.maestro.technical.ws.async.AsynchronousMaestro;
 import net.ihe.gazelle.maestro.technical.ws.async.tmintegration.TMTestRunMaestro;
@@ -66,6 +68,18 @@ class MaestroImplTest {
         assertEquals(1, testRunReports.getFirst().getStepRunReports().size());
         assertEquals(1, report.getTestCounters().getTotal());
         assertEquals(1, report.getTestCounters().getUndefined());
+    }
+
+    @Test
+    void testMaestroSimulationStep() throws ExecutionException, InterruptedException {
+        List<TestRun> testRuns = getTestRunsWithOneSimulationStep();
+        TestReport report = synchronousMaestro.executeTestSet(testRuns);
+        assertEquals(Result.PASSED, report.getResult());
+        List<TestRunReport> testRunReports = report.getTestRunReports();
+        assertEquals(1, testRunReports.size());
+        assertEquals(1, testRunReports.getFirst().getStepRunReports().size());
+        assertEquals(1, report.getTestCounters().getTotal());
+        assertEquals(1, report.getTestCounters().getPassed());
     }
 
     @Test
@@ -142,6 +156,26 @@ class MaestroImplTest {
         );
         net.ihe.gazelle.maestro.api.business.testrun.Test test = new net.ihe.gazelle.maestro.api.business.testrun.Test().addStep(validationStep);
         test.setName("validationTest");
+        test.setId(UUID.randomUUID().toString());
+        TestRun testRun = new TestRun();
+        testRun.setTest(test);
+        testRuns.add(testRun);
+        return testRuns;
+    }
+
+    private static List<TestRun> getTestRunsWithOneSimulationStep() {
+        List<TestRun> testRuns = new ArrayList<>();
+        Step simulationStep = new SimulationStep("simulationStep",
+                new Property<>(SimulationStep.SIMULATION_SERVICE, "MCSD"),
+                new Property<>(SimulationStep.SEQUENCE_ID, "sequencId"),
+                new Property<>(SimulationStep.TIMEOUT_SECONDS, 60),
+                List.of(
+                        new Property<>("Patient Id", "1.1.1.1"),
+                        new Property<>("Boolean prop", true),
+                        new Property<>("File prop", "test".getBytes())
+                ));
+        net.ihe.gazelle.maestro.api.business.testrun.Test test = new net.ihe.gazelle.maestro.api.business.testrun.Test().addStep(simulationStep);
+        test.setName("simulationTest");
         test.setId(UUID.randomUUID().toString());
         TestRun testRun = new TestRun();
         testRun.setTest(test);

@@ -4,7 +4,6 @@ import net.ihe.gazelle.maestro.api.business.testrun.runner.ConfigProvider;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.HandlerFactory;
 import net.ihe.gazelle.maestro.business.step.validation.ServiceClientException;
-import net.ihe.gazelle.maestro.business.step.validation.ValidationHandler;
 import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterface;
 import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterfaceBuilder;
 import net.ihe.gazelle.servicemetadata.api.business.HttpRestBinding;
@@ -17,9 +16,10 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 public class GazelleValidationServiceHandlerFactory implements HandlerFactory {
+
     @Override
     public Class<? extends Handler> getHandlerType() {
-        return ValidationHandler.class;
+        return GazelleValidationServiceHandler.class;
     }
 
     @Override

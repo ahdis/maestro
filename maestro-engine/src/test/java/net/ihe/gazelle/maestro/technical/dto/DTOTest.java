@@ -31,7 +31,7 @@ class DTOTest {
                 .toList());
 
         assertEquals(1, testRuns.size());
-        assertEquals(4, testRuns.getFirst().getTest().getSteps().size());
+        assertEquals(5, testRuns.getFirst().getTest().getSteps().size());
 
         List<TestRunDTO> testRunDTOS = testRuns.stream().map(TestRunDTO::new).toList();
         assertDoesNotThrow(() -> SER_DES.serializeAsString(testRunDTOS));
