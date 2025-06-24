@@ -1,8 +1,9 @@
-package net.ihe.gazelle.maestro.business.step.validation;
+package net.ihe.gazelle.maestro.technical.step.validation;
 
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.api.business.testrun.Step;
 import net.ihe.gazelle.maestro.business.step.assertion.AssertionStep;
+import net.ihe.gazelle.maestro.business.step.validation.ValidationStep;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

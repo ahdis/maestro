@@ -14,7 +14,7 @@ class StepRunnerProviderSPITest {
     @Test
     void createNotSupportedStep(){
         Step step = new DummyStep();
-        StepRunnerProvider provider = new StepRunnerProviderSPI(new HandlerProviderSPI(new ServiceRegistryImpl(new ServiceRegistryDAOImpl())));
+        StepRunnerProvider provider = new StepRunnerProviderSPI(new HandlerProviderSPI(new ServiceRegistryImpl(new ServiceRegistryDAOImpl()), null));
         assertThrows(IllegalArgumentException.class, () -> provider.create(step));
     }
 

@@ -9,6 +9,7 @@ import java.util.Map;
 /**
  * Assertion Step is not implemented. It exists just for test purpose
  */
+// TODO : to delete when StepFactoryProvider will be deleted
 public class AssertionStepFactory implements StepFactory {
 
     /**

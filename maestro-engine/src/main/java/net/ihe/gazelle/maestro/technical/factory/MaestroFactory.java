@@ -5,6 +5,7 @@ import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Produces;
 import net.ihe.gazelle.maestro.api.business.testrun.Maestro;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.ConfigProvider;
 import net.ihe.gazelle.maestro.business.engine.MaestroImpl;
 import net.ihe.gazelle.maestro.business.engine.MaestroProducer;
 import net.ihe.gazelle.maestro.technical.ServiceRegistry;
@@ -23,17 +24,20 @@ public class MaestroFactory {
 
     SessionStoreContextImpl sessionStoreContext;
 
+    ConfigProvider configProvider;
+
     @Inject
-    public MaestroFactory(ServiceRegistry serviceRegistry, MaestroProducer maestroProducer, SessionStoreContextImpl sessionStoreContext) {
+    public MaestroFactory(ServiceRegistry serviceRegistry, MaestroProducer maestroProducer, SessionStoreContextImpl sessionStoreContext, ConfigProvider configProvider) {
         this.serviceRegistry = serviceRegistry;
         this.maestroProducer = maestroProducer;
         this.sessionStoreContext = sessionStoreContext;
+        this.configProvider = configProvider;
     }
 
     @Produces
     @Default
     StepRunnerProvider getStepRunnerProvider() {
-        return new StepRunnerProviderSPI(new HandlerProviderSPI(serviceRegistry));
+        return new StepRunnerProviderSPI(new HandlerProviderSPI(serviceRegistry, configProvider));
     }
 
     @Produces

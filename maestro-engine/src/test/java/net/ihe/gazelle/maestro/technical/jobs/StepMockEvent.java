@@ -1,0 +1,68 @@
+package net.ihe.gazelle.maestro.technical.jobs;
+
+import jakarta.enterprise.event.Event;
+import jakarta.enterprise.event.NotificationOptions;
+import jakarta.enterprise.util.TypeLiteral;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.FinishedStepEvent;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.StartStepCommand;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.StepMessage;
+
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+
+public class StepMockEvent implements Event<StepMessage> {
+
+    ExecutorService executorService = new ScheduledThreadPoolExecutor(5);
+    List<EventListener> listeners = new ArrayList<>();
+
+    public StepMockEvent addListener(EventListener listener) {
+        if (listener != null) {
+            listeners.add(listener);
+        }
+        return this;
+    }
+
+    @Override
+    public void fire(StepMessage stepMessage) {
+        if (stepMessage instanceof StartStepCommand startStepCommand) {
+            listeners.forEach(listener ->
+                    executorService.submit(() -> listener.onStartStep(startStepCommand))
+            );
+        }
+        if (stepMessage instanceof FinishedStepEvent finishedStepEvent) {
+            listeners.forEach(listener ->
+                    executorService.submit(() -> listener.onFinishStep(finishedStepEvent))
+            );
+        }
+    }
+
+    @Override
+    public <U extends StepMessage> CompletionStage<U> fireAsync(U stepMessage) {
+        fire(stepMessage);
+        return null;
+    }
+
+    @Override
+    public <U extends StepMessage> CompletionStage<U> fireAsync(U u, NotificationOptions notificationOptions) {
+        return null;
+    }
+
+    @Override
+    public Event<StepMessage> select(Annotation... annotations) {
+        return null;
+    }
+
+    @Override
+    public <U extends StepMessage> Event<U> select(Class<U> aClass, Annotation... annotations) {
+        return null;
+    }
+
+    @Override
+    public <U extends StepMessage> Event<U> select(TypeLiteral<U> typeLiteral, Annotation... annotations) {
+        return null;
+    }
+}

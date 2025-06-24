@@ -6,7 +6,7 @@
     "replicaId": "replicaId",
     "providedInterfaces": [
       {
-        "interfaceName": "Validation Service",
+        "interfaceName": "Validation Service API",
         "interfaceVersion": "2.0.0",
         "bindings": [
           {

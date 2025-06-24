@@ -1,13 +1,13 @@
 package net.ihe.gazelle.maestro.business.engine;
 
-import net.ihe.gazelle.maestro.business.step.validation.ValidationHandler;
+import net.ihe.gazelle.maestro.technical.step.validation.GazelleValidationServiceHandler;
 import net.ihe.gazelle.validation.v2.api.business.profile.ValidationProfile;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
 import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
 
 import java.util.List;
 
-public class ValidationHandlerMock extends ValidationHandler {
+public class ValidationHandlerMock extends GazelleValidationServiceHandler {
 
 
     public ValidationHandlerMock() {

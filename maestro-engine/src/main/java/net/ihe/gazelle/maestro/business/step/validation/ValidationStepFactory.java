@@ -6,6 +6,7 @@ import net.ihe.gazelle.maestro.api.business.testrun.StepFactory;
 
 import java.util.Map;
 
+// TODO : to delete when StepFactoryProvider will be deleted
 public class ValidationStepFactory implements StepFactory {
 
     @Override

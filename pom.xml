@@ -32,8 +32,9 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <framework.version>2.0.0</framework.version>
-        <lang.version>1.0.3</lang.version>
+        <lang.version>1.0.4</lang.version>
         <validation.service.version>2.0.0-FRAME-74-SNAPSHOT</validation.service.version>
+        <simulation.service.api.version>1.0.0-GZL-5491-SNAPSHOT</simulation.service.api.version>
         <equalsverifier.version>3.16.1</equalsverifier.version>
 
         <!-- Quarkus Build-->
@@ -112,6 +113,13 @@
                 <artifactId>validation-service-api</artifactId>
                 <groupId>net.ihe.gazelle</groupId>
                 <version>${validation.service.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>net.ihe.gazelle</groupId>
+                <artifactId>simulation-service-api</artifactId>
+                <version>${simulation.service.api.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

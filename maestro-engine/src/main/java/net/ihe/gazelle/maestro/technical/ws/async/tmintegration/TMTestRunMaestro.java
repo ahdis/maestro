@@ -2,6 +2,7 @@ package net.ihe.gazelle.maestro.technical.ws.async.tmintegration;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
@@ -10,8 +11,6 @@ import net.ihe.gazelle.maestro.technical.jobs.testrunevents.FinishTestSetEvent;
 import net.ihe.gazelle.maestro.technical.jobs.testrunevents.StartTestSetCommand;
 import net.ihe.gazelle.maestro.technical.jobs.testrunevents.TestRunEvent;
 import net.ihe.gazelle.maestro.technical.ws.async.TestRunStore;
-import org.eclipse.microprofile.reactive.messaging.Channel;
-import org.eclipse.microprofile.reactive.messaging.Emitter;
 
 import java.util.List;
 import java.util.Map;
@@ -26,13 +25,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TMTestRunMaestro {
 
     private final Map<String, TestRunStore> tmRunningServices;
-    private final Emitter<TestRunEvent> emitter;
+    private final Event<TestRunEvent> event;
     private final TestReportClient client;
 
     @Inject
-    public TMTestRunMaestro(@Channel("test-run") Emitter<TestRunEvent> emitter, TestReportClient client) {
+    public TMTestRunMaestro(Event<TestRunEvent> event, TestReportClient client) {
         this.tmRunningServices = new ConcurrentHashMap<>();
-        this.emitter = emitter;
+        this.event = event;
         this.client = client;
     }
 
@@ -41,7 +40,7 @@ public class TMTestRunMaestro {
         List<TestRun> testRuns = TMScriptMapper.convertToTestRun(testRunNodes, store);
         TestSetRun testSetRun = new TestSetRun(UUID.randomUUID().toString(), testRuns);
         tmRunningServices.put(testSetRun.testSetId(), store);
-        emitter.send(new StartTestSetCommand(testSetRun));
+        event.fireAsync(new StartTestSetCommand(testSetRun));
     }
 
     public void callbackTM(FinishTestSetEvent finishTestSetEvent) {

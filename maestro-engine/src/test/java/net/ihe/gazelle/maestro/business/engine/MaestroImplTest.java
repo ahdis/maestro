@@ -33,26 +33,26 @@ class MaestroImplTest {
 
     @BeforeAll
     static void setUp() {
-        TestRunMockEmitter testRunMockEmitter = new TestRunMockEmitter();
-        StepMockEmitter stepMockEmitter = new StepMockEmitter();
+        TestRunMockEvent testRunMockEvent = new TestRunMockEvent();
+        StepMockEvent stepMockEvent = new StepMockEvent();
         MaestroImpl maestro = new MaestroImpl(
-                new MicroprofileMaestroProducer(testRunMockEmitter, stepMockEmitter),
+                new EventMaestroProducer(testRunMockEvent, stepMockEvent),
                 new SessionStoreContextImpl()
         );
-        synchronousMaestro = new SynchronousMaestro(testRunMockEmitter, 60);
-        MicroprofileListener microprofileListener = createListener(testRunMockEmitter, stepMockEmitter, maestro);
-        testRunMockEmitter.addListener(microprofileListener);
-        stepMockEmitter.addListener(microprofileListener);
+        synchronousMaestro = new SynchronousMaestro(testRunMockEvent, 60);
+        EventListener eventListener = createListener(testRunMockEvent, stepMockEvent, maestro);
+        testRunMockEvent.addListener(eventListener);
+        stepMockEvent.addListener(eventListener);
     }
 
-    private static MicroprofileListener createListener(TestRunMockEmitter testRunMockEmitter, StepMockEmitter stepMockEmitter, MaestroImpl maestro) {
-        AsynchronousMaestro asynchronousMaestro = new AsynchronousMaestro(testRunMockEmitter, new TestReportClient());
+    private static EventListener createListener(TestRunMockEvent testRunMockEvent, StepMockEvent stepMockEvent, MaestroImpl maestro) {
+        AsynchronousMaestro asynchronousMaestro = new AsynchronousMaestro(testRunMockEvent, new TestReportClient());
         StepRunnerJob stepRunnerJob = new StepRunnerJob(
                 new StepRunnerProviderSPI(new HandlerProviderMock()),
-                stepMockEmitter
+                stepMockEvent
         );
-        TMTestRunMaestro tmTestRunMaestro = new TMTestRunMaestro(testRunMockEmitter, new TestReportClient());
-        return new MicroprofileListener(maestro, synchronousMaestro, asynchronousMaestro, stepRunnerJob, tmTestRunMaestro);
+        TMTestRunMaestro tmTestRunMaestro = new TMTestRunMaestro(testRunMockEvent, new TestReportClient());
+        return new EventListener(maestro, synchronousMaestro, asynchronousMaestro, stepRunnerJob, tmTestRunMaestro);
     }
 
 
