@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class AssertionHandlerTest {
 
     @Test
-    void isAvaliableTest() {
+    void isAvailableTest() {
         AssertionHandler handler = new AssertionHandler();
         assertTrue(handler.isAvailable());
     }

@@ -18,11 +18,11 @@ public class AssertionStepRunner implements StepRunner {
 
     @Override
     public StepRunReportBuilder run(StepRun stepRun) {
-        handler.assertion((AssertionStep) stepRun.step());
+        boolean result = handler.assertion((AssertionStep) stepRun.step());
         return new StepRunReportBuilder()
                 .setStepId(stepRun.step().getName())
                 .setType(AssertionStep.TYPE)
-                .setResult(StepResult.UNDEFINED);
+                .setResult(result ? StepResult.PASSED : StepResult.FAILED);
     }
 
     @Override

@@ -1,6 +1,5 @@
 package net.ihe.gazelle.maestro.business.step.assertion;
 
-import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
 
 /**
@@ -12,8 +11,8 @@ public class AssertionHandler implements Handler {
         /*Empty constructor*/
     }
 
-    public StepRunReport assertion(AssertionStep assertionStep) {
-        return new StepRunReport().setStepId(assertionStep.getName());
+    public boolean assertion(AssertionStep assertionStep) {
+        return assertionStep != null;
     }
 
     @Override
