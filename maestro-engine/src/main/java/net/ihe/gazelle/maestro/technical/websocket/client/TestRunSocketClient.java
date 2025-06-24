@@ -11,14 +11,18 @@ import net.ihe.gazelle.maestro.technical.websocket.WSMessageDTO;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TestRunSocketClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestRunSocketClient.class);
-    private static final String WS_URI = "ws://localhost:8150/maestro/testRuns/internal";
+    private static final String WEBSOCKET_URL = Objects.requireNonNull(ConfigProvider.getConfig().getValue("gzl.websocket.url", String.class));;
+    private static final String WS_URI = WEBSOCKET_URL + "/internal";
     private static final int CONNECT_TIMEOUT_SECONDS = 5;
 
     private final TestRunSocketClientEndpoint client = new TestRunSocketClientEndpoint();
@@ -48,9 +52,7 @@ public class TestRunSocketClient {
             }
 
             client.sendWSMessage(message);
-            // Attendre que le message soit envoyé avant de continuer
             TimeUnit.MILLISECONDS.sleep(100);
-
         } catch (Exception e) {
             LOGGER.error("Failed to send websocket message to {}: {}", WS_URI, e.getMessage());
             throw new RuntimeException("Failed to send websocket message " + WS_URI, e);

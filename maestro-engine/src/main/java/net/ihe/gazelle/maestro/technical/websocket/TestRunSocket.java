@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 @ServerEndpoint("/testRuns/{id}")
@@ -18,30 +19,34 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TestRunSocket {
 
     private static final Logger LOG = LoggerFactory.getLogger(TestRunSocket.class.getName());
+    public static final String INTERNAL_TEST_RUN_ID = "internal";
     private final Map<String, Session> sessions = new ConcurrentHashMap<>();
     private final TextSerDes serDes = new JacksonSerDes(new ObjectMapperBuilder().build());
 
     @OnOpen
     public void onOpen(Session session, @PathParam("id") String testSetId) {
+        if (!Objects.equals(testSetId, INTERNAL_TEST_RUN_ID))
             sessions.put(testSetId, session);
     }
 
     @OnClose
     public void onClose(Session session, @PathParam("id") String testSetId) {
         sessions.remove(testSetId);
-        broadcast(String.format("TestSet %s is finished", testSetId));
     }
 
     @OnError
     public void onError(Session session, @PathParam("id") String testSetId, Throwable throwable) {
         sessions.remove(testSetId);
-        broadcast(String.format("TestSet %s ended on error: %s", testSetId, throwable.getMessage()));
+        LOG.error("Test set {} ended on error: {} ", testSetId, throwable.getMessage());
     }
 
     @OnMessage
     public void onMessage(String message, @PathParam("id") String testSetId) {
-        if (testSetId.equals("internal")) {
-            sendToUniqueClient(message);
+        // Ping for test purpose
+        if (message.equals("ping")) {
+            sendMessageToClient("pong", testSetId);
+        } else if (testSetId.equals(INTERNAL_TEST_RUN_ID)) {
+            sendMessageToClient(message);
         } else {
             broadcast(message);
         }
@@ -58,9 +63,17 @@ public class TestRunSocket {
         );
     }
 
-    private void sendToUniqueClient(String message) {
+    private void sendMessageToClient(String message) {
         String testSetId = serDes.deserialize(message, WSMessageDTO.class).getTestRunId();
         LOG.info("Sending message to unique client: {}", testSetId);
+        sessions.get(testSetId).getAsyncRemote().sendObject(message, result -> {
+            if (result.getException() != null) {
+                LOG.error("Unable to send message to {}: {}", testSetId, result.getException().getMessage());
+            }
+        });
+    }
+
+    private void sendMessageToClient(String message, String testSetId) {
         sessions.get(testSetId).getAsyncRemote().sendObject(message, result -> {
             if (result.getException() != null) {
                 LOG.error("Unable to send message to {}: {}", testSetId, result.getException().getMessage());

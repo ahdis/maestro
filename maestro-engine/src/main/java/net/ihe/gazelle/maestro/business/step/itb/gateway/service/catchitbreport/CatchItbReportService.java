@@ -1,6 +1,8 @@
 package net.ihe.gazelle.maestro.business.step.itb.gateway.service.catchitbreport;
 
+import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.event.Event;
+import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import net.ihe.gazelle.maestro.api.business.testreport.ItemBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
@@ -25,6 +27,8 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
+@Dependent
+@Default
 public class CatchItbReportService {
 
     private static final Logger log = LoggerFactory.getLogger(CatchItbReportService.class);
