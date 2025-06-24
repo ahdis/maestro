@@ -7,6 +7,7 @@ import net.ihe.gazelle.maestro.api.business.testrun.Maestro;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.FinishedStepEvent;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StartStepCommand;
 import net.ihe.gazelle.maestro.technical.jobs.testrunevents.*;
+import net.ihe.gazelle.maestro.technical.websocket.client.TestRunSocketClient;
 import net.ihe.gazelle.maestro.technical.ws.async.AsynchronousMaestro;
 import net.ihe.gazelle.maestro.technical.ws.async.tmintegration.TMTestRunMaestro;
 import org.slf4j.Logger;
@@ -25,6 +26,7 @@ public class EventListener {
     private final AsynchronousMaestro asynchronousMaestro;
     private final StepRunnerJob stepRunnerJob;
     private final TMTestRunMaestro tmTestRunMaestro;
+    private final TestRunSocketClient testRunSocketClient = new TestRunSocketClient();
 
     @Inject
     public EventListener(Maestro engine, SynchronousMaestro synchronousMaestro, AsynchronousMaestro asynchronousMaestro, StepRunnerJob stepRunnerJob, TMTestRunMaestro tmTestRunMaestro) {
@@ -54,6 +56,7 @@ public class EventListener {
     }
 
     public void onFinishTestRun(@ObservesAsync FinishTestRunEvent finishTestRunEvent) {
+        testRunSocketClient.sendTestRunCompleted(finishTestRunEvent.getTestRun().getTestSetId(),finishTestRunEvent.getTestRunReportBuilder().build());
         engine.finishTest(finishTestRunEvent.getTestRun(), finishTestRunEvent.getTestRunReportBuilder());
     }
 
@@ -62,6 +65,7 @@ public class EventListener {
     }
 
     public void onFinishStep(@ObservesAsync FinishedStepEvent finishedStepEvent) {
+        testRunSocketClient.sendTestStepCompleted(finishedStepEvent.getStepRun().testRunId(),finishedStepEvent.getStepRunReport().build());
         engine.finishStep(finishedStepEvent.getStepRun(), finishedStepEvent.getStepRunReport());
     }
 

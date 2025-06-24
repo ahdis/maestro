@@ -7,6 +7,7 @@ import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.UnexpectedErrorBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunner;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.SyncStepRunner;
 import net.ihe.gazelle.maestro.business.step.spi.ReportSerialization;
 import net.ihe.gazelle.maestro.business.step.userinteract.UserInteractionHandler;
 import net.ihe.gazelle.simulation.business.callback.Result;
@@ -20,7 +21,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-public class SimulationStepRunner implements StepRunner {
+public class SimulationStepRunner extends SyncStepRunner {
 
     private final ReportSerialization serializer;
     private final SimulationHandler simulationHandler;

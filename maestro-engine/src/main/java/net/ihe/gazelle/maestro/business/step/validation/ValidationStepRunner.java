@@ -3,12 +3,9 @@ package net.ihe.gazelle.maestro.business.step.validation;
 import net.ihe.gazelle.maestro.api.business.testreport.ItemBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
-import net.ihe.gazelle.maestro.api.business.testreport.UnexpectedErrorBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunner;
-import net.ihe.gazelle.maestro.business.step.spi.ReportSerialization;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.SyncStepRunner;
-import net.ihe.gazelle.maestro.business.step.validation.spi.ValidationReportSerializer;
+import net.ihe.gazelle.maestro.business.step.spi.ReportSerialization;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationTestResult;
 import net.ihe.gazelle.validation.v2.api.business.report.validator.ValidationReportValidator;
@@ -54,7 +51,8 @@ public class ValidationStepRunner extends SyncStepRunner {
 
     /**
      * Compute the validation step result from the received validation report from external validation tool
-     * @param validationReport The received validation report
+     *
+     * @param validationReport     The received validation report
      * @param stepRunReportBuilder An object to build the Step run report
      */
     private void computeResult(ValidationReport validationReport, StepRunReportBuilder stepRunReportBuilder) {

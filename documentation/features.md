@@ -1,4 +1,4 @@
-# Fetures Maestro 1.0.0
+# Features Maestro 1.0.0
 
 ## Description
 

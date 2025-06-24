@@ -1,3 +1,4 @@
 net.ihe.gazelle.maestro.business.step.validation.ValidationStepFactory
 net.ihe.gazelle.maestro.business.step.assertion.AssertionStepFactory
 net.ihe.gazelle.maestro.business.step.simulation.SimulationStepFactory
+net.ihe.gazelle.maestro.business.step.itb.ItbStepFactory

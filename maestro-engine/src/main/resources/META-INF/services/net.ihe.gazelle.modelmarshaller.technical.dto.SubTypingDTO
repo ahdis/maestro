@@ -1,3 +1,4 @@
 net.ihe.gazelle.maestro.technical.dto.testrun.ValidationStepDTO
 net.ihe.gazelle.maestro.technical.dto.testrun.AssertionStepDTO
 net.ihe.gazelle.maestro.technical.dto.testrun.SimulationStepDTO
+net.ihe.gazelle.maestro.technical.dto.testrun.ItbStepDTO

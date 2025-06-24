@@ -1,7 +1,6 @@
 package net.ihe.gazelle.maestro.business.step.itb.gateway.service.catchitbreport;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.enterprise.inject.Default;
+import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
 import net.ihe.gazelle.maestro.api.business.testreport.ItemBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
@@ -11,8 +10,6 @@ import net.ihe.gazelle.maestro.api.business.testrun.runner.StepMessage;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 import net.ihe.gazelle.maestro.business.step.itb.gateway.client.ItbHttpClient;
 import net.ihe.gazelle.maestro.business.step.itb.gateway.dto.ItbTriggerDTO;
-import org.eclipse.microprofile.reactive.messaging.Channel;
-import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -28,18 +25,17 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
-@Dependent
-@Default
 public class CatchItbReportService {
 
     private static final Logger log = LoggerFactory.getLogger(CatchItbReportService.class);
-    private final Emitter<StepMessage> emitter;
     private final ItbHttpClient itbHttpClient;
+    private final Event<StepMessage> finishStepEvent;
+
 
     @Inject
-    public CatchItbReportService(@Channel("step-run") Emitter<StepMessage> emitter, ItbHttpClient itbHttpClient) {
+    public CatchItbReportService(Event<StepMessage> finishStepEvent, ItbHttpClient itbHttpClient) {
         this.itbHttpClient = itbHttpClient;
-        this.emitter = emitter;
+        this.finishStepEvent = finishStepEvent;
     }
 
     /**
@@ -73,7 +69,7 @@ public class CatchItbReportService {
      * Method to push report to the messaging channel
      */
     public void pushReport(StepRun stepRun, StepRunReportBuilder stepRunReportBuilder) {
-        emitter.send(new FinishedStepEvent(stepRunReportBuilder, stepRun));
+        finishStepEvent.fireAsync(new FinishedStepEvent(stepRunReportBuilder, stepRun));
     }
 
     private static StepResult getResult(NodeList element) {
