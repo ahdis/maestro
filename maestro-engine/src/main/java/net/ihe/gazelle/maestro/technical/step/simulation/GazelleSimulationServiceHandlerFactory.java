@@ -32,7 +32,7 @@ public class GazelleSimulationServiceHandlerFactory implements HandlerFactory {
                             SimulationCallbackFactory.getSimulationSessionDAO()
                     )
             );
-        } catch (NullPointerException | NoSuchElementException e) {
+        } catch (NoSuchElementException e) {
             throw new IllegalArgumentException("Service " + providedInterface.getInterfaceName() + " has no bindings");
         }
     }

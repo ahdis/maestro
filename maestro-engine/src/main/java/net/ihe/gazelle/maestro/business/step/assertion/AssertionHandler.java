@@ -8,10 +8,12 @@ import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
  */
 public class AssertionHandler implements Handler {
 
-    public AssertionHandler(){/*Empty constructor*/}
+    public AssertionHandler() {
+        /*Empty constructor*/
+    }
 
     public StepRunReport assertion(AssertionStep assertionStep) {
-        return null;
+        return new StepRunReport().setStepId(assertionStep.getName());
     }
 
     @Override

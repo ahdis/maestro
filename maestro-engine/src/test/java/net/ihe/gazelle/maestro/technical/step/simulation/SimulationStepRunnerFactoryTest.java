@@ -6,6 +6,8 @@ import net.ihe.gazelle.maestro.business.step.assertion.AssertionStep;
 import net.ihe.gazelle.maestro.business.step.simulation.SimulationStep;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SimulationStepRunnerFactoryTest {
@@ -21,7 +23,7 @@ class SimulationStepRunnerFactoryTest {
     void getRequiredServicesOfAssertionStep(){
         Step assertionStep = new AssertionStep(
                 "saucisse",
-                new Property<>(AssertionStep.ASSERTION, "equals(puré)".getBytes()),
+                new Property<>(AssertionStep.ASSERTION, "equals(puré)".getBytes(StandardCharsets.UTF_8)),
                 new Property<>(AssertionStep.ASSERTION_SERVICE, "cuisine")
         );
         assertEquals(1, factory.getRequiredServices(assertionStep).size());
