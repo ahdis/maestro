@@ -1,8 +1,6 @@
 package net.ihe.gazelle.maestro.business.step.validation;
 
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
-import net.ihe.gazelle.maestro.business.step.validation.ValidationRequestMapper;
-import net.ihe.gazelle.maestro.business.step.validation.ValidationStep;
 import net.ihe.gazelle.validation.v2.api.business.request.ValidationItem;
 import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
 import org.junit.jupiter.api.Test;

@@ -7,6 +7,7 @@ import net.ihe.gazelle.simulation.business.setup.SimulationRequest;
 import net.ihe.gazelle.simulation.business.setup.SimulationRequestValidator;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.Charset;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,7 +25,7 @@ class SimulationRequestMapperTest {
                 List.of(
                         new Property<>("Patient Id", "1.1.1.1"),
                         new Property<>("Boolean prop", true),
-                        new Property<>("File prop", "test".getBytes())
+                        new Property<>("File prop", "test".getBytes(Charset.defaultCharset()))
                 ));
         SimulationRequest request = SimulationRequestMapper.createSimulationRequest(step);
         assertNotNull(request);
