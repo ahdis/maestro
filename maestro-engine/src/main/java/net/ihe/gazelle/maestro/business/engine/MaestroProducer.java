@@ -1,5 +1,6 @@
 package net.ihe.gazelle.maestro.business.engine;
 
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
@@ -15,17 +16,10 @@ import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 public interface MaestroProducer {
 
     /**
-     * Method called when a TestRun execution ended to continue iteration on TestRuns
-     * @param testRun Previously executed TestRun
-     * @param report A reportBuilder of testRun execution
+     * Method called when starting a new test set execution
+     * @param testSetRun The set of tests to be run
      */
-    void returnTestRunReport(TestRun testRun, TestRunReportBuilder report);
-
-    /**
-     * Method call to launch a step execution
-     * @param stepRun structure containing step to run
-     */
-    void executeStep(StepRun stepRun);
+    void executeTestSet(TestSetRun testSetRun);
 
     /**
      * Method called when a testSet execution ended to return result
@@ -33,6 +27,26 @@ public interface MaestroProducer {
      * @param report The global execution return of testSetRun
      */
     void returnTestSetReport(TestSetRun testSetRun, TestReport report);
+
+    /**
+     * Method called when a TestRun execution ended to continue iteration on TestRuns
+     * @param testRun Previously executed TestRun
+     * @param report A reportBuilder of testRun execution
+     */
+    void returnTestRunReport(TestRun testRun, TestRunReportBuilder report);
+
+    /**
+     * Method called to launch a step execution
+     * @param stepRun structure containing step to run
+     */
+    void executeStep(StepRun stepRun);
+
+    /**
+     * Method called to finish a step execution and add its report the global test report
+     * @param stepRun The step that has been run
+     * @param report The report builder to add to global test report
+     */
+    void returnStepReport(StepRun stepRun, StepRunReportBuilder report);
 
     /**
      * Method called when a blocking error occurred during execution

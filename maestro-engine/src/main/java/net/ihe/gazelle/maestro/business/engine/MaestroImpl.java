@@ -25,7 +25,6 @@ public class MaestroImpl implements Maestro {
         this.sessionStoreContext = sessionStoreContext;
     }
 
-
     @Override
     public void run(TestRun testRun) {
         boolean isValid = true;
