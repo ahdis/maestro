@@ -1,16 +1,14 @@
 package net.ihe.gazelle.maestro.technical.jobs;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Event;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import net.ihe.gazelle.lang.UnexpectedError;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
+import net.ihe.gazelle.maestro.business.engine.MaestroProducer;
 import net.ihe.gazelle.maestro.technical.jobs.testrunevents.FinishTestSetEvent;
-import net.ihe.gazelle.maestro.technical.jobs.testrunevents.StartTestSetCommand;
-import net.ihe.gazelle.maestro.technical.jobs.testrunevents.TestRunEvent;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,12 +33,12 @@ public class SynchronousMaestro {
 
     private final Map<String, CompletableFuture<TestReport>> completableFutures = new ConcurrentHashMap<>();
     private final int defaultTimeout;
-    private final Event<TestRunEvent> event;
+    private final MaestroProducer maestroProducer;
 
     @Inject
-    public SynchronousMaestro(Event<TestRunEvent> event, @ConfigProperty(name = "gzl.maestro.timeout", defaultValue = "60") int defaultTimeout) {
-        this.event = event;
+    public SynchronousMaestro(@ConfigProperty(name = "gzl.maestro.timeout", defaultValue = "60") int defaultTimeout, MaestroProducer maestroProducer) {
         this.defaultTimeout = defaultTimeout;
+        this.maestroProducer = maestroProducer;
     }
 
     public TestReport executeTestSet(List<TestRun> testRuns) throws ExecutionException, InterruptedException {
@@ -61,7 +59,7 @@ public class SynchronousMaestro {
         TestSetRun testSetRun = new TestSetRun(UUID.randomUUID().toString(), testRuns);
         CompletableFuture<TestReport> future = new CompletableFuture<>();
         completableFutures.put(testSetRun.testSetId(), future);
-        event.fireAsync(new StartTestSetCommand(testSetRun));
+        maestroProducer.executeTestSet(testSetRun);
         return future;
     }
 

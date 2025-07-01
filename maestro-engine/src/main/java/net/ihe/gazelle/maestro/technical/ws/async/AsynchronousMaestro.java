@@ -1,14 +1,12 @@
 package net.ihe.gazelle.maestro.technical.ws.async;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
+import net.ihe.gazelle.maestro.business.engine.MaestroProducer;
 import net.ihe.gazelle.maestro.technical.client.TestReportClient;
 import net.ihe.gazelle.maestro.technical.jobs.testrunevents.FinishTestSetEvent;
-import net.ihe.gazelle.maestro.technical.jobs.testrunevents.StartTestSetCommand;
-import net.ihe.gazelle.maestro.technical.jobs.testrunevents.TestRunEvent;
 
 import java.util.List;
 import java.util.Map;
@@ -19,13 +17,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class AsynchronousMaestro {
 
     private final Map<String, TestRunStore> runningServices;
-    private final Event<TestRunEvent> event;
+    private final MaestroProducer maestroProducer;
     private final TestReportClient client;
 
     @Inject
-    public AsynchronousMaestro(Event<TestRunEvent> event, TestReportClient client) {
+    public AsynchronousMaestro(MaestroProducer maestroProducer, TestReportClient client) {
         this.runningServices = new ConcurrentHashMap<>();
-        this.event = event;
+        this.maestroProducer = maestroProducer;
         this.client = client;
     }
 
@@ -34,7 +32,7 @@ public class AsynchronousMaestro {
         store.setClientCallback(callback);
         TestSetRun testSetRun = new TestSetRun(UUID.randomUUID().toString(), testRuns);
         runningServices.put(testSetRun.testSetId(), store);
-        event.fireAsync(new StartTestSetCommand(testSetRun));
+        maestroProducer.executeTestSet(testSetRun);
     }
 
     public void callback(FinishTestSetEvent finishTestSetEvent) {

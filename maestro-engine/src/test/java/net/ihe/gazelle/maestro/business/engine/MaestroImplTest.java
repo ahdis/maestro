@@ -37,23 +37,24 @@ class MaestroImplTest {
     static void setUp() {
         TestRunMockEvent testRunMockEvent = new TestRunMockEvent();
         StepMockEvent stepMockEvent = new StepMockEvent();
+        EventMaestroProducer maestroProducer = new EventMaestroProducer(testRunMockEvent, stepMockEvent);
         MaestroImpl maestro = new MaestroImpl(
                 new EventMaestroProducer(testRunMockEvent, stepMockEvent),
                 new SessionStoreContextImpl()
         );
-        synchronousMaestro = new SynchronousMaestro(testRunMockEvent, 60);
-        EventListener eventListener = createListener(testRunMockEvent, stepMockEvent, maestro);
+        synchronousMaestro = new SynchronousMaestro(60, maestroProducer);
+        EventListener eventListener = createListener(maestroProducer, maestro);
         testRunMockEvent.addListener(eventListener);
         stepMockEvent.addListener(eventListener);
     }
 
-    private static EventListener createListener(TestRunMockEvent testRunMockEvent, StepMockEvent stepMockEvent, MaestroImpl maestro) {
-        AsynchronousMaestro asynchronousMaestro = new AsynchronousMaestro(testRunMockEvent, new TestReportClient());
+    private static EventListener createListener(EventMaestroProducer maestroProducer, MaestroImpl maestro) {
+        AsynchronousMaestro asynchronousMaestro = new AsynchronousMaestro(maestroProducer, new TestReportClient());
         StepRunnerJob stepRunnerJob = new StepRunnerJob(
                 new StepRunnerProviderSPI(new HandlerProviderMock()),
-                stepMockEvent
+                maestroProducer
         );
-        TMTestRunMaestro tmTestRunMaestro = new TMTestRunMaestro(testRunMockEvent, new TestReportClient());
+        TMTestRunMaestro tmTestRunMaestro = new TMTestRunMaestro(maestroProducer, new TestReportClient());
         return new EventListener(maestro, synchronousMaestro, asynchronousMaestro, stepRunnerJob, tmTestRunMaestro);
     }
 

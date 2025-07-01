@@ -34,11 +34,11 @@ public class SimulationStepRunner implements StepRunner {
 
     @Override
     public StepRunReportBuilder run(StepRun stepRun) {
-        SimulationRequest simulationRequest = SimulationRequestMapper.
-                createSimulationRequest((SimulationStep) stepRun.step());
-        CompletableFuture<SimulationReport> futureReport = new CompletableFuture<>();
-        simulationHandler.simulate(simulationRequest, this::showInstructions, futureReport::complete);
         try {
+            SimulationRequest simulationRequest = SimulationRequestMapper
+                    .createSimulationRequest((SimulationStep) stepRun.step());
+            CompletableFuture<SimulationReport> futureReport = new CompletableFuture<>();
+            simulationHandler.simulate(simulationRequest, this::showInstructions, futureReport::complete);
             SimulationReport simulationReport = futureReport.get();
             ItemBuilder itemBuilder = new ItemBuilder()
                     .setContent(serializer.simulationReportToByteArray(simulationReport))
@@ -49,6 +49,15 @@ public class SimulationStepRunner implements StepRunner {
                     .setType(SimulationStep.TYPE);
             computeResult(simulationReport, stepRunReportBuilder);
             return stepRunReportBuilder;
+        } catch (ClassCastException e) {
+            return new StepRunReportBuilder()
+                    .setStepId(stepRun.step().getName())
+                    .setType(SimulationStep.TYPE)
+                    .addUnexpectedError(
+                            new UnexpectedErrorBuilder()
+                                    .setName("Error on property type")
+                                    .setMessage(e.getMessage())
+                    );
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return null;
