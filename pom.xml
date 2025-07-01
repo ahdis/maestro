@@ -50,7 +50,6 @@
         <surefire-plugin.version>3.2.5</surefire-plugin.version>
         <compiler-plugin.version>3.12.1</compiler-plugin.version>
         <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
-        <docker-maven-plugin.version>0.45.0</docker-maven-plugin.version>
 
         <skipITs>true</skipITs>
 
@@ -150,28 +149,6 @@
                             </goals>
                         </execution>
                     </executions>
-                </plugin>
-
-                <plugin>
-                    <!-- build gazelle-user-management docker image at maven package phase, and start the container for integration-tests -->
-                    <!-- In section plugin-management, because only activated with profile dev -->
-                    <groupId>io.fabric8</groupId>
-                    <artifactId>docker-maven-plugin</artifactId>
-                    <version>${docker-maven-plugin.version}</version>
-                    <configuration>
-                        <autoCreateCustomNetworks>true</autoCreateCustomNetworks>
-                        <images>
-                            <!-- Maestro-quarkus deployment configuration -->
-                            <image>
-                                <name>${quarkus.container-image.registry}/${quarkus.container-image.group}/${quarkus.container-image.name}:${quarkus.container-image.tag}</name>
-                                <alias>maestro</alias>
-                                <build>
-                                    <contextDir>${project.basedir}</contextDir>
-                                    <dockerFile>${project.basedir}/src/main/docker/Dockerfile.jvm</dockerFile>
-                                </build>
-                            </image>
-                        </images>
-                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>

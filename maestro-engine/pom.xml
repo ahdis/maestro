@@ -98,11 +98,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <!-- Enable Docker executions, see configuration in pluginManagement section -->
-                <groupId>io.fabric8</groupId>
-                <artifactId>docker-maven-plugin</artifactId>
-            </plugin>
         </plugins>
     </build>
 
