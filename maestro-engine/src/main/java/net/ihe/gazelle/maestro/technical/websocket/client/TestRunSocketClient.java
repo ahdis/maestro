@@ -18,6 +18,10 @@ import org.eclipse.microprofile.config.ConfigProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Internal Client for sending test run messages over WebSocket.
+ * This client connects to the WebSocket server and sends messages related to test step completion and test run completion.
+ */
 public class TestRunSocketClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestRunSocketClient.class);
@@ -52,7 +56,6 @@ public class TestRunSocketClient {
             }
 
             client.sendWSMessage(message);
-            TimeUnit.MILLISECONDS.sleep(100);
         } catch (Exception e) {
             LOGGER.error("Failed to send websocket message to {}: {}", WS_URI, e.getMessage());
             throw new RuntimeException("Failed to send websocket message " + WS_URI, e);

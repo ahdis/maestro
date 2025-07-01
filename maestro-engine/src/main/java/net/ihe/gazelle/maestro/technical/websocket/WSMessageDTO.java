@@ -4,32 +4,32 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class WSMessageDTO<T> {
 
-    private String testRunId;
+    private String testSetId;
     private String type;
     private T content;
 
     public WSMessageDTO() {
     }
 
-    public WSMessageDTO(String testRunId, String type, T content) {
-        this.testRunId = testRunId;
+    public WSMessageDTO(String testSetId, String type, T content) {
+        this.testSetId = testSetId;
         this.type = type;
         this.content = content;
     }
 
     public WSMessageDTO(WSMessageDTO<T> wsMessage) {
-        this.testRunId = wsMessage.testRunId;
+        this.testSetId = wsMessage.testSetId;
         this.type = wsMessage.type;
         this.content = wsMessage.content;
     }
 
-    @JsonProperty("testRunId")
+    @JsonProperty("testSetId")
     public String getTestRunId() {
-        return testRunId;
+        return testSetId;
     }
 
     public void setTestRunId(String testRunId) {
-        this.testRunId = testRunId;
+        this.testSetId = testRunId;
     }
 
     @JsonProperty("type")
