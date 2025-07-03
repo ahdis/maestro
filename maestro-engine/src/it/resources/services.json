@@ -11,7 +11,7 @@
         "bindings": [
           {
             "@type": "REST",
-            "serviceUrl": "http://localhost:34500/matchboxv3/gazelle"
+            "serviceUrl": "http://localhost:port/matchboxv3/gazelle"
           }
         ]
       }

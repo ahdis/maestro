@@ -2,8 +2,8 @@
   {
     "name": "matchbox",
     "version": "1.0.0",
-    "instanceId": "FIXME must be extracted from ENV var",
-    "replicaId": "FIXME must be extracted from ENV var",
+    "instanceId": "12345",
+    "replicaId": "123",
     "providedInterfaces": [
       {
         "interfaceName": "Validation Service API",
@@ -11,7 +11,7 @@
         "bindings": [
           {
             "@type": "REST",
-            "serviceUrl": "http://localhost:18088/matchboxv3/gazelle"
+            "serviceUrl": "http://localhost:port/matchboxv3/gazelle"
           }
         ]
       }
