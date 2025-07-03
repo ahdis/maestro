@@ -70,13 +70,13 @@ public class WireMockSingleton {
             }
         }
 
-        List<ServiceDTO> serviceDTOList = services.stream()
+        List<ServiceDTO<Service>> serviceDTOList = services.stream()
                 .map(ServiceDTO::new)
                 .toList();
         String replacedJson = serDes.serializeAsString(serviceDTOList);
 
-        wireMockServer.stubFor(get("/services")
-                .willReturn(okJson(replacedJson))
+        wireMockServer.stubFor(get("/service-registry/services?_limit=all&_offset=0")
+                .willReturn(okJson(replacedJson).withHeader("Content-Range", "DeployedServices 1-1/1"))
         );
     }
 
