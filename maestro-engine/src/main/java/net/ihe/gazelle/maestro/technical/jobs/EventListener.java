@@ -56,7 +56,7 @@ public class EventListener {
     }
 
     public void onFinishTestRun(@ObservesAsync FinishTestRunEvent finishTestRunEvent) {
-        testRunSocketClient.sendTestRunCompleted(finishTestRunEvent.getTestRun().getTestSetId(),finishTestRunEvent.getTestRunReportBuilder().build());
+//        testRunSocketClient.sendTestRunCompleted(finishTestRunEvent.getTestRun().getTestSetId(),finishTestRunEvent.getTestRunReportBuilder().build());
         engine.finishTest(finishTestRunEvent.getTestRun(), finishTestRunEvent.getTestRunReportBuilder());
     }
 
@@ -65,7 +65,7 @@ public class EventListener {
     }
 
     public void onFinishStep(@ObservesAsync FinishedStepEvent finishedStepEvent) {
-        testRunSocketClient.sendTestStepCompleted(finishedStepEvent.getStepRun().testRunId(),finishedStepEvent.getStepRunReport().build());
+//        testRunSocketClient.sendTestStepCompleted(finishedStepEvent.getStepRun().testRunId(),finishedStepEvent.getStepRunReport().build());
         engine.finishStep(finishedStepEvent.getStepRun(), finishedStepEvent.getStepRunReport());
     }
 

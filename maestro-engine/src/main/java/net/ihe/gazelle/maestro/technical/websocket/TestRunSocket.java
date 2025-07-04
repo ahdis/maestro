@@ -14,6 +14,7 @@ import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -64,11 +65,14 @@ public class TestRunSocket {
     }
 
     private void triggerTestRuns(String testSetId, String message) {
-        LOG.info("Triggering test runs for all clients");
-        WSMessageDTO<List<TestRunDTO>> wsMessageDTO = serDes.deserialize(message, WSMessageDTO.class);
-        List<TestRunDTO> testRunsDTO =  wsMessageDTO.getContent();
-        List<TestRun> testRuns = testRunsDTO.stream().map(TestRunDTO::getDomain).toList();
-        maestroService.executeTestSet(testSetId, testRuns);
+        LOG.info("Triggering test runs for client" + testSetId + " with message: {}", message);
+        try {
+            TestRunDTO[] testRunDTOS = serDes.deserialize(message, TestRunDTO[].class);
+            List<TestRun> testRuns = Arrays.stream(testRunDTOS).map(TestRunDTO::getDomain).toList();
+            maestroService.executeTestSet(testSetId, testRuns);
+        } catch (Exception e) {
+            // Do nothing
+        }
     }
 
     private void sendMessageToClient(String message) {
