@@ -2,8 +2,8 @@
   {
     "name": "matchbox",
     "version": "1.0.0",
-    "instanceId": "instanceId",
-    "replicaId": "replicaId",
+    "instanceId": "12345",
+    "replicaId": "123",
     "providedInterfaces": [
       {
         "interfaceName": "Validation Service API",
@@ -11,7 +11,7 @@
         "bindings": [
           {
             "@type": "REST",
-            "serviceUrl": "http://localhost:34500/matchboxv3/gazelle"
+            "serviceUrl": "http://localhost:port/matchboxv3/gazelle"
           }
         ]
       }

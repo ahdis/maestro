@@ -41,19 +41,23 @@ public class WireMockSingleton {
         return wireMockServer;
     }
 
-    public static synchronized void mockGetProfiles() {
+    public static void mockGetProfiles() {
         wireMockServer.stubFor(get(urlPathMatching("/matchboxv3/gazelle/validation/v2/profiles"))
                 .willReturn(ok().withBody("[]"))
         );
     }
 
-    public static synchronized void mockValidate() throws IOException {
+    public static void mockValidate() throws IOException {
+        mockValidate("/response.json");
+    }
+
+    public static void mockValidate(String resourcePath) throws IOException {
         wireMockServer.stubFor(post(urlPathMatching("/matchboxv3/gazelle/validation/v2/validate"))
-                .willReturn(ok().withBody(getResourceAsString("/response.json")))
+                .willReturn(ok().withBody(getResourceAsString(resourcePath)))
         );
     }
 
-    public static synchronized void mockServiceRegistry() throws IOException {
+    public static void mockServiceRegistry() throws IOException {
         String servicesJson = getResourceAsString("/services.json");
         TextSerDes serDes = new JacksonSerDes();
         List<Service> services = Arrays.stream(serDes.deserialize(servicesJson, ServiceDTO[].class))
@@ -64,19 +68,19 @@ public class WireMockSingleton {
             for (ProvidedInterface providedInterface : service.getProvidedInterfaces()) {
                 for (Binding binding : providedInterface.getBindings()) {
                     if (binding instanceof HttpRestBinding restBinding) {
-                        restBinding.setServiceUrl("http://localhost:" + wireMockServer.port());
+                        restBinding.setServiceUrl(restBinding.getServiceUrl().replace(":port", ":" + wireMockServer.port()));
                     }
                 }
             }
         }
 
-        List<ServiceDTO> serviceDTOList = services.stream()
+        List<ServiceDTO<Service>> serviceDTOList = services.stream()
                 .map(ServiceDTO::new)
                 .toList();
         String replacedJson = serDes.serializeAsString(serviceDTOList);
 
-        wireMockServer.stubFor(get("/services")
-                .willReturn(okJson(replacedJson))
+        wireMockServer.stubFor(get("/service-registry/services?_limit=all&_offset=0")
+                .willReturn(okJson(replacedJson).withHeader("Content-Range", "DeployedServices 1-1/1"))
         );
     }
 
@@ -102,11 +106,12 @@ public class WireMockSingleton {
         ).getRequests();
     }
 
-    public static WireMockServer getWireMockServer() {
-        return wireMockServer;
-    }
-
     public static String getResourceAsString(String resourcePath) throws IOException {
         return new String(Files.readAllBytes(Paths.get("src/it/resources" + resourcePath)));
+    }
+
+    public static synchronized void stop() {
+        wireMockServer.stop();
+        wireMockServer = null;
     }
 }
