@@ -3,13 +3,10 @@ package net.ihe.gazelle.maestro.technical.step.itb;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.ConfigProvider;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.HandlerFactory;
-import net.ihe.gazelle.maestro.business.step.itb.ItbHandler;
-import net.ihe.gazelle.maestro.technical.step.simulation.GazelleSimulationServiceHandler;
-import net.ihe.gazelle.servicemetadata.api.business.*;
-import net.ihe.gazelle.simulation.client.business.SimulationClientImpl;
-import net.ihe.gazelle.simulation.client.technical.SimulationCallbackFactory;
-import net.ihe.gazelle.simulation.client.technical.SimulationServiceClientImpl;
-import net.ihe.gazelle.simulation.jaxrs.api.technical.ws.SimulationAPI;
+import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterface;
+import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterfaceBuilder;
+import net.ihe.gazelle.servicemetadata.api.business.HttpRestBinding;
+import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterface;
 
 import java.util.List;
 

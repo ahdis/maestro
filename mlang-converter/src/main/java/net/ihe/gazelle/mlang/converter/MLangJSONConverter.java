@@ -185,13 +185,13 @@ public class MLangJSONConverter extends FromMLangConverter {
             step.setName("Assertion valid");
             step.setId(Integer.toString(getStepId()));
 
-            step.addProperty(buildPropertyDTO("validationService", ctx.serviceName.getText()));
-            step.addProperty(buildPropertyDTO("validationProfile", deleteMLangStringQuote(ctx.profileName.getText())));
+            step.addProperty(buildPropertyDTO("validationService","string", ctx.serviceName.getText()));
+            step.addProperty(buildPropertyDTO("validationProfile","string", deleteMLangStringQuote(ctx.profileName.getText())));
 
             StringBuilder description = new StringBuilder("This step will validate");
             for (var param : ctx.assertParams) {
                 description.append(" ").append(boldify(param.ID().getText()));
-                step.addProperty(buildPropertyDTO("contentToValidate", "${" + param.ID().getText() + "}"));
+                step.addProperty(buildPropertyDTO("contentToValidate","bytearray", "${" + param.ID().getText() + "}"));
 
             }
             description.append(" against the validator ")
@@ -271,9 +271,10 @@ public class MLangJSONConverter extends FromMLangConverter {
             return super.visitProcess_stmt(ctx);
         }
 
-        private static PropertyDTO buildPropertyDTO(String key, String value) {
+        private static PropertyDTO buildPropertyDTO(String name, String type, String value) {
             PropertyDTO property = new PropertyDTO();
-            property.setKey(key);
+            property.setName(name);
+            property.setType(type);
             property.setValue(value);
             return property;
         }

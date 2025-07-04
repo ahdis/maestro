@@ -24,11 +24,11 @@ public class EventListenerForWebSocket {
 
 
     public void onFinishTestRun(@ObservesAsync FinishTestRunEvent finishTestRunEvent) {
-        testRunSocketClient.sendTestRunCompleted(finishTestRunEvent.getTestRun().getTestSetId(),finishTestRunEvent.getTestRunReportBuilder().build());
+//        testRunSocketClient.sendTestRunCompleted(finishTestRunEvent.getTestRun().getTestSetId(),finishTestRunEvent.getTestRunReportBuilder().build());
     }
 
 
     public void onFinishStep(@ObservesAsync FinishedStepEvent finishedStepEvent) {
-        testRunSocketClient.sendTestStepCompleted(finishedStepEvent.getStepRun().testRunId(),finishedStepEvent.getStepRunReport().build());
+//        testRunSocketClient.sendTestStepCompleted(finishedStepEvent.getStepRun().testRunId(),finishedStepEvent.getStepRunReport().build());
     }
 }

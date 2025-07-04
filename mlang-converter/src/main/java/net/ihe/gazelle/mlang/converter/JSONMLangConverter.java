@@ -1,7 +1,6 @@
 package net.ihe.gazelle.mlang.converter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kereval.mlang.api.generator.MLangGeneratorVisitor;
 import com.kereval.mlang.api.model.*;
 import com.kereval.mlang.converter.ConverterException;
 import com.kereval.mlang.converter.ParserException;
@@ -10,7 +9,6 @@ import net.ihe.gazelle.model.*;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -76,15 +74,15 @@ public class JSONMLangConverter extends ToMLangConverter {
 
     private AssertMStep buildAssertValid(ValidationStepDTO validationStepDTO) throws ConverterException {
         Optional<PropertyDTO> validationServiceProp = validationStepDTO.getProperties().stream().
-                filter(p -> p.getKey().equals("validationService")).findFirst();
+                filter(p -> p.getName().equals("validationService")).findFirst();
         if (validationServiceProp.isEmpty())
             throw new ConverterException("No validation service property detected into validation step");
         Optional<PropertyDTO> profileNameProp = validationStepDTO.getProperties().stream().
-                filter(p -> p.getKey().equals("validationProfile")).findFirst();
+                filter(p -> p.getName().equals("validationProfile")).findFirst();
         if (profileNameProp.isEmpty())
             throw new ConverterException("No profile name property detected into validation step");
         Optional<PropertyDTO> contentToValidateProp = validationStepDTO.getProperties().stream().
-                filter(p -> p.getKey().equals("contentToValidate")).findFirst();
+                filter(p -> p.getName().equals("contentToValidate")).findFirst();
         if (contentToValidateProp.isEmpty())
             throw new ConverterException("No content to validate property detected into validation step");
 

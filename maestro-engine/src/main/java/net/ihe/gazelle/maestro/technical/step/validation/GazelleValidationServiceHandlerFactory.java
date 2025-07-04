@@ -9,7 +9,6 @@ import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterfaceBuilder;
 import net.ihe.gazelle.servicemetadata.api.business.HttpRestBinding;
 import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterface;
 import net.ihe.gazelle.validation.v1.api.domain.wrapper.ValidationServiceWrapper;
-import net.ihe.gazelle.validation.v2.api.technical.ws.ValidationServiceController;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -43,7 +42,8 @@ public class GazelleValidationServiceHandlerFactory implements HandlerFactory {
     @Override
     public ConsumedInterface getConsumedInterface() {
         return new ConsumedInterfaceBuilder()
-                .setInterfaceName(ValidationServiceController.INTERFACE_NAME)
+//                .setInterfaceName(ValidationServiceController.INTERFACE_NAME)
+                .setInterfaceName("Validation Service")
                 .setRequired(true)
                 .setSupportedBindings(List.of(HttpRestBinding.TYPE))
                 .setSupportedVersions(List.of("1.0.0", "2.0.0"))
