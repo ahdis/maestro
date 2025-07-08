@@ -11,9 +11,11 @@ import net.ihe.gazelle.maestro.technical.ws.async.WebSocketMaestroService;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.ObjectMapperBuilder;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -25,14 +27,19 @@ public class TestRunSocket {
     public static final String INTERNAL_TEST_RUN_ID = "internal";
     private final TextSerDes serDes = new JacksonSerDes(new ObjectMapperBuilder().build());
     private final WebSocketMaestroService maestroService;
+    private final String websocketToken;
 
     @Inject
-    public TestRunSocket(WebSocketMaestroService maestroService) {
+    public TestRunSocket(WebSocketMaestroService maestroService, @ConfigProperty(name = "gzl.websocket.token") String websocketToken) {
         this.maestroService = maestroService;
+        this.websocketToken = websocketToken;
     }
 
     @OnOpen
-    public void onOpen(Session session, @PathParam("testSetId") String testSetId) {
+    public void onOpen(Session session, @PathParam("testSetId") String testSetId) throws IOException {
+        List<String> tokenParams = session.getRequestParameterMap().get("token");
+        if (!providedTokenIsValid(tokenParams))
+            session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "Invalid token provided"));
         if (!INTERNAL_TEST_RUN_ID.equals(testSetId))
             SessionsStorageInMemory.addSession(testSetId, session);
     }
@@ -79,6 +86,18 @@ public class TestRunSocket {
             session.getAsyncRemote()
                     .sendObject(message, result -> logPotentialException(testSetId, result));
         }
+    }
+
+    private boolean providedTokenIsValid(List<String> paramValues) {
+        if (paramValues == null || paramValues.isEmpty()) {
+            return websocketToken == null || websocketToken.isBlank();
+        }
+        String token = paramValues.getFirst();
+        if (token != null && !token.isEmpty()) {
+            return token.equals(websocketToken);
+        }
+
+        return true;
     }
 
     private void sendPongToClient( String testSetId) {

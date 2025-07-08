@@ -10,7 +10,6 @@ import net.ihe.gazelle.maestro.technical.dto.report.TestRunReportDTO;
 import net.ihe.gazelle.maestro.technical.websocket.WSMessageDTO;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -25,8 +24,9 @@ import org.slf4j.LoggerFactory;
 public class TestRunSocketClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestRunSocketClient.class);
-    private static final String WEBSOCKET_URL = Objects.requireNonNull(ConfigProvider.getConfig().getValue("gzl.websocket.url", String.class));;
-    private static final String WS_URI = WEBSOCKET_URL + "/internal";
+    private static final String webSocketUrl = Objects.requireNonNull(ConfigProvider.getConfig().getValue("gzl.websocket.url", String.class));
+    private static final String webSocketToken = ConfigProvider.getConfig().getValue("gzl.websocket.token", String.class);
+    private static final String webSocketInternalUrl = webSocketUrl + "/internal";
     private static final int CONNECT_TIMEOUT_SECONDS = 5;
 
     private final TestRunSocketClientEndpoint client = new TestRunSocketClientEndpoint();
@@ -47,12 +47,13 @@ public class TestRunSocketClient {
             if (session == null || !session.isOpen()) {
                 WebSocketContainer container = ContainerProvider.getWebSocketContainer();
                 container.setDefaultMaxSessionIdleTimeout(TimeUnit.SECONDS.toMillis(CONNECT_TIMEOUT_SECONDS));
-                session = container.connectToServer(client, new URI(WS_URI));
+                String completeUri = webSocketToken != null && !webSocketToken.isBlank() ? webSocketInternalUrl + "?token=" + webSocketToken : webSocketInternalUrl;
+                session = container.connectToServer(client, new URI(completeUri));
             }
 
             client.sendWSMessage(message);
         } catch (Exception e) {
-            LOGGER.error("Failed to send websocket message to {}: {}", WS_URI, e.getMessage());
+            LOGGER.error("Failed to send websocket message to {}: {}", webSocketInternalUrl, e.getMessage());
         }
     }
 
