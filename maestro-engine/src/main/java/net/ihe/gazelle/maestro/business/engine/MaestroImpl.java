@@ -46,6 +46,7 @@ public class MaestroImpl implements Maestro {
             Context context = extractInputs(properties);
 
             String testRunId = UUID.randomUUID().toString();
+            String testSetId = testRun.getTestSetId();
 
             putInStore(testRunId, testRun, context);
 
@@ -53,7 +54,7 @@ public class MaestroImpl implements Maestro {
                 Step step = test.getSteps().getFirst();
 
                 // iterate of steps
-                runStep(new StepRun(testRunId, step));
+                runStep(new StepRun(testSetId, testRunId, step));
             }
         }
     }
@@ -232,7 +233,7 @@ public class MaestroImpl implements Maestro {
         for (int i = 0; (i < steps.size()) && !found; i++) {
             if (steps.get(i).isNameEquals(previousStep)) {
                 Step stepToRun = steps.get(i + 1);
-                runStep(new StepRun(stepRun.testRunId(), stepToRun));
+                runStep(new StepRun(stepRun.testSetId(), stepRun.testRunId(), stepToRun));
                 found = true;
             }
         }

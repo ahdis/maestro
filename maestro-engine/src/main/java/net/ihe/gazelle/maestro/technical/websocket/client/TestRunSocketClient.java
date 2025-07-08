@@ -47,18 +47,12 @@ public class TestRunSocketClient {
             if (session == null || !session.isOpen()) {
                 WebSocketContainer container = ContainerProvider.getWebSocketContainer();
                 container.setDefaultMaxSessionIdleTimeout(TimeUnit.SECONDS.toMillis(CONNECT_TIMEOUT_SECONDS));
-                try {
-                    session = container.connectToServer(client, new URI(WS_URI));
-                    LOGGER.info("WebSocket connection established to {}", WS_URI);
-                } catch (URISyntaxException e) {
-                    throw new RuntimeException("Invalid WebSocket URI: " + WS_URI, e);
-                }
+                session = container.connectToServer(client, new URI(WS_URI));
             }
 
             client.sendWSMessage(message);
         } catch (Exception e) {
             LOGGER.error("Failed to send websocket message to {}: {}", WS_URI, e.getMessage());
-            throw new RuntimeException("Failed to send websocket message " + WS_URI, e);
         }
     }
 

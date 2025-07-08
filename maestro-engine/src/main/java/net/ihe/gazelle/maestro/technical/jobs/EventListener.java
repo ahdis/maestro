@@ -7,6 +7,7 @@ import net.ihe.gazelle.maestro.api.business.testrun.Maestro;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.FinishedStepEvent;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StartStepCommand;
 import net.ihe.gazelle.maestro.technical.jobs.testrunevents.*;
+import net.ihe.gazelle.maestro.technical.websocket.SessionsStorageInMemory;
 import net.ihe.gazelle.maestro.technical.websocket.client.TestRunSocketClient;
 import net.ihe.gazelle.maestro.technical.ws.async.AsynchronousMaestro;
 import net.ihe.gazelle.maestro.technical.ws.async.tmintegration.TMTestRunMaestro;
@@ -42,10 +43,13 @@ public class EventListener {
     }
 
     public void onFinishTestSet(@ObservesAsync FinishTestSetEvent finishTestSetEvent) {
-        if (asynchronousMaestro.isServiceRunning(finishTestSetEvent.getTestSetRun().testSetId())) {
+        String testSetId = finishTestSetEvent.getTestSetRun().testSetId();
+        if (asynchronousMaestro.isServiceRunning(testSetId)) {
             asynchronousMaestro.callback(finishTestSetEvent);
-        } else if (tmTestRunMaestro.isServiceRunning(finishTestSetEvent.getTestSetRun().testSetId())) {
+        } else if (tmTestRunMaestro.isServiceRunning(testSetId)) {
             tmTestRunMaestro.callbackTM(finishTestSetEvent);
+        } else if (SessionsStorageInMemory.hasSession(testSetId)) {
+            testRunSocketClient.sendTestRunCompleted(testSetId, finishTestSetEvent.getTestReport().getTestRunReports().getFirst());
         } else {
             synchronousMaestro.completeFuture(finishTestSetEvent);
         }

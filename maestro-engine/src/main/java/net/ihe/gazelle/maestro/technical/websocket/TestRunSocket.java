@@ -16,9 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 
 @ServerEndpoint("/testRuns/{testSetId}")
 @ApplicationScoped
@@ -26,7 +23,6 @@ public class TestRunSocket {
 
     private static final Logger LOG = LoggerFactory.getLogger(TestRunSocket.class.getName());
     public static final String INTERNAL_TEST_RUN_ID = "internal";
-    private final Map<String, Session> sessions = new ConcurrentHashMap<>();
     private final TextSerDes serDes = new JacksonSerDes(new ObjectMapperBuilder().build());
     private final WebSocketMaestroService maestroService;
 
@@ -37,18 +33,18 @@ public class TestRunSocket {
 
     @OnOpen
     public void onOpen(Session session, @PathParam("testSetId") String testSetId) {
-        if (!Objects.equals(testSetId, INTERNAL_TEST_RUN_ID))
-            sessions.put(testSetId, session);
+        if (!INTERNAL_TEST_RUN_ID.equals(testSetId))
+            SessionsStorageInMemory.addSession(testSetId, session);
     }
 
     @OnClose
     public void onClose(Session session, @PathParam("testSetId") String testSetId) {
-        sessions.remove(testSetId);
+        SessionsStorageInMemory.removeSession(testSetId);
     }
 
     @OnError
     public void onError(Session session, @PathParam("testSetId") String testSetId, Throwable throwable) {
-        sessions.remove(testSetId);
+        SessionsStorageInMemory.removeSession(testSetId);
         LOG.error("Test set {} ended on error: {} ", testSetId, throwable.getMessage());
     }
 
@@ -56,7 +52,7 @@ public class TestRunSocket {
     public void onMessage(String message, @PathParam("testSetId") String testSetId) {
         // Ping for test purpose
         if (message.equals("ping")) {
-            sendMessageToClient("pong", testSetId);
+            sendPongToClient(testSetId);
         } else if (testSetId.equals(INTERNAL_TEST_RUN_ID)) {
             sendMessageToClient(message);
         } else {
@@ -65,37 +61,30 @@ public class TestRunSocket {
     }
 
     private void triggerTestRuns(String testSetId, String message) {
-        LOG.info("Triggering test runs for client" + testSetId + " with message: {}", message);
+        LOG.info("Triggering test runs for client {} with message: {}",testSetId, message);
         try {
             TestRunDTO[] testRunDTOS = serDes.deserialize(message, TestRunDTO[].class);
             List<TestRun> testRuns = Arrays.stream(testRunDTOS).map(TestRunDTO::getDomain).toList();
             maestroService.executeTestSet(testSetId, testRuns);
         } catch (Exception e) {
-            // Do nothing
+            LOG.error("Unable to trigger testRun for message {}: {}", testSetId, e.getMessage());
         }
     }
 
     private void sendMessageToClient(String message) {
         String testSetId = serDes.deserialize(message, WSMessageDTO.class).getTestRunId();
-        LOG.info("Sending message to unique client: {}", testSetId);
-        Session session = sessions.get(testSetId);
+        LOG.info("Sending message for testSetId : {}", testSetId);
+        Session session = SessionsStorageInMemory.getSession(testSetId);
         if (session != null) {
             session.getAsyncRemote()
                     .sendObject(message, result -> logPotentialException(testSetId, result));
         }
     }
 
-    private void sendMessageToClient(String message, String testSetId) {
-        Session session = sessions.get(testSetId);
+    private void sendPongToClient( String testSetId) {
+        Session session = SessionsStorageInMemory.getSession(testSetId);
         session.getAsyncRemote()
-                .sendObject(message, result -> logPotentialException(testSetId, result));
-    }
-
-    private void broadcast(String message) {
-        LOG.info("Broadcasting message: {}", message);
-        sessions.values().forEach(s ->
-                s.getAsyncRemote().sendObject(message, result -> logPotentialException(s.getId(), result))
-        );
+                .sendObject("pong", result -> logPotentialException(testSetId, result));
     }
 
     private static void logPotentialException(String testSetId, SendResult result) {

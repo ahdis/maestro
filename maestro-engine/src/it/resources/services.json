@@ -14,6 +14,16 @@
             "serviceUrl": "http://localhost:port/matchboxv3/gazelle"
           }
         ]
+      },
+      {
+        "interfaceName": "Validation Service",
+        "interfaceVersion": "2.0.0",
+        "bindings": [
+          {
+            "@type": "REST",
+            "serviceUrl": "http://localhost:port/matchboxv3/gazelle"
+          }
+        ]
       }
     ],
     "consumedInterfaces": [

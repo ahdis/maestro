@@ -3,7 +3,6 @@ package net.ihe.gazelle.maestro.technical.websocket;
 import jakarta.enterprise.event.ObservesAsync;
 import jakarta.inject.Inject;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.FinishedStepEvent;
-import net.ihe.gazelle.maestro.technical.jobs.testrunevents.*;
 import net.ihe.gazelle.maestro.technical.websocket.client.TestRunSocketClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,15 +19,10 @@ public class EventListenerForWebSocket {
 
     @Inject
     public EventListenerForWebSocket() {
+        // Default constructor for CDI
     }
-
-
-    public void onFinishTestRun(@ObservesAsync FinishTestRunEvent finishTestRunEvent) {
-//        testRunSocketClient.sendTestRunCompleted(finishTestRunEvent.getTestRun().getTestSetId(),finishTestRunEvent.getTestRunReportBuilder().build());
-    }
-
 
     public void onFinishStep(@ObservesAsync FinishedStepEvent finishedStepEvent) {
-//        testRunSocketClient.sendTestStepCompleted(finishedStepEvent.getStepRun().testRunId(),finishedStepEvent.getStepRunReport().build());
+        testRunSocketClient.sendTestStepCompleted(finishedStepEvent.getStepRun().testSetId(),finishedStepEvent.getStepRunReport().build());
     }
 }

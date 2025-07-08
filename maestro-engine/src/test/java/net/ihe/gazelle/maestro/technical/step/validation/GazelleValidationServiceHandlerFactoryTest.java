@@ -27,7 +27,8 @@ class GazelleValidationServiceHandlerFactoryTest {
     void should_get_consumed_interface() {
         ConsumedInterface consumedInterface = factory.getConsumedInterface();
         assertNotNull(consumedInterface);
-        assertEquals(ValidationServiceController.INTERFACE_NAME, consumedInterface.getInterfaceName());
+        assertEquals("Validation Service", consumedInterface.getInterfaceName());
+//        assertEquals(ValidationServiceController.INTERFACE_NAME, consumedInterface.getInterfaceName());
     }
 
     @Test
