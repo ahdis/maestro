@@ -35,6 +35,13 @@ public class UnexpectedErrorBuilder extends AbstractBuilder<UnexpectedError> {
         return this;
     }
 
+    public UnexpectedErrorBuilder fromTrowable(Throwable t) {
+        this.name = t.getClass().getSimpleName();
+        this.message = t.getMessage();
+        this.cause = t.getCause() != null ? new UnexpectedErrorBuilder().fromTrowable(t.getCause()) : null;
+        return this;
+    }
+
     @Override
     protected AbstractValidator<UnexpectedError> instantiateValidator(ValidatorBuilderFactory validatorBuilderFactory) {
         return new UnexpectedErrorValidator(validatorBuilderFactory);

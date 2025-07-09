@@ -106,6 +106,8 @@ class TestReportBuilderTest {
         testRunReportBuilder.addUnexpectedError(new UnexpectedErrorBuilder()
                 .setName("error")
                 .setMessage("error"));
+        testRunReportBuilder.addUnexpectedError(new UnexpectedErrorBuilder()
+                .fromTrowable(new Exception("error")));
 
         TestReportBuilder subReportBuilder = createTestReportBuilder()
                 .addTestRunReport(testRunReportBuilder);
@@ -119,7 +121,7 @@ class TestReportBuilderTest {
         assertEquals(Result.UNDEFINED, testReport.getResult());
         assertEquals(2, testReport.getTestCounters().getTotal());
         assertEquals(1, testReport.getTestCounters().getPassed());
-        assertEquals(1, testReport.getTestCounters().getUnexpectedErrors());
+        assertEquals(2, testReport.getTestCounters().getUnexpectedErrors());
     }
 
     @org.junit.jupiter.api.Test
