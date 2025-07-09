@@ -31,6 +31,13 @@ public class ItbHttpClientFactory {
     @Produces
     @RequestScoped
     public ItbHttpClient createItbHttpClient() {
+        if (itbApiUrl == null || itbApiUrl.isBlank()) {
+            throw new IllegalArgumentException("ITB API URL is not configured");
+        }
+        if (itbApiKey == null || itbApiKey.isBlank()) {
+            throw new IllegalArgumentException("ITB API Key is not configured");
+        }
+
         return new ItbHttpClient(itbApiUrl, itbApiKey);
     }
 }
