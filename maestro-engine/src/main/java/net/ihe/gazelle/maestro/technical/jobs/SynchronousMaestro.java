@@ -3,8 +3,9 @@ package net.ihe.gazelle.maestro.technical.jobs;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
-import net.ihe.gazelle.lang.UnexpectedError;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReportBuilder;
+import net.ihe.gazelle.maestro.api.business.testreport.UnexpectedErrorBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
 import net.ihe.gazelle.maestro.business.engine.MaestroProducer;
@@ -48,7 +49,9 @@ public class SynchronousMaestro {
                 {
                     if (ex instanceof TimeoutException) {
                         LOG.error(TIMEOUT_MESSAGE, ex);
-                        return new TestReport().setUnexpectedErrors(List.of(new UnexpectedError(ex)));
+                        return new TestReportBuilder()
+                                .addUnexpectedError(new UnexpectedErrorBuilder().fromTrowable(ex))
+                                .build();
                     }
                     throw new CompletionException(ex);
                 })

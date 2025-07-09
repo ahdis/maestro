@@ -1,7 +1,5 @@
 package net.ihe.gazelle.maestro.business.engine;
 
-import net.ihe.gazelle.lang.UnexpectedError;
-import net.ihe.gazelle.maestro.api.business.testreport.Test;
 import net.ihe.gazelle.maestro.api.business.testreport.*;
 import net.ihe.gazelle.maestro.api.business.testrun.*;
 import net.ihe.gazelle.maestro.api.business.testrun.context.Context;
@@ -70,12 +68,9 @@ public class MaestroImpl implements Maestro {
             testSetValidator.validate(testSetRun);
         } catch (IllegalArgumentException e) {
             isValid = false;
-            TestReport testReport = new TestReport()
-                    .addUnexpectedError(new UnexpectedError(e))
-                    .setUuid(UUID.randomUUID().toString())
-                    .setDateTime(Date.from(Instant.now()))
-                    .setTestCounters(new TestCounters())
-                    .setResult(Result.UNDEFINED);
+            TestReport testReport = new TestReportBuilder()
+                    .addUnexpectedError(new UnexpectedErrorBuilder().fromTrowable(e))
+                    .build();
             maestroProducer.returnTestSetReport(testSetRun, testReport);
         }
         if (isValid) {
@@ -98,11 +93,9 @@ public class MaestroImpl implements Maestro {
                         .setTestRunReports(testSetSessionStore.getTestRunReportBuilders())
                         .build();
             } catch (Exception e) {
-                testReport = new TestReport()
-                        .setDateTime(Date.from(Instant.now()))
-                        .setResult(Result.UNDEFINED)
-                        .setUuid(UUID.randomUUID().toString())
-                        .addUnexpectedError(new UnexpectedError(e));
+                testReport = new TestReportBuilder()
+                        .addUnexpectedError(new UnexpectedErrorBuilder().fromTrowable(e))
+                        .build();
             }
             String sessionId = testRun.getTestSetId();
             sessionStoreContext.clearExecutionContext(sessionId);
@@ -298,24 +291,15 @@ public class MaestroImpl implements Maestro {
             name = testRunTest.getName();
         }
 
-        Test test = new Test()
-                .setId(id)
-                .setName(name);
-        TestRunReport testRunReport = new TestRunReport();
-        testRunReport.addUnexpectedError(new UnexpectedError(e))
-                .setDateTime(Date.from(Instant.now()))
-                .setResult(Result.UNDEFINED)
-                .setTest(test)
-        ;
-
-        TestCounters testCounters = new TestCounters();
-        testCounters.incrementUnexpectedErrors();
-        TestReport testReport = new TestReport()
-                .addTestRunReport(testRunReport)
-                .setDateTime(Date.from(Instant.now()))
-                .setResult(Result.UNDEFINED)
-                .setTestCounters(testCounters)
-                .addUnexpectedError(testRunReport.getUnexpectedErrors().getFirst());
+        TestReport testReport = new TestReportBuilder()
+                .addTestRunReport(new TestRunReportBuilder()
+                        .addUnexpectedError(new UnexpectedErrorBuilder().fromTrowable(e))
+                        .setTest(new TestBuilder()
+                                .setId(id)
+                                .setName(name)
+                        )
+                )
+                .build();
 
         TestSetSessionStore testSetSessionStore = sessionStoreContext.getTestSetContexts(testRun.getTestSetId());
         TestSetRun testSetRun = testSetSessionStore.getTestSetRun();

@@ -31,8 +31,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <framework.version>2.0.0</framework.version>
-        <lang.version>1.0.4</lang.version>
+        <framework.version>2.0.1-SNAPSHOT</framework.version>
         <validation.service.version>2.0.0-FRAME-74-SNAPSHOT</validation.service.version>
         <simulation.service.api.version>1.0.0-GZL-5491-SNAPSHOT</simulation.service.api.version>
         <equalsverifier.version>3.16.1</equalsverifier.version>
@@ -121,11 +120,6 @@
                 <version>${simulation.service.api.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>net.ihe.gazelle</groupId>
-                <artifactId>lang</artifactId>
-                <version>${lang.version}</version>
             </dependency>
 
             <!-- Test dependencies -->

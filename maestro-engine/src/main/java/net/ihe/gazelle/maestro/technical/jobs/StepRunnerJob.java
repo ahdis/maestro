@@ -9,8 +9,6 @@ import net.ihe.gazelle.maestro.api.business.testreport.UnexpectedErrorBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.*;
 import net.ihe.gazelle.maestro.business.engine.MaestroProducer;
 
-import java.util.List;
-
 /**
  * A stepRunnerJob receive message from producer to execute Step, launch execution and send result to Maestro Listener
  */
@@ -52,16 +50,14 @@ public class StepRunnerJob {
      * @param stepRun Previously executed step
      */
     public void returnUnexpectedError(Exception e, StepRun stepRun) {
-        List<UnexpectedErrorBuilder> unexpectedErrorBuilders = List.of(
-                new UnexpectedErrorBuilder()
+        UnexpectedErrorBuilder unexpectedErrorBuilder = new UnexpectedErrorBuilder()
                     .setMessage(e.getMessage())
-                    .setName("StepExecutionError")
-        );
+                    .setName("StepExecutionError");
         StepRunReportBuilder builder = new StepRunReportBuilder()
                 .setStepId(stepRun.step().getName())
                 .setType(stepRun.step().getType())
                 .setResult(StepResult.UNDEFINED)
-                .setUnexpectedErrors(unexpectedErrorBuilders);
+                .addUnexpectedError(unexpectedErrorBuilder);
         stepEnded(stepRun, builder);
     }
 

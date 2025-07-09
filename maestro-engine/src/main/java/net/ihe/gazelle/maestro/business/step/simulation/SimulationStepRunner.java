@@ -13,9 +13,8 @@ import net.ihe.gazelle.maestro.business.step.userinteract.UserInteractionHandler
 import net.ihe.gazelle.simulation.business.callback.Result;
 import net.ihe.gazelle.simulation.business.callback.SimulationReport;
 import net.ihe.gazelle.simulation.business.callback.SimulationReportValidator;
-import net.ihe.gazelle.simulation.business.setup.AdditionalInstructions;
-import net.ihe.gazelle.simulation.business.setup.Parameter;
-import net.ihe.gazelle.simulation.business.setup.SimulationRequest;
+import net.ihe.gazelle.simulation.business.setup.*;
+import net.ihe.gazelle.simulation.client.business.ServiceUnavailableException;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -44,27 +43,43 @@ public class SimulationStepRunner extends SyncStepRunner {
             ItemBuilder itemBuilder = new ItemBuilder()
                     .setContent(serializer.simulationReportToByteArray(simulationReport))
                     .setName("simulationReport");
-            StepRunReportBuilder stepRunReportBuilder = new StepRunReportBuilder()
-                    .setOutputs(List.of(itemBuilder))
-                    .setStepId(stepRun.step().getName())
-                    .setType(SimulationStep.TYPE);
+            StepRunReportBuilder stepRunReportBuilder = prepareStepReport(stepRun)
+                    .setOutputs(List.of(itemBuilder));
             computeResult(simulationReport, stepRunReportBuilder);
             return stepRunReportBuilder;
+        } catch (MissingRequiredParameterException e) {
+            return buildReportWithError(stepRun, e, "Missing Required Parameter");
+        } catch (InvalidParameterValueException e) {
+            return buildReportWithError(stepRun, e, "Invalid Parameter Value");
+        } catch (UnknownSequenceException e) {
+            return buildReportWithError(stepRun, e, "Unknown Simulation Sequence");
+        } catch (ServiceUnavailableException e) {
+            return buildReportWithError(stepRun, e, "Service Unavailable");
         } catch (ClassCastException e) {
-            return new StepRunReportBuilder()
-                    .setStepId(stepRun.step().getName())
-                    .setType(SimulationStep.TYPE)
-                    .addUnexpectedError(
-                            new UnexpectedErrorBuilder()
-                                    .setName("Error on property type")
-                                    .setMessage(e.getMessage())
-                    );
+            return buildReportWithError(stepRun, e, "Error on property type");
+        } catch (RuntimeException e) {
+            return buildReportWithError(stepRun, e, "Error from simulator");
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return null;
         } catch (ExecutionException e) {
             throw new ExecutionRuntimeException(e);
         }
+    }
+
+    private StepRunReportBuilder prepareStepReport(StepRun stepRun) {
+        return new StepRunReportBuilder()
+                .setStepId(stepRun.step().getName())
+                .setType(SimulationStep.TYPE);
+    }
+
+    private StepRunReportBuilder buildReportWithError(StepRun stepRun, Exception e, String name) {
+        return prepareStepReport(stepRun)
+                .addUnexpectedError(
+                        new UnexpectedErrorBuilder()
+                                .setName(name)
+                                .setMessage(e.getMessage())
+                );
     }
 
     /**

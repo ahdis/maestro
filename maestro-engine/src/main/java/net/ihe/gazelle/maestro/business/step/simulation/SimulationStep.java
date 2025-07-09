@@ -63,12 +63,13 @@ public class SimulationStep implements Step {
                 case SIMULATION_SERVICE -> simulationService = (Property<String>) property;
                 case SEQUENCE_ID -> sequenceId = (Property<String>) property;
                 case TIMEOUT_SECONDS -> timeoutSeconds = (Property<Integer>) property;
-                default -> simulationParameters = simulationParameters.stream().map(prop -> {
-                    if (prop.getName().equals(property.getName())) {
-                        return property;
+                default -> {
+                    boolean exists = simulationParameters.stream()
+                            .anyMatch(prop -> prop.getName().equals(property.getName()));
+                    if (!exists) {
+                        simulationParameters.add(property);
                     }
-                    return prop;
-                }).toList();
+                }
             }
         });
     }

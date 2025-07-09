@@ -1,6 +1,6 @@
 [
   {
-    "clientCallback": "http://localhost:18088/mock/gazelle/rest",
+    "clientCallback": "http://localhost:port/mock/gazelle/rest",
     "callbackAuthorization": "token",
     "test": {
       "name": "Test Case 01",

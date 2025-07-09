@@ -27,7 +27,7 @@ public class TestRunValidator {
         for (Step step : steps) {
             if (!names.contains(step.getName())) {
                 names.add(step.getName());
-            }else {
+            } else {
                 throw new DuplicatedStepsException("Several steps has the same name : " + step.getName() + " should be unique");
             }
         }
