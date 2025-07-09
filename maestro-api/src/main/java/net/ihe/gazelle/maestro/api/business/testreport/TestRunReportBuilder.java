@@ -22,6 +22,7 @@ public class TestRunReportBuilder extends AbstractBuilder<TestRunReport> {
 
     public TestRunReportBuilder() {
         super();
+        dateTime = new Date();
         inputs = new ArrayList<>();
         outputs = new ArrayList<>();
         stepRunReports = new ArrayList<>();
@@ -30,6 +31,7 @@ public class TestRunReportBuilder extends AbstractBuilder<TestRunReport> {
 
     public TestRunReportBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
         super(validatorBuilderFactory);
+        dateTime = new Date();
         inputs = new ArrayList<>();
         outputs = new ArrayList<>();
         stepRunReports = new ArrayList<>();

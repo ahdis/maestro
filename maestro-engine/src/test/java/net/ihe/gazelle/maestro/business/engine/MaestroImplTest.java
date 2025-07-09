@@ -117,7 +117,7 @@ class MaestroImplTest {
     }
 
     @Test
-    void testMaestroWithInvalidTestRun() throws ExecutionException, InterruptedException {
+    void testMaestroWithInvalidTwoSameStepTestRun() throws ExecutionException, InterruptedException {
         List<TestRun> testRuns = getTestRunsWithOneValidationStep();
         Step validationStep = new ValidationStep("test-validation",
                 new Property<>(ValidationStep.VALIDATION_SERVICE, "matchbox"),
