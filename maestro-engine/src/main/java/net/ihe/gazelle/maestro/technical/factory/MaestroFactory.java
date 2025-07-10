@@ -34,13 +34,10 @@ import net.ihe.gazelle.maestro.technical.jobs.StepRunnerProvider;
 @ApplicationScoped
 public class MaestroFactory {
 
-    ServiceRegistry serviceRegistry;
-
-    MaestroProducer maestroProducer;
-
-    SessionStoreContextImpl sessionStoreContext;
-
-    ConfigProvider configProvider;
+    private final ServiceRegistry serviceRegistry;
+    private final MaestroProducer maestroProducer;
+    private final SessionStoreContextImpl sessionStoreContext;
+    private final ConfigProvider configProvider;
 
     @Inject
     public MaestroFactory(ServiceRegistry serviceRegistry, MaestroProducer maestroProducer, SessionStoreContextImpl sessionStoreContext, ConfigProvider configProvider) {
@@ -52,13 +49,13 @@ public class MaestroFactory {
 
     @Produces
     @Default
-    StepRunnerProvider getStepRunnerProvider() {
+    public StepRunnerProvider getStepRunnerProvider() {
         return new StepRunnerProviderSPI(new HandlerProviderSPI(serviceRegistry, configProvider));
     }
 
     @Produces
     @Default
-    Maestro getMaestro() {
+    public Maestro getMaestro() {
         return new MaestroImpl(maestroProducer, sessionStoreContext);
     }
 
