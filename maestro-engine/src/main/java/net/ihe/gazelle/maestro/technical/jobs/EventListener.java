@@ -84,6 +84,9 @@ public class EventListener {
     }
 
     public void onFinishStep(@ObservesAsync FinishedStepEvent finishedStepEvent) {
+        if (SessionsStorageInMemory.hasSession(finishedStepEvent.getStepRun().testSetId())) {
+            testRunSocketClient.sendTestStepCompleted(finishedStepEvent.getStepRun().testSetId(),finishedStepEvent.getStepRunReport().build());
+        }
         engine.finishStep(finishedStepEvent.getStepRun(), finishedStepEvent.getStepRunReport());
     }
 

@@ -17,15 +17,13 @@
 package net.ihe.gazelle.maestro.business.step.itb.gateway.service.catchitbreport;
 
 import jakarta.enterprise.context.Dependent;
-import jakarta.enterprise.event.Event;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import net.ihe.gazelle.maestro.api.business.testreport.ItemBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.FinishedStepEvent;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.StepMessage;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
+import net.ihe.gazelle.maestro.business.engine.MaestroProducer;
 import net.ihe.gazelle.maestro.business.step.itb.gateway.client.ItbHttpClient;
 import net.ihe.gazelle.maestro.business.step.itb.gateway.dto.ItbTriggerDTO;
 import org.slf4j.Logger;
@@ -49,13 +47,12 @@ public class CatchItbReportService {
 
     private static final Logger log = LoggerFactory.getLogger(CatchItbReportService.class);
     private final ItbHttpClient itbHttpClient;
-    private final Event<StepMessage> finishStepEvent;
-
+    private final MaestroProducer maestroProducer;
 
     @Inject
-    public CatchItbReportService(Event<StepMessage> finishStepEvent, ItbHttpClient itbHttpClient) {
+    public CatchItbReportService(MaestroProducer maestroProducer, ItbHttpClient itbHttpClient) {
         this.itbHttpClient = itbHttpClient;
-        this.finishStepEvent = finishStepEvent;
+        this.maestroProducer = maestroProducer;
     }
 
     /**
@@ -89,7 +86,7 @@ public class CatchItbReportService {
      * Method to push report to the messaging channel
      */
     public void pushReport(StepRun stepRun, StepRunReportBuilder stepRunReportBuilder) {
-        finishStepEvent.fireAsync(new FinishedStepEvent(stepRunReportBuilder, stepRun));
+        maestroProducer.returnStepReport(stepRun, stepRunReportBuilder);
     }
 
     private static StepResult getResult(NodeList element) {

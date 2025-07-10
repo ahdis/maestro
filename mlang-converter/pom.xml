@@ -28,15 +28,19 @@
     <artifactId>mlang-converter</artifactId>
 
     <dependencies>
+        <!-- Sub module dependencies -->
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>maestro-api</artifactId>
         </dependency>
+
+        <!-- Gazelle dependencies -->
         <dependency>
             <groupId>com.kereval</groupId>
             <artifactId>mlang</artifactId>
             <version>0.1.0-SNAPSHOT</version>
         </dependency>
+
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-rest-jackson</artifactId>
