@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2025 IHE International.
+  ~ Copyright 2025 Kereval.
   ~
   ~  Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -320,8 +320,8 @@
     </pluginRepositories>
 
     <organization>
-        <name>IHE Internationnal</name>
-        <url>https://www.ihe.net</url>
+        <name>Kereval</name>
+        <url>https://www.kereval.com</url>
     </organization>
 
     <licenses>
