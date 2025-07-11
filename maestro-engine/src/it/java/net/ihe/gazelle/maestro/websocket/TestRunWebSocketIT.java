@@ -50,7 +50,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class TestRunWebSocketIT implements QuarkusTestProfile {
 
     private static final String WEBSOCKET_URL = Objects.requireNonNull(ConfigProvider.getConfig().getValue("gzl.websocket.url", String.class));
-    private static final long TIMEOUT_MS = 1000;
+    private static final long TIMEOUT_MS = 500;
     private final TextSerDes serDes = new JacksonSerDes(new ObjectMapperBuilder().build());
 
     @ConfigProperty(name = "gzl.it-port")
