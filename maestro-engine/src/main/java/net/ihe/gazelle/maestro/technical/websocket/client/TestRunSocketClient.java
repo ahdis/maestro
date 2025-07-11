@@ -23,15 +23,17 @@ import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
 import net.ihe.gazelle.maestro.technical.dto.report.StepRunReportDTO;
 import net.ihe.gazelle.maestro.technical.dto.report.TestRunReportDTO;
-import net.ihe.gazelle.maestro.technical.websocket.WSMessageDTO;
+import net.ihe.gazelle.maestro.technical.websocket.dto.WSMessageDTO;
+import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
+import net.ihe.gazelle.modelmarshaller.technical.jackson.ObjectMapperBuilder;
+import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
+import org.eclipse.microprofile.config.ConfigProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-
-import org.eclipse.microprofile.config.ConfigProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Internal Client for sending test run messages over WebSocket.
@@ -44,21 +46,24 @@ public class TestRunSocketClient {
     private static final String webSocketToken = ConfigProvider.getConfig().getValue("gzl.websocket.token", String.class);
     private static final String webSocketInternalUrl = webSocketUrl + "/internal";
     private static final int CONNECT_TIMEOUT_SECONDS = 5;
+    private final TextSerDes serDes = new JacksonSerDes(new ObjectMapperBuilder().build());
 
     private final TestRunSocketClientEndpoint client = new TestRunSocketClientEndpoint();
     private Session session;
 
     public void sendTestStepCompleted(String testSetId, StepRunReport stepRunReport) {
-        WSMessageDTO<StepRunReportDTO> message = new WSMessageDTO<>(testSetId, "testStepCompleted", new StepRunReportDTO(stepRunReport));
+        String content = serDes.serializeAsString(new StepRunReportDTO(stepRunReport));
+        WSMessageDTO message = new WSMessageDTO(testSetId, "testStepCompleted", content);
         sendMessage(message);
     }
 
     public void sendTestRunCompleted(String testSetId, TestRunReport testRunReport) {
-        WSMessageDTO<TestRunReportDTO> message = new WSMessageDTO<>(testSetId, "testRunCompleted", new TestRunReportDTO(testRunReport));
+        String content = serDes.serializeAsString(new TestRunReportDTO(testRunReport));
+        WSMessageDTO message = new WSMessageDTO(testSetId, "testRunCompleted", content);
         sendMessage(message);
     }
 
-    private void sendMessage(WSMessageDTO<?> message) {
+    private void sendMessage(WSMessageDTO message) {
         try {
             if (session == null || !session.isOpen()) {
                 WebSocketContainer container = ContainerProvider.getWebSocketContainer();

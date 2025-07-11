@@ -14,37 +14,37 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.technical.websocket;
+package net.ihe.gazelle.maestro.technical.websocket.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class WSMessageDTO<T> {
+public class WSMessageDTO {
 
     private String testSetId;
     private String type;
-    private T content;
+    private String content;
 
     public WSMessageDTO() {
     }
 
-    public WSMessageDTO(String testSetId, String type, T content) {
+    public WSMessageDTO(String testSetId, String type, String content) {
         this.testSetId = testSetId;
         this.type = type;
         this.content = content;
     }
 
-    public WSMessageDTO(WSMessageDTO<T> wsMessage) {
+    public WSMessageDTO(WSMessageDTO wsMessage) {
         this.testSetId = wsMessage.testSetId;
         this.type = wsMessage.type;
         this.content = wsMessage.content;
     }
 
     @JsonProperty("testSetId")
-    public String getTestRunId() {
+    public String getTestSetId() {
         return testSetId;
     }
 
-    public void setTestRunId(String testRunId) {
+    public void setTestSetId(String testRunId) {
         this.testSetId = testRunId;
     }
 
@@ -58,11 +58,11 @@ public class WSMessageDTO<T> {
     }
 
     @JsonProperty("content")
-    public T getContent() {
+    public String getContent() {
         return content;
     }
 
-    public void setContent(T content) {
+    public void setContent(String content) {
         this.content = content;
     }
 }

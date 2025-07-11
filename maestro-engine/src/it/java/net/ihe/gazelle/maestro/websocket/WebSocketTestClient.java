@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.technical.websocket;
+package net.ihe.gazelle.maestro.websocket;
 
 import jakarta.websocket.ClientEndpoint;
 import jakarta.websocket.OnMessage;
 import jakarta.websocket.OnOpen;
 import jakarta.websocket.Session;
+import net.ihe.gazelle.maestro.technical.websocket.dto.WSMessageDTO;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.ObjectMapperBuilder;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
