@@ -17,7 +17,7 @@
 package net.ihe.gazelle.maestro.technical.dto.testrun;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import net.ihe.gazelle.maestro.business.step.simulation.SimulationStep;
+import net.ihe.gazelle.maestro.simulation.step.business.SimulationStep;
 
 @JsonTypeName(SimulationStep.TYPE)
 public class SimulationStepDTO extends StepDTO<SimulationStep> {

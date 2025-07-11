@@ -15,6 +15,5 @@
 #
 
 net.ihe.gazelle.maestro.technical.step.validation.GazelleValidationServiceHandlerFactory
-net.ihe.gazelle.maestro.technical.step.simulation.GazelleSimulationServiceHandlerFactory
 net.ihe.gazelle.maestro.technical.step.userinteract.UserInteractionHandlerFactory
 net.ihe.gazelle.maestro.technical.step.itb.ItbHandlerFactory

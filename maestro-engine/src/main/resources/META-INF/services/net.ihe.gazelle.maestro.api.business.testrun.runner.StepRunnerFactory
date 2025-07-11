@@ -16,5 +16,4 @@
 
 net.ihe.gazelle.maestro.business.step.assertion.AssertionStepRunnerFactory
 net.ihe.gazelle.maestro.technical.step.validation.ValidationStepRunnerFactory
-net.ihe.gazelle.maestro.technical.step.simulation.SimulationStepRunnerFactory
 net.ihe.gazelle.maestro.business.step.itb.ItbStepRunnerFactory

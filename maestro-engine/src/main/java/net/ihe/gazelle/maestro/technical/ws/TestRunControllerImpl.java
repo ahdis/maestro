@@ -25,7 +25,7 @@ import jakarta.ws.rs.core.Response;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testrun.InvalidTestRunException;
 import net.ihe.gazelle.maestro.technical.NotProvidedStep;
-import net.ihe.gazelle.maestro.technical.dto.UnsupportedPropertyTypeException;
+import net.ihe.gazelle.maestro.api.business.testrun.UnsupportedPropertyTypeException;
 import net.ihe.gazelle.maestro.technical.dto.report.TestReportDTO;
 import net.ihe.gazelle.maestro.technical.dto.testrun.TestRunDTO;
 import net.ihe.gazelle.maestro.technical.jobs.SynchronousMaestro;

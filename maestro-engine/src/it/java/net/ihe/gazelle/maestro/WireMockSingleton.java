@@ -106,7 +106,7 @@ public class WireMockSingleton {
 
     public static TestReport awaitTestReport() {
         String content = await()
-                .atMost(60, TimeUnit.SECONDS)
+                .atMost(3, TimeUnit.SECONDS)
                 .until(() -> {
                     List<LoggedRequest> matchingRequests = getMatchingRequests().apply(wireMockServer);
                     return !matchingRequests.isEmpty() ? matchingRequests : null;

@@ -32,6 +32,7 @@
         <module>maestro-api</module>
         <module>mlang-converter</module>
         <module>maestro-engine</module>
+        <module>maestro-step</module>
     </modules>
 
     <scm>
@@ -50,6 +51,7 @@
         <framework.version>2.0.1-SNAPSHOT</framework.version>
         <validation.service.version>2.0.0-FRAME-74-SNAPSHOT</validation.service.version>
         <simulation.service.api.version>1.0.0-GZL-5491-SNAPSHOT</simulation.service.api.version>
+        <search-api.version>1.1.0-SNAPSHOT</search-api.version>
         <lang.version>2.0.1</lang.version>
         <equalsverifier.version>3.16.1</equalsverifier.version>
 
@@ -103,6 +105,31 @@
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
+                <artifactId>validation-step</artifactId>
+                <version>0.3.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>net.ihe.gazelle</groupId>
+                <artifactId>simulation-step</artifactId>
+                <version>0.3.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>net.ihe.gazelle</groupId>
+                <artifactId>user-interaction-step</artifactId>
+                <version>0.3.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>net.ihe.gazelle</groupId>
+                <artifactId>assertion-step</artifactId>
+                <version>0.3.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>net.ihe.gazelle</groupId>
+                <artifactId>itb-step</artifactId>
+                <version>0.3.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>net.ihe.gazelle</groupId>
                 <artifactId>mlang-converter</artifactId>
                 <version>0.3.0-SNAPSHOT</version>
             </dependency>
@@ -135,6 +162,13 @@
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>simulation-service-api</artifactId>
                 <version>${simulation.service.api.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>net.ihe.gazelle</groupId>
+                <artifactId>search-api</artifactId>
+                <version>${search-api.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

@@ -19,6 +19,7 @@ package net.ihe.gazelle.maestro.technical.dto;
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.api.business.testrun.PropertyRef;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
+import net.ihe.gazelle.maestro.api.business.testrun.UnsupportedPropertyTypeException;
 import net.ihe.gazelle.maestro.technical.dto.testrun.AssertionStepDTO;
 import net.ihe.gazelle.maestro.technical.dto.testrun.PropertyDTO;
 import net.ihe.gazelle.maestro.technical.dto.testrun.TestRunDTO;

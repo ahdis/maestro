@@ -17,12 +17,11 @@
 package net.ihe.gazelle.maestro.technical.handler;
 
 import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
-import net.ihe.gazelle.maestro.business.step.simulation.SimulationHandler;
-import net.ihe.gazelle.maestro.business.step.simulation.SimulationHandlerMock;
-import net.ihe.gazelle.maestro.business.step.userinteract.UserInteractionHandler;
-import net.ihe.gazelle.maestro.business.step.userinteract.UserInteractionHandlerImpl;
 import net.ihe.gazelle.maestro.business.step.validation.ValidationHandler;
 import net.ihe.gazelle.maestro.business.step.validation.ValidationHandlerMock;
+import net.ihe.gazelle.maestro.simulation.step.business.SimulationHandler;
+import net.ihe.gazelle.userinteraction.step.business.UserInteractionHandler;
+import net.ihe.gazelle.userinteraction.step.business.UserInteractionHandlerImpl;
 
 public class HandlerProviderMock implements HandlerProvider {
 
