@@ -48,6 +48,10 @@
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
+            <artifactId>validation-step</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
             <artifactId>user-interaction-step</artifactId>
         </dependency>
         <dependency>
@@ -102,14 +106,6 @@
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
-            <artifactId>search-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.ihe.gazelle</groupId>
-            <artifactId>search-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.ihe.gazelle</groupId>
             <artifactId>service-registry-client</artifactId>
             <version>${service-registry.version}</version>
         </dependency>
@@ -138,6 +134,10 @@
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-smallrye-health</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-smallrye-openapi</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>

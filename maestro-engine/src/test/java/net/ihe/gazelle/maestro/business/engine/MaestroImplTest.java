@@ -25,7 +25,6 @@ import net.ihe.gazelle.maestro.api.business.testrun.PropertyRef;
 import net.ihe.gazelle.maestro.api.business.testrun.Step;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.business.step.assertion.AssertionStep;
-import net.ihe.gazelle.maestro.business.step.validation.ValidationStep;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationStep;
 import net.ihe.gazelle.maestro.technical.SessionStoreContextImpl;
 import net.ihe.gazelle.maestro.technical.StepRunnerProviderSPI;
@@ -34,6 +33,7 @@ import net.ihe.gazelle.maestro.technical.handler.HandlerProviderMock;
 import net.ihe.gazelle.maestro.technical.jobs.*;
 import net.ihe.gazelle.maestro.technical.ws.async.AsynchronousMaestro;
 import net.ihe.gazelle.maestro.technical.ws.async.tmintegration.TMTestRunMaestro;
+import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

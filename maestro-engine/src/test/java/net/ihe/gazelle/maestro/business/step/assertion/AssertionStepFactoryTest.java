@@ -39,8 +39,8 @@ class AssertionStepFactoryTest {
     @Test
     void createTest(){
         String name = "test";
-        Property<byte[]> assertion = new Property<>(AssertionStep.ASSERTION, "saucisse".getBytes());
-        Property<String> assertionService = new Property<>(AssertionStep.ASSERTION_SERVICE, "puré");
+        Property<byte[]> assertion = new Property<>(AssertionStep.ASSERTION, "value".getBytes());
+        Property<String> assertionService = new Property<>(AssertionStep.ASSERTION_SERVICE, "value");
         Property<Integer> dummyProperty = new Property<>("dummyField", 1);
         Map<String, Property<?>> properties = new HashMap<>();
         properties.put(AssertionStep.ASSERTION, assertion);

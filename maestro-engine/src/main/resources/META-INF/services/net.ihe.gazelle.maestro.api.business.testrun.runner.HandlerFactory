@@ -14,6 +14,4 @@
 # limitations under the License.
 #
 
-net.ihe.gazelle.maestro.technical.step.validation.GazelleValidationServiceHandlerFactory
-net.ihe.gazelle.maestro.technical.step.userinteract.UserInteractionHandlerFactory
 net.ihe.gazelle.maestro.technical.step.itb.ItbHandlerFactory

@@ -38,16 +38,16 @@ class ResolvablePropertyRefTest {
 
     @Test
     void resolveRefTest(){
-        Property<String> property = new Property<>("saucisse", "puré");
-        context.addProperty("menu", property);
-        PropertyRef<String> propertyRef = new PropertyRef<>("saucisse", "menu", String.class);
+        Property<String> property = new Property<>("name", "value");
+        context.addProperty("ref", property);
+        PropertyRef<String> propertyRef = new PropertyRef<>("name", "ref", String.class);
         ResolvablePropertyRef<String> resolvablePropertyRef = new ResolvablePropertyRef<>(propertyRef, context);
-        assertEquals("puré", resolvablePropertyRef.getValue());
+        assertEquals("value", resolvablePropertyRef.getValue());
     }
 
     @Test
     void notInContextTest(){
-        PropertyRef<String> propertyRef = new PropertyRef<>("saucisse", "menu", String.class);
+        PropertyRef<String> propertyRef = new PropertyRef<>("name", "ref", String.class);
         ResolvablePropertyRef<String> resolvablePropertyRef = new ResolvablePropertyRef<>(propertyRef, context);
         assertThrows(NoSuchElementException.class, resolvablePropertyRef::getValue);
     }

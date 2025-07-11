@@ -17,7 +17,7 @@
 package net.ihe.gazelle.maestro.technical.dto.testrun;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import net.ihe.gazelle.maestro.business.step.validation.ValidationStep;
+import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
 
 @JsonTypeName(ValidationStep.TYPE)
 public class ValidationStepDTO extends StepDTO<ValidationStep> {

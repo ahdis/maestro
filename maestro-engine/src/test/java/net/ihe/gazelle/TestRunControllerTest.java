@@ -18,12 +18,12 @@ package net.ihe.gazelle;
 
 import net.ihe.gazelle.maestro.api.business.testrun.*;
 import net.ihe.gazelle.maestro.business.engine.MaestroImpl;
-import net.ihe.gazelle.maestro.business.step.validation.ValidationStep;
 import net.ihe.gazelle.maestro.technical.SessionStoreContextImpl;
 import net.ihe.gazelle.maestro.technical.jobs.EventMaestroProducer;
 import net.ihe.gazelle.maestro.technical.jobs.StepMockEvent;
 import net.ihe.gazelle.maestro.technical.jobs.TestRunMockEvent;
 import net.ihe.gazelle.maestro.technical.ws.MissingArgumentException;
+import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
 
 import java.nio.charset.StandardCharsets;
 
