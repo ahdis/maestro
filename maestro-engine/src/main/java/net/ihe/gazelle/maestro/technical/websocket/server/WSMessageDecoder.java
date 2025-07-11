@@ -17,7 +17,7 @@
 package net.ihe.gazelle.maestro.technical.websocket.server;
 
 import jakarta.websocket.*;
-import net.ihe.gazelle.maestro.technical.websocket.WSMessageDTO;
+import net.ihe.gazelle.maestro.technical.websocket.dto.WSMessageDTO;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.ObjectMapperBuilder;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;

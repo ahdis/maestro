@@ -86,6 +86,14 @@
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
+            <artifactId>search-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>search-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
             <artifactId>service-registry-client</artifactId>
             <version>${service-registry.version}</version>
         </dependency>

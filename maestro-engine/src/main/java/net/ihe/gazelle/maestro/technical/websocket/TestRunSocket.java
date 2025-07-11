@@ -23,6 +23,7 @@ import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.technical.dto.testrun.TestRunDTO;
+import net.ihe.gazelle.maestro.technical.websocket.dto.WSMessageDTO;
 import net.ihe.gazelle.maestro.technical.ws.async.WebSocketMaestroService;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.ObjectMapperBuilder;
@@ -95,7 +96,7 @@ public class TestRunSocket {
     }
 
     private void sendMessageToClient(String message) {
-        String testSetId = serDes.deserialize(message, WSMessageDTO.class).getTestRunId();
+        String testSetId = serDes.deserialize(message, WSMessageDTO.class).getTestSetId();
         LOG.info("Sending message for testSetId : {}", testSetId);
         Session session = SessionsStorageInMemory.getSession(testSetId);
         if (session != null) {
