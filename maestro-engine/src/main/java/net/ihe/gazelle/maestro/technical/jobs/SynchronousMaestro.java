@@ -24,7 +24,7 @@ import net.ihe.gazelle.maestro.api.business.testreport.TestReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.UnexpectedErrorBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
-import net.ihe.gazelle.maestro.business.engine.MaestroProducer;
+import net.ihe.gazelle.maestro.business.MaestroEventProducer;
 import net.ihe.gazelle.maestro.technical.jobs.testrunevents.FinishTestSetEvent;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
@@ -50,12 +50,12 @@ public class SynchronousMaestro {
 
     private final Map<String, CompletableFuture<TestReport>> completableFutures = new ConcurrentHashMap<>();
     private final int defaultTimeout;
-    private final MaestroProducer maestroProducer;
+    private final MaestroEventProducer maestroEventProducer;
 
     @Inject
-    public SynchronousMaestro(@ConfigProperty(name = "gzl.maestro.timeout", defaultValue = "60") int defaultTimeout, MaestroProducer maestroProducer) {
+    public SynchronousMaestro(@ConfigProperty(name = "gzl.maestro.timeout", defaultValue = "60") int defaultTimeout, MaestroEventProducer maestroEventProducer) {
         this.defaultTimeout = defaultTimeout;
-        this.maestroProducer = maestroProducer;
+        this.maestroEventProducer = maestroEventProducer;
     }
 
     public TestReport executeTestSet(List<TestRun> testRuns) throws ExecutionException, InterruptedException {
@@ -66,7 +66,9 @@ public class SynchronousMaestro {
                     if (ex instanceof TimeoutException) {
                         LOG.error(TIMEOUT_MESSAGE, ex);
                         return new TestReportBuilder()
-                                .addUnexpectedError(new UnexpectedErrorBuilder().fromTrowable(ex))
+                                .addUnexpectedError(new UnexpectedErrorBuilder()
+                                        .fromThrowable(ex)
+                                        .setMessage("Test set execution timed out after " + defaultTimeout + " seconds."))
                                 .build();
                     }
                     throw new CompletionException(ex);
@@ -78,11 +80,9 @@ public class SynchronousMaestro {
         TestSetRun testSetRun = new TestSetRun(UUID.randomUUID().toString(), testRuns);
         CompletableFuture<TestReport> future = new CompletableFuture<>();
         completableFutures.put(testSetRun.testSetId(), future);
-        maestroProducer.executeTestSet(testSetRun);
+        maestroEventProducer.executeTestSet(testSetRun);
         return future;
     }
-
-
 
     public void completeFuture(FinishTestSetEvent finishTestSetEvent) {
         completableFutures.get(finishTestSetEvent.getTestSetRun().testSetId()).complete(finishTestSetEvent.getTestReport());

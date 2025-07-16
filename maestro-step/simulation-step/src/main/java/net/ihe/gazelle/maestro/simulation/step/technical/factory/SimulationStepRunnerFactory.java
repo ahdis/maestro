@@ -25,14 +25,14 @@ import net.ihe.gazelle.maestro.simulation.step.business.SimulationHandler;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationStep;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepRunner;
 import net.ihe.gazelle.maestro.simulation.step.technical.dto.ReportSerializationImpl;
-import net.ihe.gazelle.userinteraction.step.business.UserInteractionHandler;
-import net.ihe.gazelle.userinteraction.step.business.UserInteractionHandlerImpl;
+import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandler;
+import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandlerImpl;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static net.ihe.gazelle.userinteraction.step.business.UserInteractionHandler.NAME;
+import static net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandler.NAME;
 
 @ApplicationScoped
 public class SimulationStepRunnerFactory implements StepRunnerFactory {

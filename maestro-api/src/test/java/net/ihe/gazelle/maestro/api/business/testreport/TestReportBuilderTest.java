@@ -123,7 +123,7 @@ class TestReportBuilderTest {
                 .setName("error")
                 .setMessage("error"));
         testRunReportBuilder.addUnexpectedError(new UnexpectedErrorBuilder()
-                .fromTrowable(new Exception("error")));
+                .fromThrowable(new Exception("error")));
 
         TestReportBuilder subReportBuilder = createTestReportBuilder()
                 .addTestRunReport(testRunReportBuilder);

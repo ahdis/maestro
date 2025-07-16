@@ -56,6 +56,14 @@
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
+            <artifactId>itb-step</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>assertion-step</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
             <artifactId>mlang-converter</artifactId>
         </dependency>
 
@@ -75,34 +83,6 @@
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>search-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.ihe.gazelle</groupId>
-            <artifactId>validation-v1-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.ihe.gazelle</groupId>
-            <artifactId>validation-v2-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.ihe.gazelle</groupId>
-            <artifactId>validation-v1-rest-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.ihe.gazelle</groupId>
-            <artifactId>validation-v2-rest-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.ihe.gazelle</groupId>
-            <artifactId>simulation-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.ihe.gazelle</groupId>
-            <artifactId>simulation-jaxrs-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.ihe.gazelle</groupId>
-            <artifactId>lang</artifactId>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>

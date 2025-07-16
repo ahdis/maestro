@@ -23,7 +23,7 @@ import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.UnexpectedErrorBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.*;
-import net.ihe.gazelle.maestro.business.engine.MaestroProducer;
+import net.ihe.gazelle.maestro.business.MaestroEventProducer;
 
 /**
  * A stepRunnerJob receive message from producer to execute Step, launch execution and send result to Maestro Listener
@@ -33,12 +33,12 @@ import net.ihe.gazelle.maestro.business.engine.MaestroProducer;
 public class StepRunnerJob {
 
     private final StepRunnerProvider stepRunnerFactory;
-    private final MaestroProducer maestroProducer;
+    private final MaestroEventProducer maestroEventProducer;
 
     @Inject
-    public StepRunnerJob(StepRunnerProvider stepRunnerFactory, MaestroProducer maestroProducer) {
+    public StepRunnerJob(StepRunnerProvider stepRunnerFactory, MaestroEventProducer maestroEventProducer) {
         this.stepRunnerFactory = stepRunnerFactory;
-        this.maestroProducer = maestroProducer;
+        this.maestroEventProducer = maestroEventProducer;
     }
 
     /**
@@ -84,7 +84,7 @@ public class StepRunnerJob {
      * @param stepRunReportBuilder A StepReportBuilder containing data of stepRun execution
      */
     private void stepEnded(StepRun stepRun, StepRunReportBuilder stepRunReportBuilder) {
-        maestroProducer.returnStepReport(stepRun, stepRunReportBuilder);
+        maestroEventProducer.returnStepReport(stepRun, stepRunReportBuilder);
     }
 
 }

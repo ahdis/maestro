@@ -19,8 +19,8 @@ package net.ihe.gazelle.maestro.technical.handler;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationHandler;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationHandler;
-import net.ihe.gazelle.userinteraction.step.business.UserInteractionHandler;
-import net.ihe.gazelle.userinteraction.step.business.UserInteractionHandlerImpl;
+import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandler;
+import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandlerImpl;
 
 public class HandlerProviderMock implements HandlerProvider {
 

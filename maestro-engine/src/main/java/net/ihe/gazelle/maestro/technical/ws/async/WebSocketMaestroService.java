@@ -20,22 +20,22 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
-import net.ihe.gazelle.maestro.business.engine.MaestroProducer;
+import net.ihe.gazelle.maestro.business.MaestroEventProducer;
 
 import java.util.List;
 
 @ApplicationScoped
 public class WebSocketMaestroService {
 
-    private final MaestroProducer maestroProducer;
+    private final MaestroEventProducer maestroEventProducer;
 
     @Inject
-    public WebSocketMaestroService(MaestroProducer maestroProducer) {
-        this.maestroProducer = maestroProducer;
+    public WebSocketMaestroService(MaestroEventProducer maestroEventProducer) {
+        this.maestroEventProducer = maestroEventProducer;
     }
 
     public void executeTestSet(String testSetId, List<TestRun> testRuns) {
         TestSetRun testSetRun = new TestSetRun(testSetId, testRuns);
-        maestroProducer.executeTestSet(testSetRun);
+        maestroEventProducer.executeTestSet(testSetRun);
     }
 }

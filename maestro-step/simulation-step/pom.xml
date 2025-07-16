@@ -48,54 +48,48 @@
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>simulation-api</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>simulation-client</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>simulation-jaxrs-api</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>framework-model-validator</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>framework-model-marshaller</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>service-metadata-api</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>service-metadata-jaxrs-api</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>lang</artifactId>
-            <scope>provided</scope>
         </dependency>
 
         <!-- Stack dependencies -->
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-rest-client</artifactId>
-            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-rest-client-jackson</artifactId>
         </dependency>
         <dependency>
             <groupId>jakarta.enterprise</groupId>
             <artifactId>jakarta.enterprise.cdi-api</artifactId>
-            <scope>provided</scope>
         </dependency>
 
         <!-- Test dependencies -->

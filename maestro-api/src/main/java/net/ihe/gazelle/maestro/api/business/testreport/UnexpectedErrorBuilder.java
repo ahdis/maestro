@@ -51,10 +51,10 @@ public class UnexpectedErrorBuilder extends AbstractBuilder<UnexpectedError> {
         return this;
     }
 
-    public UnexpectedErrorBuilder fromTrowable(Throwable t) {
+    public UnexpectedErrorBuilder fromThrowable(Throwable t) {
         this.name = t.getClass().getSimpleName();
-        this.message = t.getMessage();
-        this.cause = t.getCause() != null ? new UnexpectedErrorBuilder().fromTrowable(t.getCause()) : null;
+        this.message = t.getMessage() != null ? t.getMessage() : "Unexpected Error";
+        this.cause = t.getCause() != null ? new UnexpectedErrorBuilder().fromThrowable(t.getCause()) : null;
         return this;
     }
 

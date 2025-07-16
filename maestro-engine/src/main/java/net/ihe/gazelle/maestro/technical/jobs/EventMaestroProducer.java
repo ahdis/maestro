@@ -29,7 +29,7 @@ import net.ihe.gazelle.maestro.api.business.testrun.runner.FinishedStepEvent;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StartStepCommand;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepMessage;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
-import net.ihe.gazelle.maestro.business.engine.MaestroProducer;
+import net.ihe.gazelle.maestro.business.MaestroEventProducer;
 import net.ihe.gazelle.maestro.technical.jobs.testrunevents.*;
 
 /**
@@ -41,7 +41,7 @@ import net.ihe.gazelle.maestro.technical.jobs.testrunevents.*;
  */
 @ApplicationScoped
 @Default
-public class EventMaestroProducer implements MaestroProducer {
+public class EventMaestroProducer implements MaestroEventProducer {
 
     private final Event<TestRunEvent> testRunEvent;
     private final Event<StepMessage> stepMessageEvent;

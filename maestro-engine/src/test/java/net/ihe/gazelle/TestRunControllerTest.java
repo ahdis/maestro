@@ -17,7 +17,7 @@
 package net.ihe.gazelle;
 
 import net.ihe.gazelle.maestro.api.business.testrun.*;
-import net.ihe.gazelle.maestro.business.engine.MaestroImpl;
+import net.ihe.gazelle.maestro.business.MaestroImpl;
 import net.ihe.gazelle.maestro.technical.SessionStoreContextImpl;
 import net.ihe.gazelle.maestro.technical.jobs.EventMaestroProducer;
 import net.ihe.gazelle.maestro.technical.jobs.StepMockEvent;

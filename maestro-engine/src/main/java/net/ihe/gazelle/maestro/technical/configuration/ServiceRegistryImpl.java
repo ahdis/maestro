@@ -23,7 +23,7 @@ import net.ihe.gazelle.servicemetadata.api.business.HttpRestBindingBuilder;
 import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterfaceBuilder;
 import net.ihe.gazelle.servicemetadata.api.business.Service;
 import net.ihe.gazelle.servicemetadata.api.business.ServiceBuilder;
-import net.ihe.gazelle.userinteraction.step.business.UserInteractionHandler;
+import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandler;
 
 import java.util.List;
 import java.util.NoSuchElementException;

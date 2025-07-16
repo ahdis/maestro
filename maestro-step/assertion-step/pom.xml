@@ -33,4 +33,25 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <dependencies>
+        <!-- Sub modules dependencies -->
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>maestro-api</artifactId>
+        </dependency>
+
+        <!-- Gazelle dependencies -->
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>framework-model-validator</artifactId>
+        </dependency>
+
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
 </project>

@@ -17,10 +17,7 @@
 package net.ihe.gazelle.maestro.simulation.step.business;
 
 import net.ihe.gazelle.lang.ExecutionRuntimeException;
-import net.ihe.gazelle.maestro.api.business.testreport.ItemBuilder;
-import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
-import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
-import net.ihe.gazelle.maestro.api.business.testreport.UnexpectedErrorBuilder;
+import net.ihe.gazelle.maestro.api.business.testreport.*;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.SyncStepRunner;
 import net.ihe.gazelle.simulation.business.callback.Result;
@@ -28,13 +25,16 @@ import net.ihe.gazelle.simulation.business.callback.SimulationReport;
 import net.ihe.gazelle.simulation.business.callback.SimulationReportValidator;
 import net.ihe.gazelle.simulation.business.setup.*;
 import net.ihe.gazelle.simulation.client.business.ServiceUnavailableException;
-import net.ihe.gazelle.userinteraction.step.business.UserInteractionHandler;
+import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.*;
 
 public class SimulationStepRunner extends SyncStepRunner {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SimulationStepRunner.class);
 
     private final ReportSerialization serializer;
     private final SimulationHandler simulationHandler;
@@ -53,7 +53,7 @@ public class SimulationStepRunner extends SyncStepRunner {
                     .createSimulationRequest((SimulationStep) stepRun.step());
             CompletableFuture<SimulationReport> futureReport = new CompletableFuture<>();
             simulationHandler.simulate(simulationRequest, this::showInstructions, futureReport::complete);
-            SimulationReport simulationReport = futureReport.get();
+            SimulationReport simulationReport = getSimulationReport(simulationRequest, futureReport);
             ItemBuilder itemBuilder = new ItemBuilder()
                     .setContent(serializer.toByteArray(simulationReport))
                     .setName("simulationReport");
@@ -79,6 +79,24 @@ public class SimulationStepRunner extends SyncStepRunner {
         } catch (ExecutionException e) {
             throw new ExecutionRuntimeException(e);
         }
+    }
+
+    private SimulationReport getSimulationReport(SimulationRequest simulationRequest, CompletableFuture<SimulationReport> futureReport) throws ExecutionException, InterruptedException {
+        SimulationReport simulationReport = futureReport
+                .orTimeout(simulationRequest.getTimeoutSeconds() + 10, TimeUnit.SECONDS)
+                .exceptionally(ex ->
+                {
+                    if (ex instanceof TimeoutException) {
+                        LOG.error("Simulation has timed out after {} seconds.", simulationRequest.getTimeoutSeconds() + 10, ex);
+                        return null;
+                    }
+                    throw new CompletionException(ex);
+                })
+                .get();
+        if (simulationReport == null) {
+            throw new TimeoutRuntimeException("Simulation has timed out after " + simulationRequest.getTimeoutSeconds() + 10 + " seconds.");
+        }
+        return simulationReport;
     }
 
     private StepRunReportBuilder prepareStepReport(StepRun stepRun) {

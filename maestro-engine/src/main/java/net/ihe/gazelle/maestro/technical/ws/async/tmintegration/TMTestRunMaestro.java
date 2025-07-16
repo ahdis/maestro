@@ -21,7 +21,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
-import net.ihe.gazelle.maestro.business.engine.MaestroProducer;
+import net.ihe.gazelle.maestro.business.MaestroEventProducer;
 import net.ihe.gazelle.maestro.technical.client.TestReportClient;
 import net.ihe.gazelle.maestro.technical.jobs.testrunevents.FinishTestSetEvent;
 import net.ihe.gazelle.maestro.technical.ws.async.TestRunStore;
@@ -39,13 +39,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TMTestRunMaestro {
 
     private final Map<String, TestRunStore> tmRunningServices;
-    private final MaestroProducer maestroProducer;
+    private final MaestroEventProducer maestroEventProducer;
     private final TestReportClient client;
 
     @Inject
-    public TMTestRunMaestro(MaestroProducer maestroProducer, TestReportClient client) {
+    public TMTestRunMaestro(MaestroEventProducer maestroEventProducer, TestReportClient client) {
         this.tmRunningServices = new ConcurrentHashMap<>();
-        this.maestroProducer = maestroProducer;
+        this.maestroEventProducer = maestroEventProducer;
         this.client = client;
     }
 
@@ -54,7 +54,7 @@ public class TMTestRunMaestro {
         List<TestRun> testRuns = TMScriptMapper.convertToTestRun(testRunNodes, store);
         TestSetRun testSetRun = new TestSetRun(UUID.randomUUID().toString(), testRuns);
         tmRunningServices.put(testSetRun.testSetId(), store);
-        maestroProducer.executeTestSet(testSetRun);
+        maestroEventProducer.executeTestSet(testSetRun);
     }
 
     public void callbackTM(FinishTestSetEvent finishTestSetEvent) {

@@ -17,7 +17,7 @@
 package net.ihe.gazelle.maestro.technical.factory;
 
 import net.ihe.gazelle.maestro.api.business.testrun.Maestro;
-import net.ihe.gazelle.maestro.business.engine.MaestroImpl;
+import net.ihe.gazelle.maestro.business.MaestroImpl;
 import net.ihe.gazelle.maestro.technical.SessionStoreContextImpl;
 import net.ihe.gazelle.maestro.technical.StepRunnerProviderSPI;
 import net.ihe.gazelle.maestro.technical.configuration.ServiceRegistryDAOImpl;

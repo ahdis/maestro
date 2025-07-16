@@ -17,22 +17,21 @@
 package net.ihe.gazelle.maestro.technical.dto.testrun;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import net.ihe.gazelle.maestro.business.step.assertion.AssertionStep;
-import net.ihe.gazelle.maestro.business.step.itb.ItbStep;
+import net.ihe.gazelle.maestro.itb.step.business.ItbStep;
 
 @JsonTypeName(ItbStep.TYPE)
-public class ItbStepDTO extends StepDTO<AssertionStep> {
+public class ItbStepDTO extends StepDTO<ItbStep> {
 
     public ItbStepDTO() {
-        super(new AssertionStep());
+        super(new ItbStep());
     }
 
-    public ItbStepDTO(AssertionStep assertionStep) {
-        super(assertionStep);
+    public ItbStepDTO(ItbStep itbStep) {
+        super(itbStep);
     }
 
     @Override
-    public Class<AssertionStep> getBusinessObjectClass() {
-        return AssertionStep.class;
+    public Class<ItbStep> getBusinessObjectClass() {
+        return ItbStep.class;
     }
 }
