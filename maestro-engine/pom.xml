@@ -30,8 +30,6 @@
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <service-registry.version>1.0.0-GZL-5486-SNAPSHOT</service-registry.version>
-
         <skipTests>false</skipTests>
         <skipITs>false</skipITs>
     </properties>

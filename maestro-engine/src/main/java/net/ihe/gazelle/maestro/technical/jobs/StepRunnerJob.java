@@ -67,8 +67,7 @@ public class StepRunnerJob {
      */
     public void returnUnexpectedError(Exception e, StepRun stepRun) {
         UnexpectedErrorBuilder unexpectedErrorBuilder = new UnexpectedErrorBuilder()
-                    .setMessage(e.getMessage())
-                    .setName("StepExecutionError");
+                .fromThrowable(e);
         StepRunReportBuilder builder = new StepRunReportBuilder()
                 .setStepId(stepRun.step().getName())
                 .setType(stepRun.step().getType())

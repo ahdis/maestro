@@ -67,6 +67,10 @@ public class SimulationStepRunner extends SyncStepRunner {
             return buildReportWithError(stepRun, e, "Invalid Parameter Value");
         } catch (UnknownSequenceException e) {
             return buildReportWithError(stepRun, e, "Unknown Simulation Sequence");
+        } catch (UnknownSimulationException e) {
+            return buildReportWithError(stepRun, e, "Unknown Simulation session");
+        } catch (AlreadyRunningException e) {
+            return buildReportWithError(stepRun, e, "Simulation already running");
         } catch (ServiceUnavailableException e) {
             return buildReportWithError(stepRun, e, "Service Unavailable");
         } catch (ClassCastException e) {
@@ -110,7 +114,8 @@ public class SimulationStepRunner extends SyncStepRunner {
                 .addUnexpectedError(
                         new UnexpectedErrorBuilder()
                                 .setName(name)
-                                .setMessage(e.getMessage())
+                                .setMessage(name)
+                                .setCause(new UnexpectedErrorBuilder().fromThrowable(e))
                 );
     }
 
