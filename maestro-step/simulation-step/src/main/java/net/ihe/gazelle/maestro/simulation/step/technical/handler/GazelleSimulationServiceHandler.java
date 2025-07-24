@@ -22,11 +22,15 @@ import net.ihe.gazelle.simulation.business.sequence.SimulationSequence;
 import net.ihe.gazelle.simulation.business.setup.AdditionalInstructions;
 import net.ihe.gazelle.simulation.business.setup.SimulationRequest;
 import net.ihe.gazelle.simulation.client.business.SimulationClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.function.Consumer;
 
 public class GazelleSimulationServiceHandler implements SimulationHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GazelleSimulationServiceHandler.class);
 
     private final SimulationClient simulationClient;
 
@@ -39,6 +43,7 @@ public class GazelleSimulationServiceHandler implements SimulationHandler {
         try {
             return getSimulationSequences() != null;
         } catch (Exception e) {
+            LOGGER.error(e.getMessage());
             return false;
         }
     }

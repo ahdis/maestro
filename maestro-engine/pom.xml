@@ -85,7 +85,6 @@
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>service-registry-client</artifactId>
-            <version>${service-registry.version}</version>
         </dependency>
 
         <!-- Quarkus -->
@@ -104,6 +103,10 @@
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-rest-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-rest-client-jackson</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
@@ -174,7 +177,7 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>${quarkus.platform.group-id}</groupId>
+                <groupId>io.quarkus.platform</groupId>
                 <artifactId>quarkus-maven-plugin</artifactId>
             </plugin>
             <plugin>

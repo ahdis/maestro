@@ -50,15 +50,13 @@
 
         <framework.version>2.1.0</framework.version>
         <search-api.version>1.1.0</search-api.version>
-        <validation.service.version>2.0.0-FRAME-74-SNAPSHOT</validation.service.version>
-        <simulation.service.api.version>0.1.0-SNAPSHOT</simulation.service.api.version>
-        <service-registry.version>1.0.0-SNAPSHOT</service-registry.version>
+        <validation-api.version>2.0.0-FRAME-74-SNAPSHOT</validation-api.version>
+        <simulation-api.version>0.1.0</simulation-api.version>
+        <service-registry.version>1.0.0</service-registry.version>
         <lang.version>2.0.1</lang.version>
         <equalsverifier.version>3.16.1</equalsverifier.version>
 
         <!-- Quarkus Build-->
-        <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
-        <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.version>3.15.5</quarkus.platform.version>
         <quarkus.container-image.build>true</quarkus.container-image.build>
         <quarkus.container-image.registry>rg.fr-par.scw.cloud</quarkus.container-image.registry>
@@ -67,9 +65,13 @@
         <quarkus.container-image.tag>${project.version}</quarkus.container-image.tag>
 
         <!-- Plugins version -->
-        <surefire-plugin.version>3.2.5</surefire-plugin.version>
-        <compiler-plugin.version>3.12.1</compiler-plugin.version>
+        <compiler-plugin.version>3.14.0</compiler-plugin.version>
+        <surefire-plugin.version>3.5.3</surefire-plugin.version>
         <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
+        <bulild.helper.maven.plugin.version>3.6.1</bulild.helper.maven.plugin.version>
+        <release-plugin.version>3.1.1</release-plugin.version>
+        <pitest.maven.version>1.18.2</pitest.maven.version>
+        <jandex-plugin.version>3.1.6</jandex-plugin.version>
 
         <skipITs>true</skipITs>
 
@@ -138,8 +140,8 @@
 
             <!-- Stack BOM -->
             <dependency>
-                <groupId>${quarkus.platform.group-id}</groupId>
-                <artifactId>${quarkus.platform.artifact-id}</artifactId>
+                <groupId>io.quarkus.platform</groupId>
+                <artifactId>quarkus-bom</artifactId>
                 <version>${quarkus.platform.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
@@ -156,14 +158,14 @@
             <dependency>
                 <artifactId>validation-service-api</artifactId>
                 <groupId>net.ihe.gazelle</groupId>
-                <version>${validation.service.version}</version>
+                <version>${validation-api.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>simulation-service-api</artifactId>
-                <version>${simulation.service.api.version}</version>
+                <version>${simulation-api.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -173,6 +175,11 @@
                 <version>${search-api.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>net.ihe.gazelle</groupId>
+                <artifactId>service-registry-client</artifactId>
+                <version>${service-registry.version}</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
@@ -194,7 +201,7 @@
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <groupId>${quarkus.platform.group-id}</groupId>
+                    <groupId>io.quarkus.platform</groupId>
                     <artifactId>quarkus-maven-plugin</artifactId>
                     <version>${quarkus.platform.version}</version>
                     <extensions>true</extensions>
@@ -230,28 +237,6 @@
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
-
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${jacoco-maven-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>pre-unit-test</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>post-unit-test</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
             <plugin>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>${surefire-plugin.version}</version>
@@ -273,9 +258,73 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>pre-unit-test</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>post-unit-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!-- add src/it/java as test sources -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>${bulild.helper.maven.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>add-test-source</id>
+                        <phase>generate-test-sources</phase>
+                        <goals>
+                            <goal>add-test-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>src/it/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>add-integration-test-resources</id>
+                        <phase>generate-test-resources</phase>
+                        <goals>
+                            <goal>add-test-resource</goal>
+                        </goals>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <directory>src/it/resources</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>${release-plugin.version}</version>
+                <configuration>
+                    <tagNameFormat>@{project.version}</tagNameFormat>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <releaseProfiles>release</releaseProfiles>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.pitest</groupId>
                 <artifactId>pitest-maven</artifactId>
-                <version>1.16.1</version>
+                <version>${pitest.maven.version}</version>
                 <!-- Pitest needs specific dependency for Junit5-->
                 <dependencies>
                     <dependency>
@@ -284,6 +333,20 @@
                         <version>1.2.1</version>
                     </dependency>
                 </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>io.smallrye</groupId>
+                <artifactId>jandex-maven-plugin</artifactId>
+                <version>${jandex-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>make-index</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>jandex</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

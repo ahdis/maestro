@@ -31,7 +31,7 @@ import java.util.Set;
 
 public class StepRunnerProviderSPI implements StepRunnerProvider {
 
-    private final Logger log = LoggerFactory.getLogger(StepRunnerProviderSPI.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StepRunnerProviderSPI.class);
 
     private final HandlerProvider handlerProvider;
 
@@ -53,7 +53,7 @@ public class StepRunnerProviderSPI implements StepRunnerProvider {
             }
         }
         IllegalArgumentException illegalArgumentException = new IllegalArgumentException("Step class " + step.getClass() + " is not supported");
-        log.error(illegalArgumentException.getMessage(), illegalArgumentException);
+        LOGGER.error(illegalArgumentException.getMessage(), illegalArgumentException);
         throw illegalArgumentException;
     }
 
