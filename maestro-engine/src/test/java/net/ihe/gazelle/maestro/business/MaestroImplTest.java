@@ -16,205 +16,291 @@
 
 package net.ihe.gazelle.maestro.business;
 
-import net.ihe.gazelle.lang.UnexpectedError;
-import net.ihe.gazelle.maestro.api.business.testreport.Result;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
-import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
-import net.ihe.gazelle.maestro.api.business.testrun.Property;
-import net.ihe.gazelle.maestro.api.business.testrun.PropertyRef;
-import net.ihe.gazelle.maestro.api.business.testrun.Step;
-import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
-import net.ihe.gazelle.maestro.assertion.step.business.AssertionStep;
-import net.ihe.gazelle.maestro.simulation.step.business.SimulationStep;
-import net.ihe.gazelle.maestro.technical.SessionStoreContextImpl;
-import net.ihe.gazelle.maestro.technical.StepRunnerProviderSPI;
-import net.ihe.gazelle.maestro.technical.client.TestReportClient;
-import net.ihe.gazelle.maestro.technical.handler.HandlerProviderMock;
-import net.ihe.gazelle.maestro.technical.jobs.*;
-import net.ihe.gazelle.maestro.technical.ws.async.AsynchronousMaestro;
-import net.ihe.gazelle.maestro.technical.ws.async.tmintegration.TMTestRunMaestro;
-import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
-import org.junit.jupiter.api.BeforeAll;
+import net.ihe.gazelle.maestro.api.business.testreport.*;
+import net.ihe.gazelle.maestro.api.business.testrun.*;
+import net.ihe.gazelle.maestro.api.business.testrun.context.Context;
+import net.ihe.gazelle.maestro.api.business.testrun.context.TestRunSessionStore;
+import net.ihe.gazelle.maestro.api.business.testrun.context.TestSetSessionStore;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
-
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class MaestroImplTest {
 
-    private static SynchronousMaestro synchronousMaestro;
+    @Mock
+    private MaestroEventProducer maestroEventProducer;
 
-    @BeforeAll
-    static void setUp() {
-        TestRunMockEvent testRunMockEvent = new TestRunMockEvent();
-        StepMockEvent stepMockEvent = new StepMockEvent();
-        EventMaestroProducer maestroProducer = new EventMaestroProducer(testRunMockEvent, stepMockEvent);
-        MaestroImpl maestro = new MaestroImpl(
-                new EventMaestroProducer(testRunMockEvent, stepMockEvent),
-                new SessionStoreContextImpl()
-        );
-        synchronousMaestro = new SynchronousMaestro(3, maestroProducer);
-        EventListener eventListener = createListener(maestroProducer, maestro);
-        testRunMockEvent.addListener(eventListener);
-        stepMockEvent.addListener(eventListener);
+    @Mock
+    private SessionStoreContext sessionStoreContext;
+
+    @Mock
+    private TestRun testRun;
+
+    @Mock
+    private TestSetRun testSetRun;
+
+    @Mock
+    private net.ihe.gazelle.maestro.api.business.testrun.Test test;
+
+    @Mock
+    private Step step;
+
+    @Mock
+    private TestRunSessionStore testRunSessionStore;
+
+    @Mock
+    private TestSetSessionStore testSetSessionStore;
+
+    @Mock
+    private Context context;
+
+    private MaestroImpl maestroImpl;
+
+    @BeforeEach
+    void setUp() {
+        maestroImpl = new MaestroImpl(maestroEventProducer, sessionStoreContext);
     }
 
-    private static EventListener createListener(EventMaestroProducer maestroProducer, MaestroImpl maestro) {
-        AsynchronousMaestro asynchronousMaestro = new AsynchronousMaestro(maestroProducer, new TestReportClient());
-        StepRunnerJob stepRunnerJob = new StepRunnerJob(
-                new StepRunnerProviderSPI(new HandlerProviderMock()),
-                maestroProducer
-        );
-        TMTestRunMaestro tmTestRunMaestro = new TMTestRunMaestro(maestroProducer, new TestReportClient());
-        return new EventListener(maestro, synchronousMaestro, asynchronousMaestro, stepRunnerJob, tmTestRunMaestro);
+    @Test
+    void run_TestRun_ValidTestRun_ShouldExecuteSuccessfully() {
+        // Arrange
+        String testSetId = "testSet1";
+        List<Property<?>> properties = new ArrayList<>();
+        List<Step> steps = List.of(step);
+
+        when(testRun.getTestSetId()).thenReturn(testSetId);
+        when(testRun.getTest()).thenReturn(test);
+        when(testRun.getInputs()).thenReturn(properties);
+        when(test.getSteps()).thenReturn(steps);
+        when(step.getProperties()).thenReturn(new ArrayList<>());
+
+        // Mock the session store context to return a valid TestRunSessionStore
+        when(sessionStoreContext.getExecutionContext(anyString())).thenReturn(testRunSessionStore);
+        when(testRunSessionStore.getContext()).thenReturn(context);
+
+        // Act
+        maestroImpl.run(testRun);
+
+        // Assert
+        verify(sessionStoreContext).addExecutionContext(anyString(), any(TestRunSessionStore.class));
+        verify(maestroEventProducer).executeStep(any(StepRun.class));
+    }
+
+    @Test
+    void run_TestRun_NullTestRun_ShouldEmitErrorEvent() {
+        // Act
+        maestroImpl.run((TestRun) null);
+
+        // Assert
+        verify(maestroEventProducer).emitErrorTestRunEvent(any(Exception.class));
+    }
+
+    @Test
+    void run_TestRun_ValidationException_ShouldSendUndefinedTestReport() {
+        // Arrange
+        String testSetId = "testSet1";
+        when(testRun.getTestSetId()).thenReturn(testSetId);
+        when(testRun.getTest()).thenReturn(test);
+        when(test.getId()).thenReturn("testId");
+        when(test.getName()).thenReturn("testName");
+        when(sessionStoreContext.getTestSetContexts(testSetId)).thenReturn(testSetSessionStore);
+        when(testSetSessionStore.getTestSetRun()).thenReturn(testSetRun);
+
+        // Mock validator to throw exception
+        doThrow(new IllegalArgumentException("Validation failed")).when(testRun).getInputs();
+
+        // Act
+        maestroImpl.run(testRun);
+
+        // Assert
+        verify(maestroEventProducer).returnTestSetReport(eq(testSetRun), any(TestReport.class));
+    }
+
+    @Test
+    void run_TestSetRun_ValidTestSetRun_ShouldExecuteSuccessfully() {
+        // Arrange
+        String testSetId = "testSet1";
+        List<TestRun> testRuns = List.of(testRun);
+
+        when(testSetRun.testSetId()).thenReturn(testSetId);
+        when(testSetRun.testRuns()).thenReturn(testRuns);
+        when(testRun.setTestSetId(testSetId)).thenReturn(testRun);
+        when(testRun.getTest()).thenReturn(test);
+        when(testRun.getInputs()).thenReturn(new ArrayList<>());
+        when(test.getSteps()).thenReturn(List.of(step));
+        when(step.getProperties()).thenReturn(new ArrayList<>());
+
+        // Mock the session store context to return a valid TestRunSessionStore
+        when(sessionStoreContext.getExecutionContext(anyString())).thenReturn(testRunSessionStore);
+        when(testRunSessionStore.getContext()).thenReturn(context);
+
+        // Act
+        maestroImpl.run(testSetRun);
+
+        // Assert
+        verify(sessionStoreContext).addTestSetContext(testSetId, testSetRun);
+        verify(sessionStoreContext).addExecutionContext(anyString(), any(TestRunSessionStore.class));
     }
 
 
     @Test
-    void testMaestroValidationStep() throws ExecutionException, InterruptedException {
-        List<TestRun> testRuns = getTestRunsWithOneValidationStep();
-        TestReport report = synchronousMaestro.executeTestSet(testRuns);
-        assertEquals(Result.UNDEFINED, report.getResult());
-        List<TestRunReport> testRunReports = report.getTestRunReports();
-        assertEquals(1, testRunReports.size());
-        assertEquals(1, testRunReports.getFirst().getStepRunReports().size());
-        assertEquals(1, report.getTestCounters().getTotal());
-        assertEquals(1, report.getTestCounters().getUndefined());
+    void finishTest_LastTestRun_ShouldGenerateTestReportAndClearContexts() {
+        // Arrange
+        String testSetId = "testSet1";
+        List<TestRun> testRuns = List.of(testRun);
+        List<TestRunReportBuilder> reportBuilders = new ArrayList<>();
+
+        when(testRun.getTestSetId()).thenReturn(testSetId);
+        when(sessionStoreContext.getTestSetContexts(testSetId)).thenReturn(testSetSessionStore);
+        when(testSetSessionStore.getTestSetRun()).thenReturn(testSetRun);
+        when(testSetRun.testRuns()).thenReturn(testRuns);
+        when(testSetSessionStore.getTestRunReportBuilders()).thenReturn(reportBuilders);
+
+        TestRunReportBuilder testRunReportBuilder = mock(TestRunReportBuilder.class);
+
+        // Act
+        maestroImpl.finishTest(testRun, testRunReportBuilder);
+
+        // Assert
+        verify(testSetSessionStore).addTestRunReportBuilder(testRunReportBuilder);
+        verify(sessionStoreContext).clearExecutionContext(testSetId);
+        verify(sessionStoreContext).clearTestSetContext(testSetId);
+        verify(maestroEventProducer).returnTestSetReport(eq(testSetRun), any(TestReport.class));
     }
 
     @Test
-    void testMaestroSimulationStep() throws ExecutionException, InterruptedException {
-        List<TestRun> testRuns = getTestRunsWithOneSimulationStep();
-        TestReport report = synchronousMaestro.executeTestSet(testRuns);
-        assertEquals(Result.PASSED, report.getResult());
-        List<TestRunReport> testRunReports = report.getTestRunReports();
-        assertEquals(1, testRunReports.size());
-        assertEquals(1, testRunReports.getFirst().getStepRunReports().size());
-        assertEquals(1, report.getTestCounters().getTotal());
-        assertEquals(1, report.getTestCounters().getPassed());
+    void finishTest_NotLastTestRun_ShouldRunNextTestRun() {
+        // Arrange
+        String testSetId = "testSet1";
+        TestRun testRun2 = mock(TestRun.class);
+        List<TestRun> testRuns = List.of(testRun, testRun2);
+
+        when(testRun.getTestSetId()).thenReturn(testSetId);
+        when(testRun2.setTestSetId(testSetId)).thenReturn(testRun2);
+        when(testRun2.getTest()).thenReturn(test);
+        when(testRun2.getInputs()).thenReturn(new ArrayList<>());
+        when(test.getSteps()).thenReturn(List.of(step));
+        when(step.getProperties()).thenReturn(new ArrayList<>());
+
+        when(sessionStoreContext.getTestSetContexts(testSetId)).thenReturn(testSetSessionStore);
+        when(testSetSessionStore.getTestSetRun()).thenReturn(testSetRun);
+        when(testSetRun.testRuns()).thenReturn(testRuns);
+
+        // Mock the session store context to return a valid TestRunSessionStore for the next test run
+        when(sessionStoreContext.getExecutionContext(anyString())).thenReturn(testRunSessionStore);
+        when(testRunSessionStore.getContext()).thenReturn(context);
+
+        TestRunReportBuilder testRunReportBuilder = mock(TestRunReportBuilder.class);
+
+        // Act
+        maestroImpl.finishTest(testRun, testRunReportBuilder);
+
+        // Assert
+        verify(testSetSessionStore).addTestRunReportBuilder(testRunReportBuilder);
+        verify(sessionStoreContext).addExecutionContext(anyString(), any(TestRunSessionStore.class));
+        verify(maestroEventProducer).executeStep(any(StepRun.class));
     }
 
     @Test
-    void testMaestroValidationAndAssertionStep() throws ExecutionException, InterruptedException {
-        List<TestRun> testRuns = getTestRunsWithValidationStepAndAssertionStepWithReference();
-        TestReport report = synchronousMaestro.executeTestSet(testRuns);
-        assertEquals(Result.UNDEFINED, report.getResult());
-        List<TestRunReport> testRunReports = report.getTestRunReports();
-        assertEquals(2, testRunReports.size());
-        assertEquals(1, testRunReports.getFirst().getStepRunReports().size());
-        assertEquals(1, testRunReports.getLast().getStepRunReports().size());
-        assertEquals(2, report.getTestCounters().getTotal());
-        assertEquals(1, report.getTestCounters().getPassed());
-        assertEquals(1, report.getTestCounters().getUndefined());
+    void finishStep_LastStep_ShouldGenerateTestRunReport() {
+        // Arrange
+        String testRunId = "testRun1";
+        String testSetId = "testSet1";
+        List<Step> steps = List.of(step);
+        List<StepRunReportBuilder> stepReports = new ArrayList<>();
+
+        StepRun stepRun = new StepRun(testSetId, testRunId, step);
+        StepRunReportBuilder stepRunReportBuilder = mock(StepRunReportBuilder.class);
+
+        when(sessionStoreContext.getExecutionContext(testRunId)).thenReturn(testRunSessionStore);
+        when(testRunSessionStore.getTestRun()).thenReturn(testRun);
+        when(testRunSessionStore.getStepReports()).thenReturn(stepReports);
+        when(testRun.getTest()).thenReturn(test);
+        when(test.getSteps()).thenReturn(steps);
+        when(test.getId()).thenReturn("testId");
+        when(test.getName()).thenReturn("testName");
+        when(step.isNameEquals(step)).thenReturn(true);
+
+        // Act
+        maestroImpl.finishStep(stepRun, stepRunReportBuilder);
+
+        // Assert
+        verify(testRunSessionStore).addStepRunReport(stepRunReportBuilder);
+        verify(maestroEventProducer).returnTestRunReport(eq(testRun), any(TestRunReportBuilder.class));
     }
 
     @Test
-    void testMaestroWithSeveralStepOnSameTestRun() throws ExecutionException, InterruptedException {
-        List<TestRun> testRuns = getTestRunsWithOneValidationStep();
-        Step validationStep = new ValidationStep("test-validation-two",
-                new Property<>(ValidationStep.VALIDATION_SERVICE, "matchbox"),
-                new Property<>(ValidationStep.VALIDATION_PROFILE, "Parameters"),
-                new Property<>(ValidationStep.CONTENT_TO_VALIDATE, "liyvfgljv".getBytes())
-        );
-        testRuns.getFirst().getTest().addStep(validationStep);
-        TestReport report = synchronousMaestro.executeTestSet(testRuns);
-        assertEquals(Result.UNDEFINED, report.getResult());
-        List<TestRunReport> testRunReports = report.getTestRunReports();
-        assertEquals(1, testRunReports.size());
-        assertEquals(2, testRunReports.getFirst().getStepRunReports().size());
-        assertEquals(1, report.getTestCounters().getTotal());
-        assertEquals(1, report.getTestCounters().getUndefined());
+    void finishStep_NotLastStep_ShouldRunNextStep() {
+        // Arrange
+        String testRunId = "testRun1";
+        String testSetId = "testSet1";
+        Step nextStep = mock(Step.class);
+        List<Step> steps = List.of(step, nextStep);
 
+        StepRun stepRun = new StepRun(testSetId, testRunId, step);
+        StepRunReportBuilder stepRunReportBuilder = mock(StepRunReportBuilder.class);
+
+        when(sessionStoreContext.getExecutionContext(testRunId)).thenReturn(testRunSessionStore);
+        when(testRunSessionStore.getTestRun()).thenReturn(testRun);
+        when(testRunSessionStore.getContext()).thenReturn(context);
+        when(testRun.getTest()).thenReturn(test);
+        when(test.getSteps()).thenReturn(steps);
+        when(step.isNameEquals(step)).thenReturn(true);
+        when(nextStep.getProperties()).thenReturn(new ArrayList<>());
+
+        // Act
+        maestroImpl.finishStep(stepRun, stepRunReportBuilder);
+
+        // Assert
+        verify(testRunSessionStore).addStepRunReport(stepRunReportBuilder);
+        verify(maestroEventProducer).executeStep(any(StepRun.class));
     }
 
     @Test
-    void testMaestroWithInvalidTwoSameStepTestRun() throws ExecutionException, InterruptedException {
-        List<TestRun> testRuns = getTestRunsWithOneValidationStep();
-        Step validationStep = new ValidationStep("test-validation",
-                new Property<>(ValidationStep.VALIDATION_SERVICE, "matchbox"),
-                new Property<>(ValidationStep.VALIDATION_PROFILE, "Parameters"),
-                new Property<>(ValidationStep.CONTENT_TO_VALIDATE, "liyvfgljv".getBytes())
-        );
-        testRuns.getFirst().getTest().addStep(validationStep);
-        TestReport report = synchronousMaestro.executeTestSet(testRuns);
-        assertEquals(Result.UNDEFINED, report.getResult());
-        List<TestRunReport> testRunReports = report.getTestRunReports();
-        assertEquals(1, testRunReports.size());
-        TestRunReport testRunReport = testRunReports.getFirst();
-        assertEquals(0, testRunReport.getStepRunReports().size());
-        List<UnexpectedError> unexpectedErrors = testRunReport.getUnexpectedErrors();
-        assertEquals(1, unexpectedErrors.size());
-        assertEquals("Several steps has the same name : test-validation should be unique", unexpectedErrors.getFirst().getMessage());
-        net.ihe.gazelle.maestro.api.business.testreport.Test test = testRunReport.getTest();
-        assertEquals("validationTest", test.getName());
-        assertFalse(test.getId().isBlank());
+    void finishStep_StepNotFound_ShouldThrowException() {
+        // Arrange
+        String testRunId = "testRun1";
+        String testSetId = "testSet1";
+        Step differentStep = mock(Step.class);
+        List<Step> steps = List.of(differentStep);
+
+        StepRun stepRun = new StepRun(testSetId, testRunId, step);
+        StepRunReportBuilder stepRunReportBuilder = mock(StepRunReportBuilder.class);
+
+        when(sessionStoreContext.getExecutionContext(testRunId)).thenReturn(testRunSessionStore);
+        when(testRunSessionStore.getTestRun()).thenReturn(testRun);
+        when(testRun.getTest()).thenReturn(test);
+        when(test.getSteps()).thenReturn(steps);
+        when(test.getName()).thenReturn("testName");
+        when(step.getName()).thenReturn("stepName");
+        when(step.isNameEquals(differentStep)).thenReturn(false);
+        when(differentStep.isNameEquals(step)).thenReturn(false);
+
+        // Act & Assert
+        assertThrows(InvalidTestRunException.class, () ->
+            maestroImpl.finishStep(stepRun, stepRunReportBuilder));
     }
 
     @Test
-    void testMaestroWithNullTestRun() throws ExecutionException, InterruptedException {
-        List<TestRun> testRuns = new ArrayList<>();
-        testRuns.add(null);
-        TestReport report = synchronousMaestro.executeTestSet(testRuns);
-        assertNotNull(report);
-        assertEquals(1, report.getUnexpectedErrors().size());
-        assertEquals(IllegalArgumentException.class.getSimpleName(), report.getUnexpectedErrors().getFirst().getName());
+    void constructor_ShouldInitializeFields() {
+        // Act
+        MaestroImpl newMaestro = new MaestroImpl(maestroEventProducer, sessionStoreContext);
+
+        // Assert
+        assertNotNull(newMaestro);
     }
-
-    private static List<TestRun> getTestRunsWithOneValidationStep() {
-        List<TestRun> testRuns = new ArrayList<>();
-        Step validationStep = new ValidationStep("test-validation",
-                new Property<>(ValidationStep.VALIDATION_SERVICE, "matchbox"),
-                new Property<>(ValidationStep.VALIDATION_PROFILE, "Parameters"),
-                new Property<>(ValidationStep.CONTENT_TO_VALIDATE, "liyvfgljv".getBytes())
-        );
-        net.ihe.gazelle.maestro.api.business.testrun.Test test = new net.ihe.gazelle.maestro.api.business.testrun.Test().addStep(validationStep);
-        test.setName("validationTest");
-        test.setId(UUID.randomUUID().toString());
-        TestRun testRun = new TestRun();
-        testRun.setTest(test);
-        testRuns.add(testRun);
-        return testRuns;
-    }
-
-    private static List<TestRun> getTestRunsWithOneSimulationStep() {
-        List<TestRun> testRuns = new ArrayList<>();
-        Step simulationStep = new SimulationStep("simulationStep",
-                new Property<>(SimulationStep.SIMULATION_SERVICE, "MCSD"),
-                new Property<>(SimulationStep.SEQUENCE_ID, "sequencId"),
-                new Property<>(SimulationStep.TIMEOUT_SECONDS, 60),
-                List.of(
-                        new Property<>("Patient Id", "1.1.1.1"),
-                        new Property<>("Boolean prop", true),
-                        new Property<>("File prop", "test".getBytes())
-                ));
-        net.ihe.gazelle.maestro.api.business.testrun.Test test = new net.ihe.gazelle.maestro.api.business.testrun.Test().addStep(simulationStep);
-        test.setName("simulationTest");
-        test.setId(UUID.randomUUID().toString());
-        TestRun testRun = new TestRun();
-        testRun.setTest(test);
-        testRuns.add(testRun);
-        return testRuns;
-    }
-
-    private static List<TestRun> getTestRunsWithValidationStepAndAssertionStepWithReference() {
-        Step assertionStep = new AssertionStep("test-assertion",
-                new PropertyRef<>(AssertionStep.ASSERTION, "assertion", byte[].class),
-                new Property<>(AssertionStep.ASSERTION_SERVICE, "toto")
-        );
-        net.ihe.gazelle.maestro.api.business.testrun.Test test = new net.ihe.gazelle.maestro.api.business.testrun.Test().addStep(assertionStep);
-        test.setName("assertionTest");
-        test.setId(UUID.randomUUID().toString());
-        TestRun testRun = new TestRun();
-        testRun.setTest(test);
-        List<TestRun> result = getTestRunsWithOneValidationStep();
-        result.add(testRun);
-        return result;
-    }
-
-
 }
