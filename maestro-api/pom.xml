@@ -42,13 +42,12 @@
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
-            <artifactId>framework-model-marshaller</artifactId>
+            <artifactId>lang</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
-            <artifactId>lang</artifactId>
-            <scope>provided</scope>
+            <artifactId>framework-model-marshaller</artifactId>
         </dependency>
 
         <!-- Provided dependencies -->
