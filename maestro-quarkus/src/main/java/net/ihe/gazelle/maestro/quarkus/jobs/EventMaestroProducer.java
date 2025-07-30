@@ -29,8 +29,8 @@ import net.ihe.gazelle.maestro.api.business.testrun.runner.FinishedStepEvent;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StartStepCommand;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepMessage;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
-import net.ihe.gazelle.maestro.business.MaestroEventProducer;
-import net.ihe.gazelle.maestro.quarkus.jobs.testrunevents.*;
+import net.ihe.gazelle.maestro.api.business.testrun.MaestroEventProducer;
+import net.ihe.gazelle.maestro.api.technical.event.*;
 
 /**
  * CDI Event is a specification that simplifies asynchronous messaging in Java microservices.

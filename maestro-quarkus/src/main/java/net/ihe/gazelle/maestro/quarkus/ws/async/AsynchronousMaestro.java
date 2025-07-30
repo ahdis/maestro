@@ -20,9 +20,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
-import net.ihe.gazelle.maestro.business.MaestroEventProducer;
+import net.ihe.gazelle.maestro.api.business.testrun.MaestroEventProducer;
 import net.ihe.gazelle.maestro.quarkus.client.TestReportClient;
-import net.ihe.gazelle.maestro.quarkus.jobs.testrunevents.FinishTestSetEvent;
+import net.ihe.gazelle.maestro.api.technical.event.FinishTestSetEvent;
 
 import java.util.List;
 import java.util.Map;

@@ -23,7 +23,7 @@ import jakarta.ws.rs.Produces;
 import net.ihe.gazelle.maestro.api.business.testrun.Maestro;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.ConfigProvider;
 import net.ihe.gazelle.maestro.business.MaestroImpl;
-import net.ihe.gazelle.maestro.business.MaestroEventProducer;
+import net.ihe.gazelle.maestro.api.business.testrun.MaestroEventProducer;
 import net.ihe.gazelle.maestro.quarkus.ServiceRegistry;
 import net.ihe.gazelle.maestro.quarkus.SessionStoreContextImpl;
 import net.ihe.gazelle.maestro.quarkus.StepRunnerProviderSPI;

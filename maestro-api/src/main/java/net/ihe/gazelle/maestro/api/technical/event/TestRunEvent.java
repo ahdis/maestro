@@ -14,24 +14,9 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.quarkus.jobs.testrunevents;
+package net.ihe.gazelle.maestro.api.technical.event;
 
+public interface TestRunEvent {
 
-import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
-
-/**
- * A message to start TestRun Execution
- */
-public class StartTestRunCommand implements TestRunEvent {
-
-    private final TestRun testRun;
-
-    public StartTestRunCommand(TestRun testRun) {
-        this.testRun = testRun;
-    }
-
-    public TestRun getTestRun() {
-        return testRun;
-    }
 
 }

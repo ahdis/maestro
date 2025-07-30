@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.quarkus.jobs.testrunevents;
+package net.ihe.gazelle.maestro.api.technical.event;
+
+import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
 
 /**
- * A message to Describe an error in TestRun Execution
+ * A message to launch test set execution
  */
-public class ErrorTestRunEvent implements TestRunEvent {
+public class StartTestSetCommand implements TestRunEvent{
 
-    private final Exception exception;
+    private final TestSetRun testSetRun;
 
-    public ErrorTestRunEvent(Exception exception){
-        this.exception = exception;
+    public StartTestSetCommand(TestSetRun testSetRun) {
+        this.testSetRun = testSetRun;
     }
 
-    public Exception getException() {
-        return exception;
+    public TestSetRun getTestSetRun() {
+        return testSetRun;
     }
-
 }

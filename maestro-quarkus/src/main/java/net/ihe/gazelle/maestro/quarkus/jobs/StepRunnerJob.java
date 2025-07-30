@@ -23,7 +23,7 @@ import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.UnexpectedErrorBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.*;
-import net.ihe.gazelle.maestro.business.MaestroEventProducer;
+import net.ihe.gazelle.maestro.api.business.testrun.MaestroEventProducer;
 
 /**
  * A stepRunnerJob receive message from producer to execute Step, launch execution and send result to Maestro Listener
@@ -61,7 +61,6 @@ public class StepRunnerJob {
     /**
      * Fire an event to EventListener containing a step and a StepReportBuilder with one UnexpectedErrorBuilder containing data from an
      * exception
-     * @see EventListener
      * @param e an exception that occurred during step execution
      * @param stepRun Previously executed step
      */
@@ -78,7 +77,6 @@ public class StepRunnerJob {
 
     /**
      * Fire an event containing StepRunReportBuilder and StepRun to EventListener
-     * @see EventListener
      * @param stepRun StepRun previously executed
      * @param stepRunReportBuilder A StepReportBuilder containing data of stepRun execution
      */

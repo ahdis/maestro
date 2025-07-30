@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.quarkus.jobs.testrunevents;
+package net.ihe.gazelle.maestro.api.technical.event;
 
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;

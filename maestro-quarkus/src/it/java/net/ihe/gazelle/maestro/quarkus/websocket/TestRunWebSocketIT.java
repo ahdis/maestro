@@ -27,6 +27,7 @@ import net.ihe.gazelle.maestro.api.technical.dto.report.TestRunReportDTO;
 import net.ihe.gazelle.maestro.quarkus.TestRunControllerProfile;
 import net.ihe.gazelle.maestro.quarkus.WireMockSingleton;
 import net.ihe.gazelle.maestro.api.business.testreport.Result;
+import net.ihe.gazelle.maestro.websocket.WSMessageDTO;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.ObjectMapperBuilder;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;

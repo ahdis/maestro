@@ -19,8 +19,8 @@ package net.ihe.gazelle.maestro.quarkus.factory;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.NotificationOptions;
 import jakarta.enterprise.util.TypeLiteral;
+import net.ihe.gazelle.maestro.api.technical.event.*;
 import net.ihe.gazelle.maestro.quarkus.jobs.EventListener;
-import net.ihe.gazelle.maestro.quarkus.jobs.testrunevents.*;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;

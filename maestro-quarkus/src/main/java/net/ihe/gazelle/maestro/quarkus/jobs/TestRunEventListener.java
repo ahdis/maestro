@@ -16,7 +16,7 @@
 
 package net.ihe.gazelle.maestro.quarkus.jobs;
 
-import net.ihe.gazelle.maestro.quarkus.jobs.testrunevents.TestRunEvent;
+import net.ihe.gazelle.maestro.api.technical.event.TestRunEvent;
 
 public interface TestRunEventListener {
 

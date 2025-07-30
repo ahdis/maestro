@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.quarkus.websocket;
+package net.ihe.gazelle.maestro.websocket;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

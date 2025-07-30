@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.quarkus.ws.async;
+package net.ihe.gazelle.maestro.websocket;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
-import net.ihe.gazelle.maestro.business.MaestroEventProducer;
+import net.ihe.gazelle.maestro.api.business.testrun.MaestroEventProducer;
 
 import java.util.List;
 

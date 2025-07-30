@@ -21,6 +21,7 @@ import net.ihe.gazelle.maestro.api.business.testrun.*;
 import net.ihe.gazelle.maestro.api.business.testrun.context.Context;
 import net.ihe.gazelle.maestro.api.business.testrun.context.TestRunSessionStore;
 import net.ihe.gazelle.maestro.api.business.testrun.context.TestSetSessionStore;
+import net.ihe.gazelle.maestro.api.business.testrun.MaestroEventProducer;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

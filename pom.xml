@@ -26,7 +26,7 @@
     </parent>
 
     <artifactId>maestro</artifactId>
-    <version>0.2.0-GZL-9776-SNAPSHOT</version>
+    <version>0.2.0-GZL-9778-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
         <module>maestro-api</module>
@@ -34,6 +34,7 @@
         <module>maestro-engine</module>
         <module>maestro-step</module>
         <module>maestro-quarkus</module>
+        <module>maestro-websocket</module>
     </modules>
 
     <scm>
@@ -101,42 +102,48 @@
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-api</artifactId>
-                <version>0.2.0-GZL-9776-SNAPSHOT</version>
+                <version>0.2.0-GZL-9778-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-engine</artifactId>
-                <version>0.2.0-GZL-9776-SNAPSHOT</version>
+                <version>0.2.0-GZL-9778-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>validation-step</artifactId>
-                <version>0.2.0-GZL-9776-SNAPSHOT</version>
+                <version>0.2.0-GZL-9778-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>simulation-step</artifactId>
-                <version>0.2.0-GZL-9776-SNAPSHOT</version>
+                <version>0.2.0-GZL-9778-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>user-interaction-step</artifactId>
-                <version>0.2.0-GZL-9776-SNAPSHOT</version>
+                <version>0.2.0-GZL-9778-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>assertion-step</artifactId>
-                <version>0.2.0-GZL-9776-SNAPSHOT</version>
+                <version>0.2.0-GZL-9778-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>itb-step</artifactId>
-                <version>0.2.0-GZL-9776-SNAPSHOT</version>
+                <version>0.2.0-GZL-9778-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>mlang-converter</artifactId>
-                <version>0.2.0-GZL-9776-SNAPSHOT</version>
+                <version>0.2.0-GZL-9778-SNAPSHOT</version>
+            </dependency>
+            <!-- to be removed when maestro-websocket has it own tests -->
+            <dependency>
+                <groupId>net.ihe.gazelle</groupId>
+                <artifactId>maestro-websocket</artifactId>
+                <version>0.2.0-GZL-9778-SNAPSHOT</version>
             </dependency>
 
             <!-- Stack BOM -->

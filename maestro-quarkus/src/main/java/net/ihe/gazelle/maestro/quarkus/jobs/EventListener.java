@@ -22,9 +22,7 @@ import jakarta.inject.Inject;
 import net.ihe.gazelle.maestro.api.business.testrun.Maestro;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.FinishedStepEvent;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StartStepCommand;
-import net.ihe.gazelle.maestro.quarkus.jobs.testrunevents.*;
-import net.ihe.gazelle.maestro.quarkus.websocket.SessionsStorageInMemory;
-import net.ihe.gazelle.maestro.quarkus.websocket.client.TestRunSocketClient;
+import net.ihe.gazelle.maestro.api.technical.event.*;
 import net.ihe.gazelle.maestro.quarkus.ws.async.AsynchronousMaestro;
 import net.ihe.gazelle.maestro.quarkus.ws.async.tmintegration.TMTestRunMaestro;
 import org.slf4j.Logger;
@@ -43,7 +41,6 @@ public class EventListener {
     private final AsynchronousMaestro asynchronousMaestro;
     private final StepRunnerJob stepRunnerJob;
     private final TMTestRunMaestro tmTestRunMaestro;
-    private final TestRunSocketClient testRunSocketClient = new TestRunSocketClient();
 
     @Inject
     public EventListener(Maestro engine, SynchronousMaestro synchronousMaestro, AsynchronousMaestro asynchronousMaestro, StepRunnerJob stepRunnerJob, TMTestRunMaestro tmTestRunMaestro) {
@@ -64,9 +61,7 @@ public class EventListener {
             asynchronousMaestro.callback(finishTestSetEvent);
         } else if (tmTestRunMaestro.isServiceRunning(testSetId)) {
             tmTestRunMaestro.callbackTM(finishTestSetEvent);
-        } else if (SessionsStorageInMemory.hasSession(testSetId)) {
-            testRunSocketClient.sendTestRunCompleted(testSetId, finishTestSetEvent.getTestReport().getTestRunReports().getFirst());
-        } else {
+        }else {
             synchronousMaestro.completeFuture(finishTestSetEvent);
         }
     }
@@ -84,9 +79,6 @@ public class EventListener {
     }
 
     public void onFinishStep(@ObservesAsync FinishedStepEvent finishedStepEvent) {
-        if (SessionsStorageInMemory.hasSession(finishedStepEvent.getStepRun().testSetId())) {
-            testRunSocketClient.sendTestStepCompleted(finishedStepEvent.getStepRun().testSetId(),finishedStepEvent.getStepRunReport().build());
-        }
         engine.finishStep(finishedStepEvent.getStepRun(), finishedStepEvent.getStepRunReport());
     }
 
