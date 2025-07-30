@@ -22,13 +22,17 @@ import net.ihe.gazelle.maestro.validation.step.technical.handler.GazelleValidati
 import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterface;
 import net.ihe.gazelle.servicemetadata.api.business.HttpRestBinding;
 import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterface;
+import net.ihe.gazelle.validation.v1.api.domain.wrapper.ValidationServiceWrapper;
+import net.ihe.gazelle.validation.v2.api.technical.ws.ValidationServiceController;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.wildfly.common.Assert.assertNotNull;
+import static org.wildfly.common.Assert.assertTrue;
 
 class GazelleValidationServiceHandlerFactoryTest {
 
@@ -41,10 +45,15 @@ class GazelleValidationServiceHandlerFactoryTest {
 
     @Test
     void should_get_consumed_interface() {
-        ConsumedInterface consumedInterface = factory.getConsumedInterface();
-        assertNotNull(consumedInterface);
-        assertEquals("Validation Service", consumedInterface.getInterfaceName());
-//        assertEquals(ValidationServiceController.INTERFACE_NAME, consumedInterface.getInterfaceName());
+        List<ConsumedInterface> consumedInterfaces = factory.getConsumedInterfaces();
+        assertTrue(consumedInterfaces.size() == 2);
+        ConsumedInterface consumedInterfaceFirst = consumedInterfaces.getFirst();
+        assertNotNull(consumedInterfaceFirst);
+        assertEquals("Validation Service", consumedInterfaceFirst.getInterfaceName());
+
+        ConsumedInterface consumedInterfaceLast = consumedInterfaces.getLast();
+        assertNotNull(consumedInterfaceLast);
+        assertEquals(ValidationServiceController.INTERFACE_NAME, consumedInterfaceLast.getInterfaceName());
     }
 
     @Test

@@ -26,6 +26,8 @@ import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterface;
 import net.ihe.gazelle.simulation.jaxrs.api.technical.ws.SimulationAPI;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
@@ -40,7 +42,9 @@ class GazelleSimulationServiceHandlerFactoryTest {
 
     @Test
     void should_get_consumed_interface() {
-        ConsumedInterface consumedInterface = factory.getConsumedInterface();
+        List<ConsumedInterface> consumedInterfaces = factory.getConsumedInterfaces();
+        assertNotNull(consumedInterfaces);
+        ConsumedInterface consumedInterface = consumedInterfaces.getFirst();
         assertNotNull(consumedInterface);
         assertEquals(SimulationAPI.INTERFACE_NAME, consumedInterface.getInterfaceName());
     }
