@@ -34,7 +34,6 @@
         <module>maestro-engine</module>
         <module>maestro-step</module>
         <module>maestro-quarkus</module>
-        <module>maestro-websocket</module>
     </modules>
 
     <scm>
@@ -399,7 +398,7 @@
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
-            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
@@ -418,4 +417,24 @@
             <organizationUrl>https://www.e-health-suisse.ch</organizationUrl>
         </contributor>
     </contributors>
+
+    <profiles>
+        <profile>
+            <id>with-websocket</id>
+            <activation>
+                <property>
+                    <name>websocket</name>
+                </property>
+            </activation>
+            <modules>
+                <module>maestro-api</module>
+                <module>mlang-converter</module>
+                <module>maestro-engine</module>
+                <module>maestro-step</module>
+                <module>maestro-quarkus</module>
+                <module>maestro-websocket</module>
+            </modules>
+        </profile>
+    </profiles>
+
 </project>
