@@ -29,6 +29,7 @@ import net.ihe.gazelle.simulation.client.technical.SimulationCallbackFactory;
 import net.ihe.gazelle.simulation.client.technical.SimulationServiceClientImpl;
 import net.ihe.gazelle.simulation.jaxrs.api.technical.ws.SimulationAPI;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -55,12 +56,14 @@ public class GazelleSimulationServiceHandlerFactory implements HandlerFactory {
     }
 
     @Override
-    public ConsumedInterface getConsumedInterface() {
-        return new ConsumedInterfaceBuilder()
+    public List<ConsumedInterface> getConsumedInterfaces() {
+        List <ConsumedInterface> consumedInterfaces = new ArrayList<>();
+        consumedInterfaces.add(new ConsumedInterfaceBuilder()
                 .setInterfaceName(SimulationAPI.INTERFACE_NAME)
                 .setRequired(true)
                 .setSupportedBindings(List.of(HttpRestBinding.TYPE))
                 .setSupportedVersions(List.of("1.0.0"))
-                .build();
+                .build());
+        return consumedInterfaces;
     }
 }
