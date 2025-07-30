@@ -26,6 +26,7 @@ import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterface;
 import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandler;
 import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandlerImpl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class UserInteractionHandlerFactory implements HandlerFactory {
@@ -41,12 +42,14 @@ public class UserInteractionHandlerFactory implements HandlerFactory {
     }
 
     @Override
-    public ConsumedInterface getConsumedInterface() {
-        return new ConsumedInterfaceBuilder()
+    public List<ConsumedInterface> getConsumedInterfaces() {
+        List<ConsumedInterface> consumedInterfaces = new ArrayList<>();
+        consumedInterfaces.add(new ConsumedInterfaceBuilder()
                 .setInterfaceName(UserInteractionHandler.INTERFACE_NAME)
                 .setRequired(true)
                 .setSupportedBindings(List.of(HttpRestBinding.TYPE))
                 .setSupportedVersions(List.of("1.0.0"))
-                .build();
+                .build());
+        return consumedInterfaces;
     }
 }

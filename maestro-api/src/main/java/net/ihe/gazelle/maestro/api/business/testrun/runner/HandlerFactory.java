@@ -19,6 +19,8 @@ package net.ihe.gazelle.maestro.api.business.testrun.runner;
 import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterface;
 import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterface;
 
+import java.util.List;
+
 public interface HandlerFactory {
 
     /**
@@ -35,9 +37,9 @@ public interface HandlerFactory {
     Handler createHandler(ProvidedInterface providedInterface, ConfigProvider configProvider) throws IllegalArgumentException;
 
     /**
-     * Get the interface consumed
-     * @return
+     * Get the list of consumed interfaces by this handler factory.
+     * @return a list of consumed interfaces
      */
-    ConsumedInterface getConsumedInterface();
+    List<ConsumedInterface> getConsumedInterfaces();
 
 }

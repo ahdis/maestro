@@ -40,13 +40,13 @@ public class ItbHandlerFactory implements HandlerFactory {
     }
 
     @Override
-    public ConsumedInterface getConsumedInterface() {
-        return new ConsumedInterfaceBuilder()
+    public List<ConsumedInterface> getConsumedInterfaces() {
+        return List.of(new ConsumedInterfaceBuilder()
                 .setInterfaceName("ITB API")
                 .setRequired(true)
                 .setSupportedBindings(List.of(HttpRestBinding.TYPE))
                 .setSupportedVersions(List.of("1.0.0"))
-                .build();
+                .build());
     }
 }
 
