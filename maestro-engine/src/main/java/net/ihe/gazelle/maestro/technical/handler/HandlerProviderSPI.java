@@ -25,6 +25,7 @@ import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterface;
 import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterface;
 import net.ihe.gazelle.servicemetadata.api.business.Service;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.ServiceLoader;
 
@@ -43,19 +44,21 @@ public class HandlerProviderSPI implements HandlerProvider {
         ServiceLoader<HandlerFactory> serviceLoader = ServiceLoader.load(HandlerFactory.class);
         Service service = serviceRegistry.getService(serviceName);
         for (HandlerFactory handlerFactory : serviceLoader) {
-            ProvidedInterface providedInterface = getMatchingInterface(service, handlerFactory.getConsumedInterface());
+            ProvidedInterface providedInterface = getMatchingInterface(service, handlerFactory.getConsumedInterfaces());
             if (providedInterface != null && requestedHandlerType.isAssignableFrom(handlerFactory.getHandlerType())) {
                 return handlerFactory.createHandler(providedInterface, configProvider);
             }
         }
-        throw new HandlerNotFoundException("Unable to find a handler implementation for type: "+ requestedHandlerType.getCanonicalName());
+        throw new HandlerNotFoundException("Unable to find a handler implementation for type: " + requestedHandlerType.getCanonicalName());
     }
 
-    private ProvidedInterface getMatchingInterface(Service service, ConsumedInterface consumedInterface) {
+    private ProvidedInterface getMatchingInterface(Service service, List<ConsumedInterface> consumedInterfaces) {
         try {
             return service.getProvidedInterfaces().stream().filter(
-                    providedInterface -> providedInterface.getInterfaceName().equals(consumedInterface.getInterfaceName())
-            ).collect(GzlCollectors.toSingleton());
+                    providedInterface -> consumedInterfaces.stream()
+                            .anyMatch(consumedInterface -> providedInterface.getInterfaceName() != null &&
+                                    providedInterface.getInterfaceName().equals(consumedInterface.getInterfaceName()))
+                    ).collect(GzlCollectors.toSingleton());
         } catch (NoSuchElementException e) {
             return null;
         }
