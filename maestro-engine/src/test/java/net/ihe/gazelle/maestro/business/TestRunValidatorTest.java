@@ -20,18 +20,20 @@ import net.ihe.gazelle.maestro.api.business.testrun.DuplicatedStepsException;
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.api.business.testrun.Step;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
-import net.ihe.gazelle.maestro.technical.ws.MissingArgumentException;
-import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class TestRunValidatorTest {
     TestRunValidator testRunValidator;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         testRunValidator = new TestRunValidator();
     }
 
@@ -57,15 +59,22 @@ class TestRunValidatorTest {
     void testValidateWithRedundantStep() {
         TestRun testRun = new TestRun();
         net.ihe.gazelle.maestro.api.business.testrun.Test test = new net.ihe.gazelle.maestro.api.business.testrun.Test();
-        Step step1 = new ValidationStep("test-step",
-                new Property<>(ValidationStep.VALIDATION_SERVICE, "matchbox1"),
-                new Property<>(ValidationStep.VALIDATION_PROFILE,"profile1"),
-                new Property<>(ValidationStep.CONTENT_TO_VALIDATE, "content".getBytes()));
-
-        Step step2 = new ValidationStep("test-step",
-                new Property<>(ValidationStep.VALIDATION_SERVICE, "matchbox2"),
-                new Property<>(ValidationStep.VALIDATION_PROFILE,"profile2"),
-                new Property<>(ValidationStep.CONTENT_TO_VALIDATE, "content".getBytes()));
+        Step step1 = mock(Step.class);
+        when(step1.getType()).thenReturn("VALIDATION");
+        when(step1.getProperties())
+                .thenReturn(List.of(
+                        new Property<>("validationService", "matchbox1"),
+                        new Property<>("validationProfile", "profile1"),
+                        new Property<>("contentToValidate", "content".getBytes())
+                ));
+        Step step2 = mock(Step.class);
+        when(step2.getType()).thenReturn("VALIDATION");
+        when(step2.getProperties())
+                .thenReturn(List.of(
+                        new Property<>("validationService", "matchbox1"),
+                        new Property<>("validationProfile", "profile1"),
+                        new Property<>("contentToValidate", "content".getBytes())
+                ));
 
         test.addStep(step1);
         test.addStep(step2);
