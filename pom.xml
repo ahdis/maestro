@@ -116,7 +116,7 @@
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>simulation-step</artifactId>
-                <version>0.2.0-SNAPSHOT</version>
+                <version>0.2.0-GZL-9778-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
@@ -131,7 +131,7 @@
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>itb-step</artifactId>
-                <version>0.2.0-GZL-9778-SNAPSHOT</version>
+                <version>0.2.0-GZL-9775-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
