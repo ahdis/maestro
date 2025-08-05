@@ -41,12 +41,13 @@ public class ItbStep implements Step {
     private Property<String> testCase;
     private Property<String> systemID;
     private Property<String> actorID;
-    private Property<byte[]>[] inputProperties;
+    private List<? extends Property<byte[]>> inputProperties;
 
     public ItbStep() {
+        inputProperties = List.of();
     }
 
-    public ItbStep(String name, Property<String> testCase, Property<String> systemID, Property<String> actorID, Property<byte[]>[] inputs){
+    public ItbStep(String name, Property<String> testCase, Property<String> systemID, Property<String> actorID, List<? extends Property<byte[]>> inputs){
         this.name = name;
         this.testCase = testCase;
         this.systemID = systemID;
@@ -79,7 +80,7 @@ public class ItbStep implements Step {
         props.add(testCase);
         props.add(systemID);
         props.add(actorID);
-        Collections.addAll(props, inputProperties);
+        props.addAll(inputProperties);
         return props;
     }
 
@@ -94,12 +95,12 @@ public class ItbStep implements Step {
                 case TEST_CASE -> testCase = (Property<String>) property;
                 case SYSTEM_ID -> systemID = (Property<String>) property;
                 case ACTOR_ID -> actorID = (Property<String>) property;
-                default -> inputProperties = Arrays.stream(inputProperties).map(prop -> {
+                default -> inputProperties = inputProperties.stream().map(prop -> {
                     if (prop.getName().equals(property.getName())) {
-                        return property;
+                        return (Property<byte[]>) property;
                     }
                     return prop;
-                }).toArray(Property[]::new);
+                }).toList();
             }
         });
     }
