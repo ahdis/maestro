@@ -19,7 +19,7 @@ package net.ihe.gazelle.maestro.simulation.step.business;
 import net.ihe.gazelle.lang.ExecutionRuntimeException;
 import net.ihe.gazelle.maestro.api.business.testreport.*;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.SyncStepRunner;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunner;
 import net.ihe.gazelle.simulation.business.callback.Result;
 import net.ihe.gazelle.simulation.business.callback.SimulationReport;
 import net.ihe.gazelle.simulation.business.callback.SimulationReportValidator;
@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.concurrent.*;
 
-public class SimulationStepRunner extends SyncStepRunner {
+public class SimulationStepRunner implements StepRunner {
 
     private static final Logger LOG = LoggerFactory.getLogger(SimulationStepRunner.class);
 
@@ -47,7 +47,7 @@ public class SimulationStepRunner extends SyncStepRunner {
     }
 
     @Override
-    public StepRunReportBuilder run(StepRun stepRun) {
+    public CompletableFuture<StepRunReportBuilder> run(StepRun stepRun) {
         try {
             SimulationRequest simulationRequest = SimulationRequestMapper
                     .createSimulationRequest((SimulationStep) stepRun.step());
@@ -60,7 +60,7 @@ public class SimulationStepRunner extends SyncStepRunner {
             StepRunReportBuilder stepRunReportBuilder = prepareStepReport(stepRun)
                     .setOutputs(List.of(itemBuilder));
             computeResult(simulationReport, stepRunReportBuilder);
-            return stepRunReportBuilder;
+            return CompletableFuture.completedFuture(stepRunReportBuilder);
         } catch (MissingRequiredParameterException e) {
             return buildReportWithError(stepRun, e, "Missing Required Parameter");
         } catch (InvalidParameterValueException e) {
@@ -87,7 +87,7 @@ public class SimulationStepRunner extends SyncStepRunner {
 
     private SimulationReport getSimulationReport(SimulationRequest simulationRequest, CompletableFuture<SimulationReport> futureReport) throws ExecutionException, InterruptedException {
         SimulationReport simulationReport = futureReport
-                .orTimeout(simulationRequest.getTimeoutSeconds() + 10, TimeUnit.SECONDS)
+                .orTimeout(simulationRequest.getTimeoutSeconds() + 10L, TimeUnit.SECONDS)
                 .exceptionally(ex ->
                 {
                     if (ex instanceof TimeoutException) {
@@ -109,14 +109,14 @@ public class SimulationStepRunner extends SyncStepRunner {
                 .setType(SimulationStep.TYPE);
     }
 
-    private StepRunReportBuilder buildReportWithError(StepRun stepRun, Exception e, String name) {
-        return prepareStepReport(stepRun)
+    private CompletableFuture<StepRunReportBuilder> buildReportWithError(StepRun stepRun, Exception e, String name) {
+        return CompletableFuture.completedFuture(prepareStepReport(stepRun)
                 .addUnexpectedError(
                         new UnexpectedErrorBuilder()
                                 .setName(name)
                                 .setMessage(name)
                                 .setCause(new UnexpectedErrorBuilder().fromThrowable(e))
-                );
+                ));
     }
 
     /**

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.quarkus.itb;
+package net.ihe.gazelle.maestro.itb.step.technical.gateway.ws;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -24,12 +24,13 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 import net.ihe.gazelle.maestro.itb.step.business.dao.ItbTestExecutionDBInMemory;
 import net.ihe.gazelle.maestro.itb.step.technical.gateway.dto.ItbTriggerDTO;
+import net.ihe.gazelle.maestro.itb.step.technical.gateway.service.catchitbreport.CatchItbReportService;
 import net.ihe.gazelle.maestro.itb.step.technical.gateway.service.catchitbreport.CatchItbReportServiceException;
 
-// TODO : move this class to src/main/java/net/ihe/gazelle/maestro/itb/step/technical/gateway/ws when possible
+import java.util.concurrent.CompletableFuture;
+
 /**
  * Adapter to push test report to TM
  */
@@ -53,13 +54,13 @@ public class ItbTriggerCallbackController {
     public Response triggerReportGeneration(ItbTriggerDTO itbTriggerDTO) {
         try {
             String sessionID = itbTriggerDTO.getTestSession().getTestSessionIdentifier();
-            StepRun stepRun = ItbTestExecutionDBInMemory.getStepRun(sessionID);
-            if (stepRun == null) {
+            CompletableFuture<StepRunReportBuilder> stepRunReportFuture = ItbTestExecutionDBInMemory.getStepRunReportFuture(sessionID);
+            if (stepRunReportFuture == null) {
                 return Response.status(Response.Status.NOT_FOUND).entity("Test session with ID " + sessionID + " not found.").build();
             }
             StepRunReportBuilder stepRunReportBuilder = catchItbReportService.buildItbReport(itbTriggerDTO);
-            catchItbReportService.pushReport(stepRun, stepRunReportBuilder);
-            ItbTestExecutionDBInMemory.deleteSession(sessionID);
+            stepRunReportFuture.complete(stepRunReportBuilder);
+            ItbTestExecutionDBInMemory.releaseSession(sessionID);
             return Response.ok().build();
         } catch (CatchItbReportServiceException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity("Bad format for test report. Error message : " + e.getMessage()).build();

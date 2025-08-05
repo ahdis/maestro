@@ -20,13 +20,14 @@ import net.ihe.gazelle.maestro.api.business.testreport.ItemBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.SyncStepRunner;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunner;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationTestResult;
 import net.ihe.gazelle.validation.v2.api.business.report.validator.ValidationReportValidator;
 import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * A StepRunner is an object used to run ValidationStep {@link ValidationStep}
@@ -38,7 +39,7 @@ import java.util.List;
  * Assert ValidationReport to extract result and build a ValidationReportBuilder {@link net.ihe.gazelle.validation.v2.api.business.report.ValidationReportBuilder}
  * <br>
  */
-public class ValidationStepRunner extends SyncStepRunner {
+public class ValidationStepRunner implements StepRunner {
 
     private final ReportSerialization serializer;
     private final ValidationHandler validationHandler;
@@ -49,7 +50,7 @@ public class ValidationStepRunner extends SyncStepRunner {
     }
 
     @Override
-    public StepRunReportBuilder run(StepRun stepRun) {
+    public CompletableFuture<StepRunReportBuilder> run(StepRun stepRun) {
         ValidationRequest validationRequest = ValidationRequestMapper.
                 createValidationRequest((ValidationStep) stepRun.step());
         ValidationReport validationReport = validationHandler.validate(validationRequest);
@@ -61,7 +62,7 @@ public class ValidationStepRunner extends SyncStepRunner {
                 .setStepId(stepRun.step().getName())
                 .setType(ValidationStep.TYPE);
         computeResult(validationReport, stepRunReportBuilder);
-        return stepRunReportBuilder;
+        return CompletableFuture.completedFuture(stepRunReportBuilder);
     }
 
     /**
@@ -71,14 +72,6 @@ public class ValidationStepRunner extends SyncStepRunner {
      * @param stepRunReportBuilder An object to build the Step run report
      */
     private void computeResult(ValidationReport validationReport, StepRunReportBuilder stepRunReportBuilder) {
-        ValidationReportValidator validator = new ValidationReportValidator();
-//        validator.validate(validationReport).getAllInvalidRules().forEach(
-//                ruleResult -> stepRunReportBuilder.addUnexpectedError(
-//                        new UnexpectedErrorBuilder()
-//                                .setName(ruleResult.getId())
-//                                .setMessage(ruleResult.getDescription())
-//                )
-//        );
         if (ValidationTestResult.PASSED.equals(validationReport.getOverallResult())) {
             stepRunReportBuilder.setResult(StepResult.PASSED);
         } else if (ValidationTestResult.FAILED.equals(validationReport.getOverallResult())) {

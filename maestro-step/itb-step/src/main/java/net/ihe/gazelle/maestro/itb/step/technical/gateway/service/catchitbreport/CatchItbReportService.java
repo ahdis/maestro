@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.quarkus.itb;
+package net.ihe.gazelle.maestro.itb.step.technical.gateway.service.catchitbreport;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Default;
@@ -26,7 +26,6 @@ import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 import net.ihe.gazelle.maestro.api.business.testrun.MaestroEventProducer;
 import net.ihe.gazelle.maestro.itb.step.technical.gateway.client.ItbHttpClient;
 import net.ihe.gazelle.maestro.itb.step.technical.gateway.dto.ItbTriggerDTO;
-import net.ihe.gazelle.maestro.itb.step.technical.gateway.service.catchitbreport.CatchItbReportServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -42,7 +41,6 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO : move this class to src/main/java/net/ihe/gazelle/maestro/itb/step/technical/gateway/service/catchitbreport when possible
 @Dependent
 @Default
 public class CatchItbReportService {
