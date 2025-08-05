@@ -16,28 +16,31 @@
 
 package net.ihe.gazelle.maestro.itb.step.business.dao;
 
-import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public class ItbTestExecutionDBInMemory {
 
-    private static final Map<String, StepRun> SESSIONS = new HashMap<>();
+
+    private static final Map<String, CompletableFuture<StepRunReportBuilder>> STEP_RUN_REPORT_FUTURE_MAP = new HashMap<>();
 
     private ItbTestExecutionDBInMemory() {
-        // Empty
+        // Private constructor to prevent instantiation
     }
 
-    public static void writeSessions(String sessionId, StepRun stepRun) {
-        SESSIONS.put(sessionId, stepRun);
+    public static CompletableFuture<StepRunReportBuilder> getStepRunReportFuture(String sessionId) {
+        return STEP_RUN_REPORT_FUTURE_MAP.get(sessionId);
     }
 
-    public static void deleteSession(String sessionId) {
-        SESSIONS.remove(sessionId);
+    public static void addStepRunReportFuture(String sessionId, CompletableFuture<StepRunReportBuilder> future) {
+        STEP_RUN_REPORT_FUTURE_MAP.put(sessionId, future);
     }
 
-    public static StepRun getStepRun(String testID) {
-        return SESSIONS.get(testID);
+    public static void releaseSession(String sessionId) {
+        STEP_RUN_REPORT_FUTURE_MAP.remove(sessionId);
     }
+
 }

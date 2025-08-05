@@ -49,10 +49,12 @@ public class StepRunnerJob {
         StepRun stepRun = startStepCommand.getStepRun();
         try {
             StepRunner runner = stepRunnerFactory.create(stepRun.step());
-            if (runner instanceof AsyncStepRunner)
-                runner.runAsync(stepRun);
-            if (runner instanceof SyncStepRunner)
-                stepEnded(stepRun, runner.run(stepRun));
+            runner.run(stepRun)
+                    .thenAccept(stepRunReportBuilder -> maestroEventProducer.returnStepReport(stepRun, stepRunReportBuilder))
+                    .exceptionally(e -> {
+                        returnUnexpectedError(e, stepRun);
+                        return null;
+                    });
         } catch (Exception e) {
             returnUnexpectedError(e, stepRun);
         }
@@ -64,7 +66,7 @@ public class StepRunnerJob {
      * @param e an exception that occurred during step execution
      * @param stepRun Previously executed step
      */
-    public void returnUnexpectedError(Exception e, StepRun stepRun) {
+    public void returnUnexpectedError(Throwable e, StepRun stepRun) {
         UnexpectedErrorBuilder unexpectedErrorBuilder = new UnexpectedErrorBuilder()
                 .fromThrowable(e);
         StepRunReportBuilder builder = new StepRunReportBuilder()
