@@ -60,10 +60,7 @@
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>assertion-step</artifactId>
         </dependency>
-        <dependency>
-            <groupId>net.ihe.gazelle</groupId>
-            <artifactId>maestro-websocket</artifactId>
-        </dependency>
+
         <!-- Quarkus -->
         <dependency>
             <groupId>io.quarkus</groupId>
