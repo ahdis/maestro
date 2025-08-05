@@ -26,11 +26,10 @@
     </parent>
 
     <artifactId>maestro</artifactId>
-    <version>0.2.0-GZL-9779-SNAPSHOT</version>
+    <version>0.2.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
         <module>maestro-api</module>
-        <module>mlang-converter</module>
         <module>maestro-engine</module>
         <module>maestro-step</module>
         <module>maestro-quarkus</module>
@@ -101,48 +100,43 @@
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-api</artifactId>
-                <version>0.2.0-GZL-9779-SNAPSHOT</version>
+                <version>0.2.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-engine</artifactId>
-                <version>0.2.0-GZL-9779-SNAPSHOT</version>
+                <version>0.2.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>validation-step</artifactId>
-                <version>0.2.0-GZL-9779-SNAPSHOT</version>
+                <version>0.2.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>simulation-step</artifactId>
-                <version>0.2.0-GZL-9779-SNAPSHOT</version>
+                <version>0.2.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>user-interaction-step</artifactId>
-                <version>0.2.0-GZL-9779-SNAPSHOT</version>
+                <version>0.2.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>assertion-step</artifactId>
-                <version>0.2.0-GZL-9779-SNAPSHOT</version>
+                <version>0.2.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>itb-step</artifactId>
-                <version>0.2.0-GZL-9779-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>net.ihe.gazelle</groupId>
-                <artifactId>mlang-converter</artifactId>
-                <version>0.2.0-GZL-9779-SNAPSHOT</version>
+                <version>0.2.0-SNAPSHOT</version>
             </dependency>
             <!-- to be removed when maestro-websocket has it own tests -->
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-websocket</artifactId>
-                <version>0.2.0-GZL-9779-SNAPSHOT</version>
+                <version>0.2.0-SNAPSHOT</version>
             </dependency>
 
             <!-- Stack BOM -->
@@ -428,12 +422,35 @@
             </activation>
             <modules>
                 <module>maestro-api</module>
-                <module>mlang-converter</module>
                 <module>maestro-engine</module>
                 <module>maestro-step</module>
                 <module>maestro-quarkus</module>
                 <module>maestro-websocket</module>
             </modules>
+        </profile>
+        <profile>
+            <id>with-mlang</id>
+            <activation>
+                <property>
+                    <name>mlang</name>
+                </property>
+            </activation>
+            <modules>
+                <module>maestro-api</module>
+                <module>maestro-engine</module>
+                <module>maestro-step</module>
+                <module>mlang-converter</module>
+                <module>maestro-quarkus</module>
+            </modules>
+            <dependencyManagement>
+                <dependencies>
+                    <dependency>
+                        <groupId>net.ihe.gazelle</groupId>
+                        <artifactId>mlang-converter</artifactId>
+                        <version>0.2.0-SNAPSHOT</version>
+                    </dependency>
+                </dependencies>
+            </dependencyManagement>
         </profile>
     </profiles>
 
