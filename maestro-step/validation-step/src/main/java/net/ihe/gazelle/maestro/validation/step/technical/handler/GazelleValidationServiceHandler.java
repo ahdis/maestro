@@ -46,8 +46,7 @@ public class GazelleValidationServiceHandler implements ValidationHandler {
         return validationService.getValidationProfiles() != null;
     }
 
-    @Override
-    public ValidationReport validate(ValidationRequest validationRequest) {
+    public ValidationReport validate(ValidationRequest validationRequest, String serviceName) {
         if (validationService != null) {
             return validationService.validate(validationRequest);
         } else {
@@ -55,7 +54,6 @@ public class GazelleValidationServiceHandler implements ValidationHandler {
         }
     }
 
-    @Override
     public List<ValidationProfile> getValidationProfiles() {
         if (validationService != null) {
             return validationService.getValidationProfiles();

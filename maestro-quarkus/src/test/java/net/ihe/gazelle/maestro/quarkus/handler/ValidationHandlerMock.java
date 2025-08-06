@@ -36,7 +36,7 @@ public class ValidationHandlerMock extends GazelleValidationServiceHandler {
     }
 
     @Override
-    public ValidationReport validate(ValidationRequest validationRequest) {
+    public ValidationReport validate(ValidationRequest validationRequest, String serviceName) {
         return new ValidationReport();
     }
 

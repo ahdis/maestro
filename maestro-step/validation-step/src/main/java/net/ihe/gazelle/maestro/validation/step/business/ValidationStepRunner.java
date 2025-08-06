@@ -23,7 +23,6 @@ import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunner;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationTestResult;
-import net.ihe.gazelle.validation.v2.api.business.report.validator.ValidationReportValidator;
 import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
 
 import java.util.List;
@@ -51,9 +50,13 @@ public class ValidationStepRunner implements StepRunner {
 
     @Override
     public CompletableFuture<StepRunReportBuilder> run(StepRun stepRun) {
+        ValidationStep validationStep = (ValidationStep) stepRun.step();
         ValidationRequest validationRequest = ValidationRequestMapper.
                 createValidationRequest((ValidationStep) stepRun.step());
-        ValidationReport validationReport = validationHandler.validate(validationRequest);
+        String serviceName = validationStep.getValidationService().getValue();
+
+        ValidationReport validationReport = validationHandler.validate(validationRequest, serviceName );
+
         ItemBuilder itemBuilder = new ItemBuilder()
                 .setContent(serializer.toByteArray(validationReport))
                 .setName("validationReport");

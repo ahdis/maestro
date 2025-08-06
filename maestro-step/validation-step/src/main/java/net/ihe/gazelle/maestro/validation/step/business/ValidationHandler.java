@@ -17,7 +17,28 @@
 package net.ihe.gazelle.maestro.validation.step.business;
 
 import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
-import net.ihe.gazelle.validation.v2.api.business.ValidationService;
+import net.ihe.gazelle.validation.v2.api.business.profile.ValidationProfile;
+import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
+import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
 
-public interface ValidationHandler extends Handler, ValidationService {
+import java.util.List;
+
+/**
+ * Interface for validation handlers that can validate content
+ * This interface supports multiple types of validation services
+ */
+public interface ValidationHandler extends Handler {
+
+    /**
+     * Validates the given request and returns a validation report
+     * @param validationRequest The validation request
+     * @return The validation report
+     */
+    ValidationReport validate(ValidationRequest validationRequest, String serviceName);
+
+    /**
+     * Gets the available validation profiles for this handler
+     * @return List of validation profiles
+     */
+    List<ValidationProfile> getValidationProfiles();
 }
