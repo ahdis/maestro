@@ -26,6 +26,7 @@ import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
 import org.apache.http.HttpHeaders;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -54,6 +55,11 @@ class TestRunControllerIT implements QuarkusTestProfile {
         WireMockSingleton.mockServiceRegistry();
         WireMockSingleton.mockGetProfiles();
         WireMockSingleton.mockValidate();
+    }
+
+    @AfterAll
+    void tearDown() {
+        WireMockSingleton.stop();
     }
 
     @Test
