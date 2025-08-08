@@ -94,7 +94,7 @@
             **/gazelle/context/*
             **/gazelle/maestro/technical/ws/async/tmintegration/**
         </sonar.coverage.exclusions>
-        <datahouse.version>3.0.0</datahouse.version>
+        <datahouse.version>3.0.1-GZL-9816-SNAPSHOT</datahouse.version>
     </properties>
 
     <dependencyManagement>

@@ -14,10 +14,8 @@ import net.ihe.gazelle.maestro.quarkus.record.entity.TestReportReference;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
-import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -25,7 +23,7 @@ public class TestReportRecordService {
 
     private final RecordItemClient recordItemClient;
 
-    @ConfigProperty(name="datahouse.url")
+    @ConfigProperty(name = "datahouse.url")
     String datahouseUrl;
 
     public TestReportRecordService() {
@@ -41,6 +39,7 @@ public class TestReportRecordService {
     /**
      * Pre-upload input attachments and update the report to reference them; record step outputs;
      * persist sub-reports; then persist the main TestReport with References[] including inputs and sub-reports.
+     *
      * @return the created item ID of the main TestReport
      */
     public String recordTestReportWithReferences(TestReport report) {
@@ -68,7 +67,7 @@ public class TestReportRecordService {
             return attachmentRefs;
         }
 
-        for(TestRunReport testRunReport : testRunReports) {
+        for (TestRunReport testRunReport : testRunReports) {
             List<Item> inputs = testRunReport.getInputs();
             if (inputs == null || inputs.isEmpty()) {
                 continue;
@@ -89,7 +88,7 @@ public class TestReportRecordService {
                 continue;
             }
 
-            List<String> ids = uploadAttachments(toUpload);
+            List<String> ids = recordItemClient.uploadAttachments(toUpload);
             if (ids.size() != toUpload.size()) {
                 throw new IllegalStateException("Mismatch between uploaded attachments and returned IDs");
             }
@@ -224,37 +223,4 @@ public class TestReportRecordService {
         return datahouseUrl + "/attachments/" + attachmentId;
     }
 
-    /**
-     * Invoke the new upload-only attachments API via reflection to avoid compile-time coupling.
-     * Accepts either List<String> of IDs or List<Attachment> with IDs set.
-     */
-    @SuppressWarnings("unchecked")
-    private List<String> uploadAttachments(List<Attachment> attachments) {
-        if (attachments == null || attachments.isEmpty()) return Collections.emptyList();
-        try {
-            Method m = recordItemClient.getClass().getMethod("uploadAttachments", List.class);
-            Object result = m.invoke(recordItemClient, attachments);
-            if (result instanceof List<?>) {
-                List<?> list = (List<?>) result;
-                if (list.isEmpty()) return Collections.emptyList();
-                Object first = list.get(0);
-                if (first instanceof String) {
-                    return (List<String>) list;
-                }
-                // Fallback: assume list of Attachment with IDs
-                List<String> ids = new ArrayList<>(list.size());
-                for (Object o : list) {
-                    Method getId = o.getClass().getMethod("getId");
-                    Object idVal = getId.invoke(o);
-                    ids.add(String.valueOf(idVal));
-                }
-                return ids;
-            }
-            throw new IllegalStateException("Unexpected return type from uploadAttachments: " + (result == null ? "null" : result.getClass()));
-        } catch (NoSuchMethodException e) {
-            throw new UnsupportedOperationException("Datahouse client missing uploadAttachments(List<Attachment>) API; please update dependency.", e);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to upload attachments", e);
-        }
-    }
 }
