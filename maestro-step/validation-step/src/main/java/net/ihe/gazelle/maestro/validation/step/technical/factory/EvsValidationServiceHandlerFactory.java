@@ -27,7 +27,6 @@ import net.ihe.gazelle.servicemetadata.api.business.HttpRestBinding;
 import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterface;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Factory for creating EVS ValidationHandler instances
@@ -41,11 +40,29 @@ public class EvsValidationServiceHandlerFactory implements HandlerFactory {
     }
 
     @Override
-    public Handler createHandler(ProvidedInterface providedInterface, ConfigProvider configProvider) throws IllegalArgumentException {
-        try {
-            String evsRestUrl = Objects.requireNonNull(org.eclipse.microprofile.config.ConfigProvider.getConfig().getValue("evs.service.rest.url", String.class));
-            return new EvsValidationHandler(new ValidationClientHttpImpl(evsRestUrl));
+    public Handler createHandler(ProvidedInterface providedInterface, ConfigProvider configProvider) {
+        if (providedInterface == null) {
+            throw new IllegalArgumentException("ProvidedInterface cannot be null");
+        }
 
+        if (providedInterface.getBindings() == null || providedInterface.getBindings().isEmpty()) {
+            throw new IllegalArgumentException("Provided interface has no bindings configured");
+        }
+
+        try {
+            HttpRestBinding binding = (HttpRestBinding) providedInterface.getBindings().getFirst();
+            String evsRestUrl = binding.getServiceUrl();
+
+            if (evsRestUrl == null || evsRestUrl.isBlank()) {
+                throw new IllegalArgumentException("Provided interface has no valid service URL");
+            }
+
+            return new EvsValidationHandler(new ValidationClientHttpImpl(evsRestUrl.trim()));
+
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException("First binding is not an HttpRestBinding", e);
+        } catch (IllegalArgumentException e) {
+            throw e;
         } catch (Exception e) {
             throw new IllegalArgumentException("Failed to create EVS Validation Handler", e);
         }

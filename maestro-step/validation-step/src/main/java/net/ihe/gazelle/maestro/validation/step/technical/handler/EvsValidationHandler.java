@@ -64,9 +64,8 @@ public class EvsValidationHandler implements ValidationHandler {
         if (validationClient != null) {
             List<ValidationServiceProfile> validationServiceProfiles = validationClient.getValidationProfiles();
             return convertToValidationProfiles(validationServiceProfiles);
-        } else {
-            return Collections.emptyList(); // Return empty list if client is not set
         }
+        throw new IllegalStateException("Validation client is not set");
     }
 
     private net.ihe.gazelle.evsapi.client.business.request.ValidationRequest convertToEvsRequest(ValidationRequest request, String serviceName) {

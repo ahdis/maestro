@@ -6,19 +6,15 @@ import net.ihe.gazelle.validation.v2.api.business.request.ValidationItemBuilder;
 import net.ihe.gazelle.evsapi.client.business.response.report.ConstraintPriority;
 import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
 
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class EvsValidationReportMapper {
 
-    private static final String LINE_COL_REGEX = "line \\d+(, column \\d+)?";
-    private static final Pattern LINE_COL_PATT = Pattern.compile(LINE_COL_REGEX);
+    private static final String LINE_COL_REGEX = "^line \\d+(, column \\d+)?$";
+    private static final Pattern LINE_COL_PATTERN = Pattern.compile(LINE_COL_REGEX);
 
-    private static final String XPATH_REGEX = "^/[^/\\s]++(?:/[^/\\s]++)*+$";
-    private static final Pattern XPATH_PATT = Pattern.compile(XPATH_REGEX);
-
-    private static final Pattern LINE_NUMBER_PATTERN = Pattern.compile("\\d+");
-
+    private static final String EXTENDED_REGEX =  "^(\\w+):(.+)$";
+    private static final Pattern EXTENDED_PATTERN = Pattern.compile(EXTENDED_REGEX);
     public ValidationReport mapEvsReportToValidationReport(net.ihe.gazelle.evsapi.client.business.response.report.ValidationReport evsReport, ValidationRequest validationRequest) {
         if (evsReport == null) {
             throw new IllegalArgumentException("EVS ValidationReport cannot be null");
@@ -56,7 +52,7 @@ public class EvsValidationReportMapper {
         return new ValidationMethod()
                 .setValidationProfileID(overview.getValidatorID())
                 .setValidationServiceName(overview.getValidationServiceName())
-                .setValidationProfileVersion(overview.getValidatorVersion() != null ? overview.getValidatorVersion() : "NOT_SET")
+                .setValidationProfileVersion(overview.getValidatorVersion() != null ? overview.getValidatorVersion() : "UNKNOWN")
                 .setValidationServiceVersion(overview.getValidationServiceVersion());
     }
 
@@ -233,32 +229,24 @@ public class EvsValidationReportMapper {
     private boolean isSubjectLocationValid(String subjectLocation) {
         if (subjectLocation == null) {
             return true;
+        } else if (subjectLocation.isBlank()) {
+            return false;
+        } else {
+            return EXTENDED_PATTERN.matcher(subjectLocation).find() || LINE_COL_PATTERN.matcher(subjectLocation).find();
         }
-        if (!subjectLocation.isBlank()) {
-            return LINE_COL_PATT.matcher(subjectLocation).find() || XPATH_PATT.matcher(subjectLocation).find();
-        }
-        return false;
     }
 
-    private String makeSubjectLocationValid(String subjectLocation) {
+    public String makeSubjectLocationValid(String subjectLocation) {
         if (subjectLocation == null || subjectLocation.isBlank()) {
             return null;
         }
 
-        if (isSubjectLocationValid(subjectLocation)) {
-            return subjectLocation;
-        }
+        String fixedLocation = subjectLocation.trim(); // remove outer spaces
+        fixedLocation = fixedLocation.replaceAll("\\s+", " "); // normalize all spaces
 
-        Matcher matcher = LINE_NUMBER_PATTERN.matcher(subjectLocation);
-        if (matcher.find()) {
-            try {
-                int lineNumber = Integer.parseInt(matcher.group());
-                return "line " + lineNumber;
-            } catch (NumberFormatException e) {
-                return null;
-            }
+        if (isSubjectLocationValid(fixedLocation)) {
+            return fixedLocation;
         }
-
         return null;
     }
 
