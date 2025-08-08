@@ -94,6 +94,7 @@
             **/gazelle/context/*
             **/gazelle/maestro/technical/ws/async/tmintegration/**
         </sonar.coverage.exclusions>
+        <datahouse.version>3.0.0</datahouse.version>
     </properties>
 
     <dependencyManagement>
@@ -189,6 +190,12 @@
                 <artifactId>lang</artifactId>
                 <version>${lang.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.kereval.gazelle</groupId>
+                <artifactId>datahouse-microprofile-rest-client</artifactId>
+                <version>${datahouse.version}</version>
+            </dependency>
+
 
             <!-- Test dependencies -->
             <dependency>

@@ -38,6 +38,10 @@
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>service-registry-client</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.kereval.gazelle</groupId>
+            <artifactId>datahouse-microprofile-rest-client</artifactId>
+        </dependency>
 
         <!-- Steps -->
         <dependency>
