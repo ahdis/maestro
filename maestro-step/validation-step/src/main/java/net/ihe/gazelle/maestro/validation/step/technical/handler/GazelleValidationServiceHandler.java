@@ -43,7 +43,7 @@ public class GazelleValidationServiceHandler implements ValidationHandler {
      */
     @Override
     public boolean isAvailable() {
-        return validationService.getValidationProfiles() != null && !validationService.getValidationProfiles().isEmpty();
+        return validationService.getValidationProfiles() != null;
     }
 
     public ValidationReport validate(ValidationRequest validationRequest, String serviceName) {

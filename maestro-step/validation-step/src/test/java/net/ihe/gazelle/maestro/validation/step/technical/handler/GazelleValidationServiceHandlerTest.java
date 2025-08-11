@@ -80,7 +80,7 @@ class GazelleValidationServiceHandlerTest {
 
         // Then
         assertTrue(isAvailable);
-        verify(validationService, times(2)).getValidationProfiles();
+        verify(validationService, times(1)).getValidationProfiles();
     }
 
     @Test
@@ -92,7 +92,7 @@ class GazelleValidationServiceHandlerTest {
         boolean isAvailable = gazelleValidationServiceHandler.isAvailable();
 
         // Then
-        assertFalse(isAvailable);
+        assertTrue(isAvailable);
     }
 
     @Test
