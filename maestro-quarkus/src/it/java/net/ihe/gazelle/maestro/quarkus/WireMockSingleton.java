@@ -57,9 +57,9 @@ public class WireMockSingleton {
         return wireMockServer;
     }
 
-    public static void mockGetProfiles() {
+    public static void mockGetProfiles() throws IOException {
         wireMockServer.stubFor(get(urlPathMatching("/matchboxv3/gazelle/validation/v2/profiles"))
-                .willReturn(ok().withBody("[]"))
+                .willReturn(ok().withBody(getResourceAsString("/profiles.json")))
         );
     }
 
