@@ -70,7 +70,7 @@ class EvsValidationReportMapperTest {
             () -> assertEquals("ERROR", assertionReport.getSeverity().toString()),
             () -> assertEquals("MANDATORY", assertionReport.getPriority().toString()),
             () -> assertEquals("FAILED", assertionReport.getResult().toString()),
-            () -> assertEquals("line 0", assertionReport.getSubjectLocation())
+            () -> assertEquals("line: 0", assertionReport.getSubjectLocation())
         );
     }
 
