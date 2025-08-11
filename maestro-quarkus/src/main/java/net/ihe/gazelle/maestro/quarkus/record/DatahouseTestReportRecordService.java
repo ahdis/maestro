@@ -1,14 +1,19 @@
 package net.ihe.gazelle.maestro.quarkus.record;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kereval.gazelle.datahouse.api.business.record.Attachment;
 import com.kereval.gazelle.datahouse.api.business.record.RefType;
 import com.kereval.gazelle.datahouse.api.business.record.Reference;
 import com.kereval.gazelle.datahouse.technical.rest.client.RecordItemClient;
 import com.kereval.gazelle.datahouse.technical.rest.client.RecordItemClientProvider;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
 import net.ihe.gazelle.maestro.api.business.testreport.Item;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
+import net.ihe.gazelle.maestro.business.TestReportRecordException;
+import net.ihe.gazelle.maestro.business.TestReportRecordService;
 import net.ihe.gazelle.maestro.quarkus.record.entity.TestReportEntity;
 import net.ihe.gazelle.maestro.quarkus.record.entity.TestReportReference;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
@@ -19,19 +24,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class TestReportRecordService {
+@RequestScoped
+public class DatahouseTestReportRecordService implements TestReportRecordService {
 
+    public static final String TEST_REPORT = "TEST_REPORT";
     private final RecordItemClient recordItemClient;
 
-    @ConfigProperty(name = "datahouse.url")
-    String datahouseUrl;
+    private final String datahouseUrl;
 
-    public TestReportRecordService() {
+    @Inject
+    public DatahouseTestReportRecordService(@ConfigProperty(name = "datahouse.url") String datahouseUrl) {
         this.recordItemClient = new RecordItemClientProvider().createClient();
+        this.datahouseUrl = datahouseUrl;
     }
 
     // Convenience constructor for tests to bypass config-backed client creation
-    TestReportRecordService(RecordItemClient recordItemClient, String datahouseUrl) {
+    DatahouseTestReportRecordService(RecordItemClient recordItemClient, @ConfigProperty(name = "datahouse.url") String datahouseUrl) {
         this.recordItemClient = recordItemClient;
         this.datahouseUrl = datahouseUrl;
     }
@@ -42,6 +50,7 @@ public class TestReportRecordService {
      *
      * @return the created item ID of the main TestReport
      */
+    @Override
     public String recordTestReportWithReferences(TestReport report) {
         // 1) Upload all inputs as attachments and set refs (URL in report, ID in Reference)
         List<Reference> attachmentRefs = createAttachmentsFromTestRunInputs(report.getTestRunReports());
@@ -58,7 +67,7 @@ public class TestReportRecordService {
 
     /**
      * For each TestRunReport input having content, upload it as an Attachment via the
-     * new Datahouse API and set the Item reference to the returned attachment ID.
+     * Datahouse API and set the Item reference to the returned attachment ID.
      * Content is cleared afterward to respect content XOR reference rule.
      */
     private List<Reference> createAttachmentsFromTestRunInputs(List<TestRunReport> testRunReports) {
@@ -66,48 +75,64 @@ public class TestReportRecordService {
         if (testRunReports == null || testRunReports.isEmpty()) {
             return attachmentRefs;
         }
-
         for (TestRunReport testRunReport : testRunReports) {
-            List<Item> inputs = testRunReport.getInputs();
-            if (inputs == null || inputs.isEmpty()) {
-                continue;
-            }
-
-            // Collect attachments to upload, preserving order to map IDs back
-            List<Attachment> toUpload = new ArrayList<>();
-            List<Integer> inputIndexes = new ArrayList<>();
-            for (int i = 0; i < inputs.size(); i++) {
-                Item input = inputs.get(i);
-                if (input != null && input.getContent() != null && input.getContent().length > 0) {
-                    toUpload.add(createAttachment(input));
-                    inputIndexes.add(i);
-                }
-            }
-
-            if (toUpload.isEmpty()) {
-                continue;
-            }
-
-            List<String> ids = recordItemClient.uploadAttachments(toUpload);
-            if (ids.size() != toUpload.size()) {
-                throw new IllegalStateException("Mismatch between uploaded attachments and returned IDs");
-            }
-
-            // Map IDs back to inputs: set URL reference in report and collect Reference(ID) for item
-            for (int k = 0; k < inputIndexes.size(); k++) {
-                int idx = inputIndexes.get(k);
-                String attachmentId = ids.get(k);
-                Item input = inputs.get(idx);
-                input.setReference(constructUrlToAttachment(attachmentId));
-                input.setContent(null);
-                attachmentRefs.add(new Reference()
-                        .setType(input.getName())
-                        .setValue(attachmentId)
-                        .setRefType(RefType.ATTACHMENT)
-                );
-            }
+            processInputsForAttachments(testRunReport.getInputs(), attachmentRefs);
         }
         return attachmentRefs;
+    }
+
+    private void processInputsForAttachments(List<Item> inputs, List<Reference> attachmentRefs) {
+        if (inputs == null || inputs.isEmpty()) {
+            return;
+        }
+        UploadPlan plan = buildUploadPlan(inputs);
+        if (plan.toUpload.isEmpty()) {
+            return;
+        }
+        List<String> ids = recordItemClient.uploadAttachments(plan.toUpload);
+        validateUploadedIdsCount(plan.toUpload.size(), ids.size());
+        mapIdsBackToInputs(inputs, plan.inputIndexes, ids, attachmentRefs);
+    }
+
+    private UploadPlan buildUploadPlan(List<Item> inputs) {
+        List<Attachment> toUpload = new ArrayList<>();
+        List<Integer> inputIndexes = new ArrayList<>();
+        for (int i = 0; i < inputs.size(); i++) {
+            Item input = inputs.get(i);
+            if (hasContent(input)) {
+                toUpload.add(createAttachment(input));
+                inputIndexes.add(i);
+            }
+        }
+        return new UploadPlan(toUpload, inputIndexes);
+    }
+
+    private boolean hasContent(Item input) {
+        return input != null && input.getContent() != null && input.getContent().length > 0;
+    }
+
+    private void validateUploadedIdsCount(int expected, int actual) {
+        if (expected != actual) {
+            throw new IllegalStateException("Mismatch between uploaded attachments and returned IDs");
+        }
+    }
+
+    private void mapIdsBackToInputs(List<Item> inputs, List<Integer> inputIndexes, List<String> ids, List<Reference> attachmentRefs) {
+        for (int k = 0; k < inputIndexes.size(); k++) {
+            int idx = inputIndexes.get(k);
+            String attachmentId = ids.get(k);
+            Item input = inputs.get(idx);
+            input.setReference(constructUrlToAttachment(attachmentId));
+            input.setContent(null);
+            attachmentRefs.add(new Reference()
+                    .setType(input.getName())
+                    .setValue(attachmentId)
+                    .setRefType(RefType.ATTACHMENT)
+            );
+        }
+    }
+
+    private record UploadPlan(List<Attachment> toUpload, List<Integer> inputIndexes) {
     }
 
     private List<Reference> recordTestStepOutputs(List<TestRunReport> testRunReports) {
@@ -130,7 +155,7 @@ public class TestReportRecordService {
             entity.setSubReportsReferences(testReportReferences);
 
             // Build Datahouse item content (JSON) and references array
-            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            ObjectMapper mapper = new ObjectMapper();
             String jsonContent = mapper.writeValueAsString(entity);
 
             // Compose references: inputs (attachments) + subreport item IDs + output item IDs
@@ -155,14 +180,18 @@ public class TestReportRecordService {
 
             com.kereval.gazelle.datahouse.api.business.record.Item item =
                     new com.kereval.gazelle.datahouse.api.business.record.Item()
-                            .setAccessControlList(new AccessControlList().setOwners(Set.of("gazelle")))
-                            .setType("TestReport")
+                            .setAccessControlList(
+                                    new AccessControlList()
+                                            .setOwners(Set.of("gazelle"))
+                                            .setPublic(true)
+                            )
+                            .setType(TEST_REPORT)
                             .setContent(jsonContent)
                             .setReferences(references);
 
             return recordItemClient.recordItem(item);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to record TestReport", e);
+            throw new TestReportRecordException("Failed to record TestReport", e);
         }
     }
 

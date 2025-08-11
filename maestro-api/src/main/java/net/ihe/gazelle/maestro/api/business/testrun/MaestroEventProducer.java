@@ -18,6 +18,7 @@ package net.ihe.gazelle.maestro.api.business.testrun;
 
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 
@@ -36,11 +37,11 @@ public interface MaestroEventProducer {
     void executeTestSet(TestSetRun testSetRun);
 
     /**
-     * Method called when a testSet execution ended to return result
+     * Method called when a testSet execution ended to return a result summary
      * @param testSetRun Previously executed TestSet
-     * @param report The global execution return of testSetRun
+     * @param reportSummary The summary of the test set execution
      */
-    void returnTestSetReport(TestSetRun testSetRun, TestReport report);
+    void returnTestSetReport(TestSetRun testSetRun, TestReportSummary reportSummary);
 
     /**
      * Method called when a TestRun execution ended to continue iteration on TestRuns

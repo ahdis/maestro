@@ -23,7 +23,9 @@ import io.restassured.response.Response;
 import jakarta.ws.rs.core.MediaType;
 import net.ihe.gazelle.maestro.api.business.testreport.Result;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
 import org.apache.http.HttpHeaders;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.AfterAll;
@@ -72,7 +74,7 @@ class TestRunControllerIT implements QuarkusTestProfile {
                 .extract().response();
         assertNotNull(response);
 
-        TestReport testReport = response.as(TestReportDTO.class).getDomain();
+        TestReportSummary testReport = response.as(TestReportSummaryDTO.class).getDomain();
         assertTrue(testReport.isValid());
         assertEquals(Result.FAILED, testReport.getResult());
     }

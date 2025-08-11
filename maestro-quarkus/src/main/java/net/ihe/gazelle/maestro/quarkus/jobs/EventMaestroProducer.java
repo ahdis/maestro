@@ -22,6 +22,7 @@ import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
@@ -58,8 +59,8 @@ public class EventMaestroProducer implements MaestroEventProducer {
     }
 
     @Override
-    public void returnTestSetReport(TestSetRun testSetRun, TestReport report) {
-        testRunEvent.fireAsync(new FinishTestSetEvent(testSetRun, report));
+    public void returnTestSetReport(TestSetRun testSetRun, TestReportSummary reportSummary) {
+        testRunEvent.fireAsync(new FinishTestSetEvent(testSetRun, reportSummary));
     }
 
     @Override

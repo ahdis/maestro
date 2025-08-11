@@ -17,6 +17,7 @@
 package net.ihe.gazelle.maestro.api.technical.event;
 
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
 
 /**
@@ -24,16 +25,16 @@ import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
  */
 public class FinishTestSetEvent implements TestRunEvent {
 
-    private final TestReport testReport;
+    private final TestReportSummary reportSummary;
     private final TestSetRun testSetRun;
 
-    public FinishTestSetEvent(TestSetRun testRuns, TestReport testReport) {
+    public FinishTestSetEvent(TestSetRun testRuns, TestReportSummary reportSummary) {
         this.testSetRun = testRuns;
-        this.testReport = testReport;
+        this.reportSummary = reportSummary;
     }
 
-    public TestReport getTestReport() {
-        return testReport;
+    public TestReportSummary getReportSummary() {
+        return reportSummary;
     }
 
     public TestSetRun getTestSetRun() {

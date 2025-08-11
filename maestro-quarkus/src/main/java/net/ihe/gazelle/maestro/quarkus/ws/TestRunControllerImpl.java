@@ -23,18 +23,22 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
 import net.ihe.gazelle.maestro.api.business.testrun.InvalidTestRunException;
+import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
 import net.ihe.gazelle.maestro.quarkus.NotProvidedStep;
 import net.ihe.gazelle.maestro.api.business.testrun.UnsupportedPropertyTypeException;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestRunDTO;
 import net.ihe.gazelle.maestro.quarkus.jobs.SynchronousMaestro;
 import net.ihe.gazelle.maestro.quarkus.ws.async.AsynchronousMaestro;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 @ApplicationScoped
 public class TestRunControllerImpl implements TestRunController {
@@ -43,6 +47,9 @@ public class TestRunControllerImpl implements TestRunController {
 
     private final SynchronousMaestro synchronousMaestro;
     private final AsynchronousMaestro asynchronousMaestro;
+
+    @ConfigProperty(name = "datahouse.url")
+    String dataHouseUrl;
 
     @Inject
     public TestRunControllerImpl(SynchronousMaestro synchronousMaestro, AsynchronousMaestro asynchronousMaestro) {
@@ -61,18 +68,22 @@ public class TestRunControllerImpl implements TestRunController {
 
     private Response runSynchronously(List<TestRunDTO> testRuns) {
         try {
-            TestReport testReport = synchronousMaestro.executeTestSet(
+            TestReportSummary reportSummary = synchronousMaestro.executeTestSet(
                     testRuns.stream()
                             .map(TestRunDTO::getDomain)
                             .toList()
             );
-            return Response.ok(new TestReportDTO(testReport)).build();
+            String locationPrefix = dataHouseUrl + "/items";
+            return Response.ok(new TestReportSummaryDTO(reportSummary, locationPrefix)).build();
         } catch (InvalidTestRunException | IllegalArgumentException e) {
             LOG.debug("TestRun format Exception", e);
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity("The request contains a testRun with bad format" + e).build();
         } catch (NotProvidedStep e) {
             LOG.debug(e.getMessage());
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity("Your script contains a non provided test report" + e).build();
+        } catch (TimeoutException e) {
+            LOG.error("Timeout during test execution", e);
+            return Response.status(Response.Status.GATEWAY_TIMEOUT.getStatusCode()).entity(SynchronousMaestro.TIMEOUT_MESSAGE).build();
         } catch (WebApplicationException e) {
             return Response.status(Response.Status.GATEWAY_TIMEOUT.getStatusCode()).entity(SynchronousMaestro.TIMEOUT_MESSAGE).build();
         }  catch (Exception e) {

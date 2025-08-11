@@ -20,6 +20,7 @@ import net.ihe.gazelle.maestro.api.business.testrun.*;
 import net.ihe.gazelle.maestro.business.MaestroImpl;
 import net.ihe.gazelle.maestro.business.MissingArgumentException;
 import net.ihe.gazelle.maestro.quarkus.SessionStoreContextImpl;
+import net.ihe.gazelle.maestro.quarkus.mock.InMemoryTestReportRecordService;
 import net.ihe.gazelle.maestro.quarkus.mock.StepMockEvent;
 import net.ihe.gazelle.maestro.quarkus.factory.TestRunMockEvent;
 import net.ihe.gazelle.maestro.quarkus.jobs.EventMaestroProducer;
@@ -55,6 +56,6 @@ class TestRunControllerTest {
     }
 
     private Maestro getEngine() {
-        return new MaestroImpl(new EventMaestroProducer(new TestRunMockEvent(), new StepMockEvent()), new SessionStoreContextImpl());
+        return new MaestroImpl(new EventMaestroProducer(new TestRunMockEvent(), new StepMockEvent()), new SessionStoreContextImpl(), new InMemoryTestReportRecordService());
     }
 }

@@ -32,12 +32,16 @@ import java.util.UUID;
 
 public class MaestroImpl implements Maestro {
 
-    MaestroEventProducer maestroEventProducer;
-    SessionStoreContext sessionStoreContext;
+    private final MaestroEventProducer maestroEventProducer;
+    private final SessionStoreContext sessionStoreContext;
+    private final TestReportRecordService testReportRecordService;
 
-    public MaestroImpl(MaestroEventProducer maestroEventProducer, SessionStoreContext sessionStoreContext) {
+    public MaestroImpl(MaestroEventProducer maestroEventProducer,
+                       SessionStoreContext sessionStoreContext,
+                       TestReportRecordService testReportRecordService) {
         this.maestroEventProducer = maestroEventProducer;
         this.sessionStoreContext = sessionStoreContext;
+        this.testReportRecordService = testReportRecordService;
     }
 
     @Override
@@ -86,10 +90,16 @@ public class MaestroImpl implements Maestro {
             testSetValidator.validate(testSetRun);
         } catch (IllegalArgumentException e) {
             isValid = false;
+            UnexpectedErrorBuilder unexpectedError = new UnexpectedErrorBuilder().fromThrowable(e);
             TestReport testReport = new TestReportBuilder()
-                    .addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e))
+                    .addUnexpectedError(unexpectedError)
                     .build();
-            maestroEventProducer.returnTestSetReport(testSetRun, testReport);
+            String reportId = testReportRecordService.recordTestReportWithReferences(testReport);
+            TestReportSummary testReportSummary = new TestReportSummaryBuilder()
+                    .setId(reportId)
+                    .addUnexpectedError(unexpectedError)
+                    .build();
+            maestroEventProducer.returnTestSetReport(testSetRun, testReportSummary);
         }
         if (isValid) {
             sessionStoreContext.addTestSetContext(testSetId, testSetRun);
@@ -118,7 +128,9 @@ public class MaestroImpl implements Maestro {
             String sessionId = testRun.getTestSetId();
             sessionStoreContext.clearExecutionContext(sessionId);
             sessionStoreContext.clearTestSetContext(sessionId);
-            maestroEventProducer.returnTestSetReport(testSetRun, testReport);
+            String reportId = testReportRecordService.recordTestReportWithReferences(testReport);
+            TestReportSummary reportSummary = new TestReportSummary(reportId, testReport.getDateTime(), testReport.getResult());
+            maestroEventProducer.returnTestSetReport(testSetRun, reportSummary);
         } else {
             runNextTestRun(testRun, testSetRun);
         }
@@ -183,7 +195,14 @@ public class MaestroImpl implements Maestro {
             String sessionId = testRun.getTestSetId();
             sessionStoreContext.clearExecutionContext(sessionId);
             sessionStoreContext.clearTestSetContext(sessionId);
-            maestroEventProducer.returnTestSetReport(testSetRun, testReport);
+            String reportId = testReportRecordService.recordTestReportWithReferences(testReport);
+            TestReportSummary testReportSummary = new TestReportSummaryBuilder()
+                    .setId(reportId)
+                    .setDateTime(testReport.getDateTime())
+                    .setResult(testReport.getResult())
+                    .addUnexpectedError(getUnexpectedErrorBuilder(e))
+                    .build();
+            maestroEventProducer.returnTestSetReport(testSetRun, testReportSummary);
         }
     }
 
@@ -323,8 +342,15 @@ public class MaestroImpl implements Maestro {
 
         TestSetSessionStore testSetSessionStore = sessionStoreContext.getTestSetContexts(testRun.getTestSetId());
         TestSetRun testSetRun = testSetSessionStore.getTestSetRun();
+        String reportId = testReportRecordService.recordTestReportWithReferences(testReport);
+        TestReportSummary testReportSummary = new TestReportSummaryBuilder()
+                .setId(reportId)
+                .setDateTime(testReport.getDateTime())
+                .setResult(testReport.getResult())
+                .addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e))
+                .build();
 
-        maestroEventProducer.returnTestSetReport(testSetRun, testReport);
+        maestroEventProducer.returnTestSetReport(testSetRun, testReportSummary);
     }
 
     private List<ItemBuilder> convertBinaryPropertiesToItems(List<Property<?>> properties) {

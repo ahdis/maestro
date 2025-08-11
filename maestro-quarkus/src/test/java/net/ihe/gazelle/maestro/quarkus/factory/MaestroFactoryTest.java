@@ -25,6 +25,7 @@ import net.ihe.gazelle.maestro.quarkus.configuration.ServiceRegistryDAOImpl;
 import net.ihe.gazelle.maestro.quarkus.configuration.ServiceRegistryImpl;
 import net.ihe.gazelle.maestro.quarkus.jobs.EventMaestroProducer;
 import net.ihe.gazelle.maestro.quarkus.jobs.StepRunnerProvider;
+import net.ihe.gazelle.maestro.quarkus.record.DatahouseTestReportRecordService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -42,7 +43,7 @@ class MaestroFactoryTest {
         maestroFactory = new MaestroFactory(new ServiceRegistryImpl(new ServiceRegistryDAOImpl()),
                 new EventMaestroProducer(testRunMockEvent, stepMockEvent),
                 new SessionStoreContextImpl(),
-                null);
+                null, testReport -> "test");
     }
 
     @Test

@@ -1,56 +1,23 @@
 package net.ihe.gazelle.maestro.quarkus.record;
 
-import com.kereval.gazelle.datahouse.api.business.record.Attachment;
-import com.kereval.gazelle.datahouse.technical.rest.client.RecordItemClient;
 import net.ihe.gazelle.maestro.api.business.testreport.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class TestReportRecordServiceTest {
+public class TestReportRecordServiceTestImpl {
 
-    private static class FakeRecordItemClient implements RecordItemClient {
-        int itemSeq = 0;
-        int attachSeq = 0;
-        final List<Object> recordedItems = new ArrayList<>();
-        final List<List<Attachment>> uploadedAttachmentsBatches = new ArrayList<>();
-
-        @Override
-        public String recordItem(com.kereval.gazelle.datahouse.api.business.record.Item item) {
-            recordedItems.add(item);
-            return "itm-" + (++itemSeq);
-        }
-
-        @Override
-        public String recordItem(com.kereval.gazelle.datahouse.api.business.record.Item item, List<Attachment> attachments) {
-            // not used by the service for this flow; fallback to single-arg path
-            return recordItem(item);
-        }
-
-        // New API exposed by datahouse; service calls it via reflection
-        public List<String> uploadAttachments(List<Attachment> attachments) {
-            uploadedAttachmentsBatches.add(attachments);
-            List<String> ids = new ArrayList<>();
-            for (int i = 0; i < attachments.size(); i++) {
-                ids.add("att-" + (++attachSeq));
-            }
-            return ids;
-        }
-    }
-
-    private TestReportRecordService service;
-    private FakeRecordItemClient fakeClient;
+    private DatahouseTestReportRecordService service;
+    private RecordItemClientMock recordItemClientMock;
 
     @BeforeEach
     void setup() throws Exception {
-        fakeClient = new FakeRecordItemClient();
-        service = new TestReportRecordService(fakeClient, "http://dh");
+        recordItemClientMock = new RecordItemClientMock();
+        service = new DatahouseTestReportRecordService(recordItemClientMock, "http://dh");
     }
 
     @Test
@@ -73,8 +40,8 @@ public class TestReportRecordServiceTest {
         String reportItemId = service.recordTestReportWithReferences(report);
 
         // Then: upload called once with two attachments
-        assertThat(fakeClient.uploadedAttachmentsBatches).hasSize(1);
-        assertThat(fakeClient.uploadedAttachmentsBatches.get(0)).hasSize(2);
+        assertThat(recordItemClientMock.uploadedAttachmentsBatches).hasSize(1);
+        assertThat(recordItemClientMock.uploadedAttachmentsBatches.get(0)).hasSize(2);
 
         // Inputs in domain hold URL references to attachments
         List<Item> inputs = report.getTestRunReports().get(0).getInputs();
@@ -85,7 +52,7 @@ public class TestReportRecordServiceTest {
 
         // Report item was recorded
         assertThat(reportItemId).isNotBlank();
-        assertThat(fakeClient.recordedItems).isNotEmpty();
+        assertThat(recordItemClientMock.recordedItems).isNotEmpty();
     }
 
     @Test
@@ -118,7 +85,7 @@ public class TestReportRecordServiceTest {
         assertThat(out2.getContent()).isNull();
 
         // Total recordItem calls: 2 outputs + 1 report
-        assertThat(fakeClient.recordedItems.size()).isEqualTo(3);
+        assertThat(recordItemClientMock.recordedItems.size()).isEqualTo(3);
         assertThat(reportItemId).isEqualTo("itm-3");
     }
 
@@ -137,7 +104,7 @@ public class TestReportRecordServiceTest {
         String rootId = service.recordTestReportWithReferences(report);
 
         // Then: two report items persisted (sub then root)
-        assertThat(fakeClient.recordedItems.size()).isEqualTo(2);
+        assertThat(recordItemClientMock.recordedItems.size()).isEqualTo(2);
         assertThat(rootId).isEqualTo("itm-2");
     }
 }

@@ -19,9 +19,7 @@ package net.ihe.gazelle.maestro.quarkus.jobs;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReportBuilder;
-import net.ihe.gazelle.maestro.api.business.testreport.UnexpectedErrorBuilder;
+import net.ihe.gazelle.maestro.api.business.testreport.*;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
 import net.ihe.gazelle.maestro.api.business.testrun.MaestroEventProducer;
@@ -30,6 +28,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -48,7 +47,7 @@ public class SynchronousMaestro {
     private static final Logger LOG = LoggerFactory.getLogger(SynchronousMaestro.class);
     public static final String TIMEOUT_MESSAGE = "The test execution timed out. Either the test was too long for a synchronous call, either something fatal happened and you may need to contact an administrator";
 
-    private final Map<String, CompletableFuture<TestReport>> completableFutures = new ConcurrentHashMap<>();
+    private final Map<String, CompletableFuture<TestReportSummary>> completableFutures = new ConcurrentHashMap<>();
     private final int defaultTimeout;
     private final MaestroEventProducer maestroEventProducer;
 
@@ -58,33 +57,23 @@ public class SynchronousMaestro {
         this.maestroEventProducer = maestroEventProducer;
     }
 
-    public TestReport executeTestSet(List<TestRun> testRuns) throws ExecutionException, InterruptedException {
-        CompletableFuture<TestReport> future = startTestSet(testRuns);
-        return future.orTimeout(defaultTimeout, TimeUnit.SECONDS)
-                .exceptionally(ex ->
-                {
-                    if (ex instanceof TimeoutException) {
-                        LOG.error(TIMEOUT_MESSAGE, ex);
-                        return new TestReportBuilder()
-                                .addUnexpectedError(new UnexpectedErrorBuilder()
-                                        .fromThrowable(ex)
-                                        .setMessage("Test set execution timed out after " + defaultTimeout + " seconds."))
-                                .build();
-                    }
-                    throw new CompletionException(ex);
-                })
-                .get();
+    public TestReportSummary executeTestSet(List<TestRun> testRuns) throws ExecutionException, InterruptedException, TimeoutException {
+        if (testRuns == null || testRuns.isEmpty()) {
+            throw new IllegalArgumentException("Test runs cannot be null or empty");
+        }
+        CompletableFuture<TestReportSummary> future = startTestSet(testRuns);
+        return future.get(defaultTimeout, TimeUnit.SECONDS);
     }
 
-    private CompletableFuture<TestReport> startTestSet(List<TestRun> testRuns) {
+    private CompletableFuture<TestReportSummary> startTestSet(List<TestRun> testRuns) {
         TestSetRun testSetRun = new TestSetRun(UUID.randomUUID().toString(), testRuns);
-        CompletableFuture<TestReport> future = new CompletableFuture<>();
+        CompletableFuture<TestReportSummary> future = new CompletableFuture<>();
         completableFutures.put(testSetRun.testSetId(), future);
         maestroEventProducer.executeTestSet(testSetRun);
         return future;
     }
 
     public void completeFuture(FinishTestSetEvent finishTestSetEvent) {
-        completableFutures.get(finishTestSetEvent.getTestSetRun().testSetId()).complete(finishTestSetEvent.getTestReport());
+        completableFutures.get(finishTestSetEvent.getTestSetRun().testSetId()).complete(finishTestSetEvent.getReportSummary());
     }
 }
