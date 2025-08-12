@@ -29,6 +29,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -53,12 +54,30 @@ class TestRunControllerIT implements QuarkusTestProfile {
         WireMockSingleton.mockCallback();
         WireMockSingleton.mockServiceRegistry();
         WireMockSingleton.mockGetProfiles();
+        WireMockSingleton.mockEvsProfiles();
         WireMockSingleton.mockValidate();
+        WireMockSingleton.mockEvsValidate();
     }
 
     @Test
     void synchronous_test_run_with_one_validation() throws IOException {
         String testRun = WireMockSingleton.getResourceAsString("/Testrun.json");
+        Response response = given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .body(testRun)
+                .when().post("/testRuns/run")
+                .then()
+                .extract().response();
+        assertNotNull(response);
+
+        TestReport testReport = response.as(TestReportDTO.class).getDomain();
+        assertTrue(testReport.isValid());
+        assertEquals(Result.FAILED, testReport.getResult());
+    }
+
+    @Timeout(60)
+    @Test
+    void synchronous_test_run_with_one_validationEVS() throws IOException {
+        String testRun = WireMockSingleton.getResourceAsString("/testRunWithEvsApi.json");
         Response response = given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                 .body(testRun)
                 .when().post("/testRuns/run")
