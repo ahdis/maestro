@@ -126,13 +126,12 @@ class GazelleValidationServiceHandlerTest {
     void should_validate_successfully() {
         // Given
         ValidationRequest validationRequest = createValidationRequest();
-        String serviceName = "TestService";
         ValidationReport expectedReport = new ValidationReport();
 
         when(validationService.validate(validationRequest)).thenReturn(expectedReport);
 
         // When
-        ValidationReport result = gazelleValidationServiceHandler.validate(validationRequest, serviceName);
+        ValidationReport result = gazelleValidationServiceHandler.validate(validationRequest);
 
         // Then
         assertNotNull(result);
@@ -148,7 +147,7 @@ class GazelleValidationServiceHandlerTest {
 
         // When & Then
         ServiceClientException exception = assertThrows(ServiceClientException.class, () -> {
-            handlerWithNullController.validate(validationRequest, "TestService");
+            handlerWithNullController.validate(validationRequest);
         });
 
         assertEquals("validationService not set", exception.getMessage());
@@ -156,12 +155,9 @@ class GazelleValidationServiceHandlerTest {
 
     @Test
     void should_throw_exception_when_validation_request_is_null() {
-        // Given
-        String serviceName = "TestService";
-
         // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            gazelleValidationServiceHandler.validate(null, serviceName);
+            gazelleValidationServiceHandler.validate(null);
         });
 
         assertEquals("Validation request cannot be null", exception.getMessage());
@@ -171,14 +167,12 @@ class GazelleValidationServiceHandlerTest {
     void should_throw_runtime_exception_when_validation_fails() {
         // Given
         ValidationRequest validationRequest = createValidationRequest();
-        String serviceName = "TestService";
-
         when(validationService.validate(validationRequest))
             .thenThrow(new RuntimeException("Validation service error"));
 
         // When & Then
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            gazelleValidationServiceHandler.validate(validationRequest, serviceName);
+            gazelleValidationServiceHandler.validate(validationRequest);
         });
 
         assertEquals("Validation service error", exception.getMessage());
@@ -238,7 +232,7 @@ class GazelleValidationServiceHandlerTest {
         when(validationService.validate(validationRequest)).thenReturn(expectedReport);
 
         // When
-        ValidationReport result = gazelleValidationServiceHandler.validate(validationRequest, "TestService");
+        ValidationReport result = gazelleValidationServiceHandler.validate(validationRequest);
 
         // Then
         assertNotNull(result);
@@ -253,8 +247,8 @@ class GazelleValidationServiceHandlerTest {
         when(validationService.validate(validationRequest)).thenReturn(expectedReport);
 
         // When
-        gazelleValidationServiceHandler.validate(validationRequest, "TestService");
-        gazelleValidationServiceHandler.validate(validationRequest, "TestService");
+        gazelleValidationServiceHandler.validate(validationRequest);
+        gazelleValidationServiceHandler.validate(validationRequest);
 
         // Then
         verify(validationService, times(2)).validate(validationRequest);

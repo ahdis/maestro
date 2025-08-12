@@ -21,16 +21,15 @@ import net.ihe.gazelle.evsapi.client.business.ValidationService;
 import net.ihe.gazelle.evsapi.client.business.ValidationServiceProfile;
 import net.ihe.gazelle.evsapi.client.business.request.HandledObject;
 import net.ihe.gazelle.evsapi.client.business.request.ValidationRequest;
+import net.ihe.gazelle.evsapi.client.business.response.report.ValidationOverview;
 import net.ihe.gazelle.evsapi.client.business.response.report.ValidationReport;
-import net.ihe.gazelle.maestro.validation.step.technical.mapper.EvsValidationReportMapper;
-import net.ihe.gazelle.validation.v2.api.business.profile.ValidationProfile;
+import net.ihe.gazelle.evsapi.client.business.response.report.ValidationTestResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -44,23 +43,13 @@ class EvsValidationHandlerTest {
     @Mock
     private ValidationClient mockValidationClient;
 
-    @Mock
-    private EvsValidationReportMapper mockMapper;
-
     private EvsValidationHandler evsValidationHandler;
-
-    private final ValidationReport evsReport = new ValidationReport();
-    private final net.ihe.gazelle.validation.v2.api.business.report.ValidationReport expectedReport = new net.ihe.gazelle.validation.v2.api.business.report.ValidationReport();
 
 
 
     @BeforeEach
-    void setUp() throws IllegalAccessException, NoSuchFieldException {
+    void setUp() {
         evsValidationHandler = new EvsValidationHandler(mockValidationClient);
-        var field = EvsValidationHandler.class.getDeclaredField("evsValidationReportMapper");
-        field.setAccessible(true);
-        field.set(evsValidationHandler, mockMapper);
-
     }
 
     @Test
@@ -74,11 +63,7 @@ class EvsValidationHandlerTest {
 
     @Test
     void should_return_true_when_validation_profiles_available() {
-        // Given
-        List<ValidationServiceProfile> profiles = Arrays.asList(
-            createValidationServiceProfile("profile1", "Service 1"),
-            createValidationServiceProfile("profile2", "Service 2")
-        );
+        List<ValidationServiceProfile> profiles = createValidationServiceProfile();
         when(mockValidationClient.getValidationProfiles()).thenReturn(profiles);
 
         // When
@@ -115,35 +100,35 @@ class EvsValidationHandlerTest {
     @Test
     void should_validate_successfully() {
         // Given
-        net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest validationRequest = createValidationRequest();
-        String serviceName = "TestService";
+        ValidationRequest validationRequest = createValidationRequest();
         String urlLocation = "http://example.com/validation/12345";
         String expectedOid = "12345";
 
         when(mockValidationClient.validate(any(ValidationRequest.class))).thenReturn(urlLocation);
-        when(mockValidationClient.getValidationReportByOid(expectedOid)).thenReturn(evsReport);
-        when(mockMapper.mapEvsReportToValidationReport(evsReport, validationRequest)).thenReturn(expectedReport);
+        when(mockValidationClient.getValidationReportByOid(expectedOid)).thenReturn(getExpectedEvsReport());
 
         // When
-        net.ihe.gazelle.validation.v2.api.business.report.ValidationReport result = evsValidationHandler.validate(validationRequest, serviceName);
+        ValidationReport result = evsValidationHandler.validate(validationRequest);
 
         // Then
         assertNotNull(result);
-        assertEquals(expectedReport, result);
         verify(mockValidationClient).validate(any(ValidationRequest.class));
         verify(mockValidationClient).getValidationReportByOid(expectedOid);
-        verify(mockMapper).mapEvsReportToValidationReport(evsReport, validationRequest);
+        assertEquals("662d1d93-5f2a-43a2-91d7-55b15d6cdbcc", result.getUuid());
+        assertEquals("Gazelle HL7v3 Validator", result.getValidationOverview().getValidationServiceName());
+        assertEquals("3.9.2", result.getValidationOverview().getValidationServiceVersion());
+        assertEquals(ValidationTestResult.FAILED, result.getValidationOverview().getValidationOverallResult());
     }
 
     @Test
     void should_throw_exception_when_validation_client_is_null() {
         // Given
         EvsValidationHandler handlerWithNullClient = new EvsValidationHandler(null);
-        net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest validationRequest = createValidationRequest();
+        ValidationRequest validationRequest = createValidationRequest();
 
         // When & Then
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
-            handlerWithNullClient.validate(validationRequest, "TestService");
+            handlerWithNullClient.validate(validationRequest);
         });
 
         assertEquals("Validation client is not set", exception.getMessage());
@@ -152,43 +137,39 @@ class EvsValidationHandlerTest {
     @Test
     void should_extract_oid_from_url_location() {
         // Given
-        net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest validationRequest = createValidationRequest();
-        String serviceName = "TestService";
         String urlLocation = "http://example.com/validation/report/abc123def";
         String expectedOid = "abc123def";
 
 
         when(mockValidationClient.validate(any(ValidationRequest.class))).thenReturn(urlLocation);
-        when(mockValidationClient.getValidationReportByOid(expectedOid)).thenReturn(evsReport);
-        when(mockMapper.mapEvsReportToValidationReport(evsReport, validationRequest)).thenReturn(expectedReport);
+        when(mockValidationClient.getValidationReportByOid(expectedOid)).thenReturn(getExpectedEvsReport());
 
         // When
-        net.ihe.gazelle.validation.v2.api.business.report.ValidationReport result = evsValidationHandler.validate(validationRequest, serviceName);
+        ValidationReport result = evsValidationHandler.validate(createValidationRequest());
 
         // Then
         assertNotNull(result);
         verify(mockValidationClient).getValidationReportByOid(expectedOid);
+
     }
 
     @Test
     void should_get_validation_profiles_successfully() {
         // Given
-        List<ValidationServiceProfile> serviceProfiles = Arrays.asList(
-            createValidationServiceProfile("profile1", "Service 1"),
-            createValidationServiceProfile("profile2", "Service 2")
-        );
+        List<ValidationServiceProfile> serviceProfiles = createValidationServiceProfile();
+
         when(mockValidationClient.getValidationProfiles()).thenReturn(serviceProfiles);
 
         // When
-        List<ValidationProfile> result = evsValidationHandler.getValidationProfiles();
+        List<ValidationServiceProfile> result = evsValidationHandler.getValidationProfiles();
 
         // Then
         assertNotNull(result);
         assertEquals(2, result.size());
         assertEquals("profile1", result.get(0).getProfileID());
-        assertEquals("Service 1", result.get(0).getProfileName());
+        assertEquals("Service 1", result.get(0).getServiceName());
         assertEquals("profile2", result.get(1).getProfileID());
-        assertEquals("Service 2", result.get(1).getProfileName());
+        assertEquals("Service 2", result.get(1).getServiceName());
     }
 
     @Test
@@ -202,16 +183,15 @@ class EvsValidationHandlerTest {
     }
 
     @Test
-    void should_return_empty_list_when_service_profiles_null() {
+    void should_return_null_when_service_profiles_null() {
         // Given
         when(mockValidationClient.getValidationProfiles()).thenReturn(null);
 
         // When
-        List<ValidationProfile> result = evsValidationHandler.getValidationProfiles();
+        List<ValidationServiceProfile> result = evsValidationHandler.getValidationProfiles();
 
         // Then
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+        assertNull(result);
     }
 
     @Test
@@ -220,62 +200,49 @@ class EvsValidationHandlerTest {
         when(mockValidationClient.getValidationProfiles()).thenReturn(Collections.emptyList());
 
         // When
-        List<ValidationProfile> result = evsValidationHandler.getValidationProfiles();
+        List<ValidationServiceProfile> result = evsValidationHandler.getValidationProfiles();
 
         // Then
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
 
-    @Test
-    void should_convert_validation_request_correctly() {
-        // Given
-        net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest validationRequest = createValidationRequest();
-        String serviceName = "TestService";
-        String urlLocation = "http://example.com/validation/12345";
-
-        when(mockValidationClient.validate(any(ValidationRequest.class))).thenReturn(urlLocation);
-        when(mockValidationClient.getValidationReportByOid(anyString())).thenReturn(evsReport);
-        when(mockMapper.mapEvsReportToValidationReport(any(), any())).thenReturn(expectedReport);
-
-        // When
-        evsValidationHandler.validate(validationRequest, serviceName);
-
-        // Then
-        verify(mockValidationClient).validate(argThat(evsRequest -> {
-            assertNotNull(evsRequest);
-            assertNotNull(evsRequest.getValidationService());
-            assertEquals(1, evsRequest.getHandledObjects().size());
-
-            HandledObject handledObject = evsRequest.getHandledObjects().getFirst();
-            assertEquals("test content", new String(handledObject.getContent()));
-
-            ValidationService validationService = evsRequest.getValidationService();
-            assertEquals(serviceName, validationService.getName());
-            assertEquals("testProfileId", validationService.getValidator());
-
-            return true;
-        }));
-    }
-
     // Helper methods
-    private ValidationServiceProfile createValidationServiceProfile(String profileId, String serviceName) {
-        ValidationServiceProfile profile = new ValidationServiceProfile();
-        profile.setProfileID(profileId);
-        profile.setServiceName(serviceName);
-        return profile;
+    private List<ValidationServiceProfile> createValidationServiceProfile() {
+        return List.of(
+            new ValidationServiceProfile()
+                .setProfileID("profile1")
+                .setServiceName("Service 1"),
+            new ValidationServiceProfile()
+                .setProfileID("profile2")
+                .setServiceName("Service 2")
+        );
     }
 
-    private net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest createValidationRequest() {
-        net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest request = new net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest();
-        request.setValidationProfileId("testProfileId");
-        request.addValidationItem(
-                new net.ihe.gazelle.validation.v2.api.business.request.ValidationItem()
-                        .setContent("test content".getBytes())
-                        .setItemId("testItemId")
-                        .setLocation("http://example.com/test")
-                        .setRole("testRole"));
+    private ValidationReport getExpectedEvsReport() {
+        ValidationReport report = new ValidationReport();
+        report.setUuid("662d1d93-5f2a-43a2-91d7-55b15d6cdbcc");
 
+        ValidationOverview overview = new ValidationOverview();
+        overview.setDisclaimer("this is a test disclaimer");
+        overview.setValidationServiceName("Gazelle HL7v3 Validator");
+        overview.setValidationServiceVersion("3.9.2");
+        overview.setValidatorID("[ITI-44] Patient Identity Feed HL7V3 - Add Patient Record");
+        overview.setValidationOverallResult(ValidationTestResult.FAILED);
+        report.setValidationOverview(overview);
+        return  report;
+    }
+
+    private ValidationRequest createValidationRequest() {
+        ValidationRequest request = new ValidationRequest();
+        request.setValidationService(
+                new ValidationService()
+                        .setName("TestService")
+                        .setValidator("testProfileId"))
+                .addValidationItem(
+                new HandledObject()
+                        .setContent("test content".getBytes())
+                        .setOriginalFileName("testFile.txt"));
         return request;
     }
 }

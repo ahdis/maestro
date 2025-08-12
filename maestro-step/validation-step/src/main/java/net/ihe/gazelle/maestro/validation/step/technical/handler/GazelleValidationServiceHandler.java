@@ -46,7 +46,8 @@ public class GazelleValidationServiceHandler implements ValidationHandler {
         return validationService.getValidationProfiles() != null;
     }
 
-    public ValidationReport validate(ValidationRequest validationRequest, String serviceName) {
+    @Override
+    public ValidationReport validate(ValidationRequest validationRequest) {
         if (validationRequest == null) {
             throw new IllegalArgumentException("Validation request cannot be null");
         }
@@ -57,6 +58,7 @@ public class GazelleValidationServiceHandler implements ValidationHandler {
         }
     }
 
+    @Override
     public List<ValidationProfile> getValidationProfiles() {
         if (validationService != null) {
             return validationService.getValidationProfiles();

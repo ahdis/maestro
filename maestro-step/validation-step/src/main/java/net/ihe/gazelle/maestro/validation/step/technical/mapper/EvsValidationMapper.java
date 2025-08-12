@@ -1,21 +1,41 @@
 package net.ihe.gazelle.maestro.validation.step.technical.mapper;
 
 
+import net.ihe.gazelle.evsapi.client.business.ValidationService;
+import net.ihe.gazelle.evsapi.client.business.request.HandledObject;
+import net.ihe.gazelle.evsapi.client.business.request.ValidationRequest;
+import net.ihe.gazelle.evsapi.client.business.response.report.ConstraintValidation;
+import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
 import net.ihe.gazelle.validation.v2.api.business.report.*;
 import net.ihe.gazelle.validation.v2.api.business.request.ValidationItemBuilder;
 import net.ihe.gazelle.evsapi.client.business.response.report.ConstraintPriority;
-import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
 
+import java.util.List;
 import java.util.regex.Pattern;
 
-public class EvsValidationReportMapper {
+public class EvsValidationMapper {
 
     private static final String LINE_COL_REGEX = "^line \\d+(, column \\d+)?$";
     private static final Pattern LINE_COL_PATTERN = Pattern.compile(LINE_COL_REGEX);
 
     private static final String EXTENDED_REGEX =  "^(\\w+):(.+)$";
     private static final Pattern EXTENDED_PATTERN = Pattern.compile(EXTENDED_REGEX);
-    public ValidationReport mapEvsReportToValidationReport(net.ihe.gazelle.evsapi.client.business.response.report.ValidationReport evsReport, ValidationRequest validationRequest) {
+
+
+    public net.ihe.gazelle.evsapi.client.business.request.ValidationRequest mapToEvsRequest(ValidationStep validationStep) {
+        return new net.ihe.gazelle.evsapi.client.business.request.ValidationRequest()
+                .addValidationItem(
+                        new HandledObject()
+                                .setContent(validationStep.getContentToValidate().getValue())
+                )
+                .setValidationService(
+                        new ValidationService()
+                                .setName(validationStep.getValidationService().getValue())
+                                .setValidator(validationStep.getValidationProfile().getValue())
+                );
+    }
+
+    public ValidationReport mapEvsReportToValidationReport(net.ihe.gazelle.evsapi.client.business.response.report.ValidationReport evsReport, net.ihe.gazelle.evsapi.client.business.request.ValidationRequest evsRequest) {
         if (evsReport == null) {
             throw new IllegalArgumentException("EVS ValidationReport cannot be null");
         }
@@ -25,7 +45,7 @@ public class EvsValidationReportMapper {
 
         // Build the main components
         buildValidationOverview(evsReport, reportBuilder);
-        addValidationItems(validationRequest, reportBuilder);
+        addValidationItems(evsRequest, reportBuilder);
         addSubReports(evsReport, reportBuilder);
 
         return reportBuilder.build();
@@ -73,27 +93,24 @@ public class EvsValidationReportMapper {
     /**
      * Adds validation items from the validation request if present
      */
-    private void addValidationItems(ValidationRequest validationRequest, ValidationReportBuilder reportBuilder) {
-        if (!hasValidationItems(validationRequest)) {
+    private void addValidationItems(net.ihe.gazelle.evsapi.client.business.request.ValidationRequest evsRequest, ValidationReportBuilder reportBuilder) {
+        if (!hasHandledObjects(evsRequest)) {
             return;
         }
 
         reportBuilder.addValidationItem(
                 new ValidationItemBuilder()
-                        .setContent(validationRequest.getValidationItems().getFirst().getContent())
-                        .setItemId(validationRequest.getValidationItems().getFirst().getItemId())
-                        .setLocation(validationRequest.getValidationItems().getFirst().getLocation())
-                        .setRole(validationRequest.getValidationItems().getFirst().getRole())
+                        .setContent(evsRequest.getHandledObjects().getFirst().getContent())
         );
     }
 
     /**
      * Checks if validation request has valid items
      */
-    private boolean hasValidationItems(ValidationRequest validationRequest) {
+    private boolean hasHandledObjects(ValidationRequest validationRequest) {
         return validationRequest != null &&
-               validationRequest.getValidationItems() != null &&
-               !validationRequest.getValidationItems().isEmpty();
+               validationRequest.getHandledObjects() != null &&
+               !validationRequest.getHandledObjects().isEmpty();
     }
 
     /**
@@ -177,7 +194,7 @@ public class EvsValidationReportMapper {
     /**
      * Gets requirement IDs if they exist and are not empty
      */
-    private java.util.List<String> getRequirementIds(net.ihe.gazelle.evsapi.client.business.response.report.ConstraintValidation constraint) {
+    private List<String> getRequirementIds(ConstraintValidation constraint) {
         return constraint.getAssertionIDs() != null && !constraint.getAssertionIDs().isEmpty()
                 ? constraint.getAssertionIDs()
                 : null;
@@ -186,7 +203,7 @@ public class EvsValidationReportMapper {
     /**
      * Adds unexpected errors to assertion report if they exist
      */
-    private void addUnexpectedErrors(net.ihe.gazelle.evsapi.client.business.response.report.ConstraintValidation constraint, AssertionReportBuilder assertionBuilder) {
+    private void addUnexpectedErrors(ConstraintValidation constraint, AssertionReportBuilder assertionBuilder) {
         if (constraint.getUnexpectedErrors() == null || constraint.getUnexpectedErrors().isEmpty()) {
             return;
         }

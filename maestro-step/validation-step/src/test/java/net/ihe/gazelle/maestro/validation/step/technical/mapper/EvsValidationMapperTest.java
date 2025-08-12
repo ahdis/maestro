@@ -1,16 +1,18 @@
 package net.ihe.gazelle.maestro.validation.step.technical.mapper;
 
+import net.ihe.gazelle.evsapi.client.business.request.HandledObject;
+import net.ihe.gazelle.evsapi.client.business.request.ValidationRequest;
 import net.ihe.gazelle.evsapi.client.business.response.report.*;
+import net.ihe.gazelle.maestro.api.business.testrun.Property;
+import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
-import net.ihe.gazelle.validation.v2.api.business.request.ValidationItem;
-import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class EvsValidationReportMapperTest {
+class EvsValidationMapperTest {
 
-    private final EvsValidationReportMapper mapper = new EvsValidationReportMapper();
+    private final EvsValidationMapper mapper = new EvsValidationMapper();
 
     @Test
     void should_map_validation_report() {
@@ -30,7 +32,7 @@ class EvsValidationReportMapperTest {
         assertEquals("3.9.2", validationMethod.getValidationServiceVersion());
 
         // Validate validation items (4 assertions)
-        assertValidationItems(validationReport);
+        assertArrayEquals("test content".getBytes(), validationReport.getValidationItems().getFirst().getContent());
 
         var reports = validationReport.getReports();
         assertNotNull(reports);
@@ -53,6 +55,15 @@ class EvsValidationReportMapperTest {
         }
     }
 
+    @Test
+    void should_map_validation_request() {
+        ValidationRequest request = mapper.mapToEvsRequest(createValidationStep());
+        assertNotNull(request);
+        assertEquals("testService", request.getValidationService().getName());
+        assertEquals("ITI-44", request.getValidationService().getValidator());
+        assertArrayEquals("content".getBytes(), request.getHandledObjects().getFirst().getContent());
+    }
+
 
     @Test
     void test_make_subject_location_with_xpath() {
@@ -71,19 +82,6 @@ class EvsValidationReportMapperTest {
             () -> assertEquals("MANDATORY", assertionReport.getPriority().toString()),
             () -> assertEquals("FAILED", assertionReport.getResult().toString()),
             () -> assertEquals("line: 0", assertionReport.getSubjectLocation())
-        );
-    }
-
-    private static void assertValidationItems(ValidationReport validationReport) {
-        var validationItems = validationReport.getValidationItems();
-        assertNotNull(validationItems);
-        assertEquals(1, validationItems.size());
-        var validationItem = validationItems.getFirst();
-        assertAll("Validation item properties",
-            () -> assertEquals("Item-12345", validationItem.getItemId()),
-            () -> assertEquals("http://example.com/item/12345", validationItem.getLocation()),
-            () -> assertEquals("sender", validationItem.getRole()),
-            () -> assertNotNull(validationItem.getContent())
         );
     }
 
@@ -141,16 +139,22 @@ class EvsValidationReportMapperTest {
         return report;
     }
 
-    private ValidationRequest createValidationRequest() {
+    private net.ihe.gazelle.evsapi.client.business.request.ValidationRequest createValidationRequest() {
         return new ValidationRequest()
-                .setValidationProfileId("[ITI-44] Patient Identity Feed HL7V3 - Add Patient Record")
+                .setValidationService(
+                        new net.ihe.gazelle.evsapi.client.business.ValidationService()
+                                .setName("TestService")
+                                .setValidator("ITI-44"))
                 .addValidationItem(
-                        new ValidationItem()
-                                .setItemId("Item-12345")
-                                .setLocation("http://example.com/item/12345")
-                                .setRole("sender")
-                                .setContent("Content to validate".getBytes())
+                        new HandledObject()
+                                .setContent("test content".getBytes())
                 );
+    }
+    private ValidationStep createValidationStep() {
+        return new ValidationStep("validationStep",
+                new Property<>(ValidationStep.VALIDATION_SERVICE, "testService"),
+                new Property<>(ValidationStep.VALIDATION_PROFILE, "ITI-44"),
+                new Property<>(ValidationStep.CONTENT_TO_VALIDATE, "content".getBytes()));
     }
 
 

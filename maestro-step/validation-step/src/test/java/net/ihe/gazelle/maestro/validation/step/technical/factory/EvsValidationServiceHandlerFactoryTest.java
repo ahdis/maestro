@@ -28,8 +28,6 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.wildfly.common.Assert.assertNotNull;
-import static org.wildfly.common.Assert.assertTrue;
 
 class EvsValidationServiceHandlerFactoryTest {
 
@@ -48,7 +46,7 @@ class EvsValidationServiceHandlerFactoryTest {
     @Test
     void should_get_consumed_interface() {
         List<ConsumedInterface> consumedInterfaces = factory.getConsumedInterfaces();
-        assertTrue(consumedInterfaces.size() == 1);
+        assertEquals(1, consumedInterfaces.size());
         ConsumedInterface consumedInterfaceFirst = consumedInterfaces.getFirst();
         assertNotNull(consumedInterfaceFirst);
         assertEquals("EVS Client API", consumedInterfaceFirst.getInterfaceName());

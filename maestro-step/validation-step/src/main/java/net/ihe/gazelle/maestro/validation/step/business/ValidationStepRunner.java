@@ -19,8 +19,12 @@ package net.ihe.gazelle.maestro.validation.step.business;
 import net.ihe.gazelle.maestro.api.business.testreport.ItemBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunner;
+import net.ihe.gazelle.maestro.validation.step.technical.handler.EvsValidationHandler;
+import net.ihe.gazelle.maestro.validation.step.technical.handler.GazelleValidationServiceHandler;
+import net.ihe.gazelle.maestro.validation.step.technical.mapper.EvsValidationMapper;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationTestResult;
 import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
@@ -41,11 +45,12 @@ import java.util.concurrent.CompletableFuture;
 public class ValidationStepRunner implements StepRunner {
 
     private final ReportSerialization serializer;
-    private final ValidationHandler validationHandler;
+    private final Handler handler;
+    private final EvsValidationMapper evsValidationMapper = new EvsValidationMapper();
 
     public ValidationStepRunner(ReportSerialization serializer, ValidationHandler validationHandler) {
         this.serializer = serializer;
-        this.validationHandler = validationHandler;
+        this.handler = validationHandler;
     }
 
     @Override
@@ -53,9 +58,16 @@ public class ValidationStepRunner implements StepRunner {
         ValidationStep validationStep = (ValidationStep) stepRun.step();
         ValidationRequest validationRequest = ValidationRequestMapper.
                 createValidationRequest((ValidationStep) stepRun.step());
-        String serviceName = validationStep.getValidationService().getValue();
+        ValidationReport validationReport = new ValidationReport();
 
-        ValidationReport validationReport = validationHandler.validate(validationRequest, serviceName );
+        if(handler instanceof EvsValidationHandler evsHandler) {
+            net.ihe.gazelle.evsapi.client.business.request.ValidationRequest evsRequest = evsValidationMapper.mapToEvsRequest(validationStep);
+            net.ihe.gazelle.evsapi.client.business.response.report.ValidationReport evsReport = evsHandler.validate(evsRequest);
+            validationReport = evsValidationMapper.mapEvsReportToValidationReport(evsReport, evsRequest);
+        }
+        if(handler instanceof GazelleValidationServiceHandler validationServiceHandler) {
+            validationReport = validationServiceHandler.validate(validationRequest);
+        }
 
         ItemBuilder itemBuilder = new ItemBuilder()
                 .setContent(serializer.toByteArray(validationReport))
