@@ -48,7 +48,7 @@ public class ValidationStepRunner implements StepRunner {
     private final Handler handler;
     private final EvsValidationMapper evsValidationMapper = new EvsValidationMapper();
 
-    public ValidationStepRunner(ReportSerialization serializer, ValidationHandler validationHandler) {
+    public ValidationStepRunner(ReportSerialization serializer, Handler validationHandler) {
         this.serializer = serializer;
         this.handler = validationHandler;
     }
