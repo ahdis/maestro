@@ -57,9 +57,15 @@ public class WireMockSingleton {
         return wireMockServer;
     }
 
-    public static void mockGetProfiles() {
+    public static void mockGetProfiles() throws IOException {
         wireMockServer.stubFor(get(urlPathMatching("/matchboxv3/gazelle/validation/v2/profiles"))
-                .willReturn(ok().withBody("[]"))
+                .willReturn(ok().withBody(getResourceAsString("/profiles.json")))
+        );
+    }
+
+    public static void mockEvsProfiles() throws IOException {
+        wireMockServer.stubFor(get(urlPathMatching("/evs/gazelle/validations/profiles"))
+                .willReturn(ok().withBody(getResourceAsString("/evs-profiles.json")))
         );
     }
 
@@ -70,6 +76,22 @@ public class WireMockSingleton {
     public static void mockValidate(String resourcePath) throws IOException {
         wireMockServer.stubFor(post(urlPathMatching("/matchboxv3/gazelle/validation/v2/validate"))
                 .willReturn(ok().withBody(getResourceAsString(resourcePath)))
+        );
+    }
+
+    public static void mockEvsValidate() throws IOException {
+        wireMockServer.stubFor(post(urlPathMatching("/evs/gazelle/validations"))
+                .willReturn(ok()
+                        .withStatus(201)
+                    .withHeader("Content-Type", "text/plain")
+                        .withHeader("Location", "http://localhost:34500/evs/gazelle/validations/1.1.1.1.1.1.4.754")
+                        .withBody("http://localhost:34500/evs/gazelle/validations/1.1.1.1.1.1.4.754"))
+        );
+
+        wireMockServer.stubFor(get(urlPathMatching("/evs/gazelle/validations/.*/report"))
+                .willReturn(ok()
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(getResourceAsString("/validation-response.xml")))
         );
     }
 

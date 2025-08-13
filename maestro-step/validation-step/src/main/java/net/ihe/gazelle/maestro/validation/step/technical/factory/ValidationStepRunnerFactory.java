@@ -20,13 +20,13 @@ import net.ihe.gazelle.maestro.api.business.testrun.Step;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunner;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunnerFactory;
-import net.ihe.gazelle.maestro.validation.step.business.ValidationHandler;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStepRunner;
 import net.ihe.gazelle.maestro.validation.step.technical.dto.ReportSerializationImpl;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class ValidationStepRunnerFactory implements StepRunnerFactory {
@@ -40,15 +40,15 @@ public class ValidationStepRunnerFactory implements StepRunnerFactory {
     public Map<String, Class<? extends Handler>> getRequiredServices(Step step) {
         Map<String, Class<? extends Handler>> requiredHandlers = new HashMap<>();
         if (step instanceof ValidationStep validationStep) {
-            requiredHandlers.put(validationStep.getValidationService().getValue(), ValidationHandler.class);
+            requiredHandlers.put(validationStep.getValidationService().getValue(), Handler.class);
         }
         return requiredHandlers;
     }
 
     @Override
     public StepRunner createStepRunner(Step step, Set<Handler> handlers) {
-        return handlers.stream().filter(ValidationHandler.class::isInstance).findFirst()
-                .map(handler -> new ValidationStepRunner(new ReportSerializationImpl(), (ValidationHandler) handler))
+        return handlers.stream().filter(Objects::nonNull).findFirst()
+                .map(handler -> new ValidationStepRunner(new ReportSerializationImpl(), handler))
                 .orElseThrow(() -> new IllegalArgumentException("No validation handler provided"));
     }
 }

@@ -48,6 +48,9 @@ public class GazelleValidationServiceHandler implements ValidationHandler {
 
     @Override
     public ValidationReport validate(ValidationRequest validationRequest) {
+        if (validationRequest == null) {
+            throw new IllegalArgumentException("Validation request cannot be null");
+        }
         if (validationService != null) {
             return validationService.validate(validationRequest);
         } else {

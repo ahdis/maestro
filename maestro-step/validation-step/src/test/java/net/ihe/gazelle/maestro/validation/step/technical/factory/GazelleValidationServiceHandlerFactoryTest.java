@@ -22,17 +22,13 @@ import net.ihe.gazelle.maestro.validation.step.technical.handler.GazelleValidati
 import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterface;
 import net.ihe.gazelle.servicemetadata.api.business.HttpRestBinding;
 import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterface;
-import net.ihe.gazelle.validation.v1.api.domain.wrapper.ValidationServiceWrapper;
 import net.ihe.gazelle.validation.v2.api.technical.ws.ValidationServiceController;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.wildfly.common.Assert.assertNotNull;
-import static org.wildfly.common.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class GazelleValidationServiceHandlerFactoryTest {
 
@@ -46,7 +42,7 @@ class GazelleValidationServiceHandlerFactoryTest {
     @Test
     void should_get_consumed_interface() {
         List<ConsumedInterface> consumedInterfaces = factory.getConsumedInterfaces();
-        assertTrue(consumedInterfaces.size() == 2);
+        assertEquals(2, consumedInterfaces.size());
         ConsumedInterface consumedInterfaceFirst = consumedInterfaces.getFirst();
         assertNotNull(consumedInterfaceFirst);
         assertEquals("Validation Service", consumedInterfaceFirst.getInterfaceName());
