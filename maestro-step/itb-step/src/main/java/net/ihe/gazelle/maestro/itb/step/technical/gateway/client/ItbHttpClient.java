@@ -23,6 +23,8 @@ import net.ihe.gazelle.maestro.itb.step.business.request.Parameter;
 import net.ihe.gazelle.maestro.itb.step.business.request.TestCase;
 import net.ihe.gazelle.maestro.itb.step.business.request.TestRequest;
 import net.ihe.gazelle.maestro.itb.step.business.request.TestSuite;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
@@ -35,6 +37,8 @@ import java.util.*;
  * Adapter to execute HTTP requests to ITB (Interoperability Test Bed)
  */
 public class ItbHttpClient implements ItbClient {
+
+    private static final Logger logger = LoggerFactory.getLogger(ItbHttpClient.class);
 
     private Map<String, Object> map;
 
@@ -248,6 +252,7 @@ public class ItbHttpClient implements ItbClient {
             }
             return content.get("createdSessions").get(0).get("session").asText();
         } catch (InterruptedException | IOException e) {
+            logger.error("Error sending POST request", e);
             throw new ItbHttpClientException("Error request interrupted. Try again.");
         }
     }

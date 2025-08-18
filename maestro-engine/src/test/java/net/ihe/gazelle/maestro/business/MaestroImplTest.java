@@ -49,6 +49,9 @@ class MaestroImplTest {
     private SessionStoreContext sessionStoreContext;
 
     @Mock
+    private TestReportRecordService testReportRecordService;
+
+    @Mock
     private TestRun testRun;
 
     @Mock
@@ -73,7 +76,8 @@ class MaestroImplTest {
 
     @BeforeEach
     void setUp() {
-        maestroImpl = new MaestroImpl(maestroEventProducer, sessionStoreContext);
+        when(testReportRecordService.recordTestReportWithReferences(any())).thenReturn("testReportId");
+        maestroImpl = new MaestroImpl(maestroEventProducer, sessionStoreContext, testReportRecordService);
     }
 
     @Test
@@ -128,7 +132,7 @@ class MaestroImplTest {
         maestroImpl.run(testRun);
 
         // Assert
-        verify(maestroEventProducer).returnTestSetReport(eq(testSetRun), any(TestReport.class));
+        verify(maestroEventProducer).returnTestSetReport(eq(testSetRun), any(TestReportSummary.class));
     }
 
     @Test
@@ -180,7 +184,7 @@ class MaestroImplTest {
         verify(testSetSessionStore).addTestRunReportBuilder(testRunReportBuilder);
         verify(sessionStoreContext).clearExecutionContext(testSetId);
         verify(sessionStoreContext).clearTestSetContext(testSetId);
-        verify(maestroEventProducer).returnTestSetReport(eq(testSetRun), any(TestReport.class));
+        verify(maestroEventProducer).returnTestSetReport(eq(testSetRun), any(TestReportSummary.class));
     }
 
     @Test
@@ -299,7 +303,7 @@ class MaestroImplTest {
     @Test
     void constructor_ShouldInitializeFields() {
         // Act
-        MaestroImpl newMaestro = new MaestroImpl(maestroEventProducer, sessionStoreContext);
+        MaestroImpl newMaestro = new MaestroImpl(maestroEventProducer, sessionStoreContext, testReportRecordService);
 
         // Assert
         assertNotNull(newMaestro);

@@ -24,6 +24,7 @@ import net.ihe.gazelle.maestro.api.business.testrun.Maestro;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.ConfigProvider;
 import net.ihe.gazelle.maestro.business.MaestroImpl;
 import net.ihe.gazelle.maestro.api.business.testrun.MaestroEventProducer;
+import net.ihe.gazelle.maestro.business.TestReportRecordService;
 import net.ihe.gazelle.maestro.quarkus.ServiceRegistry;
 import net.ihe.gazelle.maestro.quarkus.SessionStoreContextImpl;
 import net.ihe.gazelle.maestro.quarkus.StepRunnerProviderSPI;
@@ -37,10 +38,14 @@ public class MaestroFactory {
     private final ServiceRegistry serviceRegistry;
     private final MaestroEventProducer maestroEventProducer;
     private final SessionStoreContextImpl sessionStoreContext;
+    private final TestReportRecordService testReportRecordService;
     private final ConfigProvider configProvider;
 
     @Inject
-    public MaestroFactory(ServiceRegistry serviceRegistry, MaestroEventProducer maestroEventProducer, SessionStoreContextImpl sessionStoreContext, ConfigProvider configProvider) {
+    public MaestroFactory(ServiceRegistry serviceRegistry, MaestroEventProducer maestroEventProducer,
+                          SessionStoreContextImpl sessionStoreContext, ConfigProvider configProvider,
+                          TestReportRecordService testReportRecordService) {
+        this.testReportRecordService = testReportRecordService;
         this.serviceRegistry = serviceRegistry;
         this.maestroEventProducer = maestroEventProducer;
         this.sessionStoreContext = sessionStoreContext;
@@ -56,7 +61,7 @@ public class MaestroFactory {
     @Produces
     @Default
     public Maestro getMaestro() {
-        return new MaestroImpl(maestroEventProducer, sessionStoreContext);
+        return new MaestroImpl(maestroEventProducer, sessionStoreContext, testReportRecordService);
     }
 
 }

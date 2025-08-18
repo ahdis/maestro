@@ -62,7 +62,7 @@ public class TMTestRunMaestro {
         client.sendTestReport(
                 store.getCallbackAuthorization(),
                 store.getClientCallback(),
-                finishTestSetEvent.getTestReport()
+                finishTestSetEvent.getReportSummary()
         );
     }
 

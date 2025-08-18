@@ -56,7 +56,7 @@ public class AsynchronousMaestro {
         client.sendTestReport(
                 store.getCallbackAuthorization(),
                 store.getClientCallback(),
-                finishTestSetEvent.getTestReport()
+                finishTestSetEvent.getReportSummary()
         );
     }
 

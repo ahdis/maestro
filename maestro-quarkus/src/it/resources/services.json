@@ -56,5 +56,24 @@
         "supportedBindings": ["REST"]
       }
     ]
+  },
+  {
+    "name": "itb",
+    "version": "1.0.0",
+    "instanceId": "instanceId",
+    "replicaId": "replicaId",
+    "providedInterfaces": [
+      {
+        "interfaceName": "ITB API",
+        "interfaceVersion": "1.0.0",
+        "bindings": [
+          {
+            "@type": "REST",
+            "serviceUrl": "http://localhost/itb"
+          }
+        ]
+      }
+    ],
+    "consumedInterfaces": null
   }
 ]

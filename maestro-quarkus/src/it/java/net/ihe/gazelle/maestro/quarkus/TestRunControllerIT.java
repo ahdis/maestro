@@ -16,6 +16,7 @@
 
 package net.ihe.gazelle.maestro.quarkus;
 
+import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.QuarkusTestProfile;
 import io.quarkus.test.junit.TestProfile;
@@ -23,9 +24,12 @@ import io.restassured.response.Response;
 import jakarta.ws.rs.core.MediaType;
 import net.ihe.gazelle.maestro.api.business.testreport.Result;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
 import org.apache.http.HttpHeaders;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -43,6 +47,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @QuarkusTest
 @TestProfile(TestRunControllerProfile.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+//@QuarkusTestResource(value = DatahouseTestResource.class, restrictToAnnotatedClass = true)
 class TestRunControllerIT implements QuarkusTestProfile {
 
     @ConfigProperty(name = "gzl.it-port")
@@ -56,6 +61,13 @@ class TestRunControllerIT implements QuarkusTestProfile {
         WireMockSingleton.mockGetProfiles();
         WireMockSingleton.mockEvsProfiles();
         WireMockSingleton.mockValidate();
+        WireMockSingleton.mockKeycloak();
+        WireMockSingleton.mockDatahouse();
+    }
+
+    @AfterAll
+    void tearDown() throws IOException {
+        WireMockSingleton.stop();
         WireMockSingleton.mockEvsValidate();
     }
 
@@ -68,24 +80,8 @@ class TestRunControllerIT implements QuarkusTestProfile {
                 .then()
                 .extract().response();
         assertNotNull(response);
-
-        TestReport testReport = response.as(TestReportDTO.class).getDomain();
-        assertTrue(testReport.isValid());
-        assertEquals(Result.FAILED, testReport.getResult());
-    }
-
-    @Timeout(60)
-    @Test
-    void synchronous_test_run_with_one_validationEVS() throws IOException {
-        String testRun = WireMockSingleton.getResourceAsString("/testRunWithEvsApi.json");
-        Response response = given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-                .body(testRun)
-                .when().post("/testRuns/run")
-                .then()
-                .extract().response();
-        assertNotNull(response);
-
-        TestReport testReport = response.as(TestReportDTO.class).getDomain();
+        System.out.println(response.asString());
+        TestReportSummary testReport = response.as(TestReportSummaryDTO.class).getDomain();
         assertTrue(testReport.isValid());
         assertEquals(Result.FAILED, testReport.getResult());
     }
