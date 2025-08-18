@@ -98,7 +98,7 @@ public class DatahouseTestResource implements QuarkusTestResourceLifecycleManage
 
         int datahousePort = datahouseContainer.getMappedPort(8080);
         return Map.of(
-                "datahouse.url", "http://"+host+":" + datahousePort+"/datahouse/rest/v1",
+                "gzl.datahouse.url", "http://"+host+":" + datahousePort+"/datahouse/rest/v1",
                 "gzl.root.test.bed.url", "http://"+host+":" + datahousePort+"/"
         );
     }

@@ -33,13 +33,13 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
     private final String datahouseUrl;
 
     @Inject
-    public DatahouseTestReportRecordService(@ConfigProperty(name = "datahouse.url") String datahouseUrl) {
+    public DatahouseTestReportRecordService(@ConfigProperty(name = "gzl.datahouse.url") String datahouseUrl) {
         this.recordItemClient = new RecordItemClientProvider().createClient();
         this.datahouseUrl = datahouseUrl;
     }
 
     // Convenience constructor for tests to bypass config-backed client creation
-    DatahouseTestReportRecordService(RecordItemClient recordItemClient, @ConfigProperty(name = "datahouse.url") String datahouseUrl) {
+    DatahouseTestReportRecordService(RecordItemClient recordItemClient, @ConfigProperty(name = "gzl.datahouse.url") String datahouseUrl) {
         this.recordItemClient = recordItemClient;
         this.datahouseUrl = datahouseUrl;
     }
