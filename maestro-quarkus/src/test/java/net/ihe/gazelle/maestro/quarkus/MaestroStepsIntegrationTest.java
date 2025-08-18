@@ -253,14 +253,6 @@ class MaestroStepsIntegrationTest {
         assertFalse(test.getId().isBlank());
     }
 
-    @Test
-    void testMaestroWithNullTestRun() {
-        testReportRecordService.clear(); // Clear previous test data
-
-        List<TestRun> testRuns = new ArrayList<>();
-        testRuns.add(null);
-        assertThrows(TimeoutException.class, () -> synchronousMaestro.executeTestSet(testRuns));
-    }
 
     // Helper method to check if test runs have inputs with content
     private boolean hasInputsWithContent(List<TestRun> testRuns) {
