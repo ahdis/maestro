@@ -84,6 +84,6 @@ public class EventListener {
 
     public void onErrorTestRunEvent(@ObservesAsync ErrorTestRunEvent errorTestRunEvent) {
         Exception exception = errorTestRunEvent.getException();
-        LOG.error(exception.getMessage(), exception);
+        LOG.error("Exception caught at EventListener {}", exception.getMessage(), exception);
     }
 }

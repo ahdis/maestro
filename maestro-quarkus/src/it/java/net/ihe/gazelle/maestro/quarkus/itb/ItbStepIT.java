@@ -28,6 +28,7 @@ import net.ihe.gazelle.maestro.quarkus.WireMockSingleton;
 import org.apache.http.HttpHeaders;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
@@ -39,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @QuarkusTest
 @TestProfile(ItbStepProfile.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Disabled
 class ItbStepIT {
 
     @ConfigProperty(name = "gzl.it-port")

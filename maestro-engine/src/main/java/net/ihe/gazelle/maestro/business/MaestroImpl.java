@@ -16,6 +16,7 @@
 
 package net.ihe.gazelle.maestro.business;
 
+import net.ihe.gazelle.lang.UnexpectedError;
 import net.ihe.gazelle.maestro.api.business.testreport.*;
 import net.ihe.gazelle.maestro.api.business.testrun.*;
 import net.ihe.gazelle.maestro.api.business.testrun.context.Context;
@@ -94,12 +95,7 @@ public class MaestroImpl implements Maestro {
             TestReport testReport = new TestReportBuilder()
                     .addUnexpectedError(unexpectedError)
                     .build();
-            String reportId = testReportRecordService.recordTestReportWithReferences(testReport);
-            TestReportSummary testReportSummary = new TestReportSummaryBuilder()
-                    .setId(reportId)
-                    .addUnexpectedError(unexpectedError)
-                    .build();
-            maestroEventProducer.returnTestSetReport(testSetRun, testReportSummary);
+            recordAndReturnTestReport(testReport, testSetRun);
         }
         if (isValid) {
             sessionStoreContext.addTestSetContext(testSetId, testSetRun);
@@ -128,13 +124,13 @@ public class MaestroImpl implements Maestro {
             String sessionId = testRun.getTestSetId();
             sessionStoreContext.clearExecutionContext(sessionId);
             sessionStoreContext.clearTestSetContext(sessionId);
-            String reportId = testReportRecordService.recordTestReportWithReferences(testReport);
-            TestReportSummary reportSummary = new TestReportSummary(reportId, testReport.getDateTime(), testReport.getResult());
-            maestroEventProducer.returnTestSetReport(testSetRun, reportSummary);
+            recordAndReturnTestReport(testReport, testSetRun);
         } else {
             runNextTestRun(testRun, testSetRun);
         }
     }
+
+
 
     @Override
     public void finishStep(StepRun stepRun, StepRunReportBuilder stepRunReportBuilder) {
@@ -195,14 +191,24 @@ public class MaestroImpl implements Maestro {
             String sessionId = testRun.getTestSetId();
             sessionStoreContext.clearExecutionContext(sessionId);
             sessionStoreContext.clearTestSetContext(sessionId);
+            recordAndReturnTestReport(testReport, testSetRun);
+        }
+    }
+
+    private void recordAndReturnTestReport(TestReport testReport, TestSetRun testSetRun) {
+        try{
             String reportId = testReportRecordService.recordTestReportWithReferences(testReport);
-            TestReportSummary testReportSummary = new TestReportSummaryBuilder()
+            TestReportSummary reportSummary = new TestReportSummary()
                     .setId(reportId)
                     .setDateTime(testReport.getDateTime())
-                    .setResult(testReport.getResult())
-                    .addUnexpectedError(getUnexpectedErrorBuilder(e))
-                    .build();
-            maestroEventProducer.returnTestSetReport(testSetRun, testReportSummary);
+                    .setResult(testReport.getResult());
+            if (testReport.getUnexpectedErrors() != null) {
+                reportSummary.setUnexpectedErrors(testReport.getUnexpectedErrors());
+            }
+            maestroEventProducer.returnTestSetReport(testSetRun, reportSummary);
+        }
+        catch (Exception e) {
+            maestroEventProducer.emitErrorTestRunEvent(e);
         }
     }
 
@@ -342,15 +348,7 @@ public class MaestroImpl implements Maestro {
 
         TestSetSessionStore testSetSessionStore = sessionStoreContext.getTestSetContexts(testRun.getTestSetId());
         TestSetRun testSetRun = testSetSessionStore.getTestSetRun();
-        String reportId = testReportRecordService.recordTestReportWithReferences(testReport);
-        TestReportSummary testReportSummary = new TestReportSummaryBuilder()
-                .setId(reportId)
-                .setDateTime(testReport.getDateTime())
-                .setResult(testReport.getResult())
-                .addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e))
-                .build();
-
-        maestroEventProducer.returnTestSetReport(testSetRun, testReportSummary);
+        recordAndReturnTestReport(testReport, testSetRun);
     }
 
     private List<ItemBuilder> convertBinaryPropertiesToItems(List<Property<?>> properties) {

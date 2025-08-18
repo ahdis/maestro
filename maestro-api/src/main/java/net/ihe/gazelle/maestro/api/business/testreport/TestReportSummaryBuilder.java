@@ -16,6 +16,12 @@ public class TestReportSummaryBuilder extends AbstractBuilder<TestReportSummary>
     private Result result;
     private List<UnexpectedErrorBuilder> unexpectedErrors = new ArrayList<>();
 
+    public TestReportSummaryBuilder() {
+        super();
+    }
+
+
+
 
     public TestReportSummaryBuilder setId(String id) {
         this.id = id;

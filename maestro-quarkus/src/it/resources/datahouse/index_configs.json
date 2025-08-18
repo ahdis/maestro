@@ -1,0 +1,119 @@
+[
+  {
+    "name": "type",
+    "itemType": "ITEM",
+    "fieldType": "STRING",
+    "fullName": "type",
+    "value": "{\"type\": 1}"
+  },
+  {
+    "name": "message_protocol",
+    "itemType": "MESSAGE",
+    "fieldType": "STRING",
+    "fullName": "content.type",
+    "value": "{\"content.type\": 1, \"type\": 1, \"content.captureDate\": -1, \"accessControlListMongo.public\": 1,\"accessControlListMongo.entries.role\": 1,\"accessControlListMongo.entries.user\": 1}"
+  },
+  {
+    "name": "channel_type",
+    "itemType": "MESSAGE",
+    "fieldType": "STRING",
+    "fullName": "content.channelType",
+    "value": "{\"content.channelType\": 1, \"type\": 1, \"content.captureDate\": -1, \"accessControlListMongo.public\": 1,\"accessControlListMongo.entries.role\": 1,\"accessControlListMongo.entries.user\": 1}"
+  },
+  {
+    "name": "proxy_port",
+    "itemType": "MESSAGE",
+    "fieldType": "INTEGER",
+    "fullName": "content.proxyPort",
+    "value": "{\"content.proxyPort\": 1, \"type\": 1, \"content.captureDate\": -1, \"accessControlListMongo.public\": 1,\"accessControlListMongo.entries.role\": 1,\"accessControlListMongo.entries.user\": 1}"
+  },
+  {
+    "name": "sender_hostname",
+    "itemType": "MESSAGE",
+    "fieldType": "STRING",
+    "fullName": "content.sender.hostname",
+    "value": "{\"content.sender.hostname\": 1, \"content.channelType\": 1, \"type\": 1, \"content.captureDate\": -1, \"accessControlListMongo.public\": 1,\"accessControlListMongo.entries.role\": 1,\"accessControlListMongo.entries.user\": 1}"
+  },
+  {
+    "name": "sender_ip",
+    "itemType": "MESSAGE",
+    "fieldType": "STRING",
+    "fullName": "content.sender.ip",
+    "value": "{\"content.sender.ip\": 1, \"content.channelType\": 1, \"type\": 1, \"content.captureDate\": -1, \"accessControlListMongo.public\": 1,\"accessControlListMongo.entries.role\": 1,\"accessControlListMongo.entries.user\": 1}"
+  },
+  {
+    "name": "sender_port",
+    "itemType": "MESSAGE",
+    "fieldType": "INTEGER",
+    "fullName": "content.sender.port",
+    "value": "{\"content.sender.port\": 1, \"content.channelType\": 1, \"type\": 1, \"content.captureDate\": -1, \"accessControlListMongo.public\": 1,\"accessControlListMongo.entries.role\": 1,\"accessControlListMongo.entries.user\": 1}"
+  },
+  {
+    "name": "receiver_hostname",
+    "itemType": "MESSAGE",
+    "fieldType": "STRING",
+    "fullName": "content.receiver.hostname",
+    "value": "{\"content.receiver.hostname\": 1, \"content.channelType\": 1, \"type\": 1, \"content.captureDate\": -1, \"accessControlListMongo.public\": 1,\"accessControlListMongo.entries.role\": 1,\"accessControlListMongo.entries.user\": 1}"
+  },
+  {
+    "name": "receiver_ip",
+    "itemType": "MESSAGE",
+    "fieldType": "STRING",
+    "fullName": "content.receiver.ip",
+    "value": "{\"content.receiver.ip\": 1, \"content.channelType\": 1, \"type\": 1, \"content.captureDate\": -1, \"accessControlListMongo.public\": 1,\"accessControlListMongo.entries.role\": 1,\"accessControlListMongo.entries.user\": 1}"
+  },
+  {
+    "name": "date",
+    "itemType": "ITEM",
+    "fieldType": "DATE",
+    "fullName": "date",
+    "value": "{\"date\": -1}"
+  },
+  {
+    "name": "capture_date",
+    "itemType": "MESSAGE",
+    "fieldType": "DATE_STRING",
+    "fullName": "content.captureDate",
+    "value": "{\"content.captureDate\": -1, \"type\": 1}"
+  },
+  {
+    "value": "{\"content.captureDate\": 1, \"type\": 1}"
+  },
+
+  {
+    "name": "message_type",
+    "itemType": "MESSAGE",
+    "fieldType": "STRING",
+    "fullName": "content.additionalParameters.message_type",
+    "value": "{\"content.additionalParameters.message_type\": 1, \"type\": 1, \"content.captureDate\": -1,  \"accessControlListMongo.public\": 1,\"accessControlListMongo.entries.role\": 1,\"accessControlListMongo.entries.user\": 1}"
+  },
+  {
+    "name": "reference",
+    "itemType": "MESSAGE",
+    "fieldType": "STRING",
+    "fullName": "references.value",
+    "value": "{\"references.value\": 1, \"type\": 1, \"content.captureDate\": -1,  \"accessControlListMongo.public\": 1}"
+  },
+  {
+    "name": "secured_message",
+    "itemType": "MESSAGE",
+    "fieldType": "BOOLEAN",
+    "fullName": "content.secured",
+    "value": "{\"content.secured\": 1, \"content.channelType\": 1, \"type\": 1, \"content.captureDate\": -1,  \"accessControlListMongo.public\": 1,\"accessControlListMongo.entries.role\": 1,\"accessControlListMongo.entries.user\": 1}"
+  },
+  {
+    "value": "{\"content.channelType\": 1, \"content.proxyPort\": 1, \"type\": 1, \"content.captureDate\": -1}"
+  },
+  {
+    "value": "{\"content.channelType\": 1, \"content.proxyPort\": 1, \"type\": 1, \"content.captureDate\": -1}"
+  },
+  {
+    "value": "{type: 1,\"accessControlListMongo.public\": 1,\"accessControlListMongo.entries.user\": 1,\"accessControlListMongo.entries.role\": 1}"
+  },
+  {
+    "value": "{ type: 1, \"accessControlListMongo.public\": 1, \"content.captureDate\": -1 }"
+  },
+  {
+    "value": "{type: 1,\"accessControlListMongo.public\": 1,\"accessControlListMongo.entries.role\": 1,\"accessControlListMongo.entries.user\": 1,\"content.captureDate\": -1}"
+  }
+]

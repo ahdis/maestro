@@ -16,6 +16,7 @@
 
 package net.ihe.gazelle.maestro.quarkus;
 
+import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.QuarkusTestProfile;
 import io.quarkus.test.junit.TestProfile;
@@ -45,6 +46,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @QuarkusTest
 @TestProfile(TestRunControllerProfile.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+//@QuarkusTestResource(value = DatahouseTestResource.class, restrictToAnnotatedClass = true)
 class TestRunControllerIT implements QuarkusTestProfile {
 
     @ConfigProperty(name = "gzl.it-port")
@@ -57,6 +59,8 @@ class TestRunControllerIT implements QuarkusTestProfile {
         WireMockSingleton.mockServiceRegistry();
         WireMockSingleton.mockGetProfiles();
         WireMockSingleton.mockValidate();
+        WireMockSingleton.mockKeycloak();
+        WireMockSingleton.mockDatahouse();
     }
 
     @AfterAll
@@ -73,7 +77,7 @@ class TestRunControllerIT implements QuarkusTestProfile {
                 .then()
                 .extract().response();
         assertNotNull(response);
-
+        System.out.println(response.asString());
         TestReportSummary testReport = response.as(TestReportSummaryDTO.class).getDomain();
         assertTrue(testReport.isValid());
         assertEquals(Result.FAILED, testReport.getResult());

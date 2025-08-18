@@ -2,6 +2,7 @@ package net.ihe.gazelle.maestro.quarkus.record.entity;
 
 import net.ihe.gazelle.lang.UnexpectedError;
 import net.ihe.gazelle.maestro.api.business.testreport.*;
+import net.ihe.gazelle.maestro.api.technical.dto.report.*;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -9,16 +10,16 @@ import java.util.List;
 
 public class TestReportEntity {
 
-    private final TestReport testReport;
+    private final TestReportDTO testReport;
 
     private List<TestReportReference> subReportsReferences = new ArrayList<>();
 
     public TestReportEntity() {
-        this.testReport = new TestReport();
+        this.testReport = new TestReportDTO();
     }
 
     public TestReportEntity(TestReport testReport) {
-        this.testReport = new TestReport(testReport);
+        this.testReport = new TestReportDTO(testReport);
     }
 
 
@@ -49,7 +50,7 @@ public class TestReportEntity {
         return this;
     }
 
-    public TestService getTestService() {
+    public TestServiceDTO getTestService() {
         return testReport.getTestService();
     }
 
@@ -58,30 +59,30 @@ public class TestReportEntity {
         return this;
     }
 
-    public List<SystemUnderTest> getSystemsUnderTest() {
+    public List<SystemUnderTestDTO> getSystemsUnderTest() {
         return new ArrayList<>(testReport.getSystemsUnderTest());
     }
 
-    public TestReportEntity setSystemsUnderTest(List<SystemUnderTest> systemsUnderTest) {
+    public TestReportEntity setSystemsUnderTest(List<SystemUnderTestDTO> systemsUnderTest) {
         this.testReport.setSystemsUnderTest(new ArrayList<>(systemsUnderTest));
         return this;
     }
 
-    public TestReportEntity addSystemUnderTest(SystemUnderTest systemUnderTest) {
+    public TestReportEntity addSystemUnderTest(SystemUnderTestDTO systemUnderTest) {
         this.testReport.getSystemsUnderTest().add(systemUnderTest);
         return this;
     }
 
-    public TestReportEntity addSystemsUnderTest(List<SystemUnderTest> systemsUnderTest) {
+    public TestReportEntity addSystemsUnderTest(List<SystemUnderTestDTO> systemsUnderTest) {
         this.testReport.getSystemsUnderTest().addAll(systemsUnderTest);
         return this;
     }
 
-    public Result getResult() {
+    public String getResult() {
         return testReport.getResult();
     }
 
-    public TestReportEntity setResult(Result result) {
+    public TestReportEntity setResult(String result) {
         this.testReport.setResult(result);
         return this;
     }
@@ -95,11 +96,11 @@ public class TestReportEntity {
         return this;
     }
 
-    public TestCounters getTestCounters() {
+    public TestCountersDTO getTestCounters() {
         return testReport.getTestCounters();
     }
 
-    public TestReportEntity setTestCounters(TestCounters testCounters) {
+    public TestReportEntity setTestCounters(TestCountersDTO testCounters) {
         this.testReport.setTestCounters(testCounters);
         return this;
     }
@@ -132,20 +133,20 @@ public class TestReportEntity {
     }
 
 
-    public List<TestRunReport> getTestRunReports() {
+    public List<TestRunReportDTO> getTestRunReports() {
         return new ArrayList<>(testReport.getTestRunReports());
     }
 
-    public TestReportEntity setTestRunReports(List<TestRunReport> testRunReports) {
+    public TestReportEntity setTestRunReports(List<TestRunReportDTO> testRunReports) {
         this.testReport.setTestRunReports(new ArrayList<>(testRunReports));
         return this;
     }
 
-    public List<UnexpectedError> getUnexpectedErrors() {
+    public List<UnexpectedErrorDTO> getUnexpectedErrors() {
         return new ArrayList<>(testReport.getUnexpectedErrors());
     }
 
-    public TestReportEntity setUnexpectedErrors(List<UnexpectedError> unexpectedErrors) {
+    public TestReportEntity setUnexpectedErrors(List<UnexpectedErrorDTO> unexpectedErrors) {
         this.testReport.setUnexpectedErrors(new ArrayList<>(unexpectedErrors));
         return this;
     }

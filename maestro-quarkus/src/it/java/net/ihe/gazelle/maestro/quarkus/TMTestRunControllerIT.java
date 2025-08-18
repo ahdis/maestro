@@ -34,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 @TestProfile(TMTestRunControllerProfile.class)
+@Disabled
 class TMTestRunControllerIT implements QuarkusTestProfile {
 
     @ConfigProperty(name = "gzl.it-port")

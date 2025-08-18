@@ -122,7 +122,7 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
             int idx = inputIndexes.get(k);
             String attachmentId = ids.get(k);
             Item input = inputs.get(idx);
-            input.setReference(constructUrlToAttachment(attachmentId));
+            input.setReference(constructPathToAttachment(attachmentId));
             input.setContent(null);
             attachmentRefs.add(new Reference()
                     .setType(input.getName())
@@ -233,7 +233,10 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
                 ? new String(maestroItem.getContent(), StandardCharsets.UTF_8)
                 : "";
         return new com.kereval.gazelle.datahouse.api.business.record.Item()
-                .setAccessControlList(new AccessControlList().setOwners(Set.of("gazelle"))) //todo: set real ACL
+                .setAccessControlList(new AccessControlList()
+                        .setOwners(Set.of("gazelle"))
+                        .setPublic(true)
+                ) //todo: set real ACL
                 .setType(maestroItem.getName())
                 .setContent(content);
     }
@@ -248,8 +251,12 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
         return datahouseUrl + "/items/" + itemId;
     }
 
-    private String constructUrlToAttachment(String attachmentId) {
-        return datahouseUrl + "/attachments/" + attachmentId;
+    /**
+     * This is just a path as we cannot construct a full URL here, because the Item ID is not known
+     * until the full TestReport is recorded.
+     */
+    private String constructPathToAttachment(String attachmentId) {
+        return "/attachments/" + attachmentId;
     }
 
 }
