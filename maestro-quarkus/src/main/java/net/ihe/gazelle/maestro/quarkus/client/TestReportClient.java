@@ -41,7 +41,7 @@ public class TestReportClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(TestReportClient.class);
 
-    @ConfigProperty(name = "gzl.datahouse.url")
+    @ConfigProperty(name = "datahouse.url")
     String dataHouseUrl;
 
     public void sendTestReport(String callBackAuthorization, String callBackUrl, TestReportSummary testReportSummary) {

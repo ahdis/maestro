@@ -33,13 +33,13 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
     private final String datahouseUrl;
 
     @Inject
-    public DatahouseTestReportRecordService(@ConfigProperty(name = "gzl.datahouse.url") String datahouseUrl) {
+    public DatahouseTestReportRecordService(@ConfigProperty(name = "datahouse.url") String datahouseUrl) {
         this.recordItemClient = new RecordItemClientProvider().createClient();
         this.datahouseUrl = datahouseUrl;
     }
 
     // Convenience constructor for tests to bypass config-backed client creation
-    DatahouseTestReportRecordService(RecordItemClient recordItemClient, @ConfigProperty(name = "gzl.datahouse.url") String datahouseUrl) {
+    DatahouseTestReportRecordService(RecordItemClient recordItemClient, @ConfigProperty(name = "datahouse.url") String datahouseUrl) {
         this.recordItemClient = recordItemClient;
         this.datahouseUrl = datahouseUrl;
     }
@@ -125,7 +125,7 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
             input.setReference(constructPathToAttachment(attachmentId));
             input.setContent(null);
             attachmentRefs.add(new Reference()
-                    .setType(input.getName())
+                    .setName(input.getName())
                     .setValue(attachmentId)
                     .setRefType(RefType.ATTACHMENT)
             );
@@ -167,7 +167,7 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
             if (testReportReferences != null) {
                 for (TestReportReference ref : testReportReferences) {
                     references.add(new Reference()
-                            .setType(ref.getTestSuiteName())
+                            .setName(ref.getTestSuiteName())
                             .setValue(ref.getTestReportId())
                             .setRefType(RefType.ITEM_ID)
                     );
@@ -220,7 +220,7 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
             item.setReference(constructUrlToDatahouse(itemId));
             item.setContent(null); // Clear content after recording to avoid duplication
             references.add(new Reference()
-                    .setType(item.getName())
+                    .setName(item.getName())
                     .setValue(itemId)
                     .setRefType(RefType.ITEM_ID)
             );

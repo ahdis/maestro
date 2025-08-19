@@ -47,7 +47,7 @@ public class TestRunControllerImpl implements TestRunController {
     private final SynchronousMaestro synchronousMaestro;
     private final AsynchronousMaestro asynchronousMaestro;
 
-    @ConfigProperty(name = "gzl.datahouse.url")
+    @ConfigProperty(name = "datahouse.url")
     String dataHouseUrl;
 
     @Inject
