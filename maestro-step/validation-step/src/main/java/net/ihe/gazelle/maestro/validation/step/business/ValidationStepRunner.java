@@ -44,6 +44,7 @@ import java.util.concurrent.CompletableFuture;
  */
 public class ValidationStepRunner implements StepRunner {
 
+    public static final String VALIDATION_REPORT = "VALIDATION_REPORT";
     private final ReportSerialization serializer;
     private final Handler handler;
     private final EvsValidationMapper evsValidationMapper = new EvsValidationMapper();
@@ -71,7 +72,7 @@ public class ValidationStepRunner implements StepRunner {
 
         ItemBuilder itemBuilder = new ItemBuilder()
                 .setContent(serializer.toByteArray(validationReport))
-                .setName("validationReport");
+                .setName(VALIDATION_REPORT);
         StepRunReportBuilder stepRunReportBuilder = new StepRunReportBuilder()
                 .setOutputs(List.of(itemBuilder))
                 .setStepId(stepRun.step().getName())
