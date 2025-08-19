@@ -24,10 +24,10 @@ import java.util.List;
 public class TestSetValidator {
 
     public void validate(TestSetRun testSetRun) throws IllegalArgumentException{
-        List<TestRun> testRuns = testSetRun.testRuns();
+        List<TestRun> testRuns = testSetRun.getTestRuns();
         for (TestRun testRun : testRuns) {
             if(testRun == null) {
-                throw new IllegalArgumentException("TestSet " + testSetRun.testSetId() + " contains at least one null testRun");
+                throw new IllegalArgumentException("TestSet " + testSetRun.getTestSetId() + " contains at least one null testRun");
             }
         }
     }

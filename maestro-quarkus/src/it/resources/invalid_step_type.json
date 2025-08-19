@@ -1,39 +1,50 @@
-[
-  {
-    "testSetId": "testSet1",
-    "test": {
-      "id": "1",
-      "name": "name1",
-      "steps": [
+{
+  "testSuiteName": "Invalid Step Type Test Suite",
+  "accessControlList": {
+  "owners": [
+    "gazelle"
+  ],
+  "public": true,
+  "isPublic": true
+  },
+  "testRuns": [
+    {
+      "testSetId": "testSet1",
+      "test": {
+        "id": "1",
+        "name": "name1",
+        "steps": [
+          {
+            "type": "INVALID",
+            "name": "step1",
+            "properties": [
+              {
+                "name": "validationService",
+                "value": "matchbox",
+                "type": "string"
+              },
+              {
+                "name": "validationProfile",
+                "value": "parameters",
+                "type": "string"
+              },
+              {
+                "name": "contentToValidate",
+                "value": "${inputFile1}",
+                "type": "byteArray"
+              }
+            ]
+          }
+        ]
+      },
+      "inputs": [
         {
-          "type": "INVALID",
-          "name": "step1",
-          "properties": [
-            {
-              "name": "validationService",
-              "value": "matchbox",
-              "type": "string"
-            },
-            {
-              "name": "validationProfile",
-              "value": "parameters",
-              "type": "string"
-            },
-            {
-              "name": "contentToValidate",
-              "value": "${inputFile1}",
-              "type": "byteArray"
-            }
-          ]
+          "name": "inputFile1",
+          "value": "ihfeorhqifrghqpervgh",
+          "type": "byteArray"
         }
       ]
-    },
-    "inputs": [
-      {
-        "name": "inputFile1",
-        "value": "ihfeorhqifrghqpervgh",
-        "type": "byteArray"
-      }
-    ]
-  }
-]
+    }
+  ]
+
+}

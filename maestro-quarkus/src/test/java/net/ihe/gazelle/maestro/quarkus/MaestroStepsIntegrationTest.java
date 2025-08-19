@@ -21,10 +21,7 @@ import net.ihe.gazelle.maestro.api.business.testreport.Result;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
-import net.ihe.gazelle.maestro.api.business.testrun.Property;
-import net.ihe.gazelle.maestro.api.business.testrun.PropertyRef;
-import net.ihe.gazelle.maestro.api.business.testrun.Step;
-import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
+import net.ihe.gazelle.maestro.api.business.testrun.*;
 import net.ihe.gazelle.maestro.assertion.step.business.AssertionStep;
 import net.ihe.gazelle.maestro.business.MaestroImpl;
 import net.ihe.gazelle.maestro.quarkus.mock.InMemoryTestReportRecordService;
@@ -40,11 +37,13 @@ import net.ihe.gazelle.maestro.quarkus.ws.async.AsynchronousMaestro;
 import net.ihe.gazelle.maestro.quarkus.ws.async.tmintegration.TMTestRunMaestro;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationStep;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
+import net.ihe.gazelle.security.business.acl.AccessControlList;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -89,8 +88,8 @@ class MaestroStepsIntegrationTest {
     void testMaestroValidationStep() throws ExecutionException, InterruptedException, TimeoutException {
         testReportRecordService.clear(); // Clear previous test data
 
-        List<TestRun> testRuns = getTestRunsWithOneValidationStep();
-        TestReportSummary reportSummary = synchronousMaestro.executeTestSet(testRuns);
+        TestSetRun testSetRun = getTestRunsWithOneValidationStep();
+        TestReportSummary reportSummary = synchronousMaestro.executeTestSet(testSetRun);
 
         // Verify the summary contains basic information
         assertNotNull(reportSummary);
@@ -112,7 +111,7 @@ class MaestroStepsIntegrationTest {
         assertEquals(1, fullReport.getTestCounters().getUndefined());
 
         // Verify that inputs with content were stored as attachments
-        if (hasInputsWithContent(testRuns)) {
+        if (hasInputsWithContent(testSetRun.getTestRuns())) {
             assertTrue(testReportRecordService.getStoredAttachmentsCount() > 0, "Input attachments should be stored");
         }
     }
@@ -121,8 +120,8 @@ class MaestroStepsIntegrationTest {
     void testMaestroSimulationStep() throws ExecutionException, InterruptedException, TimeoutException {
         testReportRecordService.clear(); // Clear previous test data
 
-        List<TestRun> testRuns = getTestRunsWithOneSimulationStep();
-        TestReportSummary reportSummary = synchronousMaestro.executeTestSet(testRuns);
+        TestSetRun testSetRun = getTestRunsWithOneSimulationStep();
+        TestReportSummary reportSummary = synchronousMaestro.executeTestSet(testSetRun);
 
         // Verify the summary
         assertNotNull(reportSummary);
@@ -155,8 +154,8 @@ class MaestroStepsIntegrationTest {
     void testMaestroValidationAndAssertionStep() throws ExecutionException, InterruptedException, TimeoutException {
         testReportRecordService.clear(); // Clear previous test data
 
-        List<TestRun> testRuns = getTestRunsWithValidationStepAndAssertionStepWithReference();
-        TestReportSummary reportSummary = synchronousMaestro.executeTestSet(testRuns);
+        TestSetRun testSetRun = getTestRunsWithValidationStepAndAssertionStepWithReference();
+        TestReportSummary reportSummary = synchronousMaestro.executeTestSet(testSetRun);
 
         // Verify the summary
         assertNotNull(reportSummary);
@@ -183,16 +182,16 @@ class MaestroStepsIntegrationTest {
     void testMaestroWithSeveralStepOnSameTestRun() throws ExecutionException, InterruptedException, TimeoutException {
         testReportRecordService.clear(); // Clear previous test data
 
-        List<TestRun> testRuns = getTestRunsWithOneValidationStep();
+        TestSetRun testSetRun = getTestRunsWithOneValidationStep();
         Property<byte[]> contentToValidate = new Property<>(ValidationStep.CONTENT_TO_VALIDATE, "liyvfgljv".getBytes());
         Step validationStep = new ValidationStep("test-validation-two",
                 new Property<>(ValidationStep.VALIDATION_SERVICE, "matchbox"),
                 new Property<>(ValidationStep.VALIDATION_PROFILE, "Parameters"),
                 contentToValidate
         );
-        testRuns.getFirst().getTest().addStep(validationStep);
-        testRuns.getFirst().addInputs(contentToValidate);
-        TestReportSummary reportSummary = synchronousMaestro.executeTestSet(testRuns);
+        testSetRun.getTestRuns().getFirst().getTest().addStep(validationStep);
+        testSetRun.getTestRuns().getFirst().addInputs(contentToValidate);
+        TestReportSummary reportSummary = synchronousMaestro.executeTestSet(testSetRun);
 
         // Verify the summary
         assertNotNull(reportSummary);
@@ -220,14 +219,14 @@ class MaestroStepsIntegrationTest {
     void testMaestroWithInvalidTwoSameStepTestRun() throws ExecutionException, InterruptedException, TimeoutException {
         testReportRecordService.clear(); // Clear previous test data
 
-        List<TestRun> testRuns = getTestRunsWithOneValidationStep();
+        TestSetRun testSetRun = getTestRunsWithOneValidationStep();
         Step validationStep = new ValidationStep("test-validation",
                 new Property<>(ValidationStep.VALIDATION_SERVICE, "matchbox"),
                 new Property<>(ValidationStep.VALIDATION_PROFILE, "Parameters"),
                 new Property<>(ValidationStep.CONTENT_TO_VALIDATE, "liyvfgljv".getBytes())
         );
-        testRuns.getFirst().getTest().addStep(validationStep);
-        TestReportSummary reportSummary = synchronousMaestro.executeTestSet(testRuns);
+        testSetRun.getTestRuns().getFirst().getTest().addStep(validationStep);
+        TestReportSummary reportSummary = synchronousMaestro.executeTestSet(testSetRun);
 
         // Verify the summary
         assertNotNull(reportSummary);
@@ -262,7 +261,7 @@ class MaestroStepsIntegrationTest {
                 .anyMatch(ValidationStep.class::isInstance);
     }
 
-    private static List<TestRun> getTestRunsWithOneValidationStep() {
+    private static TestSetRun getTestRunsWithOneValidationStep() {
         List<TestRun> testRuns = new ArrayList<>();
         Property<byte[]> contentToValidate = new Property<>(ValidationStep.CONTENT_TO_VALIDATE, "liyvfgljv".getBytes());
         Step validationStep = new ValidationStep("test-validation",
@@ -277,10 +276,13 @@ class MaestroStepsIntegrationTest {
         testRun.setTest(test);
         testRun.addInputs(contentToValidate);
         testRuns.add(testRun);
-        return testRuns;
+        return new TestSetRun()
+                .setTestRuns(testRuns)
+                .setAccessControlList(new AccessControlList().setOwners(Set.of("gazelle")))
+                ;
     }
 
-    private static List<TestRun> getTestRunsWithOneSimulationStep() {
+    private static TestSetRun getTestRunsWithOneSimulationStep() {
         List<TestRun> testRuns = new ArrayList<>();
         Step simulationStep = new SimulationStep("simulationStep",
                 new Property<>(SimulationStep.SIMULATION_SERVICE, "MCSD"),
@@ -297,10 +299,13 @@ class MaestroStepsIntegrationTest {
         TestRun testRun = new TestRun();
         testRun.setTest(test);
         testRuns.add(testRun);
-        return testRuns;
+        return new TestSetRun()
+                .setTestRuns(testRuns)
+                .setAccessControlList(new AccessControlList().setOwners(Set.of("gazelle")))
+                ;
     }
 
-    private static List<TestRun> getTestRunsWithValidationStepAndAssertionStepWithReference() {
+    private static TestSetRun getTestRunsWithValidationStepAndAssertionStepWithReference() {
         Step assertionStep = new AssertionStep("test-assertion",
                 new PropertyRef<>(AssertionStep.ASSERTION, "assertion", byte[].class),
                 new Property<>(AssertionStep.ASSERTION_SERVICE, "toto")
@@ -310,8 +315,8 @@ class MaestroStepsIntegrationTest {
         test.setId(UUID.randomUUID().toString());
         TestRun testRun = new TestRun();
         testRun.setTest(test);
-        List<TestRun> result = getTestRunsWithOneValidationStep();
-        result.add(testRun);
+        TestSetRun result = getTestRunsWithOneValidationStep();
+        result.getTestRuns().add(testRun);
         return result;
     }
 

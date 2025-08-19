@@ -26,7 +26,7 @@
     </parent>
 
     <artifactId>maestro</artifactId>
-    <version>0.2.0-DGSANTEBP-49-SNAPSHOT</version>
+    <version>0.2.0-GZL-9850-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
         <module>maestro-api</module>
@@ -98,6 +98,7 @@
             **/gazelle/maestro/technical/ws/async/tmintegration/**
         </sonar.coverage.exclusions>
         <datahouse.version>3.0.1-GZL-9816-SNAPSHOT</datahouse.version>
+        <security.version>3.2.0</security.version>
     </properties>
 
     <dependencyManagement>
@@ -106,43 +107,43 @@
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-api</artifactId>
-                <version>0.2.0-DGSANTEBP-49-SNAPSHOT</version>
+                <version>0.2.0-GZL-9850-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-engine</artifactId>
-                <version>0.2.0-DGSANTEBP-49-SNAPSHOT</version>
+                <version>0.2.0-GZL-9850-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>validation-step</artifactId>
-                <version>0.2.0-DGSANTEBP-49-SNAPSHOT</version>
+                <version>0.2.0-GZL-9850-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>simulation-step</artifactId>
-                <version>0.2.0-DGSANTEBP-49-SNAPSHOT</version>
+                <version>0.2.0-GZL-9850-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>user-interaction-step</artifactId>
-                <version>0.2.0-DGSANTEBP-49-SNAPSHOT</version>
+                <version>0.2.0-GZL-9850-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>assertion-step</artifactId>
-                <version>0.2.0-DGSANTEBP-49-SNAPSHOT</version>
+                <version>0.2.0-GZL-9850-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>itb-step</artifactId>
-                <version>0.2.0-DGSANTEBP-49-SNAPSHOT</version>
+                <version>0.2.0-GZL-9850-SNAPSHOT</version>
             </dependency>
             <!-- to be removed when maestro-websocket has it own tests -->
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-websocket</artifactId>
-                <version>0.2.0-DGSANTEBP-49-SNAPSHOT</version>
+                <version>0.2.0-GZL-9850-SNAPSHOT</version>
             </dependency>
 
             <!-- Stack BOM -->
@@ -197,6 +198,11 @@
                 <groupId>com.kereval.gazelle</groupId>
                 <artifactId>datahouse-microprofile-rest-client</artifactId>
                 <version>${datahouse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.ihe.gazelle</groupId>
+                <artifactId>security</artifactId>
+                <version>${security.version}</version>
             </dependency>
 
 
@@ -459,7 +465,7 @@
                     <dependency>
                         <groupId>net.ihe.gazelle</groupId>
                         <artifactId>mlang-converter</artifactId>
-                        <version>0.2.0-DGSANTEBP-49-SNAPSHOT</version>
+                        <version>0.2.0-GZL-9850-SNAPSHOT</version>
                     </dependency>
                 </dependencies>
             </dependencyManagement>

@@ -20,7 +20,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
-import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestRunDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSetRunDTO;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
@@ -29,8 +29,6 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-
-import java.util.List;
 
 @Path("/testRuns")
 public interface TestRunController {
@@ -50,7 +48,7 @@ public interface TestRunController {
      *     <li><b>Timeout exception</b> : 504 + message explaining why timeout occurred</li>
      * </p>
      * @param callback The callback URI to send back the Test report for asynchronous run
-     * @param testRuns A list of TestRun
+     * @param testSetRun A list of TestRun
      * @return A response with a status code and a body containing TestReport or an exception
      */
     @POST
@@ -102,10 +100,10 @@ public interface TestRunController {
                     required = true,
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON,
-                            schema = @Schema(implementation = TestRunDTO[].class),
+                            schema = @Schema(implementation = TestSetRunDTO.class),
                             example = TEST_RUN
                     )
-            ) List<TestRunDTO> testRuns
+            ) TestSetRunDTO testSetRun
     );
 
     String TEST_RUN = """

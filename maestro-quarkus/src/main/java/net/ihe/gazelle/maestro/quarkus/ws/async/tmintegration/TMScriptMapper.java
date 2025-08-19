@@ -22,13 +22,12 @@ import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.api.business.testrun.Step;
 import net.ihe.gazelle.maestro.api.business.testrun.Test;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
+import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
 import net.ihe.gazelle.maestro.business.MissingArgumentException;
 import net.ihe.gazelle.maestro.quarkus.ws.async.TestRunStore;
+import net.ihe.gazelle.security.business.acl.AccessControlList;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This class is temporary, used for converting TM script to maestro script
@@ -40,25 +39,60 @@ public class TMScriptMapper {
         // Private constructor to prevent instantiation
     }
 
-    public static List<TestRun> convertToTestRun(JsonNode jsonNode, TestRunStore testRunDAO) {
-        ArrayNode testRunNodes = (ArrayNode) jsonNode;
-        List<TestRun> testRuns = new ArrayList<>();
-        for (JsonNode testRunNode : testRunNodes) {
-            try {
-                testRunDAO.setClientCallback(testRunNode.get("clientCallback").asText());
-                testRunDAO.setCallbackAuthorization(testRunNode.get("callbackAuthorization").asText());
-                TestRun testRun = new TestRun();
-                JsonNode testNode = testRunNode.get("test");
-                parseTest(testNode, testRun);
-                ArrayNode inputNodes = (ArrayNode) testRunNode.get("inputs");
-                parseInputs(inputNodes, testRun);
-                testRun.setTestSetId(testRun.getTest().getName());
-                testRuns.add(testRun);
-            } catch (NullPointerException e) {
-                throw new MissingArgumentException("Argument inputs is missing in testRun");
+    /**
+     * New method that returns a TestSetRun for the updated JSON structure
+     * Expected JSON structure:
+     * {
+     *   "testSuiteName": "...",
+     *   "accessControlList": { ... },
+     *   "testRuns": [ ... ]
+     * }
+     */
+    public static TestSetRun convertToTestSetRun(JsonNode jsonNode, TestRunStore testRunDAO) {
+        try {
+            // Extract root level properties
+            String testSuiteName = jsonNode.get("testSuiteName").asText();
+            JsonNode accessControlListNode = jsonNode.get("accessControlList");
+            ArrayNode testRunNodes = (ArrayNode) jsonNode.get("testRuns");
+
+            // Create TestSetRun instance
+            TestSetRun testSetRun = new TestSetRun();
+            testSetRun.setTestSuiteName(testSuiteName);
+
+            // Parse access control list if present
+            if (accessControlListNode != null && !accessControlListNode.isNull()) {
+                AccessControlList acl = parseAccessControlList(accessControlListNode);
+                testSetRun.setAccessControlList(acl);
             }
+
+            // Parse test runs
+            List<TestRun> testRuns = new ArrayList<>();
+            for (JsonNode testRunNode : testRunNodes) {
+                parseTestRunNode(testRunDAO, testRunNode, testSetRun, testRuns);
+            }
+
+            testSetRun.setTestRuns(testRuns);
+            return testSetRun;
+
+        } catch (NullPointerException e) {
+            throw new MissingArgumentException("Required root properties (testSuiteName, testRuns) are missing");
         }
-        return testRuns;
+    }
+
+    private static void parseTestRunNode(TestRunStore testRunDAO, JsonNode testRunNode, TestSetRun testSetRun, List<TestRun> testRuns) {
+        try {
+            testRunDAO.setClientCallback(testRunNode.get("clientCallback").asText());
+            testRunDAO.setCallbackAuthorization(testRunNode.get("callbackAuthorization").asText());
+            TestRun testRun = new TestRun();
+            JsonNode testNode = testRunNode.get("test");
+            parseTest(testNode, testRun);
+            ArrayNode inputNodes = (ArrayNode) testRunNode.get("inputs");
+            parseInputs(inputNodes, testRun);
+            testRun.setTestSetId(testSetRun.getTestSetId());
+            testRuns.add(testRun);
+        } catch (NullPointerException e) {
+            throw new MissingArgumentException("Argument inputs is missing in testRun");
+        }
     }
 
     private static void parseTest(JsonNode testNode, TestRun testRun) {
@@ -122,4 +156,56 @@ public class TMScriptMapper {
             }
         }
     }
+
+    private static AccessControlList parseAccessControlList(JsonNode aclNode) {
+        AccessControlList acl = new AccessControlList();
+        try {
+            // Parse owners
+            JsonNode ownersNode = aclNode.get("owners");
+            if (ownersNode != null && ownersNode.isArray()) {
+                Set<String> owners = new HashSet<>();
+                for (JsonNode ownerNode : ownersNode) {
+                    owners.add(ownerNode.asText());
+                }
+                acl.setOwners(owners);
+            }
+
+            // Parse readers
+            JsonNode readersNode = aclNode.get("readers");
+            if (readersNode != null && readersNode.isArray()) {
+                Set<String> readers = new HashSet<>();
+                for (JsonNode readerNode : readersNode) {
+                    readers.add(readerNode.asText());
+                }
+                acl.setReaders(readers);
+            }
+
+            // Parse editors
+            JsonNode editorsNode = aclNode.get("editors");
+            if (editorsNode != null && editorsNode.isArray()) {
+                Set<String> editors = new HashSet<>();
+                for (JsonNode editorNode : editorsNode) {
+                    editors.add(editorNode.asText());
+                }
+                acl.setEditors(editors);
+            }
+
+            // Parse isPublic
+            JsonNode isPublicNode = aclNode.get("isPublic");
+            if (isPublicNode != null) {
+                acl.setPublic(isPublicNode.asBoolean());
+            }
+
+            // Parse readAccessKey
+            JsonNode readAccessKeyNode = aclNode.get("readAccessKey");
+            if (readAccessKeyNode != null && !readAccessKeyNode.isNull()) {
+                acl.setReadAccessKey(readAccessKeyNode.asText());
+            }
+
+        } catch (Exception e) {
+            throw new MissingArgumentException("Error parsing AccessControlList: " + e.getMessage());
+        }
+        return acl;
+    }
+
 }

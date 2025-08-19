@@ -19,6 +19,7 @@ package net.ihe.gazelle.maestro.api.business.testreport;
 import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory;
 import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractBuilder;
 import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
+import net.ihe.gazelle.maestro.api.business.acl.AccessControlListBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.validator.TestReportValidator;
 
 import java.util.ArrayList;
@@ -39,6 +40,7 @@ public class TestReportBuilder extends AbstractBuilder<TestReport> {
     private List<TestReportBuilder> subReports;
     private List<TestRunReportBuilder> testRunReports;
     private List<UnexpectedErrorBuilder> unexpectedErrors;
+    private AccessControlListBuilder accessControlListBuilder;
 
     public TestReportBuilder() {
         super();
@@ -135,6 +137,11 @@ public class TestReportBuilder extends AbstractBuilder<TestReport> {
         return this;
     }
 
+    public TestReportBuilder setAccessControlList(AccessControlListBuilder accessControlListBuilder){
+        this.accessControlListBuilder = accessControlListBuilder;
+        return this;
+    }
+
     @Override
     protected AbstractValidator<TestReport> instantiateValidator(ValidatorBuilderFactory validatorBuilderFactory) {
         return new TestReportValidator(validatorBuilderFactory);
@@ -174,7 +181,9 @@ public class TestReportBuilder extends AbstractBuilder<TestReport> {
                         !unexpectedErrors.isEmpty() ? unexpectedErrors.stream()
                                 .map(AbstractBuilder::staticBuildWithoutValidation)
                                 .toList() : new ArrayList<>()
-                );
+                )
+                .setAccessControlList(AbstractBuilder.staticBuildWithoutValidation(accessControlListBuilder))
+        ;
         testReport.computeResult();
         testReport.computeCounters();
     }

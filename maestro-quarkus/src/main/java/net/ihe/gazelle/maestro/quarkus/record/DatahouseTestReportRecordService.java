@@ -22,7 +22,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @RequestScoped
 public class DatahouseTestReportRecordService implements TestReportRecordService {
@@ -57,7 +56,7 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
         List<Reference> attachmentRefs = createAttachmentsFromTestRunInputs(report.getTestRunReports());
 
         // 2) Record step outputs and collect their item references (persist once)
-        List<Reference> outputItemRefs = recordTestStepOutputs(report.getTestRunReports());
+        List<Reference> outputItemRefs = recordTestStepOutputs(report.getTestRunReports(), report.getAccessControlList());
 
         // 3) Persist sub-reports and collect their references
         List<TestReportReference> subReportRefs = recordSubReports(report);
@@ -137,14 +136,14 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
     private record UploadPlan(List<Attachment> toUpload, List<Integer> inputIndexes) {
     }
 
-    private List<Reference> recordTestStepOutputs(List<TestRunReport> testRunReports) {
+    private List<Reference> recordTestStepOutputs(List<TestRunReport> testRunReports, AccessControlList acl) {
         List<Reference> outputRefs = new ArrayList<>();
         if (testRunReports == null) return outputRefs;
         for (TestRunReport testRunReport : testRunReports) {
             if (testRunReport.getStepRunReports() == null) continue;
             for (StepRunReport stepRunReport : testRunReport.getStepRunReports()) {
                 List<Item> outputs = stepRunReport.getOutputs();
-                outputRefs.addAll(recordMaestroItems(outputs));
+                outputRefs.addAll(recordMaestroItems(outputs, acl));
             }
         }
         return outputRefs;
@@ -183,11 +182,7 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
 
             com.kereval.gazelle.datahouse.api.business.record.Item item =
                     new com.kereval.gazelle.datahouse.api.business.record.Item()
-                            .setAccessControlList(
-                                    new AccessControlList()
-                                            .setOwners(Set.of("gazelle"))
-                                            .setPublic(true)
-                            )
+                            .setAccessControlList(testReport.getAccessControlList())
                             .setType(TEST_REPORT_TYPE)
                             .setContent(jsonContent)
                             .setReferences(references);
@@ -213,12 +208,12 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
         return subRefs;
     }
 
-    private List<Reference> recordMaestroItems(List<Item> items) {
+    private List<Reference> recordMaestroItems(List<Item> items, AccessControlList acl) {
         List<Reference> references = new ArrayList<>();
         if (items == null || items.isEmpty()) return references;
         for (Item item : items) {
             if (item == null) continue;
-            com.kereval.gazelle.datahouse.api.business.record.Item datahouseItem = convertMaestroItemToDatahouseItem(item);
+            com.kereval.gazelle.datahouse.api.business.record.Item datahouseItem = convertMaestroItemToDatahouseItem(item, acl);
             String itemId = recordItemClient.recordItem(datahouseItem);
             item.setReference(constructUrlToDatahouse(itemId));
             item.setContent(null); // Clear content after recording to avoid duplication
@@ -231,15 +226,12 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
         return references;
     }
 
-    private com.kereval.gazelle.datahouse.api.business.record.Item convertMaestroItemToDatahouseItem(Item maestroItem) {
+    private com.kereval.gazelle.datahouse.api.business.record.Item convertMaestroItemToDatahouseItem(Item maestroItem, AccessControlList acl) {
         String content = maestroItem.getContent() != null
                 ? new String(maestroItem.getContent(), StandardCharsets.UTF_8)
                 : "";
         return new com.kereval.gazelle.datahouse.api.business.record.Item()
-                .setAccessControlList(new AccessControlList()
-                        .setOwners(Set.of("gazelle"))
-                        .setPublic(true)
-                ) //todo: set real ACL
+                .setAccessControlList(acl)
                 .setType(maestroItem.getName())
                 .setContent(content);
     }

@@ -16,13 +16,12 @@
 
 package net.ihe.gazelle.maestro.business;
 
-import net.ihe.gazelle.lang.UnexpectedError;
+import net.ihe.gazelle.maestro.api.business.acl.AccessControlListBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.*;
 import net.ihe.gazelle.maestro.api.business.testrun.*;
 import net.ihe.gazelle.maestro.api.business.testrun.context.Context;
 import net.ihe.gazelle.maestro.api.business.testrun.context.TestRunSessionStore;
 import net.ihe.gazelle.maestro.api.business.testrun.context.TestSetSessionStore;
-import net.ihe.gazelle.maestro.api.business.testrun.MaestroEventProducer;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 
 import java.time.Instant;
@@ -81,7 +80,7 @@ public class MaestroImpl implements Maestro {
 
     @Override
     public void run(TestSetRun testSetRun) {
-        String testSetId = testSetRun.testSetId();
+        String testSetId = testSetRun.getTestSetId();
         if (testSetId == null) {
             maestroEventProducer.emitErrorTestRunEvent(new InvalidTestSetException("testSetId is null"));
         }
@@ -93,13 +92,15 @@ public class MaestroImpl implements Maestro {
             isValid = false;
             UnexpectedErrorBuilder unexpectedError = new UnexpectedErrorBuilder().fromThrowable(e);
             TestReport testReport = new TestReportBuilder()
+                    .setTestSuiteName(testSetRun.getTestSuiteName())
                     .addUnexpectedError(unexpectedError)
+                    .setAccessControlList(new AccessControlListBuilder(testSetRun.getAccessControlList()))
                     .build();
             recordAndReturnTestReport(testReport, testSetRun);
         }
         if (isValid) {
             sessionStoreContext.addTestSetContext(testSetId, testSetRun);
-            TestRun first = testSetRun.testRuns().getFirst();
+            TestRun first = testSetRun.getTestRuns().getFirst();
             run(first.setTestSetId(testSetId));
         }
     }
@@ -109,16 +110,20 @@ public class MaestroImpl implements Maestro {
         TestSetSessionStore testSetSessionStore = sessionStoreContext.getTestSetContexts(testRun.getTestSetId());
         testSetSessionStore.addTestRunReportBuilder(testRunReportBuilder);
         TestSetRun testSetRun = testSetSessionStore.getTestSetRun();
-        if (testSetRun.testRuns().getLast().equals(testRun)) {
+        if (testSetRun.getTestRuns().getLast().equals(testRun)) {
             TestReport testReport;
             try {
                 testReport = new TestReportBuilder()
+                        .setTestSuiteName(testSetRun.getTestSuiteName())
                         .setDateTime(Date.from(Instant.now()))
                         .setTestRunReports(testSetSessionStore.getTestRunReportBuilders())
+                        .setAccessControlList(new AccessControlListBuilder(testSetRun.getAccessControlList()))
                         .build();
             } catch (Exception e) {
                 testReport = new TestReportBuilder()
+                        .setTestSuiteName(testSetRun.getTestSuiteName())
                         .addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e))
+                        .setAccessControlList(new AccessControlListBuilder(testSetRun.getAccessControlList()))
                         .build();
             }
             String sessionId = testRun.getTestSetId();
@@ -172,7 +177,7 @@ public class MaestroImpl implements Maestro {
      */
     private void runNextTestRun(TestRun testRun, TestSetRun testSetRun) {
         TestSetSessionStore testSetSessionStore = sessionStoreContext.getTestSetContexts(testRun.getTestSetId());
-        List<TestRun> testRuns = testSetSessionStore.getTestSetRun().testRuns();
+        List<TestRun> testRuns = testSetSessionStore.getTestSetRun().getTestRuns();
         boolean found = false;
         for (int i = 0; (i < testRuns.size() - 1 && !found); i++) {
             if (testRuns.get(i).equals(testRun)) {
@@ -184,9 +189,11 @@ public class MaestroImpl implements Maestro {
             Exception e = new InvalidTestSetException("TestRun " + testRun.getTest().getName() +
                     " not found in testSet " + testRun.getTestSetId() + " or is last element of set");
             TestReport testReport = new TestReportBuilder()
+                    .setTestSuiteName(testSetRun.getTestSuiteName())
                     .setDateTime(Date.from(Instant.now()))
                     .setTestRunReports(testSetSessionStore.getTestRunReportBuilders())
                     .addUnexpectedError(getUnexpectedErrorBuilder(e))
+                    .setAccessControlList(new AccessControlListBuilder(testSetRun.getAccessControlList()))
                     .build();
             String sessionId = testRun.getTestSetId();
             sessionStoreContext.clearExecutionContext(sessionId);
@@ -335,8 +342,10 @@ public class MaestroImpl implements Maestro {
             id = testRunTest.getId();
             name = testRunTest.getName();
         }
-
+        TestSetSessionStore testSetSessionStore = sessionStoreContext.getTestSetContexts(testRun.getTestSetId());
+        TestSetRun testSetRun = testSetSessionStore.getTestSetRun();
         TestReport testReport = new TestReportBuilder()
+                .setTestSuiteName(testSetRun.getTestSuiteName())
                 .addTestRunReport(new TestRunReportBuilder()
                         .addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e))
                         .setTest(new TestBuilder()
@@ -344,10 +353,9 @@ public class MaestroImpl implements Maestro {
                                 .setName(name)
                         )
                 )
+                .setAccessControlList(new AccessControlListBuilder(testSetRun.getAccessControlList()))
                 .build();
 
-        TestSetSessionStore testSetSessionStore = sessionStoreContext.getTestSetContexts(testRun.getTestSetId());
-        TestSetRun testSetRun = testSetSessionStore.getTestSetRun();
         recordAndReturnTestReport(testReport, testSetRun);
     }
 

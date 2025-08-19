@@ -17,6 +17,8 @@
 package net.ihe.gazelle.maestro.api.business.testreport;
 
 import net.ihe.gazelle.lang.UnexpectedError;
+import net.ihe.gazelle.security.business.ProtectedResource;
+import net.ihe.gazelle.security.business.acl.AccessControlList;
 
 import java.util.*;
 
@@ -46,7 +48,7 @@ import static net.ihe.gazelle.maestro.api.business.testreport.Result.UNDEFINED;
  * Counters must be valid
  */
 
-public class TestReport {
+public class TestReport implements ProtectedResource {
 
     public static final String REPORT_VERSION = "1.0";
 
@@ -63,6 +65,8 @@ public class TestReport {
     private List<TestReport> subReports;
     private List<TestRunReport> testRunReports;
     private List<UnexpectedError> unexpectedErrors;
+    private AccessControlList accessControlList;
+
 
     public TestReport() {
         reportVersion = REPORT_VERSION;
@@ -72,6 +76,7 @@ public class TestReport {
         subReports = new ArrayList<>();
         testRunReports = new ArrayList<>();
         unexpectedErrors = new ArrayList<>();
+        accessControlList = new AccessControlList();
     }
 
     public TestReport(TestReport copy) {
@@ -89,6 +94,7 @@ public class TestReport {
         setSubReports(copy.getSubReports());
         setTestRunReports(copy.getTestRunReports());
         setUnexpectedErrors(copy.getUnexpectedErrors());
+        setAccessControlList(copy.getAccessControlList());
     }
 
     public String getReportVersion() {
@@ -245,6 +251,16 @@ public class TestReport {
 
     public TestReport addUnexpectedErrors(List<UnexpectedError> unexpectedErrors) {
         this.unexpectedErrors.addAll(unexpectedErrors);
+        return this;
+    }
+
+    @Override
+    public AccessControlList getAccessControlList() {
+        return accessControlList;
+    }
+
+    public TestReport setAccessControlList(AccessControlList accessControlList) {
+        this.accessControlList = accessControlList;
         return this;
     }
 

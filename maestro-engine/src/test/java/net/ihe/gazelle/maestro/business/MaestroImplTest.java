@@ -141,8 +141,8 @@ class MaestroImplTest {
         String testSetId = "testSet1";
         List<TestRun> testRuns = List.of(testRun);
 
-        when(testSetRun.testSetId()).thenReturn(testSetId);
-        when(testSetRun.testRuns()).thenReturn(testRuns);
+        when(testSetRun.getTestSetId()).thenReturn(testSetId);
+        when(testSetRun.getTestRuns()).thenReturn(testRuns);
         when(testRun.setTestSetId(testSetId)).thenReturn(testRun);
         when(testRun.getTest()).thenReturn(test);
         when(testRun.getInputs()).thenReturn(new ArrayList<>());
@@ -172,7 +172,7 @@ class MaestroImplTest {
         when(testRun.getTestSetId()).thenReturn(testSetId);
         when(sessionStoreContext.getTestSetContexts(testSetId)).thenReturn(testSetSessionStore);
         when(testSetSessionStore.getTestSetRun()).thenReturn(testSetRun);
-        when(testSetRun.testRuns()).thenReturn(testRuns);
+        when(testSetRun.getTestRuns()).thenReturn(testRuns);
         when(testSetSessionStore.getTestRunReportBuilders()).thenReturn(reportBuilders);
 
         TestRunReportBuilder testRunReportBuilder = mock(TestRunReportBuilder.class);
@@ -203,7 +203,7 @@ class MaestroImplTest {
 
         when(sessionStoreContext.getTestSetContexts(testSetId)).thenReturn(testSetSessionStore);
         when(testSetSessionStore.getTestSetRun()).thenReturn(testSetRun);
-        when(testSetRun.testRuns()).thenReturn(testRuns);
+        when(testSetRun.getTestRuns()).thenReturn(testRuns);
 
         // Mock the session store context to return a valid TestRunSessionStore for the next test run
         when(sessionStoreContext.getExecutionContext(anyString())).thenReturn(testRunSessionStore);

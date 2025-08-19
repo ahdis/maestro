@@ -56,7 +56,7 @@ public class EventListener {
     }
 
     public void onFinishTestSet(@ObservesAsync FinishTestSetEvent finishTestSetEvent) {
-        String testSetId = finishTestSetEvent.getTestSetRun().testSetId();
+        String testSetId = finishTestSetEvent.getTestSetRun().getTestSetId();
         if (asynchronousMaestro.isServiceRunning(testSetId)) {
             asynchronousMaestro.callback(finishTestSetEvent);
         } else if (tmTestRunMaestro.isServiceRunning(testSetId)) {

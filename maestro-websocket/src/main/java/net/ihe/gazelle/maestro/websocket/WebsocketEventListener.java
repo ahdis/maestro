@@ -7,11 +7,9 @@ import jakarta.websocket.SendResult;
 import jakarta.websocket.Session;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
-import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.FinishedStepEvent;
 import net.ihe.gazelle.maestro.api.technical.dto.report.StepRunReportDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
-import net.ihe.gazelle.maestro.api.technical.dto.report.TestRunReportDTO;
 import net.ihe.gazelle.maestro.api.technical.event.FinishTestSetEvent;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.ObjectMapperBuilder;
@@ -36,7 +34,7 @@ public class WebsocketEventListener {
 
 
     public void onFinishTestSet(@ObservesAsync FinishTestSetEvent finishTestSetEvent){
-        String testSetId = finishTestSetEvent.getTestSetRun().testSetId();
+        String testSetId = finishTestSetEvent.getTestSetRun().getTestSetId();
         if (SessionsStorageInMemory.hasSession(testSetId)) {
             sendTestRunCompleted(finishTestSetEvent);
         }
@@ -50,7 +48,7 @@ public class WebsocketEventListener {
     }
 
     private void sendTestRunCompleted(FinishTestSetEvent finishTestSetEvent) {
-        String testSetId = finishTestSetEvent.getTestSetRun().testSetId();
+        String testSetId = finishTestSetEvent.getTestSetRun().getTestSetId();
         TestReportSummary testReportSummary = finishTestSetEvent.getReportSummary();
         String locationPrefix = datahouseUr + "/items/" + testSetId;
         String content = serDes.serializeAsString(new TestReportSummaryDTO(testReportSummary, locationPrefix));
