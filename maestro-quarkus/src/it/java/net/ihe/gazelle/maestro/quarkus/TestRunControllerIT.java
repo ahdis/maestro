@@ -16,16 +16,13 @@
 
 package net.ihe.gazelle.maestro.quarkus;
 
-import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.QuarkusTestProfile;
 import io.quarkus.test.junit.TestProfile;
 import io.restassured.response.Response;
 import jakarta.ws.rs.core.MediaType;
 import net.ihe.gazelle.maestro.api.business.testreport.Result;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
-import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
 import org.apache.http.HttpHeaders;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -33,7 +30,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -47,7 +43,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @QuarkusTest
 @TestProfile(TestRunControllerProfile.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-//@QuarkusTestResource(value = DatahouseTestResource.class, restrictToAnnotatedClass = true)
 class TestRunControllerIT implements QuarkusTestProfile {
 
     @ConfigProperty(name = "gzl.it-port")
@@ -62,13 +57,18 @@ class TestRunControllerIT implements QuarkusTestProfile {
         WireMockSingleton.mockEvsProfiles();
         WireMockSingleton.mockValidate();
         WireMockSingleton.mockKeycloak();
-        WireMockSingleton.mockDatahouse();
+        MockDatahouseServer.start(8080);
     }
 
     @AfterAll
-    void tearDown() throws IOException {
+    void tearDown() {
         WireMockSingleton.stop();
-        WireMockSingleton.mockEvsValidate();
+        try {
+            MockDatahouseServer.stop();
+        } catch (IOException e) {
+            // log and ignore in teardown
+            e.printStackTrace();
+        }
     }
 
     @Test
@@ -96,7 +96,7 @@ class TestRunControllerIT implements QuarkusTestProfile {
                 .then()
                 .statusCode(202);
 
-        TestReport testReport = WireMockSingleton.awaitTestReport();
+        TestReportSummary testReport = WireMockSingleton.awaitTestReport();
         assertTrue(testReport.isValid());
         assertEquals(Result.FAILED, testReport.getResult());
     }

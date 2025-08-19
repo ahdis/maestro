@@ -16,19 +16,18 @@
 
 package net.ihe.gazelle.maestro.quarkus.itb;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import io.restassured.response.Response;
 import jakarta.ws.rs.core.MediaType;
 import net.ihe.gazelle.maestro.api.business.testreport.Result;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
-import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
+import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
 import net.ihe.gazelle.maestro.quarkus.WireMockSingleton;
 import org.apache.http.HttpHeaders;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
@@ -40,7 +39,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @QuarkusTest
 @TestProfile(ItbStepProfile.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Disabled
 class ItbStepIT {
 
     @ConfigProperty(name = "gzl.it-port")
@@ -57,6 +55,14 @@ class ItbStepIT {
         ItbStepWireMock.mockItbTestExecution(maestroPort);
         ItbStepWireMock.mockItbTestLogs();
         ItbStepWireMock.mockItbPdfReport();
+        WireMockSingleton.mockKeycloak();
+        // Start MockDatahouseServer statically on port 8080
+        net.ihe.gazelle.maestro.quarkus.MockDatahouseServer.start(8080);
+    }
+
+    @AfterAll
+    void tearDownAll() throws IOException {
+        net.ihe.gazelle.maestro.quarkus.MockDatahouseServer.stop();
     }
 
     @Test
@@ -69,7 +75,7 @@ class ItbStepIT {
                 .extract().response();
 
         assertNotNull(response);
-        TestReport testReport = response.as(TestReportDTO.class).getDomain();
+        TestReportSummary testReport = response.as(TestReportSummaryDTO.class).getDomain();
         assertTrue(testReport.isValid());
         assertEquals(Result.PASSED, testReport.getResult());
     }

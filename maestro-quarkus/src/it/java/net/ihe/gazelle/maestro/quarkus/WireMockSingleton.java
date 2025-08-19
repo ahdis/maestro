@@ -19,8 +19,8 @@ package net.ihe.gazelle.maestro.quarkus;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import net.ihe.gazelle.m2m.client.technical.KeycloakConfigurationProvider;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
-import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
+import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
 import net.ihe.gazelle.oidc.server.OIDCJWTGenerator;
@@ -164,14 +164,14 @@ public class WireMockSingleton {
         );
     }
 
-    public static TestReport awaitTestReport() {
+    public static TestReportSummary awaitTestReport() {
         String content = await()
                 .atMost(3, TimeUnit.SECONDS)
                 .until(() -> {
                     List<LoggedRequest> matchingRequests = getMatchingRequests().apply(wireMockServer);
                     return !matchingRequests.isEmpty() ? matchingRequests : null;
                 }, Objects::nonNull).getFirst().getPart("json report").getBody().asString();
-        return new JacksonSerDes().deserialize(content, TestReportDTO.class).getDomain();
+        return new JacksonSerDes().deserialize(content, TestReportSummaryDTO.class).getDomain();
     }
 
     private static Function<WireMockServer, List<LoggedRequest>> getMatchingRequests() {
@@ -189,5 +189,7 @@ public class WireMockSingleton {
     public static synchronized void stop() {
         wireMockServer.stop();
         wireMockServer = null;
+        keycloakMockServer.stop();
+        keycloakMockServer = null;
     }
 }

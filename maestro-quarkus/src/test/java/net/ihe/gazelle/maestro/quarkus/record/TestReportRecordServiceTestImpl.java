@@ -9,13 +9,13 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class TestReportRecordServiceTestImpl {
+class TestReportRecordServiceTestImpl {
 
     private DatahouseTestReportRecordService service;
     private RecordItemClientMock recordItemClientMock;
 
     @BeforeEach
-    void setup() throws Exception {
+    void setup() {
         recordItemClientMock = new RecordItemClientMock();
         service = new DatahouseTestReportRecordService(recordItemClientMock, "http://dh");
     }
@@ -45,8 +45,8 @@ public class TestReportRecordServiceTestImpl {
 
         // Inputs in domain hold URL references to attachments
         List<Item> inputs = report.getTestRunReports().get(0).getInputs();
-        assertThat(inputs.get(0).getReference()).isEqualTo("http://dh/attachments/att-1");
-        assertThat(inputs.get(1).getReference()).isEqualTo("http://dh/attachments/att-2");
+        assertThat(inputs.get(0).getReference()).isEqualTo("/attachments/att-1");
+        assertThat(inputs.get(1).getReference()).isEqualTo("/attachments/att-2");
         assertThat(inputs.get(0).getContent()).isNull();
         assertThat(inputs.get(1).getContent()).isNull();
 
@@ -85,7 +85,7 @@ public class TestReportRecordServiceTestImpl {
         assertThat(out2.getContent()).isNull();
 
         // Total recordItem calls: 2 outputs + 1 report
-        assertThat(recordItemClientMock.recordedItems.size()).isEqualTo(3);
+        assertThat(recordItemClientMock.recordedItems).hasSize(3);
         assertThat(reportItemId).isEqualTo("itm-3");
     }
 
@@ -104,7 +104,7 @@ public class TestReportRecordServiceTestImpl {
         String rootId = service.recordTestReportWithReferences(report);
 
         // Then: two report items persisted (sub then root)
-        assertThat(recordItemClientMock.recordedItems.size()).isEqualTo(2);
+        assertThat(recordItemClientMock.recordedItems).hasSize(2);
         assertThat(rootId).isEqualTo("itm-2");
     }
 }
