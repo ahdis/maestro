@@ -126,6 +126,7 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
             input.setContent(null);
             attachmentRefs.add(new Reference()
                     .setName(input.getName())
+                    .setType("INPUT_TEST")
                     .setValue(attachmentId)
                     .setRefType(RefType.ATTACHMENT)
             );
@@ -168,6 +169,7 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
                 for (TestReportReference ref : testReportReferences) {
                     references.add(new Reference()
                             .setName(ref.getTestSuiteName())
+                            .setType(TEST_REPORT)
                             .setValue(ref.getTestReportId())
                             .setRefType(RefType.ITEM_ID)
                     );
@@ -221,6 +223,7 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
             item.setContent(null); // Clear content after recording to avoid duplication
             references.add(new Reference()
                     .setName(item.getName())
+                    .setType("REPORT")
                     .setValue(itemId)
                     .setRefType(RefType.ITEM_ID)
             );
