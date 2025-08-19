@@ -27,7 +27,8 @@ import java.util.Set;
 @RequestScoped
 public class DatahouseTestReportRecordService implements TestReportRecordService {
 
-    public static final String TEST_REPORT = "TEST_REPORT";
+    public static final String TEST_REPORT_TYPE = "TEST_REPORT";
+    public static final String BYTE_ARRAY_TYPE = "BYTE_ARRAY";
     private final RecordItemClient recordItemClient;
 
     private final String datahouseUrl;
@@ -126,7 +127,7 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
             input.setContent(null);
             attachmentRefs.add(new Reference()
                     .setName(input.getName())
-                    .setType("INPUT_TEST")
+                    .setType(BYTE_ARRAY_TYPE)
                     .setValue(attachmentId)
                     .setRefType(RefType.ATTACHMENT)
             );
@@ -169,7 +170,7 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
                 for (TestReportReference ref : testReportReferences) {
                     references.add(new Reference()
                             .setName(ref.getTestSuiteName())
-                            .setType(TEST_REPORT)
+                            .setType(TEST_REPORT_TYPE)
                             .setValue(ref.getTestReportId())
                             .setRefType(RefType.ITEM_ID)
                     );
@@ -187,7 +188,7 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
                                             .setOwners(Set.of("gazelle"))
                                             .setPublic(true)
                             )
-                            .setType(TEST_REPORT)
+                            .setType(TEST_REPORT_TYPE)
                             .setContent(jsonContent)
                             .setReferences(references);
 
@@ -222,8 +223,7 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
             item.setReference(constructUrlToDatahouse(itemId));
             item.setContent(null); // Clear content after recording to avoid duplication
             references.add(new Reference()
-                    .setName(item.getName())
-                    .setType("REPORT")
+                    .setType(item.getName())
                     .setValue(itemId)
                     .setRefType(RefType.ITEM_ID)
             );

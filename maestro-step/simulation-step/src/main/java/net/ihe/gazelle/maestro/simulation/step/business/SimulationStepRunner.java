@@ -35,6 +35,7 @@ import java.util.concurrent.*;
 public class SimulationStepRunner implements StepRunner {
 
     private static final Logger LOG = LoggerFactory.getLogger(SimulationStepRunner.class);
+    public static final String SIMULATION_REPORT = "SIMULATION_REPORT";
 
     private final ReportSerialization serializer;
     private final SimulationHandler simulationHandler;
@@ -56,7 +57,7 @@ public class SimulationStepRunner implements StepRunner {
             SimulationReport simulationReport = getSimulationReport(simulationRequest, futureReport);
             ItemBuilder itemBuilder = new ItemBuilder()
                     .setContent(serializer.toByteArray(simulationReport))
-                    .setName("simulationReport");
+                    .setName(SIMULATION_REPORT);
             StepRunReportBuilder stepRunReportBuilder = prepareStepReport(stepRun)
                     .setOutputs(List.of(itemBuilder));
             computeResult(simulationReport, stepRunReportBuilder);
