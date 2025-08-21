@@ -72,8 +72,8 @@ public class EvsValidationMapper {
         return new ValidationMethod()
                 .setValidationProfileID(overview.getValidatorID())
                 .setValidationServiceName(overview.getValidationServiceName())
-                .setValidationProfileVersion(overview.getValidatorVersion() != null ? overview.getValidatorVersion() : "UNKNOWN")
-                .setValidationServiceVersion(overview.getValidationServiceVersion());
+                .setValidationProfileVersion(overview.getValidatorVersion() != null && !overview.getValidatorVersion().isEmpty() ? overview.getValidatorVersion() : "UNKNOWN")
+                .setValidationServiceVersion(overview.getValidationServiceVersion() != null && !overview.getValidationServiceVersion().isEmpty() ? overview.getValidationServiceVersion() : "UNKNOWN");
     }
 
     /**
