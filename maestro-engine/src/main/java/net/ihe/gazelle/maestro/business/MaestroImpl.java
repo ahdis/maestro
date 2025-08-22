@@ -16,7 +16,6 @@
 
 package net.ihe.gazelle.maestro.business;
 
-import net.ihe.gazelle.lang.UnexpectedError;
 import net.ihe.gazelle.maestro.api.business.testreport.*;
 import net.ihe.gazelle.maestro.api.business.testrun.*;
 import net.ihe.gazelle.maestro.api.business.testrun.context.Context;
@@ -36,13 +35,16 @@ public class MaestroImpl implements Maestro {
     private final MaestroEventProducer maestroEventProducer;
     private final SessionStoreContext sessionStoreContext;
     private final TestReportRecordService testReportRecordService;
+    private static final String GAZELLE_ENGINE = "Gazelle engine";
+    private final String maestroVersion;
 
     public MaestroImpl(MaestroEventProducer maestroEventProducer,
                        SessionStoreContext sessionStoreContext,
-                       TestReportRecordService testReportRecordService) {
+                       TestReportRecordService testReportRecordService, String maestroVersion) {
         this.maestroEventProducer = maestroEventProducer;
         this.sessionStoreContext = sessionStoreContext;
         this.testReportRecordService = testReportRecordService;
+        this.maestroVersion = maestroVersion;
     }
 
     @Override
@@ -93,6 +95,7 @@ public class MaestroImpl implements Maestro {
             isValid = false;
             UnexpectedErrorBuilder unexpectedError = new UnexpectedErrorBuilder().fromThrowable(e);
             TestReport testReport = new TestReportBuilder()
+                    .setTestService(getTestServiceBuilder())
                     .addUnexpectedError(unexpectedError)
                     .build();
             recordAndReturnTestReport(testReport, testSetRun);
@@ -114,10 +117,12 @@ public class MaestroImpl implements Maestro {
             try {
                 testReport = new TestReportBuilder()
                         .setDateTime(Date.from(Instant.now()))
+                        .setTestService(getTestServiceBuilder())
                         .setTestRunReports(testSetSessionStore.getTestRunReportBuilders())
                         .build();
             } catch (Exception e) {
                 testReport = new TestReportBuilder()
+                        .setTestService(getTestServiceBuilder())
                         .addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e))
                         .build();
             }
@@ -162,6 +167,13 @@ public class MaestroImpl implements Maestro {
                 .setMessage(e.getMessage());
     }
 
+    private TestServiceBuilder getTestServiceBuilder() {
+        return new TestServiceBuilder()
+                .setDisclaimer("Maestro disclaimer")
+                .setServiceIdentification(
+                        new EntityIdentificationBuilder().setName(GAZELLE_ENGINE).setVersion(maestroVersion));
+    }
+
     /**
      * Method call at the end of a TestRun execution to run next TestRun.
      * <p>
@@ -185,6 +197,7 @@ public class MaestroImpl implements Maestro {
                     " not found in testSet " + testRun.getTestSetId() + " or is last element of set");
             TestReport testReport = new TestReportBuilder()
                     .setDateTime(Date.from(Instant.now()))
+                    .setTestService(getTestServiceBuilder())
                     .setTestRunReports(testSetSessionStore.getTestRunReportBuilders())
                     .addUnexpectedError(getUnexpectedErrorBuilder(e))
                     .build();
@@ -337,6 +350,7 @@ public class MaestroImpl implements Maestro {
         }
 
         TestReport testReport = new TestReportBuilder()
+                .setTestService(getTestServiceBuilder())
                 .addTestRunReport(new TestRunReportBuilder()
                         .addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e))
                         .setTest(new TestBuilder()

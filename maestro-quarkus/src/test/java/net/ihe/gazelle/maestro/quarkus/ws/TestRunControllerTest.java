@@ -56,6 +56,6 @@ class TestRunControllerTest {
     }
 
     private Maestro getEngine() {
-        return new MaestroImpl(new EventMaestroProducer(new TestRunMockEvent(), new StepMockEvent()), new SessionStoreContextImpl(), new InMemoryTestReportRecordService());
+        return new MaestroImpl(new EventMaestroProducer(new TestRunMockEvent(), new StepMockEvent()), new SessionStoreContextImpl(), new InMemoryTestReportRecordService(), "999.0.0");
     }
 }

@@ -66,7 +66,7 @@ class MaestroStepsIntegrationTest {
         MaestroImpl maestro = new MaestroImpl(
                 new EventMaestroProducer(testRunMockEvent, stepMockEvent),
                 new SessionStoreContextImpl(),
-                testReportRecordService
+                testReportRecordService,"999.0.0"
         );
         synchronousMaestro = new SynchronousMaestro(3, maestroProducer);
         EventListener eventListener = createListener(maestroProducer, maestro);

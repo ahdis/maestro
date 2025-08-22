@@ -77,7 +77,7 @@ class MaestroImplTest {
     @BeforeEach
     void setUp() {
         when(testReportRecordService.recordTestReportWithReferences(any())).thenReturn("testReportId");
-        maestroImpl = new MaestroImpl(maestroEventProducer, sessionStoreContext, testReportRecordService);
+        maestroImpl = new MaestroImpl(maestroEventProducer, sessionStoreContext, testReportRecordService, "999.0.0");
     }
 
     @Test
@@ -303,7 +303,7 @@ class MaestroImplTest {
     @Test
     void constructor_ShouldInitializeFields() {
         // Act
-        MaestroImpl newMaestro = new MaestroImpl(maestroEventProducer, sessionStoreContext, testReportRecordService);
+        MaestroImpl newMaestro = new MaestroImpl(maestroEventProducer, sessionStoreContext, testReportRecordService, "1.0.0");
 
         // Assert
         assertNotNull(newMaestro);
