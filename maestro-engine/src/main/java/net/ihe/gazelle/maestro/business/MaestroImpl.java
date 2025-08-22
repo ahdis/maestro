@@ -169,7 +169,7 @@ public class MaestroImpl implements Maestro {
 
     private TestServiceBuilder getTestServiceBuilder() {
         return new TestServiceBuilder()
-                .setDisclaimer("Maestro disclaimer")
+                .setDisclaimer("This Gazelle execution service is provided for technical compliance purposes only and does not constitute legal, medical, or regulatory advice.")
                 .setServiceIdentification(
                         new EntityIdentificationBuilder().setName(GAZELLE_ENGINE).setVersion(maestroVersion));
     }
