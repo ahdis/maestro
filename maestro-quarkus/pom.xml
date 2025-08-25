@@ -24,6 +24,10 @@
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>maestro-engine</artifactId>
         </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>maestro-websocket</artifactId>
+        </dependency>
 
         <!-- Gazelle dependencies -->
         <dependency>
