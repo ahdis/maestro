@@ -52,7 +52,7 @@ public class SimulationHandlerMock extends GazelleSimulationServiceHandler {
                 .setSequenceId("Simple_CHXDS_ITI-41-42")
                 .setServiceName("Mock_XDS_Simulator")
                 .setServiceVersion("1.0.0")
-                .addTransaction(new TransactionReportBuilder()
+                .addTransactionReport(new TransactionReportBuilder()
                         .setResult(Result.PASSED)
                         .setTransaction("ITI-41")
                         .addStandard("ebRIM")

@@ -52,7 +52,7 @@
         <framework.version>2.1.0</framework.version>
         <search-api.version>1.1.0</search-api.version>
         <validation-api.version>2.0.0-FRAME-74-SNAPSHOT</validation-api.version>
-        <simulation-api.version>0.1.0</simulation-api.version>
+        <simulation-api.version>0.1.1-SNAPSHOT</simulation-api.version>
         <service-registry.version>1.0.0</service-registry.version>
         <lang.version>2.0.1</lang.version>
         <equalsverifier.version>3.16.1</equalsverifier.version>
@@ -60,7 +60,7 @@
         <!-- Quarkus Build-->
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
-        <quarkus.platform.version>3.15.5</quarkus.platform.version>
+        <quarkus.platform.version>3.15.6.1</quarkus.platform.version>
         <quarkus.container-image.build>true</quarkus.container-image.build>
         <quarkus.container-image.registry>rg.fr-par.scw.cloud</quarkus.container-image.registry>
         <quarkus.container-image.group>gazelle-snapshot</quarkus.container-image.group>

@@ -24,7 +24,7 @@ import net.ihe.gazelle.simulation.business.callback.Result;
 import net.ihe.gazelle.simulation.business.callback.SimulationReport;
 import net.ihe.gazelle.simulation.business.callback.SimulationReportValidator;
 import net.ihe.gazelle.simulation.business.setup.*;
-import net.ihe.gazelle.simulation.client.business.ServiceUnavailableException;
+import net.ihe.gazelle.simulation.business.sequence.ServiceUnavailableException;
 import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

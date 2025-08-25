@@ -49,6 +49,11 @@ public class GazelleSimulationServiceHandler implements SimulationHandler {
     }
 
     @Override
+    public String getChecksum(List<SimulationSequence> sequences) {
+        throw new UnsupportedOperationException("Not supported by maestro.");
+    }
+
+    @Override
     public List<SimulationSequence> getSimulationSequences() {
         return simulationClient.getSimulationSequences();
     }
