@@ -20,51 +20,54 @@ package net.ihe.gazelle.maestro.api.business.testreport;
 import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory;
 import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractBuilder;
 import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
-import net.ihe.gazelle.maestro.api.business.testreport.validator.ItemValidator;
+import net.ihe.gazelle.maestro.api.business.testreport.validator.InputValidator;
 
-public class ItemBuilder extends AbstractBuilder<Item> {
+public class InputBuilder extends AbstractBuilder<Input> {
 
     private String name;
     private byte[] content;
     private String reference;
 
-    public ItemBuilder() {
+    public InputBuilder() {
         super();
     }
 
-    public ItemBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
+    public InputBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
         super(validatorBuilderFactory);
     }
 
-    public ItemBuilder setName(String name) {
+    public InputBuilder setName(String name) {
         this.name = name;
         return this;
     }
 
-    public ItemBuilder setContent(byte[] content) {
+    public InputBuilder setContent(byte[] content) {
         this.content = content;
         return this;
     }
 
-    public ItemBuilder setReference(String reference) {
+    public InputBuilder setReference(String reference) {
         this.reference = reference;
         return this;
     }
 
+
+
     @Override
-    protected AbstractValidator<Item> instantiateValidator(ValidatorBuilderFactory validatorBuilderFactory) {
-        return new ItemValidator(validatorBuilderFactory);
+    protected AbstractValidator<Input> instantiateValidator(ValidatorBuilderFactory validatorBuilderFactory) {
+        return new InputValidator(validatorBuilderFactory);
     }
 
     @Override
-    protected Item instantiate() {
-        return new Item();
+    protected Input instantiate() {
+        return new Input();
     }
 
     @Override
-    protected void make(Item item) {
-        item.setName(name)
+    protected void make(Input input) {
+        input.setName(name)
                 .setContent(content)
-                .setReference(reference);
+                .setReference(reference)
+        ;
     }
 }

@@ -16,7 +16,8 @@
 
 package net.ihe.gazelle.maestro.validation.step.business;
 
-import net.ihe.gazelle.maestro.api.business.testreport.ItemBuilder;
+import net.ihe.gazelle.maestro.api.business.testreport.Output;
+import net.ihe.gazelle.maestro.api.business.testreport.OutputBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
@@ -70,11 +71,13 @@ public class ValidationStepRunner implements StepRunner {
             validationReport = validationServiceHandler.validate(validationRequest);
         }
 
-        ItemBuilder itemBuilder = new ItemBuilder()
+        OutputBuilder outputBuilder = new OutputBuilder()
                 .setContent(serializer.toByteArray(validationReport))
-                .setName(VALIDATION_REPORT);
+                .setName(VALIDATION_REPORT)
+                .setFormat(Output.FORMAT_JSON)
+                ;
         StepRunReportBuilder stepRunReportBuilder = new StepRunReportBuilder()
-                .setOutputs(List.of(itemBuilder))
+                .setOutputs(List.of(outputBuilder))
                 .setStepId(stepRun.step().getName())
                 .setType(ValidationStep.TYPE);
         computeResult(validationReport, stepRunReportBuilder);

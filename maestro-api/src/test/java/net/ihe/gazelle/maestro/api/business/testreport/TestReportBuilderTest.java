@@ -172,7 +172,7 @@ class TestReportBuilderTest {
                         .setDescription("description")
                         .setVersion("1.0"))
                 .setOutputs(new ArrayList<>())
-                .addOutput(new ItemBuilder()
+                .addOutput(new OutputBuilder()
                         .setName("name")
                         .setReference("reference"))
                 .setStepRunReports(new ArrayList<>())

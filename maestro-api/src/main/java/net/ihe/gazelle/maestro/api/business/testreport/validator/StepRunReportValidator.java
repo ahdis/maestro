@@ -23,18 +23,18 @@ import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 
 public class StepRunReportValidator extends AbstractValidator<StepRunReport> {
 
-    private final ItemValidator itemValidator;
+    private final OutputValidator outputValidator;
     private final UnexpectedErrorValidator unexpectedErrorValidator;
 
     public StepRunReportValidator() {
         super();
-        itemValidator = new ItemValidator();
+        outputValidator = new OutputValidator();
         unexpectedErrorValidator = new UnexpectedErrorValidator();
     }
 
     public StepRunReportValidator(ValidatorBuilderFactory validatorBuilderFactory) {
         super(validatorBuilderFactory);
-        itemValidator = new ItemValidator();
+        outputValidator = new OutputValidator();
         unexpectedErrorValidator = new UnexpectedErrorValidator();
     }
 
@@ -49,7 +49,7 @@ public class StepRunReportValidator extends AbstractValidator<StepRunReport> {
                 .addRule("stepIdValid", StepRunReport::isStepIdValid, "StepId must be set and not empty")
                 .addRule("typeValid", StepRunReport::isTypeValid, "Type must be set and not empty")
                 .addRule("resultValid", StepRunReport::isResultValid, "Result must be set")
-                .addMember("outputs", StepRunReport::getOutputs, itemValidator::getAssembledValidatorBuilder)
+                .addMember("outputs", StepRunReport::getOutputs, outputValidator::getAssembledValidatorBuilder)
                 .addMember("unexpectedErrors", StepRunReport::getUnexpectedErrors, unexpectedErrorValidator::getAssembledValidatorBuilder);
     }
 }

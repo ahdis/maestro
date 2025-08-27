@@ -2,16 +2,14 @@ package net.ihe.gazelle.maestro.quarkus.record;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kereval.gazelle.datahouse.api.business.record.Attachment;
+import com.kereval.gazelle.datahouse.api.business.record.Item;
 import com.kereval.gazelle.datahouse.api.business.record.RefType;
 import com.kereval.gazelle.datahouse.api.business.record.Reference;
 import com.kereval.gazelle.datahouse.technical.rest.client.RecordItemClient;
 import com.kereval.gazelle.datahouse.technical.rest.client.RecordItemClientProvider;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
-import net.ihe.gazelle.maestro.api.business.testreport.Item;
-import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
-import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
+import net.ihe.gazelle.maestro.api.business.testreport.*;
 import net.ihe.gazelle.maestro.business.TestReportRecordException;
 import net.ihe.gazelle.maestro.business.TestReportRecordService;
 import net.ihe.gazelle.maestro.quarkus.record.entity.TestReportEntity;
@@ -81,11 +79,11 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
         return attachmentRefs;
     }
 
-    private void processInputsForAttachments(List<Item> inputs, List<Reference> attachmentRefs) {
+    private void processInputsForAttachments(List<Input> inputs, List<Reference> attachmentRefs) {
         if (inputs == null || inputs.isEmpty()) {
             return;
         }
-        UploadPlan plan = buildUploadPlan(inputs);
+        UploadPlan plan = buildInputUploadPlan(inputs);
         if (plan.toUpload.isEmpty()) {
             return;
         }
@@ -94,20 +92,20 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
         mapIdsBackToInputs(inputs, plan.inputIndexes, ids, attachmentRefs);
     }
 
-    private UploadPlan buildUploadPlan(List<Item> inputs) {
+    private UploadPlan buildInputUploadPlan(List<Input> inputs) {
         List<Attachment> toUpload = new ArrayList<>();
         List<Integer> inputIndexes = new ArrayList<>();
         for (int i = 0; i < inputs.size(); i++) {
-            Item input = inputs.get(i);
+            Input input = inputs.get(i);
             if (hasContent(input)) {
-                toUpload.add(createAttachment(input));
+                toUpload.add(createAttachment(input.getName(), input.getContent()));
                 inputIndexes.add(i);
             }
         }
         return new UploadPlan(toUpload, inputIndexes);
     }
 
-    private boolean hasContent(Item input) {
+    private boolean hasContent(Input input) {
         return input != null && input.getContent() != null && input.getContent().length > 0;
     }
 
@@ -117,11 +115,11 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
         }
     }
 
-    private void mapIdsBackToInputs(List<Item> inputs, List<Integer> inputIndexes, List<String> ids, List<Reference> attachmentRefs) {
+    private void mapIdsBackToInputs(List<Input> inputs, List<Integer> inputIndexes, List<String> ids, List<Reference> attachmentRefs) {
         for (int k = 0; k < inputIndexes.size(); k++) {
             int idx = inputIndexes.get(k);
             String attachmentId = ids.get(k);
-            Item input = inputs.get(idx);
+            Input input = inputs.get(idx);
             input.setReference(constructPathToAttachment(attachmentId));
             input.setContent(null);
             attachmentRefs.add(new Reference()
@@ -142,8 +140,8 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
         for (TestRunReport testRunReport : testRunReports) {
             if (testRunReport.getStepRunReports() == null) continue;
             for (StepRunReport stepRunReport : testRunReport.getStepRunReports()) {
-                List<Item> outputs = stepRunReport.getOutputs();
-                outputRefs.addAll(recordMaestroItems(outputs, acl));
+                List<Output> outputs = stepRunReport.getOutputs();
+                outputRefs.addAll(recordOutputs(outputs, acl));
             }
         }
         return outputRefs;
@@ -208,38 +206,63 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
         return subRefs;
     }
 
-    private List<Reference> recordMaestroItems(List<Item> items, AccessControlList acl) {
+    private List<Reference> recordOutputs(List<Output> outputs, AccessControlList acl) {
         List<Reference> references = new ArrayList<>();
-        if (items == null || items.isEmpty()) return references;
-        for (Item item : items) {
-            if (item == null) continue;
-            com.kereval.gazelle.datahouse.api.business.record.Item datahouseItem = convertMaestroItemToDatahouseItem(item, acl);
-            String itemId = recordItemClient.recordItem(datahouseItem);
-            item.setReference(constructUrlToDatahouse(itemId));
-            item.setContent(null); // Clear content after recording to avoid duplication
-            references.add(new Reference()
-                    .setType(item.getName())
-                    .setValue(itemId)
-                    .setRefType(RefType.ITEM_ID)
-            );
+        List<Output> nonJsonOutputs = new ArrayList<>();
+        if (outputs == null || outputs.isEmpty()) return references;
+        for (Output output : outputs) {
+            if (output == null) continue;
+            if (Output.FORMAT_JSON.equals(output.getFormat())) {
+                recordOutputAsItem(acl, output, references);
+            } else {
+                nonJsonOutputs.add(output);
+            }
+        }
+        // Batch record non-JSON outputs as attachments
+        if (!nonJsonOutputs.isEmpty()) {
+            recordOutputsAsAttachments(nonJsonOutputs, references);
         }
         return references;
     }
 
-    private com.kereval.gazelle.datahouse.api.business.record.Item convertMaestroItemToDatahouseItem(Item maestroItem, AccessControlList acl) {
-        String content = maestroItem.getContent() != null
-                ? new String(maestroItem.getContent(), StandardCharsets.UTF_8)
+    private void recordOutputAsItem(AccessControlList acl, Output output, List<Reference> references) {
+        Item datahouseItem = buildDatahouseItemFromOutput(output, acl);
+        String itemId = recordItemClient.recordItem(datahouseItem);
+        output.setReference(constructUrlToDatahouse(itemId));
+        output.setContent(null); // Clear content after recording to avoid duplication
+        references.add(new Reference()
+                .setType(output.getName())
+                .setValue(itemId)
+                .setRefType(RefType.ITEM_ID)
+        );
+    }
+
+    private void recordOutputsAsAttachments(List<Output> outputs, List<Reference> references) {
+        UploadPlan plan = buildOutputUploadPlan(outputs);
+        if (plan.toUpload.isEmpty()) {
+            return;
+        }
+        List<String> ids = recordItemClient.uploadAttachments(plan.toUpload);
+        validateUploadedIdsCount(plan.toUpload.size(), ids.size());
+        mapIdsBackToOutputs(outputs, plan.inputIndexes, ids, references);
+    }
+
+    private Item buildDatahouseItemFromOutput(Output maestroOutput, AccessControlList acl) {
+        String content = maestroOutput.getContent() != null
+                ? new String(maestroOutput.getContent(), StandardCharsets.UTF_8)
                 : "";
-        return new com.kereval.gazelle.datahouse.api.business.record.Item()
+        return new Item()
                 .setAccessControlList(acl)
-                .setType(maestroItem.getName())
+                .setType(maestroOutput.getName())
                 .setContent(content);
     }
 
-    private Attachment createAttachment(Item maestroItem) {
+    private Attachment createAttachment(String name, byte[] content) {
         return new Attachment()
-                .setType(maestroItem.getName())
-                .setContent(maestroItem.getContent());
+                .setType(name)
+                .setContent(content)
+                .setType(BYTE_ARRAY_TYPE)
+                ;
     }
 
     private String constructUrlToDatahouse(String itemId) {
@@ -252,6 +275,40 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
      */
     private String constructPathToAttachment(String attachmentId) {
         return "/attachments/" + attachmentId;
+    }
+
+
+    private UploadPlan buildOutputUploadPlan(List<Output> outputs) {
+        List<Attachment> toUpload = new ArrayList<>();
+        List<Integer> outputIndexes = new ArrayList<>();
+        for (int i = 0; i < outputs.size(); i++) {
+            Output output = outputs.get(i);
+            if (hasContent(output)) {
+                toUpload.add(createAttachment(output.getName(), output.getContent()));
+                outputIndexes.add(i);
+            }
+        }
+        return new UploadPlan(toUpload, outputIndexes);
+    }
+
+    private boolean hasContent(Output output) {
+        return output != null && output.getContent() != null && output.getContent().length > 0;
+    }
+
+    private void mapIdsBackToOutputs(List<Output> outputs, List<Integer> outputIndexes, List<String> ids, List<Reference> attachmentRefs) {
+        for (int k = 0; k < outputIndexes.size(); k++) {
+            int idx = outputIndexes.get(k);
+            String attachmentId = ids.get(k);
+            Output output = outputs.get(idx);
+            output.setReference(constructPathToAttachment(attachmentId));
+            output.setContent(null);
+            attachmentRefs.add(new Reference()
+                    .setName(output.getName())
+                    .setType(output.getFormat())
+                    .setValue(attachmentId)
+                    .setRefType(RefType.ATTACHMENT)
+            );
+        }
     }
 
 }

@@ -1,12 +1,8 @@
 package net.ihe.gazelle.maestro.quarkus.mock;
 
-import net.ihe.gazelle.maestro.api.business.testreport.Item;
-import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
-import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
+import net.ihe.gazelle.maestro.api.business.testreport.*;
 import net.ihe.gazelle.maestro.business.TestReportRecordService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,7 +11,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class InMemoryTestReportRecordService implements TestReportRecordService {
 
     private final Map<String, TestReport> storedReports = new ConcurrentHashMap<>();
-    private final Map<String, Item> storedItems = new ConcurrentHashMap<>();
+    private final Map<String, Output> storedItems = new ConcurrentHashMap<>();
     private final Map<String, byte[]> storedAttachments = new ConcurrentHashMap<>();
     private final AtomicLong reportIdCounter = new AtomicLong(1);
     private final AtomicLong itemIdCounter = new AtomicLong(1);
@@ -52,12 +48,12 @@ public class InMemoryTestReportRecordService implements TestReportRecordService 
         }
     }
 
-    private void processInputsForAttachments(List<Item> inputs) {
+    private void processInputsForAttachments(List<Input> inputs) {
         if (inputs == null || inputs.isEmpty()) {
             return;
         }
 
-        for (Item input : inputs) {
+        for (Input input : inputs) {
             if (hasContent(input)) {
                 String attachmentId = generateAttachmentId();
                 storedAttachments.put(attachmentId, input.getContent().clone());
@@ -67,9 +63,6 @@ public class InMemoryTestReportRecordService implements TestReportRecordService 
         }
     }
 
-    /**
-     * Record step outputs as items and update their references
-     */
     private void recordTestStepOutputs(List<TestRunReport> testRunReports) {
         if (testRunReports == null) return;
 
@@ -77,8 +70,16 @@ public class InMemoryTestReportRecordService implements TestReportRecordService 
             if (testRunReport.getStepRunReports() == null) continue;
 
             for (StepRunReport stepRunReport : testRunReport.getStepRunReports()) {
-                List<Item> outputs = stepRunReport.getOutputs();
-                recordItems(outputs);
+                List<Output> outputs = stepRunReport.getOutputs();
+                if (outputs == null || outputs.isEmpty()) continue;
+                for (Output output : outputs) {
+                    if (output == null) continue;
+                    if (Output.FORMAT_JSON.equals(output.getFormat())) {
+                        recordOutputAsItem(output);
+                    } else {
+                        recordOutputAsAttachment(output);
+                    }
+                }
             }
         }
     }
@@ -95,23 +96,22 @@ public class InMemoryTestReportRecordService implements TestReportRecordService 
         }
     }
 
-    /**
-     * Record items and update their references
-     */
-    private void recordItems(List<Item> items) {
-        if (items == null || items.isEmpty()) return;
-
-        for (Item item : items) {
-            if (item == null) continue;
-
-            String itemId = generateItemId();
-            storedItems.put(itemId, cloneItem(item));
-            item.setReference(constructUrlToItem(itemId));
-            item.setContent(null); // Clear content after recording
-        }
+    private void recordOutputAsItem(Output output) {
+        String itemId = generateItemId();
+        storedItems.put(itemId, cloneItem(output));
+        output.setReference(constructUrlToItem(itemId));
+        output.setContent(null);
     }
 
-    private boolean hasContent(Item input) {
+    private void recordOutputAsAttachment(Output output) {
+        if (output.getContent() == null || output.getContent().length == 0) return;
+        String attachmentId = generateAttachmentId();
+        storedAttachments.put(attachmentId, output.getContent().clone());
+        output.setReference(constructUrlToAttachment(attachmentId));
+        output.setContent(null);
+    }
+
+    private boolean hasContent(Input input) {
         return input != null && input.getContent() != null && input.getContent().length > 0;
     }
 
@@ -137,13 +137,14 @@ public class InMemoryTestReportRecordService implements TestReportRecordService 
 
 
 
-    private Item cloneItem(Item original) {
+    private Output cloneItem(Output original) {
         if (original == null) return null;
 
-        Item clone = new Item();
+        Output clone = new Output();
         clone.setName(original.getName());
         clone.setContent(original.getContent() != null ? original.getContent().clone() : null);
         clone.setReference(original.getReference());
+        clone.setFormat(original.getFormat());
 
         return clone;
     }
@@ -153,7 +154,7 @@ public class InMemoryTestReportRecordService implements TestReportRecordService 
         return storedReports.get(reportId);
     }
 
-    public Item getStoredItem(String itemId) {
+    public Output getStoredItem(String itemId) {
         return storedItems.get(itemId);
     }
 

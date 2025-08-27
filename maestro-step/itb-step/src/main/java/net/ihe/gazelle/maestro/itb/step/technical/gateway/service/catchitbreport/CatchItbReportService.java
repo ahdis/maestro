@@ -19,7 +19,8 @@ package net.ihe.gazelle.maestro.itb.step.technical.gateway.service.catchitbrepor
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
-import net.ihe.gazelle.maestro.api.business.testreport.ItemBuilder;
+import net.ihe.gazelle.maestro.api.business.testreport.Output;
+import net.ihe.gazelle.maestro.api.business.testreport.OutputBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
@@ -103,20 +104,28 @@ public class CatchItbReportService {
         }
     }
 
-    private List<ItemBuilder> buildOutputs(ItbTriggerDTO itbTriggerDTO) {
-        List<ItemBuilder> outputs = new ArrayList<>();
+    private List<OutputBuilder> buildOutputs(ItbTriggerDTO itbTriggerDTO) {
+        List<OutputBuilder> outputs = new ArrayList<>();
         outputs.add(extractXmlFromReport(itbTriggerDTO));
 
         try {
             String logs = itbHttpClient.getTestLogs(itbTriggerDTO.getTestSession().getTestSessionIdentifier());
-            outputs.add(new ItemBuilder().setName("logs").setContent(logs.getBytes()));
+            outputs.add(new OutputBuilder()
+                    .setName("logs")
+                    .setContent(logs.getBytes())
+                    .setFormat(Output.FORMAT_TEXT)
+            );
         } catch (Exception e) {
             log.warn("Could not retrieve logs for session {}: {}", itbTriggerDTO.getTestSession().getTestSessionIdentifier(), e.getMessage());
         }
 
         try {
             byte[] pdf = itbHttpClient.requestPDFReport(itbTriggerDTO.getTestSession().getTestSessionIdentifier(), itbTriggerDTO.getTestSession().getTestCaseIdentifier());
-            outputs.add(new ItemBuilder().setName("pdf").setContent(pdf));
+            outputs.add(new OutputBuilder()
+                    .setName("pdf")
+                    .setContent(pdf)
+                    .setFormat(Output.FORMAT_PDF)
+            );
         } catch (Exception e) {
             log.warn("Could not request pdf for session {}: {}", itbTriggerDTO.getTestSession().getTestSessionIdentifier(), e.getMessage());
         }
@@ -124,7 +133,11 @@ public class CatchItbReportService {
         return outputs;
     }
 
-    private ItemBuilder extractXmlFromReport(ItbTriggerDTO itbTriggerDTO) {
-        return new ItemBuilder().setName("rawXml").setContent(itbTriggerDTO.getTestReport().getBytes());
+    private OutputBuilder extractXmlFromReport(ItbTriggerDTO itbTriggerDTO) {
+        return new OutputBuilder()
+                .setName("rawXml")
+                .setContent(itbTriggerDTO.getTestReport().getBytes())
+                .setFormat(Output.FORMAT_XML)
+                ;
     }
 }

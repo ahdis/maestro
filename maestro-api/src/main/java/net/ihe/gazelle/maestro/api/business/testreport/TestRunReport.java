@@ -31,8 +31,8 @@ public class TestRunReport {
     private Date dateTime;
     private Result result;
     private Test test;
-    private List<Item> inputs;
-    private List<Item> outputs;
+    private List<Input> inputs;
+    private List<Output> outputs;
     private List<StepRunReport> stepRunReports;
     private String urlToTestRun;
     private List<UnexpectedError> unexpectedErrors;
@@ -85,40 +85,40 @@ public class TestRunReport {
         return this;
     }
 
-    public List<Item> getInputs() {
+    public List<Input> getInputs() {
         return new ArrayList<>(inputs);
     }
 
-    public TestRunReport setInputs(List<Item> inputs) {
+    public TestRunReport setInputs(List<Input> inputs) {
         this.inputs = new ArrayList<>(inputs);
         return this;
     }
 
-    public TestRunReport addInput(Item input) {
+    public TestRunReport addInput(Input input) {
         inputs.add(input);
         return this;
     }
 
-    public TestRunReport addInputs(List<Item> inputs) {
+    public TestRunReport addInputs(List<Input> inputs) {
         this.inputs.addAll(inputs);
         return this;
     }
 
-    public List<Item> getOutputs() {
+    public List<Output> getOutputs() {
         return new ArrayList<>(outputs);
     }
 
-    public TestRunReport setOutputs(List<Item> outputs) {
+    public TestRunReport setOutputs(List<Output> outputs) {
         this.outputs = new ArrayList<>(outputs);
         return this;
     }
 
-    public TestRunReport addOutput(Item output) {
+    public TestRunReport addOutput(Output output) {
         outputs.add(output);
         return this;
     }
 
-    public TestRunReport addOutputs(List<Item> outputs) {
+    public TestRunReport addOutputs(List<Output> outputs) {
         this.outputs.addAll(outputs);
         return this;
     }

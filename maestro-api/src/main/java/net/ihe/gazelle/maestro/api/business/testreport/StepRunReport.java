@@ -31,7 +31,7 @@ public class StepRunReport {
     private String stepId;
     private String type;
     private StepResult result;
-    private List<Item> outputs;
+    private List<Output> outputs;
     private List<UnexpectedError> unexpectedErrors;
 
     public StepRunReport() {
@@ -74,21 +74,21 @@ public class StepRunReport {
         return this;
     }
 
-    public List<Item> getOutputs() {
+    public List<Output> getOutputs() {
         return new ArrayList<>(outputs);
     }
 
-    public StepRunReport setOutputs(List<Item> outputs) {
+    public StepRunReport setOutputs(List<Output> outputs) {
         this.outputs = new ArrayList<>(outputs);
         return this;
     }
 
-    public StepRunReport addOutput(Item item) {
-        outputs.add(item);
+    public StepRunReport addOutput(Output output) {
+        outputs.add(output);
         return this;
     }
 
-    public StepRunReport addOutputs(List<Item> outputs) {
+    public StepRunReport addOutputs(List<Output> outputs) {
         this.outputs.addAll(outputs);
         return this;
     }

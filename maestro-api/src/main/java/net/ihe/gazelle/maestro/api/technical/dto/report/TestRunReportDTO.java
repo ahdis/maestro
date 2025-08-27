@@ -85,30 +85,30 @@ public class TestRunReportDTO {
     }
 
     @JsonGetter(value = "inputs")
-    public List<ItemDTO> getInputs() {
+    public List<InputDTO> getInputs() {
         return domain.getInputs().stream()
-                .map(ItemDTO::new)
+                .map(InputDTO::new)
                 .toList();
     }
 
     @JsonSetter(value = "inputs")
-    public void setInputs(List<ItemDTO> inputs) {
+    public void setInputs(List<InputDTO> inputs) {
         domain.setInputs(inputs.stream()
-                .map(ItemDTO::getDomain)
+                .map(InputDTO::getDomain)
                 .toList());
     }
 
     @JsonGetter(value = "outputs")
-    public List<ItemDTO> getOutputs() {
+    public List<OutputDTO> getOutputs() {
         return domain.getOutputs().stream()
-                .map(ItemDTO::new)
+                .map(OutputDTO::new)
                 .toList();
     }
 
     @JsonSetter(value = "outputs")
-    public void setOutputs(List<ItemDTO> outputs) {
-        domain.setInputs(outputs.stream()
-                .map(ItemDTO::getDomain)
+    public void setOutputs(List<OutputDTO> outputs) {
+        domain.setOutputs(outputs.stream()
+                .map(OutputDTO::getDomain)
                 .toList());
     }
 

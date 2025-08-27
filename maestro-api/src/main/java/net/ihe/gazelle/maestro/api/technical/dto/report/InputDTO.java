@@ -17,22 +17,22 @@
 package net.ihe.gazelle.maestro.api.technical.dto.report;
 
 import com.fasterxml.jackson.annotation.*;
-import net.ihe.gazelle.maestro.api.business.testreport.Item;
+import net.ihe.gazelle.maestro.api.business.testreport.Input;
 
 import java.util.Base64;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({"name", "content", "reference"})
-public class ItemDTO {
+public class InputDTO {
 
     @JsonIgnore
-    private final Item domain;
+    private final Input domain;
 
-    public ItemDTO() {
-        this.domain = new Item();
+    public InputDTO() {
+        this.domain = new Input();
     }
 
-    public ItemDTO(Item domain) {
+    public InputDTO(Input domain) {
         this.domain = domain;
     }
 
@@ -69,8 +69,10 @@ public class ItemDTO {
         domain.setReference(reference);
     }
 
+
+
     @JsonIgnore
-    public Item getDomain() {
+    public Input getDomain() {
         return domain;
     }
 }

@@ -55,11 +55,13 @@ public class SimulationStepRunner implements StepRunner {
             CompletableFuture<SimulationReport> futureReport = new CompletableFuture<>();
             simulationHandler.simulate(simulationRequest, this::showInstructions, futureReport::complete);
             SimulationReport simulationReport = getSimulationReport(simulationRequest, futureReport);
-            ItemBuilder itemBuilder = new ItemBuilder()
+            OutputBuilder outputBuilder = new OutputBuilder()
                     .setContent(serializer.toByteArray(simulationReport))
-                    .setName(SIMULATION_REPORT);
+                    .setName(SIMULATION_REPORT)
+                    .setFormat(Output.FORMAT_JSON)
+                    ;
             StepRunReportBuilder stepRunReportBuilder = prepareStepReport(stepRun)
-                    .setOutputs(List.of(itemBuilder));
+                    .setOutputs(List.of(outputBuilder));
             computeResult(simulationReport, stepRunReportBuilder);
             return CompletableFuture.completedFuture(stepRunReportBuilder);
         } catch (MissingRequiredParameterException e) {

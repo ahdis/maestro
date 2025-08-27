@@ -29,7 +29,7 @@ public class StepRunReportBuilder extends AbstractBuilder<StepRunReport> {
     private String stepId;
     private String type;
     private StepResult result;
-    private List<ItemBuilder> outputs;
+    private List<OutputBuilder> outputs;
     private List<UnexpectedErrorBuilder> unexpectedErrors;
 
     public StepRunReportBuilder() {
@@ -59,17 +59,17 @@ public class StepRunReportBuilder extends AbstractBuilder<StepRunReport> {
         return this;
     }
 
-    public StepRunReportBuilder setOutputs(List<ItemBuilder> outputs) {
+    public StepRunReportBuilder setOutputs(List<OutputBuilder> outputs) {
         this.outputs = new ArrayList<>(outputs);
         return this;
     }
 
-    public StepRunReportBuilder addOutput(ItemBuilder item) {
+    public StepRunReportBuilder addOutput(OutputBuilder item) {
         this.outputs.add(item);
         return this;
     }
 
-    public StepRunReportBuilder addOutputs(List<ItemBuilder> outputs) {
+    public StepRunReportBuilder addOutputs(List<OutputBuilder> outputs) {
         this.outputs.addAll(outputs);
         return this;
     }

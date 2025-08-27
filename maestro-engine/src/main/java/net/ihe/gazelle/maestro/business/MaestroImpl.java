@@ -136,7 +136,7 @@ public class MaestroImpl implements Maestro {
     public void finishStep(StepRun stepRun, StepRunReportBuilder stepRunReportBuilder) {
         String testRunId = stepRun.testRunId();
         TestRun testRun = getTestRunFromStore(testRunId);
-        List<ItemBuilder> inputs = convertBinaryPropertiesToItems(testRun.getInputs());
+        List<InputBuilder> inputs = convertBinaryPropertiesToItems(testRun.getInputs());
         addStepReportToStore(testRunId, stepRunReportBuilder);
         if (stepRun.step().isNameEquals(testRun.getTest().getSteps().getLast())) {
             TestRunReportBuilder testRunReportBuilder = new TestRunReportBuilder()
@@ -378,11 +378,11 @@ public class MaestroImpl implements Maestro {
         recordAndReturnTestReport(testReport, testSetRun);
     }
 
-    private List<ItemBuilder> convertBinaryPropertiesToItems(List<Property<?>> properties) {
-        List<ItemBuilder> items = new ArrayList<>();
+    private List<InputBuilder> convertBinaryPropertiesToItems(List<Property<?>> properties) {
+        List<InputBuilder> items = new ArrayList<>();
         for (Property<?> property : properties) {
             if(property.getValue() instanceof byte[] content) {
-                ItemBuilder item = new ItemBuilder()
+                InputBuilder item = new InputBuilder()
                         .setName(property.getName())
                         .setContent(content);
                 items.add(item);
