@@ -19,6 +19,7 @@ package net.ihe.gazelle.maestro.api.business.testrun;
 import net.ihe.gazelle.maestro.api.business.testreport.SystemUnderTest;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,6 +45,7 @@ public class TestSetRun {
     public TestSetRun() {
         this.testSetId = UUID.randomUUID().toString();
         this.accessControlList = new AccessControlList();
+        this.systemsUnderTest = new ArrayList<>();
     }
 
     public TestSetRun(String testSetId, List<TestRun> testRuns) {
