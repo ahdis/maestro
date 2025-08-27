@@ -23,7 +23,6 @@ import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunner;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationTestResult;
-import net.ihe.gazelle.validation.v2.api.business.report.validator.ValidationReportValidator;
 import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
 
 import java.util.List;
