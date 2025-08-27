@@ -4,11 +4,11 @@ package net.ihe.gazelle.maestro.validation.step.technical.mapper;
 import net.ihe.gazelle.evsapi.client.business.ValidationService;
 import net.ihe.gazelle.evsapi.client.business.request.HandledObject;
 import net.ihe.gazelle.evsapi.client.business.request.ValidationRequest;
+import net.ihe.gazelle.evsapi.client.business.response.report.ConstraintPriority;
 import net.ihe.gazelle.evsapi.client.business.response.report.ConstraintValidation;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
 import net.ihe.gazelle.validation.v2.api.business.report.*;
 import net.ihe.gazelle.validation.v2.api.business.request.ValidationItemBuilder;
-import net.ihe.gazelle.evsapi.client.business.response.report.ConstraintPriority;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -18,7 +18,7 @@ public class EvsValidationMapper {
     private static final String LINE_COL_REGEX = "^line \\d+(, column \\d+)?$";
     private static final Pattern LINE_COL_PATTERN = Pattern.compile(LINE_COL_REGEX);
 
-    private static final String EXTENDED_REGEX =  "^(\\w+):(.+)$";
+    private static final String EXTENDED_REGEX = "^(\\w+):(.+)$";
     private static final Pattern EXTENDED_PATTERN = Pattern.compile(EXTENDED_REGEX);
 
 
@@ -41,7 +41,6 @@ public class EvsValidationMapper {
         }
 
         ValidationReportBuilder reportBuilder = new ValidationReportBuilder();
-        reportBuilder.setModelVersion(ValidationReport.MODEL_VERSION);
 
         // Build the main components
         buildValidationOverview(evsReport, reportBuilder);
@@ -98,10 +97,15 @@ public class EvsValidationMapper {
             return;
         }
 
-        reportBuilder.addValidationItem(
-                new ValidationItemBuilder()
-                        .setContent(evsRequest.getHandledObjects().getFirst().getContent())
-        );
+        for (HandledObject item : evsRequest.getHandledObjects()) {
+            if (item != null) {
+                reportBuilder.addValidationItem(
+                        new ValidationItemBuilder()
+                                .setContent(item.getContent())
+                                .setRole(item.getRole())
+                );
+            }
+        }
     }
 
     /**
@@ -109,8 +113,8 @@ public class EvsValidationMapper {
      */
     private boolean hasHandledObjects(ValidationRequest validationRequest) {
         return validationRequest != null &&
-               validationRequest.getHandledObjects() != null &&
-               !validationRequest.getHandledObjects().isEmpty();
+                validationRequest.getHandledObjects() != null &&
+                !validationRequest.getHandledObjects().isEmpty();
     }
 
     /**
@@ -161,8 +165,8 @@ public class EvsValidationMapper {
      */
     private boolean hasConstraints(net.ihe.gazelle.evsapi.client.business.response.report.ValidationSubReport subReport) {
         return subReport != null &&
-               subReport.getConstraints() != null &&
-               !subReport.getConstraints().isEmpty();
+                subReport.getConstraints() != null &&
+                !subReport.getConstraints().isEmpty();
     }
 
     /**
@@ -210,7 +214,7 @@ public class EvsValidationMapper {
 
         constraint.getUnexpectedErrors().forEach(error -> {
             if (error != null) {
-                assertionBuilder.addUnexpectedErrorBuilder(
+                assertionBuilder.addUnexpectedError(
                         new UnexpectedErrorBuilder()
                                 .setName(error.getName())
                                 .setMessage(error.getMessage())

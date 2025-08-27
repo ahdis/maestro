@@ -16,6 +16,8 @@
 
 package net.ihe.gazelle.maestro.itb.step.technical.gateway.service.catchitbreport;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
@@ -109,14 +111,15 @@ public class CatchItbReportService {
 
         try {
             String logs = itbHttpClient.getTestLogs(itbTriggerDTO.getTestSession().getTestSessionIdentifier());
-            outputs.add(new ItemBuilder().setName("logs").setContent(logs.getBytes()));
+            outputs.add(new ItemBuilder().setName("LOGS").setContent(wrapDataInJson(logs)));
         } catch (Exception e) {
             log.warn("Could not retrieve logs for session {}: {}", itbTriggerDTO.getTestSession().getTestSessionIdentifier(), e.getMessage());
         }
 
         try {
             byte[] pdf = itbHttpClient.requestPDFReport(itbTriggerDTO.getTestSession().getTestSessionIdentifier(), itbTriggerDTO.getTestSession().getTestCaseIdentifier());
-            outputs.add(new ItemBuilder().setName("pdf").setContent(pdf));
+            String encodedPDF = java.util.Base64.getEncoder().encodeToString(pdf);
+            outputs.add(new ItemBuilder().setName("PDF").setContent(wrapDataInJson(encodedPDF)));
         } catch (Exception e) {
             log.warn("Could not request pdf for session {}: {}", itbTriggerDTO.getTestSession().getTestSessionIdentifier(), e.getMessage());
         }
@@ -125,6 +128,19 @@ public class CatchItbReportService {
     }
 
     private ItemBuilder extractXmlFromReport(ItbTriggerDTO itbTriggerDTO) {
-        return new ItemBuilder().setName("rawXml").setContent(itbTriggerDTO.getTestReport().getBytes());
+        String encodedPDF = java.util.Base64.getEncoder().encodeToString(itbTriggerDTO.getTestReport().getBytes());
+        return new ItemBuilder().setName("RAW_XML").setContent(wrapDataInJson(encodedPDF));
+    }
+
+    /**
+     * We need to wrap the XML content in a JSON object to be compatible with the datahouse persistence service
+     * @param data the data to wrap
+     * @return the wrapped data as a byte array
+     */
+    private byte[] wrapDataInJson(String data) {
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode node = mapper.createObjectNode();
+        node.put("content", data);
+        return node.toString().getBytes();
     }
 }
