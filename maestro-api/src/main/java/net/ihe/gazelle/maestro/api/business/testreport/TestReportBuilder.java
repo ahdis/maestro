@@ -160,7 +160,7 @@ public class TestReportBuilder extends AbstractBuilder<TestReport> {
                 .setDateTime(dateTime)
                 .setTestService(AbstractBuilder.staticBuildWithoutValidation(testService))
                 .setSystemsUnderTest(
-                        !subReports.isEmpty() ? systemsUnderTest.stream()
+                        !systemsUnderTest.isEmpty() ? systemsUnderTest.stream()
                                 .map(AbstractBuilder::staticBuildWithoutValidation)
                                 .toList() : new ArrayList<>()
                 )

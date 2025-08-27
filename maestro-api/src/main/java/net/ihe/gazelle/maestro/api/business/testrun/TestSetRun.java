@@ -16,6 +16,7 @@
 
 package net.ihe.gazelle.maestro.api.business.testrun;
 
+import net.ihe.gazelle.maestro.api.business.testreport.SystemUnderTest;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 
 import java.util.List;
@@ -26,6 +27,9 @@ import java.util.UUID;
  * {@link TestRun}
  * testSetId an id that will be spread to each element of testRuns <br>
  * testRuns the list of testRuns to execute
+ * {@link AccessControlList} accessControlList an ACL that will be spread to each element of testRuns <br>
+ * systemsUnderTest the list of systems under test that will be spread to each element of testRuns <br>
+ * testSetRunId today maps the TestInstance ID in Gazelle Test Management
  */
 public class TestSetRun {
 
@@ -33,6 +37,9 @@ public class TestSetRun {
     private String testSuiteName;
     private List<TestRun> testRuns;
     private AccessControlList accessControlList;
+    private List<SystemUnderTest> systemsUnderTest;
+    private String testSetRunId;
+
 
     public TestSetRun() {
         this.testSetId = UUID.randomUUID().toString();
@@ -73,5 +80,21 @@ public class TestSetRun {
     public TestSetRun setAccessControlList(AccessControlList accessControlList) {
         this.accessControlList = accessControlList;
         return this;
+    }
+
+    public List<SystemUnderTest> getSystemsUnderTest() {
+        return systemsUnderTest;
+    }
+
+    public void setSystemsUnderTest(List<SystemUnderTest> systemsUnderTest) {
+        this.systemsUnderTest = systemsUnderTest;
+    }
+
+    public String getTestSetRunId() {
+        return testSetRunId;
+    }
+
+    public void setTestSetRunId(String testSetRunId) {
+        this.testSetRunId = testSetRunId;
     }
 }

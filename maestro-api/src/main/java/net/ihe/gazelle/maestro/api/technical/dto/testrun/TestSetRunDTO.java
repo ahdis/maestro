@@ -18,16 +18,20 @@ package net.ihe.gazelle.maestro.api.technical.dto.testrun;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import net.ihe.gazelle.maestro.api.business.testreport.SystemUnderTest;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 
 import java.util.List;
 
-@JsonPropertyOrder({"testRuns", "accessControlList"})
+@JsonPropertyOrder({"testSuiteName", "testRuns", "accessControlList", "systemsUnderTest"})
 public class TestSetRunDTO {
 
+    private String testSuiteName;
     private List<TestRunDTO> testRuns;
-
     private AccessControlList accessControlList;
+    private List<SystemUnderTest> systemsUnderTest;
+    private String testSetRunId;
+
 
     public TestSetRunDTO() {
         accessControlList = new AccessControlList();
@@ -51,5 +55,33 @@ public class TestSetRunDTO {
     public TestSetRunDTO setAccessControlList(AccessControlList accessControlList) {
         this.accessControlList = accessControlList;
         return this;
+    }
+
+    @JsonProperty("testSuiteName")
+    public String getTestSuiteName() {
+        return testSuiteName;
+    }
+    public TestSetRunDTO setTestSuiteName(String testSuiteName) {
+        this.testSuiteName = testSuiteName;
+        return this;
+    }
+
+    @JsonProperty("systemsUnderTest")
+    public List<SystemUnderTest> getSystemsUnderTest() {
+        return systemsUnderTest;
+    }
+
+    public TestSetRunDTO setSystemsUnderTest(List<SystemUnderTest> systemsUnderTest) {
+        this.systemsUnderTest = systemsUnderTest;
+        return this;
+    }
+
+    @JsonProperty("testSetRunId")
+    public String getTestSetRunId() {
+        return testSetRunId;
+    }
+
+    public void setTestSetRunId(String testSetRunId) {
+        this.testSetRunId = testSetRunId;
     }
 }

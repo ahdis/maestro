@@ -14,6 +14,17 @@
     "isPublic": false,
     "readAccessKey": "tm-test-access-key"
   },
+  "systemsUnderTest": [
+    {
+      "systemIdentification": {
+        "name": "sut-1",
+        "version": "1.0.0"
+      },
+      "macAddresses": ["AA:BB:CC:DD:EE:FF"],
+      "ipAddresses": ["192.168.0.10"],
+      "hostNames": ["sut1.local"]
+    }
+  ],
   "testRuns": [
     {
       "clientCallback": "http://localhost:port/mock/gazelle/rest",
@@ -59,4 +70,3 @@
     }
   ]
 }
-

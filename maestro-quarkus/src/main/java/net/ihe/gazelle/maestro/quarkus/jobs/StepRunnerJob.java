@@ -24,6 +24,7 @@ import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.UnexpectedErrorBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.*;
 import net.ihe.gazelle.maestro.api.business.testrun.MaestroEventProducer;
+import org.slf4j.Logger;
 
 /**
  * A stepRunnerJob receive message from producer to execute Step, launch execution and send result to Maestro Listener
@@ -31,6 +32,8 @@ import net.ihe.gazelle.maestro.api.business.testrun.MaestroEventProducer;
 @Dependent
 @Default
 public class StepRunnerJob {
+
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(StepRunnerJob.class);
 
     private final StepRunnerProvider stepRunnerFactory;
     private final MaestroEventProducer maestroEventProducer;
@@ -67,6 +70,7 @@ public class StepRunnerJob {
      * @param stepRun Previously executed step
      */
     public void returnUnexpectedError(Throwable e, StepRun stepRun) {
+        logger.error("Unexpected error during step execution", e);
         UnexpectedErrorBuilder unexpectedErrorBuilder = new UnexpectedErrorBuilder()
                 .fromThrowable(e);
         StepRunReportBuilder builder = new StepRunReportBuilder()

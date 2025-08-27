@@ -41,7 +41,6 @@ public class EvsValidationMapper {
         }
 
         ValidationReportBuilder reportBuilder = new ValidationReportBuilder();
-        reportBuilder.setModelVersion(ValidationReport.MODEL_VERSION);
 
         // Build the main components
         buildValidationOverview(evsReport, reportBuilder);
@@ -210,7 +209,7 @@ public class EvsValidationMapper {
 
         constraint.getUnexpectedErrors().forEach(error -> {
             if (error != null) {
-                assertionBuilder.addUnexpectedErrorBuilder(
+                assertionBuilder.addUnexpectedError(
                         new UnexpectedErrorBuilder()
                                 .setName(error.getName())
                                 .setMessage(error.getMessage())

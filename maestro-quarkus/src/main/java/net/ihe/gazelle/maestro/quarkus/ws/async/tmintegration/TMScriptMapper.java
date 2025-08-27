@@ -23,6 +23,8 @@ import net.ihe.gazelle.maestro.api.business.testrun.Step;
 import net.ihe.gazelle.maestro.api.business.testrun.Test;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
+import net.ihe.gazelle.maestro.api.business.testreport.EntityIdentification;
+import net.ihe.gazelle.maestro.api.business.testreport.SystemUnderTest;
 import net.ihe.gazelle.maestro.business.MissingArgumentException;
 import net.ihe.gazelle.maestro.quarkus.ws.async.TestRunStore;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
@@ -45,6 +47,14 @@ public class TMScriptMapper {
      * {
      *   "testSuiteName": "...",
      *   "accessControlList": { ... },
+     *   "systemsUnderTest": [
+     *     {
+     *       "systemIdentification": {"name": "...", "version": "..."},
+     *       "macAddresses": ["..."],
+     *       "ipAddresses": ["..."],
+     *       "hostNames": ["..."]
+     *     }
+     *   ],
      *   "testRuns": [ ... ]
      * }
      */
@@ -52,18 +62,28 @@ public class TMScriptMapper {
         try {
             // Extract root level properties
             String testSuiteName = jsonNode.get("testSuiteName").asText();
+            String testSetRunId = jsonNode.get("testSetRunId").asText();
             JsonNode accessControlListNode = jsonNode.get("accessControlList");
+            JsonNode systemsUnderTestNode = jsonNode.get("systemsUnderTest");
             ArrayNode testRunNodes = (ArrayNode) jsonNode.get("testRuns");
 
             // Create TestSetRun instance
             TestSetRun testSetRun = new TestSetRun();
             testSetRun.setTestSuiteName(testSuiteName);
+            testSetRun.setTestSetRunId(testSetRunId);
 
             // Parse access control list if present
             if (accessControlListNode != null && !accessControlListNode.isNull()) {
                 AccessControlList acl = parseAccessControlList(accessControlListNode);
                 testSetRun.setAccessControlList(acl);
             }
+
+            // Parse systemsUnderTest (optional)
+            List<SystemUnderTest> systemsUnderTest = new ArrayList<>();
+            if (systemsUnderTestNode != null && systemsUnderTestNode.isArray()) {
+                systemsUnderTest = parseSystemsUnderTest((ArrayNode) systemsUnderTestNode);
+            }
+            testSetRun.setSystemsUnderTest(systemsUnderTest);
 
             // Parse test runs
             List<TestRun> testRuns = new ArrayList<>();
@@ -77,6 +97,63 @@ public class TMScriptMapper {
         } catch (NullPointerException e) {
             throw new MissingArgumentException("Required root properties (testSuiteName, testRuns) are missing");
         }
+    }
+
+    private static List<SystemUnderTest> parseSystemsUnderTest(ArrayNode sutNodes) {
+        List<SystemUnderTest> systems = new ArrayList<>();
+        for (JsonNode sutNode : sutNodes) {
+            systems.add(parseSingleSystemUnderTest(sutNode));
+        }
+        return systems;
+    }
+
+    private static SystemUnderTest parseSingleSystemUnderTest(JsonNode sutNode) {
+        SystemUnderTest sut = new SystemUnderTest();
+
+        EntityIdentification identification = parseEntityIdentification(sutNode.get("systemIdentification"));
+        if (identification != null) {
+            sut.setSystemIdentification(identification);
+        }
+
+        List<String> macs = parseStringArray(sutNode.get("macAddresses"));
+        if (macs != null) {
+            sut.setMacAddresses(macs);
+        }
+
+        List<String> ips = parseStringArray(sutNode.get("ipAddresses"));
+        if (ips != null) {
+            sut.setIpAddresses(ips);
+        }
+
+        List<String> hosts = parseStringArray(sutNode.get("hostNames"));
+        if (hosts != null) {
+            sut.setHostNames(hosts);
+        }
+
+        return sut;
+    }
+
+    private static EntityIdentification parseEntityIdentification(JsonNode idNode) {
+        if (idNode == null || idNode.isNull()) {
+            return null;
+        }
+        EntityIdentification id = new EntityIdentification();
+        if (idNode.hasNonNull("name")) {
+            id.setName(idNode.get("name").asText());
+        }
+        if (idNode.hasNonNull("version")) {
+            id.setVersion(idNode.get("version").asText());
+        }
+        return id;
+    }
+
+    private static List<String> parseStringArray(JsonNode node) {
+        if (node == null || !node.isArray()) {
+            return List.of();
+        }
+        List<String> values = new ArrayList<>();
+        node.forEach(n -> values.add(n.asText()));
+        return values;
     }
 
     private static void parseTestRunNode(TestRunStore testRunDAO, JsonNode testRunNode, TestSetRun testSetRun, List<TestRun> testRuns) {
@@ -160,52 +237,60 @@ public class TMScriptMapper {
     private static AccessControlList parseAccessControlList(JsonNode aclNode) {
         AccessControlList acl = new AccessControlList();
         try {
-            // Parse owners
-            JsonNode ownersNode = aclNode.get("owners");
-            if (ownersNode != null && ownersNode.isArray()) {
-                Set<String> owners = new HashSet<>();
-                for (JsonNode ownerNode : ownersNode) {
-                    owners.add(ownerNode.asText());
-                }
+            Set<String> owners = parseStringSet(aclNode.get("owners"));
+            if (owners != null) {
                 acl.setOwners(owners);
             }
 
-            // Parse readers
-            JsonNode readersNode = aclNode.get("readers");
-            if (readersNode != null && readersNode.isArray()) {
-                Set<String> readers = new HashSet<>();
-                for (JsonNode readerNode : readersNode) {
-                    readers.add(readerNode.asText());
-                }
+            Set<String> readers = parseStringSet(aclNode.get("readers"));
+            if (readers != null) {
                 acl.setReaders(readers);
             }
 
-            // Parse editors
-            JsonNode editorsNode = aclNode.get("editors");
-            if (editorsNode != null && editorsNode.isArray()) {
-                Set<String> editors = new HashSet<>();
-                for (JsonNode editorNode : editorsNode) {
-                    editors.add(editorNode.asText());
-                }
+            Set<String> editors = parseStringSet(aclNode.get("editors"));
+            if (editors != null) {
                 acl.setEditors(editors);
             }
 
-            // Parse isPublic
-            JsonNode isPublicNode = aclNode.get("isPublic");
-            if (isPublicNode != null) {
-                acl.setPublic(isPublicNode.asBoolean());
+            Boolean isPublic = parseBoolean(aclNode.get("isPublic"));
+            if (isPublic != null) {
+                acl.setPublic(isPublic);
             }
 
-            // Parse readAccessKey
-            JsonNode readAccessKeyNode = aclNode.get("readAccessKey");
-            if (readAccessKeyNode != null && !readAccessKeyNode.isNull()) {
-                acl.setReadAccessKey(readAccessKeyNode.asText());
+            String readAccessKey = parseText(aclNode.get("readAccessKey"));
+            if (readAccessKey != null) {
+                acl.setReadAccessKey(readAccessKey);
             }
 
         } catch (Exception e) {
             throw new MissingArgumentException("Error parsing AccessControlList: " + e.getMessage());
         }
         return acl;
+    }
+
+    private static Set<String> parseStringSet(JsonNode node) {
+        if (node == null || !node.isArray()) {
+            return Set.of();
+        }
+        Set<String> values = new HashSet<>();
+        for (JsonNode item : node) {
+            values.add(item.asText());
+        }
+        return values;
+    }
+
+    private static Boolean parseBoolean(JsonNode node) {
+        if (node == null || node.isNull()) {
+            return Boolean.FALSE;
+        }
+        return node.asBoolean();
+    }
+
+    private static String parseText(JsonNode node) {
+        if (node == null || node.isNull()) {
+            return null;
+        }
+        return node.asText();
     }
 
 }

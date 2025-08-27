@@ -33,6 +33,13 @@ public class EntityIdentificationBuilder extends AbstractBuilder<EntityIdentific
     public EntityIdentificationBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
         super(validatorBuilderFactory);
     }
+    
+    public EntityIdentificationBuilder(EntityIdentification entityIdentification) {
+        if (entityIdentification != null) {
+            this.version = entityIdentification.getVersion();
+            this.name = entityIdentification.getName();
+        }
+    }
 
     public EntityIdentificationBuilder setVersion(String version) {
         this.version = version;

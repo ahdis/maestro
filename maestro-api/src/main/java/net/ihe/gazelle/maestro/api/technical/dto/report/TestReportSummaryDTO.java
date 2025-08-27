@@ -2,10 +2,10 @@ package net.ihe.gazelle.maestro.api.technical.dto.report;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import net.ihe.gazelle.lang.UnexpectedError;
 import net.ihe.gazelle.maestro.api.business.testreport.Result;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -14,6 +14,9 @@ public class TestReportSummaryDTO {
     private final TestReportSummary domain;
 
     private String location;
+
+    private List<UnexpectedErrorDTO> unexpectedErrors = new ArrayList<>();
+
 
     public TestReportSummaryDTO() {
         this.domain = new TestReportSummary();
@@ -66,18 +69,20 @@ public class TestReportSummaryDTO {
         return this;
     }
 
-    public List<UnexpectedError> getUnexpectedErrors() {
-        return domain.getUnexpectedErrors();
+    public List<UnexpectedErrorDTO> getUnexpectedErrors() {
+        return unexpectedErrors;
     }
 
-    public TestReportSummaryDTO setUnexpectedErrors(List<UnexpectedError> unexpectedErrors) {
-        domain.setUnexpectedErrors(unexpectedErrors);
+    public TestReportSummaryDTO setUnexpectedErrors(List<UnexpectedErrorDTO> unexpectedErrors) {
+        this.unexpectedErrors = unexpectedErrors;
         return this;
     }
 
     @JsonIgnore
     public TestReportSummary getDomain() {
-        return domain;
+        return domain
+                .setUnexpectedErrors(unexpectedErrors.stream().map(UnexpectedErrorDTO::getDomain).toList())
+                ;
     }
 
 }
