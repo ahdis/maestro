@@ -30,10 +30,15 @@ import net.ihe.gazelle.maestro.quarkus.SessionStoreContextImpl;
 import net.ihe.gazelle.maestro.quarkus.StepRunnerProviderSPI;
 import net.ihe.gazelle.maestro.quarkus.handler.HandlerProviderSPI;
 import net.ihe.gazelle.maestro.quarkus.jobs.StepRunnerProvider;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 
 @ApplicationScoped
 public class MaestroFactory {
+
+
+    @ConfigProperty(name = "quarkus.application.version")
+    String applicationVersion;
 
     private final ServiceRegistry serviceRegistry;
     private final MaestroEventProducer maestroEventProducer;
@@ -61,7 +66,7 @@ public class MaestroFactory {
     @Produces
     @Default
     public Maestro getMaestro() {
-        return new MaestroImpl(maestroEventProducer, sessionStoreContext, testReportRecordService);
+        return new MaestroImpl(maestroEventProducer, sessionStoreContext, testReportRecordService, applicationVersion);
     }
 
 }

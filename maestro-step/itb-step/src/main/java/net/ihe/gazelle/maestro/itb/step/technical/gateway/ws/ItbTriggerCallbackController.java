@@ -28,6 +28,8 @@ import net.ihe.gazelle.maestro.itb.step.business.dao.ItbTestExecutionDBInMemory;
 import net.ihe.gazelle.maestro.itb.step.technical.gateway.dto.ItbTriggerDTO;
 import net.ihe.gazelle.maestro.itb.step.technical.gateway.service.catchitbreport.CatchItbReportService;
 import net.ihe.gazelle.maestro.itb.step.technical.gateway.service.catchitbreport.CatchItbReportServiceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -37,6 +39,7 @@ import java.util.concurrent.CompletableFuture;
 @Path("/itb")
 public class ItbTriggerCallbackController {
 
+    private static final Logger log = LoggerFactory.getLogger(ItbTriggerCallbackController.class);
     private final CatchItbReportService catchItbReportService;
 
     @Inject
@@ -53,6 +56,7 @@ public class ItbTriggerCallbackController {
     @Produces(MediaType.APPLICATION_JSON)
     public Response triggerReportGeneration(ItbTriggerDTO itbTriggerDTO) {
         try {
+            log.warn(String.valueOf(itbTriggerDTO));
             String sessionID = itbTriggerDTO.getTestSession().getTestSessionIdentifier();
             CompletableFuture<StepRunReportBuilder> stepRunReportFuture = ItbTestExecutionDBInMemory.getStepRunReportFuture(sessionID);
             if (stepRunReportFuture == null) {

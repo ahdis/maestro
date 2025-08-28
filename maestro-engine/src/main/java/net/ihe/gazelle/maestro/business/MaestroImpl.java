@@ -35,13 +35,16 @@ public class MaestroImpl implements Maestro {
     private final MaestroEventProducer maestroEventProducer;
     private final SessionStoreContext sessionStoreContext;
     private final TestReportRecordService testReportRecordService;
+    private static final String GAZELLE_ENGINE = "Gazelle engine";
+    private final String maestroVersion;
 
     public MaestroImpl(MaestroEventProducer maestroEventProducer,
                        SessionStoreContext sessionStoreContext,
-                       TestReportRecordService testReportRecordService) {
+                       TestReportRecordService testReportRecordService, String maestroVersion) {
         this.maestroEventProducer = maestroEventProducer;
         this.sessionStoreContext = sessionStoreContext;
         this.testReportRecordService = testReportRecordService;
+        this.maestroVersion = maestroVersion;
     }
 
     @Override
@@ -118,6 +121,7 @@ public class MaestroImpl implements Maestro {
             } catch (Exception e) {
                 TestReportBuilder testReportBuilder = buildGenericTestReport(testSetRun);
                 testReport = testReportBuilder
+                        .setTestService(getTestServiceBuilder())
                         .addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e))
                         .build();
             }
@@ -162,6 +166,13 @@ public class MaestroImpl implements Maestro {
                 .setMessage(e.getMessage());
     }
 
+    private TestServiceBuilder getTestServiceBuilder() {
+        return new TestServiceBuilder()
+                .setDisclaimer("This Gazelle execution service is provided for technical compliance purposes only and does not constitute legal, medical, or regulatory advice.")
+                .setServiceIdentification(
+                        new EntityIdentificationBuilder().setName(GAZELLE_ENGINE).setVersion(maestroVersion));
+    }
+
     /**
      * Method call at the end of a TestRun execution to run next TestRun.
      * <p>
@@ -197,6 +208,7 @@ public class MaestroImpl implements Maestro {
 
     private TestReportBuilder buildGenericTestReport(TestSetRun testSetRun) {
         TestReportBuilder testReportBuilder = new TestReportBuilder()
+                .setTestService(getTestServiceBuilder())
                 .setDateTime(Date.from(Instant.now()))
                 .setTestSuiteName(testSetRun.getTestSuiteName())
                 .setAccessControlList(new AccessControlListBuilder(testSetRun.getAccessControlList()))
