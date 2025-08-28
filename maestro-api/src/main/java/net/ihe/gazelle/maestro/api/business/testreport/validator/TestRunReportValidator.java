@@ -25,6 +25,7 @@ public class TestRunReportValidator extends AbstractValidator<TestRunReport> {
 
     private final TestValidator testValidator;
     private final OutputValidator outputValidator;
+    private final InputValidator inputValidator;
     private final StepRunReportValidator stepRunReportValidator;
     private final UnexpectedErrorValidator unexpectedErrorValidator;
 
@@ -34,6 +35,7 @@ public class TestRunReportValidator extends AbstractValidator<TestRunReport> {
         outputValidator = new OutputValidator();
         stepRunReportValidator = new StepRunReportValidator();
         unexpectedErrorValidator = new UnexpectedErrorValidator();
+        inputValidator = new InputValidator();
     }
 
     public TestRunReportValidator(ValidatorBuilderFactory validatorBuilderFactory) {
@@ -42,6 +44,7 @@ public class TestRunReportValidator extends AbstractValidator<TestRunReport> {
         outputValidator = new OutputValidator();
         stepRunReportValidator = new StepRunReportValidator();
         unexpectedErrorValidator = new UnexpectedErrorValidator();
+        inputValidator = new InputValidator();
     }
 
     @Override
@@ -57,7 +60,7 @@ public class TestRunReportValidator extends AbstractValidator<TestRunReport> {
                 .addRule("testValid", TestRunReport::isTestValid, "Test must be set")
                 .addRule("urlToTestRun", TestRunReport::isUrlToTestRunValid, "URL must be set and not empty if present")
                 .addMember("test", TestRunReport::getTest, testValidator::getAssembledValidatorBuilder)
-                .addMember("inputs", TestRunReport::getInputs, outputValidator::getAssembledValidatorBuilder)
+                .addMember("inputs", TestRunReport::getInputs, inputValidator::getAssembledValidatorBuilder)
                 .addMember("outputs", TestRunReport::getOutputs, outputValidator::getAssembledValidatorBuilder)
                 .addMember("stepRunReports", TestRunReport::getStepRunReports, stepRunReportValidator::getAssembledValidatorBuilder)
                 .addMember("unexpectedErrors", TestRunReport::getUnexpectedErrors, unexpectedErrorValidator::getAssembledValidatorBuilder);
