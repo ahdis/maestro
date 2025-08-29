@@ -20,8 +20,8 @@ import net.ihe.gazelle.maestro.validation.step.business.ServiceClientException;
 import net.ihe.gazelle.validation.v2.api.business.ValidationService;
 import net.ihe.gazelle.validation.v2.api.business.profile.ValidationProfile;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
+import net.ihe.gazelle.validation.v2.api.business.request.Input;
 import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
-import net.ihe.gazelle.validation.v2.api.business.request.ValidationItem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -226,7 +226,7 @@ class GazelleValidationServiceHandlerTest {
         // Given
         ValidationRequest validationRequest = new ValidationRequest();
         validationRequest.setValidationProfileId("testProfileId");
-        validationRequest.setValidationItems(Collections.emptyList());
+        validationRequest.setInputs(Collections.emptyList());
 
         ValidationReport expectedReport = new ValidationReport();
         when(validationService.validate(validationRequest)).thenReturn(expectedReport);
@@ -267,9 +267,9 @@ class GazelleValidationServiceHandlerTest {
         ValidationRequest request = new ValidationRequest();
         request.setValidationProfileId("testProfileId");
 
-        ValidationItem item = new ValidationItem();
+        Input item = new Input();
         item.setContent("test content".getBytes());
-        request.setValidationItems(Collections.singletonList(item));
+        request.setInputs(Collections.singletonList(item));
 
         return request;
     }

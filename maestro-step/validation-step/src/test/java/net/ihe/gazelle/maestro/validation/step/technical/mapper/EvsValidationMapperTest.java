@@ -8,6 +8,8 @@ import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class EvsValidationMapperTest {
@@ -32,7 +34,7 @@ class EvsValidationMapperTest {
         assertEquals("3.9.2", validationMethod.getValidationServiceVersion());
 
         // Validate validation items (4 assertions)
-        assertArrayEquals("test content".getBytes(), validationReport.getValidationItems().getFirst().getContent());
+        assertArrayEquals("test content".getBytes(), validationReport.getInputs().getFirst().getContent());
 
         var reports = validationReport.getReports();
         assertNotNull(reports);
@@ -81,7 +83,7 @@ class EvsValidationMapperTest {
             () -> assertEquals("ERROR", assertionReport.getSeverity().toString()),
             () -> assertEquals("MANDATORY", assertionReport.getPriority().toString()),
             () -> assertEquals("FAILED", assertionReport.getResult().toString()),
-            () -> assertEquals("line: 0", assertionReport.getSubjectLocation())
+            () -> assertEquals("line: 0", assertionReport.getSubjectLocations().getFirst().getValue())
         );
     }
 
@@ -154,7 +156,8 @@ class EvsValidationMapperTest {
         return new ValidationStep("validationStep",
                 new Property<>(ValidationStep.VALIDATION_SERVICE, "testService"),
                 new Property<>(ValidationStep.VALIDATION_PROFILE, "ITI-44"),
-                new Property<>(ValidationStep.CONTENT_TO_VALIDATE, "content".getBytes()));
+                List.of(new Property<>("contentToValidate", "content".getBytes()))
+                );
     }
 
 

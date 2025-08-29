@@ -183,11 +183,11 @@ class MaestroStepsIntegrationTest {
         testReportRecordService.clear(); // Clear previous test data
 
         TestSetRun testSetRun = getTestRunsWithOneValidationStep();
-        Property<byte[]> contentToValidate = new Property<>(ValidationStep.CONTENT_TO_VALIDATE, "liyvfgljv".getBytes());
+        Property<byte[]> contentToValidate = new Property<>("content", "liyvfgljv".getBytes());
         Step validationStep = new ValidationStep("test-validation-two",
                 new Property<>(ValidationStep.VALIDATION_SERVICE, "matchbox"),
                 new Property<>(ValidationStep.VALIDATION_PROFILE, "Parameters"),
-                contentToValidate
+                new ArrayList<>(List.of(contentToValidate))
         );
         testSetRun.getTestRuns().getFirst().getTest().addStep(validationStep);
         testSetRun.getTestRuns().getFirst().addInputs(contentToValidate);
@@ -223,7 +223,7 @@ class MaestroStepsIntegrationTest {
         Step validationStep = new ValidationStep("test-validation",
                 new Property<>(ValidationStep.VALIDATION_SERVICE, "matchbox"),
                 new Property<>(ValidationStep.VALIDATION_PROFILE, "Parameters"),
-                new Property<>(ValidationStep.CONTENT_TO_VALIDATE, "liyvfgljv".getBytes())
+                List.of(new Property<>("content", "liyvfgljv".getBytes()))
         );
         testSetRun.getTestRuns().getFirst().getTest().addStep(validationStep);
         TestReportSummary reportSummary = synchronousMaestro.executeTestSet(testSetRun);
@@ -263,11 +263,11 @@ class MaestroStepsIntegrationTest {
 
     private static TestSetRun getTestRunsWithOneValidationStep() {
         List<TestRun> testRuns = new ArrayList<>();
-        Property<byte[]> contentToValidate = new Property<>(ValidationStep.CONTENT_TO_VALIDATE, "liyvfgljv".getBytes());
+        Property<byte[]> contentToValidate = new Property<>("content", "liyvfgljv".getBytes());
         Step validationStep = new ValidationStep("test-validation",
                 new Property<>(ValidationStep.VALIDATION_SERVICE, "matchbox"),
                 new Property<>(ValidationStep.VALIDATION_PROFILE, "Parameters"),
-                contentToValidate
+                new ArrayList<>(List.of(contentToValidate))
         );
         net.ihe.gazelle.maestro.api.business.testrun.Test test = new net.ihe.gazelle.maestro.api.business.testrun.Test().addStep(validationStep);
         test.setName("validationTest");

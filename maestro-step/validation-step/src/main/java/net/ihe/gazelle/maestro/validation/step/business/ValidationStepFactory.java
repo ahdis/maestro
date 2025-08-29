@@ -20,6 +20,7 @@ import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.api.business.testrun.Step;
 import net.ihe.gazelle.maestro.api.business.testrun.StepFactory;
 
+import java.util.List;
 import java.util.Map;
 
 // TODO : to delete when StepFactoryProvider will be deleted
@@ -32,12 +33,22 @@ public class ValidationStepFactory implements StepFactory {
                 name,
                 (Property<String>) properties.get(ValidationStep.VALIDATION_SERVICE),
                 (Property<String>) properties.get(ValidationStep.VALIDATION_PROFILE),
-                (Property<byte[]>) properties.get(ValidationStep.CONTENT_TO_VALIDATE)
+                getContentsToValidate(properties)
         );
     }
 
     @Override
     public String getSupportedStep() {
         return ValidationStep.TYPE;
+    }
+
+    private static List<Property<byte[]>> getContentsToValidate(Map<String, Property<?>> properties) {
+        // return all byte[] properties which key is not VALIDATION_SERVICE or VALIDATION_PROFILE
+        return properties.entrySet().stream()
+                .filter(entry -> !entry.getKey().equals(ValidationStep.VALIDATION_SERVICE)
+                    && !entry.getKey().equals(ValidationStep.VALIDATION_PROFILE) && entry.getValue().getValue() instanceof byte[])
+                .map(Map.Entry::getValue)
+                .map(property -> (Property<byte[]>) property)
+                .toList();
     }
 }

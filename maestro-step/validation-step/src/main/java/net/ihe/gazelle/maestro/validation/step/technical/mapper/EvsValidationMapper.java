@@ -8,7 +8,7 @@ import net.ihe.gazelle.evsapi.client.business.response.report.ConstraintPriority
 import net.ihe.gazelle.evsapi.client.business.response.report.ConstraintValidation;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
 import net.ihe.gazelle.validation.v2.api.business.report.*;
-import net.ihe.gazelle.validation.v2.api.business.request.ValidationItemBuilder;
+import net.ihe.gazelle.validation.v2.api.business.request.InputBuilder;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -24,9 +24,11 @@ public class EvsValidationMapper {
 
     public net.ihe.gazelle.evsapi.client.business.request.ValidationRequest mapToEvsRequest(ValidationStep validationStep) {
         return new net.ihe.gazelle.evsapi.client.business.request.ValidationRequest()
-                .addValidationItem(
-                        new HandledObject()
-                                .setContent(validationStep.getContentToValidate().getValue())
+                .setValidationItems(validationStep.getContentsToValidate().stream()
+                        .map(contentProp -> new HandledObject()
+                                .setContent(contentProp.getValue())
+                                .setRole(contentProp.getName()))
+                        .toList()
                 )
                 .setValidationService(
                         new ValidationService()
@@ -99,10 +101,10 @@ public class EvsValidationMapper {
 
         for (HandledObject item : evsRequest.getHandledObjects()) {
             if (item != null) {
-                reportBuilder.addValidationItem(
-                        new ValidationItemBuilder()
+                reportBuilder.addInput(
+                        new InputBuilder()
                                 .setContent(item.getContent())
-                                .setRole(item.getRole())
+                                .setItemId(item.getRole())
                 );
             }
         }
@@ -179,7 +181,10 @@ public class EvsValidationMapper {
                 .setAssertionID(constraint.getConstraintID())
                 .setAssertionType(constraint.getConstraintType())
                 .setDescription(constraint.getConstraintDescription())
-                .setSubjectLocation(validLocation)
+                .addSubjectLocation(
+                        new SubjectLocationBuilder()
+                                .setValue(validLocation)
+                )
                 .setSubjectValue(constraint.getValueInValidatedObject())
                 .setRequirementIDs(getRequirementIds(constraint))
                 .setPriority(mapPriority(constraint.getPriority()))

@@ -27,6 +27,8 @@ import net.ihe.gazelle.maestro.quarkus.jobs.EventMaestroProducer;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 class TestRunControllerTest {
 
@@ -40,7 +42,8 @@ class TestRunControllerTest {
                         "iti78-request-validation",
                         new Property<>(ValidationStep.VALIDATION_SERVICE, "matchbox"),
                         new Property<>(ValidationStep.VALIDATION_PROFILE, "Parameters"),
-                        new PropertyRef<>(ValidationStep.CONTENT_TO_VALIDATE, "iti78-request", byte[].class)));
+                        new ArrayList<>(List.of(new PropertyRef<>("content", "iti78-request", byte[].class))))
+                );
 
         testRun.setTest(test);
 

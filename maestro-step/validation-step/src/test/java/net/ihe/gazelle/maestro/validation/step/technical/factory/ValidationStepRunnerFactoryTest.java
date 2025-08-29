@@ -23,6 +23,8 @@ import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ValidationStepRunnerFactoryTest {
@@ -45,7 +47,7 @@ class ValidationStepRunnerFactoryTest {
                 "iti78-request-validation",
                 new Property<>(ValidationStep.VALIDATION_SERVICE, "matchbox"),
                 new Property<>(ValidationStep.VALIDATION_PROFILE, "Parameters"),
-                new PropertyRef<>(ValidationStep.CONTENT_TO_VALIDATE, "iti78-request", byte[].class)
+                List.of(new PropertyRef<>("contentToValidate", "iti78-request", byte[].class))
         );
         assertEquals(1, validationStepRunnerFactory.getRequiredServices(validationStep).size());
     }
