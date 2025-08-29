@@ -17,7 +17,7 @@
 package net.ihe.gazelle.maestro.validation.step.business;
 
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
-import net.ihe.gazelle.validation.v2.api.business.request.ValidationItem;
+import net.ihe.gazelle.validation.v2.api.business.request.Input;
 import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
 import org.junit.jupiter.api.Test;
 
@@ -36,14 +36,15 @@ class ValidationRequestMapperTest {
         ValidationRequest request = ValidationRequestMapper.createValidationRequest(step);
         assertNotNull(request);
         assertEquals(step.getValidationProfile().getValue(), request.getValidationProfileId());
-        assertEquals(1, request.getValidationItems().size());
-        ValidationItem item = request.getValidationItems().getFirst();
-        assertNotNull(item);
-        assertNull(item.getItemId());
-        String actualContent = new String(item.getContent(), StandardCharsets.UTF_8);
+        assertEquals(1, request.getInputs().size());
+        Input input = request.getInputs().getFirst();
+        assertNotNull(input);
+        assertNull(input.getItemId());
+        String actualContent = new String(input.getContent(), StandardCharsets.UTF_8);
         assertEquals("content", actualContent);
-        assertNull(item.getRole());
-        assertNull(item.getLocation());
+        assertNull(input.getItemId());
+        assertNull(input.getId());
+        assertNull(input.getLocation());
     }
 
 }

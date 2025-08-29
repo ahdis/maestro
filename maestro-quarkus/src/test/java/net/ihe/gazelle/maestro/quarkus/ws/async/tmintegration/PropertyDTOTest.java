@@ -78,7 +78,7 @@ class PropertyDTOTest {
         Property<?> property = propertyDTO.createProperty();
         assertEquals("dateValue", property.getName());
         assertInstanceOf(Date.class, property.getValue());
-        Date expected = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").parse(date);
+        Date expected = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").parse(date);
         assertEquals(expected, property.getValue());
     }
 
