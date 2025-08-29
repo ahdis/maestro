@@ -34,6 +34,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -47,6 +48,8 @@ import java.util.List;
 public class CatchItbReportService {
 
     private static final Logger log = LoggerFactory.getLogger(CatchItbReportService.class);
+    public static final String PDF_ITB_VALIDATION_REPORT = "PDF_ITB_Validation_Report";
+    public static final String XML_ITB_VALIDATION_REPORT = "XML_ITB_Validation_Report";
     private final ItbHttpClient itbHttpClient;
     private final MaestroEventProducer maestroProducer;
 
@@ -66,6 +69,16 @@ public class CatchItbReportService {
     public StepRunReportBuilder buildItbReport(ItbTriggerDTO itbTriggerDTO) {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            // Harden XML parsing against XXE and external entity expansion
+            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+            factory.setXIncludeAware(false);
+            factory.setExpandEntityReferences(false);
+            // Forbids any external access during parsing
+            optionalEntityEscape(factory);
             DocumentBuilder builder = factory.newDocumentBuilder();
             InputSource is = new InputSource(new StringReader(itbTriggerDTO.getTestReport()));
             Document docReport = builder.parse(is);
@@ -80,6 +93,15 @@ public class CatchItbReportService {
             return testReport;
         } catch (ParserConfigurationException | IOException | SAXException e) {
             throw new CatchItbReportServiceException("Error while parsing ITB report: " + e.getMessage(), e);
+        }
+    }
+
+    private static void optionalEntityEscape(DocumentBuilderFactory factory) {
+        try {
+            factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+        } catch (IllegalArgumentException ignored) {
+            // Some XML parsers may not support these attributes; ignore if unsupported
         }
     }
 
@@ -122,7 +144,7 @@ public class CatchItbReportService {
         try {
             byte[] pdf = itbHttpClient.requestPDFReport(itbTriggerDTO.getTestSession().getTestSessionIdentifier(), itbTriggerDTO.getTestSession().getTestCaseIdentifier());
             outputs.add(new OutputBuilder()
-                    .setName("pdf")
+                    .setName(PDF_ITB_VALIDATION_REPORT)
                     .setContent(pdf)
                     .setFormat(Output.FORMAT_PDF)
             );
@@ -135,7 +157,7 @@ public class CatchItbReportService {
 
     private OutputBuilder extractXmlFromReport(ItbTriggerDTO itbTriggerDTO) {
         return new OutputBuilder()
-                .setName("rawXml")
+                .setName(XML_ITB_VALIDATION_REPORT)
                 .setContent(itbTriggerDTO.getTestReport().getBytes())
                 .setFormat(Output.FORMAT_XML)
                 ;
