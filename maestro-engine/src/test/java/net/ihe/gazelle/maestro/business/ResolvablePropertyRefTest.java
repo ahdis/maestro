@@ -32,7 +32,7 @@ class ResolvablePropertyRefTest {
     Context context;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         context = new Context();
     }
 

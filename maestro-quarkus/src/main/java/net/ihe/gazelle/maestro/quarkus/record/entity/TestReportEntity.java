@@ -1,7 +1,7 @@
 package net.ihe.gazelle.maestro.quarkus.record.entity;
 
-import net.ihe.gazelle.lang.UnexpectedError;
-import net.ihe.gazelle.maestro.api.business.testreport.*;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+import net.ihe.gazelle.maestro.api.business.testreport.TestService;
 import net.ihe.gazelle.maestro.api.technical.dto.report.*;
 
 import java.util.ArrayList;

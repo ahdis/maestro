@@ -21,8 +21,6 @@ import net.ihe.gazelle.maestro.api.business.testrun.PropertyRef;
 import net.ihe.gazelle.maestro.api.business.testrun.Step;
 import net.ihe.gazelle.maestro.api.business.testrun.StepFactory;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 // TODO : to delete when StepFactoryProvider will be deleted

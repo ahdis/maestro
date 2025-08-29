@@ -18,14 +18,13 @@ package net.ihe.gazelle.maestro.quarkus.factory;
 
 import net.ihe.gazelle.maestro.api.business.testrun.Maestro;
 import net.ihe.gazelle.maestro.business.MaestroImpl;
-import net.ihe.gazelle.maestro.quarkus.mock.StepMockEvent;
 import net.ihe.gazelle.maestro.quarkus.SessionStoreContextImpl;
 import net.ihe.gazelle.maestro.quarkus.StepRunnerProviderSPI;
 import net.ihe.gazelle.maestro.quarkus.configuration.ServiceRegistryDAOImpl;
 import net.ihe.gazelle.maestro.quarkus.configuration.ServiceRegistryImpl;
 import net.ihe.gazelle.maestro.quarkus.jobs.EventMaestroProducer;
 import net.ihe.gazelle.maestro.quarkus.jobs.StepRunnerProvider;
-import net.ihe.gazelle.maestro.quarkus.record.DatahouseTestReportRecordService;
+import net.ihe.gazelle.maestro.quarkus.mock.StepMockEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

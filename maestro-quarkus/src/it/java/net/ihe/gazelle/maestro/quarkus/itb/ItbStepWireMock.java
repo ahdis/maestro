@@ -18,7 +18,6 @@ package net.ihe.gazelle.maestro.quarkus.itb;
 
 import net.ihe.gazelle.maestro.itb.step.business.dao.ItbTestExecutionDBInMemory;
 import net.ihe.gazelle.maestro.quarkus.WireMockSingleton;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +39,7 @@ public class ItbStepWireMock {
         // Utility class
     }
 
-    public static void mockItbTestExecution(int maestroPort) throws IOException {
+    public static void mockItbTestExecution(int maestroPort) {
         // Mock the ITB test execution endpoint
         WireMockSingleton.startServer(0).stubFor(post(urlPathEqualTo("/api/rest/tests/start"))
                 .willReturn(ok().withBody("{\"createdSessions\":[{\"session\":\"test-session-123\"}]}"))

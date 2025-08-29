@@ -41,6 +41,7 @@ import java.lang.reflect.Type;
 @Produces("application/json")
 public class ItbTriggerDTOMessageBodyReader implements MessageBodyReader<ItbTriggerDTO>, MessageBodyWriter<ItbTriggerDTO> {
 
+    public static final String VALUE = "value";
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Override
@@ -70,7 +71,9 @@ public class ItbTriggerDTOMessageBodyReader implements MessageBodyReader<ItbTrig
                     testSessionDTO = parseTestSessionDTO(inputNode.path("item"));
                     break;
                 case "testReport":
-                    testReport = inputNode.path("value").asText();
+                    testReport = inputNode.path(VALUE).asText();
+                    break;
+                default: // ignore unknown fields
                     break;
             }
         }
@@ -88,13 +91,15 @@ public class ItbTriggerDTOMessageBodyReader implements MessageBodyReader<ItbTrig
 
             switch (name) {
                 case "id":
-                    id = Long.parseLong(node.path("value").asText());
+                    id = Long.parseLong(node.path(VALUE).asText());
                     break;
                 case "shortName":
-                    shortName = node.path("value").asText();
+                    shortName = node.path(VALUE).asText();
                     break;
                 case "fullName":
-                    fullName = node.path("value").asText();
+                    fullName = node.path(VALUE).asText();
+                    break;
+                default: // ignore unknown fields
                     break;
             }
         }
@@ -112,13 +117,15 @@ public class ItbTriggerDTOMessageBodyReader implements MessageBodyReader<ItbTrig
 
             switch (name) {
                 case "testSuiteIdentifier":
-                    testSuiteId = node.path("value").asText();
+                    testSuiteId = node.path(VALUE).asText();
                     break;
                 case "testCaseIdentifier":
-                    testCaseId = node.path("value").asText();
+                    testCaseId = node.path(VALUE).asText();
                     break;
                 case "testSessionIdentifier":
-                    testSessionId = node.path("value").asText();
+                    testSessionId = node.path(VALUE).asText();
+                    break;
+                default: // ignore unknown fields
                     break;
             }
         }

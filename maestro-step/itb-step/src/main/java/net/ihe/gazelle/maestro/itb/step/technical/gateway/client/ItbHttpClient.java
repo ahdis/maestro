@@ -39,6 +39,7 @@ import java.util.*;
 public class ItbHttpClient implements ItbClient {
 
     private static final Logger logger = LoggerFactory.getLogger(ItbHttpClient.class);
+    public static final String INPUT = "input";
 
     private Map<String, Object> map;
 
@@ -102,12 +103,16 @@ public class ItbHttpClient implements ItbClient {
                 try {
                     HttpResponse<byte[]> response = client.send(req, HttpResponse.BodyHandlers.ofByteArray());
                     return response.body();
-                } catch (InterruptedException | IOException e) {
-                    throw new RuntimeException("Error request interrupted requesting PDF report. Try again.");
+                } catch (IOException e) {
+                    throw new ItbHttpClientException("Error request interrupted requesting PDF report. Try again.");
+                }
+                catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new ItbHttpClientException("Error request interrupted requesting PDF report. Try again.");
                 }
             }
         }
-        return null;
+        return new byte[0];
     }
 
     /**
@@ -158,7 +163,7 @@ public class ItbHttpClient implements ItbClient {
             Map<String, Object> input = setUpRequestParameter(requestParam);
             if (!input.isEmpty()) {
                 Map<String, Object> inputWrapper = new HashMap<>();
-                inputWrapper.put("input", input);
+                inputWrapper.put(INPUT, input);
                 inputMapping.add(inputWrapper);
             }
         }
@@ -177,7 +182,7 @@ public class ItbHttpClient implements ItbClient {
                     Map<String, Object> input = setUpAdditionalInput(suiteParameter);
                     Map<String, Object> inputWrapper = new HashMap<>();
                     inputWrapper.put("testSuite", new String[]{ts.getSuiteID()});
-                    inputWrapper.put("input", input);
+                    inputWrapper.put(INPUT, input);
                     inputMapping.add(inputWrapper);
                 }
             }
@@ -197,10 +202,10 @@ public class ItbHttpClient implements ItbClient {
                 if (Objects.nonNull(tc.getParameters())) {
                     for (Parameter caseParameter : tc.getParameters()) {
                         Map<String, Object> input = setUpAdditionalInput(caseParameter);
-                        inputMapping.add(new HashMap<>() {{
-                            put("testCase", new String[]{tc.getCaseID()});
-                            put("input", input);
-                        }});
+                        inputMapping.add(Map.of(
+                            "testCase", new String[]{tc.getCaseID()},
+                                INPUT, input
+                        ));
                     }
                 }
             }
@@ -235,25 +240,29 @@ public class ItbHttpClient implements ItbClient {
      */
     private String sendPOSTRequest(String uri, String mediatype, String body) {
         //Set up http request
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest req = HttpRequest.newBuilder()
-                .uri(URI.create(uri))
-                .header("ITB_API_KEY", itbApiKey)
-                .header("Content-Type", mediatype)
-                .POST(HttpRequest.BodyPublishers.ofString(body))
-                .build();
-        // Execute request and return response to the controller
-        try {
-            HttpResponse<String> response = client.send(req, HttpResponse.BodyHandlers.ofString());
-            String respBody = response.body();
-            JsonNode content = mapper.readTree(respBody);
-            if (response.statusCode() == 400) {
-                throw new ItbHttpClientException("ITB request error : " + content.get("error_description"));
+        try(HttpClient client = HttpClient.newHttpClient()) {
+            HttpRequest req = HttpRequest.newBuilder()
+                    .uri(URI.create(uri))
+                    .header("ITB_API_KEY", itbApiKey)
+                    .header("Content-Type", mediatype)
+                    .POST(HttpRequest.BodyPublishers.ofString(body))
+                    .build();
+            // Execute request and return response to the controller
+            try {
+                HttpResponse<String> response = client.send(req, HttpResponse.BodyHandlers.ofString());
+                String respBody = response.body();
+                JsonNode content = mapper.readTree(respBody);
+                if (response.statusCode() == 400) {
+                    throw new ItbHttpClientException("ITB request error : " + content.get("error_description"));
+                }
+                return content.get("createdSessions").get(0).get("session").asText();
+            } catch (IOException e) {
+                logger.error("Error sending POST request", e);
+                throw new ItbHttpClientException("Error request interrupted. Try again.");
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new ItbHttpClientException("Error request interrupted. Try again.");
             }
-            return content.get("createdSessions").get(0).get("session").asText();
-        } catch (InterruptedException | IOException e) {
-            logger.error("Error sending POST request", e);
-            throw new ItbHttpClientException("Error request interrupted. Try again.");
         }
     }
 }
