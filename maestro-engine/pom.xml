@@ -20,7 +20,7 @@
     <parent>
         <groupId>net.ihe.gazelle</groupId>
         <artifactId>maestro</artifactId>
-        <version>0.2.0-GZL-9883-SNAPSHOT</version>
+        <version>0.2.0-GZL-9893-SNAPSHOT</version>
     </parent>
 
     <artifactId>maestro-engine</artifactId>

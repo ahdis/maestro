@@ -75,12 +75,17 @@ public class MaestroImpl implements Maestro {
             if (test != null) {
                 Step step = test.getSteps().getFirst();
 
-                // iterate of steps
-                try{
+                // iterate steps starting with the first; on error, record step error and continue
+                try {
                     runStep(new StepRun(testSetId, testRunId, step));
-                }
-                catch (Exception e) {
-                    sendUndefinedTestReport(testRun, e);
+                } catch (Exception e) {
+                    StepRun stepRun = new StepRun(testSetId, testRunId, step);
+                    StepRunReportBuilder builder = new StepRunReportBuilder()
+                            .setStepId(step.getName())
+                            .setType(step.getType())
+                            .setResult(StepResult.UNDEFINED)
+                            .addUnexpectedError(getUnexpectedErrorBuilder(e));
+                    finishStep(stepRun, builder);
                 }
             }
         }
@@ -126,6 +131,7 @@ public class MaestroImpl implements Maestro {
             } catch (Exception e) {
                 TestReportBuilder testReportBuilder = buildGenericTestReport(testSetRun);
                 testReport = testReportBuilder
+                        .setTestRunReports(testSetSessionStore.getTestRunReportBuilders())
                         .setTestService(getTestServiceBuilder())
                         .addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e))
                         .build();
