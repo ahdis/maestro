@@ -17,9 +17,11 @@
 package net.ihe.gazelle.maestro.validation.step.business;
 
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
+import net.ihe.gazelle.maestro.api.business.testrun.PropertyRef;
 import net.ihe.gazelle.maestro.api.business.testrun.Step;
 import net.ihe.gazelle.maestro.api.business.testrun.StepFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -44,11 +46,12 @@ public class ValidationStepFactory implements StepFactory {
 
     private static List<Property<byte[]>> getContentsToValidate(Map<String, Property<?>> properties) {
         // return all byte[] properties which key is not VALIDATION_SERVICE or VALIDATION_PROFILE
-        return properties.entrySet().stream()
+        return new ArrayList<>(properties.entrySet().stream()
                 .filter(entry -> !entry.getKey().equals(ValidationStep.VALIDATION_SERVICE)
-                    && !entry.getKey().equals(ValidationStep.VALIDATION_PROFILE) && entry.getValue().getValue() instanceof byte[])
+                    && !entry.getKey().equals(ValidationStep.VALIDATION_PROFILE) && entry.getValue() instanceof PropertyRef<?> propertyRef
+                    && propertyRef.getType().equals(byte[].class))
                 .map(Map.Entry::getValue)
                 .map(property -> (Property<byte[]>) property)
-                .toList();
+                .toList());
     }
 }

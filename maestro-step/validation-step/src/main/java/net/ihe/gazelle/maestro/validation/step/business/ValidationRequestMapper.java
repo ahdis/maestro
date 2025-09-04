@@ -37,6 +37,7 @@ public class ValidationRequestMapper {
             validationRequest.addInput(new InputBuilder()
                     .setItemId(contentToValidate.getName())
                     .setContent(contentToValidate.getValue())
+                    .setId(contentToValidate.getName())
             );
         }
         return validationRequest.build();
