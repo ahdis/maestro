@@ -17,7 +17,6 @@
 package net.ihe.gazelle.maestro.validation.step.business;
 
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
-import net.ihe.gazelle.maestro.api.business.testrun.PropertyRef;
 import net.ihe.gazelle.maestro.api.business.testrun.Step;
 
 import java.util.ArrayList;
@@ -105,7 +104,7 @@ public class ValidationStep implements Step {
                 validationService = (Property<String>) property;
             } else if (property.getName().equals(VALIDATION_PROFILE)) {
                 validationProfile = (Property<String>) property;
-            } else if (property instanceof PropertyRef<?> ref && ref.getType().equals(byte[].class)) {
+            } else if (byte[].class.equals(property.getType())) {
                 contentsToValidate.add((Property<byte[]>) property);
             }
             else {

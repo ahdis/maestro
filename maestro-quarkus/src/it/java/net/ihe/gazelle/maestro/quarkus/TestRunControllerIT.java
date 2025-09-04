@@ -38,6 +38,8 @@ import java.io.IOException;
 import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
@@ -113,14 +115,14 @@ class TestRunControllerIT implements QuarkusTestProfile {
                 .extract().response()
                 .body().asString();
 
-        assertTrue(response.contains(expectedMessage), "Expected message not found in response:\n" + response);
+        assertThat(response, containsString(expectedMessage));
     }
 
     private static Stream<Arguments> invalidTestRunProvider() {
         return Stream.of(
                 Arguments.of("/invalid_step_type.json", "Could not resolve type id"),
                 Arguments.of("/invalid_property_type.json", "Unsupported property type"),
-                Arguments.of("/invalid_property_name.json", "is not a validation step property"),
+                Arguments.of("/invalid_property_name.json", "Property invalid is neither a validation step property nor a content to validate"),
                 Arguments.of("/invalid_structure.json", "Unable to parse TestRun structure")
         );
     }

@@ -17,7 +17,6 @@
 package net.ihe.gazelle.maestro.validation.step.business;
 
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
-import net.ihe.gazelle.maestro.api.business.testrun.PropertyRef;
 import net.ihe.gazelle.maestro.api.business.testrun.Step;
 import net.ihe.gazelle.maestro.api.business.testrun.StepFactory;
 
@@ -48,8 +47,8 @@ public class ValidationStepFactory implements StepFactory {
         // return all byte[] properties which key is not VALIDATION_SERVICE or VALIDATION_PROFILE
         return new ArrayList<>(properties.entrySet().stream()
                 .filter(entry -> !entry.getKey().equals(ValidationStep.VALIDATION_SERVICE)
-                    && !entry.getKey().equals(ValidationStep.VALIDATION_PROFILE) && entry.getValue() instanceof PropertyRef<?> propertyRef
-                    && propertyRef.getType().equals(byte[].class))
+                    && !entry.getKey().equals(ValidationStep.VALIDATION_PROFILE)
+                    && byte[].class.equals(entry.getValue().getType()))
                 .map(Map.Entry::getValue)
                 .map(property -> (Property<byte[]>) property)
                 .toList());

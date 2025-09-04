@@ -76,7 +76,12 @@ public class MaestroImpl implements Maestro {
                 Step step = test.getSteps().getFirst();
 
                 // iterate of steps
-                runStep(new StepRun(testSetId, testRunId, step));
+                try{
+                    runStep(new StepRun(testSetId, testRunId, step));
+                }
+                catch (Exception e) {
+                    sendUndefinedTestReport(testRun, e);
+                }
             }
         }
     }

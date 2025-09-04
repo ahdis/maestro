@@ -1,5 +1,6 @@
 {
   "testSuiteName": "TM Integration Test Suite",
+  "testSetRunId": "testSet1",
   "accessControlList": {
     "owners": [
       "gazelle",

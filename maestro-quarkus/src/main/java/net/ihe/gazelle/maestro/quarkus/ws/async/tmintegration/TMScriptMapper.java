@@ -37,6 +37,12 @@ import java.util.*;
  */
 public class TMScriptMapper {
 
+    public static final String TEST_SUITE_NAME = "testSuiteName";
+    public static final String TEST_SET_RUN_ID = "testSetRunId";
+    public static final String ACCESS_CONTROL_LIST = "accessControlList";
+    public static final String TEST_RUNS = "testRuns";
+    public static final String OWNERS = "owners";
+
     private TMScriptMapper() {
         // Private constructor to prevent instantiation
     }
@@ -60,12 +66,13 @@ public class TMScriptMapper {
      */
     public static TestSetRun convertToTestSetRun(JsonNode jsonNode, TestRunStore testRunDAO) {
         try {
+            validateScript(jsonNode);
             // Extract root level properties
-            String testSuiteName = jsonNode.get("testSuiteName").asText();
-            String testSetRunId = jsonNode.get("testSetRunId").asText();
-            JsonNode accessControlListNode = jsonNode.get("accessControlList");
+            String testSuiteName = jsonNode.get(TEST_SUITE_NAME).asText();
+            String testSetRunId = jsonNode.get(TEST_SET_RUN_ID).asText();
+            JsonNode accessControlListNode = jsonNode.get(ACCESS_CONTROL_LIST);
             JsonNode systemsUnderTestNode = jsonNode.get("systemsUnderTest");
-            ArrayNode testRunNodes = (ArrayNode) jsonNode.get("testRuns");
+            ArrayNode testRunNodes = (ArrayNode) jsonNode.get(TEST_RUNS);
 
             // Create TestSetRun instance
             TestSetRun testSetRun = new TestSetRun();
@@ -237,25 +244,18 @@ public class TMScriptMapper {
     private static AccessControlList parseAccessControlList(JsonNode aclNode) {
         AccessControlList acl = new AccessControlList();
         try {
-            Set<String> owners = parseStringSet(aclNode.get("owners"));
-            if (owners != null) {
-                acl.setOwners(owners);
-            }
+            Set<String> owners = parseStringSet(aclNode.get(OWNERS));
+            acl.setOwners(owners);
 
             Set<String> readers = parseStringSet(aclNode.get("readers"));
-            if (readers != null) {
-                acl.setReaders(readers);
-            }
+            acl.setReaders(readers);
 
             Set<String> editors = parseStringSet(aclNode.get("editors"));
-            if (editors != null) {
-                acl.setEditors(editors);
-            }
+            acl.setEditors(editors);
 
             Boolean isPublic = parseBoolean(aclNode.get("isPublic"));
-            if (isPublic != null) {
-                acl.setPublic(isPublic);
-            }
+            acl.setPublic(isPublic);
+
 
             String readAccessKey = parseText(aclNode.get("readAccessKey"));
             if (readAccessKey != null) {
@@ -291,6 +291,25 @@ public class TMScriptMapper {
             return null;
         }
         return node.asText();
+    }
+
+    private static void validateScript(JsonNode jsonNode) {
+        if (jsonNode.get(TEST_SUITE_NAME) == null || jsonNode.get(TEST_SUITE_NAME).isNull()) {
+            throw new MissingArgumentException("Argument testSuiteName is missing");
+        }
+        if (jsonNode.get(TEST_RUNS) == null || !jsonNode.get(TEST_RUNS).isArray() || jsonNode.get(TEST_RUNS).isEmpty()) {
+            throw new MissingArgumentException("Argument testRuns is missing or empty");
+        }
+        if( jsonNode.get(TEST_SET_RUN_ID) == null || jsonNode.get(TEST_SET_RUN_ID).isNull()) {
+            throw new MissingArgumentException("Argument testSetRunId is missing");
+        }
+        if (jsonNode.get(ACCESS_CONTROL_LIST) != null && !jsonNode.get(ACCESS_CONTROL_LIST).isNull()) {
+            JsonNode aclNode = jsonNode.get(ACCESS_CONTROL_LIST);
+            if (aclNode.get(OWNERS) == null || !aclNode.get(OWNERS).isArray() || aclNode.get(OWNERS).isEmpty()) {
+                throw new MissingArgumentException("Argument owners is missing or empty in accessControlList");
+            }
+        }
+
     }
 
 }

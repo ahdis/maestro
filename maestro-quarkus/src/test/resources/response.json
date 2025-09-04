@@ -10,7 +10,7 @@
     "validationProfileID": "CR-BIO-V1",
     "validationProfileVersion": "1.0"
   },
-  "validationItems": null,
+  "inputs": null,
   "reports": [
     {
       "name": "Well Formed Validation",
@@ -22,7 +22,7 @@
           "assertionID": "Well Formed Validation",
           "assertionType": null,
           "description": "Success: The document you have validated is supposed to be a well-formed document.",
-          "subjectLocation": null,
+          "subjectLocations": null,
           "subjectValue": null,
           "requirementIDs": null,
           "severity": "INFO",
@@ -52,7 +52,12 @@
           "assertionID": null,
           "assertionType": "Failed",
           "description": "cvc-elt.1.a : Déclaration de l'élément 'AAA' introuvable.",
-          "subjectLocation": "line 1, column 6",
+          "subjectLocations": [
+            {
+              "type": "line-column",
+              "value": "line 2, column 3"
+            }
+          ],
           "subjectValue": "cvc-elt.1.a : Déclaration de l'élément 'AAA' introuvable.",
           "requirementIDs": null,
           "severity": "ERROR",
@@ -82,7 +87,7 @@
           "assertionID": null,
           "assertionType": "ActivePattern",
           "description": "Found pattern: null",
-          "subjectLocation": null,
+          "subjectLocations": null,
           "subjectValue": null,
           "requirementIDs": null,
           "severity": "INFO",
@@ -94,7 +99,7 @@
           "assertionID": null,
           "assertionType": "ActivePattern",
           "description": "Found pattern: null",
-          "subjectLocation": null,
+          "subjectLocations": null,
           "subjectValue": null,
           "requirementIDs": null,
           "severity": "INFO",
@@ -106,7 +111,7 @@
           "assertionID": null,
           "assertionType": "FiredRule",
           "description": "/",
-          "subjectLocation": null,
+          "subjectLocations": null,
           "subjectValue": null,
           "requirementIDs": null,
           "severity": "INFO",
@@ -118,7 +123,10 @@
           "assertionID": null,
           "assertionType": "FailedAssert",
           "description": "\n\tAdditional description: descendant-or-self::hl7:ClinicalDocument[hl7:templateId[@root = '2.16.840.1.113883.2.8.2.1'] and hl7:templateId[@root = '1.2.250.1.213.1.1.1.1'] and hl7:templateId[@root = '1.3.6.1.4.1.19376.1.3.3']]: Instance is expected to have the following element: %%2",
-          "subjectLocation": "/AAA[1]",
+          "subjectLocations": [{
+            "type": "XPath",
+            "value": "/AAA"
+          }],
           "subjectValue": null,
           "requirementIDs": null,
           "severity": "WARNING",
@@ -130,7 +138,7 @@
           "assertionID": "template-1.3.6.1.4.1.19376.1.3.3-2020-09-11T114756",
           "assertionType": "ActivePattern",
           "description": "Found pattern: template-1.3.6.1.4.1.19376.1.3.3-2020-09-11T114756",
-          "subjectLocation": null,
+          "subjectLocations": null,
           "subjectValue": null,
           "requirementIDs": null,
           "severity": "INFO",
@@ -142,7 +150,7 @@
           "assertionID": "template-1.3.6.1.4.1.19376.1.3.3-2020-09-11T114756-closed",
           "assertionType": "ActivePattern",
           "description": "Found pattern: template-1.3.6.1.4.1.19376.1.3.3-2020-09-11T114756-closed",
-          "subjectLocation": null,
+          "subjectLocations": null,
           "subjectValue": null,
           "requirementIDs": null,
           "severity": "INFO",
