@@ -44,6 +44,8 @@ class ValidationRequestMapperTest {
         assertEquals("contentToValidate", item.getItemId());
         String actualContent = new String(item.getContent(), StandardCharsets.UTF_8);
         assertEquals("content", actualContent);
+        assertNull(item.getItemId());
+        assertNull(item.getId());
         assertNull(item.getLocation());
     }
 

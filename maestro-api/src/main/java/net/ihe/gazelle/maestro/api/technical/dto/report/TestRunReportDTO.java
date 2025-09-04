@@ -29,7 +29,7 @@ import java.util.List;
 })
 public class TestRunReportDTO {
 
-    public static final String ISO_8601_DATETIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+    public static final String ISO_8601_DATETIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
 
     @JsonIgnore
     private final TestRunReport domain;

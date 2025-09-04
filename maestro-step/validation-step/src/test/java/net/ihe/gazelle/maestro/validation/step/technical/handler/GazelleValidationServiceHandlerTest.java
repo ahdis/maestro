@@ -70,8 +70,8 @@ class GazelleValidationServiceHandlerTest {
     void should_return_true_when_validation_profiles_available() {
         // Given
         List<ValidationProfile> profiles = Arrays.asList(
-            createValidationProfile("profile1", "Profile 1"),
-            createValidationProfile("profile2", "Profile 2")
+                createValidationProfile("profile1", "Profile 1"),
+                createValidationProfile("profile2", "Profile 2")
         );
         when(validationService.getValidationProfiles()).thenReturn(profiles);
 
@@ -111,7 +111,7 @@ class GazelleValidationServiceHandlerTest {
     void should_return_false_when_get_profiles_throws_exception() {
         // Given
         when(validationService.getValidationProfiles())
-            .thenThrow(new RuntimeException("Service unavailable"));
+                .thenThrow(new RuntimeException("Service unavailable"));
 
         // When
         Throwable exception = assertThrows(RuntimeException.class, () -> {
@@ -168,7 +168,7 @@ class GazelleValidationServiceHandlerTest {
         // Given
         ValidationRequest validationRequest = createValidationRequest();
         when(validationService.validate(validationRequest))
-            .thenThrow(new RuntimeException("Validation service error"));
+                .thenThrow(new RuntimeException("Validation service error"));
 
         // When & Then
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
@@ -182,8 +182,8 @@ class GazelleValidationServiceHandlerTest {
     void should_get_validation_profiles_successfully() {
         // Given
         List<ValidationProfile> expectedProfiles = Arrays.asList(
-            createValidationProfile("profile1", "Profile 1"),
-            createValidationProfile("profile2", "Profile 2")
+                createValidationProfile("profile1", "Profile 1"),
+                createValidationProfile("profile2", "Profile 2")
         );
         when(validationService.getValidationProfiles()).thenReturn(expectedProfiles);
 
@@ -212,7 +212,7 @@ class GazelleValidationServiceHandlerTest {
     void should_return_empty_list_when_get_profiles_throws_exception() {
         // Given
         when(validationService.getValidationProfiles())
-            .thenThrow(new RuntimeException("Service error"));
+                .thenThrow(new RuntimeException("Service error"));
 
         // When
         Throwable exception = assertThrows(RuntimeException.class, gazelleValidationServiceHandler::getValidationProfiles);
@@ -267,9 +267,9 @@ class GazelleValidationServiceHandlerTest {
         ValidationRequest request = new ValidationRequest();
         request.setValidationProfileId("testProfileId");
 
-        Input item = new Input();
-        item.setContent("test content".getBytes());
-        request.setInputs(Collections.singletonList(item));
+        Input input = new Input();
+        input.setContent("test content".getBytes());
+        request.setInputs(Collections.singletonList(input));
 
         return request;
     }

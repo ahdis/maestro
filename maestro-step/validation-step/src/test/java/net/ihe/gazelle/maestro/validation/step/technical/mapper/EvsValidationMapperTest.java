@@ -66,13 +66,6 @@ class EvsValidationMapperTest {
         assertArrayEquals("content".getBytes(), request.getHandledObjects().getFirst().getContent());
     }
 
-
-    @Test
-    void test_make_subject_location_with_xpath() {
-        String location = mapper.makeSubjectLocationValid("line: 0");
-        assertEquals("line: 0", location);
-    }
-
     private static void assertSubReports(net.ihe.gazelle.validation.v2.api.business.report.ValidationSubReport subReport) {
         var assertionReports = subReport.getAssertionReports();
         assertNotNull(assertionReports);
@@ -99,7 +92,7 @@ class EvsValidationMapperTest {
         overview.setValidatorID("[ITI-44] Patient Identity Feed HL7V3 - Add Patient Record");
         overview.setValidationOverallResult(ValidationTestResult.FAILED);
         try {
-            overview.setValidationDateTime(new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").parse("2025-05-08T01:52:08.000Z"));
+            overview.setValidationDateTime(new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").parse("2025-05-08T01:52:08.000Z"));
         } catch (java.text.ParseException e) {
             // Handle parsing exception if needed
         }
@@ -128,7 +121,7 @@ class EvsValidationMapperTest {
         constraint.setSeverity(SeverityLevel.ERROR);
         constraint.setTestResult(ValidationTestResult.FAILED);
         constraint.setConstraintDescription("Cannot parse document to extract part to validate");
-        constraint.setLocationInValidatedObject(" line: 0");
+        constraint.setLocationInValidatedObject("line: 0");
 
         java.util.List<ConstraintValidation> constraints = new java.util.ArrayList<>();
         constraints.add(constraint);

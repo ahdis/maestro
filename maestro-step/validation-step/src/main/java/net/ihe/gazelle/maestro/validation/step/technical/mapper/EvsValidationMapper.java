@@ -8,19 +8,12 @@ import net.ihe.gazelle.evsapi.client.business.response.report.ConstraintPriority
 import net.ihe.gazelle.evsapi.client.business.response.report.ConstraintValidation;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
 import net.ihe.gazelle.validation.v2.api.business.report.*;
+import net.ihe.gazelle.validation.v2.api.business.report.validator.SubjectLocationValidator;
 import net.ihe.gazelle.validation.v2.api.business.request.InputBuilder;
 
 import java.util.List;
-import java.util.regex.Pattern;
 
 public class EvsValidationMapper {
-
-    private static final String LINE_COL_REGEX = "^line \\d+(, column \\d+)?$";
-    private static final Pattern LINE_COL_PATTERN = Pattern.compile(LINE_COL_REGEX);
-
-    private static final String EXTENDED_REGEX = "^(\\w+):(.+)$";
-    private static final Pattern EXTENDED_PATTERN = Pattern.compile(EXTENDED_REGEX);
-
 
     public net.ihe.gazelle.evsapi.client.business.request.ValidationRequest mapToEvsRequest(ValidationStep validationStep) {
         return new net.ihe.gazelle.evsapi.client.business.request.ValidationRequest()
@@ -103,8 +96,9 @@ public class EvsValidationMapper {
             if (item != null) {
                 reportBuilder.addInput(
                         new InputBuilder()
+                                .setId(item.getRole())
                                 .setContent(item.getContent())
-                                .setItemId(item.getRole())
+                                .setItemId(item.getOriginalFileName())
                 );
             }
         }
@@ -175,29 +169,38 @@ public class EvsValidationMapper {
      * Creates assertion report from EVS constraint
      */
     private AssertionReportBuilder createAssertionReport(net.ihe.gazelle.evsapi.client.business.response.report.ConstraintValidation constraint) {
-        String validLocation = getValidatedLocation(constraint.getLocationInValidatedObject());
 
-        return new AssertionReportBuilder()
+        AssertionReportBuilder assertionReportBuilder = new AssertionReportBuilder()
                 .setAssertionID(constraint.getConstraintID())
                 .setAssertionType(constraint.getConstraintType())
                 .setDescription(constraint.getConstraintDescription())
-                .addSubjectLocation(
-                        new SubjectLocationBuilder()
-                                .setValue(validLocation)
-                )
                 .setSubjectValue(constraint.getValueInValidatedObject())
                 .setRequirementIDs(getRequirementIds(constraint))
                 .setPriority(mapPriority(constraint.getPriority()))
                 .setResult(mapTestResult(constraint.getTestResult()));
+
+        SubjectLocationBuilder subjectLocationBuilder = getValidatedSubjectLocation(constraint.getLocationInValidatedObject());
+        if (subjectLocationBuilder != null) {
+            assertionReportBuilder.addSubjectLocation(subjectLocationBuilder);
+        }
+        return  assertionReportBuilder;
     }
 
     /**
      * Gets validated location, fixing invalid formats if necessary
      */
-    private String getValidatedLocation(String originalLocation) {
-        return isSubjectLocationValid(originalLocation)
-                ? originalLocation
-                : makeSubjectLocationValid(originalLocation);
+    private SubjectLocationBuilder getValidatedSubjectLocation(String originalLocation) {
+        if (originalLocation == null || originalLocation.isEmpty()) {
+            return null;
+        }
+        SubjectLocationBuilder subjectLocationBuilder = new SubjectLocationBuilder().setValue(originalLocation)
+                .setInputId(null) //TODO find the associated input ID if possible
+                .setType("UNKNOWN"); //TODO: determine type based on format if possible
+        if (isSubjectLocationValid(subjectLocationBuilder)) {
+            return subjectLocationBuilder;
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -252,28 +255,12 @@ public class EvsValidationMapper {
         };
     }
 
-    private boolean isSubjectLocationValid(String subjectLocation) {
+    private boolean isSubjectLocationValid(SubjectLocationBuilder subjectLocation) {
         if (subjectLocation == null) {
             return true;
-        } else if (subjectLocation.isBlank()) {
-            return false;
-        } else {
-            return EXTENDED_PATTERN.matcher(subjectLocation).find() || LINE_COL_PATTERN.matcher(subjectLocation).find();
         }
+        SubjectLocation subjectLocation1 = subjectLocation.build();
+        SubjectLocationValidator subjectLocationValidator = new SubjectLocationValidator();
+        return subjectLocationValidator.validate(subjectLocation1).isValid();
     }
-
-    public String makeSubjectLocationValid(String subjectLocation) {
-        if (subjectLocation == null || subjectLocation.isBlank()) {
-            return null;
-        }
-
-        String fixedLocation = subjectLocation.trim(); // remove outer spaces
-        fixedLocation = fixedLocation.replaceAll("\\s+", " "); // normalize all spaces
-
-        if (isSubjectLocationValid(fixedLocation)) {
-            return fixedLocation;
-        }
-        return null;
-    }
-
 }
