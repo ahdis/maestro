@@ -123,19 +123,13 @@ public class TMScriptMapper {
         }
 
         List<String> macs = parseStringArray(sutNode.get("macAddresses"));
-        if (macs != null) {
-            sut.setMacAddresses(macs);
-        }
+        sut.setMacAddresses(macs);
 
         List<String> ips = parseStringArray(sutNode.get("ipAddresses"));
-        if (ips != null) {
-            sut.setIpAddresses(ips);
-        }
+        sut.setIpAddresses(ips);
 
         List<String> hosts = parseStringArray(sutNode.get("hostNames"));
-        if (hosts != null) {
-            sut.setHostNames(hosts);
-        }
+        sut.setHostNames(hosts);
 
         return sut;
     }
@@ -198,6 +192,7 @@ public class TMScriptMapper {
             try {
                 String name = stepNode.get("id").asText();
                 String type = stepNode.get("@type").asText();
+                type = adaptTypeIfNeeded(type);
                 ArrayNode propertyNodes = (ArrayNode) stepNode.get("properties");
                 StepFactoryProvider provider = new StepFactoryProvider();
                 Step step = provider.create(type, name, parseProperties(propertyNodes));
@@ -310,6 +305,14 @@ public class TMScriptMapper {
             }
         }
 
+    }
+
+    private static String adaptTypeIfNeeded(String type) {
+        // Temporary adaptation for known discrepancies
+        if("ITBStep".equals(type)) {
+            return "ITB";
+        }
+        return type;
     }
 
 }
