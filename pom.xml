@@ -48,19 +48,22 @@
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <!--git-->
+        <git.project.url>
+            https://${git.user.name}:${git.user.token}@gitlab.inria.fr/gazelle/private/kereval/maestro.git
+        </git.project.url>
 
-        <framework.version>2.1.0</framework.version>
+        <quarkus.platform.version>3.15.6.2</quarkus.platform.version>
+
+        <framework.version>2.1.2-SNAPSHOT</framework.version>
         <search-api.version>1.1.0</search-api.version>
-        <validation-api.version>2.0.0-FRAME-74-SNAPSHOT</validation-api.version>
-        <simulation-api.version>0.1.1-SNAPSHOT</simulation-api.version>
+        <validation-api.version>2.0.0-SNAPSHOT</validation-api.version>
+        <simulation-api.version>0.1.1</simulation-api.version>
         <service-registry.version>1.0.0</service-registry.version>
         <lang.version>2.0.1</lang.version>
         <equalsverifier.version>3.16.1</equalsverifier.version>
 
         <!-- Quarkus Build-->
-        <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
-        <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
-        <quarkus.platform.version>3.15.6.1</quarkus.platform.version>
         <quarkus.container-image.build>true</quarkus.container-image.build>
         <quarkus.container-image.registry>rg.fr-par.scw.cloud</quarkus.container-image.registry>
         <quarkus.container-image.group>gazelle-snapshot</quarkus.container-image.group>
@@ -77,13 +80,6 @@
         <jandex-plugin.version>3.1.6</jandex-plugin.version>
 
         <skipITs>true</skipITs>
-
-        <!--git-->
-        <git.user.name>gitlab-ci</git.user.name>
-        <git.user.token>changeit</git.user.token>
-        <git.project.url>
-            https://${git.user.name}:${git.user.token}@gitlab.inria.fr/gazelle/private/kereval/maestro.git
-        </git.project.url>
 
         <sonar.coverage.exclusions>
             **/gazelle/business/engine/NotInitializedReferenceException.java,

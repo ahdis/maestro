@@ -22,7 +22,6 @@ import net.ihe.gazelle.maestro.validation.step.technical.handler.GazelleValidati
 import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterface;
 import net.ihe.gazelle.servicemetadata.api.business.HttpRestBinding;
 import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterface;
-import net.ihe.gazelle.validation.v1.api.domain.wrapper.ValidationServiceWrapper;
 import net.ihe.gazelle.validation.v2.api.technical.ws.ValidationServiceController;
 import org.junit.jupiter.api.Test;
 
