@@ -15,6 +15,8 @@ import java.util.List;
 
 public class EvsValidationMapper {
 
+    public static final String UNKNOWN = "UNKNOWN";
+
     public net.ihe.gazelle.evsapi.client.business.request.ValidationRequest mapToEvsRequest(ValidationStep validationStep) {
         return new net.ihe.gazelle.evsapi.client.business.request.ValidationRequest()
                 .setValidationItems(validationStep.getContentsToValidate().stream()
@@ -66,8 +68,8 @@ public class EvsValidationMapper {
         return new ValidationMethod()
                 .setValidationProfileID(overview.getValidatorID())
                 .setValidationServiceName(overview.getValidationServiceName())
-                .setValidationProfileVersion(overview.getValidatorVersion() != null && !overview.getValidatorVersion().isEmpty() ? overview.getValidatorVersion() : "UNKNOWN")
-                .setValidationServiceVersion(overview.getValidationServiceVersion() != null && !overview.getValidationServiceVersion().isEmpty() ? overview.getValidationServiceVersion() : "UNKNOWN");
+                .setValidationProfileVersion(overview.getValidatorVersion() != null && !overview.getValidatorVersion().isEmpty() ? overview.getValidatorVersion() : UNKNOWN)
+                .setValidationServiceVersion(overview.getValidationServiceVersion() != null && !overview.getValidationServiceVersion().isEmpty() ? overview.getValidationServiceVersion() : UNKNOWN);
     }
 
     /**
@@ -195,7 +197,7 @@ public class EvsValidationMapper {
         }
         SubjectLocationBuilder subjectLocationBuilder = new SubjectLocationBuilder().setValue(originalLocation)
                 .setInputId(null) //TODO find the associated input ID if possible
-                .setType("UNKNOWN"); //TODO: determine type based on format if possible
+                .setType(UNKNOWN); //TODO: determine type based on format if possible
         if (isSubjectLocationValid(subjectLocationBuilder)) {
             return subjectLocationBuilder;
         } else {
