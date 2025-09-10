@@ -1,7 +1,9 @@
 # Define templates
 include:
-  - project: 'gazelle/private/gitlab-ci-templates'
-    file: 'extends-v2.yaml'
+  - project: ${GITLAB_CI_TEMPLATES_PATH}
+    file:
+      - ${GITLAB_CI_TEMPLATES_FILE}
+      - 'CI/stages/schedule.yaml'
     ref: 'master'
 
 # Define stages
@@ -14,6 +16,8 @@ stages:
   - release
   - upgrade
   - clean
+  - schedule
+  - scheduled-jobs
 
 # Define global variables
 variables:
@@ -33,6 +37,14 @@ package:
   needs:
     - job: compile/unit-test
       artifacts: true
+
+security/dependenciesWithOwaspDependencyCheck:
+  stage: test
+  extends:
+    - .testSecurityDependenciesForJavaWithOwaspDependencyCheck
+  needs:
+    - job: compile/unit-test
+      artifacts: false
 
 static-analysis:
   stage: test
@@ -72,3 +84,13 @@ release/dockerImage:
   extends:
     - .releaseDockerWithQuarkus
   needs: [ "release/code" ]
+
+mutator-schedule:
+  stage: schedule
+  extends:
+    - .createMutationNightlyPipeline
+  needs:
+    - job: static-analysis
+  variables:
+    CRON_SCHEDULE: "05 01 * * *"
+  allow_failure: false
