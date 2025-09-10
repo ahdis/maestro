@@ -15,8 +15,7 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -26,7 +25,7 @@
     </parent>
 
     <artifactId>maestro</artifactId>
-    <version>0.2.0-SNAPSHOT</version>
+    <version>0.2.0</version>
     <packaging>pom</packaging>
     <modules>
         <module>maestro-api</module>
@@ -40,7 +39,7 @@
         <connection>scm:git:${git.project.url}</connection>
         <url>scm:git:${git.project.url}</url>
         <developerConnection>scm:git:${git.project.url}</developerConnection>
-        <tag>HEAD</tag>
+        <tag>0.2.0</tag>
     </scm>
 
     <properties>
@@ -100,43 +99,43 @@
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-api</artifactId>
-                <version>0.2.0-SNAPSHOT</version>
+                <version>0.2.0</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-engine</artifactId>
-                <version>0.2.0-SNAPSHOT</version>
+                <version>0.2.0</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>validation-step</artifactId>
-                <version>0.2.0-SNAPSHOT</version>
+                <version>0.2.0</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>simulation-step</artifactId>
-                <version>0.2.0-SNAPSHOT</version>
+                <version>0.2.0</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>user-interaction-step</artifactId>
-                <version>0.2.0-SNAPSHOT</version>
+                <version>0.2.0</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>assertion-step</artifactId>
-                <version>0.2.0-SNAPSHOT</version>
+                <version>0.2.0</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>itb-step</artifactId>
-                <version>0.2.0-SNAPSHOT</version>
+                <version>0.2.0</version>
             </dependency>
             <!-- to be removed when maestro-websocket has it own tests -->
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-websocket</artifactId>
-                <version>0.2.0-SNAPSHOT</version>
+                <version>0.2.0</version>
             </dependency>
 
             <!-- Stack BOM -->
