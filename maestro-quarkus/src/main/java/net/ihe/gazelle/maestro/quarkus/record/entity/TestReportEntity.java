@@ -1,7 +1,6 @@
 package net.ihe.gazelle.maestro.quarkus.record.entity;
 
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
-import net.ihe.gazelle.maestro.api.business.testreport.TestService;
 import net.ihe.gazelle.maestro.api.technical.dto.report.*;
 
 import java.util.ArrayList;
@@ -54,8 +53,8 @@ public class TestReportEntity {
         return testReport.getTestService();
     }
 
-    public TestReportEntity setTestService(TestService testService) {
-        this.setTestService(testService);
+    public TestReportEntity setTestService(TestServiceDTO testService) {
+        this.testReport.setTestService(testService);
         return this;
     }
 

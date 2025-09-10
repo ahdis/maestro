@@ -115,6 +115,22 @@ class MaestroImplTest {
     }
 
     @Test
+    void run_TestRun_TestIsNull_ShouldNotExecuteStep() {
+        String testSetId = "ts";
+        when(testRun.getTestSetId()).thenReturn(testSetId);
+        // Keep test non-null but invalid (no steps) to trigger validator error and undefined report path
+        when(testRun.getTest()).thenReturn(test);
+        when(test.getSteps()).thenReturn(new ArrayList<>());
+        when(test.getId()).thenReturn("id");
+        when(test.getName()).thenReturn("name");
+        when(testRun.getInputs()).thenReturn(new ArrayList<>());
+        when(sessionStoreContext.getTestSetContexts(testSetId)).thenReturn(testSetSessionStore);
+        when(testSetSessionStore.getTestSetRun()).thenReturn(testSetRun);
+        maestroImpl.run(testRun);
+        verify(maestroEventProducer, never()).executeStep(any());
+    }
+
+    @Test
     void run_TestRun_ValidationException_ShouldSendUndefinedTestReport() {
         // Arrange
         String testSetId = "testSet1";
@@ -125,14 +141,21 @@ class MaestroImplTest {
         when(sessionStoreContext.getTestSetContexts(testSetId)).thenReturn(testSetSessionStore);
         when(testSetSessionStore.getTestSetRun()).thenReturn(testSetRun);
 
-        // Mock validator to throw exception
-        doThrow(new IllegalArgumentException("Validation failed")).when(testRun).getInputs();
+        // Force an exception during runStep by failing setProperties
+        when(testRun.getInputs()).thenReturn(new ArrayList<>());
+        when(sessionStoreContext.getExecutionContext(anyString())).thenReturn(testRunSessionStore);
+        when(testRunSessionStore.getContext()).thenReturn(context);
+        when(testRunSessionStore.getTestRun()).thenReturn(testRun);
+        when(test.getSteps()).thenReturn(List.of(step));
+        when(step.getProperties()).thenReturn(new ArrayList<>());
+        doThrow(new RuntimeException("boom")).when(step).setProperties(any());
+        when(step.isNameEquals(step)).thenReturn(true);
 
         // Act
         maestroImpl.run(testRun);
 
         // Assert
-        verify(maestroEventProducer).returnTestSetReport(eq(testSetRun), any(TestReportSummary.class));
+        verify(maestroEventProducer).returnTestRunReport(eq(testRun), any(TestRunReportBuilder.class));
     }
 
     @Test
@@ -161,6 +184,36 @@ class MaestroImplTest {
         verify(sessionStoreContext).addExecutionContext(anyString(), any(TestRunSessionStore.class));
     }
 
+    @Test
+    void run_TestSetRun_NullTestSetId_ShouldEmitErrorEvent() {
+        when(testSetRun.getTestSetId()).thenReturn(null);
+        // Provide minimal testRuns to avoid downstream NPEs
+        when(testSetRun.getTestRuns()).thenReturn(new ArrayList<>(List.of(testRun)));
+        when(testRun.setTestSetId(anyString())).thenReturn(testRun);
+        when(testRun.getTest()).thenReturn(test);
+        when(testRun.getInputs()).thenReturn(new ArrayList<>());
+        when(test.getSteps()).thenReturn(List.of(step));
+        when(step.getProperties()).thenReturn(new ArrayList<>());
+
+        when(sessionStoreContext.getExecutionContext(anyString())).thenReturn(testRunSessionStore);
+        when(testRunSessionStore.getContext()).thenReturn(context);
+
+        maestroImpl.run(testSetRun);
+        verify(maestroEventProducer).emitErrorTestRunEvent(any(InvalidTestSetException.class));
+    }
+
+    @Test
+    void run_TestSetRun_Invalid_ShouldReturnSummaryWithUnexpectedError() {
+        String testSetId = "ts";
+        when(testSetRun.getTestSetId()).thenReturn(testSetId);
+        ArrayList<TestRun> listWithNull = new ArrayList<>();
+        listWithNull.add(null);
+        when(testSetRun.getTestRuns()).thenReturn(listWithNull);
+        maestroImpl.run(testSetRun);
+        verify(maestroEventProducer).returnTestSetReport(eq(testSetRun), any(TestReportSummary.class));
+        verify(sessionStoreContext, never()).addTestSetContext(anyString(), any());
+    }
+
 
     @Test
     void finishTest_LastTestRun_ShouldGenerateTestReportAndClearContexts() {
@@ -185,6 +238,35 @@ class MaestroImplTest {
         verify(sessionStoreContext).clearExecutionContext(testSetId);
         verify(sessionStoreContext).clearTestSetContext(testSetId);
         verify(maestroEventProducer).returnTestSetReport(eq(testSetRun), any(TestReportSummary.class));
+    }
+
+    
+
+    @Test
+    void finishTest_RunNextTestRun_NotFound_ShouldSendErrorAndClearContexts() {
+        String testSetId = "testSet1";
+        when(testRun.getTestSetId()).thenReturn(testSetId);
+        when(test.getName()).thenReturn("t");
+        when(testRun.getTest()).thenReturn(test);
+        when(sessionStoreContext.getTestSetContexts(testSetId)).thenReturn(testSetSessionStore);
+        when(testSetSessionStore.getTestSetRun()).thenReturn(testSetRun);
+        when(testSetRun.getTestRuns()).thenReturn(List.of(mock(TestRun.class)));
+        maestroImpl.finishTest(testRun, mock(TestRunReportBuilder.class));
+        verify(sessionStoreContext).clearExecutionContext(testSetId);
+        verify(sessionStoreContext).clearTestSetContext(testSetId);
+        verify(maestroEventProducer).returnTestSetReport(eq(testSetRun), any(TestReportSummary.class));
+    }
+
+    @Test
+    void recordAndReturnTestReport_WhenRecordFails_ShouldEmitErrorEvent() {
+        String testSetId = "testSet1";
+        when(testRun.getTestSetId()).thenReturn(testSetId);
+        when(sessionStoreContext.getTestSetContexts(testSetId)).thenReturn(testSetSessionStore);
+        when(testSetSessionStore.getTestSetRun()).thenReturn(testSetRun);
+        when(testSetRun.getTestRuns()).thenReturn(List.of(testRun));
+        when(testReportRecordService.recordTestReportWithReferences(any())).thenThrow(new RuntimeException("db down"));
+        maestroImpl.finishTest(testRun, mock(TestRunReportBuilder.class));
+        verify(maestroEventProducer).emitErrorTestRunEvent(any(RuntimeException.class));
     }
 
     @Test

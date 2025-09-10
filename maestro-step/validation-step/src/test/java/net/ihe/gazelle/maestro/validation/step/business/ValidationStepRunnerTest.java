@@ -15,6 +15,7 @@ import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -27,7 +28,7 @@ class ValidationStepRunnerTest {
         return new ValidationStep(name,
                 new Property<>(ValidationStep.VALIDATION_SERVICE, "service"),
                 new Property<>(ValidationStep.VALIDATION_PROFILE, "profile"),
-                List.of(new Property<>("content", "abc".getBytes())));
+                List.of(new Property<>("content", "abc".getBytes(StandardCharsets.UTF_8))));
     }
 
     private ReportSerialization serializerReturning(byte[] bytes) {
@@ -49,7 +50,7 @@ class ValidationStepRunnerTest {
 
     @Test
     void run_setsPassed_whenReportPassed() {
-        ValidationStepRunner runner = new ValidationStepRunner(serializerReturning("{}".getBytes()), handlerReturning(ValidationTestResult.PASSED));
+        ValidationStepRunner runner = new ValidationStepRunner(serializerReturning("{}".getBytes(StandardCharsets.UTF_8)), handlerReturning(ValidationTestResult.PASSED));
         StepRun stepRun = new StepRun("ts", "tr", buildStep("v1"));
         StepRunReportBuilder b = runner.run(stepRun).join();
         StepRunReport report = b.build();
@@ -60,7 +61,7 @@ class ValidationStepRunnerTest {
 
     @Test
     void run_setsFailed_whenReportFailed() {
-        ValidationStepRunner runner = new ValidationStepRunner(serializerReturning("{}".getBytes()), handlerReturning(ValidationTestResult.FAILED));
+        ValidationStepRunner runner = new ValidationStepRunner(serializerReturning("{}".getBytes(StandardCharsets.UTF_8)), handlerReturning(ValidationTestResult.FAILED));
         StepRun stepRun = new StepRun("ts", "tr", buildStep("v2"));
         StepRunReport report = runner.run(stepRun).join().build();
         assertEquals(StepResult.FAILED, report.getResult());
@@ -68,7 +69,7 @@ class ValidationStepRunnerTest {
 
     @Test
     void run_setsUndefined_whenReportUndefined() {
-        ValidationStepRunner runner = new ValidationStepRunner(serializerReturning("{}".getBytes()), handlerReturning(null));
+        ValidationStepRunner runner = new ValidationStepRunner(serializerReturning("{}".getBytes(StandardCharsets.UTF_8)), handlerReturning(null));
         StepRun stepRun = new StepRun("ts", "tr", buildStep("v3"));
         StepRunReport report = runner.run(stepRun).join().build();
         assertEquals(StepResult.UNDEFINED, report.getResult());
