@@ -22,6 +22,7 @@ import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,7 +34,8 @@ class ValidationRequestMapperTest {
         ValidationStep step = new ValidationStep("validationStep",
                 new Property<>(ValidationStep.VALIDATION_SERVICE, "matchbox"),
                 new Property<>(ValidationStep.VALIDATION_PROFILE, "default"),
-                new Property<>(ValidationStep.CONTENT_TO_VALIDATE, "content".getBytes()));
+                new ArrayList<>(List.of(new Property<>("contentToValidate", "content".getBytes())))
+        );
         ValidationRequest request = ValidationRequestMapper.createValidationRequest(step);
         assertNotNull(request);
         assertEquals(step.getValidationProfile().getValue(), request.getValidationProfileId());
