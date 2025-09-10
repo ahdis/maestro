@@ -24,6 +24,7 @@ import net.ihe.gazelle.maestro.api.business.testrun.context.TestSetSessionStore;
  * <p>
  * Structure used to store context of a session
  * It contains 2 maps :
+ * </p>
  * <p>
  *     - <b>SESSION_CONTEXT</b> containing context of a session, the set of TestRunSessionStore
  * {@link TestRunSessionStore}
@@ -32,8 +33,6 @@ import net.ihe.gazelle.maestro.api.business.testrun.context.TestSetSessionStore;
  *     - <b>TEST_SET_CONTEXT</b> containing context of TestSet, the set of TestSetSessionStore
  * {@link TestSetSessionStore}
  * </p>
- * </p>
- *
  */
 public interface SessionStoreContext {
 

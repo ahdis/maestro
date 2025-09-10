@@ -25,7 +25,6 @@ import net.ihe.gazelle.simulation.business.setup.ParameterType;
 import net.ihe.gazelle.simulation.business.setup.SimulationRequest;
 import net.ihe.gazelle.simulation.client.business.SimulationClient;
 
-import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -48,17 +47,15 @@ public class SimulationHandlerMock extends GazelleSimulationServiceHandler {
     @Override
     public void simulate(SimulationRequest simulationRequest, Consumer<AdditionalInstructions> instructionHandler, Consumer<SimulationReport> reportConsumer) {
         SimulationReport report = new SimulationReportBuilder()
-                .setDateTime(new Date())
                 .setSequenceId("Simple_CHXDS_ITI-41-42")
                 .setServiceName("Mock_XDS_Simulator")
                 .setServiceVersion("1.0.0")
-                .addTransaction(new TransactionReportBuilder()
+                .addTransactionReport(new TransactionReportBuilder()
                         .setResult(Result.PASSED)
                         .setTransaction("ITI-41")
                         .addStandard("ebRIM")
                         .addMessage(new MessageBuilder()
                                 .setName("ITI-41 request")
-                                .setDateTime(new Date())
                                 .setSender("XDS Document Repository")
                                 .setReceiver("Document Registry")
                                 .setReference("ref"))

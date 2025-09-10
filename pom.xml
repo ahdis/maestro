@@ -15,8 +15,7 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -26,7 +25,7 @@
     </parent>
 
     <artifactId>maestro</artifactId>
-    <version>0.2.0-DGSANTEBP-45-SNAPSHOT</version>
+    <version>0.3.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
         <module>maestro-api</module>
@@ -47,11 +46,15 @@
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <!--git-->
+        <git.project.url>
+            https://${git.user.name}:${git.user.token}@gitlab.inria.fr/gazelle/private/kereval/maestro.git
+        </git.project.url>
 
-        <framework.version>2.1.0</framework.version>
+        <framework.version>2.1.2</framework.version>
         <search-api.version>1.1.0</search-api.version>
         <validation-api.version>2.0.0</validation-api.version>
-        <simulation-api.version>0.1.0</simulation-api.version>
+        <simulation-api.version>0.1.1</simulation-api.version>
         <service-registry.version>1.0.0</service-registry.version>
         <lang.version>2.0.1</lang.version>
         <equalsverifier.version>3.16.1</equalsverifier.version>
@@ -59,7 +62,7 @@
         <!-- Quarkus Build-->
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
-        <quarkus.platform.version>3.15.5</quarkus.platform.version>
+        <quarkus.platform.version>3.15.6.2</quarkus.platform.version>
         <quarkus.container-image.build>true</quarkus.container-image.build>
         <quarkus.container-image.registry>rg.fr-par.scw.cloud</quarkus.container-image.registry>
         <quarkus.container-image.group>gazelle-snapshot</quarkus.container-image.group>
@@ -68,6 +71,7 @@
 
         <!-- Plugins version -->
         <compiler-plugin.version>3.14.0</compiler-plugin.version>
+        <javadoc-plugin.version>3.11.3</javadoc-plugin.version>
         <surefire-plugin.version>3.5.3</surefire-plugin.version>
         <maven.failsafe.plugin.version>3.1.2</maven.failsafe.plugin.version>
         <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
@@ -79,13 +83,6 @@
         <skipTests>false</skipTests>
         <skipITs>${skipTests}</skipITs>
         <skipUnitTests>${skipTests}</skipUnitTests>
-
-        <!--git-->
-        <git.user.name>gitlab-ci</git.user.name>
-        <git.user.token>changeit</git.user.token>
-        <git.project.url>
-            https://${git.user.name}:${git.user.token}@gitlab.inria.fr/gazelle/private/kereval/maestro.git
-        </git.project.url>
 
         <sonar.coverage.exclusions>
             **/gazelle/business/engine/NotInitializedReferenceException.java,
@@ -109,43 +106,43 @@
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-api</artifactId>
-                <version>0.2.0-DGSANTEBP-45-SNAPSHOT</version>
+                <version>0.3.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-engine</artifactId>
-                <version>0.2.0-DGSANTEBP-45-SNAPSHOT</version>
+                <version>0.3.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>validation-step</artifactId>
-                <version>0.2.0-DGSANTEBP-45-SNAPSHOT</version>
+                <version>0.3.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>simulation-step</artifactId>
-                <version>0.2.0-DGSANTEBP-45-SNAPSHOT</version>
+                <version>0.3.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>user-interaction-step</artifactId>
-                <version>0.2.0-DGSANTEBP-45-SNAPSHOT</version>
+                <version>0.3.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>assertion-step</artifactId>
-                <version>0.2.0-DGSANTEBP-45-SNAPSHOT</version>
+                <version>0.3.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>itb-step</artifactId>
-                <version>0.2.0-DGSANTEBP-45-SNAPSHOT</version>
+                <version>0.3.0-SNAPSHOT</version>
             </dependency>
             <!-- to be removed when maestro-websocket has it own tests -->
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-websocket</artifactId>
-                <version>0.2.0-DGSANTEBP-45-SNAPSHOT</version>
+                <version>0.3.0-SNAPSHOT</version>
             </dependency>
 
             <!-- Stack BOM -->
@@ -247,6 +244,11 @@
                         <arg>-parameters</arg>
                     </compilerArgs>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${javadoc-plugin.version}</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -467,7 +469,7 @@
                     <dependency>
                         <groupId>net.ihe.gazelle</groupId>
                         <artifactId>mlang-converter</artifactId>
-                        <version>0.2.0-DGSANTEBP-45-SNAPSHOT</version>
+                        <version>0.3.0-SNAPSHOT</version>
                     </dependency>
                 </dependencies>
             </dependencyManagement>

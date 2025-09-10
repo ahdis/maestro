@@ -33,8 +33,7 @@ class ValidationRequestMapperTest {
         ValidationStep step = new ValidationStep("validationStep",
                 new Property<>(ValidationStep.VALIDATION_SERVICE, "matchbox"),
                 new Property<>(ValidationStep.VALIDATION_PROFILE, "default"),
-                List.of(new Property<>("contentToValidate", "content".getBytes()))
-        );
+                new Property<>(ValidationStep.CONTENT_TO_VALIDATE, "content".getBytes()));
         ValidationRequest request = ValidationRequestMapper.createValidationRequest(step);
         assertNotNull(request);
         assertEquals(step.getValidationProfile().getValue(), request.getValidationProfileId());

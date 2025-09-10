@@ -29,10 +29,10 @@ import java.util.regex.Pattern;
  * To recognize if a String is a reference, it shall follow syntax describ in PATTERN field.
  * </p>
  * <p>
- *     For exemple :
- *     <p>
- *         <b>${propertyName}</b> is a reference where propertyName is the name of the referenced Property
- *     </p>
+ * For exemple :
+ * </p>
+ * <p>
+ *  <b>${propertyName}</b> is a reference where propertyName is the name of the referenced Property
  * </p>
  */
 public class ReferenceParser {

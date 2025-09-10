@@ -24,7 +24,7 @@ import net.ihe.gazelle.simulation.business.callback.Result;
 import net.ihe.gazelle.simulation.business.callback.SimulationReport;
 import net.ihe.gazelle.simulation.business.callback.SimulationReportValidator;
 import net.ihe.gazelle.simulation.business.setup.*;
-import net.ihe.gazelle.simulation.client.business.ServiceUnavailableException;
+import net.ihe.gazelle.simulation.business.sequence.ServiceUnavailableException;
 import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,30 +80,22 @@ public class SimulationStepRunner implements StepRunner {
             return buildReportWithError(stepRun, e, "Error on property type");
         } catch (RuntimeException e) {
             return buildReportWithError(stepRun, e, "Error from simulator");
+        }
+    }
+
+    private SimulationReport getSimulationReport(SimulationRequest simulationRequest, CompletableFuture<SimulationReport> futureReport) {
+        long timeout = simulationRequest.getTimeoutSeconds() + 10L;
+        try {
+            return futureReport.get(timeout, TimeUnit.SECONDS);
+        } catch (TimeoutException e) {
+            LOG.error("Simulation timed out after {} seconds", timeout);
+            throw new TimeoutRuntimeException("Simulation timed out after " + timeout + " seconds");
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return null;
         } catch (ExecutionException e) {
             throw new ExecutionRuntimeException(e);
         }
-    }
-
-    private SimulationReport getSimulationReport(SimulationRequest simulationRequest, CompletableFuture<SimulationReport> futureReport) throws ExecutionException, InterruptedException {
-        SimulationReport simulationReport = futureReport
-                .orTimeout(simulationRequest.getTimeoutSeconds() + 10L, TimeUnit.SECONDS)
-                .exceptionally(ex ->
-                {
-                    if (ex instanceof TimeoutException) {
-                        LOG.error("Simulation has timed out after {} seconds.", simulationRequest.getTimeoutSeconds() + 10, ex);
-                        return null;
-                    }
-                    throw new CompletionException(ex);
-                })
-                .get();
-        if (simulationReport == null) {
-            throw new TimeoutRuntimeException("Simulation has timed out after " + simulationRequest.getTimeoutSeconds() + 10 + " seconds.");
-        }
-        return simulationReport;
     }
 
     private StepRunReportBuilder prepareStepReport(StepRun stepRun) {

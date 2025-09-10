@@ -19,8 +19,11 @@ package net.ihe.gazelle.maestro.quarkus.ws;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import net.ihe.gazelle.maestro.api.business.testrun.InvalidTestRunException;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSetRunDTO;
+import net.ihe.gazelle.maestro.business.MissingArgumentException;
+import net.ihe.gazelle.maestro.quarkus.NotProvidedStep;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
@@ -34,11 +37,19 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 public interface TestRunController {
 
     /**
-     * This endpoint can run Synchronously or Asynchronously depending on the presence of a callback URI
-     * If the callback query parameter is not set, this will run synchronously and directly send the Test report as a response.
-     * If the callback query parameter is set, this will run asynchronously and will send the Test report to the specified callback URI later on.
-     * Different response can be sent depending on what happen during execution
+     * This endpoint can run synchronously or asynchronously depending on the presence of a callback URI.
      * <p>
+     * If the callback query parameter is not set, this will run synchronously and directly send the
+     * {@code TestReport} as a response.
+     * </p>
+     * <p>
+     * If the callback query parameter is set, this will run asynchronously and will send the
+     * {@code TestReport} to the specified callback URI later on.
+     * </p>
+     * <p>
+     * Different responses can be sent depending on what happens during execution:
+     * </p>
+     * <ul>
      *     <li><b>Execution went well</b> : 200 + TestReport in body if callback is not present and run is synchronous</li>
      *     <li><b>Execution went well</b> : 202 If callback is present and run is asynchronous </li>
      *     <li><b>Request couldn't be Parsed</b> : 400 + ParsingErrorException or MissingArgumentException</li>
@@ -46,7 +57,7 @@ public interface TestRunController {
      *     <li><b>Request try to execute an unsupported Step</b> : 400 + NotProvidedStep</li>
      *     <li><b>Unknown Error occurred</b> : 500 + Exception</li>
      *     <li><b>Timeout exception</b> : 504 + message explaining why timeout occurred</li>
-     * </p>
+     * </ul>
      * @param callback The callback URI to send back the Test report for asynchronous run
      * @param testSetRun A list of TestRun
      * @return A response with a status code and a body containing TestReport or an exception

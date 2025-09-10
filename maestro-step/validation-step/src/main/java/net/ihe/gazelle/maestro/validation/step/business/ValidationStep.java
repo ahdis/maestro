@@ -26,17 +26,17 @@ import java.util.List;
  * <p>
  * A Validation Step is an automated step used to validate some content with validation service.
  * This step has 3 properties :
- *  <p>
+ * </p>
+ * <p>
  *         <b>VALIDATION_SERVICE</b> String name of validation service name.
  *          ServiceRegistryDAO will return a list of services with a name field.
  *          VALIDATION_SERVICE must be in this list.
- *  </p>
- *  <p>
+ * </p>
+ * <p>
  *          <b>VALIDATION_PROFILE</b> String name of validation Profile provided by validation service
- *  </p>
- *  <p>
+ * </p>
+ * <p>
  *          <b>CONTENT_TO_VALIDATE</b> Byte array of content to validate with validation profile on validation service
- *  </p>
  * </p>
  */
 public class ValidationStep implements Step {
