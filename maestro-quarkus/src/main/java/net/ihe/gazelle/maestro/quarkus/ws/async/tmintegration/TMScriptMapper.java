@@ -42,6 +42,8 @@ public class TMScriptMapper {
     public static final String ACCESS_CONTROL_LIST = "accessControlList";
     public static final String TEST_RUNS = "testRuns";
     public static final String OWNERS = "owners";
+    public static final String VERSION = "version";
+    public static final String NAME = "name";
 
     private TMScriptMapper() {
         // Private constructor to prevent instantiation
@@ -139,11 +141,13 @@ public class TMScriptMapper {
             return null;
         }
         EntityIdentification id = new EntityIdentification();
-        if (idNode.hasNonNull("name")) {
-            id.setName(idNode.get("name").asText());
+        String name = idNode.get(NAME).asText();
+        if (idNode.hasNonNull(NAME) && !name.isBlank()) {
+            id.setName(name);
         }
-        if (idNode.hasNonNull("version")) {
-            id.setVersion(idNode.get("version").asText());
+        String version = idNode.get(VERSION).asText();
+        if (idNode.hasNonNull(VERSION) && !version.isBlank()) {
+            id.setVersion(version);
         }
         return id;
     }
@@ -176,7 +180,7 @@ public class TMScriptMapper {
     private static void parseTest(JsonNode testNode, TestRun testRun) {
         try {
             Test test = new Test();
-            String name = testNode.get("name").asText();
+            String name = testNode.get(NAME).asText();
             test.setId(name);
             test.setName(name);
             ArrayNode stepNodes = (ArrayNode) testNode.get("steps");

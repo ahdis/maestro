@@ -9,7 +9,6 @@ import net.ihe.gazelle.evsapi.client.business.response.report.ConstraintValidati
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
 import net.ihe.gazelle.validation.v2.api.business.report.*;
 import net.ihe.gazelle.validation.v2.api.business.report.validator.SubjectLocationValidator;
-import net.ihe.gazelle.validation.v2.api.business.request.InputBuilder;
 
 import java.util.List;
 
@@ -64,8 +63,8 @@ public class EvsValidationMapper {
     /**
      * Creates validation method from EVS validation overview
      */
-    private ValidationMethod createValidationMethod(net.ihe.gazelle.evsapi.client.business.response.report.ValidationOverview overview) {
-        return new ValidationMethod()
+    private ValidationMethodBuilder createValidationMethod(net.ihe.gazelle.evsapi.client.business.response.report.ValidationOverview overview) {
+        return new ValidationMethodBuilder()
                 .setValidationProfileID(overview.getValidatorID())
                 .setValidationServiceName(overview.getValidationServiceName())
                 .setValidationProfileVersion(overview.getValidatorVersion() != null && !overview.getValidatorVersion().isEmpty() ? overview.getValidatorVersion() : UNKNOWN)
@@ -97,7 +96,7 @@ public class EvsValidationMapper {
         for (HandledObject item : evsRequest.getHandledObjects()) {
             if (item != null) {
                 reportBuilder.addInput(
-                        new InputBuilder()
+                        new InputInReportBuilder()
                                 .setId(item.getRole())
                                 .setContent(item.getContent())
                                 .setItemId(item.getOriginalFileName())

@@ -17,10 +17,10 @@
 package net.ihe.gazelle.maestro.validation.step.technical.handler;
 
 import net.ihe.gazelle.maestro.validation.step.business.ServiceClientException;
+import net.ihe.gazelle.validation.v2.api.business.Input;
 import net.ihe.gazelle.validation.v2.api.business.ValidationService;
 import net.ihe.gazelle.validation.v2.api.business.profile.ValidationProfile;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
-import net.ihe.gazelle.validation.v2.api.business.request.Input;
 import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

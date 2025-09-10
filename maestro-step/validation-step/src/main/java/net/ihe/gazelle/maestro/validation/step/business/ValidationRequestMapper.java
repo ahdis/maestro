@@ -17,7 +17,7 @@
 package net.ihe.gazelle.maestro.validation.step.business;
 
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
-import net.ihe.gazelle.validation.v2.api.business.request.InputBuilder;
+import net.ihe.gazelle.validation.v2.api.business.request.InputInRequestBuilder;
 import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
 import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequestBuilder;
 
@@ -34,7 +34,7 @@ public class ValidationRequestMapper {
         ValidationRequestBuilder validationRequest = new ValidationRequestBuilder()
                 .setValidationProfileId(validationStep.getValidationProfile().getValue());
         for (Property<byte[]> contentToValidate : validationStep.getContentsToValidate()) {
-            validationRequest.addInput(new InputBuilder()
+            validationRequest.addInput(new InputInRequestBuilder()
                     .setItemId(contentToValidate.getName())
                     .setContent(contentToValidate.getValue())
                     .setId(contentToValidate.getName())
