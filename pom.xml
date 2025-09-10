@@ -72,6 +72,7 @@
 
         <!-- Plugins version -->
         <compiler-plugin.version>3.14.0</compiler-plugin.version>
+        <javadoc-plugin.version>3.11.3</javadoc-plugin.version>
         <surefire-plugin.version>3.5.3</surefire-plugin.version>
         <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
         <bulild.helper.maven.plugin.version>3.6.1</bulild.helper.maven.plugin.version>
@@ -226,6 +227,11 @@
                         <arg>-parameters</arg>
                     </compilerArgs>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${javadoc-plugin.version}</version>
             </plugin>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
