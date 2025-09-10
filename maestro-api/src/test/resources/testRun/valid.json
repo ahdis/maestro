@@ -1,0 +1,120 @@
+[
+  {
+    "testSetId": "testSet1",
+    "test": {
+      "id": "1",
+      "name": "name1",
+      "steps": [
+        {
+          "type": "MOCK",
+          "name": "test",
+          "properties": [
+            {
+              "name": "stringProperty",
+              "value": "string",
+              "type": "string"
+            },
+            {
+              "name": "integerProperty",
+              "value": "3",
+              "type": "integer"
+            },
+            {
+              "name": "booleanProperty",
+              "value": "true",
+              "type": "boolean"
+            },
+            {
+              "name": "doubleProperty",
+              "value": "0.5",
+              "type": "double"
+            },
+            {
+              "name": "byteArrayProperty",
+              "value": "ihfeorhqifrghqpervgh",
+              "type": "byteArray"
+            },
+            {
+              "name": "dateProperty",
+              "value": "2024-11-08T11:19:36.385+0000",
+              "type": "date"
+            }
+          ]
+        },
+        {
+          "type": "MOCK",
+          "name": "testRefs",
+          "properties": [
+            {
+              "name": "stringProperty",
+              "value": "${stringInput}",
+              "type": "string"
+            },
+            {
+              "name": "integerProperty",
+              "value": "${integerInput}",
+              "type": "integer"
+            },
+            {
+              "name": "booleanProperty",
+              "value": "${booleanInput}",
+              "type": "boolean"
+            },
+            {
+              "name": "doubleProperty",
+              "value": "${doubleInput}",
+              "type": "double"
+            },
+            {
+              "name": "byteArrayProperty",
+              "value": "${byteArrayInput}",
+              "type": "byteArray"
+            },
+            {
+              "name": "dateProperty",
+              "value": "${dateInput}",
+              "type": "date"
+            }
+          ]
+        }
+      ]
+    },
+    "inputs": [
+      {
+        "name": "inputFile1",
+        "value": "ihfeorhqifrghqpervgh",
+        "type": "byteArray"
+      },
+      {
+        "name": "stringInput",
+        "value": "string",
+        "type": "string"
+      },
+      {
+        "name": "integerInput",
+        "value": "3",
+        "type": "integer"
+      },
+      {
+        "name": "booleanInput",
+        "value": "true",
+        "type": "boolean"
+      },
+      {
+        "name": "doubleInput",
+        "value": "0.5",
+        "type": "double"
+      },
+      {
+        "name": "byteArrayInput",
+        "value": "ihfeorhqifrghqpervgh",
+        "type": "string"
+      },
+      {
+        "name": "dateInput",
+        "value": "2024-11-08T11:19:36.385+0000",
+        "type": "date"
+      }
+    ]
+  }
+]

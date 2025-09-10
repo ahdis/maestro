@@ -1,0 +1,59 @@
+[
+  {
+    "testSetId": "testSet1",
+    "test": {
+      "id": "1",
+      "name": "name1",
+      "steps": [
+        {
+          "type": "MOCK",
+          "name": "test",
+          "properties": [
+            {
+              "name": "stringProperty",
+              "value": "string",
+              "type": "wrong"
+            }
+          ]
+        }
+      ]
+    },
+    "inputs": [
+      {
+        "name": "inputFile1",
+        "value": "ihfeorhqifrghqpervgh",
+        "type": "byteArray"
+      },
+      {
+        "name": "stringInput",
+        "value": "string",
+        "type": "string"
+      },
+      {
+        "name": "integerInput",
+        "value": "3",
+        "type": "integer"
+      },
+      {
+        "name": "booleanInput",
+        "value": "true",
+        "type": "boolean"
+      },
+      {
+        "name": "doubleInput",
+        "value": "0.5",
+        "type": "double"
+      },
+      {
+        "name": "byteArrayInput",
+        "value": "ihfeorhqifrghqpervgh",
+        "type": "string"
+      },
+      {
+        "name": "dateInput",
+        "value": "2024-11-08T11:19:36.385+0000",
+        "type": "date"
+      }
+    ]
+  }
+]
