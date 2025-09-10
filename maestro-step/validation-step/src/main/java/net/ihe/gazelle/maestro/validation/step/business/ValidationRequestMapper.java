@@ -16,7 +16,7 @@
 
 package net.ihe.gazelle.maestro.validation.step.business;
 
-import net.ihe.gazelle.validation.v2.api.business.request.InputBuilder;
+import net.ihe.gazelle.validation.v2.api.business.request.InputInRequestBuilder;
 import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
 import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequestBuilder;
 
@@ -32,7 +32,7 @@ public class ValidationRequestMapper {
     public static ValidationRequest createValidationRequest(ValidationStep validationStep) {
         ValidationRequestBuilder validationRequest = new ValidationRequestBuilder()
                 .setValidationProfileId(validationStep.getValidationProfile().getValue())
-                .addInput(new InputBuilder()
+                .addInput(new InputInRequestBuilder()
                         .setContent(validationStep.getContentToValidate().getValue())
                 );
         return validationRequest.build();

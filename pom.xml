@@ -55,9 +55,9 @@
 
         <quarkus.platform.version>3.15.6.2</quarkus.platform.version>
 
-        <framework.version>2.1.2-SNAPSHOT</framework.version>
+        <framework.version>2.1.2</framework.version>
         <search-api.version>1.1.0</search-api.version>
-        <validation-api.version>2.0.0-SNAPSHOT</validation-api.version>
+        <validation-api.version>2.0.0</validation-api.version>
         <simulation-api.version>0.1.1</simulation-api.version>
         <service-registry.version>1.0.0</service-registry.version>
         <lang.version>2.0.1</lang.version>
