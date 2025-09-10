@@ -102,5 +102,11 @@ class GazelleSimulationServiceHandlerTest {
         assertSame(instructionConsumer, instrCaptor.getValue());
         assertSame(reportConsumer, reportCaptor.getValue());
     }
+
+    @Test
+    void testGetChecksumThrowsUnsupportedOperationException() {
+        GazelleSimulationServiceHandler handler = new GazelleSimulationServiceHandler(simulationClient);
+        assertThrows(UnsupportedOperationException.class, () -> handler.getChecksum(null));
+    }
 }
 
