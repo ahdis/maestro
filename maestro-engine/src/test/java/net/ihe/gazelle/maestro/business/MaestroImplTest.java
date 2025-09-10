@@ -16,12 +16,13 @@
 
 package net.ihe.gazelle.maestro.business;
 
-import net.ihe.gazelle.maestro.api.business.testreport.*;
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
+import net.ihe.gazelle.maestro.api.business.testreport.TestRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.*;
 import net.ihe.gazelle.maestro.api.business.testrun.context.Context;
 import net.ihe.gazelle.maestro.api.business.testrun.context.TestRunSessionStore;
 import net.ihe.gazelle.maestro.api.business.testrun.context.TestSetSessionStore;
-import net.ihe.gazelle.maestro.api.business.testrun.MaestroEventProducer;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,7 +35,8 @@ import org.mockito.quality.Strictness;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 

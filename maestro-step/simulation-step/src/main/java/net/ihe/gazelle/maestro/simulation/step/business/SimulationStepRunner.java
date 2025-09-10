@@ -20,17 +20,20 @@ import net.ihe.gazelle.lang.ExecutionRuntimeException;
 import net.ihe.gazelle.maestro.api.business.testreport.*;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunner;
+import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandler;
 import net.ihe.gazelle.simulation.business.callback.Result;
 import net.ihe.gazelle.simulation.business.callback.SimulationReport;
 import net.ihe.gazelle.simulation.business.callback.SimulationReportValidator;
 import net.ihe.gazelle.simulation.business.sequence.ServiceUnavailableException;
 import net.ihe.gazelle.simulation.business.setup.*;
-import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class SimulationStepRunner implements StepRunner {
 

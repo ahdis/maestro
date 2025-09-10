@@ -16,12 +16,12 @@
 
 package net.ihe.gazelle.maestro.simulation.step.technical.dto;
 
+import net.ihe.gazelle.maestro.simulation.step.business.ReportSerialization;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.SerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.SerializationException;
 import net.ihe.gazelle.simulation.business.callback.SimulationReport;
 import net.ihe.gazelle.simulation.jaxrs.api.technical.dto.callback.SimulationReportDTO;
-import net.ihe.gazelle.maestro.simulation.step.business.ReportSerialization;
 
 public class ReportSerializationImpl implements ReportSerialization {
 

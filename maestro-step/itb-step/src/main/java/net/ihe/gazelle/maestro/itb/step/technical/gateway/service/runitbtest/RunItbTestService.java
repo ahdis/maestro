@@ -17,11 +17,11 @@
 package net.ihe.gazelle.maestro.itb.step.technical.gateway.service.runitbtest;
 
 
-import net.ihe.gazelle.maestro.itb.step.technical.gateway.client.ItbHttpClient;
 import net.ihe.gazelle.maestro.itb.step.business.request.Parameter;
 import net.ihe.gazelle.maestro.itb.step.business.request.TestCase;
 import net.ihe.gazelle.maestro.itb.step.business.request.TestRequest;
 import net.ihe.gazelle.maestro.itb.step.business.request.TestSuite;
+import net.ihe.gazelle.maestro.itb.step.technical.gateway.client.ItbHttpClient;
 
 import java.util.ArrayList;
 import java.util.List;
