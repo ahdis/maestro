@@ -26,37 +26,23 @@ import java.util.Base64;
 import java.util.Date;
 
 /**
- * <p>
- *     DTO For Property Objects. It has 3 attributes
- *     <p>
- *         <b>name</b> Property name
- *     </p>
- *     <p>
- *         <b>value</b> property value represented as a String,
- *         but the final Property value can be of various type describe in type field
- *     </p>
- *     <p>
- *         <b>type</b> property type. There are different possible value for this field :
- *         <p>
- *             - <b>string</b> corresponding to String
- *         </p>
- *         <p>
- *             - <b>integer</b> corresponding to Integer
- *         </p>
- *         <p>
- *             - <b>boolean</b> corresponding to Boolean
- *         </p>
- *         <p>
- *             - <b>double</b> corresponding to Double
- *         </p>
- *         <p>
- *             - <b>byteArray</b> corresponding to byte[]
- *         </p>
- *         <p>
- *             - <b>date</b> corresponding to Date from java.util library
- *         </p>
- *     </p>
- * </p>
+ * DTO for Property objects. It has 3 attributes:
+ *
+ * <ul>
+ *   <li><b>name</b> – Property name</li>
+ *   <li><b>value</b> – Property value represented as a {@code String}, but the final
+ *       Property value can be of various types described in the {@code type} field</li>
+ *   <li><b>type</b> – Property type. Possible values include:
+ *     <ul>
+ *       <li><b>string</b> – corresponds to {@link String}</li>
+ *       <li><b>integer</b> – corresponds to {@link Integer}</li>
+ *       <li><b>boolean</b> – corresponds to {@link Boolean}</li>
+ *       <li><b>double</b> – corresponds to {@link Double}</li>
+ *       <li><b>byteArray</b> – corresponds to {@code byte[]}</li>
+ *       <li><b>date</b> – corresponds to {@link java.util.Date}</li>
+ *     </ul>
+ *   </li>
+ * </ul>
  */
 public class PropertyDTO {
 

@@ -24,12 +24,12 @@ package net.ihe.gazelle.maestro.api.business.testrun.runner;
  * </p>
  * <p>
  * This abstract class should not be used directly to send message. Use inheritors class instead :
- *  <p>
+ * </p>
+ * <p>
  * {@link FinishedStepEvent}
- *  </p>
- *  <p>
+ * </p>
+ * <p>
  * {@link StartStepCommand}
- *  </p>
  * </p>
  */
 public abstract class StepMessage {
