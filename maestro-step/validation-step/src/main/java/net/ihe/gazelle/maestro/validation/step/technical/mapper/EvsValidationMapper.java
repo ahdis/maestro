@@ -99,7 +99,6 @@ public class EvsValidationMapper {
                         new InputInReportBuilder()
                                 .setId(item.getRole())
                                 .setContent(item.getContent())
-                                .setItemId(item.getOriginalFileName())
                 );
             }
         }

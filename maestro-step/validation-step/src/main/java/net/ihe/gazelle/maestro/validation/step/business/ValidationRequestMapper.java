@@ -35,7 +35,6 @@ public class ValidationRequestMapper {
                 .setValidationProfileId(validationStep.getValidationProfile().getValue());
         for (Property<byte[]> contentToValidate : validationStep.getContentsToValidate()) {
             validationRequest.addInput(new InputInRequestBuilder()
-                    .setItemId(contentToValidate.getName())
                     .setContent(contentToValidate.getValue())
                     .setId(contentToValidate.getName())
             );
