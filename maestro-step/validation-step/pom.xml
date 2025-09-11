@@ -20,7 +20,7 @@
     <parent>
         <groupId>net.ihe.gazelle</groupId>
         <artifactId>maestro-step</artifactId>
-        <version>0.3.0-SNAPSHOT</version>
+        <version>0.3.0-GZL-9946-SNAPSHOT</version>
     </parent>
 
     <artifactId>validation-step</artifactId>

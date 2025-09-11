@@ -25,4 +25,8 @@ public class MissingArgumentException extends RuntimeException{
     public MissingArgumentException(Throwable cause) {
         super(cause);
     }
+
+    public MissingArgumentException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }
