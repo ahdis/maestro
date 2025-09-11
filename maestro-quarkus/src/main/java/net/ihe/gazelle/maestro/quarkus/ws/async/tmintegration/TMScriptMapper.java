@@ -242,46 +242,36 @@ public class TMScriptMapper {
         Set<String> availableKeys = new HashSet<>();
         if (inputNodes != null) {
             for (JsonNode inputNode : inputNodes) {
-                addProvidedInput(inputNode, testRun, providedKeys, availableKeys);
+                try {
+                    String key = inputNode.get("key").asText();
+                    providedKeys.add(key);
+                    String value = inputNode.get("value").asText();
+                    if (value != null && !value.isBlank()) {
+                        availableKeys.add(key);
+                    }
+                    PropertyDTO propertyDTO = new PropertyDTO(
+                            key,
+                            value,
+                            "byteArray");
+                    testRun.addInputs(propertyDTO.createProperty());
+                } catch (NullPointerException e) {
+                    throw new MissingArgumentException("Argument inputs is missing in inputs");
+                }
             }
         }
-        addMissingRequiredPlaceholders(requiredMap, providedKeys, availableKeys, testRun);
+        // Ensure required inputs declared in test are present even if not provided in testRun inputs
+        if (requiredMap != null) {
+            for (Map.Entry<String, Boolean> entry : requiredMap.entrySet()) {
+                String key = entry.getKey();
+                boolean required = Boolean.TRUE.equals(entry.getValue());
+                if (required && !providedKeys.contains(key)) {
+                    // Add an empty binary input to satisfy required presence
+                    testRun.addInputs(new Property<>(key, new byte[0]));
+                    availableKeys.add(key);
+                }
+            }
+        }
         return availableKeys;
-    }
-
-    private static void addProvidedInput(JsonNode inputNode,
-                                         TestRun testRun,
-                                         Set<String> providedKeys,
-                                         Set<String> availableKeys) {
-        try {
-            String key = inputNode.get("key").asText();
-            providedKeys.add(key);
-            String value = inputNode.get("value").asText();
-            if (value != null && !value.isBlank()) {
-                availableKeys.add(key);
-            }
-            PropertyDTO propertyDTO = new PropertyDTO(key, value, "byteArray");
-            testRun.addInputs(propertyDTO.createProperty());
-        } catch (NullPointerException e) {
-            throw new MissingArgumentException("Argument inputs is missing in inputs");
-        }
-    }
-
-    private static void addMissingRequiredPlaceholders(Map<String, Boolean> requiredMap,
-                                                       Set<String> providedKeys,
-                                                       Set<String> availableKeys,
-                                                       TestRun testRun) {
-        if (requiredMap == null || requiredMap.isEmpty()) {
-            return;
-        }
-        for (Map.Entry<String, Boolean> entry : requiredMap.entrySet()) {
-            boolean required = Boolean.TRUE.equals(entry.getValue());
-            String key = entry.getKey();
-            if (required && !providedKeys.contains(key)) {
-                testRun.addInputs(new Property<>(key, new byte[0]));
-                availableKeys.add(key);
-            }
-        }
     }
 
     private static void trimOptionalMissingStepRefs(TestRun testRun, Map<String, Boolean> requiredMap, Set<String> availableKeys) {
@@ -290,34 +280,26 @@ public class TMScriptMapper {
         }
         for (Step step : testRun.getTest().getSteps()) {
             List<Property<?>> props = step.getProperties();
-            if (props == null) {
-                step.setProperties(List.of());
-                continue;
-            }
+            if (props == null) continue;
             List<Property<?>> adjusted = new ArrayList<>();
             for (Property<?> p : props) {
-                if (keepProperty(p, requiredMap, availableKeys)) {
-                    adjusted.add(p);
+                if (p == null) {
+                    // Drop null placeholders to avoid NPEs in setProperties implementations
+                    continue;
                 }
+                if (p instanceof PropertyRef<?> ref) {
+                    String refKey = ref.getReference();
+                    boolean required = requiredMap.getOrDefault(refKey, true);
+                    boolean available = availableKeys != null && availableKeys.contains(refKey);
+                    if (!required && !available) {
+                        // Skip optional and missing reference
+                        continue;
+                    }
+                }
+                adjusted.add(p);
             }
             step.setProperties(adjusted);
         }
-    }
-
-    private static boolean keepProperty(Property<?> property,
-                                        Map<String, Boolean> requiredMap,
-                                        Set<String> availableKeys) {
-        if (property == null) {
-            return false;
-        }
-        if (property instanceof PropertyRef<?> ref) {
-            String refKey = ref.getReference();
-            boolean required = requiredMap.getOrDefault(refKey, true);
-            boolean available = availableKeys != null && availableKeys.contains(refKey);
-            return required || available;
-        }
-        return true;
-    }
     }
 
     private static AccessControlList parseAccessControlList(JsonNode aclNode) {
