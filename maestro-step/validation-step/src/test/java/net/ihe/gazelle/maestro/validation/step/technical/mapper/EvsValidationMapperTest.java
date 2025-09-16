@@ -76,7 +76,7 @@ class EvsValidationMapperTest {
             () -> assertEquals("ERROR", assertionReport.getSeverity().toString()),
             () -> assertEquals("MANDATORY", assertionReport.getPriority().toString()),
             () -> assertEquals("FAILED", assertionReport.getResult().toString()),
-            () -> assertEquals("line: 0", assertionReport.getSubjectLocations().getFirst().getValue())
+            () -> assertEquals("line 0, column 0", assertionReport.getSubjectLocations().getFirst().getValue())
         );
     }
 
@@ -121,7 +121,7 @@ class EvsValidationMapperTest {
         constraint.setSeverity(SeverityLevel.ERROR);
         constraint.setTestResult(ValidationTestResult.FAILED);
         constraint.setConstraintDescription("Cannot parse document to extract part to validate");
-        constraint.setLocationInValidatedObject("line: 0");
+        constraint.setLocationInValidatedObject("line 0, column 0");
 
         java.util.List<ConstraintValidation> constraints = new java.util.ArrayList<>();
         constraints.add(constraint);
