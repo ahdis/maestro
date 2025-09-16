@@ -131,7 +131,8 @@ class TMScriptMapperTest {
         testNode.set("inputs", declaredInputs);
 
         ArrayNode inputs = mapper.createArrayNode();
-        inputs.add(mapper.createObjectNode().put("key", "textInput").put("value", "alpha"));
+        String textValue = Base64.getEncoder().encodeToString("alpha".getBytes(StandardCharsets.UTF_8));
+        inputs.add(mapper.createObjectNode().put("key", "textInput").put("value", textValue));
         inputs.add(mapper.createObjectNode().put("key", "flag").put("value", "true"));
         inputs.add(mapper.createObjectNode().put("key", "count").put("value", "5.5"));
         run.set("inputs", inputs);
@@ -153,6 +154,30 @@ class TMScriptMapperTest {
         Property<?> count = properties.stream().filter(p -> "count".equals(p.getName())).findFirst().orElseThrow();
         assertInstanceOf(Double.class, count.getValue());
         assertEquals(5.5d, (Double) count.getValue(), 1e-9);
+    }
+
+    @Test
+    void convertToTestSetRun_keepsPlainText_whenNotBase64() {
+        ObjectNode root = baseRoot();
+        ArrayNode runs = mapper.createArrayNode();
+        ObjectNode run = minimalTestRunNode("test-D");
+
+        ObjectNode testNode = (ObjectNode) run.get("test");
+        ArrayNode declaredInputs = mapper.createArrayNode();
+        declaredInputs.add(mapper.createObjectNode().put("key", "textInput").put("type", "text"));
+        testNode.set("inputs", declaredInputs);
+
+        ArrayNode inputs = mapper.createArrayNode();
+        inputs.add(mapper.createObjectNode().put("key", "textInput").put("value", "plain"));
+        run.set("inputs", inputs);
+
+        runs.add(run);
+        root.set(TMScriptMapper.TEST_RUNS, runs);
+
+        TestSetRun tsr = TMScriptMapper.convertToTestSetRun(root, new TestRunStore());
+        Property<?> text = tsr.getTestRuns().getFirst().getInputs().getFirst();
+        assertInstanceOf(String.class, text.getValue());
+        assertEquals("plain", text.getValue());
     }
 
     @Test

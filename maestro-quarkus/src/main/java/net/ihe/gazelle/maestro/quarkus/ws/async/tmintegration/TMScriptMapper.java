@@ -25,6 +25,7 @@ import net.ihe.gazelle.maestro.business.MissingArgumentException;
 import net.ihe.gazelle.maestro.quarkus.ws.async.TestRunStore;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -257,9 +258,10 @@ public class TMScriptMapper {
                     String declaredType = definition != null ? definition.type() : null;
                     String instanceType = inputNode.hasNonNull("type") ? inputNode.get("type").asText() : null;
                     String propertyType = resolvePropertyType(declaredType, instanceType);
+                    String adjustedValue = adjustValueForInput(value, declaredType, instanceType, propertyType);
                     PropertyDTO propertyDTO = new PropertyDTO(
                             key,
-                            value,
+                            adjustedValue,
                             propertyType);
                     testRun.addInputs(propertyDTO.createProperty());
                 } catch (NullPointerException e) {
@@ -440,6 +442,29 @@ public class TMScriptMapper {
             }
         }
         return null;
+    }
+
+    private static String adjustValueForInput(String value, String declaredType, String instanceType, String propertyType) {
+        if (value == null) {
+            return null;
+        }
+        if (!"string".equals(propertyType)) {
+            return value;
+        }
+        String sourceType = firstNonBlank(declaredType, instanceType);
+        if (sourceType == null) {
+            return value;
+        }
+        String normalized = sourceType.trim().toLowerCase(Locale.ROOT);
+        if (normalized.contains("text")) {
+            try {
+                byte[] decoded = Base64.getDecoder().decode(value.trim());
+                return new String(decoded, StandardCharsets.UTF_8);
+            } catch (IllegalArgumentException ignored) {
+                // Value was not Base64 encoded; keep as-is
+            }
+        }
+        return value;
     }
 
     private record InputDefinition(String type, boolean required) {
