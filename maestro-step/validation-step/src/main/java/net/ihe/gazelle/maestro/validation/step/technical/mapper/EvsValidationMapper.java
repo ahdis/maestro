@@ -14,7 +14,10 @@ import java.util.List;
 
 public class EvsValidationMapper {
 
-    public static final String UNKNOWN = "UNKNOWN";
+    public static final String UNKNOWN_LOCATION_TYPE = "unknown";
+    public static final String LINE_COLUMN_LOCATION_TYPE = "line-column";
+    public static final String XML_PATH_LOCATION_TYPE = "xml-path";
+    public static final String JSON_PATH_LOCATION_TYPE = "json-path";
 
     public net.ihe.gazelle.evsapi.client.business.request.ValidationRequest mapToEvsRequest(ValidationStep validationStep) {
         return new net.ihe.gazelle.evsapi.client.business.request.ValidationRequest()
@@ -66,9 +69,9 @@ public class EvsValidationMapper {
     private ValidationMethodBuilder createValidationMethod(net.ihe.gazelle.evsapi.client.business.response.report.ValidationOverview overview) {
         return new ValidationMethodBuilder()
                 .setValidationProfileID(overview.getValidatorID())
+                .setValidationProfileVersion(overview.getValidatorVersion() != null && !overview.getValidatorVersion().isEmpty() ? overview.getValidatorVersion() : "Unknown")
                 .setValidationServiceName(overview.getValidationServiceName())
-                .setValidationProfileVersion(overview.getValidatorVersion() != null && !overview.getValidatorVersion().isEmpty() ? overview.getValidatorVersion() : UNKNOWN)
-                .setValidationServiceVersion(overview.getValidationServiceVersion() != null && !overview.getValidationServiceVersion().isEmpty() ? overview.getValidationServiceVersion() : UNKNOWN);
+                .setValidationServiceVersion(overview.getValidationServiceVersion() != null && !overview.getValidationServiceVersion().isEmpty() ? overview.getValidationServiceVersion() : "Unknown");
     }
 
     /**
@@ -189,17 +192,34 @@ public class EvsValidationMapper {
     /**
      * Gets validated location, fixing invalid formats if necessary
      */
-    private SubjectLocationBuilder getValidatedSubjectLocation(String originalLocation) {
-        if (originalLocation == null || originalLocation.isEmpty()) {
+    private SubjectLocationBuilder getValidatedSubjectLocation(String locationValue) {
+        if (locationValue == null || locationValue.isEmpty()) {
             return null;
         }
-        SubjectLocationBuilder subjectLocationBuilder = new SubjectLocationBuilder().setValue(originalLocation)
+        SubjectLocationBuilder subjectLocationBuilder = new SubjectLocationBuilder().setValue(locationValue)
                 .setInputId(null) //TODO find the associated input ID if possible
-                .setType(UNKNOWN); //TODO: determine type based on format if possible
+                .setType(estimateTypeFromLocationValue(locationValue));
         if (isSubjectLocationValid(subjectLocationBuilder)) {
             return subjectLocationBuilder;
         } else {
             return null;
+        }
+    }
+
+    /**
+     * Estimates location type from the location value using simple heuristics
+     * @param location the location value
+     * @return the estimated location type
+     */
+    private String estimateTypeFromLocationValue(String location) {
+        if (location.startsWith("line")) {
+            return LINE_COLUMN_LOCATION_TYPE;
+        } else if (location.contains("/")) {
+            return XML_PATH_LOCATION_TYPE;
+        } else if (location.contains("$")) {
+            return JSON_PATH_LOCATION_TYPE;
+        } else {
+            return UNKNOWN_LOCATION_TYPE;
         }
     }
 

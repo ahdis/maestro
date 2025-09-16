@@ -25,8 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ValidationRequestMapperTest {
 
@@ -43,10 +42,10 @@ class ValidationRequestMapperTest {
         assertEquals(1, request.getInputs().size());
         Input item = request.getInputs().getFirst();
         assertNotNull(item);
-        assertEquals("contentToValidate", item.getId());
         String actualContent = new String(item.getContent(), StandardCharsets.UTF_8);
         assertEquals("content", actualContent);
         assertEquals("contentToValidate", item.getId());
+        assertNull(item.getItemId());
     }
 
 }
