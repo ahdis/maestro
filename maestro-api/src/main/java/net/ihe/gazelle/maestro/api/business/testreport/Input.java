@@ -2,10 +2,15 @@ package net.ihe.gazelle.maestro.api.business.testreport;
 
 public class Input {
 
+    public static final String BYTE_ARRAY_TYPE = "byteArray";
+    public static final String TEXT_TYPE = "text";
+    public static final String BOOLEAN_TYPE = "boolean";
+    public static final String NUMBER_TYPE = "number";
 
     private String name;
     private byte[] content;
     private String reference;
+    private String type;
 
     public Input() {
     }
@@ -48,6 +53,14 @@ public class Input {
     }
 
 
+    public String getType() {
+        return type;
+    }
+
+    public Input setType(String type) {
+        this.type = type;
+        return this;
+    }
 
     public boolean isNameValid() {
         return name != null && !name.isBlank();
@@ -69,6 +82,9 @@ public class Input {
         }
     }
 
+    public boolean isTypeValid() {
+        return type != null && !type.isBlank();
+    }
 
 
     public boolean isValid() {

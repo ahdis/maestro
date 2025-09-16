@@ -24,6 +24,7 @@ import net.ihe.gazelle.maestro.api.business.testrun.context.TestRunSessionStore;
 import net.ihe.gazelle.maestro.api.business.testrun.context.TestSetSessionStore;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
@@ -151,7 +152,7 @@ public class MaestroImpl implements Maestro {
     public void finishStep(StepRun stepRun, StepRunReportBuilder stepRunReportBuilder) {
         String testRunId = stepRun.testRunId();
         TestRun testRun = getTestRunFromStore(testRunId);
-        List<InputBuilder> inputs = convertBinaryPropertiesToItems(testRun.getInputs());
+        List<InputBuilder> inputs = convertPropertiesToItems(testRun.getInputs());
         addStepReportToStore(testRunId, stepRunReportBuilder);
         if (stepRun.step().isNameEquals(testRun.getTest().getSteps().getLast())) {
             TestRunReportBuilder testRunReportBuilder = new TestRunReportBuilder()
@@ -401,13 +402,44 @@ public class MaestroImpl implements Maestro {
         recordAndReturnTestReport(testReport, testSetRun);
     }
 
-    private List<InputBuilder> convertBinaryPropertiesToItems(List<Property<?>> properties) {
+    private List<InputBuilder> convertPropertiesToItems(List<Property<?>> properties) {
         List<InputBuilder> items = new ArrayList<>();
         for (Property<?> property : properties) {
-            if(property.getValue() instanceof byte[] content) {
+            if(property instanceof PropertyRef<?> propertyRef){
                 InputBuilder item = new InputBuilder()
                         .setName(property.getName())
-                        .setContent(content);
+                        .setContent(("${"+propertyRef.getReference()+"}").getBytes(StandardCharsets.UTF_8));
+                items.add(item);
+            }
+            else if(property.getValue() instanceof byte[] content) {
+                InputBuilder item = new InputBuilder()
+                        .setName(property.getName())
+                        .setContent(content)
+                        .setType(Input.BYTE_ARRAY_TYPE)
+                        ;
+                items.add(item);
+            }
+            else if(property.getValue() instanceof String value) {
+                InputBuilder item = new InputBuilder()
+                        .setName(property.getName())
+                        .setContent(value.getBytes(StandardCharsets.UTF_8))
+                        .setType(Input.TEXT_TYPE)
+                        ;
+                items.add(item);
+            }
+            else if(property.getValue() instanceof Boolean value) {
+                InputBuilder item = new InputBuilder()
+                        .setName(property.getName())
+                        .setContent(new byte[]{(byte) (Boolean.TRUE.equals(value) ? 1 : 0)})
+                        .setType(Input.BOOLEAN_TYPE);
+                items.add(item);
+            }
+            else if(property.getValue() instanceof Number value) {
+                InputBuilder item = new InputBuilder()
+                        .setName(property.getName())
+                        .setContent(value.toString().getBytes(StandardCharsets.UTF_8))
+                        .setType(Input.NUMBER_TYPE)
+                        ;
                 items.add(item);
             }
         }

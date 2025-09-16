@@ -104,6 +104,10 @@ class TMScriptMapperTest {
         ArrayNode inputs = mapper.createArrayNode();
         inputs.add(mapper.createObjectNode().put("key", "payload").put("value", content));
         run.set("inputs", inputs);
+        ObjectNode testNode = (ObjectNode) run.get("test");
+        ArrayNode declaredInputs = mapper.createArrayNode();
+        declaredInputs.add(mapper.createObjectNode().put("key", "payload").put("type", "file"));
+        testNode.set("inputs", declaredInputs);
         runs.add(run);
         root.set(TMScriptMapper.TEST_RUNS, runs);
 
@@ -111,6 +115,44 @@ class TMScriptMapperTest {
         Property<?> in = tsr.getTestRuns().getFirst().getInputs().getFirst();
         assertEquals("payload", in.getName());
         assertArrayEquals("hello".getBytes(StandardCharsets.UTF_8), (byte[]) in.getValue());
+    }
+
+    @Test
+    void convertToTestSetRun_usesDeclaredInputTypes() {
+        ObjectNode root = baseRoot();
+        ArrayNode runs = mapper.createArrayNode();
+        ObjectNode run = minimalTestRunNode("test-C");
+
+        ObjectNode testNode = (ObjectNode) run.get("test");
+        ArrayNode declaredInputs = mapper.createArrayNode();
+        declaredInputs.add(mapper.createObjectNode().put("key", "textInput").put("type", "text").put("required", true));
+        declaredInputs.add(mapper.createObjectNode().put("key", "flag").put("type", "boolean").put("required", true));
+        declaredInputs.add(mapper.createObjectNode().put("key", "count").put("type", "number").put("required", true));
+        testNode.set("inputs", declaredInputs);
+
+        ArrayNode inputs = mapper.createArrayNode();
+        inputs.add(mapper.createObjectNode().put("key", "textInput").put("value", "alpha"));
+        inputs.add(mapper.createObjectNode().put("key", "flag").put("value", "true"));
+        inputs.add(mapper.createObjectNode().put("key", "count").put("value", "5.5"));
+        run.set("inputs", inputs);
+
+        runs.add(run);
+        root.set(TMScriptMapper.TEST_RUNS, runs);
+
+        TestSetRun tsr = TMScriptMapper.convertToTestSetRun(root, new TestRunStore());
+        List<Property<?>> properties = tsr.getTestRuns().getFirst().getInputs();
+
+        Property<?> text = properties.stream().filter(p -> "textInput".equals(p.getName())).findFirst().orElseThrow();
+        assertInstanceOf(String.class, text.getValue());
+        assertEquals("alpha", text.getValue());
+
+        Property<?> flag = properties.stream().filter(p -> "flag".equals(p.getName())).findFirst().orElseThrow();
+        assertInstanceOf(Boolean.class, flag.getValue());
+        assertEquals(Boolean.TRUE, flag.getValue());
+
+        Property<?> count = properties.stream().filter(p -> "count".equals(p.getName())).findFirst().orElseThrow();
+        assertInstanceOf(Double.class, count.getValue());
+        assertEquals(5.5d, (Double) count.getValue(), 1e-9);
     }
 
     @Test
@@ -171,4 +213,3 @@ class TMScriptMapperTest {
         assertEquals("key-1", parsed.getReadAccessKey());
     }
 }
-
