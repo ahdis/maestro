@@ -163,17 +163,18 @@ public class TMScriptMapper {
             testRunDAO.setCallbackAuthorization(testRunNode.get("callbackAuthorization").asText());
             TestRun testRun = new TestRun();
             JsonNode testNode = testRunNode.get("test");
-            parseTest(testNode, testRun);
+            Map<String, Boolean> testInputsRequired = parseTest(testNode, testRun);
             ArrayNode inputNodes = (ArrayNode) testRunNode.get("inputs");
-            parseInputs(inputNodes, testRun);
+            Set<String> availableKeys = parseInputs(inputNodes, testRun, testInputsRequired);
+            trimOptionalMissingStepRefs(testRun, testInputsRequired, availableKeys);
             testRun.setTestSetId(testSetRun.getTestSetId());
             testRuns.add(testRun);
         } catch (NullPointerException e) {
-            throw new MissingArgumentException("Argument inputs is missing in testRun");
+            throw new MissingArgumentException("Argument inputs is missing in testRun", e);
         }
     }
 
-    private static void parseTest(JsonNode testNode, TestRun testRun) {
+    private static Map<String, Boolean> parseTest(JsonNode testNode, TestRun testRun) {
         try {
             Test test = new Test();
             String name = testNode.get(NAME).asText();
@@ -182,6 +183,20 @@ public class TMScriptMapper {
             ArrayNode stepNodes = (ArrayNode) testNode.get("steps");
             parseStep(stepNodes, test);
             testRun.setTest(test);
+            // Parse test declared inputs with required flag
+            Map<String, Boolean> requiredMap = new HashMap<>();
+            JsonNode declaredInputs = testNode.get("inputs");
+            if (declaredInputs != null && declaredInputs.isArray()) {
+                for (JsonNode declaredInput : declaredInputs) {
+                    String key = declaredInput.get("key").asText();
+                    boolean required = true; // default to required when unspecified
+                    if (declaredInput.has("required") && !declaredInput.get("required").isNull()) {
+                        required = declaredInput.get("required").asBoolean();
+                    }
+                    requiredMap.put(key, required);
+                }
+            }
+            return requiredMap;
         } catch (NullPointerException e) {
             throw new MissingArgumentException("Argument inputs is missing in test");
         }
@@ -222,17 +237,68 @@ public class TMScriptMapper {
         return properties;
     }
 
-    private static void parseInputs(ArrayNode inputNodes, TestRun testRun) {
-        for (JsonNode inputNode : inputNodes) {
-            try {
-                PropertyDTO propertyDTO = new PropertyDTO(
-                        inputNode.get("key").asText(),
-                        inputNode.get("value").asText(),
-                        "byteArray");
-                testRun.addInputs(propertyDTO.createProperty());
-            } catch (NullPointerException e) {
-                throw new MissingArgumentException("Argument inputs is missing in inputs");
+    private static Set<String> parseInputs(ArrayNode inputNodes, TestRun testRun, Map<String, Boolean> requiredMap) {
+        Set<String> providedKeys = new HashSet<>();
+        Set<String> availableKeys = new HashSet<>();
+        if (inputNodes != null) {
+            for (JsonNode inputNode : inputNodes) {
+                try {
+                    String key = inputNode.get("key").asText();
+                    providedKeys.add(key);
+                    String value = inputNode.get("value").asText();
+                    if (value != null && !value.isBlank()) {
+                        availableKeys.add(key);
+                    }
+                    PropertyDTO propertyDTO = new PropertyDTO(
+                            key,
+                            value,
+                            "byteArray");
+                    testRun.addInputs(propertyDTO.createProperty());
+                } catch (NullPointerException e) {
+                    throw new MissingArgumentException("Argument inputs is missing in inputs");
+                }
             }
+        }
+        // Ensure required inputs declared in test are present even if not provided in testRun inputs
+        if (requiredMap != null) {
+            for (Map.Entry<String, Boolean> entry : requiredMap.entrySet()) {
+                String key = entry.getKey();
+                boolean required = Boolean.TRUE.equals(entry.getValue());
+                if (required && !providedKeys.contains(key)) {
+                    // Add an empty binary input to satisfy required presence
+                    testRun.addInputs(new Property<>(key, new byte[0]));
+                    availableKeys.add(key);
+                }
+            }
+        }
+        return availableKeys;
+    }
+
+    private static void trimOptionalMissingStepRefs(TestRun testRun, Map<String, Boolean> requiredMap, Set<String> availableKeys) {
+        if (testRun == null || testRun.getTest() == null || requiredMap == null) {
+            return;
+        }
+        for (Step step : testRun.getTest().getSteps()) {
+            List<Property<?>> props = step.getProperties();
+            if (props == null) continue;
+            List<Property<?>> adjusted = new ArrayList<>();
+            for (Property<?> p : props) {
+                if (p == null) {
+                    // Drop null placeholders to avoid NPEs in setProperties implementations
+                    continue;
+                }
+                if (p instanceof PropertyRef<?> ref) {
+                    String refKey = ref.getReference();
+                    boolean required = requiredMap.getOrDefault(refKey, true);
+                    boolean available = availableKeys != null && availableKeys.contains(refKey);
+                    if (!required && !available) {
+                        // Skip optional and missing reference
+                        continue;
+                    }
+                }
+                adjusted.add(p);
+            }
+            step.setProperties(adjusted);
         }
     }
 
