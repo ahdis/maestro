@@ -58,19 +58,14 @@ public class TestRunControllerImpl implements TestRunController {
 
     @Override
     public Response run(String callback, TestSetRunDTO testSetRunDTO) {
-        TestSetRun testSetRun = new TestSetRun()
-                .setTestRuns(testSetRunDTO.getTestRuns().stream().map(TestRunDTO::getDomain).toList())
-                .setAccessControlList(testSetRunDTO.getAccessControlList())
-                .setTestSuiteName(testSetRunDTO.getTestSuiteName())
-                .setSystemsUnderTest(testSetRunDTO.getSystemsUnderTest())
-                .setTestSetRunId(testSetRunDTO.getTestSetRunId())
-                ;
+        TestSetRun testSetRun = getTestSetRun(testSetRunDTO);
         if (callback != null) {
             return runAsynchronously(callback, testSetRun);
         } else {
             return runSynchronously(testSetRun);
         }
     }
+
 
     private Response runSynchronously(TestSetRun testSetRun) {
         try {
@@ -144,5 +139,18 @@ public class TestRunControllerImpl implements TestRunController {
                 .entity(message)
                 .type(MediaType.APPLICATION_JSON)
                 .build();
+    }
+
+    private static TestSetRun getTestSetRun(TestSetRunDTO testSetRunDTO) {
+        TestSetRun testSetRun = new TestSetRun()
+                .setTestRuns(testSetRunDTO.getTestRuns().stream().map(TestRunDTO::getDomain).toList())
+                .setAccessControlList(testSetRunDTO.getAccessControlList())
+                .setTestSuiteName(testSetRunDTO.getTestSuiteName())
+                .setTestSetRunId(testSetRunDTO.getTestSetRunId())
+                ;
+        if( testSetRunDTO.getSystemsUnderTest() != null) {
+            testSetRun.setSystemsUnderTest(testSetRunDTO.getSystemsUnderTest());
+        }
+        return testSetRun;
     }
 }
