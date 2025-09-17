@@ -11,7 +11,9 @@ import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
 import net.ihe.gazelle.maestro.business.MissingArgumentException;
+import net.ihe.gazelle.maestro.itb.step.business.ItbStep;
 import net.ihe.gazelle.maestro.quarkus.ws.async.TestRunStore;
+import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 import org.junit.jupiter.api.Test;
 
@@ -48,6 +50,22 @@ class TMScriptMapperTest {
         testRun.set("test", testNode);
         testRun.set("inputs", mapper.createArrayNode()); // empty inputs
         return testRun;
+    }
+
+    private ObjectNode propertyNode(String key, String value) {
+        ObjectNode property = mapper.createObjectNode();
+        property.put("key", key);
+        property.put("value", value);
+        return property;
+    }
+
+    private ObjectNode declaredInput(String key, Boolean required) {
+        ObjectNode declared = mapper.createObjectNode();
+        declared.put("key", key);
+        if (required != null) {
+            declared.put(TMScriptMapper.REQUIRED, required);
+        }
+        return declared;
     }
 
     @Test
@@ -170,5 +188,125 @@ class TMScriptMapperTest {
         assertTrue(parsed.isPublic());
         assertEquals("key-1", parsed.getReadAccessKey());
     }
-}
 
+    @Test
+    void convertToTestSetRun_trimsOptionalReferencesAndKeepsRequiredOnSteps() {
+        ObjectNode root = baseRoot();
+        ObjectNode run = minimalTestRunNode("test-optional");
+        ObjectNode testNode = (ObjectNode) run.get("test");
+
+        ArrayNode declaredInputs = mapper.createArrayNode();
+        declaredInputs.add(declaredInput("requiredInput", true));
+        declaredInputs.add(declaredInput("optionalInput", false));
+        testNode.set("inputs", declaredInputs);
+
+        ArrayNode properties = mapper.createArrayNode();
+        properties.add(propertyNode(ValidationStep.VALIDATION_SERVICE, "matchbox"));
+        properties.add(propertyNode(ValidationStep.VALIDATION_PROFILE, "profile"));
+        properties.add(propertyNode("requiredContent", "${requiredInput}"));
+        properties.add(propertyNode("optionalContent", "${optionalInput}"));
+
+        ObjectNode step = mapper.createObjectNode();
+        step.put("id", "step-1");
+        step.put("@type", ValidationStep.TYPE);
+        step.set("properties", properties);
+
+        ArrayNode steps = mapper.createArrayNode().add(step);
+        testNode.set("steps", steps);
+
+        String payload = Base64.getEncoder().encodeToString("required-data".getBytes(StandardCharsets.UTF_8));
+        ArrayNode inputValues = mapper.createArrayNode();
+        inputValues.add(mapper.createObjectNode().put("key", "requiredInput").put("value", payload));
+        run.set("inputs", inputValues);
+
+        ArrayNode runs = mapper.createArrayNode().add(run);
+        root.set(TMScriptMapper.TEST_RUNS, runs);
+
+        TestSetRun converted = TMScriptMapper.convertToTestSetRun(root, new TestRunStore());
+        TestRun testRun = converted.getTestRuns().getFirst();
+
+        Property<?> requiredInput = testRun.getInputs().stream()
+                .filter(property -> property.getName().equals("requiredInput"))
+                .findFirst()
+                .orElseThrow();
+        assertArrayEquals("required-data".getBytes(StandardCharsets.UTF_8), (byte[]) requiredInput.getValue());
+
+        ValidationStep validationStep = (ValidationStep) testRun.getTest().getSteps().getFirst();
+        assertEquals("matchbox", validationStep.getValidationService().getValue());
+        assertEquals("profile", validationStep.getValidationProfile().getValue());
+
+        assertEquals(1, validationStep.getContentsToValidate().size());
+        assertEquals("requiredContent", validationStep.getContentsToValidate().getFirst().getName());
+    }
+
+    @Test
+    void convertToTestSetRun_addsEmptyInputWhenRequiredDeclarationMissingValue() {
+        ObjectNode root = baseRoot();
+        ObjectNode run = minimalTestRunNode("test-required-missing");
+        ObjectNode testNode = (ObjectNode) run.get("test");
+
+        ArrayNode properties = mapper.createArrayNode();
+        properties.add(propertyNode(ValidationStep.VALIDATION_SERVICE, "matchbox"));
+        properties.add(propertyNode(ValidationStep.VALIDATION_PROFILE, "profile"));
+        properties.add(propertyNode("requiredContent", "${requiredInput}"));
+
+        ObjectNode step = mapper.createObjectNode();
+        step.put("id", "step-1");
+        step.put("@type", ValidationStep.TYPE);
+        step.set("properties", properties);
+
+        testNode.set("steps", mapper.createArrayNode().add(step));
+        testNode.set("inputs", mapper.createArrayNode().add(declaredInput("requiredInput", true)));
+
+        // Do not provide the input value in run inputs
+        run.set("inputs", mapper.createArrayNode());
+
+        root.set(TMScriptMapper.TEST_RUNS, mapper.createArrayNode().add(run));
+
+        TestSetRun converted = TMScriptMapper.convertToTestSetRun(root, new TestRunStore());
+        Property<?> requiredInput = converted.getTestRuns().getFirst().getInputs().stream()
+                .filter(property -> property.getName().equals("requiredInput"))
+                .findFirst()
+                .orElseThrow();
+
+        assertArrayEquals(new byte[0], (byte[]) requiredInput.getValue());
+    }
+
+    @Test
+    void convertToTestSetRun_adaptsItbStepType() {
+        ObjectNode root = baseRoot();
+        ObjectNode run = minimalTestRunNode("test-itb");
+        ObjectNode testNode = (ObjectNode) run.get("test");
+
+        ArrayNode stepProperties = mapper.createArrayNode();
+        stepProperties.add(propertyNode(ItbStep.TEST_CASE, "TC-1"));
+        stepProperties.add(propertyNode(ItbStep.SYSTEM_ID, "SYS-1"));
+        stepProperties.add(propertyNode(ItbStep.ACTOR_ID, "ACTOR-1"));
+
+        ObjectNode step = mapper.createObjectNode();
+        step.put("id", "step-1");
+        step.put("@type", "ITBStep");
+        step.set("properties", stepProperties);
+        testNode.set("steps", mapper.createArrayNode().add(step));
+
+        testNode.set("inputs", mapper.createArrayNode());
+
+        root.set(TMScriptMapper.TEST_RUNS, mapper.createArrayNode().add(run));
+
+        TestSetRun converted = TMScriptMapper.convertToTestSetRun(root, new TestRunStore());
+        assertEquals(ItbStep.TYPE, converted.getTestRuns().getFirst().getTest().getSteps().getFirst().getType());
+    }
+
+    @Test
+    void convertToTestSetRun_throwsWhenTestRunInputsMissing() {
+        ObjectNode root = baseRoot();
+        ObjectNode run = minimalTestRunNode("invalid");
+        run.remove("clientCallback");
+
+        root.set(TMScriptMapper.TEST_RUNS, mapper.createArrayNode().add(run));
+
+        TestRunStore testRunDAO = new TestRunStore();
+        MissingArgumentException exception = assertThrows(MissingArgumentException.class, () -> TMScriptMapper.convertToTestSetRun(root, testRunDAO));
+        assertEquals("Argument inputs is missing in testRun", exception.getMessage());
+    }
+}
