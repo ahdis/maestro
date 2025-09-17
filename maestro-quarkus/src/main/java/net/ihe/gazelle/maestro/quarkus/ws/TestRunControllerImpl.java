@@ -61,6 +61,9 @@ public class TestRunControllerImpl implements TestRunController {
         TestSetRun testSetRun = new TestSetRun()
                 .setTestRuns(testSetRunDTO.getTestRuns().stream().map(TestRunDTO::getDomain).toList())
                 .setAccessControlList(testSetRunDTO.getAccessControlList())
+                .setTestSuiteName(testSetRunDTO.getTestSuiteName())
+                .setSystemsUnderTest(testSetRunDTO.getSystemsUnderTest())
+                .setTestSetRunId(testSetRunDTO.getTestSetRunId())
                 ;
         if (callback != null) {
             return runAsynchronously(callback, testSetRun);
