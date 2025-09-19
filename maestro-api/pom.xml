@@ -47,6 +47,10 @@
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>framework-model-marshaller</artifactId>
         </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>security</artifactId>
+        </dependency>
 
         <!-- Provided dependencies -->
         <dependency>

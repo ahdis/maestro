@@ -108,7 +108,7 @@ Reference in step's properties should be string type, but referenced input type 
 
 ## Reports
 
-In all Test Report, date shall be to format ISO_8601 : "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+In all Test Report, date shall be to format ISO_8601 : "yyyy-MM-dd'T'HH:mm:ss.SSSX"
 The returned report is produced in JSON format
 The root contains :
 - A report version

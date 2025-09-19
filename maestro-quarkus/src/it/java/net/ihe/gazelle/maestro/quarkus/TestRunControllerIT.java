@@ -22,10 +22,11 @@ import io.quarkus.test.junit.TestProfile;
 import io.restassured.response.Response;
 import jakarta.ws.rs.core.MediaType;
 import net.ihe.gazelle.maestro.api.business.testreport.Result;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
-import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
+import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
 import org.apache.http.HttpHeaders;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -37,6 +38,8 @@ import java.io.IOException;
 import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
@@ -53,7 +56,21 @@ class TestRunControllerIT implements QuarkusTestProfile {
         WireMockSingleton.mockCallback();
         WireMockSingleton.mockServiceRegistry();
         WireMockSingleton.mockGetProfiles();
+        WireMockSingleton.mockEvsProfiles();
         WireMockSingleton.mockValidate();
+        WireMockSingleton.mockKeycloak();
+        MockDatahouseServer.start(8080);
+    }
+
+    @AfterAll
+    void tearDown() {
+        WireMockSingleton.stop();
+        try {
+            MockDatahouseServer.stop();
+        } catch (IOException e) {
+            // log and ignore in teardown
+            e.printStackTrace();
+        }
     }
 
     @Test
@@ -65,8 +82,8 @@ class TestRunControllerIT implements QuarkusTestProfile {
                 .then()
                 .extract().response();
         assertNotNull(response);
-
-        TestReport testReport = response.as(TestReportDTO.class).getDomain();
+        System.out.println(response.asString());
+        TestReportSummary testReport = response.as(TestReportSummaryDTO.class).getDomain();
         assertTrue(testReport.isValid());
         assertEquals(Result.FAILED, testReport.getResult());
     }
@@ -81,7 +98,7 @@ class TestRunControllerIT implements QuarkusTestProfile {
                 .then()
                 .statusCode(202);
 
-        TestReport testReport = WireMockSingleton.awaitTestReport();
+        TestReportSummary testReport = WireMockSingleton.awaitTestReport();
         assertTrue(testReport.isValid());
         assertEquals(Result.FAILED, testReport.getResult());
     }
@@ -98,14 +115,14 @@ class TestRunControllerIT implements QuarkusTestProfile {
                 .extract().response()
                 .body().asString();
 
-        assertTrue(response.contains(expectedMessage), "Expected message not found in response:\n" + response);
+        assertThat(response, containsString(expectedMessage));
     }
 
     private static Stream<Arguments> invalidTestRunProvider() {
         return Stream.of(
                 Arguments.of("/invalid_step_type.json", "Could not resolve type id"),
                 Arguments.of("/invalid_property_type.json", "Unsupported property type"),
-                Arguments.of("/invalid_property_name.json", "is not a validation step property"),
+                Arguments.of("/invalid_property_name.json", "Property invalid is neither a validation step property nor a content to validate"),
                 Arguments.of("/invalid_structure.json", "Unable to parse TestRun structure")
         );
     }

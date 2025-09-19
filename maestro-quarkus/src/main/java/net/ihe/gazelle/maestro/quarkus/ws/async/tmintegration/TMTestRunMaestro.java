@@ -19,16 +19,13 @@ package net.ihe.gazelle.maestro.quarkus.ws.async.tmintegration;
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
-import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
 import net.ihe.gazelle.maestro.api.business.testrun.MaestroEventProducer;
-import net.ihe.gazelle.maestro.quarkus.client.TestReportClient;
+import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
 import net.ihe.gazelle.maestro.api.technical.event.FinishTestSetEvent;
+import net.ihe.gazelle.maestro.quarkus.client.TestReportClient;
 import net.ihe.gazelle.maestro.quarkus.ws.async.TestRunStore;
 
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -49,20 +46,19 @@ public class TMTestRunMaestro {
         this.client = client;
     }
 
-    public void startTestSet(JsonNode testRunNodes) {
+    public void startTestSet(JsonNode testSetRunNode) {
         TestRunStore store = new TestRunStore();
-        List<TestRun> testRuns = TMScriptMapper.convertToTestRun(testRunNodes, store);
-        TestSetRun testSetRun = new TestSetRun(UUID.randomUUID().toString(), testRuns);
-        tmRunningServices.put(testSetRun.testSetId(), store);
+        TestSetRun testSetRun = TMScriptMapper.convertToTestSetRun(testSetRunNode, store);
+        tmRunningServices.put(testSetRun.getTestSetId(), store);
         maestroEventProducer.executeTestSet(testSetRun);
     }
 
     public void callbackTM(FinishTestSetEvent finishTestSetEvent) {
-        TestRunStore store = tmRunningServices.get(finishTestSetEvent.getTestSetRun().testSetId());
+        TestRunStore store = tmRunningServices.get(finishTestSetEvent.getTestSetRun().getTestSetId());
         client.sendTestReport(
                 store.getCallbackAuthorization(),
                 store.getClientCallback(),
-                finishTestSetEvent.getTestReport()
+                finishTestSetEvent.getReportSummary()
         );
     }
 

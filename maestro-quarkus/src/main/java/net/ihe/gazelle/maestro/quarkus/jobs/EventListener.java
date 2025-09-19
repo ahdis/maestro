@@ -56,7 +56,7 @@ public class EventListener {
     }
 
     public void onFinishTestSet(@ObservesAsync FinishTestSetEvent finishTestSetEvent) {
-        String testSetId = finishTestSetEvent.getTestSetRun().testSetId();
+        String testSetId = finishTestSetEvent.getTestSetRun().getTestSetId();
         if (asynchronousMaestro.isServiceRunning(testSetId)) {
             asynchronousMaestro.callback(finishTestSetEvent);
         } else if (tmTestRunMaestro.isServiceRunning(testSetId)) {
@@ -84,6 +84,6 @@ public class EventListener {
 
     public void onErrorTestRunEvent(@ObservesAsync ErrorTestRunEvent errorTestRunEvent) {
         Exception exception = errorTestRunEvent.getException();
-        LOG.error(exception.getMessage(), exception);
+        LOG.error("Exception caught at EventListener {}", exception.getMessage(), exception);
     }
 }

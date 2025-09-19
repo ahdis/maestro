@@ -34,7 +34,7 @@ public class SimulationStep implements Step {
     private Property<String> simulationService;
     private Property<String> sequenceId;
     private Property<Integer> timeoutSeconds;
-    private List<Property<?>> simulationParameters;
+    private List<Property<Object>> simulationParameters;
 
     public SimulationStep() {
         simulationParameters = new ArrayList<>();
@@ -45,7 +45,13 @@ public class SimulationStep implements Step {
         this.simulationService = simulationService;
         this.sequenceId = sequenceId;
         this.timeoutSeconds = timeoutSeconds;
-        this.simulationParameters = simulationParameters;
+        // Normalize to Property<Object> for heterogeneous parameter values
+        this.simulationParameters = new ArrayList<>();
+        if (simulationParameters != null) {
+            for (Property<?> p : simulationParameters) {
+                this.simulationParameters.add(toObjectProperty(p));
+            }
+        }
     }
 
     @Override
@@ -83,7 +89,7 @@ public class SimulationStep implements Step {
                     boolean exists = simulationParameters.stream()
                             .anyMatch(prop -> prop.getName().equals(property.getName()));
                     if (!exists) {
-                        simulationParameters.add(property);
+                        simulationParameters.add(toObjectProperty(property));
                     }
                 }
             }
@@ -102,12 +108,16 @@ public class SimulationStep implements Step {
         return timeoutSeconds;
     }
 
-    public List<Property<?>> getSimulationParameters() {
+    public List<Property<Object>> getSimulationParameters() {
         return simulationParameters;
     }
 
     @Override
     public String getType() {
         return TYPE;
+    }
+
+    private static Property<Object> toObjectProperty(Property<?> property) {
+        return new Property<>(property.getName(), property.getValue());
     }
 }

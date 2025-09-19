@@ -1,39 +1,49 @@
-[
-  {
-    "testSetId": "testSet1",
-    "test": {
-      "id": "1",
-      "name": "name1",
-      "steps": [
+{
+  "testSuiteName": "Invalid Property Name Test Suite",
+  "accessControlList": {
+    "owners": [
+      "gazelle"
+    ],
+    "public": true,
+    "isPublic": true
+  },
+  "testRuns": [
+    {
+      "testSetId": "testSet1",
+      "test": {
+        "id": "1",
+        "name": "name1",
+        "steps": [
+          {
+            "type": "VALIDATION",
+            "name": "step1",
+            "properties": [
+              {
+                "name": "invalid",
+                "value": "matchbox",
+                "type": "string"
+              },
+              {
+                "name": "validationProfile",
+                "value": "parameters",
+                "type": "string"
+              },
+              {
+                "name": "contentToValidate",
+                "value": "${inputFile1}",
+                "type": "byteArray"
+              }
+            ]
+          }
+        ]
+      },
+      "inputs": [
         {
-          "type": "VALIDATION",
-          "name": "step1",
-          "properties": [
-            {
-              "name": "invalid",
-              "value": "matchbox",
-              "type": "string"
-            },
-            {
-              "name": "validationProfile",
-              "value": "parameters",
-              "type": "string"
-            },
-            {
-              "name": "contentToValidate",
-              "value": "${inputFile1}",
-              "type": "byteArray"
-            }
-          ]
+          "name": "inputFile1",
+          "value": "ihfeorhqifrghqpervgh",
+          "type": "byteArray"
         }
       ]
-    },
-    "inputs": [
-      {
-        "name": "inputFile1",
-        "value": "ihfeorhqifrghqpervgh",
-        "type": "byteArray"
-      }
-    ]
-  }
-]
+    }
+  ]
+}

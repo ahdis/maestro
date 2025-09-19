@@ -142,8 +142,8 @@ class TestReportTest {
                 .setRunId("id")
                 .setDateTime(new Date())
                 .setTest(new net.ihe.gazelle.maestro.api.business.testreport.Test("id"))
-                .addInput(new Item("input", "reference"))
-                .addOutput(new Item("output", "reference"))
+                .addInput(new Input("input", "reference"))
+                .addOutput(new Output("output", "reference", "format"))
                 .addStepRunReport(new StepRunReport("id", "type", StepResult.PASSED))
                 .setUrlToTestRun("urlToTestRun");
         testRunReport.computeResult();

@@ -15,3 +15,4 @@
 #
 
 net.ihe.gazelle.maestro.validation.step.technical.factory.GazelleValidationServiceHandlerFactory
+net.ihe.gazelle.maestro.validation.step.technical.factory.EvsValidationServiceHandlerFactory

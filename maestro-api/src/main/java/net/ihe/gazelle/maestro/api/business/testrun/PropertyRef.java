@@ -39,6 +39,7 @@ public class PropertyRef<T> extends Property<T> {
         return reference;
     }
 
+    @Override
     public Class<T> getType() {
         return type;
     }

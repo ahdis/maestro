@@ -20,8 +20,6 @@ import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.api.business.testrun.Step;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**

@@ -19,12 +19,12 @@ package net.ihe.gazelle.maestro.userinteraction.step.technical;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.ConfigProvider;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.HandlerFactory;
+import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandler;
+import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandlerImpl;
 import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterface;
 import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterfaceBuilder;
 import net.ihe.gazelle.servicemetadata.api.business.HttpRestBinding;
 import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterface;
-import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandler;
-import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandlerImpl;
 
 import java.util.ArrayList;
 import java.util.List;

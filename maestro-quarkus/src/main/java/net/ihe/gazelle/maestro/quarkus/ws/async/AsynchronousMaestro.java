@@ -18,15 +18,12 @@ package net.ihe.gazelle.maestro.quarkus.ws.async;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
-import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
 import net.ihe.gazelle.maestro.api.business.testrun.MaestroEventProducer;
-import net.ihe.gazelle.maestro.quarkus.client.TestReportClient;
+import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
 import net.ihe.gazelle.maestro.api.technical.event.FinishTestSetEvent;
+import net.ihe.gazelle.maestro.quarkus.client.TestReportClient;
 
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @ApplicationScoped
@@ -43,20 +40,19 @@ public class AsynchronousMaestro {
         this.client = client;
     }
 
-    public void executeTestSet(String callback, List<TestRun> testRuns) {
+    public void executeTestSet(String callback, TestSetRun testSetRun) {
         TestRunStore store = new TestRunStore();
         store.setClientCallback(callback);
-        TestSetRun testSetRun = new TestSetRun(UUID.randomUUID().toString(), testRuns);
-        runningServices.put(testSetRun.testSetId(), store);
+        runningServices.put(testSetRun.getTestSetId(), store);
         maestroEventProducer.executeTestSet(testSetRun);
     }
 
     public void callback(FinishTestSetEvent finishTestSetEvent) {
-        TestRunStore store = runningServices.get(finishTestSetEvent.getTestSetRun().testSetId());
+        TestRunStore store = runningServices.get(finishTestSetEvent.getTestSetRun().getTestSetId());
         client.sendTestReport(
                 store.getCallbackAuthorization(),
                 store.getClientCallback(),
-                finishTestSetEvent.getTestReport()
+                finishTestSetEvent.getReportSummary()
         );
     }
 

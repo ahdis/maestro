@@ -30,8 +30,8 @@ public class TestRunReportBuilder extends AbstractBuilder<TestRunReport> {
     private String runId;
     private Date dateTime;
     private TestBuilder test;
-    private List<ItemBuilder> inputs;
-    private List<ItemBuilder> outputs;
+    private List<InputBuilder> inputs;
+    private List<OutputBuilder> outputs;
     private List<StepRunReportBuilder> stepRunReports;
     private String urlToTestRun;
     private List<UnexpectedErrorBuilder> unexpectedErrors;
@@ -69,22 +69,22 @@ public class TestRunReportBuilder extends AbstractBuilder<TestRunReport> {
         return this;
     }
 
-    public TestRunReportBuilder setInputs(List<ItemBuilder> inputs) {
+    public TestRunReportBuilder setInputs(List<InputBuilder> inputs) {
         this.inputs = new ArrayList<>(inputs);
         return this;
     }
 
-    public TestRunReportBuilder addInput(ItemBuilder input) {
+    public TestRunReportBuilder addInput(InputBuilder input) {
         inputs.add(input);
         return this;
     }
 
-    public TestRunReportBuilder setOutputs(List<ItemBuilder> outputs) {
+    public TestRunReportBuilder setOutputs(List<OutputBuilder> outputs) {
         this.outputs = new ArrayList<>(outputs);
         return this;
     }
 
-    public TestRunReportBuilder addOutput(ItemBuilder output) {
+    public TestRunReportBuilder addOutput(OutputBuilder output) {
         outputs.add(output);
         return this;
     }

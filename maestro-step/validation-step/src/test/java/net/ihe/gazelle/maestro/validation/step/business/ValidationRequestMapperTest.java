@@ -22,6 +22,8 @@ import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -32,17 +34,18 @@ class ValidationRequestMapperTest {
         ValidationStep step = new ValidationStep("validationStep",
                 new Property<>(ValidationStep.VALIDATION_SERVICE, "matchbox"),
                 new Property<>(ValidationStep.VALIDATION_PROFILE, "default"),
-                new Property<>(ValidationStep.CONTENT_TO_VALIDATE, "content".getBytes()));
+                new ArrayList<>(List.of(new Property<>("contentToValidate", "content".getBytes(StandardCharsets.UTF_8))))
+        );
         ValidationRequest request = ValidationRequestMapper.createValidationRequest(step);
         assertNotNull(request);
         assertEquals(step.getValidationProfile().getValue(), request.getValidationProfileId());
         assertEquals(1, request.getInputs().size());
-        Input input = request.getInputs().getFirst();
-        assertNotNull(input);
-        assertNull(input.getItemId());
-        String actualContent = new String(input.getContent(), StandardCharsets.UTF_8);
+        Input item = request.getInputs().getFirst();
+        assertNotNull(item);
+        String actualContent = new String(item.getContent(), StandardCharsets.UTF_8);
         assertEquals("content", actualContent);
-        assertNull(input.getLocation());
+        assertEquals("contentToValidate", item.getId());
+        assertNull(item.getItemId());
     }
 
 }

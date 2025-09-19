@@ -19,28 +19,29 @@ package net.ihe.gazelle.maestro.api.business.testreport.validator;
 import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilder;
 import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory;
 import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
-import net.ihe.gazelle.maestro.api.business.testreport.Item;
+import net.ihe.gazelle.maestro.api.business.testreport.Input;
 
-public class ItemValidator extends AbstractValidator<Item> {
+public class InputValidator extends AbstractValidator<Input> {
 
-    public ItemValidator() {
+    public InputValidator() {
         super();
     }
 
-    public ItemValidator(ValidatorBuilderFactory builderFactory) {
+    public InputValidator(ValidatorBuilderFactory builderFactory) {
         super(builderFactory);
     }
 
     @Override
-    protected ValidatorBuilder<? extends Item> instantiateValidatorBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
-        return validatorBuilderFactory.getBuilder(Item.class);
+    protected ValidatorBuilder<? extends Input> instantiateValidatorBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
+        return validatorBuilderFactory.getBuilder(Input.class);
     }
 
     @Override
-    protected void addRulesAndMembers(ValidatorBuilder<? extends Item> validatorBuilder) {
+    protected void addRulesAndMembers(ValidatorBuilder<? extends Input> validatorBuilder) {
         validatorBuilder
-                .addRule("nameValid", Item::isNameValid, "Name must be set and not empty")
-                .addRule("contentValid", Item::isContentValid, "If reference is null, content must be set and not empty")
-                .addRule("referenceValid", Item::isReferenceValid, "If content is null, reference must be set and not empty");
+                .addRule("nameValid", Input::isNameValid, "Name must be set and not empty")
+                .addRule("contentValid", Input::isContentValid, "If reference is null, content must be set and not empty")
+                .addRule("referenceValid", Input::isReferenceValid, "If content is null, reference must be set and not empty")
+        ;
     }
 }

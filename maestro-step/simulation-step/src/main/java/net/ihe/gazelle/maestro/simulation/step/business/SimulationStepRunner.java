@@ -20,21 +20,25 @@ import net.ihe.gazelle.lang.ExecutionRuntimeException;
 import net.ihe.gazelle.maestro.api.business.testreport.*;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunner;
+import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandler;
 import net.ihe.gazelle.simulation.business.callback.Result;
 import net.ihe.gazelle.simulation.business.callback.SimulationReport;
 import net.ihe.gazelle.simulation.business.callback.SimulationReportValidator;
-import net.ihe.gazelle.simulation.business.setup.*;
 import net.ihe.gazelle.simulation.business.sequence.ServiceUnavailableException;
-import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandler;
+import net.ihe.gazelle.simulation.business.setup.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class SimulationStepRunner implements StepRunner {
 
     private static final Logger LOG = LoggerFactory.getLogger(SimulationStepRunner.class);
+    public static final String SIMULATION_REPORT = "SIMULATION_REPORT";
 
     private final ReportSerialization serializer;
     private final SimulationHandler simulationHandler;
@@ -54,11 +58,13 @@ public class SimulationStepRunner implements StepRunner {
             CompletableFuture<SimulationReport> futureReport = new CompletableFuture<>();
             simulationHandler.simulate(simulationRequest, this::showInstructions, futureReport::complete);
             SimulationReport simulationReport = getSimulationReport(simulationRequest, futureReport);
-            ItemBuilder itemBuilder = new ItemBuilder()
+            OutputBuilder outputBuilder = new OutputBuilder()
                     .setContent(serializer.toByteArray(simulationReport))
-                    .setName("simulationReport");
+                    .setName(SIMULATION_REPORT)
+                    .setFormat(Output.FORMAT_JSON)
+                    ;
             StepRunReportBuilder stepRunReportBuilder = prepareStepReport(stepRun)
-                    .setOutputs(List.of(itemBuilder));
+                    .setOutputs(List.of(outputBuilder));
             computeResult(simulationReport, stepRunReportBuilder);
             return CompletableFuture.completedFuture(stepRunReportBuilder);
         } catch (MissingRequiredParameterException e) {

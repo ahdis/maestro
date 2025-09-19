@@ -46,7 +46,7 @@ import java.util.Date;
  */
 public class PropertyDTO {
 
-    public static final String ISO_8601_DATETIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+    public static final String ISO_8601_DATETIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
 
     private String name;
     protected String value;

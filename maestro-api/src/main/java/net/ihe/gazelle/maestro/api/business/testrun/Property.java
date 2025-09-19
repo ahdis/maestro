@@ -65,6 +65,15 @@ public class Property<T> {
         return this;
     }
 
+    /**
+     * Best-effort runtime type of the value.
+     * For regular properties, returns {@code value.getClass()} when non-null, otherwise {@code null}.
+     * Subclasses like {@link PropertyRef} may override to provide a non-null declared type.
+     */
+    public Class<?> getType() {
+        return value != null ? value.getClass() : null;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

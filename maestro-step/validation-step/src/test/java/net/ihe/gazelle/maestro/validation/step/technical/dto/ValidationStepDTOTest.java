@@ -28,10 +28,9 @@ class ValidationStepDTOTest {
                 }
                 """;
         DeserializationException de = assertThrows(DeserializationException.class, () -> SER_DES.deserialize(json, ValidationStepDTO.class));
-        de.printStackTrace();
         assertEquals(IllegalArgumentException.class, de.getCause().getCause().getClass());
         IllegalArgumentException iae = (IllegalArgumentException) de.getCause().getCause();
-        assertTrue(iae.getMessage().contains("is not a validation step property"));
+        assertTrue(iae.getMessage().contains("is neither a validation step property nor a content to validate"));
     }
 
 }

@@ -45,6 +45,19 @@ public class SystemUnderTestBuilder extends AbstractBuilder<SystemUnderTest> {
         hostNames = new ArrayList<>();
     }
 
+    public SystemUnderTestBuilder(SystemUnderTest systemUnderTest) {
+        if (systemUnderTest != null) {
+            this.systemIdentification = new EntityIdentificationBuilder(systemUnderTest.getSystemIdentification());
+            this.macAddresses = systemUnderTest.getMacAddresses() != null ? new ArrayList<>(systemUnderTest.getMacAddresses()) : new ArrayList<>();
+            this.ipAddresses = systemUnderTest.getIpAddresses() != null ? new ArrayList<>(systemUnderTest.getIpAddresses()) : new ArrayList<>();
+            this.hostNames = systemUnderTest.getHostNames() != null ? new ArrayList<>(systemUnderTest.getHostNames()) : new ArrayList<>();
+        } else {
+            macAddresses = new ArrayList<>();
+            ipAddresses = new ArrayList<>();
+            hostNames = new ArrayList<>();
+        }
+    }
+
     public SystemUnderTestBuilder setSystemIdentification(EntityIdentificationBuilder systemIdentification) {
         this.systemIdentification = systemIdentification;
         return this;

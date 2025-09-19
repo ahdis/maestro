@@ -32,7 +32,7 @@ class AssertionStepFactoryTest {
     AssertionStepFactory assertionStepFactory;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         assertionStepFactory = new AssertionStepFactory();
     }
 

@@ -45,21 +45,20 @@ public class ValidationStep implements Step {
 
     public static final String VALIDATION_SERVICE = "validationService";
     public static final String VALIDATION_PROFILE = "validationProfile";
-    public static final String CONTENT_TO_VALIDATE = "contentToValidate";
 
     private String name;
     private Property<String> validationService;
     private Property<String> validationProfile;
-    private Property<byte[]> contentToValidate;
+    private List<Property<byte[]>> contentsToValidate = new ArrayList<>();
 
     public ValidationStep() {
     }
 
-    public ValidationStep(String name, Property<String> validationService, Property<String> validationProfile, Property<byte[]> contentToValidate) {
+    public ValidationStep(String name, Property<String> validationService, Property<String> validationProfile, List<Property<byte[]>> contentsToValidate) {
         this.name = name;
         this.validationService = validationService;
         this.validationProfile = validationProfile;
-        this.contentToValidate = contentToValidate;
+        this.contentsToValidate = contentsToValidate;
     }
 
     @Override
@@ -80,8 +79,8 @@ public class ValidationStep implements Step {
         return validationProfile;
     }
 
-    public Property<byte[]> getContentToValidate() {
-        return contentToValidate;
+    public List<Property<byte[]>> getContentsToValidate() {
+        return contentsToValidate;
     }
 
     @Override
@@ -89,7 +88,7 @@ public class ValidationStep implements Step {
         List<Property<?>> props = new ArrayList<>();
         props.add(validationService);
         props.add(validationProfile);
-        props.add(contentToValidate);
+        props.addAll(contentsToValidate);
         return props;
     }
 
@@ -99,13 +98,18 @@ public class ValidationStep implements Step {
         if (properties == null) {
             throw new IllegalArgumentException("Property shouldn't be null");
         }
+        contentsToValidate = new ArrayList<>();
         properties.forEach(property -> {
-            switch (property.getName()) {
-                case VALIDATION_SERVICE -> validationService = (Property<String>) property;
-                case VALIDATION_PROFILE -> validationProfile = (Property<String>) property;
-                case CONTENT_TO_VALIDATE -> contentToValidate = (Property<byte[]>) property;
-                default -> throw new IllegalArgumentException("Property " + property.getName()
-                        + " is not a validation step property");
+            if (property.getName().equals(VALIDATION_SERVICE)) {
+                validationService = (Property<String>) property;
+            } else if (property.getName().equals(VALIDATION_PROFILE)) {
+                validationProfile = (Property<String>) property;
+            } else if (byte[].class.equals(property.getType())) {
+                contentsToValidate.add((Property<byte[]>) property);
+            }
+            else {
+                throw new IllegalArgumentException("Property " + property.getName()
+                        + " is neither a validation step property nor a content to validate");
             }
         });
     }

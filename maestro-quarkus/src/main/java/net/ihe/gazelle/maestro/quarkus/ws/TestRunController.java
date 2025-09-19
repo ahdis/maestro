@@ -19,11 +19,8 @@ package net.ihe.gazelle.maestro.quarkus.ws;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import net.ihe.gazelle.maestro.api.business.testrun.InvalidTestRunException;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
-import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestRunDTO;
-import net.ihe.gazelle.maestro.business.MissingArgumentException;
-import net.ihe.gazelle.maestro.quarkus.NotProvidedStep;
+import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSetRunDTO;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
@@ -32,8 +29,6 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-
-import java.util.List;
 
 @Path("/testRuns")
 public interface TestRunController {
@@ -51,20 +46,18 @@ public interface TestRunController {
      * <p>
      * Different responses can be sent depending on what happens during execution:
      * </p>
-     *
      * <ul>
-     *   <li><b>Execution successful</b>: <code>200</code> + {@code TestReport} in body (if callback is not present and run is synchronous)</li>
-     *   <li><b>Execution successful</b>: <code>202</code> (if callback is present and run is asynchronous)</li>
-     *   <li><b>Request couldn't be parsed</b>: <code>400</code> + {@link ParsingErrorException} or {@link MissingArgumentException}</li>
-     *   <li><b>TestRun isn't valid</b>: <code>400</code> + {@link InvalidTestRunException}</li>
-     *   <li><b>Unsupported step execution</b>: <code>400</code> + {@link NotProvidedStep}</li>
-     *   <li><b>Unknown error occurred</b>: <code>500</code> + {@link Exception}</li>
-     *   <li><b>Timeout exception</b>: <code>504</code> + message explaining why timeout occurred</li>
+     *     <li><b>Execution went well</b> : 200 + TestReport in body if callback is not present and run is synchronous</li>
+     *     <li><b>Execution went well</b> : 202 If callback is present and run is asynchronous </li>
+     *     <li><b>Request couldn't be Parsed</b> : 400 + ParsingErrorException or MissingArgumentException</li>
+     *     <li><b>TestRun isn't valid</b> : 400 + InvalidTestRunException</li>
+     *     <li><b>Request try to execute an unsupported Step</b> : 400 + NotProvidedStep</li>
+     *     <li><b>Unknown Error occurred</b> : 500 + Exception</li>
+     *     <li><b>Timeout exception</b> : 504 + message explaining why timeout occurred</li>
      * </ul>
-     *
-     * @param callback the callback URI to send back the test report for asynchronous runs
-     * @param testRuns a list of {@code TestRun} objects
-     * @return a response with a status code and a body containing {@code TestReport} or an exception
+     * @param callback The callback URI to send back the Test report for asynchronous run
+     * @param testSetRun A list of TestRun
+     * @return A response with a status code and a body containing TestReport or an exception
      */
     @POST
     @Path("/run")
@@ -115,10 +108,10 @@ public interface TestRunController {
                     required = true,
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON,
-                            schema = @Schema(implementation = TestRunDTO[].class),
+                            schema = @Schema(implementation = TestSetRunDTO.class),
                             example = TEST_RUN
                     )
-            ) List<TestRunDTO> testRuns
+            ) TestSetRunDTO testSetRun
     );
 
     String TEST_RUN = """

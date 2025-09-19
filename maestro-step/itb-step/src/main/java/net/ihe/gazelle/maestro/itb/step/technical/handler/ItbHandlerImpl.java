@@ -20,20 +20,17 @@ import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
 import net.ihe.gazelle.maestro.itb.step.business.ItbHandler;
 import net.ihe.gazelle.maestro.itb.step.business.ItbStep;
-import net.ihe.gazelle.maestro.itb.step.technical.gateway.client.ItbHttpClient;
 import net.ihe.gazelle.maestro.itb.step.business.request.Parameter;
 import net.ihe.gazelle.maestro.itb.step.business.request.TestCase;
 import net.ihe.gazelle.maestro.itb.step.business.request.TestRequest;
+import net.ihe.gazelle.maestro.itb.step.technical.gateway.client.ItbHttpClient;
 import net.ihe.gazelle.maestro.itb.step.technical.gateway.service.runitbtest.RunItbTestService;
 import org.eclipse.microprofile.config.ConfigProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 public class ItbHandlerImpl implements ItbHandler {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ItbHandlerImpl.class);
 
     public ItbHandlerImpl() {
         // Empty
@@ -61,7 +58,7 @@ public class ItbHandlerImpl implements ItbHandler {
         testCase.setTestCase(propertyOptional.orElseThrow().getValue());
 
         List<Parameter> parameters = new ArrayList<>();
-        for (Property property : step.getProperties()) {
+        for (Property<?> property : step.getProperties()) {
                 Parameter parameter = new Parameter();
             parameter.setName(property.getName());
             try {

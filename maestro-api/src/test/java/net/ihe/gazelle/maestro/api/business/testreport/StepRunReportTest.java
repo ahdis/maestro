@@ -25,7 +25,7 @@ class StepRunReportTest {
     @Test
     void stepRun_valid() {
         StepRunReport stepRunReport = new StepRunReport("id", "type", StepResult.PASSED)
-                .addOutput(new Item("name", "reference"));
+                .addOutput(new Output("name", "reference", "format"));
         assertEquals("id", stepRunReport.getStepId());
         assertEquals("type", stepRunReport.getType());
         assertEquals(StepResult.PASSED, stepRunReport.getResult());
@@ -57,7 +57,7 @@ class StepRunReportTest {
         StepRunReport stepRunReport = new StepRunReport()
                 .setStepId("id")
                 .setType("type")
-                .addOutput(new Item("name", "reference"));
+                .addOutput(new Output("name", "reference", "format"));
         stepRunReport.setResult(null);
         assertFalse(stepRunReport.isValid());
     }

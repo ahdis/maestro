@@ -18,7 +18,7 @@ package net.ihe.gazelle.maestro.api.technical.dto;
 
 import net.ihe.gazelle.lang.UnexpectedError;
 import net.ihe.gazelle.maestro.api.business.testreport.*;
-import net.ihe.gazelle.maestro.api.technical.dto.report.ItemDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.report.OutputDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.report.SystemUnderTestDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.report.UnexpectedErrorDTO;
@@ -61,13 +61,13 @@ class TestReportDTOTest {
 
     @Test
     void testItemDTO() {
-        String json = SER_DES.serializeAsString(new ItemDTO(
-                new Item()
+        String json = SER_DES.serializeAsString(new OutputDTO(
+                new Output()
                         .setName("name")
                         .setContent("test".getBytes())
         ));
-        Item item =  SER_DES.deserialize(json, Item.class);
-        assertTrue(item.isValid());
+        Output output =  SER_DES.deserialize(json, Output.class);
+        assertTrue(output.isValid());
     }
 
     @Test
@@ -96,16 +96,18 @@ class TestReportDTOTest {
                         .setName("testName")
                         .setDescription("description")
                         .setVersion("1.0"))
-                .addOutput(new ItemBuilder()
+                .addOutput(new OutputBuilder()
                         .setName("name")
-                        .setReference("reference"))
+                        .setReference("reference")
+                        .setFormat("format")
+                )
                 .setStepRunReports(new ArrayList<>())
                 .addStepRunReport(new StepRunReportBuilder()
                         .setStepId("stepId")
                         .setType("validation")
                         .setResult(StepResult.PASSED))
                 .setInputs(List.of(
-                        new ItemBuilder()
+                        new InputBuilder()
                                 .setName("item")
                                 .setReference("reference")
                 ))

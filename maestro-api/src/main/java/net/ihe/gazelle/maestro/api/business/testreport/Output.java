@@ -24,30 +24,40 @@ import java.util.Objects;
  * name is mandatory <br>
  * content xor reference <br>
  */
-public class Item {
+public class Output {
+
+    public static final String FORMAT_XML = "XML";
+    public static final String FORMAT_JSON = "JSON";
+    public static final String FORMAT_PDF = "PDF";
+    public static final String FORMAT_TEXT = "TEXT";
+
 
     private String name;
     private byte[] content;
     private String reference;
+    private String format;
 
-    public Item() {
+
+    public Output() {
     }
 
-    public Item(String name, byte[] content) {
+    public Output(String name, byte[] content, String format) {
         this.name = name;
         this.content = content;
+        this.format = format;
     }
 
-    public Item(String name, String reference) {
+    public Output(String name, String reference, String format) {
         this.name = name;
         this.reference = reference;
+        this.format = format;
     }
 
     public String getName() {
         return name;
     }
 
-    public Item setName(String name) {
+    public Output setName(String name) {
         this.name = name;
         return this;
     }
@@ -56,7 +66,7 @@ public class Item {
         return content;
     }
 
-    public Item setContent(byte[] content) {
+    public Output setContent(byte[] content) {
         this.content = content;
         return this;
     }
@@ -65,8 +75,17 @@ public class Item {
         return reference;
     }
 
-    public Item setReference(String reference) {
+    public Output setReference(String reference) {
         this.reference = reference;
+        return this;
+    }
+
+    public String getFormat() {
+        return format;
+    }
+
+    public Output setFormat(String format) {
+        this.format = format;
         return this;
     }
 
@@ -90,6 +109,10 @@ public class Item {
         }
     }
 
+    public boolean isFormatValid() {
+        return format != null && !format.isBlank();
+    }
+
     public boolean isValid() {
         return isNameValid() && isContentValid() && isReferenceValid();
     }
@@ -97,10 +120,10 @@ public class Item {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Item item)) return false;
-        return Objects.equals(name, item.name)
-                && Objects.deepEquals(content, item.content)
-                && Objects.equals(reference, item.reference);
+        if (!(o instanceof Output output)) return false;
+        return Objects.equals(name, output.name)
+                && Objects.deepEquals(content, output.content)
+                && Objects.equals(reference, output.reference);
     }
 
     @Override

@@ -16,13 +16,89 @@
 
 package net.ihe.gazelle.maestro.api.business.testrun;
 
+import net.ihe.gazelle.maestro.api.business.testreport.SystemUnderTest;
+import net.ihe.gazelle.security.business.acl.AccessControlList;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * A TestSetRun is a structure containing several TestRun that will be executed iteratively.
  * {@link TestRun}
- * @param testSetId an id that will be spread to each element of testRuns
- * @param testRuns the list of testRuns to execute
+ * testSetId an id that will be spread to each element of testRuns <br>
+ * testRuns the list of testRuns to execute
+ * {@link AccessControlList} accessControlList an ACL that will be spread to each element of testRuns <br>
+ * systemsUnderTest the list of systems under test that will be spread to each element of testRuns <br>
+ * testSetRunId today maps the TestInstance ID in Gazelle Test Management
  */
-public record TestSetRun(String testSetId, List<TestRun> testRuns) {
+public class TestSetRun {
+
+    private final String testSetId;
+    private String testSuiteName;
+    private List<TestRun> testRuns;
+    private AccessControlList accessControlList;
+    private List<SystemUnderTest> systemsUnderTest;
+    private String testSetRunId;
+
+
+    public TestSetRun() {
+        this.testSetId = UUID.randomUUID().toString();
+        this.accessControlList = new AccessControlList();
+        this.systemsUnderTest = new ArrayList<>();
+    }
+
+    public TestSetRun(String testSetId, List<TestRun> testRuns) {
+        this.testSetId = testSetId;
+        this.testRuns = testRuns;
+    }
+
+    public String getTestSetId() {
+        return testSetId;
+    }
+
+    public String getTestSuiteName() {
+        return testSuiteName;
+    }
+
+    public TestSetRun setTestSuiteName(String testSuiteName) {
+        this.testSuiteName = testSuiteName;
+        return this;
+    }
+
+    public List<TestRun> getTestRuns() {
+        return testRuns;
+    }
+
+    public TestSetRun setTestRuns(List<TestRun> testRuns) {
+        this.testRuns = testRuns;
+        return this;
+    }
+
+    public AccessControlList getAccessControlList() {
+        return accessControlList;
+    }
+
+    public TestSetRun setAccessControlList(AccessControlList accessControlList) {
+        this.accessControlList = accessControlList;
+        return this;
+    }
+
+    public List<SystemUnderTest> getSystemsUnderTest() {
+        return systemsUnderTest;
+    }
+
+    public TestSetRun setSystemsUnderTest(List<SystemUnderTest> systemsUnderTest) {
+        this.systemsUnderTest = systemsUnderTest;
+        return this;
+    }
+
+    public String getTestSetRunId() {
+        return testSetRunId;
+    }
+
+    public TestSetRun setTestSetRunId(String testSetRunId) {
+        this.testSetRunId = testSetRunId;
+        return this;
+    }
 }

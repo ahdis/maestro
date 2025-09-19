@@ -17,11 +17,11 @@
 package net.ihe.gazelle.maestro.itb.step.technical.gateway.service.runitbtest;
 
 
-import net.ihe.gazelle.maestro.itb.step.technical.gateway.client.ItbHttpClient;
 import net.ihe.gazelle.maestro.itb.step.business.request.Parameter;
 import net.ihe.gazelle.maestro.itb.step.business.request.TestCase;
 import net.ihe.gazelle.maestro.itb.step.business.request.TestRequest;
 import net.ihe.gazelle.maestro.itb.step.business.request.TestSuite;
+import net.ihe.gazelle.maestro.itb.step.technical.gateway.client.ItbHttpClient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -143,11 +143,6 @@ public class RunItbTestService {
         return true;
     }
 
-    private String validateURL(String url) {
-        if (!url.matches("^((http|https|ftp)://)([\\w-]+(\\.[\\w-]+)*)(:\\d+)?(/[\\w\\-.,@?^=%&:/~+#]*)?(\\?([\\w\\-]+=[\\w\\-]*(&[\\w\\-]+=[\\w\\-]*)*)?)?(#[-a-zA-Z0-9_]*)?$"))
-            throw new RunItbTestServiceException("Wrong format for callback url");
-        return url;
-    }
 
     /**
      * Method to validate a parameter with a defined type
@@ -156,15 +151,13 @@ public class RunItbTestService {
      */
     private void validateParamWithType(Parameter param) {
         switch (param.getType()) {
-            case "text" -> {
-                if (param.getValue().isEmpty())
-                    throw new RunItbTestServiceException(param.getName() + " parameter value is empty");
-            }
+           case "text" -> validateText(param);
             case "uuid" -> validateUuid(param);
             case "APIKey" -> validateAPIKey(param);
             case "file" -> validateFile(param);
             case "integer" -> validateInteger(param);
             case "float" -> validateFloat(param);
+            default -> throw new RunItbTestServiceException("Wrong type for parameter " + param.getName() + " : " + param.getType());
         }
     }
 
@@ -184,6 +177,7 @@ public class RunItbTestService {
             if (validateInteger(param)) type = "integer";
             if (validateFloat(param)) type = "float";
         } catch (RunItbTestServiceException ignored) {
+            // should not happen as we are in the case where type is unknown
         }
         return type;
     }
@@ -309,8 +303,12 @@ public class RunItbTestService {
         modifiedRequest.setTestSuite(validateTestSuite(ts));
         modifiedRequest.setTestCases(validateTestCases(tcs));
 
-//        modifiedRequest.setCallbackURL(validateURL(request.getCallbackURL()));
-//        modifiedRequest.setCallbackAuthorization(request.getCallbackAuthorization());
         return modifiedRequest;
+    }
+
+    private void validateText(Parameter param) {
+        if (param.getValue().isEmpty()) {
+            throw new RunItbTestServiceException(param.getName() + " parameter value is empty");
+        }
     }
 }

@@ -32,7 +32,6 @@
         <module>maestro-engine</module>
         <module>maestro-step</module>
         <module>maestro-quarkus</module>
-        <module>maestro-websocket</module>
     </modules>
 
     <scm>
@@ -52,8 +51,6 @@
             https://${git.user.name}:${git.user.token}@gitlab.inria.fr/gazelle/private/kereval/maestro.git
         </git.project.url>
 
-        <quarkus.platform.version>3.15.6.2</quarkus.platform.version>
-
         <framework.version>2.1.2</framework.version>
         <search-api.version>1.1.0</search-api.version>
         <validation-api.version>2.0.0</validation-api.version>
@@ -63,6 +60,9 @@
         <equalsverifier.version>3.16.1</equalsverifier.version>
 
         <!-- Quarkus Build-->
+        <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
+        <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
+        <quarkus.platform.version>3.15.6.2</quarkus.platform.version>
         <quarkus.container-image.build>true</quarkus.container-image.build>
         <quarkus.container-image.registry>rg.fr-par.scw.cloud</quarkus.container-image.registry>
         <quarkus.container-image.group>gazelle-snapshot</quarkus.container-image.group>
@@ -73,13 +73,16 @@
         <compiler-plugin.version>3.14.0</compiler-plugin.version>
         <javadoc-plugin.version>3.11.3</javadoc-plugin.version>
         <surefire-plugin.version>3.5.3</surefire-plugin.version>
+        <maven.failsafe.plugin.version>3.1.2</maven.failsafe.plugin.version>
         <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
         <bulild.helper.maven.plugin.version>3.6.1</bulild.helper.maven.plugin.version>
         <release-plugin.version>3.1.1</release-plugin.version>
         <pitest.maven.version>1.18.2</pitest.maven.version>
         <jandex-plugin.version>3.1.6</jandex-plugin.version>
 
-        <skipITs>true</skipITs>
+        <skipTests>false</skipTests>
+        <skipITs>${skipTests}</skipITs>
+        <skipUnitTests>${skipTests}</skipUnitTests>
 
         <sonar.coverage.exclusions>
             **/gazelle/business/engine/NotInitializedReferenceException.java,
@@ -90,7 +93,11 @@
             **/gazelle/technical/ws/ParsingErrorException.java,
             **/gazelle/context/*
             **/gazelle/maestro/technical/ws/async/tmintegration/**
+            **/gazelle/maestro/websocket/**
+            **/gazelle/maestro/mlang/**
         </sonar.coverage.exclusions>
+        <datahouse.version>3.1.0</datahouse.version>
+        <security.version>3.2.0</security.version>
     </properties>
 
     <dependencyManagement>
@@ -186,6 +193,17 @@
                 <artifactId>lang</artifactId>
                 <version>${lang.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.kereval.gazelle</groupId>
+                <artifactId>datahouse-microprofile-rest-client</artifactId>
+                <version>${datahouse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.ihe.gazelle</groupId>
+                <artifactId>security</artifactId>
+                <version>${security.version}</version>
+            </dependency>
+
 
             <!-- Test dependencies -->
             <dependency>
@@ -233,18 +251,20 @@
                 <version>${javadoc-plugin.version}</version>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${surefire-plugin.version}</version>
                 <configuration>
-                    <systemPropertyVariables>
-                        <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
-                        <maven.home>${maven.home}</maven.home>
-                    </systemPropertyVariables>
+                    <includes>
+                        <include>**/*Test.java</include>
+                    </includes>
+                    <skipTests>${skipUnitTests}</skipTests>
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>${surefire-plugin.version}</version>
+                <version>${maven.failsafe.plugin.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -254,12 +274,10 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <systemPropertyVariables>
-                        <native.image.path>${project.build.directory}/${project.build.finalName}-runner
-                        </native.image.path>
-                        <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
-                        <maven.home>${maven.home}</maven.home>
-                    </systemPropertyVariables>
+                    <includes>
+                        <include>**/*IT.java</include>
+                    </includes>
+                    <skipITs>${skipITs}</skipITs>
                 </configuration>
             </plugin>
             <plugin>
@@ -451,7 +469,7 @@
                     <dependency>
                         <groupId>net.ihe.gazelle</groupId>
                         <artifactId>mlang-converter</artifactId>
-                        <version>0.2.0-SNAPSHOT</version>
+                        <version>0.3.0-SNAPSHOT</version>
                     </dependency>
                 </dependencies>
             </dependencyManagement>

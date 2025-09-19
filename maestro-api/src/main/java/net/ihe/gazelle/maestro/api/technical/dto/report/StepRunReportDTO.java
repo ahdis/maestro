@@ -68,16 +68,16 @@ public class StepRunReportDTO {
     }
 
     @JsonGetter(value = "outputs")
-    public List<ItemDTO> outputs() {
+    public List<OutputDTO> outputs() {
         return domain.getOutputs().stream()
-                .map(ItemDTO::new)
+                .map(OutputDTO::new)
                 .toList();
     }
 
     @JsonSetter(value = "outputs")
-    public void setOutputs(List<ItemDTO> outputs) {
+    public void setOutputs(List<OutputDTO> outputs) {
         domain.setOutputs(outputs.stream().map(
-                ItemDTO::getDomain
+                OutputDTO::getDomain
         ).toList());
     }
 

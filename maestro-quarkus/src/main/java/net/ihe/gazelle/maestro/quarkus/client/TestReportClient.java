@@ -19,15 +19,16 @@ package net.ihe.gazelle.maestro.quarkus.client;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.HttpHeaders;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
-import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
+import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
+import org.apache.hc.client5.http.entity.EntityBuilder;
 import org.apache.hc.client5.http.impl.classic.BasicHttpClientResponseHandler;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpEntity;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,21 +41,26 @@ public class TestReportClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(TestReportClient.class);
 
-    public void sendTestReport(String callBackAuthorization, String callBackUrl, TestReport testReport) {
+    @ConfigProperty(name = "datahouse.url")
+    String dataHouseUrl;
+
+    public void sendTestReport(String callBackAuthorization, String callBackUrl, TestReportSummary testReportSummary) {
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             HttpPost httpPost = new HttpPost(callBackUrl);
             httpPost.setHeader(HttpHeaders.AUTHORIZATION, callBackAuthorization);
 
             ObjectMapper mapper = new ObjectMapper();
-            String json = mapper.writeValueAsString(new TestReportDTO(testReport));
+            String locationPrefix = dataHouseUrl + "/items/";
+            String json = mapper.writeValueAsString(new TestReportSummaryDTO(testReportSummary, locationPrefix));
 
-            HttpEntity multipartEntity = MultipartEntityBuilder.create()
-                    .addTextBody("json report", json, ContentType.APPLICATION_JSON)
-                    .build();
+            httpPost.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
+            try(HttpEntity entity = EntityBuilder.create()
+                    .setText(json)
+                    .build()){
+                httpPost.setEntity(entity);
+                client.execute(httpPost, new BasicHttpClientResponseHandler());
+            }
 
-            httpPost.setEntity(multipartEntity);
-
-            client.execute(httpPost, new BasicHttpClientResponseHandler());
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }

@@ -22,7 +22,7 @@ import io.quarkus.test.junit.TestProfile;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import net.ihe.gazelle.maestro.api.business.testreport.Result;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.*;
 
@@ -39,12 +39,24 @@ class TMTestRunControllerIT implements QuarkusTestProfile {
     @ConfigProperty(name = "gzl.it-port")
     int port;
 
+    @BeforeAll
+    static void beforeAll() throws IOException {
+        MockDatahouseServer.start(8080);
+    }
+
+    @AfterAll
+    static void afterAll() throws IOException {
+        MockDatahouseServer.stop();
+    }
+
     @BeforeEach
     void setUp() throws IOException {
         WireMockSingleton.startServer(port);
         WireMockSingleton.mockCallback();
         WireMockSingleton.mockServiceRegistry();
         WireMockSingleton.mockGetProfiles();
+        WireMockSingleton.mockKeycloak();
+
     }
 
     @AfterEach
@@ -64,7 +76,7 @@ class TMTestRunControllerIT implements QuarkusTestProfile {
                 .when().post("/v0/run")
                 .then().statusCode(200);
 
-        TestReport testReport =  WireMockSingleton.awaitTestReport();
+        TestReportSummary testReport =  WireMockSingleton.awaitTestReport();
         assertTrue(testReport.isValid());
         assertEquals(Result.PASSED, testReport.getResult());
     }
@@ -81,7 +93,7 @@ class TMTestRunControllerIT implements QuarkusTestProfile {
                 .when().post("/v0/run")
                 .then().statusCode(200);
 
-        TestReport testReport = WireMockSingleton.awaitTestReport();
+        TestReportSummary testReport = WireMockSingleton.awaitTestReport();
         assertTrue(testReport.isValid());
         assertEquals(Result.FAILED, testReport.getResult());
     }
