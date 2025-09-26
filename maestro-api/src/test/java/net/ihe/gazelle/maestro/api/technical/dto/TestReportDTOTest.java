@@ -108,6 +108,7 @@ class TestReportDTOTest {
                         .setResult(StepResult.PASSED))
                 .setInputs(List.of(
                         new InputBuilder()
+                                .setType("type")
                                 .setName("item")
                                 .setReference("reference")
                 ))
