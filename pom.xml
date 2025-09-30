@@ -65,6 +65,8 @@
     <properties>
         <!--git-->
         <git.project.path>gazelle/private/kereval/maestro</git.project.path>
+        <git.project.path.ext>${git.project.path}</git.project.path.ext>
+        <git.project.url>https://${git.user.name}:${git.user.token}@gitlab.inria.fr/${git.project.path.ext}.git</git.project.url>
 
         <!-- Quarkus Build-->
         <quarkus.container-image.name>app/maestro</quarkus.container-image.name>
