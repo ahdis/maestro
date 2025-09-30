@@ -139,7 +139,7 @@ public class WireMockSingleton {
     }
 
     public static void mockKeycloak() {
-        keycloakMockServer = new WireMockServer(28080);
+        keycloakMockServer = new WireMockServer(28090);
 
         keycloakMockServer.start();
 

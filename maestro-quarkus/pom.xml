@@ -4,24 +4,18 @@
     <parent>
         <groupId>net.ihe.gazelle</groupId>
         <artifactId>maestro</artifactId>
-        <version>0.3.1-SNAPSHOT</version>
+        <version>0.3.1-GZL-9726-SNAPSHOT</version>
     </parent>
 
     <artifactId>maestro-quarkus</artifactId>
 
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
         <!-- Test properties -->
         <sso.client.version>3.1.0</sso.client.version>
         <mongodb-driver-sync.version>5.0.0</mongodb-driver-sync.version>
-
     </properties>
 
     <dependencies>
-
         <!-- Sub modules dependencies -->
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
@@ -180,106 +174,23 @@
             <version>4.11.0</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>maestro-websocket</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>${quarkus.platform.group-id}</groupId>
+                <groupId>io.quarkus.platform</groupId>
                 <artifactId>quarkus-maven-plugin</artifactId>
-                <version>${quarkus.platform.version}</version>
-                <extensions>true</extensions>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>build</goal>
-                            <goal>generate-code</goal>
-                            <goal>generate-code-tests</goal>
-                            <goal>native-image-agent</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <!-- Add integration test sources -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>add-test-source</id>
-                        <phase>generate-test-sources</phase>
-                        <goals>
-                            <goal>add-test-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>src/it/java</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>add-integration-test-resources</id>
-                        <phase>generate-test-resources</phase>
-                        <goals>
-                            <goal>add-test-resource</goal>
-                        </goals>
-                        <configuration>
-                            <resources>
-                                <resource>
-                                    <directory>src/it/resources</directory>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- Configure compiler to exclude websocket tests by default -->
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <testExcludes>
-                        <testExclude>**/websocket/**</testExclude>
-                    </testExcludes>
-                </configuration>
-            </plugin>
-
-            <!-- Configure surefire to exclude websocket tests by default -->
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>**/websocket/**</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-
-            <!-- Configure failsafe to exclude websocket integration tests by default -->
-            <plugin>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>**/websocket/**</exclude>
-                    </excludes>
-                </configuration>
             </plugin>
         </plugins>
     </build>
 
     <profiles>
-        <profile>
-            <id>native</id>
-            <activation>
-                <property>
-                    <name>native</name>
-                </property>
-            </activation>
-            <properties>
-                <skipITs>false</skipITs>
-                <quarkus.native.enabled>true</quarkus.native.enabled>
-            </properties>
-        </profile>
         <profile>
             <id>with-websocket</id>
             <activation>
@@ -300,7 +211,7 @@
                         <artifactId>maven-compiler-plugin</artifactId>
                         <configuration>
                             <!-- Remove test excludes to compile all tests -->
-                            <testExcludes combine.self="override" />
+                            <testExcludes combine.self="override"></testExcludes>
                         </configuration>
                     </plugin>
 
@@ -309,7 +220,7 @@
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
                             <!-- Remove excludes to run all tests -->
-                            <excludes combine.self="override" />
+                            <excludes combine.self="override"></excludes>
                         </configuration>
                     </plugin>
 
@@ -318,7 +229,7 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <configuration>
                             <!-- Remove excludes to run all integration tests -->
-                            <excludes combine.self="override" />
+                            <excludes combine.self="override"></excludes>
                         </configuration>
                     </plugin>
                 </plugins>
