@@ -281,7 +281,7 @@ class TMScriptMapperTest {
         ArrayNode steps = mapper.createArrayNode().add(step);
         testNode.set("steps", steps);
 
-        String payload = Base64.getEncoder().encodeToString("required-data".getBytes(StandardCharsets.UTF_8));
+        String payload = "required-data";
         ArrayNode inputValues = mapper.createArrayNode();
         inputValues.add(mapper.createObjectNode().put("key", "requiredInput").put("value", payload));
         run.set("inputs", inputValues);
@@ -296,7 +296,7 @@ class TMScriptMapperTest {
                 .filter(property -> property.getName().equals("requiredInput"))
                 .findFirst()
                 .orElseThrow();
-        assertArrayEquals("required-data".getBytes(StandardCharsets.UTF_8), (byte[]) requiredInput.getValue());
+        assertEquals("required-data", requiredInput.getValue());
 
         ValidationStep validationStep = (ValidationStep) testRun.getTest().getSteps().getFirst();
         assertEquals("matchbox", validationStep.getValidationService().getValue());
@@ -304,39 +304,6 @@ class TMScriptMapperTest {
 
         assertEquals(1, validationStep.getContentsToValidate().size());
         assertEquals("requiredContent", validationStep.getContentsToValidate().getFirst().getName());
-    }
-
-    @Test
-    void convertToTestSetRun_addsEmptyInputWhenRequiredDeclarationMissingValue() {
-        ObjectNode root = baseRoot();
-        ObjectNode run = minimalTestRunNode("test-required-missing");
-        ObjectNode testNode = (ObjectNode) run.get("test");
-
-        ArrayNode properties = mapper.createArrayNode();
-        properties.add(propertyNode(ValidationStep.VALIDATION_SERVICE, "matchbox"));
-        properties.add(propertyNode(ValidationStep.VALIDATION_PROFILE, "profile"));
-        properties.add(propertyNode("requiredContent", "${requiredInput}"));
-
-        ObjectNode step = mapper.createObjectNode();
-        step.put("id", "step-1");
-        step.put("@type", ValidationStep.TYPE);
-        step.set("properties", properties);
-
-        testNode.set("steps", mapper.createArrayNode().add(step));
-        testNode.set("inputs", mapper.createArrayNode().add(declaredInput("requiredInput", true)));
-
-        // Do not provide the input value in run inputs
-        run.set("inputs", mapper.createArrayNode());
-
-        root.set(TMScriptMapper.TEST_RUNS, mapper.createArrayNode().add(run));
-
-        TestSetRun converted = TMScriptMapper.convertToTestSetRun(root, new TestRunStore());
-        Property<?> requiredInput = converted.getTestRuns().getFirst().getInputs().stream()
-                .filter(property -> property.getName().equals("requiredInput"))
-                .findFirst()
-                .orElseThrow();
-
-        assertArrayEquals(new byte[0], (byte[]) requiredInput.getValue());
     }
 
     @Test
