@@ -41,6 +41,7 @@ public class TMScriptMapper {
     public static final String OWNERS = "owners";
     public static final String VERSION = "version";
     public static final String NAME = "name";
+    public static final String REQUIRED = "required";
 
     private TMScriptMapper() {
         // Private constructor to prevent instantiation
@@ -191,8 +192,8 @@ public class TMScriptMapper {
                 for (JsonNode declaredInput : declaredInputs) {
                     String key = declaredInput.get("key").asText();
                     boolean required = true; // default to required when unspecified
-                    if (declaredInput.has("required") && !declaredInput.get("required").isNull()) {
-                        required = declaredInput.get("required").asBoolean();
+                    if (declaredInput.has(REQUIRED) && !declaredInput.get(REQUIRED).isNull()) {
+                        required = declaredInput.get(REQUIRED).asBoolean();
                     }
                     String type = null;
                     if (declaredInput.hasNonNull("type")) {
@@ -247,14 +248,33 @@ public class TMScriptMapper {
         Set<String> availableKeys = new HashSet<>();
         if (inputNodes != null) {
             for (JsonNode inputNode : inputNodes) {
-                try {
-                    String key = inputNode.get("key").asText();
-                    providedKeys.add(key);
-                    String value = inputNode.get("value").asText();
-                    if (value != null && !value.isBlank()) {
-                        availableKeys.add(key);
-                    }
-                    InputDefinition definition = inputDefinitions != null ? inputDefinitions.get(key) : null;
+                addInputToTestRun(testRun, inputNode, providedKeys, availableKeys);
+            }
+        }
+        // Ensure required inputs declared in test are present even if not provided in testRun inputs
+        if (requiredMap != null) {
+            for (Map.Entry<String, Boolean> entry : requiredMap.entrySet()) {
+                String key = entry.getKey();
+                boolean required = Boolean.TRUE.equals(entry.getValue());
+                if (required && !providedKeys.contains(key)) {
+                    // Add an empty binary input to satisfy required presence
+                    testRun.addInputs(new Property<>(key, new byte[0]));
+                    availableKeys.add(key);
+                }
+            }
+        }
+        return availableKeys;
+    }
+
+    private static void addInputToTestRun(TestRun testRun, JsonNode inputNode, Set<String> providedKeys, Set<String> availableKeys) {
+        try {
+            String key = inputNode.get("key").asText();
+            providedKeys.add(key);
+            String value = inputNode.get("value").asText();
+            if (value != null && !value.isBlank()) {
+                availableKeys.add(key);
+            }
+            InputDefinition definition = inputDefinitions != null ? inputDefinitions.get(key) : null;
                     String declaredType = definition != null ? definition.type() : null;
                     String instanceType = inputNode.hasNonNull("type") ? inputNode.get("type").asText() : null;
                     String propertyType = resolvePropertyType(declaredType, instanceType);
@@ -262,12 +282,10 @@ public class TMScriptMapper {
                     PropertyDTO propertyDTO = new PropertyDTO(
                             key,
                             adjustedValue,
-                            propertyType);
-                    testRun.addInputs(propertyDTO.createProperty());
-                } catch (NullPointerException e) {
-                    throw new MissingArgumentException("Argument inputs is missing in inputs");
-                }
-            }
+                    propertyType);
+            testRun.addInputs(propertyDTO.createProperty());
+        } catch (NullPointerException e) {
+            throw new MissingArgumentException("Argument inputs is missing in inputs");
         }
         // Ensure required inputs declared in test are present even if not provided in testRun inputs
         if (inputDefinitions != null) {
@@ -282,7 +300,6 @@ public class TMScriptMapper {
                 }
             }
         }
-        return availableKeys;
     }
 
     private static void trimOptionalMissingStepRefs(TestRun testRun, Map<String, InputDefinition> inputDefinitions, Set<String> availableKeys) {
@@ -290,15 +307,18 @@ public class TMScriptMapper {
             return;
         }
         for (Step step : testRun.getTest().getSteps()) {
-            List<Property<?>> props = step.getProperties();
-            if (props == null) continue;
+            List<Property<?>> properties = step.getProperties();
+            if (properties == null) continue;
             List<Property<?>> adjusted = new ArrayList<>();
-            for (Property<?> p : props) {
-                if (p == null) {
-                    // Drop null placeholders to avoid NPEs in setProperties implementations
-                    continue;
-                }
-                if (p instanceof PropertyRef<?> ref) {
+            constructAdjustedProperties(requiredMap, availableKeys, properties, adjusted);
+            step.setProperties(adjusted);
+        }
+    }
+
+    private static void constructAdjustedProperties(Map<String, Boolean> requiredMap, Set<String> availableKeys, List<Property<?>> properties, List<Property<?>> adjusted) {
+        for (Property<?> property : properties) {
+            if (property != null) {
+                if (property instanceof PropertyRef<?> ref) {
                     String refKey = ref.getReference();
                     InputDefinition definition = inputDefinitions.get(refKey);
                     boolean required = definition == null || definition.required();
@@ -308,9 +328,8 @@ public class TMScriptMapper {
                         continue;
                     }
                 }
-                adjusted.add(p);
+                adjusted.add(property);
             }
-            step.setProperties(adjusted);
         }
     }
 

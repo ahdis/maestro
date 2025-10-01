@@ -88,15 +88,17 @@ public class TestSetRun {
         return systemsUnderTest;
     }
 
-    public void setSystemsUnderTest(List<SystemUnderTest> systemsUnderTest) {
+    public TestSetRun setSystemsUnderTest(List<SystemUnderTest> systemsUnderTest) {
         this.systemsUnderTest = systemsUnderTest;
+        return this;
     }
 
     public String getTestSetRunId() {
         return testSetRunId;
     }
 
-    public void setTestSetRunId(String testSetRunId) {
+    public TestSetRun setTestSetRunId(String testSetRunId) {
         this.testSetRunId = testSetRunId;
+        return this;
     }
 }
