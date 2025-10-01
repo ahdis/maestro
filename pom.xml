@@ -24,7 +24,7 @@
     </parent>
 
     <artifactId>maestro</artifactId>
-    <version>0.3.1-GZL-9726-SNAPSHOT</version>
+    <version>0.3.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <organization>
@@ -52,7 +52,6 @@
         <module>maestro-engine</module>
         <module>maestro-step</module>
         <module>maestro-quarkus</module>
-        <module>maestro-websocket</module>
     </modules>
 
     <scm>
@@ -64,13 +63,7 @@
 
     <properties>
         <!--git-->
-        <git.project.path>gazelle/private/kereval/maestro</git.project.path>
-        <git.project.path.ext>${git.project.path}</git.project.path.ext>
-        <git.project.url>https://${git.user.name}:${git.user.token}@gitlab.inria.fr/${git.project.path.ext}.git</git.project.url>
-
-        <!-- Quarkus Build-->
-        <quarkus.container-image.name>app/maestro</quarkus.container-image.name>
-        <quarkus.container-image.tag>${project.version}</quarkus.container-image.tag>
+        <git.project.url>https://${git.user.name}:${git.user.token}@gitlab.inria.fr/gazelle/private/kereval/maestro.git</git.project.url>
 
         <framework.version>2.1.2</framework.version>
         <search-api.version>1.1.0</search-api.version>
@@ -95,8 +88,7 @@
             **/gazelle/context/*
             **/gazelle/maestro/technical/ws/async/tmintegration/**
             **/gazelle/maestro/websocket/**
-            **/gazelle/maestro/mlang/**
-        </sonar.coverage.exclusions>
+            **/gazelle/maestro/mlang/**</sonar.coverage.exclusions>
     </properties>
 
     <dependencyManagement>
@@ -105,43 +97,43 @@
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-api</artifactId>
-                <version>0.3.1-GZL-9726-SNAPSHOT</version>
+                <version>0.3.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-engine</artifactId>
-                <version>0.3.1-GZL-9726-SNAPSHOT</version>
+                <version>0.3.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>validation-step</artifactId>
-                <version>0.3.1-GZL-9726-SNAPSHOT</version>
+                <version>0.3.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>simulation-step</artifactId>
-                <version>0.3.1-GZL-9726-SNAPSHOT</version>
+                <version>0.3.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>user-interaction-step</artifactId>
-                <version>0.3.1-GZL-9726-SNAPSHOT</version>
+                <version>0.3.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>assertion-step</artifactId>
-                <version>0.3.1-GZL-9726-SNAPSHOT</version>
+                <version>0.3.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>itb-step</artifactId>
-                <version>0.3.1-GZL-9726-SNAPSHOT</version>
+                <version>0.3.1-SNAPSHOT</version>
             </dependency>
             <!-- to be removed when maestro-websocket has it own tests -->
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-websocket</artifactId>
-                <version>0.3.1-GZL-9726-SNAPSHOT</version>
+                <version>0.3.1-SNAPSHOT</version>
             </dependency>
 
             <!-- Stack BOM -->
@@ -215,8 +207,17 @@
 
     <repositories>
         <repository>
-            <id>parent-bom-repository</id>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>IHE</id>
+            <name>IHE Public Maven Repository Group</name>
             <url>https://nexus.ihe-catalyst.net/repository/maven-public/</url>
+            <layout>default</layout>
         </repository>
     </repositories>
 

@@ -19,7 +19,7 @@
     <parent>
         <groupId>net.ihe.gazelle</groupId>
         <artifactId>maestro-step</artifactId>
-        <version>0.3.1-GZL-9726-SNAPSHOT</version>
+        <version>0.3.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>itb-step</artifactId>
@@ -49,6 +49,7 @@
             <artifactId>service-metadata-jaxrs-api</artifactId>
         </dependency>
 
+        <!-- Technical dependencies -->
         <dependency>
             <groupId>org.eclipse.microprofile.config</groupId>
             <artifactId>microprofile-config-api</artifactId>
