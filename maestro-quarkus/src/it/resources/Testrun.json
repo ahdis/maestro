@@ -1,5 +1,6 @@
 {
   "testSuiteName": "testSuite1",
+  "testSetRunId": "testRun1",
   "accessControlList": {
   "owners": [
     "gazelle",

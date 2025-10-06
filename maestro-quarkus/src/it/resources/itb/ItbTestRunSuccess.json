@@ -1,5 +1,6 @@
 {
   "testSuiteName": "ITB Test Suite",
+  "testSetRunId": "testRun1",
   "accessControlList": {
     "owners": [
       "gazelle"

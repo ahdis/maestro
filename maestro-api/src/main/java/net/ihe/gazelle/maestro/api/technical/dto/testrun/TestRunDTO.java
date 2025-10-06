@@ -40,15 +40,6 @@ public class TestRunDTO {
         this.domain = domain;
     }
 
-    @JsonGetter("testSetId")
-    public String getTestSetId() {
-        return domain.getTestSetId();
-    }
-
-    @JsonSetter("testSetId")
-    public void setTestSetId(String testSetId) {
-        domain.setTestSetId(testSetId);
-    }
 
     @JsonGetter("test")
     public TestDTO getTest() {

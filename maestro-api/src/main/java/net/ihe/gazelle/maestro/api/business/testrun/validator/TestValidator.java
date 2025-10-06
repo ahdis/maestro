@@ -15,7 +15,7 @@ public class TestValidator extends AbstractValidator<Test> {
     @Override
     protected void addRulesAndMembers(ValidatorBuilder<? extends Test> validatorBuilder) {
         validatorBuilder
-                .addRule("idValid", Test::isIdValid, "ID must be set and greater than 0")
+                .addRule("idValid", Test::isIdValid, "ID must be set")
                 .addRule("nameValid", Test::isNameValid, "Name must be set and not empty")
                 .addRule("stepsValid", Test::areStepsValid, "Test must contain at least one step")
                 .addRule("stepsUniques", Test::areStepsUnique, "Steps must be unique")

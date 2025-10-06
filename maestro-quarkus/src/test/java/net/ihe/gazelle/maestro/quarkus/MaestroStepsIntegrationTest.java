@@ -275,11 +275,13 @@ class MaestroStepsIntegrationTest {
         net.ihe.gazelle.maestro.api.business.testrun.Test test = new net.ihe.gazelle.maestro.api.business.testrun.Test().addStep(validationStep);
         test.setName("validationTest");
         test.setId(UUID.randomUUID().toString());
+        TestSetRun testSetRun = new TestSetRun();
         TestRun testRun = new TestRun();
         testRun.setTest(test);
         testRun.addInputs(contentToValidate);
+        testRun.setTestSetId(testSetRun.getTestSetId());
         testRuns.add(testRun);
-        return new TestSetRun()
+        return testSetRun
                 .setTestSuiteName("Test Suite")
                 .setTestSetRunId(UUID.randomUUID().toString())
                 .setTestRuns(testRuns)
@@ -299,15 +301,17 @@ class MaestroStepsIntegrationTest {
                 new Property<>(SimulationStep.SEQUENCE_ID, "sequencId"),
                 new Property<>(SimulationStep.TIMEOUT_SECONDS, 60),
                 inputs);
+        TestSetRun testSetRun = new TestSetRun();
         net.ihe.gazelle.maestro.api.business.testrun.Test test = new net.ihe.gazelle.maestro.api.business.testrun.Test().addStep(simulationStep);
         test.setName("simulationTest");
         test.setId(UUID.randomUUID().toString());
         TestRun testRun = new TestRun()
+                .setTestSetId(testSetRun.getTestSetId())
                 .setInputs(inputs)
                 ;
         testRun.setTest(test);
         testRuns.add(testRun);
-        return new TestSetRun()
+        return testSetRun
                 .setTestSuiteName("Test Suite")
                 .setTestSetRunId(UUID.randomUUID().toString())
                 .setTestRuns(testRuns)
@@ -320,16 +324,17 @@ class MaestroStepsIntegrationTest {
                 new PropertyRef<>(AssertionStep.ASSERTION, "assertion", byte[].class),
                 new Property<>(AssertionStep.ASSERTION_SERVICE, "toto")
         );
+        TestSetRun testSetRun = getTestRunsWithOneValidationStep();
         net.ihe.gazelle.maestro.api.business.testrun.Test test = new net.ihe.gazelle.maestro.api.business.testrun.Test().addStep(assertionStep);
         test.setName("assertionTest");
         test.setId(UUID.randomUUID().toString());
         TestRun testRun = new TestRun()
+                .setTestSetId(testSetRun.getTestSetId())
                 .setInputs(List.of(new Property<>("assertion", "liyvfgljv".getBytes())))
                 ;
         testRun.setTest(test);
-        TestSetRun result = getTestRunsWithOneValidationStep();
-        result.getTestRuns().add(testRun);
-        return result;
+        testSetRun.getTestRuns().add(testRun);
+        return testSetRun;
     }
 
 

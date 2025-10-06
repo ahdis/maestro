@@ -71,10 +71,6 @@ public class TestRun {
         return test != null;
     }
 
-    public boolean areInputsValid() {
-        return inputs == null || !inputs.isEmpty();
-    }
-
 
     @Override
     public boolean equals(Object o) {

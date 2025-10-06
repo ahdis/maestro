@@ -254,12 +254,14 @@ class TestRunControllerTest {
         TestRun testRun = new TestRun();
 
         net.ihe.gazelle.maestro.api.business.testrun.Test test = new net.ihe.gazelle.maestro.api.business.testrun.Test();
-                test.addStep(new ValidationStep(
-                        "iti78-request-validation",
-                        new Property<>(ValidationStep.VALIDATION_SERVICE, "matchbox"),
-                        new Property<>(ValidationStep.VALIDATION_PROFILE, "Parameters"),
-                        new ArrayList<>(List.of(new PropertyRef<>("content", "iti78-request", byte[].class))))
-                );
+        test.setId("iti78-request");
+        test.setName("ITI-78 Request");
+        test.addStep(new ValidationStep(
+                "iti78-request-validation",
+                new Property<>(ValidationStep.VALIDATION_SERVICE, "matchbox"),
+                new Property<>(ValidationStep.VALIDATION_PROFILE, "Parameters"),
+                new ArrayList<>(List.of(new PropertyRef<>("content", "iti78-request", byte[].class))))
+        );
 
         testRun.setTest(test);
 

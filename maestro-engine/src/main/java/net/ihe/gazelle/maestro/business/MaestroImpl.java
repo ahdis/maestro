@@ -128,7 +128,7 @@ public class MaestroImpl implements Maestro {
                 return;
             }
             TestRun testRun = testRunCursor.next();
-            run(testRun.setTestSetId(testSetId));
+            run(testRun);
         }
         catch (Exception e){
             logger.error("Error running test set {}", testSetRun.getTestSetId(), e);
@@ -182,7 +182,8 @@ public class MaestroImpl implements Maestro {
             try {
                 run(testRunCursor.next());
                 //fixme: remove this error handling from here
-            } catch (InvalidTestSetException e) {
+            } catch (Exception e) {
+                logger.error("Error running test {}", (testRun.getTest() != null ? testRun.getTest().getName() : ""), e);
                 TestReportBuilder testReportBuilder = buildGenericTestReport(testSetRun);
                 TestReport testReport = testReportBuilder.setDateTime(Date.from(Instant.now()))
                         .setTestRunReports(testSetSessionStore.getTestRunReportBuilders())
@@ -381,33 +382,6 @@ public class MaestroImpl implements Maestro {
         return res;
     }
 
-    /**
-     * Method called when an exception is raised during iteration and execution must be stopped.
-     * @param testRun The TestRun where problem occurred
-     * @param e raised exception
-     */
-    private void sendUndefinedTestReport(TestRun testRun, Exception e) {
-        String id = "";
-        String name = "";
-        net.ihe.gazelle.maestro.api.business.testrun.Test testRunTest = testRun.getTest();
-        if (testRunTest != null) {
-            id = testRunTest.getId();
-            name = testRunTest.getName();
-        }
-        TestSetSessionStore testSetSessionStore = sessionStoreContext.getTestSetContexts(testRun.getTestSetId());
-        TestSetRun testSetRun = testSetSessionStore.getTestSetRun();
-        TestReportBuilder testReportBuilder = buildGenericTestReport(testSetRun);
-        TestReport testReport = testReportBuilder
-                .addTestRunReport(new TestRunReportBuilder()
-                        .addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e))
-                        .setTest(new TestBuilder()
-                                .setId(id)
-                                .setName(name)
-                        )
-                )
-                .build();
-        recordAndReturnTestReport(testReport, testSetRun);
-    }
 
     private List<InputBuilder> convertPropertiesToItems(List<Property<?>> properties) {
         List<InputBuilder> items = new ArrayList<>();

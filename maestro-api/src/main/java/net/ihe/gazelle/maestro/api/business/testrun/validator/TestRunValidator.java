@@ -25,7 +25,6 @@ public class TestRunValidator extends AbstractValidator<TestRun> {
     protected void addRulesAndMembers(ValidatorBuilder<? extends TestRun> validatorBuilder) {
             validatorBuilder
                     .addRule("testValid", TestRun::isTestValid, "Test must be set with at least a single step")
-                    .addRule("inputValid", TestRun::areInputsValid, "If inputs are set, they must be not empty")
                     .addMember("inputs", TestRun::getInputs, propertyValidator::getAssembledValidatorBuilder)
                     .addMember("test", TestRun::getTest, testValidator::getAssembledValidatorBuilder)
             ;
