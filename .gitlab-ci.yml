@@ -85,6 +85,15 @@ release/dockerImage:
     - .releaseDockerWithQuarkus
   needs: [ "release/code" ]
 
+release/documentation:
+  stage: release
+  extends:
+    - .releaseDocumentation
+  variables:
+    USER_DOCUMENTATION_APP_NAME: "Maestro"
+    JIRA_COMPONENT_NAME: "maestro"
+  needs: [ "release/code" ]
+
 mutator-schedule:
   stage: schedule
   extends:

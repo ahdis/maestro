@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 
 public class MockDatahouseServer {
 
-    private static final MockWebServer server = new MockWebServer();
+    private static MockWebServer server;
     private static final ObjectMapper mapper = new ObjectMapper();
 
     // heuristics patterns
@@ -29,16 +29,18 @@ public class MockDatahouseServer {
         // utility holder
     }
 
-    public static void start(int port) throws IOException {
+    public static synchronized void start(int port) throws IOException {
         if (started.compareAndSet(false, true)) {
+            server = new MockWebServer();
             server.start(port);
             server.setDispatcher(createDispatcher());
         }
     }
 
-    public static void stop() throws IOException {
+    public static synchronized void stop() throws IOException {
         if (started.compareAndSet(true, false)) {
             server.shutdown();
+            server = null;
         }
     }
 

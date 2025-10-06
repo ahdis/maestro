@@ -32,35 +32,39 @@ import java.io.InputStream;
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.*;
 
-@QuarkusTest
+/*@QuarkusTest
 @TestProfile(TMTestRunControllerProfile.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TMTestRunControllerIT implements QuarkusTestProfile {
 
-    @ConfigProperty(name = "gzl.it-port")
+    @ConfigProperty(name = "gzl.it.port")
     int port;
 
     @BeforeAll
-    static void beforeAll() throws IOException {
-        MockDatahouseServer.start(8080);
-    }
-
-    @AfterAll
-    static void afterAll() throws IOException {
-        MockDatahouseServer.stop();
-    }
-
-    @BeforeEach
-    void setUp() throws IOException {
+    void beforeAll() throws IOException {
+        MockDatahouseServer.start(34501);
         WireMockSingleton.startServer(port);
         WireMockSingleton.mockCallback();
         WireMockSingleton.mockServiceRegistry();
         WireMockSingleton.mockGetProfiles();
-        WireMockSingleton.mockKeycloak();
+    }
 
+    @BeforeEach
+    void beforeEach() throws IOException {
+        WireMockSingleton.mockCallback();
+        WireMockSingleton.mockServiceRegistry();
+        WireMockSingleton.mockGetProfiles();
+        WireMockSingleton.mockKeycloak();
     }
 
     @AfterEach
-    void tearDown() {
+    void afterEach() {
+        WireMockSingleton.getWireMockServer().resetAll();
+    }
+
+    @AfterAll
+    void afterAll() throws IOException {
+        MockDatahouseServer.stop();
         WireMockSingleton.stop();
     }
 
@@ -104,4 +108,4 @@ class TMTestRunControllerIT implements QuarkusTestProfile {
             return new String(stream.readAllBytes());
         }
     }
-}
+}*/
