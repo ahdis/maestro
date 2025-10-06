@@ -24,6 +24,7 @@ import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
 import net.ihe.gazelle.maestro.api.business.testrun.*;
 import net.ihe.gazelle.maestro.assertion.step.business.AssertionStep;
 import net.ihe.gazelle.maestro.business.MaestroImpl;
+import net.ihe.gazelle.maestro.business.SessionStoreContextImpl;
 import net.ihe.gazelle.maestro.quarkus.client.TestReportClient;
 import net.ihe.gazelle.maestro.quarkus.factory.TestRunMockEvent;
 import net.ihe.gazelle.maestro.quarkus.handler.HandlerProviderMock;
@@ -48,6 +49,8 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -246,7 +249,7 @@ class MaestroStepsIntegrationTest {
         assertEquals(0, testRunReport.getStepRunReports().size());
         List<UnexpectedError> unexpectedErrors = testRunReport.getUnexpectedErrors();
         assertEquals(1, unexpectedErrors.size());
-        assertEquals("Several steps has the same name : test-validation should be unique", unexpectedErrors.getFirst().getMessage());
+        assertThat(unexpectedErrors.getFirst().getMessage(), containsString("TestRun.test [stepsUniques] Steps must be unique => invalid"));
         net.ihe.gazelle.maestro.api.business.testreport.Test test = testRunReport.getTest();
         assertEquals("validationTest", test.getName());
         assertFalse(test.getId().isBlank());
@@ -277,6 +280,8 @@ class MaestroStepsIntegrationTest {
         testRun.addInputs(contentToValidate);
         testRuns.add(testRun);
         return new TestSetRun()
+                .setTestSuiteName("Test Suite")
+                .setTestSetRunId(UUID.randomUUID().toString())
                 .setTestRuns(testRuns)
                 .setAccessControlList(new AccessControlList().setOwners(Set.of("gazelle")))
                 ;
@@ -284,22 +289,27 @@ class MaestroStepsIntegrationTest {
 
     private static TestSetRun getTestRunsWithOneSimulationStep() {
         List<TestRun> testRuns = new ArrayList<>();
+        List<Property<?>> inputs = List.of(
+                new Property<>("Patient Id", "1.1.1.1"),
+                new Property<>("Boolean prop", true),
+                new Property<>("File prop", "test".getBytes())
+        );
         Step simulationStep = new SimulationStep("simulationStep",
                 new Property<>(SimulationStep.SIMULATION_SERVICE, "MCSD"),
                 new Property<>(SimulationStep.SEQUENCE_ID, "sequencId"),
                 new Property<>(SimulationStep.TIMEOUT_SECONDS, 60),
-                List.of(
-                        new Property<>("Patient Id", "1.1.1.1"),
-                        new Property<>("Boolean prop", true),
-                        new Property<>("File prop", "test".getBytes())
-                ));
+                inputs);
         net.ihe.gazelle.maestro.api.business.testrun.Test test = new net.ihe.gazelle.maestro.api.business.testrun.Test().addStep(simulationStep);
         test.setName("simulationTest");
         test.setId(UUID.randomUUID().toString());
-        TestRun testRun = new TestRun();
+        TestRun testRun = new TestRun()
+                .setInputs(inputs)
+                ;
         testRun.setTest(test);
         testRuns.add(testRun);
         return new TestSetRun()
+                .setTestSuiteName("Test Suite")
+                .setTestSetRunId(UUID.randomUUID().toString())
                 .setTestRuns(testRuns)
                 .setAccessControlList(new AccessControlList().setOwners(Set.of("gazelle")))
                 ;
@@ -313,7 +323,9 @@ class MaestroStepsIntegrationTest {
         net.ihe.gazelle.maestro.api.business.testrun.Test test = new net.ihe.gazelle.maestro.api.business.testrun.Test().addStep(assertionStep);
         test.setName("assertionTest");
         test.setId(UUID.randomUUID().toString());
-        TestRun testRun = new TestRun();
+        TestRun testRun = new TestRun()
+                .setInputs(List.of(new Property<>("assertion", "liyvfgljv".getBytes())))
+                ;
         testRun.setTest(test);
         TestSetRun result = getTestRunsWithOneValidationStep();
         result.getTestRuns().add(testRun);

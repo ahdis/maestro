@@ -34,7 +34,7 @@ import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSetRunDTO;
 import net.ihe.gazelle.maestro.business.MaestroImpl;
 import net.ihe.gazelle.maestro.business.MissingArgumentException;
 import net.ihe.gazelle.maestro.quarkus.NotProvidedStep;
-import net.ihe.gazelle.maestro.quarkus.SessionStoreContextImpl;
+import net.ihe.gazelle.maestro.business.SessionStoreContextImpl;
 import net.ihe.gazelle.maestro.quarkus.factory.TestRunMockEvent;
 import net.ihe.gazelle.maestro.quarkus.jobs.EventMaestroProducer;
 import net.ihe.gazelle.maestro.quarkus.jobs.SynchronousMaestro;
