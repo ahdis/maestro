@@ -24,6 +24,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * DTO for Property objects. It has 3 attributes:
@@ -47,6 +49,8 @@ import java.util.Date;
 public class PropertyDTO {
 
     public static final String ISO_8601_DATETIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
+
+    private static final Pattern DATA_URI_BASE64_PREFIX = Pattern.compile("^data:[^,]*;base64,", Pattern.CASE_INSENSITIVE);
 
     private String name;
     protected String value;
@@ -114,7 +118,30 @@ public class PropertyDTO {
      * @return the byteArray Object converted from value
      */
     private byte[] parseByteArray(String value) {
-        return Base64.getDecoder().decode(value);
+        if (value == null) {
+            return new byte[0];
+        }
+
+        String sanitized = value.trim();
+        Matcher matcher = DATA_URI_BASE64_PREFIX.matcher(sanitized);
+        if (matcher.find()) {
+            sanitized = sanitized.substring(matcher.end());
+        }
+
+        sanitized = sanitized.replaceAll("\\s", "");
+        if (sanitized.isEmpty()) {
+            return new byte[0];
+        }
+
+        try {
+            return Base64.getDecoder().decode(sanitized);
+        } catch (IllegalArgumentException ex) {
+            try {
+                return Base64.getMimeDecoder().decode(sanitized);
+            } catch (IllegalArgumentException mimeEx) {
+                throw new IllegalArgumentException("Invalid Base64 encoding for byteArray property", mimeEx);
+            }
+        }
     }
 
     private Date parseDate(String value) {

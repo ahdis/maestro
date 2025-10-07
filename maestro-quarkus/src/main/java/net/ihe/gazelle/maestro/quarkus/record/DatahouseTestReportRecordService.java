@@ -97,7 +97,7 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
         List<Integer> inputIndexes = new ArrayList<>();
         for (int i = 0; i < inputs.size(); i++) {
             Input input = inputs.get(i);
-            if (hasContent(input)) {
+            if (shouldUploadAsAttachment(input)) {
                 toUpload.add(createAttachment(input.getName(), input.getContent()));
                 inputIndexes.add(i);
             }
@@ -107,6 +107,17 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
 
     private boolean hasContent(Input input) {
         return input != null && input.getContent() != null && input.getContent().length > 0;
+    }
+
+    private boolean shouldUploadAsAttachment(Input input) {
+        if (!hasContent(input)) {
+            return false;
+        }
+        String type = input.getType();
+        if (type == null || type.isBlank()) {
+            return true;
+        }
+        return Input.BYTE_ARRAY_TYPE.equalsIgnoreCase(type);
     }
 
     private void validateUploadedIdsCount(int expected, int actual) {

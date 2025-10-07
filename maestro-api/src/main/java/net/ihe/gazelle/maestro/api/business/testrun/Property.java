@@ -74,6 +74,10 @@ public class Property<T> {
         return value != null ? value.getClass() : null;
     }
 
+    public boolean isNameValid() {
+        return name != null && !name.isBlank();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

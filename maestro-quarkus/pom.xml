@@ -4,7 +4,7 @@
     <parent>
         <groupId>net.ihe.gazelle</groupId>
         <artifactId>maestro</artifactId>
-        <version>0.3.1-SNAPSHOT</version>
+        <version>0.4.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>maestro-quarkus</artifactId>
@@ -235,7 +235,7 @@
                         <artifactId>maven-compiler-plugin</artifactId>
                         <configuration>
                             <!-- Remove test excludes to compile all tests -->
-                            <testExcludes combine.self="override"></testExcludes>
+                            <testExcludes combine.self="override" />
                         </configuration>
                     </plugin>
 
@@ -244,7 +244,7 @@
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
                             <!-- Remove excludes to run all tests -->
-                            <excludes combine.self="override"></excludes>
+                            <excludes combine.self="override" />
                         </configuration>
                     </plugin>
 
@@ -253,7 +253,7 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <configuration>
                             <!-- Remove excludes to run all integration tests -->
-                            <excludes combine.self="override"></excludes>
+                            <excludes combine.self="override" />
                         </configuration>
                     </plugin>
                 </plugins>
