@@ -16,7 +16,6 @@
 
 package net.ihe.gazelle.maestro.quarkus;
 
-import net.ihe.gazelle.lang.UnexpectedError;
 import net.ihe.gazelle.maestro.api.business.testreport.Result;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
@@ -219,7 +218,7 @@ class MaestroStepsIntegrationTest {
     }
 
     @Test
-    void testMaestroWithInvalidTwoSameStepTestRun() throws ExecutionException, InterruptedException, TimeoutException {
+    void testMaestroWithInvalidTwoSameStepTestRun()  {
         testReportRecordService.clear(); // Clear previous test data
 
         TestSetRun testSetRun = getTestRunsWithOneValidationStep();
@@ -229,30 +228,9 @@ class MaestroStepsIntegrationTest {
                 List.of(new Property<>("content", "liyvfgljv".getBytes()))
         );
         testSetRun.getTestRuns().getFirst().getTest().addStep(validationStep);
-        TestReportSummary reportSummary = synchronousMaestro.executeTestSet(testSetRun);
+        Throwable throwable = assertThrows(IllegalArgumentException.class, () -> synchronousMaestro.executeTestSet(testSetRun));
+        assertThat(throwable.getMessage(), containsString("Steps must be unique => invalid"));
 
-        // Verify the summary
-        assertNotNull(reportSummary);
-        assertEquals(Result.UNDEFINED, reportSummary.getResult());
-        assertNotNull(reportSummary.getId(), "Report summary should have an ID");
-
-        // Verify persistence behavior even with errors
-        assertTrue(testReportRecordService.getStoredReportsCount() > 0, "TestReport should be persisted even with errors");
-
-        // Retrieve and verify the full report
-        TestReport fullReport = testReportRecordService.getStoredReport(reportSummary.getId());
-        assertNotNull(fullReport, "Should be able to retrieve full report from storage");
-
-        List<TestRunReport> testRunReports = fullReport.getTestRunReports();
-        assertEquals(1, testRunReports.size());
-        TestRunReport testRunReport = testRunReports.getFirst();
-        assertEquals(0, testRunReport.getStepRunReports().size());
-        List<UnexpectedError> unexpectedErrors = testRunReport.getUnexpectedErrors();
-        assertEquals(1, unexpectedErrors.size());
-        assertThat(unexpectedErrors.getFirst().getMessage(), containsString("TestRun.test [stepsUniques] Steps must be unique => invalid"));
-        net.ihe.gazelle.maestro.api.business.testreport.Test test = testRunReport.getTest();
-        assertEquals("validationTest", test.getName());
-        assertFalse(test.getId().isBlank());
     }
 
 

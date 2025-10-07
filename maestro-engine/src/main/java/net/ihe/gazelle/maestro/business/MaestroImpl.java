@@ -23,8 +23,6 @@ import net.ihe.gazelle.maestro.api.business.testrun.context.Context;
 import net.ihe.gazelle.maestro.api.business.testrun.context.TestRunSessionStore;
 import net.ihe.gazelle.maestro.api.business.testrun.context.TestSetSessionStore;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
-import net.ihe.gazelle.maestro.api.business.testrun.validator.TestRunValidator;
-import net.ihe.gazelle.maestro.api.business.testrun.validator.TestSetRunValidator;
 import org.slf4j.Logger;
 
 import java.nio.charset.StandardCharsets;
@@ -43,8 +41,6 @@ public class MaestroImpl implements Maestro {
     private final MaestroEventProducer maestroEventProducer;
     private final SessionStoreContext sessionStoreContext;
     private final TestReportRecordService testReportRecordService;
-    private final TestSetRunValidator testSetRunValidator;
-    private final TestRunValidator testRunValidator;
     private final String maestroVersion;
 
     public MaestroImpl(MaestroEventProducer maestroEventProducer,
@@ -54,8 +50,6 @@ public class MaestroImpl implements Maestro {
         this.sessionStoreContext = sessionStoreContext;
         this.testReportRecordService = testReportRecordService;
         this.maestroVersion = maestroVersion;
-        this.testSetRunValidator = new TestSetRunValidator();
-        this.testRunValidator = new TestRunValidator();
     }
 
     @Override
@@ -65,9 +59,6 @@ public class MaestroImpl implements Maestro {
         }
 
         try {
-
-            testRunValidator.assertValid(testRun);
-
             // create context
             Context context = extractInputs(testRun.getInputs());
 
@@ -113,7 +104,6 @@ public class MaestroImpl implements Maestro {
         }
 
         try{
-            testSetRunValidator.assertValid(testSetRun);
 
             String testSetId = testSetRun.getTestSetId();
             sessionStoreContext.addTestSetContext(testSetId, testSetRun);
