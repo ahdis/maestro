@@ -14,7 +14,6 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
@@ -40,7 +39,6 @@
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>maestro-api</artifactId>
         </dependency>
-
 
         <!-- Gazelle dependencies -->
         <dependency>
@@ -70,7 +68,6 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
-
 
         <!-- Test dependencies -->
         <dependency>
@@ -123,7 +120,6 @@
         </dependency>
     </dependencies>
 
-
     <build>
         <plugins>
             <plugin>
@@ -134,10 +130,10 @@
                 <executions>
                     <execution>
                         <id>add-test-source</id>
-                        <phase>generate-test-sources</phase>
                         <goals>
                             <goal>add-test-source</goal>
                         </goals>
+                        <phase>generate-test-sources</phase>
                         <configuration>
                             <sources>
                                 <source>src/it/java</source>
@@ -146,10 +142,10 @@
                     </execution>
                     <execution>
                         <id>add-integration-test-resources</id>
-                        <phase>generate-test-resources</phase>
                         <goals>
                             <goal>add-test-resource</goal>
                         </goals>
+                        <phase>generate-test-resources</phase>
                         <configuration>
                             <resources>
                                 <resource>
@@ -172,10 +168,10 @@
                 <executions>
                     <execution>
                         <id>default-test</id>
-                        <phase>test</phase>
                         <goals>
                             <goal>test</goal>
                         </goals>
+                        <phase>test</phase>
                     </execution>
                 </executions>
             </plugin>
@@ -202,6 +198,5 @@
             </plugin>
         </plugins>
     </build>
-
 
 </project>

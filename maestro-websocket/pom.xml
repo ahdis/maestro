@@ -9,18 +9,13 @@
 
     <artifactId>maestro-websocket</artifactId>
 
-    <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-
     <dependencies>
         <!-- Sub modules dependencies -->
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>maestro-api</artifactId>
         </dependency>
+
         <!-- Gazelle dependencies -->
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
@@ -30,6 +25,7 @@
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>framework-model-validator</artifactId>
         </dependency>
+
         <!-- jakarta -->
         <dependency>
             <groupId>jakarta.websocket</groupId>
@@ -39,7 +35,8 @@
         <dependency>
             <groupId>jakarta.websocket</groupId>
             <artifactId>jakarta.websocket-client-api</artifactId>
-            <version>2.1.1</version> <!-- Match version from quarkus BOM -->
+            <version>2.1.1</version>
+            <!-- Match version from quarkus BOM -->
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -47,12 +44,14 @@
             <artifactId>jakarta.enterprise.cdi-api</artifactId>
             <scope>provided</scope>
         </dependency>
+
         <!-- MP Dependencies -->
         <dependency>
             <groupId>org.eclipse.microprofile.config</groupId>
             <artifactId>microprofile-config-api</artifactId>
             <scope>provided</scope>
         </dependency>
+
         <!-- other dependencies -->
         <dependency>
             <groupId>org.slf4j</groupId>

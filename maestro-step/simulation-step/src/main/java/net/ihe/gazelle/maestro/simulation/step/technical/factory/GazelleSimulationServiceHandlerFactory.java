@@ -61,8 +61,8 @@ public class GazelleSimulationServiceHandlerFactory implements HandlerFactory {
         consumedInterfaces.add(new ConsumedInterfaceBuilder()
                 .setInterfaceName(SimulationAPI.INTERFACE_NAME)
                 .setRequired(true)
-                .setSupportedBindings(List.of(HttpRestBinding.TYPE))
-                .setSupportedVersions(List.of("1.0.0"))
+                .addSupportedBinding(HttpRestBinding.TYPE)
+                .addSupportedVersion("1.0.0")
                 .build());
         return consumedInterfaces;
     }

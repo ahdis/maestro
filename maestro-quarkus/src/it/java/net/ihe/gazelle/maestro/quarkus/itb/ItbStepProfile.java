@@ -27,7 +27,7 @@ public class ItbStepProfile implements QuarkusTestProfile {
     public Map<String, String> getConfigOverrides() {
         Map<String, String> overrides = new HashMap<>();
         overrides.put("gzl.service.registry.file.path", this.getClass().getResource("/services.json").getPath());
-        overrides.put("itb.api.url", "http://localhost:${gzl.it-port}");
+        overrides.put("itb.api.url", "http://localhost:${gzl.it.port}");
         overrides.put("itb.api.key", "test-api-key");
         return overrides;
     }

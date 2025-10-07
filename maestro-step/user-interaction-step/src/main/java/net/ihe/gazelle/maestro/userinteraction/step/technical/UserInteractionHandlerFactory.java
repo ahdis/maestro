@@ -47,8 +47,8 @@ public class UserInteractionHandlerFactory implements HandlerFactory {
         consumedInterfaces.add(new ConsumedInterfaceBuilder()
                 .setInterfaceName(UserInteractionHandler.INTERFACE_NAME)
                 .setRequired(true)
-                .setSupportedBindings(List.of(HttpRestBinding.TYPE))
-                .setSupportedVersions(List.of("1.0.0"))
+                .addSupportedBinding(HttpRestBinding.TYPE)
+                .addSupportedVersion("1.0.0")
                 .build());
         return consumedInterfaces;
     }
