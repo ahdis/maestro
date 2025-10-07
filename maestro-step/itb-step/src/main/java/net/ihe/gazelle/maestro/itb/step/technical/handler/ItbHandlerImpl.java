@@ -31,6 +31,8 @@ import java.util.*;
 
 public class ItbHandlerImpl implements ItbHandler {
 
+    private static final Set<String> CORE_PROPERTY_NAMES = Set.of(ItbStep.TEST_CASE, ItbStep.SYSTEM_ID, ItbStep.ACTOR_ID);
+
 
     public ItbHandlerImpl() {
         // Empty
@@ -52,21 +54,31 @@ public class ItbHandlerImpl implements ItbHandler {
         testRequest.setTestID(step.getActorID().getValue());
         TestCase testCase = new TestCase();
         Optional<Property<String>> propertyOptional = step.getProperties().stream()
-                .filter(property -> "testCase".equals(property.getName()) && property.getValue() instanceof String)
+                .filter(property -> ItbStep.TEST_CASE.equals(property.getName()) && property.getValue() instanceof String)
                 .map(property -> (Property<String>) property)
                 .findFirst();
         testCase.setTestCase(propertyOptional.orElseThrow().getValue());
 
         List<Parameter> parameters = new ArrayList<>();
         for (Property<?> property : step.getProperties()) {
-                Parameter parameter = new Parameter();
+            if (CORE_PROPERTY_NAMES.contains(property.getName())) {
+                continue;
+            }
+            Parameter parameter = new Parameter();
             parameter.setName(property.getName());
             try {
-                parameter.setType(property.getValue() instanceof byte[] ? "file" : "text");
-                if (parameter.getType().equals("file")) {
-                    parameter.setValue(new String(Base64.getEncoder().encode((byte[]) property.getValue())));
+                Object value = property.getValue();
+                if (value instanceof byte[] bytes) {
+                    parameter.setType("file");
+                    parameter.setValue(Base64.getEncoder().encodeToString(bytes));
+                } else if (value instanceof String str) {
+                    parameter.setType("text");
+                    parameter.setValue(str);
+                } else if (value != null) {
+                    parameter.setType("text");
+                    parameter.setValue(String.valueOf(value));
                 } else {
-                    parameter.setValue((String) property.getValue());
+                    continue;
                 }
                 parameters.add(parameter);
             } catch (NoSuchElementException e) {

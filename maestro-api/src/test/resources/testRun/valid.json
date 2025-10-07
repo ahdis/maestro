@@ -1,6 +1,5 @@
 [
   {
-    "testSetId": "testSet1",
     "test": {
       "id": "1",
       "name": "name1",

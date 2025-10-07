@@ -20,6 +20,9 @@ import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.UnexpectedErrorBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.context.Context;
+import net.ihe.gazelle.maestro.api.business.testrun.StepCursor;
+import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
+import net.ihe.gazelle.maestro.api.business.testrun.TestRunCursor;
 import net.ihe.gazelle.maestro.api.business.testrun.context.TestRunSessionStore;
 import net.ihe.gazelle.maestro.api.business.testrun.context.TestSetSessionStore;
 import nl.jqno.equalsverifier.EqualsVerifier;
@@ -40,7 +43,7 @@ class ContextTest {
         Context context = new Context();
         TestRun testRun = new TestRun();
         List<StepRunReportBuilder> stepRunReportBuilders = new ArrayList<>();
-        testRunSessionStore = new TestRunSessionStore(context, testRun, stepRunReportBuilders);
+        testRunSessionStore = new TestRunSessionStore(context, testRun, stepRunReportBuilders, StepCursor.empty());
     }
 
     @Test
@@ -76,6 +79,7 @@ class ContextTest {
         EqualsVerifier.simple()
                 .forClass(TestSetSessionStore.class)
                 .withPrefabValues(TestRunReportBuilder.class, testRunReportBuilder1, testRunReportBuilder2)
+                .withPrefabValues(TestRunCursor.class, TestRunCursor.empty(), new TestRunCursor(List.of(new TestRun())))
                 .verify();
     }
 

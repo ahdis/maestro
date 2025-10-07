@@ -8,11 +8,11 @@ include:
 
 # Define stages
 stages:
+  - prepare
   - build
-  - predeploy
-  - deploy
   - test
   - publish
+  - security
   - release
   - upgrade
   - clean
@@ -103,3 +103,12 @@ mutator-schedule:
   variables:
     CRON_SCHEDULE: "05 01 * * *"
   allow_failure: false
+
+security/containerWithTrivy:
+  extends:
+    - .testSecurityContainerWithTrivy
+
+security/SBOMForJava:
+  extends:
+    - .testSecuritySBOMForJava
+  needs: [ "security/containerWithTrivy" ]

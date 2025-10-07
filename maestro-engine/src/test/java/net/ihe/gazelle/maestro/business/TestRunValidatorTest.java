@@ -16,15 +16,17 @@
 
 package net.ihe.gazelle.maestro.business;
 
-import net.ihe.gazelle.maestro.api.business.testrun.DuplicatedStepsException;
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.api.business.testrun.Step;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
+import net.ihe.gazelle.maestro.api.business.testrun.validator.TestRunValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -39,20 +41,22 @@ class TestRunValidatorTest {
 
     @Test
     void testValidateNullTestRun() {
-        assertThrows(MissingArgumentException.class, () -> testRunValidator.validate(null));
+        assertThrows(NullPointerException.class, () -> testRunValidator.validate((TestRun) null));
     }
 
     @Test
     void testValidateEmptyTestRun() {
         TestRun testRun = new TestRun();
-        assertThrows(MissingArgumentException.class, () -> testRunValidator.validate(testRun));
+        Throwable throwable = assertThrows(IllegalArgumentException.class, () -> testRunValidator.assertValid(testRun));
+        assertThat(throwable.getMessage(), containsString("TestRun [testValid] Test must be set with at least a single step => invalid"));
     }
 
     @Test
     void testValidateEmptyTest() {
         TestRun testRun = new TestRun();
         testRun.setTest(new net.ihe.gazelle.maestro.api.business.testrun.Test());
-        assertThrows(MissingArgumentException.class, () -> testRunValidator.validate(testRun));
+        Throwable throwable = assertThrows(IllegalArgumentException.class, () -> testRunValidator.assertValid(testRun));
+        assertThat(throwable.getMessage(), containsString("TestRun.test [stepsValid] Test must contain at least one step => invalid"));
     }
 
     @Test
@@ -81,6 +85,7 @@ class TestRunValidatorTest {
 
         testRun.setTest(test);
 
-        assertThrows(DuplicatedStepsException.class, () -> testRunValidator.validate(testRun));
+        Throwable throwable = assertThrows(IllegalArgumentException.class, () -> testRunValidator.assertValid(testRun));
+        assertThat(throwable.getMessage(), containsString("TestRun.test [stepsUniques] Steps must be unique => invalid"));
     }
 }

@@ -67,6 +67,11 @@ public class TestRun {
         return this;
     }
 
+    public boolean isTestValid() {
+        return test != null;
+    }
+
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof TestRun testRun)) return false;

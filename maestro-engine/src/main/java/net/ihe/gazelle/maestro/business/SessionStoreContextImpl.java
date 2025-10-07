@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.quarkus;
+package net.ihe.gazelle.maestro.business;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
 import net.ihe.gazelle.maestro.api.business.testrun.context.TestRunSessionStore;
 import net.ihe.gazelle.maestro.api.business.testrun.context.TestSetSessionStore;
-import net.ihe.gazelle.maestro.business.SessionStoreContext;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,7 +30,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * So we want that only with its session id, we can figure out from which TestRunSessionStore or TestSetSessionStore
  * this SteRun/TestRun depend on.
  */
-@ApplicationScoped
 public class SessionStoreContextImpl implements SessionStoreContext {
 
     private static final Map<String, TestRunSessionStore> SESSION_CONTEXT = new ConcurrentHashMap<>();

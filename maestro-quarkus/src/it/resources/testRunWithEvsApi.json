@@ -1,6 +1,7 @@
 [
   {
     "testSetId": "Simple Test without description",
+    "testSetRunId": "testRun1",
     "test": {
       "id": "Simple Test without description",
       "name": "Simple Test without description",

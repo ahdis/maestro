@@ -27,6 +27,7 @@ public class InputBuilder extends AbstractBuilder<Input> {
     private String name;
     private byte[] content;
     private String reference;
+    private String type;
 
     public InputBuilder() {
         super();
@@ -52,6 +53,11 @@ public class InputBuilder extends AbstractBuilder<Input> {
     }
 
 
+    public InputBuilder setType(String type) {
+        this.type = type;
+        return this;
+    }
+
 
     @Override
     protected AbstractValidator<Input> instantiateValidator(ValidatorBuilderFactory validatorBuilderFactory) {
@@ -68,6 +74,7 @@ public class InputBuilder extends AbstractBuilder<Input> {
         input.setName(name)
                 .setContent(content)
                 .setReference(reference)
+                .setType(type)
         ;
     }
 }
