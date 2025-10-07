@@ -34,7 +34,7 @@ import java.util.UUID;
  */
 public class TestSetRun {
 
-    private final String testSetId;
+    private final String testSetId; // internal use only
     private String testSuiteName;
     private List<TestRun> testRuns;
     private AccessControlList accessControlList;
@@ -100,5 +100,13 @@ public class TestSetRun {
     public TestSetRun setTestSetRunId(String testSetRunId) {
         this.testSetRunId = testSetRunId;
         return this;
+    }
+
+    public boolean isTestSuiteNameValid() {
+        return testSuiteName != null && !testSuiteName.isBlank();
+    }
+
+    public boolean isTestSetRunIdValid() {
+        return testSetRunId != null && !testSetRunId.isBlank();
     }
 }

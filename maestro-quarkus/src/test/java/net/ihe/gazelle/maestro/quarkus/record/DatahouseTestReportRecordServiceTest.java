@@ -49,6 +49,55 @@ class DatahouseTestReportRecordServiceTest {
     }
 
     @Test
+    void keeps_non_binary_inputs_inline() {
+        byte[] binaryContent = "bin".getBytes(StandardCharsets.UTF_8);
+        byte[] textContent = "hello".getBytes(StandardCharsets.UTF_8);
+        byte[] booleanContent = "true".getBytes(StandardCharsets.UTF_8);
+        byte[] numberContent = "42".getBytes(StandardCharsets.UTF_8);
+
+        Input binaryInput = new Input("file", binaryContent).setType(Input.BYTE_ARRAY_TYPE);
+        Input textInput = new Input("text", textContent).setType(Input.TEXT_TYPE);
+        Input booleanInput = new Input("flag", booleanContent).setType(Input.BOOLEAN_TYPE);
+        Input numberInput = new Input("count", numberContent).setType(Input.NUMBER_TYPE);
+
+        TestRunReport run = new TestRunReport()
+                .setDateTime(new java.util.Date())
+                .setResult(Result.UNDEFINED)
+                .setTest(new net.ihe.gazelle.maestro.api.business.testreport.Test().setName("T"))
+                .addInput(binaryInput)
+                .addInput(textInput)
+                .addInput(booleanInput)
+                .addInput(numberInput);
+
+        TestReport report = new TestReport()
+                .setUuid("R-inline")
+                .setDateTime(new java.util.Date())
+                .setResult(Result.UNDEFINED)
+                .addTestRunReport(run);
+
+        service.recordTestReportWithReferences(report);
+
+        assertThat(recordItemClientMock.uploadedAttachmentsBatches).hasSize(1);
+        assertThat(recordItemClientMock.uploadedAttachmentsBatches.get(0)).hasSize(1);
+
+        assertThat(binaryInput.getReference()).isEqualTo("/attachments/att-1");
+        assertThat(binaryInput.getContent()).isNull();
+        assertThat(binaryInput.getType()).isEqualTo(Input.BYTE_ARRAY_TYPE);
+
+        assertThat(textInput.getReference()).isNull();
+        assertThat(textInput.getContent()).isEqualTo(textContent);
+        assertThat(textInput.getType()).isEqualTo(Input.TEXT_TYPE);
+
+        assertThat(booleanInput.getReference()).isNull();
+        assertThat(booleanInput.getContent()).isEqualTo(booleanContent);
+        assertThat(booleanInput.getType()).isEqualTo(Input.BOOLEAN_TYPE);
+
+        assertThat(numberInput.getReference()).isNull();
+        assertThat(numberInput.getContent()).isEqualTo(numberContent);
+        assertThat(numberInput.getType()).isEqualTo(Input.NUMBER_TYPE);
+    }
+
+    @Test
     void records_json_outputs_as_items_and_updates_references() {
         Output out1 = new Output("out1", "x".getBytes(StandardCharsets.UTF_8), Output.FORMAT_JSON);
         Output out2 = new Output("out2", "y".getBytes(StandardCharsets.UTF_8), Output.FORMAT_JSON);
@@ -132,4 +181,3 @@ class DatahouseTestReportRecordServiceTest {
         assertThat(reportItemId).isEqualTo("itm-2");
     }
 }
-

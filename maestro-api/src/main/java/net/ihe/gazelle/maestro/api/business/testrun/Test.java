@@ -65,6 +65,31 @@ public class Test {
         return this;
     }
 
+    public boolean isIdValid() {
+        return id != null && !id.isBlank();
+    }
+
+    public boolean isNameValid() {
+        return name != null && !name.isBlank();
+    }
+
+    public boolean areStepsValid() {
+        return steps != null && !steps.isEmpty();
+    }
+
+    public boolean areStepsUnique() {
+        List<String> names = new ArrayList<>();
+        for (Step step : steps) {
+            if (!names.contains(step.getName())) {
+                names.add(step.getName());
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Test test)) return false;

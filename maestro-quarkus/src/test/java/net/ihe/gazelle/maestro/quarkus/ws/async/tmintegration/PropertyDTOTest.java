@@ -70,6 +70,27 @@ class PropertyDTOTest {
         assertInstanceOf(byte[].class, property.getValue());
         assertArrayEquals(array, (byte[]) property.getValue());
     }
+
+    @Test
+    void byteArrayDataUriTest() {
+        String base64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg==";
+        String dataUri = "data:image/png;base64," + base64;
+        PropertyDTO propertyDTO = new PropertyDTO("imagePayload", dataUri, "byteArray");
+        Property<?> property = propertyDTO.createProperty();
+        assertEquals("imagePayload", property.getName());
+        assertInstanceOf(byte[].class, property.getValue());
+        assertArrayEquals(Base64.decodeBase64(base64), (byte[]) property.getValue());
+    }
+
+    @Test
+    void byteArrayWithWhitespaceIsAccepted() {
+        String base64 = Base64.encodeBase64String("binary".getBytes());
+        String chunked = " \n" + base64.substring(0, 4) + "\n" + base64.substring(4) + "\n";
+        PropertyDTO propertyDTO = new PropertyDTO("chunkedPayload", chunked, "byteArray");
+        Property<?> property = propertyDTO.createProperty();
+        assertInstanceOf(byte[].class, property.getValue());
+        assertArrayEquals(Base64.decodeBase64(base64), (byte[]) property.getValue());
+    }
     @Test
     void dateTest() throws ParseException {
         String date = "2024-07-05T12:18:28.975+0000";

@@ -69,6 +69,16 @@ public class InputDTO {
         domain.setReference(reference);
     }
 
+    @JsonGetter(value = "type")
+    public String getType() {
+        return domain.getType();
+    }
+
+    @JsonSetter(value = "type")
+    public void setType(String type) {
+        domain.setType(type);
+    }
+
 
 
     @JsonIgnore

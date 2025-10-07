@@ -17,6 +17,7 @@
 package net.ihe.gazelle.maestro.api.business.testrun.context;
 
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
+import net.ihe.gazelle.maestro.api.business.testrun.StepCursor;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 
 import java.util.ArrayList;
@@ -32,11 +33,13 @@ public class TestRunSessionStore {
     private Context context;
     private TestRun testRun;
     private List<StepRunReportBuilder> stepReports;
+    private StepCursor stepCursor;
 
-    public TestRunSessionStore(Context context, TestRun testRun, List<StepRunReportBuilder> stepReports) {
+    public TestRunSessionStore(Context context, TestRun testRun, List<StepRunReportBuilder> stepReports, StepCursor stepCursor) {
         this.context = context;
         this.testRun = testRun;
         this.stepReports = new ArrayList<>(stepReports);
+        this.stepCursor = stepCursor;
     }
 
     public Context getContext() {
@@ -65,5 +68,13 @@ public class TestRunSessionStore {
 
     public void addStepRunReport(StepRunReportBuilder stepReportBuilder) {
         stepReports.add(stepReportBuilder);
+    }
+
+    public StepCursor getStepCursor() {
+        return stepCursor;
+    }
+
+    public void setStepCursor(StepCursor stepCursor) {
+        this.stepCursor = stepCursor;
     }
 }

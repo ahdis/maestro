@@ -42,6 +42,7 @@ public class InputValidator extends AbstractValidator<Input> {
                 .addRule("nameValid", Input::isNameValid, "Name must be set and not empty")
                 .addRule("contentValid", Input::isContentValid, "If reference is null, content must be set and not empty")
                 .addRule("referenceValid", Input::isReferenceValid, "If content is null, reference must be set and not empty")
+                .addRule("typeValid", Input::isTypeValid, "Type must be set and not empty")
         ;
     }
 }

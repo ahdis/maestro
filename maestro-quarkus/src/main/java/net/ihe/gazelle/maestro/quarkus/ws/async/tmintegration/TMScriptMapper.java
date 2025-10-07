@@ -25,6 +25,7 @@ import net.ihe.gazelle.maestro.business.MissingArgumentException;
 import net.ihe.gazelle.maestro.quarkus.ws.async.TestRunStore;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -41,6 +42,9 @@ public class TMScriptMapper {
     public static final String VERSION = "version";
     public static final String NAME = "name";
     public static final String REQUIRED = "required";
+    public static final String BYTE_ARRAY = "byteArray";
+    public static final String STRING = "string";
+    public static final String DOUBLE = "double";
 
     private TMScriptMapper() {
         // Private constructor to prevent instantiation
@@ -164,10 +168,10 @@ public class TMScriptMapper {
             testRunDAO.setCallbackAuthorization(testRunNode.get("callbackAuthorization").asText());
             TestRun testRun = new TestRun();
             JsonNode testNode = testRunNode.get("test");
-            Map<String, Boolean> testInputsRequired = parseTest(testNode, testRun);
+            Map<String, InputDefinition> inputDefinitions = parseTest(testNode, testRun);
             ArrayNode inputNodes = (ArrayNode) testRunNode.get("inputs");
-            Set<String> availableKeys = parseInputs(inputNodes, testRun, testInputsRequired);
-            trimOptionalMissingStepRefs(testRun, testInputsRequired, availableKeys);
+            Set<String> availableKeys = parseInputs(inputNodes, testRun, inputDefinitions);
+            trimOptionalMissingStepRefs(testRun, inputDefinitions, availableKeys);
             testRun.setTestSetId(testSetRun.getTestSetId());
             testRuns.add(testRun);
         } catch (NullPointerException e) {
@@ -175,7 +179,7 @@ public class TMScriptMapper {
         }
     }
 
-    private static Map<String, Boolean> parseTest(JsonNode testNode, TestRun testRun) {
+    private static Map<String, InputDefinition> parseTest(JsonNode testNode, TestRun testRun) {
         try {
             Test test = new Test();
             String name = testNode.get(NAME).asText();
@@ -185,7 +189,7 @@ public class TMScriptMapper {
             parseStep(stepNodes, test);
             testRun.setTest(test);
             // Parse test declared inputs with required flag
-            Map<String, Boolean> requiredMap = new HashMap<>();
+            Map<String, InputDefinition> definitions = new HashMap<>();
             JsonNode declaredInputs = testNode.get("inputs");
             if (declaredInputs != null && declaredInputs.isArray()) {
                 for (JsonNode declaredInput : declaredInputs) {
@@ -194,10 +198,14 @@ public class TMScriptMapper {
                     if (declaredInput.has(REQUIRED) && !declaredInput.get(REQUIRED).isNull()) {
                         required = declaredInput.get(REQUIRED).asBoolean();
                     }
-                    requiredMap.put(key, required);
+                    String type = null;
+                    if (declaredInput.hasNonNull("type")) {
+                        type = declaredInput.get("type").asText();
+                    }
+                    definitions.put(key, new InputDefinition(type, required));
                 }
             }
-            return requiredMap;
+            return definitions;
         } catch (NullPointerException e) {
             throw new MissingArgumentException("Argument inputs is missing in test");
         }
@@ -227,9 +235,9 @@ public class TMScriptMapper {
                 String value = propertyNode.get("value").asText();
                 ReferenceParser referenceParser = new ReferenceParser();
                 if (referenceParser.isReference(value)) {
-                    properties.put(key, new PropertyDTO(key, value, "byteArray").createPropertyRef(referenceParser.getReference(value)));
+                    properties.put(key, new PropertyDTO(key, value, BYTE_ARRAY).createPropertyRef(referenceParser.getReference(value)));
                 } else  {
-                    properties.put(key, new PropertyDTO(key, value, "string").createProperty());
+                    properties.put(key, new PropertyDTO(key, value, STRING).createProperty());
                 }
             } catch (NullPointerException e) {
                 throw new MissingArgumentException("Argument inputs is missing in properties");
@@ -238,22 +246,21 @@ public class TMScriptMapper {
         return properties;
     }
 
-    private static Set<String> parseInputs(ArrayNode inputNodes, TestRun testRun, Map<String, Boolean> requiredMap) {
+    private static Set<String> parseInputs(ArrayNode inputNodes, TestRun testRun, Map<String, InputDefinition> inputDefinitions) {
         Set<String> providedKeys = new HashSet<>();
         Set<String> availableKeys = new HashSet<>();
         if (inputNodes != null) {
             for (JsonNode inputNode : inputNodes) {
-                addInputToTestRun(testRun, inputNode, providedKeys, availableKeys);
+                addInputToTestRun(testRun, inputNode, inputDefinitions, providedKeys, availableKeys);
             }
         }
-        // Ensure required inputs declared in test are present even if not provided in testRun inputs
-        if (requiredMap != null) {
-            for (Map.Entry<String, Boolean> entry : requiredMap.entrySet()) {
+        if (inputDefinitions != null) {
+            for (Map.Entry<String, InputDefinition> entry : inputDefinitions.entrySet()) {
                 String key = entry.getKey();
-                boolean required = Boolean.TRUE.equals(entry.getValue());
+                InputDefinition definition = entry.getValue();
+                boolean required = definition == null || definition.required();
                 if (required && !providedKeys.contains(key)) {
-                    // Add an empty binary input to satisfy required presence
-                    testRun.addInputs(new Property<>(key, new byte[0]));
+                    testRun.addInputs(createDefaultProperty(key, definition));
                     availableKeys.add(key);
                 }
             }
@@ -261,7 +268,11 @@ public class TMScriptMapper {
         return availableKeys;
     }
 
-    private static void addInputToTestRun(TestRun testRun, JsonNode inputNode, Set<String> providedKeys, Set<String> availableKeys) {
+    private static void addInputToTestRun(TestRun testRun,
+                                          JsonNode inputNode,
+                                          Map<String, InputDefinition> inputDefinitions,
+                                          Set<String> providedKeys,
+                                          Set<String> availableKeys) {
         try {
             String key = inputNode.get("key").asText();
             providedKeys.add(key);
@@ -269,35 +280,43 @@ public class TMScriptMapper {
             if (value != null && !value.isBlank()) {
                 availableKeys.add(key);
             }
-            PropertyDTO propertyDTO = new PropertyDTO(
-                    key,
-                    value,
-                    "byteArray");
+            InputDefinition definition = inputDefinitions != null ? inputDefinitions.get(key) : null;
+            String declaredType = definition != null ? definition.type() : null;
+            String instanceType = inputNode.hasNonNull("type") ? inputNode.get("type").asText() : null;
+            String propertyType = resolvePropertyType(declaredType, instanceType);
+            String adjustedValue = adjustValueForInput(value, declaredType, instanceType, propertyType);
+            PropertyDTO propertyDTO = new PropertyDTO(key, adjustedValue, propertyType);
             testRun.addInputs(propertyDTO.createProperty());
         } catch (NullPointerException e) {
             throw new MissingArgumentException("Argument inputs is missing in inputs");
         }
     }
 
-    private static void trimOptionalMissingStepRefs(TestRun testRun, Map<String, Boolean> requiredMap, Set<String> availableKeys) {
-        if (testRun == null || testRun.getTest() == null || requiredMap == null) {
+    private static void trimOptionalMissingStepRefs(TestRun testRun, Map<String, InputDefinition> inputDefinitions, Set<String> availableKeys) {
+        if (testRun == null || testRun.getTest() == null || inputDefinitions == null) {
             return;
         }
         for (Step step : testRun.getTest().getSteps()) {
             List<Property<?>> properties = step.getProperties();
-            if (properties == null) continue;
+            if (properties == null) {
+                continue;
+            }
             List<Property<?>> adjusted = new ArrayList<>();
-            constructAdjustedProperties(requiredMap, availableKeys, properties, adjusted);
+            constructAdjustedProperties(inputDefinitions, availableKeys, properties, adjusted);
             step.setProperties(adjusted);
         }
     }
 
-    private static void constructAdjustedProperties(Map<String, Boolean> requiredMap, Set<String> availableKeys, List<Property<?>> properties, List<Property<?>> adjusted) {
+    private static void constructAdjustedProperties(Map<String, InputDefinition> inputDefinitions,
+                                                    Set<String> availableKeys,
+                                                    List<Property<?>> properties,
+                                                    List<Property<?>> adjusted) {
         for (Property<?> property : properties) {
             if (property != null) {
                 if (property instanceof PropertyRef<?> ref) {
                     String refKey = ref.getReference();
-                    boolean required = requiredMap.getOrDefault(refKey, true);
+                    InputDefinition definition = inputDefinitions.get(refKey);
+                    boolean required = definition == null || definition.required();
                     boolean available = availableKeys != null && availableKeys.contains(refKey);
                     if (!required && !available) {
                         // Skip optional and missing reference
@@ -386,6 +405,83 @@ public class TMScriptMapper {
             return "ITB";
         }
         return type;
+    }
+
+    private static String resolvePropertyType(String declaredType, String instanceType) {
+        String source = firstNonBlank(declaredType, instanceType);
+        if (source == null) {
+            return STRING;
+        }
+        String normalized = source.trim().toLowerCase(Locale.ROOT);
+        if (normalized.contains("file") || normalized.contains("byte")) {
+            return BYTE_ARRAY;
+        }
+        if (normalized.contains("text") || normalized.contains(STRING)) {
+            return STRING;
+        }
+        if (normalized.contains("bool")) {
+            return "boolean";
+        }
+        if (normalized.contains("int")) {
+            return "integer";
+        }
+        if (normalized.contains(DOUBLE) || normalized.contains("float") || normalized.contains("number")) {
+            return DOUBLE;
+        }
+        if (normalized.contains("date")) {
+            return "date";
+        }
+        return STRING;
+    }
+
+    private static Property<?> createDefaultProperty(String key, InputDefinition definition) {
+        String propertyType = resolvePropertyType(definition != null ? definition.type() : null, null);
+        return switch (propertyType) {
+            case "boolean" -> new Property<>(key, Boolean.FALSE);
+            case "integer" -> new Property<>(key, 0);
+            case DOUBLE -> new Property<>(key, 0.0d);
+            case BYTE_ARRAY -> new Property<>(key, new byte[0]);
+            case "date" -> new Property<>(key, new Date(0L));
+            default -> new Property<>(key, "");
+        };
+    }
+
+    private static String firstNonBlank(String... values) {
+        if (values == null) {
+            return null;
+        }
+        for (String value : values) {
+            if (value != null && !value.isBlank()) {
+                return value;
+            }
+        }
+        return null;
+    }
+
+    private static String adjustValueForInput(String value, String declaredType, String instanceType, String propertyType) {
+        if (value == null) {
+            return null;
+        }
+        if (!STRING.equals(propertyType)) {
+            return value;
+        }
+        String sourceType = firstNonBlank(declaredType, instanceType);
+        if (sourceType == null) {
+            return value;
+        }
+        String normalized = sourceType.trim().toLowerCase(Locale.ROOT);
+        if (normalized.contains("text")) {
+            try {
+                byte[] decoded = Base64.getDecoder().decode(value.trim());
+                return new String(decoded, StandardCharsets.UTF_8);
+            } catch (IllegalArgumentException ignored) {
+                // Value was not Base64 encoded; keep as-is
+            }
+        }
+        return value;
+    }
+
+    private record InputDefinition(String type, boolean required) {
     }
 
 }

@@ -142,12 +142,20 @@ public class TestRunControllerImpl implements TestRunController {
     }
 
     private static TestSetRun getTestSetRun(TestSetRunDTO testSetRunDTO) {
-        TestSetRun testSetRun = new TestSetRun()
-                .setTestRuns(testSetRunDTO.getTestRuns().stream().map(TestRunDTO::getDomain).toList())
+        TestSetRun testSetRun = new TestSetRun();
+        testSetRun
+                .setTestRuns(testSetRunDTO.getTestRuns()
+                        .stream()
+                        .map(testRunDTO -> testRunDTO
+                                .getDomain()
+                                .setTestSetId(testSetRun.getTestSetId())
+                        ).toList()
+                )
                 .setAccessControlList(testSetRunDTO.getAccessControlList())
                 .setTestSuiteName(testSetRunDTO.getTestSuiteName())
                 .setTestSetRunId(testSetRunDTO.getTestSetRunId())
                 ;
+
         if( testSetRunDTO.getSystemsUnderTest() != null) {
             testSetRun.setSystemsUnderTest(testSetRunDTO.getSystemsUnderTest());
         }

@@ -17,7 +17,6 @@
 package net.ihe.gazelle.maestro.itb.step.business;
 
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
-import net.ihe.gazelle.maestro.api.business.testrun.PropertyRef;
 import net.ihe.gazelle.maestro.api.business.testrun.Step;
 import net.ihe.gazelle.maestro.api.business.testrun.StepFactory;
 
@@ -39,9 +38,9 @@ public class ItbStepFactory implements StepFactory {
                 (Property<String>) properties.get(ItbStep.TEST_CASE),
                 (Property<String>) properties.get(ItbStep.SYSTEM_ID),
                 (Property<String>) properties.get(ItbStep.ACTOR_ID),
-                properties.values().stream()
-                        .filter(value -> value instanceof PropertyRef<?>)
-                        .map(value -> (PropertyRef<byte[]>) value)
+                properties.entrySet().stream()
+                        .filter(entry -> !isCoreProperty(entry.getKey()))
+                        .map(Map.Entry::getValue)
                         .toList()
         );
     }
@@ -49,5 +48,11 @@ public class ItbStepFactory implements StepFactory {
     @Override
     public String getSupportedStep() {
         return ItbStep.TYPE;
+    }
+
+    private boolean isCoreProperty(String propertyName) {
+        return ItbStep.TEST_CASE.equals(propertyName)
+                || ItbStep.SYSTEM_ID.equals(propertyName)
+                || ItbStep.ACTOR_ID.equals(propertyName);
     }
 }
