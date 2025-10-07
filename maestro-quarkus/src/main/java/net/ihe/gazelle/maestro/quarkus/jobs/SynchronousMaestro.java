@@ -22,6 +22,7 @@ import jakarta.inject.Inject;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
 import net.ihe.gazelle.maestro.api.business.testrun.MaestroEventProducer;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
+import net.ihe.gazelle.maestro.api.business.testrun.validator.TestSetRunValidator;
 import net.ihe.gazelle.maestro.api.technical.event.FinishTestSetEvent;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -43,11 +44,14 @@ public class SynchronousMaestro {
     private final Map<String, CompletableFuture<TestReportSummary>> completableFutures = new ConcurrentHashMap<>();
     private final int defaultTimeout;
     private final MaestroEventProducer maestroEventProducer;
+    private final TestSetRunValidator testSetRunValidator;
+
 
     @Inject
     public SynchronousMaestro(@ConfigProperty(name = "gzl.maestro.timeout", defaultValue = "60") int defaultTimeout, MaestroEventProducer maestroEventProducer) {
         this.defaultTimeout = defaultTimeout;
         this.maestroEventProducer = maestroEventProducer;
+        this.testSetRunValidator = new TestSetRunValidator();
     }
 
     public TestReportSummary executeTestSet(TestSetRun testSetRun) throws ExecutionException, InterruptedException, TimeoutException {
@@ -59,6 +63,7 @@ public class SynchronousMaestro {
     }
 
     private CompletableFuture<TestReportSummary> startTestSet(TestSetRun testSetRun) {
+        testSetRunValidator.assertValid(testSetRun);
         CompletableFuture<TestReportSummary> future = new CompletableFuture<>();
         completableFutures.put(testSetRun.getTestSetId(), future);
         maestroEventProducer.executeTestSet(testSetRun);

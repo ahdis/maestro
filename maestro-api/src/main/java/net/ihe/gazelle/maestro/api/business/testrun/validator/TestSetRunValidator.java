@@ -30,7 +30,7 @@ public class TestSetRunValidator extends AbstractValidator<TestSetRun> {
         validatorBuilder
                 .addRule("testSuiteNameValid", TestSetRun::isTestSuiteNameValid, "Test Suite name must be set and not empty")
                 .addRule("testSetRunIdValid", TestSetRun::isTestSetRunIdValid, "Test Set Run ID must be set and not empty")
-//                .addMember("testRuns", TestSetRun::getTestRuns, testRunValidator::getAssembledValidatorBuilder)
+                .addMember("testRuns", TestSetRun::getTestRuns, testRunValidator::getAssembledValidatorBuilder)
                 .addMember("accessControlList", TestSetRun::getAccessControlList, accessControlListValidator::getAssembledValidatorBuilder)
                 .addMember("systemUnderTest", TestSetRun::getSystemsUnderTest, systemUnderTestValidator::getAssembledValidatorBuilder)
         ;
