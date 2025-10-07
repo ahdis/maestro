@@ -16,13 +16,11 @@
 
 package net.ihe.gazelle.maestro.api.technical.dto.testrun;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.api.business.testrun.PropertyRef;
 import net.ihe.gazelle.maestro.api.business.testrun.UnsupportedPropertyTypeException;
+import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -32,8 +30,13 @@ import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@JsonPropertyOrder({"name", "value", "type"})
-public class PropertyDTO {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonPropertyOrder({
+        "name",
+        "value",
+        "type"
+})
+public class PropertyDTO implements DTO<Property<?>> {
 
     public static final String ISO_8601_DATETIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
     private static final Pattern REFERENCE_PATTERN = Pattern.compile("^\\$\\{(\\w+)}$");
@@ -45,55 +48,88 @@ public class PropertyDTO {
     public static final String DATE = "date";
 
     @JsonIgnore
-    private Property<?> domain;
+    private Property<?> property;
     @JsonIgnore
     private String value;
     @JsonIgnore
     private String type;
 
     public PropertyDTO() {
-        domain = new Property<>();
+        property = new Property<>();
     }
 
-    public PropertyDTO(Property<?> domain) {
-        if (domain instanceof PropertyRef<?> propertyRef) {
+    public PropertyDTO(Property<?> property) {
+        if (property instanceof PropertyRef<?> propertyRef) {
             value = "${" + propertyRef.getReference() + "}";
             type = extractType(propertyRef);
         } else {
-            if (domain.getValue() instanceof String stringValue) {
+            if (property.getValue() instanceof String stringValue) {
                 value = stringValue;
                 type = STRING;
-            } else if (domain.getValue() instanceof Integer integer) {
+            } else if (property.getValue() instanceof Integer integer) {
                 value = String.valueOf(integer);
                 type = INTEGER;
-            } else if (domain.getValue() instanceof Boolean booleanValue) {
+            } else if (property.getValue() instanceof Boolean booleanValue) {
                 value = String.valueOf(booleanValue);
                 type = BOOLEAN;
-            } else if (domain.getValue() instanceof Double doubleValue) {
+            } else if (property.getValue() instanceof Double doubleValue) {
                 value = String.valueOf(doubleValue);
                 type = DOUBLE;
-            } else if (domain.getValue() instanceof byte[] binaryValue) {
+            } else if (property.getValue() instanceof byte[] binaryValue) {
                 value = Base64.getEncoder().encodeToString(binaryValue);
                 type = BYTE_ARRAY;
-            } else if (domain.getValue() instanceof Date date) {
+            } else if (property.getValue() instanceof Date date) {
                 SimpleDateFormat formatter = new SimpleDateFormat(ISO_8601_DATETIME_PATTERN);
                 value = formatter.format(date);
                 type = DATE;
             } else {
-                throw new UnsupportedPropertyTypeException("Unsupported property type : " + domain.getValue().getClass().getName());
+                throw new UnsupportedPropertyTypeException("Unsupported property type : " + property.getValue().getClass().getName());
             }
         }
-        this.domain = domain;
+        this.property = property;
+    }
+
+    @Override
+    @JsonIgnore
+    public Property<?> getBusinessObject() {
+        switch (type) {
+            case STRING -> property = getReferenceOr(
+                    String.class,
+                    () -> new Property<>(this.getName(), value)
+            );
+            case INTEGER -> property = getReferenceOr(
+                    Integer.class,
+                    () -> new Property<>(this.getName(), Integer.valueOf(value))
+            );
+            case BOOLEAN -> property = getReferenceOr(
+                    Boolean.class,
+                    () -> new Property<>(this.getName(), Boolean.valueOf(value))
+            );
+            case DOUBLE -> property = getReferenceOr(
+                    Double.class,
+                    () -> new Property<>(this.getName(), Double.valueOf(value))
+            );
+            case BYTE_ARRAY -> property = getReferenceOr(
+                    byte[].class,
+                    () -> new Property<>(this.getName(), Base64.getDecoder().decode(value))
+            );
+            case DATE -> property = getReferenceOr(
+                    Date.class,
+                    () -> new Property<>(this.getName(), parseDate(value))
+            );
+            default -> throw new UnsupportedPropertyTypeException("Unsupported property type : " + type);
+        }
+        return property;
     }
 
     @JsonGetter("name")
     public String getName() {
-        return domain.getName();
+        return property.getName();
     }
 
     @JsonSetter("name")
     public void setName(String name) {
-        domain.setName(name);
+        property.setName(name);
     }
 
     @JsonGetter("value")
@@ -114,39 +150,6 @@ public class PropertyDTO {
     @JsonSetter("type")
     public void setType(String type) {
         this.type = type;
-    }
-
-    @JsonIgnore
-    @SuppressWarnings("java:S1452")
-    public Property<?> getDomain() {
-        switch (type) {
-            case STRING -> domain = getReferenceOr(
-                    String.class,
-                    () -> new Property<>(this.getName(), value)
-            );
-            case INTEGER -> domain = getReferenceOr(
-                    Integer.class,
-                    () -> new Property<>(this.getName(), Integer.valueOf(value))
-            );
-            case BOOLEAN -> domain = getReferenceOr(
-                    Boolean.class,
-                    () -> new Property<>(this.getName(), Boolean.valueOf(value))
-            );
-            case DOUBLE -> domain = getReferenceOr(
-                    Double.class,
-                    () -> new Property<>(this.getName(), Double.valueOf(value))
-            );
-            case BYTE_ARRAY -> domain = getReferenceOr(
-                    byte[].class,
-                    () -> new Property<>(this.getName(), Base64.getDecoder().decode(value))
-            );
-            case DATE -> domain = getReferenceOr(
-                    Date.class,
-                    () -> new Property<>(this.getName(), parseDate(value))
-            );
-            default -> throw new UnsupportedPropertyTypeException("Unsupported property type : " + type);
-        }
-        return domain;
     }
 
     @JsonIgnore

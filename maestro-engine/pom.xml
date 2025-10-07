@@ -57,7 +57,6 @@
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>search-client</artifactId>
         </dependency>
-
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>lang</artifactId>

@@ -1,62 +1,71 @@
 package net.ihe.gazelle.maestro.api.technical.dto.report;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import net.ihe.gazelle.maestro.api.business.testreport.Result;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
+import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class TestReportSummaryDTO {
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonPropertyOrder({
+        "id",
+        "dateTime",
+        "result",
+        "location",
+        "unexpectedErrors"
+})
+public class TestReportSummaryDTO implements DTO<TestReportSummary> {
 
-    private final TestReportSummary domain;
-
+    private final TestReportSummary testReportSummary;
     private String location;
 
-    private List<UnexpectedErrorDTO> unexpectedErrors = new ArrayList<>();
-
-
     public TestReportSummaryDTO() {
-        this.domain = new TestReportSummary();
+        this.testReportSummary = new TestReportSummary();
     }
 
-    public TestReportSummaryDTO(TestReportSummary domain, String locationPrefix) {
-        this.domain = domain;
-        if (domain != null && domain.getId() != null) {
-            this.location = locationPrefix + "/" + domain.getId();
+    public TestReportSummaryDTO(TestReportSummary testReportSummary, String locationPrefix) {
+        this.testReportSummary = testReportSummary;
+        if (testReportSummary != null && testReportSummary.getId() != null) {
+            this.location = locationPrefix + "/" + testReportSummary.getId();
         }
+    }
+
+    @Override
+    @JsonIgnore
+    public TestReportSummary getBusinessObject() {
+        return testReportSummary;
     }
 
     @JsonProperty("id")
     public String getId() {
-        return domain.getId();
+        return getBusinessObject().getId();
     }
 
-    public TestReportSummaryDTO setId(String id) {
-        domain.setId(id);
-        return this;
+    public void setId(String id) {
+        getBusinessObject().setId(id);
     }
 
     @JsonProperty("dateTime")
     public Date getDateTime() {
-        return domain.getDateTime();
+        return getBusinessObject().getDateTime();
     }
 
-    public TestReportSummaryDTO setDateTime(Date datetime) {
-        domain.setDateTime(datetime);
-        return this;
+    public void setDateTime(Date datetime) {
+        getBusinessObject().setDateTime(datetime);
     }
 
     @JsonProperty("result")
     public Result getResult() {
-        return domain.getResult();
+        return getBusinessObject().getResult();
     }
 
-    public TestReportSummaryDTO setResult(Result result) {
-        domain.setResult(result);
-        return this;
+    public void setResult(Result result) {
+        getBusinessObject().setResult(result);
     }
 
     @JsonProperty("location")
@@ -64,25 +73,18 @@ public class TestReportSummaryDTO {
         return location;
     }
 
-    public TestReportSummaryDTO setLocation(String location) {
+    public void setLocation(String location) {
         this.location = location;
-        return this;
     }
 
+    @JsonProperty("unexpectedErrors")
     public List<UnexpectedErrorDTO> getUnexpectedErrors() {
-        return unexpectedErrors;
+        return getBusinessObject().getUnexpectedErrors().stream().map(UnexpectedErrorDTO::new).toList();
     }
 
-    public TestReportSummaryDTO setUnexpectedErrors(List<UnexpectedErrorDTO> unexpectedErrors) {
-        this.unexpectedErrors = unexpectedErrors;
-        return this;
+    public void setUnexpectedErrors(List<UnexpectedErrorDTO> unexpectedErrors) {
+        getBusinessObject().setUnexpectedErrors(
+                unexpectedErrors.stream().map(UnexpectedErrorDTO::getBusinessObject).toList()
+        );
     }
-
-    @JsonIgnore
-    public TestReportSummary getDomain() {
-        return domain
-                .setUnexpectedErrors(unexpectedErrors.stream().map(UnexpectedErrorDTO::getDomain).toList())
-                ;
-    }
-
 }

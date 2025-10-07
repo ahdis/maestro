@@ -39,7 +39,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 
-/*@QuarkusTest
+@QuarkusTest
 @TestProfile(TestRunControllerProfile.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TestRunControllerIT implements QuarkusTestProfile {
@@ -80,7 +80,7 @@ class TestRunControllerIT implements QuarkusTestProfile {
                 .extract().response();
         assertNotNull(response);
         System.out.println(response.asString());
-        TestReportSummary testReport = response.as(TestReportSummaryDTO.class).getDomain();
+        TestReportSummary testReport = response.as(TestReportSummaryDTO.class).getBusinessObject();
         assertTrue(testReport.isValid());
         assertEquals(Result.FAILED, testReport.getResult());
     }
@@ -123,4 +123,4 @@ class TestRunControllerIT implements QuarkusTestProfile {
                 Arguments.of("/invalid_structure.json", "Unable to parse TestRun structure")
         );
     }
-}*/
+}

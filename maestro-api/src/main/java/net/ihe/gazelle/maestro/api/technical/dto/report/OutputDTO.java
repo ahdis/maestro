@@ -18,69 +18,76 @@ package net.ihe.gazelle.maestro.api.technical.dto.report;
 
 import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.testreport.Output;
+import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 
 import java.util.Base64;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({"name", "content", "reference", "format"})
-public class OutputDTO {
+@JsonPropertyOrder({
+        "name",
+        "content",
+        "reference",
+        "format"
+})
+public class OutputDTO implements DTO<Output> {
 
     @JsonIgnore
-    private final Output domain;
+    private final Output output;
 
     public OutputDTO() {
-        this.domain = new Output();
+        this(new Output());
     }
 
-    public OutputDTO(Output domain) {
-        this.domain = domain;
+    public OutputDTO(Output output) {
+        this.output = output;
+    }
+
+    @Override
+    @JsonIgnore
+    public Output getBusinessObject() {
+        return output;
     }
 
     @JsonGetter(value = "name")
     public String getName() {
-        return domain.getName();
+        return getBusinessObject().getName();
     }
 
     @JsonSetter(value = "name")
     public void setName(String name) {
-        domain.setName(name);
+        getBusinessObject().setName(name);
     }
 
     @JsonGetter(value = "content")
     public String getContent() {
-        if (domain.getContent() == null) {
+        if (getBusinessObject().getContent() == null) {
             return null;
         }
-        return Base64.getEncoder().encodeToString(domain.getContent());
+        return Base64.getEncoder().encodeToString(getBusinessObject().getContent());
     }
 
     @JsonSetter(value = "content")
     public void setContent(String content) {
-        domain.setContent(Base64.getDecoder().decode(content));
+        getBusinessObject().setContent(Base64.getDecoder().decode(content));
     }
 
     @JsonGetter(value = "reference")
     public String getReference() {
-        return domain.getReference();
+        return getBusinessObject().getReference();
     }
 
     @JsonSetter(value = "reference")
     public void setReference(String reference) {
-        domain.setReference(reference);
+        getBusinessObject().setReference(reference);
     }
 
     @JsonGetter(value = "format")
     public String getFormat() {
-        return domain.getFormat();
+        return getBusinessObject().getFormat();
     }
 
     @JsonSetter(value = "format")
     public void setFormat(String format) {
-        domain.setFormat(format);
-    }
-
-    @JsonIgnore
-    public Output getDomain() {
-        return domain;
+        getBusinessObject().setFormat(format);
     }
 }

@@ -19,84 +19,95 @@ package net.ihe.gazelle.maestro.api.technical.dto.report;
 import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
+import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({"stepId", "type", "result", "outputs"})
-public class StepRunReportDTO {
+@JsonPropertyOrder({
+        "stepId",
+        "type",
+        "result",
+        "outputs"
+})
+public class StepRunReportDTO implements DTO<StepRunReport> {
 
     @JsonIgnore
-    private final StepRunReport domain;
+    private final StepRunReport stepRunReport;
 
     public StepRunReportDTO() {
-        this.domain = new StepRunReport();
+       this(new StepRunReport());
     }
 
-    public StepRunReportDTO(StepRunReport domain) {
-        this.domain = domain;
+    public StepRunReportDTO(StepRunReport stepRunReport) {
+        this.stepRunReport = stepRunReport;
+    }
+
+    @Override
+    @JsonIgnore
+    public StepRunReport getBusinessObject() {
+        return stepRunReport;
     }
 
     @JsonGetter(value = "stepId")
     public String getStepId() {
-        return domain.getStepId();
+        return getBusinessObject().getStepId();
     }
 
     @JsonSetter(value = "stepId")
     public void setStepId(String stepId) {
-        domain.setStepId(stepId);
+        getBusinessObject().setStepId(stepId);
     }
 
     @JsonGetter(value = "type")
     public String getType() {
-        return domain.getType();
+        return getBusinessObject().getType();
     }
 
     @JsonSetter(value = "type")
     public void setType(String type) {
-        domain.setType(type);
+        getBusinessObject().setType(type);
     }
 
     @JsonGetter(value = "result")
     public String getResult() {
-        return domain.getResult().name();
+        return getBusinessObject().getResult().name();
     }
 
     @JsonSetter(value = "result")
     public void setResult(String result) {
-        domain.setResult(StepResult.valueOf(result));
+        getBusinessObject().setResult(StepResult.valueOf(result));
     }
 
     @JsonGetter(value = "outputs")
     public List<OutputDTO> outputs() {
-        return domain.getOutputs().stream()
+        return getBusinessObject()
+                .getOutputs()
+                .stream()
                 .map(OutputDTO::new)
                 .toList();
     }
 
     @JsonSetter(value = "outputs")
     public void setOutputs(List<OutputDTO> outputs) {
-        domain.setOutputs(outputs.stream().map(
-                OutputDTO::getDomain
-        ).toList());
+        getBusinessObject().setOutputs(
+                outputs.stream().map(OutputDTO::getBusinessObject).toList()
+        );
     }
 
     @JsonGetter(value = "unexpectedErrors")
     public List<UnexpectedErrorDTO> getUnexpectedErrors() {
-        return domain.getUnexpectedErrors().stream()
+        return getBusinessObject()
+                .getUnexpectedErrors()
+                .stream()
                 .map(UnexpectedErrorDTO::new)
                 .toList();
     }
 
     @JsonSetter(value = "unexpectedErrors")
     public void setUnexpectedErrors(List<UnexpectedErrorDTO> unexpectedErrors) {
-        domain.setUnexpectedErrors(unexpectedErrors.stream().map(
-                UnexpectedErrorDTO::getDomain
-        ).toList());
-    }
-
-    @JsonIgnore
-    public StepRunReport getDomain() {
-        return domain;
+        getBusinessObject().setUnexpectedErrors(
+                unexpectedErrors.stream().map(UnexpectedErrorDTO::getBusinessObject).toList()
+        );
     }
 }

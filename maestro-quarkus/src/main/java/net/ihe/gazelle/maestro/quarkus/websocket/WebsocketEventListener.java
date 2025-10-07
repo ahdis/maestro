@@ -1,4 +1,4 @@
-package net.ihe.gazelle.maestro.websocket;
+package net.ihe.gazelle.maestro.quarkus.websocket;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.ObservesAsync;
@@ -12,18 +12,19 @@ import net.ihe.gazelle.maestro.api.technical.dto.report.StepRunReportDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
 import net.ihe.gazelle.maestro.api.technical.event.FinishTestSetEvent;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
-import net.ihe.gazelle.modelmarshaller.technical.jackson.ObjectMapperBuilder;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 @ApplicationScoped
 public class WebsocketEventListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(WebsocketEventListener.class);
 
-    private final TextSerDes serDes = new JacksonSerDes(new ObjectMapperBuilder().build());
+    private final TextSerDes serDes = new JacksonSerDes();
 
     private final String datahouseUr;
 
@@ -32,33 +33,32 @@ public class WebsocketEventListener {
         this.datahouseUr = datahouseUr;
     }
 
-
-    public void onFinishTestSet(@ObservesAsync FinishTestSetEvent finishTestSetEvent){
+    public void onFinishTestSet(@ObservesAsync FinishTestSetEvent finishTestSetEvent) throws IOException {
         String testSetId = finishTestSetEvent.getTestSetRun().getTestSetId();
-        if (SessionsStorageInMemory.hasSession(testSetId)) {
+        if (WebsocketSessionsInMemory.hasSession(testSetId)) {
             sendTestRunCompleted(finishTestSetEvent);
         }
     }
 
     public void onFinishStep(@ObservesAsync FinishedStepEvent finishedStepEvent) {
-        if (SessionsStorageInMemory.hasSession(finishedStepEvent.getStepRun().testSetId())) {
+        if (WebsocketSessionsInMemory.hasSession(finishedStepEvent.getStepRun().testSetId())) {
             sendTestStepCompleted(finishedStepEvent);
         }
-
     }
 
-    private void sendTestRunCompleted(FinishTestSetEvent finishTestSetEvent) {
+    private void sendTestRunCompleted(FinishTestSetEvent finishTestSetEvent) throws IOException {
         String testSetId = finishTestSetEvent.getTestSetRun().getTestSetId();
         TestReportSummary testReportSummary = finishTestSetEvent.getReportSummary();
-        String locationPrefix = datahouseUr + "/items/" + testSetId;
+        String locationPrefix = datahouseUr + "/items";
         String content = serDes.serializeAsString(new TestReportSummaryDTO(testReportSummary, locationPrefix));
         WSMessageDTO message = new WSMessageDTO(testSetId, "testRunCompleted", content);
         String serializedMessage = serDes.serializeAsString(message);
         LOG.info("Sending TestRunReport for testSetId : {}", testSetId);
-        Session session = SessionsStorageInMemory.getSession(testSetId);
+        Session session = WebsocketSessionsInMemory.getSession(testSetId);
         if (session != null) {
             session.getAsyncRemote()
                     .sendText(serializedMessage, result -> logPotentialException(testSetId, result));
+            session.close();
         }
     }
 
@@ -69,7 +69,7 @@ public class WebsocketEventListener {
         WSMessageDTO message = new WSMessageDTO(testSetId, "testStepCompleted", content);
         String serializedMessage = serDes.serializeAsString(message);
         LOG.info("Sending TestStepRunReport for testSetId : {}", testSetId);
-        Session session = SessionsStorageInMemory.getSession(testSetId);
+        Session session = WebsocketSessionsInMemory.getSession(testSetId);
         if (session != null) {
             session.getAsyncRemote()
                     .sendText(serializedMessage, result -> logPotentialException(testSetId, result));

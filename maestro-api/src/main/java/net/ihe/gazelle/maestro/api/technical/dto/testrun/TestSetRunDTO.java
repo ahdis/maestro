@@ -16,72 +16,90 @@
 
 package net.ihe.gazelle.maestro.api.technical.dto.testrun;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import net.ihe.gazelle.maestro.api.business.testreport.SystemUnderTest;
+import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
+import net.ihe.gazelle.maestro.api.technical.dto.report.SystemUnderTestDTO;
+import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 
 import java.util.List;
 
-@JsonPropertyOrder({"testSuiteName", "testRuns", "accessControlList", "systemsUnderTest"})
-public class TestSetRunDTO {
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonPropertyOrder({
+        "testSuiteName",
+        "testRuns",
+        "accessControlList",
+        "systemsUnderTest",
+        "testSetRunId"
+})
+public class TestSetRunDTO implements DTO<TestSetRun> {
 
-    private String testSuiteName;
-    private List<TestRunDTO> testRuns;
-    private AccessControlList accessControlList;
-    private List<SystemUnderTest> systemsUnderTest;
-    private String testSetRunId;
-
+    @JsonIgnore
+    private final TestSetRun testSetRun;
 
     public TestSetRunDTO() {
-        accessControlList = new AccessControlList();
+        this(new TestSetRun());
     }
 
-    @JsonProperty("testRuns")
-    public List<TestRunDTO> getTestRuns() {
-        return testRuns;
+    public TestSetRunDTO(TestSetRun testSetRun) {
+        this.testSetRun = testSetRun;
     }
 
-    public TestSetRunDTO setTestRuns(List<TestRunDTO> testRuns) {
-        this.testRuns = testRuns;
-        return this;
-    }
-
-    @JsonProperty("accessControlList")
-    public AccessControlList getAccessControlList() {
-        return accessControlList;
-    }
-
-    public TestSetRunDTO setAccessControlList(AccessControlList accessControlList) {
-        this.accessControlList = accessControlList;
-        return this;
+    @Override
+    public TestSetRun getBusinessObject() {
+        return testSetRun;
     }
 
     @JsonProperty("testSuiteName")
     public String getTestSuiteName() {
-        return testSuiteName;
+        return getBusinessObject().getTestSuiteName();
     }
-    public TestSetRunDTO setTestSuiteName(String testSuiteName) {
-        this.testSuiteName = testSuiteName;
-        return this;
+
+    public void setTestSuiteName(String testSuiteName) {
+        getBusinessObject().setTestSuiteName(testSuiteName);
+    }
+
+    @JsonProperty("testRuns")
+    public List<TestRunDTO> getTestRuns() {
+        return getBusinessObject().getTestRuns().stream().map(TestRunDTO::new).toList();
+    }
+
+    public void setTestRuns(List<TestRunDTO> testRuns) {
+        getBusinessObject().setTestRuns(
+                testRuns.stream().map(TestRunDTO::getBusinessObject).toList()
+        );
+    }
+
+    @JsonProperty("accessControlList")
+    public AccessControlList getAccessControlList() {
+        return getBusinessObject().getAccessControlList();
+    }
+
+    public void setAccessControlList(AccessControlList accessControlList) {
+        getBusinessObject().setAccessControlList(accessControlList);
     }
 
     @JsonProperty("systemsUnderTest")
-    public List<SystemUnderTest> getSystemsUnderTest() {
-        return systemsUnderTest;
+    public List<SystemUnderTestDTO> getSystemsUnderTest() {
+        return getBusinessObject().getSystemsUnderTest().stream().map(SystemUnderTestDTO::new).toList();
     }
 
-    public TestSetRunDTO setSystemsUnderTest(List<SystemUnderTest> systemsUnderTest) {
-        this.systemsUnderTest = systemsUnderTest;
-        return this;
+    public void setSystemsUnderTest(List<SystemUnderTestDTO> systemsUnderTest) {
+        getBusinessObject().setSystemsUnderTest(
+                systemsUnderTest.stream().map(SystemUnderTestDTO::getBusinessObject).toList()
+        );
     }
 
     @JsonProperty("testSetRunId")
     public String getTestSetRunId() {
-        return testSetRunId;
+        return getBusinessObject().getTestSetRunId();
     }
 
     public void setTestSetRunId(String testSetRunId) {
-        this.testSetRunId = testSetRunId;
+        getBusinessObject().setTestSetRunId(testSetRunId);
     }
 }

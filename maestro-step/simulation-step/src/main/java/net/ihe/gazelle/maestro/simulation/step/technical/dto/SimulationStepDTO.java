@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.simulation.step.dto;
+package net.ihe.gazelle.maestro.simulation.step.technical.dto;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.StepDTO;

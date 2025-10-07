@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.websocket;
+package net.ihe.gazelle.maestro.quarkus.websocket;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
-import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
 import net.ihe.gazelle.maestro.api.business.testrun.MaestroEventProducer;
-
-import java.util.List;
+import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
 
 @ApplicationScoped
 public class WebSocketMaestroService {
@@ -34,8 +31,8 @@ public class WebSocketMaestroService {
         this.maestroEventProducer = maestroEventProducer;
     }
 
-    public void executeTestSet(String testSetId, List<TestRun> testRuns) {
-        TestSetRun testSetRun = new TestSetRun(testSetId, testRuns);
+    public void executeTestSet(String testSetId, TestSetRun testSetRun) {
+        testSetRun.setTestSetId(testSetId);
         maestroEventProducer.executeTestSet(testSetRun);
     }
 }

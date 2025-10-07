@@ -42,7 +42,7 @@ class DTOTest {
     @Test
     void should_deserialize_serialize() {
         List<TestRun> testRuns = assertDoesNotThrow(() -> Arrays.stream(SER_DES.deserialize(getTestRun("valid"), TestRunDTO[].class))
-                .map(TestRunDTO::getDomain)
+                .map(TestRunDTO::getBusinessObject)
                 .toList());
 
         assertEquals(1, testRuns.size());

@@ -145,13 +145,13 @@ public class WireMockSingleton {
     }
 
     public static TestReportSummary awaitTestReport() {
-        byte[] content = await()
+        byte[] content = Objects.requireNonNull(await()
                 .atMost(3, TimeUnit.SECONDS)
                 .until(() -> {
                     List<LoggedRequest> matchingRequests = getMatchingRequests().apply(wireMockServer);
                     return !matchingRequests.isEmpty() ? matchingRequests : null;
-                }, Objects::nonNull).getFirst().getBody();
-        return new JacksonSerDes().deserialize(content, TestReportSummaryDTO.class).getDomain();
+                }, Objects::nonNull)).getFirst().getBody();
+        return new JacksonSerDes().deserialize(content, TestReportSummaryDTO.class).getBusinessObject();
     }
 
     private static Function<WireMockServer, List<LoggedRequest>> getMatchingRequests() {

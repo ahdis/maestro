@@ -16,61 +16,70 @@
 
 package net.ihe.gazelle.maestro.api.technical.dto.testrun;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
+import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@JsonPropertyOrder({"testSetId", "test", "inputs"})
-public class TestRunDTO {
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonPropertyOrder({
+        "testSetId",
+        "test",
+        "inputs"
+})
+public class TestRunDTO implements DTO<TestRun> {
 
     @JsonIgnore
-    private final TestRun domain;
+    private final TestRun testRun;
 
     public TestRunDTO() {
-        domain = new TestRun();
+        this(new TestRun());
     }
 
-    public TestRunDTO(TestRun domain) {
-        this.domain = domain;
+    public TestRunDTO(TestRun testRun) {
+        this.testRun = testRun;
     }
 
+    @Override
+    @JsonIgnore
+    public TestRun getBusinessObject() {
+        return testRun;
+    }
+
+    @JsonGetter("testSetId")
+    public String getTestSetId() {
+        return getBusinessObject().getTestSetId();
+    }
+
+    @JsonSetter("testSetId")
+    public void setTestSetId(String testSetId) {
+        getBusinessObject().setTestSetId(testSetId);
+    }
 
     @JsonGetter("test")
     public TestDTO getTest() {
-        return new TestDTO(domain.getTest());
+        return new TestDTO(getBusinessObject().getTest());
     }
 
     @JsonSetter("test")
     public void setTest(TestDTO test) {
-        domain.setTest(test.getDomain());
+        getBusinessObject().setTest(test.getBusinessObject());
     }
 
     @JsonGetter("inputs")
     public List<PropertyDTO> getInputs() {
-        List<PropertyDTO> propertyDTOList = new ArrayList<>();
-        for (Property<?> property : domain.getInputs()) {
-            propertyDTOList.add(new PropertyDTO(property));
-        }
-        return propertyDTOList;
+        return getBusinessObject().getInputs().stream().map(PropertyDTO::new).toList();
     }
 
     @JsonSetter("inputs")
     public void setInputs(List<PropertyDTO> inputs) {
         List<Property<?>> properties = new ArrayList<>();
         for (PropertyDTO propertyDTO : inputs) {
-            properties.add(propertyDTO.getDomain());
+            properties.add(propertyDTO.getBusinessObject());
         }
-        domain.setInputs(properties);
-    }
-
-    @JsonIgnore
-    public TestRun getDomain() {
-        return domain;
+        getBusinessObject().setInputs(properties);
     }
 }

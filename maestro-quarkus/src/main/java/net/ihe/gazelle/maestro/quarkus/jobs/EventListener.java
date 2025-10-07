@@ -23,6 +23,7 @@ import net.ihe.gazelle.maestro.api.business.testrun.Maestro;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.FinishedStepEvent;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StartStepCommand;
 import net.ihe.gazelle.maestro.api.technical.event.*;
+import net.ihe.gazelle.maestro.quarkus.websocket.WebsocketSessionsInMemory;
 import net.ihe.gazelle.maestro.quarkus.ws.async.AsynchronousMaestro;
 import net.ihe.gazelle.maestro.quarkus.ws.async.tmintegration.TMTestRunMaestro;
 import org.slf4j.Logger;
@@ -61,7 +62,7 @@ public class EventListener {
             asynchronousMaestro.callback(finishTestSetEvent);
         } else if (tmTestRunMaestro.isServiceRunning(testSetId)) {
             tmTestRunMaestro.callbackTM(finishTestSetEvent);
-        }else {
+        } else if (!WebsocketSessionsInMemory.hasSession(testSetId)) {
             synchronousMaestro.completeFuture(finishTestSetEvent);
         }
     }

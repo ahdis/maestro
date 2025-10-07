@@ -145,8 +145,9 @@ public class SimulationStepRunner implements StepRunner {
                 .append(additionalInstructions.getInstruction())
                 .append("\n");
         for (Parameter parameter : additionalInstructions.getParameters()) {
-            instructions.append("name : ").append(parameter.getName()).append("\n")
-                    .append("value : ").append(parameter.getValue());
+            instructions
+                    .append("name : ").append(parameter.getName()).append("\n")
+                    .append("value : ").append(parameter.getValue()).append("\n");
         }
         userInteractionHandler.displayMessage(instructions.toString());
     }

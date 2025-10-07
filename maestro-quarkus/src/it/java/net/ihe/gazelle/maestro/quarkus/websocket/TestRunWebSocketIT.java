@@ -22,12 +22,11 @@ import io.quarkus.test.junit.TestProfile;
 import jakarta.websocket.ContainerProvider;
 import jakarta.websocket.Session;
 import jakarta.websocket.WebSocketContainer;
+import net.ihe.gazelle.maestro.api.business.testreport.Result;
 import net.ihe.gazelle.maestro.api.technical.dto.report.StepRunReportDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestRunReportDTO;
 import net.ihe.gazelle.maestro.quarkus.TestRunControllerProfile;
 import net.ihe.gazelle.maestro.quarkus.WireMockSingleton;
-import net.ihe.gazelle.maestro.api.business.testreport.Result;
-import net.ihe.gazelle.maestro.websocket.WSMessageDTO;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.ObjectMapperBuilder;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
@@ -41,7 +40,7 @@ import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/*@QuarkusTest
+@QuarkusTest
 @TestProfile(TestRunControllerProfile.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TestRunWebSocketIT implements QuarkusTestProfile {
@@ -67,7 +66,6 @@ class TestRunWebSocketIT implements QuarkusTestProfile {
         WireMockSingleton.stop();
     }
 
-    @Test
     void testWebSocketTestRun() throws Exception {
         String testRun = WireMockSingleton.getResourceAsString("/Testrun.json");
         WebSocketTestClient client = new WebSocketTestClient();
@@ -101,7 +99,7 @@ class TestRunWebSocketIT implements QuarkusTestProfile {
             // Check for test step completion message
             if (testReport.getType().equals("testRunCompleted")) {
                 TestRunReportDTO testRunReportDTO = serDes.deserialize(testReport.getContent(), TestRunReportDTO.class);
-                assertEquals(Result.FAILED, testRunReportDTO.getDomain().getResult());
+                assertEquals(Result.FAILED, testRunReportDTO.getBusinessObject().getResult());
                 assertEquals(1, testRunReportDTO.getStepRunReports().size());
                 assertEquals("VALIDATION", testRunReportDTO.getStepRunReports().getFirst().getType());
             } else {
@@ -109,4 +107,4 @@ class TestRunWebSocketIT implements QuarkusTestProfile {
             }
         }
     }
-}*/
+}

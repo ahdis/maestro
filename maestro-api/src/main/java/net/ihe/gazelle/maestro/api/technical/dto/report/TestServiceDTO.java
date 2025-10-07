@@ -18,44 +18,49 @@ package net.ihe.gazelle.maestro.api.technical.dto.report;
 
 import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.testreport.TestService;
+import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({"serviceIdentification", "disclaimer"})
-public class TestServiceDTO {
+@JsonPropertyOrder({
+        "serviceIdentification",
+        "disclaimer"
+})
+public class TestServiceDTO implements DTO<TestService> {
 
     @JsonIgnore
-    private final TestService domain;
+    private final TestService testService;
 
     public TestServiceDTO() {
-        domain = new TestService();
+        this(new TestService());
     }
 
-    public TestServiceDTO(TestService domain) {
-        this.domain = domain;
+    public TestServiceDTO(TestService testService) {
+        this.testService = testService;
+    }
+
+    @Override
+    @JsonIgnore
+    public TestService getBusinessObject() {
+        return testService;
     }
 
     @JsonGetter(value = "serviceIdentification")
     public EntityIdentificationDTO getServiceIdentification() {
-        return new EntityIdentificationDTO(domain.getServiceIdentification());
+        return new EntityIdentificationDTO(getBusinessObject().getServiceIdentification());
     }
 
     @JsonSetter(value = "serviceIdentification")
     public void setServiceIdentification(EntityIdentificationDTO entityIdentificationDTO) {
-        domain.setServiceIdentification(entityIdentificationDTO.getDomain());
+        getBusinessObject().setServiceIdentification(entityIdentificationDTO.getBusinessObject());
     }
 
     @JsonGetter(value = "disclaimer")
     public String getDisclaimer() {
-        return domain.getDisclaimer();
+        return getBusinessObject().getDisclaimer();
     }
 
     @JsonGetter(value = "disclaimer")
     public void setDisclaimer(String disclaimer) {
-        domain.setDisclaimer(disclaimer);
-    }
-
-    @JsonIgnore
-    public TestService getDomain() {
-        return domain;
+        getBusinessObject().setDisclaimer(disclaimer);
     }
 }
