@@ -32,7 +32,7 @@ import java.io.InputStream;
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.*;
 
-/*@QuarkusTest
+@QuarkusTest
 @TestProfile(TMTestRunControllerProfile.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TMTestRunControllerIT implements QuarkusTestProfile {
@@ -108,4 +108,4 @@ class TMTestRunControllerIT implements QuarkusTestProfile {
             return new String(stream.readAllBytes());
         }
     }
-}*/
+}
