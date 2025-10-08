@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.List;
 
-@ServerEndpoint("/testRuns/{testSetId}")
+@ServerEndpoint("/v1/runs/{testSetId}")
 @ApplicationScoped
 public class TestRunSocketController {
 

@@ -20,7 +20,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import net.ihe.gazelle.maestro.api.business.testreport.SystemUnderTest;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
 import net.ihe.gazelle.maestro.api.technical.dto.report.SystemUnderTestDTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
