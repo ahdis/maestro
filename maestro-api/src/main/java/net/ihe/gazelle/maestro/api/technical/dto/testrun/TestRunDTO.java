@@ -26,7 +26,6 @@ import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
-        "testSetId",
         "test",
         "inputs"
 })
@@ -47,16 +46,6 @@ public class TestRunDTO implements DTO<TestRun> {
     @JsonIgnore
     public TestRun getBusinessObject() {
         return testRun;
-    }
-
-    @JsonGetter("testSetId")
-    public String getTestSetId() {
-        return getBusinessObject().getTestSetId();
-    }
-
-    @JsonSetter("testSetId")
-    public void setTestSetId(String testSetId) {
-        getBusinessObject().setTestSetId(testSetId);
     }
 
     @JsonGetter("test")

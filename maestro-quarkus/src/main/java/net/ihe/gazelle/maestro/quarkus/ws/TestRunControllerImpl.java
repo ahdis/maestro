@@ -58,6 +58,9 @@ public class TestRunControllerImpl implements TestRunController {
     @Override
     public Response run(String callback, TestSetRunDTO testSetRunDTO) {
         TestSetRun testSetRun = testSetRunDTO.getBusinessObject();
+        testSetRun.getTestRuns().forEach(
+                testRun -> testRun.setTestSetId(testSetRun.getTestSetId())
+        );
         if (callback != null) {
             return runAsynchronously(callback, testSetRun);
         } else {
