@@ -20,6 +20,7 @@ import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.api.business.testrun.Step;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -39,18 +40,18 @@ public class ItbStep implements Step {
     private Property<String> testCase;
     private Property<String> systemID;
     private Property<String> actorID;
-    private List<? extends Property<byte[]>> inputProperties;
+    private List<Property<?>> inputProperties;
 
     public ItbStep() {
-        inputProperties = List.of();
+        inputProperties = new ArrayList<>();
     }
 
-    public ItbStep(String name, Property<String> testCase, Property<String> systemID, Property<String> actorID, List<? extends Property<byte[]>> inputs){
+    public ItbStep(String name, Property<String> testCase, Property<String> systemID, Property<String> actorID, List<? extends Property<?>> inputs){
         this.name = name;
         this.testCase = testCase;
         this.systemID = systemID;
         this.actorID = actorID;
-        this.inputProperties = inputs;
+        this.inputProperties = new ArrayList<>(inputs);
     }
 
     @Override
@@ -75,9 +76,15 @@ public class ItbStep implements Step {
     @Override
     public List<Property<?>> getProperties() {
         List<Property<?>> props = new ArrayList<>();
-        props.add(testCase);
-        props.add(systemID);
-        props.add(actorID);
+        if (testCase != null) {
+            props.add(testCase);
+        }
+        if (systemID != null) {
+            props.add(systemID);
+        }
+        if (actorID != null) {
+            props.add(actorID);
+        }
         props.addAll(inputProperties);
         return props;
     }
@@ -88,19 +95,21 @@ public class ItbStep implements Step {
         if (properties == null) {
             throw new IllegalArgumentException("property shouldn't be null");
         }
+        LinkedHashMap<String, Property<?>> inputsByName = new LinkedHashMap<>();
+        for (Property<?> input : inputProperties) {
+            inputsByName.put(input.getName(), input);
+        }
+
         properties.forEach(property -> {
             switch (property.getName()) {
                 case TEST_CASE -> testCase = (Property<String>) property;
                 case SYSTEM_ID -> systemID = (Property<String>) property;
                 case ACTOR_ID -> actorID = (Property<String>) property;
-                default -> inputProperties = inputProperties.stream().map(prop -> {
-                    if (prop.getName().equals(property.getName())) {
-                        return (Property<byte[]>) property;
-                    }
-                    return prop;
-                }).toList();
+                default -> inputsByName.put(property.getName(), property);
             }
         });
+
+        inputProperties = new ArrayList<>(inputsByName.values());
     }
 
     @Override

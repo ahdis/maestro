@@ -18,9 +18,11 @@ class ItbStepTest {
         Property<String> testCase = new Property<>(ItbStep.TEST_CASE, "TC-1");
         Property<String> systemId = new Property<>(ItbStep.SYSTEM_ID, "SYS");
         Property<String> actorId = new Property<>(ItbStep.ACTOR_ID, "ACT");
-        List<Property<byte[]>> inputs = new ArrayList<>();
-        Property<byte[]> input = new Property<>("payload", new byte[]{1, 2});
-        inputs.add(input);
+        List<Property<?>> inputs = new ArrayList<>();
+        Property<byte[]> binaryInput = new Property<>("payload", new byte[]{1, 2});
+        Property<String> textInput = new Property<>("note", "hello");
+        inputs.add(binaryInput);
+        inputs.add(textInput);
 
         ItbStep step = new ItbStep("itb", testCase, systemId, actorId, inputs);
 
@@ -34,7 +36,8 @@ class ItbStepTest {
         assertTrue(props.contains(testCase));
         assertTrue(props.contains(systemId));
         assertTrue(props.contains(actorId));
-        assertTrue(props.contains(input));
+        assertTrue(props.contains(binaryInput));
+        assertTrue(props.contains(textInput));
     }
 
     @Test
@@ -46,11 +49,15 @@ class ItbStepTest {
         Property<String> systemId = new Property<>(ItbStep.SYSTEM_ID, "SYS-2");
         Property<String> actorId = new Property<>(ItbStep.ACTOR_ID, "ACT-2");
         Property<byte[]> input = new Property<>("payload", new byte[]{3});
+        Property<String> textInput = new Property<>("note", "world");
 
-        step.setProperties(List.of(testCase, systemId, actorId, input));
+        step.setProperties(List.of(testCase, systemId, actorId, input, textInput));
 
         assertEquals(testCase, step.getTestCase());
         assertEquals(systemId, step.getSystemID());
         assertEquals(actorId, step.getActorID());
+        List<Property<?>> properties = step.getProperties();
+        assertTrue(properties.contains(input));
+        assertTrue(properties.contains(textInput));
     }
 }

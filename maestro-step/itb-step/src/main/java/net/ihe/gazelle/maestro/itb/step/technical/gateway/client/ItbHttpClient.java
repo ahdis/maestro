@@ -130,6 +130,8 @@ public class ItbHttpClient implements ItbClient {
 
         } else if (param.getType().equals("integer") || param.getType().equals("float")) {
             input.put("type", "number");
+        } else if(param.getType().equals("text")) {
+            input.put("type", "string");
         }
         input.put("value", param.getValue());
         return input;
