@@ -34,13 +34,12 @@ import java.util.UUID;
  */
 public class TestSetRun {
 
-    private final String testSetId; // internal use only
+    private String testSetId; // internal use only
     private String testSuiteName;
     private List<TestRun> testRuns;
     private AccessControlList accessControlList;
     private List<SystemUnderTest> systemsUnderTest;
     private String testSetRunId;
-
 
     public TestSetRun() {
         this.testSetId = UUID.randomUUID().toString();
@@ -55,6 +54,10 @@ public class TestSetRun {
 
     public String getTestSetId() {
         return testSetId;
+    }
+
+    public void setTestSetId(String testSetId) {
+        this.testSetId = testSetId;
     }
 
     public String getTestSuiteName() {

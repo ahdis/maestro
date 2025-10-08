@@ -14,4 +14,4 @@
 # limitations under the License.
 #
 
-net.ihe.gazelle.maestro.simulation.step.dto.SimulationStepDTO
+net.ihe.gazelle.maestro.simulation.step.technical.dto.SimulationStepDTO

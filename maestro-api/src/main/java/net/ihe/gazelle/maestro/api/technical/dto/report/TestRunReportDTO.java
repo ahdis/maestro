@@ -19,139 +19,157 @@ package net.ihe.gazelle.maestro.api.technical.dto.report;
 import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.testreport.Result;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
+import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 
 import java.util.Date;
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
-        "runId", "dateTime", "result", "test", "inputs", "outputs", "stepRunReports", "urlToTestRun", "unexpectedErrors"
+        "runId",
+        "dateTime",
+        "result",
+        "test",
+        "inputs",
+        "outputs",
+        "stepRunReports",
+        "urlToTestRun",
+        "unexpectedErrors"
 })
-public class TestRunReportDTO {
+public class TestRunReportDTO implements DTO<TestRunReport> {
 
     public static final String ISO_8601_DATETIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
 
     @JsonIgnore
-    private final TestRunReport domain;
+    private final TestRunReport testRunReport;
 
     public TestRunReportDTO() {
-        this.domain = new TestRunReport();
+        this(new TestRunReport());
     }
 
-    public TestRunReportDTO(TestRunReport domain) {
-        this.domain = domain;
+    public TestRunReportDTO(TestRunReport testRunReport) {
+        this.testRunReport = testRunReport;
+    }
+
+    @Override
+    @JsonIgnore
+    public TestRunReport getBusinessObject() {
+        return testRunReport;
     }
 
     @JsonGetter(value = "runId")
     public String getRunId() {
-        return domain.getRunId();
+        return getBusinessObject().getRunId();
     }
 
     @JsonSetter(value = "runId")
     public void setRunId(String runId) {
-        domain.setRunId(runId);
+        getBusinessObject().setRunId(runId);
     }
 
     @JsonGetter(value = "dateTime")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = ISO_8601_DATETIME_PATTERN)
     public Date getDateTime() {
-        return domain.getDateTime();
+        return getBusinessObject().getDateTime();
     }
 
     @JsonSetter(value = "dateTime")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = ISO_8601_DATETIME_PATTERN)
     public void setDateTime(Date dateTime) {
-        domain.setDateTime(dateTime);
+        getBusinessObject().setDateTime(dateTime);
     }
 
     @JsonGetter(value = "result")
     public String result() {
-        return domain.getResult().name();
+        return getBusinessObject().getResult().name();
     }
 
     @JsonSetter(value = "result")
     public void setResult(String result) {
-        domain.setResult(Result.valueOf(result));
+        getBusinessObject().setResult(Result.valueOf(result));
     }
 
     @JsonGetter(value = "test")
     public TestDTO test() {
-        return new TestDTO(domain.getTest());
+        return new TestDTO(getBusinessObject().getTest());
     }
 
     @JsonSetter(value = "test")
     public void setTest(TestDTO testDTO) {
-        domain.setTest(testDTO.getDomain());
+        getBusinessObject().setTest(testDTO.getBusinessObject());
     }
 
     @JsonGetter(value = "inputs")
     public List<InputDTO> getInputs() {
-        return domain.getInputs().stream()
+        return getBusinessObject()
+                .getInputs()
+                .stream()
                 .map(InputDTO::new)
                 .toList();
     }
 
     @JsonSetter(value = "inputs")
     public void setInputs(List<InputDTO> inputs) {
-        domain.setInputs(inputs.stream()
-                .map(InputDTO::getDomain)
-                .toList());
+        getBusinessObject().setInputs(
+                inputs.stream().map(InputDTO::getBusinessObject).toList()
+        );
     }
 
     @JsonGetter(value = "outputs")
     public List<OutputDTO> getOutputs() {
-        return domain.getOutputs().stream()
+        return getBusinessObject()
+                .getOutputs()
+                .stream()
                 .map(OutputDTO::new)
                 .toList();
     }
 
     @JsonSetter(value = "outputs")
     public void setOutputs(List<OutputDTO> outputs) {
-        domain.setOutputs(outputs.stream()
-                .map(OutputDTO::getDomain)
-                .toList());
+        getBusinessObject().setOutputs(
+                outputs.stream().map(OutputDTO::getBusinessObject).toList()
+        );
     }
 
     @JsonGetter(value = "stepRunReports")
     public List<StepRunReportDTO> getStepRunReports() {
-        return domain.getStepRunReports().stream()
+        return getBusinessObject()
+                .getStepRunReports()
+                .stream()
                 .map(StepRunReportDTO::new)
                 .toList();
     }
 
     @JsonSetter(value = "stepRunReports")
     public void setStepRunReports(List<StepRunReportDTO> stepRunReports) {
-        domain.setStepRunReports(stepRunReports.stream()
-                .map(StepRunReportDTO::getDomain)
-                .toList());
+        getBusinessObject().setStepRunReports(
+                stepRunReports.stream().map(StepRunReportDTO::getBusinessObject).toList()
+        );
     }
 
     @JsonGetter(value = "urlToTestRun")
     public String getUrlToTestRun() {
-        return domain.getUrlToTestRun();
+        return getBusinessObject().getUrlToTestRun();
     }
 
     @JsonSetter(value = "urlToTestRun")
     public void setUrlToTestRun(String urlToTestRun) {
-        domain.setUrlToTestRun(urlToTestRun);
+        getBusinessObject().setUrlToTestRun(urlToTestRun);
     }
 
     @JsonGetter(value = "unexpectedErrors")
     public List<UnexpectedErrorDTO> getUnexpectedErrors() {
-        return domain.getUnexpectedErrors().stream()
+        return getBusinessObject()
+                .getUnexpectedErrors()
+                .stream()
                 .map(UnexpectedErrorDTO::new)
                 .toList();
     }
 
     @JsonSetter(value = "unexpectedErrors")
     public void setUnexpectedErrors(List<UnexpectedErrorDTO> unexpectedErrors) {
-        domain.setUnexpectedErrors(unexpectedErrors.stream()
-                .map(UnexpectedErrorDTO::getDomain)
-                .toList());
-    }
-
-    @JsonIgnore
-    public TestRunReport getDomain() {
-        return domain;
+        getBusinessObject().setUnexpectedErrors(
+                unexpectedErrors.stream().map(UnexpectedErrorDTO::getBusinessObject).toList()
+        );
     }
 }

@@ -24,8 +24,8 @@ import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterface;
 import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterfaceBuilder;
 import net.ihe.gazelle.servicemetadata.api.business.HttpRestBinding;
 import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterface;
+import net.ihe.gazelle.simulation.callback.jaxrs.server.technical.SimulationCallbackFactory;
 import net.ihe.gazelle.simulation.client.business.SimulationClientImpl;
-import net.ihe.gazelle.simulation.client.technical.SimulationCallbackFactory;
 import net.ihe.gazelle.simulation.client.technical.SimulationServiceClientImpl;
 import net.ihe.gazelle.simulation.jaxrs.api.technical.ws.SimulationAPI;
 

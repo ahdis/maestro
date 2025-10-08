@@ -80,7 +80,7 @@ class TestRunControllerIT implements QuarkusTestProfile {
                 .extract().response();
         assertNotNull(response);
         System.out.println(response.asString());
-        TestReportSummary testReport = response.as(TestReportSummaryDTO.class).getDomain();
+        TestReportSummary testReport = response.as(TestReportSummaryDTO.class).getBusinessObject();
         assertTrue(testReport.isValid());
         assertEquals(Result.FAILED, testReport.getResult());
     }

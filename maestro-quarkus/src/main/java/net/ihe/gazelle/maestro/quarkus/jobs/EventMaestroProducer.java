@@ -18,7 +18,6 @@ package net.ihe.gazelle.maestro.quarkus.jobs;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
-import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
@@ -40,7 +39,6 @@ import net.ihe.gazelle.maestro.api.technical.event.*;
  * processing with ease while integrating seamlessly into CDI based applications.
  */
 @ApplicationScoped
-@Default
 public class EventMaestroProducer implements MaestroEventProducer {
 
     private final Event<TestRunEvent> testRunEvent;

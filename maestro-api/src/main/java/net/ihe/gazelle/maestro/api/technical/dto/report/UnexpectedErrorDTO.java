@@ -18,46 +18,57 @@ package net.ihe.gazelle.maestro.api.technical.dto.report;
 
 import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.lang.UnexpectedError;
+import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({"name", "message", "cause"})
-public class UnexpectedErrorDTO {
+@JsonPropertyOrder({
+        "name",
+        "message",
+        "cause"
+})
+public class UnexpectedErrorDTO implements DTO<UnexpectedError> {
 
     @JsonIgnore
-    private final UnexpectedError domain;
+    private final UnexpectedError unexpectedError;
 
     public UnexpectedErrorDTO() {
-        domain = new UnexpectedError();
+        this(new UnexpectedError());
     }
 
-    public UnexpectedErrorDTO(UnexpectedError domain) {
-        this.domain = domain;
+    public UnexpectedErrorDTO(UnexpectedError unexpectedError) {
+        this.unexpectedError = unexpectedError;
+    }
+
+    @Override
+    @JsonIgnore
+    public UnexpectedError getBusinessObject() {
+        return unexpectedError;
     }
 
     @JsonGetter(value = "name")
     public String getName() {
-        return domain.getName();
+        return getBusinessObject().getName();
     }
 
     @JsonSetter(value = "name")
     public void setName(String name) {
-        domain.setName(name);
+        getBusinessObject().setName(name);
     }
 
     @JsonGetter(value = "message")
     public String getMessage() {
-        return domain.getMessage();
+        return getBusinessObject().getMessage();
     }
 
     @JsonSetter(value = "message")
     public void setMessage(String message) {
-        domain.setMessage(message);
+        getBusinessObject().setMessage(message);
     }
 
     @JsonGetter(value = "cause")
     public UnexpectedErrorDTO getCause() {
-        if (domain.getCause() != null) {
-            return new UnexpectedErrorDTO(domain.getCause());
+        if (getBusinessObject().getCause() != null) {
+            return new UnexpectedErrorDTO(getBusinessObject().getCause());
         }
         return null;
     }
@@ -65,12 +76,7 @@ public class UnexpectedErrorDTO {
     @JsonSetter(value = "cause")
     public void setCause(UnexpectedErrorDTO cause) {
         if (cause != null) {
-            domain.setCause(cause.getDomain());
+            getBusinessObject().setCause(cause.getBusinessObject());
         }
-    }
-
-    @JsonIgnore
-    public UnexpectedError getDomain() {
-        return domain;
     }
 }

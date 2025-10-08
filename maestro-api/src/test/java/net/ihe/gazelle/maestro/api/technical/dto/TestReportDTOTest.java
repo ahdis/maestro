@@ -39,11 +39,11 @@ class TestReportDTOTest {
     @Test
     void testDTOmarshalling() {
         String json = SER_DES.serializeAsString(new TestReportDTO(createTestReport(createTestServiceBuilder())));
-        TestReport testReport = SER_DES.deserialize(json, TestReportDTO.class).getDomain();
+        TestReport testReport = SER_DES.deserialize(json, TestReportDTO.class).getBusinessObject();
         assertTrue(testReport.isValid());
 
         json = SER_DES.serializeAsString(new TestReportDTO(createTestReport(null)));
-        testReport = SER_DES.deserialize(json, TestReportDTO.class).getDomain();
+        testReport = SER_DES.deserialize(json, TestReportDTO.class).getBusinessObject();
         assertTrue(testReport.isValid());
     }
 

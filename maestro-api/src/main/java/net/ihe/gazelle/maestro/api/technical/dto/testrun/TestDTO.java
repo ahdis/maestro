@@ -16,10 +16,7 @@
 
 package net.ihe.gazelle.maestro.api.technical.dto.testrun;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.testrun.Step;
 import net.ihe.gazelle.maestro.api.business.testrun.Test;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
@@ -27,44 +24,55 @@ import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
 
 import java.util.List;
 
-@JsonPropertyOrder({"id", "name", "steps"})
-public class TestDTO {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonPropertyOrder({
+        "id",
+        "name",
+        "steps"
+})
+public class TestDTO implements DTO<Test> {
 
     @JsonIgnore
-    private final Test domain;
+    private final Test test;
 
     public TestDTO() {
-        domain = new Test();
+        this(new Test());
     }
 
-    public TestDTO(Test domain) {
-        this.domain = domain;
+    public TestDTO(Test test) {
+        this.test = test;
+    }
+
+    @Override
+    @JsonIgnore
+    public Test getBusinessObject() {
+        return test;
     }
 
     @JsonGetter("id")
     public String getId() {
-        return domain.getId();
+        return getBusinessObject().getId();
     }
 
     @JsonSetter("id")
     public void setId(String id) {
-        domain.setId(id);
+        getBusinessObject().setId(id);
     }
 
     @JsonGetter("name")
     public String getName() {
-        return domain.getName();
+        return getBusinessObject().getName();
     }
 
     @JsonSetter("name")
     public void setName(String name) {
-        domain.setName(name);
+        getBusinessObject().setName(name);
     }
 
     @SuppressWarnings("rawtypes")
     @JsonGetter("steps")
     public List<StepDTO> getSteps() {
-        return domain.getSteps().stream()
+        return getBusinessObject().getSteps().stream()
                 .map(SubTypingDTO::fromBusinessObject)
                 .map(StepDTO.class::cast)
                 .toList();
@@ -73,14 +81,9 @@ public class TestDTO {
     @SuppressWarnings("rawtypes")
     @JsonSetter("steps")
     public void setSteps(List<StepDTO> steps) {
-        domain.setSteps(steps.stream()
+        getBusinessObject().setSteps(steps.stream()
                 .map(DTO::getBusinessObject)
                 .map(Step.class::cast)
                 .toList());
-    }
-
-    @JsonIgnore
-    public Test getDomain() {
-        return domain;
     }
 }

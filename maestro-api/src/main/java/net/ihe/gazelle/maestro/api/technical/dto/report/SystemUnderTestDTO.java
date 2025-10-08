@@ -18,66 +18,73 @@ package net.ihe.gazelle.maestro.api.technical.dto.report;
 
 import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.testreport.SystemUnderTest;
+import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({"systemIdentification", "macAddresses", "ipAddresses", "hostNames"})
-public class SystemUnderTestDTO {
+@JsonPropertyOrder({
+        "systemIdentification",
+        "macAddresses",
+        "ipAddresses",
+        "hostNames"
+})
+public class SystemUnderTestDTO implements DTO<SystemUnderTest> {
 
     @JsonIgnore
-    private final SystemUnderTest domain;
+    private final SystemUnderTest systemUnderTest;
 
     public SystemUnderTestDTO() {
-        this.domain = new SystemUnderTest();
+        this(new SystemUnderTest());
     }
 
-    public SystemUnderTestDTO(SystemUnderTest domain) {
-        this.domain = domain;
+    public SystemUnderTestDTO(SystemUnderTest systemUnderTest) {
+        this.systemUnderTest = systemUnderTest;
+    }
+
+    @Override
+    @JsonIgnore
+    public SystemUnderTest getBusinessObject() {
+        return systemUnderTest;
     }
 
     @JsonGetter(value = "systemIdentification")
     public EntityIdentificationDTO getSystemIdentification() {
-        return new EntityIdentificationDTO(domain.getSystemIdentification());
+        return new EntityIdentificationDTO(getBusinessObject().getSystemIdentification());
     }
 
     @JsonSetter(value = "systemIdentification")
     public void setSystemIdentification(EntityIdentificationDTO entityIdentificationDTO) {
-        domain.setSystemIdentification(entityIdentificationDTO.getDomain());
+        getBusinessObject().setSystemIdentification(entityIdentificationDTO.getBusinessObject());
     }
 
     @JsonGetter(value = "macAddresses")
     public List<String> getMacAddresses() {
-        return domain.getMacAddresses();
+        return getBusinessObject().getMacAddresses();
     }
 
     @JsonSetter(value = "macAddresses")
     public void setMacAddresses(List<String> macAddresses) {
-        domain.setMacAddresses(macAddresses);
+        getBusinessObject().setMacAddresses(macAddresses);
     }
 
     @JsonGetter(value = "ipAddresses")
     public List<String> getIpAddresses() {
-        return domain.getIpAddresses();
+        return getBusinessObject().getIpAddresses();
     }
 
     @JsonSetter(value = "ipAddresses")
     public void setIpAddresses(List<String> ipAddresses) {
-        domain.setIpAddresses(ipAddresses);
+        getBusinessObject().setIpAddresses(ipAddresses);
     }
 
     @JsonGetter(value = "hostNames")
     public List<String> getHostNames() {
-        return domain.getHostNames();
+        return getBusinessObject().getHostNames();
     }
 
     @JsonSetter(value = "hostNames")
     public void setHostNames(List<String> hostNames) {
-        domain.setHostNames(hostNames);
-    }
-
-    @JsonIgnore
-    public SystemUnderTest getDomain() {
-        return domain;
+        getBusinessObject().setHostNames(hostNames);
     }
 }

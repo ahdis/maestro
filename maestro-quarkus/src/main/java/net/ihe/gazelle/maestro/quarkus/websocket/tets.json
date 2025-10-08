@@ -1,0 +1,40 @@
+{
+  "testSuiteName": "Simple_CHXDS_ITI-41-42",
+  "testRuns": [
+    {
+      "testSetId": "Simple_CHXDS_ITI-41-42",
+      "test": {
+        "id": "Simple_CHXDS_ITI-41-42",
+        "name": "Simple_CHXDS_ITI-41-42",
+        "steps": [
+          {
+            "type": "SIMULATION",
+            "name": "Simple_CHXDS_ITI-41-42",
+            "properties": [
+              {
+                "name": "simulationService",
+                "value": "Mock_XDS_Simulator",
+                "type": "string"
+              },
+              {
+                "name": "sequenceId",
+                "value": "Simple_CHXDS_ITI-41-42",
+                "type": "string"
+              },
+              {
+                "name": "timeoutSeconds",
+                "value": "60",
+                "type": "integer"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "accessControlList": {
+    "public": true
+  },
+  "systemsUnderTest": [],
+  "testSetRunId": "Simple_CHXDS_ITI-41-42"
+}

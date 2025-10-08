@@ -147,7 +147,7 @@ public class MaestroImpl implements Maestro {
         testSetSessionStore.addTestRunReportBuilder(testRunReportBuilder);
         TestSetRun testSetRun = testSetSessionStore.getTestSetRun();
         TestRunCursor testRunCursor = testSetSessionStore.getTestRunCursor();
-        if(testRunCursor == null){
+        if(testRunCursor == null) {
             throw new InvalidTestSetException("FATAL: No cursor available for test set " + testRun.getTestSetId());
         }
         if (!testRunCursor.hasNext()) {

@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.websocket;
+package net.ihe.gazelle.maestro.quarkus.websocket;
 
 import jakarta.websocket.Session;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class SessionsStorageInMemory {
+public class WebsocketSessionsInMemory {
 
     private static final Map<String, Session> sessions = new ConcurrentHashMap<>();
 
-    private SessionsStorageInMemory() {
+    private WebsocketSessionsInMemory() {
         // Prevent instantiation
     }
 

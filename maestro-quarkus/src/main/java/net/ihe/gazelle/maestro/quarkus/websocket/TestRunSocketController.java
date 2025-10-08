@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.websocket;
+package net.ihe.gazelle.maestro.quarkus.websocket;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.ObservesAsync;
 import jakarta.inject.Inject;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
-import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
-import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestRunDTO;
-import net.ihe.gazelle.maestro.api.technical.event.FinishTestSetEvent;
+import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
+import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSetRunDTO;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.ObjectMapperBuilder;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
@@ -33,21 +31,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 @ServerEndpoint("/testRuns/{testSetId}")
 @ApplicationScoped
-public class TestRunSocket {
+public class TestRunSocketController {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TestRunSocket.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(TestRunSocketController.class.getName());
     public static final String INTERNAL_TEST_RUN_ID = "internal";
     private final TextSerDes serDes = new JacksonSerDes(new ObjectMapperBuilder().build());
     private final WebSocketMaestroService maestroService;
     private final String websocketToken;
 
     @Inject
-    public TestRunSocket(WebSocketMaestroService maestroService, @ConfigProperty(name = "gzl.websocket.token") String websocketToken) {
+    public TestRunSocketController(WebSocketMaestroService maestroService,
+                                   @ConfigProperty(name = "gzl.websocket.token") String websocketToken) {
         this.maestroService = maestroService;
         this.websocketToken = websocketToken;
     }
@@ -58,17 +56,17 @@ public class TestRunSocket {
         if (!providedTokenIsValid(tokenParams))
             session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "Invalid token provided"));
         if (!INTERNAL_TEST_RUN_ID.equals(testSetId))
-            SessionsStorageInMemory.addSession(testSetId, session);
+            WebsocketSessionsInMemory.addSession(testSetId, session);
     }
 
     @OnClose
     public void onClose(Session session, @PathParam("testSetId") String testSetId) {
-        SessionsStorageInMemory.removeSession(testSetId);
+        WebsocketSessionsInMemory.removeSession(testSetId);
     }
 
     @OnError
     public void onError(Session session, @PathParam("testSetId") String testSetId, Throwable throwable) {
-        SessionsStorageInMemory.removeSession(testSetId);
+        WebsocketSessionsInMemory.removeSession(testSetId);
         LOG.error("Test set {} ended on error: {} ", testSetId, throwable.getMessage());
     }
 
@@ -77,7 +75,7 @@ public class TestRunSocket {
         // Ping for test purpose
         if (message.equals("ping")) {
             sendPongToClient(testSetId);
-        }else {
+        } else {
             triggerTestRuns(testSetId, message);
         }
     }
@@ -85,15 +83,12 @@ public class TestRunSocket {
     private void triggerTestRuns(String testSetId, String message) {
         LOG.info("Triggering test runs for client {} with message: {}",testSetId, message);
         try {
-            TestRunDTO[] testRunDTOS = serDes.deserialize(message, TestRunDTO[].class);
-            List<TestRun> testRuns = Arrays.stream(testRunDTOS).map(TestRunDTO::getDomain).toList();
-            maestroService.executeTestSet(testSetId, testRuns);
+            TestSetRun testSetRun = serDes.deserialize(message, TestSetRunDTO.class).getBusinessObject();
+            maestroService.executeTestSet(testSetId, testSetRun);
         } catch (Exception e) {
             LOG.error("Unable to trigger testRun for message {}: {}", testSetId, e.getMessage());
         }
     }
-
-
 
     private boolean providedTokenIsValid(List<String> paramValues) {
         if (paramValues == null || paramValues.isEmpty()) {
@@ -108,7 +103,7 @@ public class TestRunSocket {
     }
 
     private void sendPongToClient( String testSetId) {
-        Session session = SessionsStorageInMemory.getSession(testSetId);
+        Session session = WebsocketSessionsInMemory.getSession(testSetId);
         session.getAsyncRemote()
                 .sendObject("pong", result -> logPotentialException(testSetId, result));
     }

@@ -27,7 +27,6 @@ import net.ihe.gazelle.maestro.api.business.testrun.InvalidTestRunException;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
 import net.ihe.gazelle.maestro.api.business.testrun.UnsupportedPropertyTypeException;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
-import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestRunDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSetRunDTO;
 import net.ihe.gazelle.maestro.quarkus.NotProvidedStep;
 import net.ihe.gazelle.maestro.quarkus.jobs.SynchronousMaestro;
@@ -58,14 +57,16 @@ public class TestRunControllerImpl implements TestRunController {
 
     @Override
     public Response run(String callback, TestSetRunDTO testSetRunDTO) {
-        TestSetRun testSetRun = getTestSetRun(testSetRunDTO);
+        TestSetRun testSetRun = testSetRunDTO.getBusinessObject();
+        testSetRun.getTestRuns().forEach(
+                testRun -> testRun.setTestSetId(testSetRun.getTestSetId())
+        );
         if (callback != null) {
             return runAsynchronously(callback, testSetRun);
         } else {
             return runSynchronously(testSetRun);
         }
     }
-
 
     private Response runSynchronously(TestSetRun testSetRun) {
         try {
@@ -139,26 +140,5 @@ public class TestRunControllerImpl implements TestRunController {
                 .entity(message)
                 .type(MediaType.APPLICATION_JSON)
                 .build();
-    }
-
-    private static TestSetRun getTestSetRun(TestSetRunDTO testSetRunDTO) {
-        TestSetRun testSetRun = new TestSetRun();
-        testSetRun
-                .setTestRuns(testSetRunDTO.getTestRuns()
-                        .stream()
-                        .map(testRunDTO -> testRunDTO
-                                .getDomain()
-                                .setTestSetId(testSetRun.getTestSetId())
-                        ).toList()
-                )
-                .setAccessControlList(testSetRunDTO.getAccessControlList())
-                .setTestSuiteName(testSetRunDTO.getTestSuiteName())
-                .setTestSetRunId(testSetRunDTO.getTestSetRunId())
-                ;
-
-        if( testSetRunDTO.getSystemsUnderTest() != null) {
-            testSetRun.setSystemsUnderTest(testSetRunDTO.getSystemsUnderTest());
-        }
-        return testSetRun;
     }
 }

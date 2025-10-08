@@ -67,8 +67,8 @@
 
         <framework.version>2.1.2</framework.version>
         <search-api.version>1.1.0</search-api.version>
-        <validation-api.version>2.0.0</validation-api.version>
-        <simulation-api.version>0.1.1</simulation-api.version>
+        <validation-api.version>2.0.1</validation-api.version>
+        <simulation-api.version>0.2.0-SNAPSHOT</simulation-api.version>
         <service-registry.version>1.0.0</service-registry.version>
         <lang.version>2.0.1</lang.version>
         <datahouse.version>3.1.0</datahouse.version>
@@ -88,10 +88,7 @@
             **/gazelle/context/*
             **/gazelle/maestro/technical/ws/async/tmintegration/**
             **/gazelle/maestro/websocket/**
-            **/gazelle/maestro/mlang/**
-        </sonar.coverage.exclusions>
-        <datahouse.version>3.1.0</datahouse.version>
-        <security.version>3.2.0</security.version>
+            **/gazelle/maestro/mlang/**</sonar.coverage.exclusions>
     </properties>
 
     <dependencyManagement>
@@ -225,21 +222,6 @@
     </repositories>
 
     <profiles>
-        <profile>
-            <id>with-websocket</id>
-            <activation>
-                <property>
-                    <name>websocket</name>
-                </property>
-            </activation>
-            <modules>
-                <module>maestro-api</module>
-                <module>maestro-engine</module>
-                <module>maestro-step</module>
-                <module>maestro-quarkus</module>
-                <module>maestro-websocket</module>
-            </modules>
-        </profile>
         <profile>
             <id>with-mlang</id>
             <activation>
