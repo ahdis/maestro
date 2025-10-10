@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.api.technical.dto.report.SystemUnderTestDTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
-import net.ihe.gazelle.security.business.acl.AccessControlList;
+import net.ihe.gazelle.security.technical.acl.AccessControlListDTO;
 
 import java.util.List;
 
@@ -74,12 +74,12 @@ public class TestSuiteRunDTO implements DTO<TestSuiteRun> {
     }
 
     @JsonProperty("accessControlList")
-    public AccessControlList getAccessControlList() {
-        return getBusinessObject().getAccessControlList();
+    public AccessControlListDTO getAccessControlList() {
+        return new AccessControlListDTO(getBusinessObject().getAccessControlList());
     }
 
-    public void setAccessControlList(AccessControlList accessControlList) {
-        getBusinessObject().setAccessControlList(accessControlList);
+    public void setAccessControlList(AccessControlListDTO accessControlList) {
+        getBusinessObject().setAccessControlList(accessControlList.getBusinessObject());
     }
 
     @JsonProperty("systemsUnderTest")

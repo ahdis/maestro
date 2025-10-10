@@ -16,9 +16,9 @@
 
 package net.ihe.gazelle.maestro.business;
 
+import net.ihe.gazelle.errorhandling.business.UnexpectedErrorBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReportBuilder;
-import net.ihe.gazelle.maestro.api.business.testreport.UnexpectedErrorBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.StepCursor;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRunCursor;

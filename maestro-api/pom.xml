@@ -24,19 +24,8 @@
 
     <artifactId>maestro-api</artifactId>
 
-    <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-
     <dependencies>
         <!-- Gazelle dependencies -->
-        <dependency>
-            <groupId>net.ihe.gazelle</groupId>
-            <artifactId>service-metadata-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>lang</artifactId>
@@ -44,11 +33,23 @@
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
+            <artifactId>error-handling</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
             <artifactId>framework-model-marshaller</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>service-metadata-api</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>security</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Provided dependencies -->

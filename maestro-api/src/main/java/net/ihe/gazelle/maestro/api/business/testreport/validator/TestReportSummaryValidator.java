@@ -1,5 +1,6 @@
 package net.ihe.gazelle.maestro.api.business.testreport.validator;
 
+import net.ihe.gazelle.errorhandling.business.UnexpectedErrorValidator;
 import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilder;
 import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory;
 import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;

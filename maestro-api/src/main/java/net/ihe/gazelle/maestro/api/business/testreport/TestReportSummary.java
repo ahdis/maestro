@@ -1,6 +1,6 @@
 package net.ihe.gazelle.maestro.api.business.testreport;
 
-import net.ihe.gazelle.lang.UnexpectedError;
+import net.ihe.gazelle.errorhandling.business.UnexpectedError;
 
 import java.util.ArrayList;
 import java.util.Date;

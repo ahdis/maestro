@@ -22,13 +22,7 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import net.ihe.gazelle.maestro.api.business.testreport.Result;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
-import net.ihe.gazelle.maestro.api.business.testrun.InvalidTestRunException;
-import net.ihe.gazelle.maestro.api.business.testrun.Maestro;
-import net.ihe.gazelle.maestro.api.business.testrun.Property;
-import net.ihe.gazelle.maestro.api.business.testrun.PropertyRef;
-import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
-import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
-import net.ihe.gazelle.maestro.api.business.testrun.UnsupportedPropertyTypeException;
+import net.ihe.gazelle.maestro.api.business.testrun.*;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestRunDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSuiteRunDTO;
@@ -43,7 +37,7 @@ import net.ihe.gazelle.maestro.quarkus.jobs.SynchronousMaestro;
 import net.ihe.gazelle.maestro.quarkus.mock.InMemoryTestReportRecordService;
 import net.ihe.gazelle.maestro.quarkus.ws.async.AsynchronousMaestro;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
-import net.ihe.gazelle.security.business.acl.AccessControlList;
+import net.ihe.gazelle.security.technical.acl.AccessControlListDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -294,7 +288,7 @@ class TestRunControllerTest {
         TestSuiteRunDTO dto = new TestSuiteRunDTO();
         TestRun testRun = new TestRun().setTestSetId("test-set");
         dto.setTestRuns(List.of(new TestRunDTO(testRun)));
-        dto.setAccessControlList(new AccessControlList());
+        dto.setAccessControlList(new AccessControlListDTO());
         return dto;
     }
 }

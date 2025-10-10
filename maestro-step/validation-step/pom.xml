@@ -42,22 +42,6 @@
         <!-- Gazelle dependencies -->
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
-            <artifactId>framework-model-validator</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.ihe.gazelle</groupId>
-            <artifactId>framework-model-marshaller</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.ihe.gazelle</groupId>
-            <artifactId>service-metadata-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.ihe.gazelle</groupId>
-            <artifactId>service-metadata-jaxrs-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.ihe.gazelle</groupId>
             <artifactId>validation-v1-api</artifactId>
         </dependency>
         <dependency>
@@ -74,18 +58,45 @@
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
-            <artifactId>lang</artifactId>
+            <artifactId>evs-client-api</artifactId>
+            <version>${evs-client-api.version}</version>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
-            <artifactId>evs-client-api</artifactId>
-            <version>${evs-client-api.version}</version>
+            <artifactId>error-handling</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>framework-model-validator</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>framework-model-marshaller</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>service-metadata-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>service-metadata-jaxrs-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>lang</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Libraries -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Test dependencies -->

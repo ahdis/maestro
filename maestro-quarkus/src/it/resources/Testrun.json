@@ -2,11 +2,11 @@
   "testSuiteName": "testSuite1",
   "testSetRunId": "testRun1",
   "accessControlList": {
-  "owners": [
-    "gazelle",
-    "tm-integration"
-  ],
-  "isPublic": true
+    "owners": [
+      "gazelle",
+      "tm-integration"
+    ],
+    "isPublic": true
   },
   "testRuns": [
     {

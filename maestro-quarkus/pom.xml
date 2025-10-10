@@ -14,34 +14,14 @@
         <quarkus.container-image.tag>${project.version}</quarkus.container-image.tag>
 
         <!-- Test properties -->
-        <sso.client.version>3.1.0</sso.client.version>
         <mongodb-driver-sync.version>5.0.0</mongodb-driver-sync.version>
     </properties>
 
     <dependencies>
-
         <!-- Sub modules dependencies -->
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>maestro-engine</artifactId>
-        </dependency>
-
-        <!-- Gazelle dependencies -->
-        <dependency>
-            <groupId>net.ihe.gazelle</groupId>
-            <artifactId>service-metadata-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.ihe.gazelle</groupId>
-            <artifactId>search-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.ihe.gazelle</groupId>
-            <artifactId>service-registry-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.kereval.gazelle</groupId>
-            <artifactId>datahouse-microprofile-rest-client</artifactId>
         </dependency>
 
         <!-- Steps -->
@@ -64,6 +44,48 @@
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>assertion-step</artifactId>
+        </dependency>
+
+        <!-- Gazelle dependencies -->
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>lang</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>error-handling</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>framework-model-marshaller</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>framework-model-validator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>service-metadata-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>search-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>search-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>service-registry-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.kereval.gazelle</groupId>
+            <artifactId>datahouse-microprofile-rest-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>security</artifactId>
         </dependency>
 
         <!-- Quarkus -->
@@ -171,6 +193,21 @@
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>mockwebserver</artifactId>
             <version>4.11.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>simulation-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>simulation-client</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>validation-v2-api</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

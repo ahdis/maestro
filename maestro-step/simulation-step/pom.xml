@@ -50,23 +50,33 @@
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
+            <artifactId>error-handling</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
             <artifactId>framework-model-validator</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>framework-model-marshaller</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>service-metadata-api</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>service-metadata-jaxrs-api</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>lang</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Stack dependencies -->
