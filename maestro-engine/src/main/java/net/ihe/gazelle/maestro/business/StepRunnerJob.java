@@ -14,46 +14,40 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.quarkus.jobs;
+package net.ihe.gazelle.maestro.business;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.enterprise.inject.Default;
-import jakarta.inject.Inject;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.UnexpectedErrorBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.MaestroEventProducer;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.StartStepCommand;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunner;
+import net.ihe.gazelle.maestro.api.technical.event.StartStepRun;
 import org.slf4j.Logger;
 
 /**
  * A stepRunnerJob receive message from producer to execute Step, launch execution and send result to Maestro Listener
  */
-@Dependent
-@Default
 public class StepRunnerJob {
 
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(StepRunnerJob.class);
 
-    private final StepRunnerProvider stepRunnerFactory;
+    private final StepRunnerProvider stepRunnerProvider;
     private final MaestroEventProducer maestroEventProducer;
 
-    @Inject
-    public StepRunnerJob(StepRunnerProvider stepRunnerFactory, MaestroEventProducer maestroEventProducer) {
-        this.stepRunnerFactory = stepRunnerFactory;
+    public StepRunnerJob(StepRunnerProvider stepRunnerProvider, MaestroEventProducer maestroEventProducer) {
+        this.stepRunnerProvider = stepRunnerProvider;
         this.maestroEventProducer = maestroEventProducer;
     }
 
     /**
      * Execute Step with a stepRunner corresponding to the step
-     * @param startStepCommand Message containing step to run
+     * @param startStepRun Message containing step to run
      */
-    public void launchStepExecution(StartStepCommand startStepCommand) {
-        StepRun stepRun = startStepCommand.getStepRun();
+    public void launchStepExecution(StartStepRun startStepRun) {
+        StepRun stepRun = startStepRun.getStepRun();
         try {
-            StepRunner runner = stepRunnerFactory.create(stepRun.step());
+            StepRunner runner = stepRunnerProvider.create(stepRun.step());
             runner.run(stepRun)
                     .thenAccept(stepRunReportBuilder -> maestroEventProducer.returnStepReport(stepRun, stepRunReportBuilder))
                     .exceptionally(e -> {
@@ -91,5 +85,4 @@ public class StepRunnerJob {
     private void stepEnded(StepRun stepRun, StepRunReportBuilder stepRunReportBuilder) {
         maestroEventProducer.returnStepReport(stepRun, stepRunReportBuilder);
     }
-
 }

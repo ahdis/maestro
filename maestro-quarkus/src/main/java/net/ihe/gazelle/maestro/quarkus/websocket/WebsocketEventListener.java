@@ -2,18 +2,16 @@ package net.ihe.gazelle.maestro.quarkus.websocket;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.ObservesAsync;
-import jakarta.inject.Inject;
 import jakarta.websocket.SendResult;
 import jakarta.websocket.Session;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.FinishedStepEvent;
+import net.ihe.gazelle.maestro.api.technical.event.StepRunFinished;
 import net.ihe.gazelle.maestro.api.technical.dto.report.StepRunReportDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
-import net.ihe.gazelle.maestro.api.technical.event.FinishTestSetEvent;
+import net.ihe.gazelle.maestro.api.technical.event.TestSuiteFinished;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,31 +24,26 @@ public class WebsocketEventListener {
 
     private final TextSerDes serDes = new JacksonSerDes();
 
-    private final String datahouseUr;
-
-    @Inject
-    public WebsocketEventListener(@ConfigProperty(name = "datahouse.url") String datahouseUr) {
-        this.datahouseUr = datahouseUr;
+    public WebsocketEventListener() {
     }
 
-    public void onFinishTestSet(@ObservesAsync FinishTestSetEvent finishTestSetEvent) throws IOException {
-        String testSetId = finishTestSetEvent.getTestSetRun().getTestSetId();
+    public void onFinishTestSet(@ObservesAsync TestSuiteFinished testSuiteFinished) throws IOException {
+        String testSetId = testSuiteFinished.testSuiteRun().getInternalId();
         if (WebsocketSessionsInMemory.hasSession(testSetId)) {
-            sendTestRunCompleted(finishTestSetEvent);
+            sendTestRunCompleted(testSuiteFinished);
         }
     }
 
-    public void onFinishStep(@ObservesAsync FinishedStepEvent finishedStepEvent) {
-        if (WebsocketSessionsInMemory.hasSession(finishedStepEvent.getStepRun().testSetId())) {
-            sendTestStepCompleted(finishedStepEvent);
+    public void onFinishStep(@ObservesAsync StepRunFinished stepRunFinished) {
+        if (WebsocketSessionsInMemory.hasSession(stepRunFinished.stepRun().testSetId())) {
+            sendTestStepCompleted(stepRunFinished);
         }
     }
 
-    private void sendTestRunCompleted(FinishTestSetEvent finishTestSetEvent) throws IOException {
-        String testSetId = finishTestSetEvent.getTestSetRun().getTestSetId();
-        TestReportSummary testReportSummary = finishTestSetEvent.getReportSummary();
-        String locationPrefix = datahouseUr + "/items";
-        String content = serDes.serializeAsString(new TestReportSummaryDTO(testReportSummary, locationPrefix));
+    private void sendTestRunCompleted(TestSuiteFinished testSuiteFinished) throws IOException {
+        String testSetId = testSuiteFinished.testSuiteRun().getInternalId();
+        TestReportSummary testReportSummary = testSuiteFinished.reportSummary();
+        String content = serDes.serializeAsString(new TestReportSummaryDTO(testReportSummary));
         WSMessageDTO message = new WSMessageDTO(testSetId, "testRunCompleted", content);
         String serializedMessage = serDes.serializeAsString(message);
         LOG.info("Sending TestRunReport for testSetId : {}", testSetId);
@@ -62,9 +55,9 @@ public class WebsocketEventListener {
         }
     }
 
-    private void sendTestStepCompleted(FinishedStepEvent finishedStepEvent) {
-        String testSetId = finishedStepEvent.getStepRun().testSetId();
-        StepRunReport stepRunReport = finishedStepEvent.getStepRunReport().build();
+    private void sendTestStepCompleted(StepRunFinished stepRunFinished) {
+        String testSetId = stepRunFinished.stepRun().testSetId();
+        StepRunReport stepRunReport = stepRunFinished.stepRunReportBuilder().build();
         String content = serDes.serializeAsString(new StepRunReportDTO(stepRunReport));
         WSMessageDTO message = new WSMessageDTO(testSetId, "testStepCompleted", content);
         String serializedMessage = serDes.serializeAsString(message);

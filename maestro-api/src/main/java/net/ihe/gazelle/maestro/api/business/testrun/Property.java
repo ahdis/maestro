@@ -16,19 +16,13 @@
 
 package net.ihe.gazelle.maestro.api.business.testrun;
 
-import net.ihe.gazelle.maestro.api.business.testrun.context.Context;
-
 import java.util.Objects;
 
 /**
  * A structure containing a String name and a value of type T
- * Property are used to defined Step inputs.
- * {@link Step}
+ * Property reprensents inputs and outputs.
  * <br>
- * Context can also contain a list of Property.
- * {@link Context}
- * <br>
- * Property can also be a PropertyRef
+ * Property can also be a PropertyRef if they are variables.
  * {@link PropertyRef}
  * <br>
  * @param <T> Value type, can be any object

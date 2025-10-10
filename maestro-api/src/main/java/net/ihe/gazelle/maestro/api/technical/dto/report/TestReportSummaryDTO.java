@@ -22,17 +22,13 @@ import java.util.List;
 public class TestReportSummaryDTO implements DTO<TestReportSummary> {
 
     private final TestReportSummary testReportSummary;
-    private String location;
 
     public TestReportSummaryDTO() {
         this.testReportSummary = new TestReportSummary();
     }
 
-    public TestReportSummaryDTO(TestReportSummary testReportSummary, String locationPrefix) {
+    public TestReportSummaryDTO(TestReportSummary testReportSummary) {
         this.testReportSummary = testReportSummary;
-        if (testReportSummary != null && testReportSummary.getId() != null) {
-            this.location = locationPrefix + "/" + testReportSummary.getId();
-        }
     }
 
     @Override
@@ -70,11 +66,11 @@ public class TestReportSummaryDTO implements DTO<TestReportSummary> {
 
     @JsonProperty("location")
     public String getLocation() {
-        return location;
+        return getBusinessObject().getLocation();
     }
 
     public void setLocation(String location) {
-        this.location = location;
+        getBusinessObject().setLocation(location);
     }
 
     @JsonProperty("unexpectedErrors")

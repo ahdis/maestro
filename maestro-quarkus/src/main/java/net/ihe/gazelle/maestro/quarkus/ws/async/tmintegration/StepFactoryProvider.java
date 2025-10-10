@@ -20,7 +20,7 @@ import net.ihe.gazelle.maestro.api.business.testrun.DuplicatedStepsException;
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.api.business.testrun.Step;
 import net.ihe.gazelle.maestro.api.business.testrun.StepFactory;
-import net.ihe.gazelle.maestro.quarkus.NotProvidedStep;
+import net.ihe.gazelle.maestro.quarkus.UnknownStepType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,7 +35,7 @@ public class StepFactoryProvider {
         if (factory != null) {
             return factory.create(stepName, properties);
         } else {
-            throw new NotProvidedStep("Step type " + type + " not known");
+            throw new UnknownStepType(type);
         }
     }
 

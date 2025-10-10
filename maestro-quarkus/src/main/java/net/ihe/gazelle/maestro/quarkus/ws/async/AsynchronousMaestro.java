@@ -19,10 +19,10 @@ package net.ihe.gazelle.maestro.quarkus.ws.async;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import net.ihe.gazelle.maestro.api.business.testrun.MaestroEventProducer;
-import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
+import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.api.business.testrun.validator.TestSetRunValidator;
-import net.ihe.gazelle.maestro.api.technical.event.FinishTestSetEvent;
-import net.ihe.gazelle.maestro.quarkus.client.TestReportClient;
+import net.ihe.gazelle.maestro.api.technical.event.TestSuiteFinished;
+import net.ihe.gazelle.maestro.quarkus.client.MaestroCaller;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,37 +30,24 @@ import java.util.concurrent.ConcurrentHashMap;
 @ApplicationScoped
 public class AsynchronousMaestro {
 
-    private final Map<String, TestRunStore> runningServices;
-    private final MaestroEventProducer maestroEventProducer;
-    private final TestReportClient client;
-    private final TestSetRunValidator testSetRunValidator;
+   private static final Map<String, MaestroCaller> RUNNING_SESSIONS = new ConcurrentHashMap<>();
+   private final TestSetRunValidator testSetRunValidator = new TestSetRunValidator();
+   private final MaestroEventProducer maestroEventProducer;
 
-    @Inject
-    public AsynchronousMaestro(MaestroEventProducer maestroEventProducer, TestReportClient client) {
-        this.runningServices = new ConcurrentHashMap<>();
-        this.maestroEventProducer = maestroEventProducer;
-        this.client = client;
-        this.testSetRunValidator = new TestSetRunValidator();
-    }
+   @Inject
+   public AsynchronousMaestro(MaestroEventProducer maestroEventProducer) {
+      this.maestroEventProducer = maestroEventProducer;
+   }
 
-    public void executeTestSet(String callback, TestSetRun testSetRun) {
-        testSetRunValidator.assertValid(testSetRun);
-        TestRunStore store = new TestRunStore();
-        store.setClientCallback(callback);
-        runningServices.put(testSetRun.getTestSetId(), store);
-        maestroEventProducer.executeTestSet(testSetRun);
-    }
+   public void executeTestSuite(TestSuiteRun testSuiteRun, MaestroCaller caller) {
+      testSetRunValidator.assertValid(testSuiteRun);
+      RUNNING_SESSIONS.put(testSuiteRun.getInternalId(), caller);
+      maestroEventProducer.executeTestSet(testSuiteRun);
+   }
 
-    public void callback(FinishTestSetEvent finishTestSetEvent) {
-        TestRunStore store = runningServices.get(finishTestSetEvent.getTestSetRun().getTestSetId());
-        client.sendTestReport(
-                store.getCallbackAuthorization(),
-                store.getClientCallback(),
-                finishTestSetEvent.getReportSummary()
-        );
-    }
+   public void onTestSuiteFinished(TestSuiteFinished testSuiteFinished) {
+      MaestroCaller caller = RUNNING_SESSIONS.get(testSuiteFinished.testSuiteRun().getInternalId());
+      caller.onTestSuiteFinished(testSuiteFinished);
+   }
 
-    public boolean isServiceRunning(String testSetId) {
-        return runningServices.containsKey(testSetId);
-    }
 }

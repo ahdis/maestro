@@ -24,15 +24,14 @@ import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.MaestroEventProducer;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
-import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.FinishedStepEvent;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.StartStepCommand;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.StepMessage;
+import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
+import net.ihe.gazelle.maestro.api.technical.event.StepRunFinished;
+import net.ihe.gazelle.maestro.api.technical.event.StartStepRun;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 import net.ihe.gazelle.maestro.api.technical.event.*;
 
 /**
- * CDI Event is a specification that simplifies asynchronous messaging in Java microservices.
+ * CDI Message is a specification that simplifies asynchronous messaging in Java microservices.
  * It provides a framework for building reactive systems using standardized annotations and APIs to
  * interact with message brokers, Observers in our case.
  * It supports concepts like event-driven architecture, message publishing/subscribing, and
@@ -41,43 +40,41 @@ import net.ihe.gazelle.maestro.api.technical.event.*;
 @ApplicationScoped
 public class EventMaestroProducer implements MaestroEventProducer {
 
-    private final Event<TestRunEvent> testRunEvent;
-    private final Event<StepMessage> stepMessageEvent;
+    private final Event<Message> messageEvent;
 
     @Inject
-    public EventMaestroProducer(Event<TestRunEvent> testRunEvent, Event<StepMessage> stepMessageEvent) {
-        this.testRunEvent = testRunEvent;
-        this.stepMessageEvent = stepMessageEvent;
+    public EventMaestroProducer(Event<Message> messageEvent) {
+        this.messageEvent = messageEvent;
     }
 
     @Override
-    public void executeTestSet(TestSetRun testSetRun) {
-        testRunEvent.fireAsync(new StartTestSetCommand(testSetRun));
+    public void executeTestSet(TestSuiteRun testSuiteRun) {
+        messageEvent.fireAsync(new StartTestSuite(testSuiteRun));
     }
 
     @Override
-    public void returnTestSetReport(TestSetRun testSetRun, TestReportSummary reportSummary) {
-        testRunEvent.fireAsync(new FinishTestSetEvent(testSetRun, reportSummary));
+    public void returnTestSetReport(TestSuiteRun testSuiteRun, TestReportSummary reportSummary) {
+        messageEvent.fireAsync(new TestSuiteFinished(testSuiteRun, reportSummary));
     }
 
     @Override
     public void returnTestRunReport(TestRun testRun, TestRunReportBuilder report) {
-        testRunEvent.fireAsync(new FinishTestRunEvent(testRun, report));
+        messageEvent.fireAsync(new TestRunFinished(testRun, report));
     }
 
     @Override
     public void executeStep(StepRun stepRun) {
-        stepMessageEvent.fireAsync(new StartStepCommand(stepRun));
+       messageEvent.fireAsync(new StartStepRun(stepRun));
     }
 
     @Override
     public void returnStepReport(StepRun stepRun, StepRunReportBuilder report) {
-        stepMessageEvent.fireAsync(new FinishedStepEvent(report, stepRun));
+       messageEvent.fireAsync(new StepRunFinished(stepRun, report));
     }
 
     @Override
     public void emitErrorTestRunEvent(Exception exception) {
-        testRunEvent.fireAsync(new ErrorTestRunEvent(exception));
+        messageEvent.fireAsync(new ErrorTestRunEvent(exception));
     }
 
 }

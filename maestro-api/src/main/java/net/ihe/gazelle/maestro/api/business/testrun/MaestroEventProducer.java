@@ -31,16 +31,16 @@ public interface MaestroEventProducer {
 
     /**
      * Method called when starting a new test set execution
-     * @param testSetRun The set of tests to be run
+     * @param testSuiteRun The set of tests to be run
      */
-    void executeTestSet(TestSetRun testSetRun);
+    void executeTestSet(TestSuiteRun testSuiteRun);
 
     /**
      * Method called when a testSet execution ended to return a result summary
-     * @param testSetRun Previously executed TestSet
+     * @param testSuiteRun Previously executed TestSet
      * @param reportSummary The summary of the test set execution
      */
-    void returnTestSetReport(TestSetRun testSetRun, TestReportSummary reportSummary);
+    void returnTestSetReport(TestSuiteRun testSuiteRun, TestReportSummary reportSummary);
 
     /**
      * Method called when a TestRun execution ended to continue iteration on TestRuns

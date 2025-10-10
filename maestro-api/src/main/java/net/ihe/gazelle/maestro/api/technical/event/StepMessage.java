@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.api.business.testrun.runner;
+package net.ihe.gazelle.maestro.api.technical.event;
+
+import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 
 /**
  * <p>
@@ -26,12 +28,13 @@ package net.ihe.gazelle.maestro.api.business.testrun.runner;
  * This abstract class should not be used directly to send message. Use inheritors class instead :
  * </p>
  * <p>
- * {@link FinishedStepEvent}
+ * {@link StepRunFinished}
  * </p>
  * <p>
- * {@link StartStepCommand}
+ * {@link StartStepRun}
  * </p>
  */
+@Deprecated
 public abstract class StepMessage {
     private final StepRun stepRun;
 

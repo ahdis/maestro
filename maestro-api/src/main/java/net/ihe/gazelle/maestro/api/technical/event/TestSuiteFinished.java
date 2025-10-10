@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.quarkus.jobs;
+package net.ihe.gazelle.maestro.api.technical.event;
 
-import net.ihe.gazelle.maestro.api.business.testrun.runner.StepMessage;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
+import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 
-public interface StepRunEventListener {
-
-    void receiveStepEvent(StepMessage stepMessage);
+/**
+ * A message to notify that a TestSet Execution Ended and to send a TestReport
+ */
+public record TestSuiteFinished(TestSuiteRun testSuiteRun, TestReportSummary reportSummary) implements Message {
 
 }

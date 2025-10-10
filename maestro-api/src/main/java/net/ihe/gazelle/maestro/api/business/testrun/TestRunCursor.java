@@ -36,11 +36,11 @@ public final class TestRunCursor {
         return new TestRunCursor(List.of());
     }
 
-    public static TestRunCursor from(TestSetRun testSetRun) {
-        if (testSetRun == null) {
+    public static TestRunCursor from(TestSuiteRun testSuiteRun) {
+        if (testSuiteRun == null) {
             return empty();
         }
-        return new TestRunCursor(testSetRun.getTestRuns());
+        return new TestRunCursor(testSuiteRun.getTestRuns());
     }
 
     public boolean hasNext() {

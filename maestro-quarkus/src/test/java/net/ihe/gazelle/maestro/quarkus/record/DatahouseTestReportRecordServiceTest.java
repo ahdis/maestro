@@ -1,6 +1,8 @@
 package net.ihe.gazelle.maestro.quarkus.record;
 
 import net.ihe.gazelle.maestro.api.business.testreport.*;
+import net.ihe.gazelle.maestro.business.TestReportRecordService;
+import net.ihe.gazelle.maestro.business.TestReportRecordService.ItemReference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -35,9 +37,10 @@ class DatahouseTestReportRecordServiceTest {
                 .setResult(Result.UNDEFINED)
                 .addTestRunReport(run);
 
-        String id = service.recordTestReportWithReferences(report);
+        ItemReference reportRef = service.recordTestReportWithReferences(report);
 
-        assertThat(id).isNotBlank();
+        assertThat(reportRef.id()).isNotBlank();
+        assertThat(reportRef.location()).isNotBlank();
         assertThat(recordItemClientMock.uploadedAttachmentsBatches).hasSize(1);
         assertThat(recordItemClientMock.uploadedAttachmentsBatches.get(0)).hasSize(2);
 
@@ -113,7 +116,7 @@ class DatahouseTestReportRecordServiceTest {
                 .setResult(Result.UNDEFINED)
                 .addTestRunReport(run);
 
-        String reportItemId = service.recordTestReportWithReferences(report);
+        ItemReference reportRef = service.recordTestReportWithReferences(report);
 
         // two items for outputs, then one for the main report
         assertThat(recordItemClientMock.recordedItems).hasSize(3);
@@ -121,7 +124,8 @@ class DatahouseTestReportRecordServiceTest {
         assertThat(out2.getReference()).isEqualTo("http://dh/items/itm-2");
         assertThat(out1.getContent()).isNull();
         assertThat(out2.getContent()).isNull();
-        assertThat(reportItemId).isEqualTo("itm-3");
+        assertThat(reportRef.id()).isEqualTo("itm-3");
+        assertThat(reportRef.location()).isEqualTo("http://dh/items/itm-3");
     }
 
     @Test
@@ -140,7 +144,7 @@ class DatahouseTestReportRecordServiceTest {
                 .setResult(Result.UNDEFINED)
                 .addTestRunReport(run);
 
-        String reportItemId = service.recordTestReportWithReferences(report);
+        ItemReference reportRef = service.recordTestReportWithReferences(report);
 
         // one batch upload for two attachments; only main report item recorded
         assertThat(recordItemClientMock.uploadedAttachmentsBatches).hasSize(1);
@@ -150,7 +154,8 @@ class DatahouseTestReportRecordServiceTest {
         assertThat(out2.getReference()).isEqualTo("/attachments/att-2");
         assertThat(out1.getContent()).isNull();
         assertThat(out2.getContent()).isNull();
-        assertThat(reportItemId).isEqualTo("itm-1");
+        assertThat(reportRef.id()).isEqualTo("itm-1");
+         assertThat(reportRef.location()).isEqualTo("http://dh/items/itm-1");
     }
 
     @Test
@@ -169,7 +174,7 @@ class DatahouseTestReportRecordServiceTest {
                 .setResult(Result.UNDEFINED)
                 .addTestRunReport(run);
 
-        String reportItemId = service.recordTestReportWithReferences(report);
+        ItemReference reportRef = service.recordTestReportWithReferences(report);
 
         // one output as item, one as attachment, plus main report item
         assertThat(recordItemClientMock.recordedItems).hasSize(2);
@@ -178,6 +183,7 @@ class DatahouseTestReportRecordServiceTest {
         assertThat(txtOut.getReference()).isEqualTo("/attachments/att-1");
         assertThat(jsonOut.getContent()).isNull();
         assertThat(txtOut.getContent()).isNull();
-        assertThat(reportItemId).isEqualTo("itm-2");
+        assertThat(reportRef.id()).isEqualTo("itm-2");
+         assertThat(reportRef.location()).isEqualTo("http://dh/items/itm-2");
     }
 }

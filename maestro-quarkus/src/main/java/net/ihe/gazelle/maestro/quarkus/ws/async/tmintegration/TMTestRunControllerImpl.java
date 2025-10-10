@@ -22,10 +22,12 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import net.ihe.gazelle.maestro.api.business.testrun.InvalidTestRunException;
-import net.ihe.gazelle.maestro.business.MissingArgumentException;
-import net.ihe.gazelle.maestro.quarkus.NotProvidedStep;
+import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
+import net.ihe.gazelle.maestro.quarkus.UnknownStepType;
+import net.ihe.gazelle.maestro.quarkus.client.ApacheTestReportClient;
 import net.ihe.gazelle.maestro.quarkus.jobs.SynchronousMaestro;
 import net.ihe.gazelle.maestro.quarkus.ws.ParsingErrorException;
+import net.ihe.gazelle.maestro.quarkus.ws.async.AsynchronousMaestro;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,17 +36,22 @@ public class TMTestRunControllerImpl implements TMTestRunController {
 
     private static final Logger LOG = LoggerFactory.getLogger(TMTestRunControllerImpl.class);
 
-    private final TMTestRunMaestro tmTestRunMaestro;
+    private final AsynchronousMaestro asynchronousMaestro;
 
     @Inject
-    public TMTestRunControllerImpl(TMTestRunMaestro tmTestRunMaestro) {
-        this.tmTestRunMaestro = tmTestRunMaestro;
+    public TMTestRunControllerImpl(AsynchronousMaestro tmTestRunMaestro) {
+        this.asynchronousMaestro = tmTestRunMaestro;
     }
 
     @Override
-    public Response run(JsonNode tmTestRunScript) {
+    public Response run(JsonNode testSetNode) {
         try {
-            tmTestRunMaestro.startTestSet(tmTestRunScript);
+           RestCallbackId callbackId = new RestCallbackId();
+           TestSuiteRun testSuiteRun = TMScriptMapper.convertToTestSetRun(testSetNode, callbackId);
+           asynchronousMaestro.executeTestSuite(
+                 testSuiteRun,
+                 new ApacheTestReportClient(callbackId.getCallbackAuthorization(), callbackId.getCallbackUrl())
+           );
             return Response.ok().build();
         } catch (WebApplicationException e) {
             return Response.status(Response.Status.GATEWAY_TIMEOUT.getStatusCode()).entity(SynchronousMaestro.TIMEOUT_MESSAGE).build();
@@ -54,7 +61,7 @@ public class TMTestRunControllerImpl implements TMTestRunController {
         } catch (InvalidTestRunException | IllegalArgumentException e) {
             LOG.debug("TestRun format Exception", e);
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity("the request contains a testRun with bad format" + e).build();
-        } catch (NotProvidedStep e) {
+        } catch (UnknownStepType e) {
             LOG.debug(e.getMessage());
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity("Your script contains a non provided testreport" + e).build();
         } catch (Exception e) {

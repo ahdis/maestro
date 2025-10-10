@@ -14,22 +14,19 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.api.technical.event;
+package net.ihe.gazelle.maestro.quarkus.dto;
 
-import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.quarkus.jackson.ObjectMapperCustomizer;
+import jakarta.inject.Singleton;
+import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSubTypingDTOModule;
+import net.ihe.gazelle.modelmarshaller.technical.jackson.ObjectMapperBuilder;
 
-/**
- * A message to launch test set execution
- */
-public class StartTestSetCommand implements TestRunEvent{
+@Singleton
+public class RegisterCustomModuleCustomizer implements ObjectMapperCustomizer {
 
-    private final TestSetRun testSetRun;
-
-    public StartTestSetCommand(TestSetRun testSetRun) {
-        this.testSetRun = testSetRun;
+    public void customize(ObjectMapper mapper) {
+          ObjectMapperBuilder.applyGazelleSettings(mapper);
     }
 
-    public TestSetRun getTestSetRun() {
-        return testSetRun;
-    }
 }

@@ -18,7 +18,7 @@ package net.ihe.gazelle.maestro.business;
 
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.api.business.testrun.PropertyRef;
-import net.ihe.gazelle.maestro.api.business.testrun.context.Context;
+import net.ihe.gazelle.maestro.business.context.Context;
 
 import java.util.NoSuchElementException;
 

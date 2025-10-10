@@ -20,7 +20,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
-import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSetRunDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSuiteRunDTO;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
@@ -51,7 +51,7 @@ public interface TestRunController {
      *     <li><b>Execution went well</b> : 202 If callback is present and run is asynchronous </li>
      *     <li><b>Request couldn't be Parsed</b> : 400 + ParsingErrorException or MissingArgumentException</li>
      *     <li><b>TestRun isn't valid</b> : 400 + InvalidTestRunException</li>
-     *     <li><b>Request try to execute an unsupported Step</b> : 400 + NotProvidedStep</li>
+     *     <li><b>Request try to execute an unsupported Step</b> : 400 + UnknownStepType</li>
      *     <li><b>Unknown Error occurred</b> : 500 + Exception</li>
      *     <li><b>Timeout exception</b> : 504 + message explaining why timeout occurred</li>
      * </ul>
@@ -108,10 +108,10 @@ public interface TestRunController {
                     required = true,
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON,
-                            schema = @Schema(implementation = TestSetRunDTO.class),
+                            schema = @Schema(implementation = TestSuiteRunDTO.class),
                             example = TEST_RUN
                     )
-            ) TestSetRunDTO testSetRun
+            ) TestSuiteRunDTO testSetRun
     );
 
     String TEST_RUN = """

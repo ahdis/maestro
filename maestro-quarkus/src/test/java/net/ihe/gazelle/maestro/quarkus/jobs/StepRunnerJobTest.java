@@ -6,9 +6,11 @@ package net.ihe.gazelle.maestro.quarkus.jobs;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.MaestroEventProducer;
 import net.ihe.gazelle.maestro.api.business.testrun.Step;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.StartStepCommand;
+import net.ihe.gazelle.maestro.api.technical.event.StartStepRun;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunner;
+import net.ihe.gazelle.maestro.business.StepRunnerJob;
+import net.ihe.gazelle.maestro.business.StepRunnerProvider;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
 import org.junit.jupiter.api.Test;
 
@@ -34,7 +36,7 @@ class StepRunnerJobTest {
         StepRunnerJob job = new StepRunnerJob(provider, producer);
         Step step = new ValidationStep();
         step.setName("s");
-        StartStepCommand cmd = new StartStepCommand(stepRunFor(step));
+        StartStepRun cmd = new StartStepRun(stepRunFor(step));
         job.launchStepExecution(cmd);
 
         verify(producer, timeout(500)).returnStepReport(any(StepRun.class), any(StepRunReportBuilder.class));
@@ -49,7 +51,7 @@ class StepRunnerJobTest {
         StepRunnerJob job = new StepRunnerJob(provider, producer);
         Step step = new ValidationStep();
         step.setName("s");
-        job.launchStepExecution(new StartStepCommand(stepRunFor(step)));
+        job.launchStepExecution(new StartStepRun(stepRunFor(step)));
 
         verify(producer, timeout(500)).returnStepReport(any(StepRun.class), any(StepRunReportBuilder.class));
     }

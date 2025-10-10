@@ -16,7 +16,12 @@
 
 package net.ihe.gazelle.maestro.api.technical.event;
 
-public interface TestRunEvent {
 
+import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
+
+/**
+ * A message to start TestRun Execution
+ */
+public record StartTestRun(TestRun testRun) implements Message {
 
 }

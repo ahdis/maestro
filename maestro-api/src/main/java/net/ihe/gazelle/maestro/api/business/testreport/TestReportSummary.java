@@ -9,6 +9,7 @@ import java.util.List;
 public class TestReportSummary {
 
     private String id;
+    private String location;
     private Date dateTime;
     private Result result;
     private List<UnexpectedError> unexpectedErrors;
@@ -40,7 +41,16 @@ public class TestReportSummary {
         return this;
     }
 
-    public Date getDateTime() {
+   public String getLocation() {
+      return location;
+   }
+
+   public TestReportSummary setLocation(String location) {
+      this.location = location;
+      return this;
+   }
+
+   public Date getDateTime() {
         return dateTime;
     }
 
@@ -72,21 +82,16 @@ public class TestReportSummary {
         return this;
     }
 
-    public boolean isIdValid() {
+    public boolean isIdDefined() {
         return id != null && !id.isBlank();
     }
 
-    public boolean isDateTimeValid() {
+    public boolean isDateTimeDefined() {
         return dateTime != null && !dateTime.after(new Date());
     }
 
-    public boolean isResultValid() {
+    public boolean isResultDefined() {
         return result != null;
     }
-
-    public boolean isValid() {
-        return isIdValid() && isDateTimeValid() && isResultValid();
-    }
-
 
 }

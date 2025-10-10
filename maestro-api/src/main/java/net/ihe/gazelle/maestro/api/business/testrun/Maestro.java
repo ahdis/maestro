@@ -18,9 +18,6 @@ package net.ihe.gazelle.maestro.api.business.testrun;
 
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReportBuilder;
-import net.ihe.gazelle.maestro.api.business.testrun.context.Context;
-import net.ihe.gazelle.maestro.api.business.testrun.context.TestRunSessionStore;
-import net.ihe.gazelle.maestro.api.business.testrun.context.TestSetSessionStore;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 
 /**
@@ -29,40 +26,25 @@ import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 public interface Maestro {
 
     /**
-     * Start execution of a TestRun by initializing a testRun session.
-     * {@link TestRunSessionStore}
-     * <br>
-     * Create a new context containing TestRun's inputs and run first test step of testRun if it's valid.
-     * {@link Context}
-     * {@link TestRun}
-     * <p>
-     * If testRun is null, it emits an exception.
-     * If testRun is not null, but is not valid, it sends a report with undefined result containing an unexpectedError
-     * caused by <b>MissingArgumentException</b> or <b>DuplicatedStepsException</b>.
-     *</p>
+     * Start execution of a TestRun.
+     *
      * @param testRun the testRun containing automated steps to execute
+     *
+     * @throws InvalidTestRunException if testRun is null or not valid
      */
     void run(TestRun testRun);
 
     /**
-     * Start execution of a test set by initializing a test set session.
-     * {@link TestSetRun}
-     * <br>
-     * Instance a new TestSetSessionStore in SessionsStore.
-     * {@link TestSetSessionStore}
-     * <br>
-     * Run first testRun if it's valid.
-     * <p>
-     * If test set's id is null, it emits an InvalidTestSetException.
-     * If test set's id is not null, but testSet is not valid, it sends a report with undefined result containing an unexpectedError
-     * caused by an <b>IllegalArgumentException</b>
-     * </p>
-     * @param testSetRun the testSetRun containing a list of testRun and an id
+     * Execution all tests of a test suite
+     *
+     * @param testSuiteRun the testSuiteRun containing a list of testRun and an id
+     *
+     * @throws InvalidTestSetException if testSuiteRun is null or not valid
      */
-    void run(TestSetRun testSetRun);
+    void run(TestSuiteRun testSuiteRun);
 
     /**
-     * Method called by MaestroListener when receiving a FinishTestRunEvent message
+     * Method called by MaestroListener when receiving a TestRunFinished message
      * @param testRun The testRun previously executed
      * @param testRunReportBuilder The Report Builder of previous TestRun execution
      */

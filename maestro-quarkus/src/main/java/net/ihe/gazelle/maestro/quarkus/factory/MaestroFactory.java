@@ -22,15 +22,11 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.Produces;
 import net.ihe.gazelle.maestro.api.business.testrun.Maestro;
 import net.ihe.gazelle.maestro.api.business.testrun.MaestroEventProducer;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.ConfigProvider;
 import net.ihe.gazelle.maestro.business.MaestroImpl;
-import net.ihe.gazelle.maestro.business.SessionStoreContext;
+import net.ihe.gazelle.maestro.business.context.SessionStore;
 import net.ihe.gazelle.maestro.business.TestReportRecordService;
-import net.ihe.gazelle.maestro.quarkus.ServiceRegistry;
-import net.ihe.gazelle.maestro.business.SessionStoreContextImpl;
-import net.ihe.gazelle.maestro.quarkus.StepRunnerProviderSPI;
-import net.ihe.gazelle.maestro.quarkus.handler.HandlerProviderSPI;
-import net.ihe.gazelle.maestro.quarkus.jobs.StepRunnerProvider;
+import net.ihe.gazelle.maestro.business.StepRunnerJob;
+import net.ihe.gazelle.maestro.business.StepRunnerProvider;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 
@@ -38,36 +34,35 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 public class MaestroFactory {
 
 
-    @ConfigProperty(name = "quarkus.application.version")
-    String applicationVersion;
+   @ConfigProperty(name = "quarkus.application.version")
+   String applicationVersion;
 
-    private final ServiceRegistry serviceRegistry;
-    private final MaestroEventProducer maestroEventProducer;
-    private final SessionStoreContext sessionStoreContext;
-    private final TestReportRecordService testReportRecordService;
-    private final ConfigProvider configProvider;
+   private final MaestroEventProducer maestroEventProducer;
+   private final SessionStore sessionStore;
+   private final TestReportRecordService testReportRecordService;
+   private final StepRunnerProvider stepRunnerProvider;
 
-    @Inject
-    public MaestroFactory(ServiceRegistry serviceRegistry, MaestroEventProducer maestroEventProducer,
-                          SessionStoreContext sessionStoreContext, ConfigProvider configProvider,
-                          TestReportRecordService testReportRecordService) {
-        this.testReportRecordService = testReportRecordService;
-        this.serviceRegistry = serviceRegistry;
-        this.maestroEventProducer = maestroEventProducer;
-        this.sessionStoreContext = sessionStoreContext;
-        this.configProvider = configProvider;
-    }
+   @Inject
+   public MaestroFactory(MaestroEventProducer maestroEventProducer,
+                         SessionStore sessionStore,
+                         TestReportRecordService testReportRecordService,
+                         StepRunnerProvider stepRunnerProvider) {
+      this.maestroEventProducer = maestroEventProducer;
+      this.sessionStore = sessionStore;
+      this.testReportRecordService = testReportRecordService;
+      this.stepRunnerProvider = stepRunnerProvider;
+   }
 
-    @Produces
-    @Default
-    public StepRunnerProvider getStepRunnerProvider() {
-        return new StepRunnerProviderSPI(new HandlerProviderSPI(serviceRegistry, configProvider));
-    }
+   @Produces
+   @Default
+   public Maestro getMaestro() {
+      return new MaestroImpl(maestroEventProducer, sessionStore, testReportRecordService, applicationVersion);
+   }
 
-    @Produces
-    @Default
-    public Maestro getMaestro() {
-        return new MaestroImpl(maestroEventProducer, sessionStoreContext, testReportRecordService, applicationVersion);
-    }
+   @Produces
+   @Default
+   public StepRunnerJob getStepRunnerJob() {
+      return new StepRunnerJob(stepRunnerProvider, maestroEventProducer);
+   }
 
 }

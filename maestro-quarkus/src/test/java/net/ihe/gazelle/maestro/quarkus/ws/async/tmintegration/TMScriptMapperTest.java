@@ -9,10 +9,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import net.ihe.gazelle.maestro.api.business.testreport.SystemUnderTest;
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
-import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
-import net.ihe.gazelle.maestro.business.MissingArgumentException;
+import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.itb.step.business.ItbStep;
-import net.ihe.gazelle.maestro.quarkus.ws.async.TestRunStore;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 import org.junit.jupiter.api.Test;
@@ -87,11 +85,11 @@ class TMScriptMapperTest {
         runs.add(minimalTestRunNode("test-A"));
         root.set(TMScriptMapper.TEST_RUNS, runs);
 
-        TestRunStore store = new TestRunStore();
-        TestSetRun tsr = TMScriptMapper.convertToTestSetRun(root, store);
+        RestCallbackId store = new RestCallbackId();
+        TestSuiteRun tsr = TMScriptMapper.convertToTestSetRun(root, store);
 
         assertEquals("suite-1", tsr.getTestSuiteName());
-        assertEquals("tsr-123", tsr.getTestSetRunId());
+        assertEquals("tsr-123", tsr.getTestSuiteClientId());
         AccessControlList acl = tsr.getAccessControlList();
         assertTrue(acl.getOwners().contains("alice"));
 
@@ -109,7 +107,7 @@ class TMScriptMapperTest {
         assertEquals("test-A", trs.getFirst().getTest().getId());
         assertEquals(0, trs.getFirst().getTest().getSteps().size());
 
-        assertEquals("http://callback", store.getClientCallback());
+        assertEquals("http://callback", store.getCallbackUrl());
         assertEquals("Bearer token", store.getCallbackAuthorization());
     }
 
@@ -129,7 +127,7 @@ class TMScriptMapperTest {
         runs.add(run);
         root.set(TMScriptMapper.TEST_RUNS, runs);
 
-        TestSetRun tsr = TMScriptMapper.convertToTestSetRun(root, new TestRunStore());
+        TestSuiteRun tsr = TMScriptMapper.convertToTestSetRun(root, new RestCallbackId());
         Property<?> in = tsr.getTestRuns().getFirst().getInputs().getFirst();
         assertEquals("payload", in.getName());
         assertArrayEquals("hello".getBytes(StandardCharsets.UTF_8), (byte[]) in.getValue());
@@ -158,7 +156,7 @@ class TMScriptMapperTest {
         runs.add(run);
         root.set(TMScriptMapper.TEST_RUNS, runs);
 
-        TestSetRun tsr = TMScriptMapper.convertToTestSetRun(root, new TestRunStore());
+        TestSuiteRun tsr = TMScriptMapper.convertToTestSetRun(root, new RestCallbackId());
         List<Property<?>> properties = tsr.getTestRuns().getFirst().getInputs();
 
         Property<?> text = properties.stream().filter(p -> "textInput".equals(p.getName())).findFirst().orElseThrow();
@@ -192,7 +190,7 @@ class TMScriptMapperTest {
         runs.add(run);
         root.set(TMScriptMapper.TEST_RUNS, runs);
 
-        TestSetRun tsr = TMScriptMapper.convertToTestSetRun(root, new TestRunStore());
+        TestSuiteRun tsr = TMScriptMapper.convertToTestSetRun(root, new RestCallbackId());
         Property<?> text = tsr.getTestRuns().getFirst().getInputs().getFirst();
         assertInstanceOf(String.class, text.getValue());
         assertEquals("plain", text.getValue());
@@ -204,7 +202,7 @@ class TMScriptMapperTest {
         ObjectNode root1 = mapper.createObjectNode();
         root1.set(TMScriptMapper.TEST_RUNS, mapper.createArrayNode().add(mapper.createObjectNode()));
         root1.put(TMScriptMapper.TEST_SET_RUN_ID, "tsr");
-        TestRunStore testRunDAO = new TestRunStore();
+        RestCallbackId testRunDAO = new RestCallbackId();
         MissingArgumentException ex1 = assertThrows(MissingArgumentException.class, () -> TMScriptMapper.convertToTestSetRun(root1, testRunDAO));
         assertEquals("Argument testSuiteName is missing", ex1.getMessage());
 
@@ -247,7 +245,7 @@ class TMScriptMapperTest {
         runs.add(minimalTestRunNode("t"));
         root.set(TMScriptMapper.TEST_RUNS, runs);
 
-        TestSetRun tsr = TMScriptMapper.convertToTestSetRun(root, new TestRunStore());
+        TestSuiteRun tsr = TMScriptMapper.convertToTestSetRun(root, new RestCallbackId());
         AccessControlList parsed = tsr.getAccessControlList();
         assertEquals(Set.of("alice"), parsed.getOwners());
         assertEquals(Set.of("r1", "r2"), parsed.getReaders());
@@ -289,7 +287,7 @@ class TMScriptMapperTest {
         ArrayNode runs = mapper.createArrayNode().add(run);
         root.set(TMScriptMapper.TEST_RUNS, runs);
 
-        TestSetRun converted = TMScriptMapper.convertToTestSetRun(root, new TestRunStore());
+        TestSuiteRun converted = TMScriptMapper.convertToTestSetRun(root, new RestCallbackId());
         TestRun testRun = converted.getTestRuns().getFirst();
 
         Property<?> requiredInput = testRun.getInputs().stream()
@@ -327,7 +325,7 @@ class TMScriptMapperTest {
 
         root.set(TMScriptMapper.TEST_RUNS, mapper.createArrayNode().add(run));
 
-        TestSetRun converted = TMScriptMapper.convertToTestSetRun(root, new TestRunStore());
+        TestSuiteRun converted = TMScriptMapper.convertToTestSetRun(root, new RestCallbackId());
         assertEquals(ItbStep.TYPE, converted.getTestRuns().getFirst().getTest().getSteps().getFirst().getType());
     }
 
@@ -339,7 +337,7 @@ class TMScriptMapperTest {
 
         root.set(TMScriptMapper.TEST_RUNS, mapper.createArrayNode().add(run));
 
-        TestRunStore testRunDAO = new TestRunStore();
+        RestCallbackId testRunDAO = new RestCallbackId();
         MissingArgumentException exception = assertThrows(MissingArgumentException.class, () -> TMScriptMapper.convertToTestSetRun(root, testRunDAO));
         assertEquals("Argument inputs is missing in testRun", exception.getMessage());
     }

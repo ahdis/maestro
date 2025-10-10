@@ -20,12 +20,11 @@ import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.event.ObservesAsync;
 import jakarta.inject.Inject;
 import net.ihe.gazelle.maestro.api.business.testrun.Maestro;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.FinishedStepEvent;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.StartStepCommand;
+import net.ihe.gazelle.maestro.api.technical.event.StepRunFinished;
+import net.ihe.gazelle.maestro.api.technical.event.StartStepRun;
 import net.ihe.gazelle.maestro.api.technical.event.*;
-import net.ihe.gazelle.maestro.quarkus.websocket.WebsocketSessionsInMemory;
+import net.ihe.gazelle.maestro.business.StepRunnerJob;
 import net.ihe.gazelle.maestro.quarkus.ws.async.AsynchronousMaestro;
-import net.ihe.gazelle.maestro.quarkus.ws.async.tmintegration.TMTestRunMaestro;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,49 +37,38 @@ public class EventListener {
     private static final Logger LOG = LoggerFactory.getLogger(EventListener.class);
 
     private final Maestro engine;
-    private final SynchronousMaestro synchronousMaestro;
     private final AsynchronousMaestro asynchronousMaestro;
     private final StepRunnerJob stepRunnerJob;
-    private final TMTestRunMaestro tmTestRunMaestro;
 
     @Inject
-    public EventListener(Maestro engine, SynchronousMaestro synchronousMaestro, AsynchronousMaestro asynchronousMaestro, StepRunnerJob stepRunnerJob, TMTestRunMaestro tmTestRunMaestro) {
+    public EventListener(Maestro engine, SynchronousMaestro synchronousMaestro, AsynchronousMaestro asynchronousMaestro, StepRunnerJob stepRunnerJob) {
         this.engine = engine;
-        this.synchronousMaestro = synchronousMaestro;
         this.asynchronousMaestro = asynchronousMaestro;
         this.stepRunnerJob = stepRunnerJob;
-        this.tmTestRunMaestro = tmTestRunMaestro;
     }
 
-    public void onStartTestSet(@ObservesAsync StartTestSetCommand startTestSetCommand) {
-        engine.run(startTestSetCommand.getTestSetRun());
+    public void onStartTestSet(@ObservesAsync StartTestSuite startTestSuite) {
+        engine.run(startTestSuite.testSuiteRun());
     }
 
-    public void onFinishTestSet(@ObservesAsync FinishTestSetEvent finishTestSetEvent) {
-        String testSetId = finishTestSetEvent.getTestSetRun().getTestSetId();
-        if (asynchronousMaestro.isServiceRunning(testSetId)) {
-            asynchronousMaestro.callback(finishTestSetEvent);
-        } else if (tmTestRunMaestro.isServiceRunning(testSetId)) {
-            tmTestRunMaestro.callbackTM(finishTestSetEvent);
-        } else if (!WebsocketSessionsInMemory.hasSession(testSetId)) {
-            synchronousMaestro.completeFuture(finishTestSetEvent);
-        }
+    public void onFinishTestSet(@ObservesAsync TestSuiteFinished testSuiteFinished) {
+       asynchronousMaestro.onTestSuiteFinished(testSuiteFinished);
     }
 
-    public void onStartTestRun(@Observes StartTestRunCommand startTestRunCommand) {
-        engine.run(startTestRunCommand.getTestRun());
+    public void onStartTestRun(@Observes StartTestRun startTestRun) {
+        engine.run(startTestRun.testRun());
     }
 
-    public void onFinishTestRun(@ObservesAsync FinishTestRunEvent finishTestRunEvent) {
-        engine.finishTest(finishTestRunEvent.getTestRun(), finishTestRunEvent.getTestRunReportBuilder());
+    public void onFinishTestRun(@ObservesAsync TestRunFinished testRunFinished) {
+        engine.finishTest(testRunFinished.testRun(), testRunFinished.testRunReportBuilder());
     }
 
-    public void onStartStep(@ObservesAsync StartStepCommand startStepCommand) {
-        stepRunnerJob.launchStepExecution(startStepCommand);
+    public void onStartStep(@ObservesAsync StartStepRun startStepRun) {
+        stepRunnerJob.launchStepExecution(startStepRun);
     }
 
-    public void onFinishStep(@ObservesAsync FinishedStepEvent finishedStepEvent) {
-        engine.finishStep(finishedStepEvent.getStepRun(), finishedStepEvent.getStepRunReport());
+    public void onFinishStep(@ObservesAsync StepRunFinished stepRunFinished) {
+        engine.finishStep(stepRunFinished.stepRun(), stepRunFinished.stepRunReportBuilder());
     }
 
     public void onErrorTestRunEvent(@ObservesAsync ErrorTestRunEvent errorTestRunEvent) {

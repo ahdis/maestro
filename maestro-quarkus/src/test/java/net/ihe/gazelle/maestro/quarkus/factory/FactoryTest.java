@@ -18,45 +18,54 @@ package net.ihe.gazelle.maestro.quarkus.factory;
 
 import net.ihe.gazelle.maestro.api.business.testrun.Maestro;
 import net.ihe.gazelle.maestro.business.MaestroImpl;
-import net.ihe.gazelle.maestro.business.SessionStoreContextImpl;
+import net.ihe.gazelle.maestro.business.context.SessionStoreImpl;
+import net.ihe.gazelle.maestro.business.TestReportRecordService.ItemReference;
 import net.ihe.gazelle.maestro.quarkus.StepRunnerProviderSPI;
 import net.ihe.gazelle.maestro.quarkus.configuration.ServiceRegistryDAOImpl;
 import net.ihe.gazelle.maestro.quarkus.configuration.ServiceRegistryImpl;
 import net.ihe.gazelle.maestro.quarkus.jobs.EventMaestroProducer;
-import net.ihe.gazelle.maestro.quarkus.jobs.StepRunnerProvider;
-import net.ihe.gazelle.maestro.quarkus.mock.StepMockEvent;
+import net.ihe.gazelle.maestro.business.StepRunnerProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-class MaestroFactoryTest {
+class FactoryTest {
 
-    MaestroFactory maestroFactory;
+   MaestroFactory maestroFactory;
+   ServicesFactory servicesFactory;
 
-    @BeforeEach
-    void setUp() {
-        TestRunMockEvent testRunMockEvent = new TestRunMockEvent();
-        StepMockEvent stepMockEvent = new StepMockEvent();
-        maestroFactory = new MaestroFactory(new ServiceRegistryImpl(new ServiceRegistryDAOImpl()),
-                new EventMaestroProducer(testRunMockEvent, stepMockEvent),
-                new SessionStoreContextImpl(),
-                null, testReport -> "test");
-    }
+   @BeforeEach
+   void setUp() {
+      TestRunMockEvent testRunMockEvent = new TestRunMockEvent();
 
-    @Test
-    void getMaestroTest(){
-        Maestro maestro = maestroFactory.getMaestro();
-        assertNotNull(maestro);
-        assertInstanceOf(MaestroImpl.class, maestro);
-    }
+      servicesFactory = new ServicesFactory(
+            new ServiceRegistryImpl(new ServiceRegistryDAOImpl()),
+            null
+      );
 
-    @Test
-    void getStepRunnerProviderTest(){
-        StepRunnerProvider provider = maestroFactory.getStepRunnerProvider();
-        assertNotNull(provider);
-        assertInstanceOf(StepRunnerProviderSPI.class, provider);
-    }
+      maestroFactory = new MaestroFactory(
+            new EventMaestroProducer(testRunMockEvent),
+            new SessionStoreImpl(),
+            testReport -> new ItemReference("test", null),
+            servicesFactory.getStepRunnerProvider()
+      );
+
+   }
+
+   @Test
+   void getMaestroTest() {
+      Maestro maestro = maestroFactory.getMaestro();
+      assertNotNull(maestro);
+      assertInstanceOf(MaestroImpl.class, maestro);
+   }
+
+   @Test
+   void getStepRunnerProviderTest() {
+      StepRunnerProvider provider = servicesFactory.getStepRunnerProvider();
+      assertNotNull(provider);
+      assertInstanceOf(StepRunnerProviderSPI.class, provider);
+   }
 
 }

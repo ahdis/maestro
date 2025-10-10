@@ -29,53 +29,52 @@ class TestSetRunTest {
 
     @Test
     void defaultConstructorInitializesFields() {
-        TestSetRun tsr = new TestSetRun();
-        assertNotNull(tsr.getTestSetId(), "testSetId should be generated");
+        TestSuiteRun tsr = new TestSuiteRun();
+        assertNotNull(tsr.getInternalId(), "testSetId should be generated");
         assertNull(tsr.getTestRuns(), "testRuns should be null until explicitly set");
         assertNotNull(tsr.getAccessControlList(), "ACL should be initialized");
         assertNotNull(tsr.getSystemsUnderTest(), "systemsUnderTest should be initialized");
         assertTrue(tsr.getSystemsUnderTest().isEmpty(), "systemsUnderTest should start empty");
-        assertNull(tsr.getTestSetRunId(), "testSetRunId should be null by default");
+        assertNull(tsr.getTestSuiteClientId(), "testSetRunId should be null by default");
         assertNull(tsr.getTestSuiteName(), "testSuiteName should be null by default");
     }
 
     @Test
     void parameterizedConstructorSetsFields() {
-        String id = "custom-id";
         List<TestRun> runs = new ArrayList<>();
         runs.add(new TestRun());
-        TestSetRun tsr = new TestSetRun(id, runs);
-        assertEquals(id, tsr.getTestSetId());
+        TestSuiteRun tsr = new TestSuiteRun(runs);
+        assertNotNull(tsr.getInternalId());
         assertEquals(runs, tsr.getTestRuns());
     }
 
     @Test
     void fluentSettersReturnSameInstance() {
-        TestSetRun tsr = new TestSetRun();
+        TestSuiteRun tsr = new TestSuiteRun();
         AccessControlList acl = new AccessControlList();
         List<SystemUnderTest> systems = new ArrayList<>();
         systems.add(new SystemUnderTest());
         List<TestRun> runs = new ArrayList<>();
         runs.add(new TestRun());
 
-        TestSetRun returned = tsr
+        TestSuiteRun returned = tsr
                 .setTestSuiteName("suite")
                 .setAccessControlList(acl)
                 .setSystemsUnderTest(systems)
                 .setTestRuns(runs)
-                .setTestSetRunId("tsr-id");
+                .setTestSuiteClientId("tsr-id");
 
         assertSame(tsr, returned, "Fluent setters should return same instance");
         assertEquals("suite", tsr.getTestSuiteName());
         assertSame(acl, tsr.getAccessControlList());
         assertSame(systems, tsr.getSystemsUnderTest());
         assertSame(runs, tsr.getTestRuns());
-        assertEquals("tsr-id", tsr.getTestSetRunId());
+        assertEquals("tsr-id", tsr.getTestSuiteClientId());
     }
 
     @Test
     void settersStoreProvidedInstances() {
-        TestSetRun tsr = new TestSetRun();
+        TestSuiteRun tsr = new TestSuiteRun();
         AccessControlList acl = new AccessControlList();
         List<SystemUnderTest> systems = new ArrayList<>();
         List<TestRun> runs = new ArrayList<>();
@@ -84,13 +83,13 @@ class TestSetRunTest {
         tsr.setSystemsUnderTest(systems);
         tsr.setTestRuns(runs);
         tsr.setTestSuiteName("suiteName");
-        tsr.setTestSetRunId("runId");
+        tsr.setTestSuiteClientId("runId");
 
         assertSame(acl, tsr.getAccessControlList());
         assertSame(systems, tsr.getSystemsUnderTest());
         assertSame(runs, tsr.getTestRuns());
         assertEquals("suiteName", tsr.getTestSuiteName());
-        assertEquals("runId", tsr.getTestSetRunId());
+        assertEquals("runId", tsr.getTestSuiteClientId());
     }
 }
 

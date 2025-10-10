@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.api.business.testrun.context;
+package net.ihe.gazelle.maestro.business.context;
 
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
 

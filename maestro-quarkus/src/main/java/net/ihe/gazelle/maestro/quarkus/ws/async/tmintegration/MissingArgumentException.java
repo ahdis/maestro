@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.quarkus.ws;
+package net.ihe.gazelle.maestro.quarkus.ws.async.tmintegration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.quarkus.jackson.ObjectMapperCustomizer;
-import jakarta.inject.Singleton;
-import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSubTypingDTOModule;
+public class MissingArgumentException extends RuntimeException{
 
-@Singleton
-public class RegisterCustomModuleCustomizer implements ObjectMapperCustomizer {
+    public MissingArgumentException(String message) {
+        super(message);
+    }
 
-    public void customize(ObjectMapper mapper) {
-        mapper.registerModule(new JacksonSubTypingDTOModule());
+    public MissingArgumentException(Throwable cause) {
+        super(cause);
+    }
+
+    public MissingArgumentException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

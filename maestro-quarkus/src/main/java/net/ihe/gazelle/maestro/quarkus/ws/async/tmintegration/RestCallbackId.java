@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.quarkus.ws.async;
+package net.ihe.gazelle.maestro.quarkus.ws.async.tmintegration;
 
 /**
  * This class is a structure to store a callback URL and authorization token
  * for a given test set run execution received from TM
  */
-public class TestRunStore {
+public class RestCallbackId {
 
-    private String clientCallback;
+    private String callbackUrl;
     private String callbackAuthorization;
 
-    public TestRunStore() {
+    public RestCallbackId() {
         // Empty constructor
     }
 
-    public String getClientCallback() {
-        return clientCallback;
+    public String getCallbackUrl() {
+        return callbackUrl;
     }
 
-    public void setClientCallback(String clientCallback) {
-        this.clientCallback = clientCallback;
+    public void setCallbackUrl(String callbackUrl) {
+        this.callbackUrl = callbackUrl;
     }
 
     public String getCallbackAuthorization() {

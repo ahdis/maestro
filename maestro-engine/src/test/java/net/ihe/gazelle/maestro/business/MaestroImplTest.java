@@ -20,10 +20,12 @@ import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.*;
-import net.ihe.gazelle.maestro.api.business.testrun.context.Context;
-import net.ihe.gazelle.maestro.api.business.testrun.context.TestRunSessionStore;
-import net.ihe.gazelle.maestro.api.business.testrun.context.TestSetSessionStore;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
+import net.ihe.gazelle.maestro.business.TestReportRecordService.ItemReference;
+import net.ihe.gazelle.maestro.business.context.Context;
+import net.ihe.gazelle.maestro.business.context.SessionStore;
+import net.ihe.gazelle.maestro.business.context.TestRunSession;
+import net.ihe.gazelle.maestro.business.context.TestSuiteSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,23 +50,24 @@ class MaestroImplTest {
     private MaestroEventProducer maestroEventProducer;
 
     @Mock
-    private SessionStoreContext sessionStoreContext;
+    private SessionStore sessionStore;
 
     @Mock
     private TestReportRecordService testReportRecordService;
 
     @Mock
-    private TestRunSessionStore testRunSessionStore;
+    private TestRunSession testRunSession;
 
     @Mock
-    private TestSetSessionStore testSetSessionStore;
+    private TestSuiteSession testSuiteSession;
 
     private MaestroImpl maestroImpl;
 
     @BeforeEach
     void setUp() {
-        when(testReportRecordService.recordTestReportWithReferences(any())).thenReturn("testReportId");
-        maestroImpl = new MaestroImpl(maestroEventProducer, sessionStoreContext, testReportRecordService, "999.0.0");
+        when(testReportRecordService.recordTestReportWithReferences(any()))
+              .thenReturn(new ItemReference("testReportId", null));
+        maestroImpl = new MaestroImpl(maestroEventProducer, sessionStore, testReportRecordService, "999.0.0");
     }
 
     @Test
@@ -87,15 +90,15 @@ class MaestroImplTest {
         testRun.setTest(test);
         testRun.setInputs(List.of(new Property<>("key1", "value1")));
 
-        TestSetRun testSetRun = new TestSetRun();
-        testSetRun.setTestRuns(List.of(testRun));
+        TestSuiteRun testSuiteRun = new TestSuiteRun();
+        testSuiteRun.setTestRuns(List.of(testRun));
 
         TestRunCursor testRunCursor = new TestRunCursor(List.of(testRun));
 
-        when(sessionStoreContext.getTestSetContexts(testSetId)).thenReturn(testSetSessionStore);
-        when(testSetSessionStore.getTestSetRun()).thenReturn(testSetRun);
-        when(testSetSessionStore.getTestRunCursor()).thenReturn(testRunCursor);
-        when(testRunSessionStore.getStepCursor()).thenReturn(StepCursor.from(test));
+        when(sessionStore.getTestSuite(testSetId)).thenReturn(testSuiteSession);
+        when(testSuiteSession.getTestSuiteRun()).thenReturn(testSuiteRun);
+        when(testSuiteSession.getTestRunCursor()).thenReturn(testRunCursor);
+        when(testRunSession.getStepCursor()).thenReturn(StepCursor.from(test));
 
         maestroImpl.run(testRun);
         verify(maestroEventProducer, never()).executeStep(any());
@@ -126,15 +129,15 @@ class MaestroImplTest {
 
         Context context = new Context();
 
-        // Mock for standalone test run - no testSetSessionStore
-        when(sessionStoreContext.getTestSetContexts(testSetId)).thenReturn(null);
-        when(sessionStoreContext.getExecutionContext(anyString())).thenReturn(testRunSessionStore);
-        when(testRunSessionStore.getContext()).thenReturn(context);
-        when(testRunSessionStore.getTestRun()).thenReturn(testRun);
+        // Mock for standalone test run - no testSuiteSession
+        when(sessionStore.getTestSuite(testSetId)).thenReturn(null);
+        when(sessionStore.getTestRun(anyString())).thenReturn(testRunSession);
+        when(testRunSession.getContext()).thenReturn(context);
+        when(testRunSession.getTestRun()).thenReturn(testRun);
 
         StepCursor stepCursor = mock(StepCursor.class);
         when(stepCursor.next()).thenReturn(step);
-        when(testRunSessionStore.getStepCursor()).thenReturn(stepCursor);
+        when(testRunSession.getStepCursor()).thenReturn(stepCursor);
 
         // Act
         maestroImpl.run(testRun);
@@ -151,17 +154,17 @@ class MaestroImplTest {
         TestRun testRun = new TestRun();
         testRun.setTestSetId(testSetId);
 
-        TestSetRun testSetRun = new TestSetRun();
-        testSetRun.setTestRuns(List.of(testRun));
+        TestSuiteRun testSuiteRun = new TestSuiteRun();
+        testSuiteRun.setTestRuns(List.of(testRun));
         List<TestRunReportBuilder> reportBuilders = new ArrayList<>();
 
         TestRunCursor testRunCursor = new TestRunCursor(List.of(testRun));
         testRunCursor.next(); // Move cursor to indicate this test run has executed
 
-        when(sessionStoreContext.getTestSetContexts(testSetId)).thenReturn(testSetSessionStore);
-        when(testSetSessionStore.getTestSetRun()).thenReturn(testSetRun);
-        when(testSetSessionStore.getTestRunReportBuilders()).thenReturn(reportBuilders);
-        when(testSetSessionStore.getTestRunCursor()).thenReturn(testRunCursor);
+        when(sessionStore.getTestSuite(testSetId)).thenReturn(testSuiteSession);
+        when(testSuiteSession.getTestSuiteRun()).thenReturn(testSuiteRun);
+        when(testSuiteSession.getTestRunReportBuilders()).thenReturn(reportBuilders);
+        when(testSuiteSession.getTestRunCursor()).thenReturn(testRunCursor);
 
         TestRunReportBuilder testRunReportBuilder = mock(TestRunReportBuilder.class);
 
@@ -169,10 +172,10 @@ class MaestroImplTest {
         maestroImpl.finishTest(testRun, testRunReportBuilder);
 
         // Assert
-        verify(testSetSessionStore).addTestRunReportBuilder(testRunReportBuilder);
-        verify(sessionStoreContext).clearExecutionContext(testSetId);
-        verify(sessionStoreContext).clearTestSetContext(testSetId);
-        verify(maestroEventProducer).returnTestSetReport(eq(testSetRun), any(TestReportSummary.class));
+        verify(testSuiteSession).addTestRunReportBuilder(testRunReportBuilder);
+        verify(sessionStore).removeTestRun(testSetId);
+        verify(sessionStore).removeTestSuite(testSetId);
+        verify(maestroEventProducer).returnTestSetReport(eq(testSuiteRun), any(TestReportSummary.class));
     }
 
 
@@ -190,19 +193,19 @@ class MaestroImplTest {
 
         TestRun anotherTestRun = new TestRun();
 
-        TestSetRun testSetRun = new TestSetRun();
-        testSetRun.setTestRuns(List.of(anotherTestRun));
+        TestSuiteRun testSuiteRun = new TestSuiteRun();
+        testSuiteRun.setTestRuns(List.of(anotherTestRun));
         TestRunCursor testRunCursor = new TestRunCursor(List.of(anotherTestRun));
         testRunCursor.next(); // Move cursor to indicate run has executed
 
-        when(sessionStoreContext.getTestSetContexts(testSetId)).thenReturn(testSetSessionStore);
-        when(testSetSessionStore.getTestSetRun()).thenReturn(testSetRun);
-        when(testSetSessionStore.getTestRunCursor()).thenReturn(testRunCursor);
+        when(sessionStore.getTestSuite(testSetId)).thenReturn(testSuiteSession);
+        when(testSuiteSession.getTestSuiteRun()).thenReturn(testSuiteRun);
+        when(testSuiteSession.getTestRunCursor()).thenReturn(testRunCursor);
 
         maestroImpl.finishTest(testRun, mock(TestRunReportBuilder.class));
-        verify(sessionStoreContext).clearExecutionContext(testSetId);
-        verify(sessionStoreContext).clearTestSetContext(testSetId);
-        verify(maestroEventProducer).returnTestSetReport(eq(testSetRun), any(TestReportSummary.class));
+        verify(sessionStore).removeTestRun(testSetId);
+        verify(sessionStore).removeTestSuite(testSetId);
+        verify(maestroEventProducer).returnTestSetReport(eq(testSuiteRun), any(TestReportSummary.class));
     }
 
     @Test
@@ -212,14 +215,14 @@ class MaestroImplTest {
         TestRun testRun = new TestRun();
         testRun.setTestSetId(testSetId);
 
-        TestSetRun testSetRun = new TestSetRun();
-        testSetRun.setTestRuns(List.of(testRun));
+        TestSuiteRun testSuiteRun = new TestSuiteRun();
+        testSuiteRun.setTestRuns(List.of(testRun));
         TestRunCursor testRunCursor = new TestRunCursor(List.of(testRun));
         testRunCursor.next(); // Move cursor to indicate run has executed
 
-        when(sessionStoreContext.getTestSetContexts(testSetId)).thenReturn(testSetSessionStore);
-        when(testSetSessionStore.getTestSetRun()).thenReturn(testSetRun);
-        when(testSetSessionStore.getTestRunCursor()).thenReturn(testRunCursor);
+        when(sessionStore.getTestSuite(testSetId)).thenReturn(testSuiteSession);
+        when(testSuiteSession.getTestSuiteRun()).thenReturn(testSuiteRun);
+        when(testSuiteSession.getTestRunCursor()).thenReturn(testRunCursor);
         when(testReportRecordService.recordTestReportWithReferences(any())).thenThrow(new RuntimeException("db down"));
 
         maestroImpl.finishTest(testRun, mock(TestRunReportBuilder.class));
@@ -250,16 +253,16 @@ class MaestroImplTest {
         StepRun stepRun = new StepRun(testSetId, testRunId, step);
         StepRunReportBuilder stepRunReportBuilder = mock(StepRunReportBuilder.class);
 
-        when(sessionStoreContext.getExecutionContext(testRunId)).thenReturn(testRunSessionStore);
-        when(testRunSessionStore.getTestRun()).thenReturn(testRun);
-        when(testRunSessionStore.getStepReports()).thenReturn(stepReports);
-        when(testRunSessionStore.getStepCursor()).thenReturn(stepCursor);
+        when(sessionStore.getTestRun(testRunId)).thenReturn(testRunSession);
+        when(testRunSession.getTestRun()).thenReturn(testRun);
+        when(testRunSession.getStepReports()).thenReturn(stepReports);
+        when(testRunSession.getStepCursor()).thenReturn(stepCursor);
 
         // Act
         maestroImpl.finishStep(stepRun, stepRunReportBuilder);
 
         // Assert
-        verify(testRunSessionStore).addStepRunReport(stepRunReportBuilder);
+        verify(testRunSession).addStepRunReport(stepRunReportBuilder);
         verify(maestroEventProducer).returnTestRunReport(eq(testRun), any(TestRunReportBuilder.class));
     }
 
@@ -289,23 +292,23 @@ class MaestroImplTest {
         StepRun stepRun = new StepRun(testSetId, testRunId, step);
         StepRunReportBuilder stepRunReportBuilder = mock(StepRunReportBuilder.class);
 
-        when(sessionStoreContext.getExecutionContext(testRunId)).thenReturn(testRunSessionStore);
-        when(testRunSessionStore.getTestRun()).thenReturn(testRun);
-        when(testRunSessionStore.getContext()).thenReturn(context);
-        when(testRunSessionStore.getStepCursor()).thenReturn(stepCursor);
+        when(sessionStore.getTestRun(testRunId)).thenReturn(testRunSession);
+        when(testRunSession.getTestRun()).thenReturn(testRun);
+        when(testRunSession.getContext()).thenReturn(context);
+        when(testRunSession.getStepCursor()).thenReturn(stepCursor);
 
         // Act
         maestroImpl.finishStep(stepRun, stepRunReportBuilder);
 
         // Assert
-        verify(testRunSessionStore).addStepRunReport(stepRunReportBuilder);
+        verify(testRunSession).addStepRunReport(stepRunReportBuilder);
         verify(maestroEventProducer).executeStep(any(StepRun.class));
     }
 
     @Test
     void constructor_ShouldInitializeFields() {
         // Act
-        MaestroImpl newMaestro = new MaestroImpl(maestroEventProducer, sessionStoreContext, testReportRecordService, "1.0.0");
+        MaestroImpl newMaestro = new MaestroImpl(maestroEventProducer, sessionStore, testReportRecordService, "1.0.0");
 
         // Assert
         assertNotNull(newMaestro);

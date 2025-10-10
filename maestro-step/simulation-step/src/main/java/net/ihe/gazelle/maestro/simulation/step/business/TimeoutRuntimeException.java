@@ -25,4 +25,8 @@ public class TimeoutRuntimeException extends RuntimeException {
     public TimeoutRuntimeException(String message, Throwable cause) {
         super(message, cause);
     }
+
+   public TimeoutRuntimeException(Throwable cause) {
+      super(cause);
+   }
 }

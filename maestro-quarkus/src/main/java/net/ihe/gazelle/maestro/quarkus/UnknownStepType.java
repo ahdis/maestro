@@ -14,12 +14,24 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.quarkus.jobs;
+package net.ihe.gazelle.maestro.quarkus;
 
-import net.ihe.gazelle.maestro.api.technical.event.TestRunEvent;
+import java.io.Serial;
 
-public interface TestRunEventListener {
+/**
+ * Exception thrown when no Step implementation is found for a given step type.
+ */
+public class UnknownStepType extends RuntimeException {
+   @Serial
+   private static final long serialVersionUID = -621661685516155741L;
 
-    void receiveTestRun(TestRunEvent event);
+   /**
+    * Constructs a new UnknownStepType exception with the specified detail message.
+    *
+    * @param message the detail message
+    */
+   public UnknownStepType(String message){
+      super(message);
+   }
 
 }

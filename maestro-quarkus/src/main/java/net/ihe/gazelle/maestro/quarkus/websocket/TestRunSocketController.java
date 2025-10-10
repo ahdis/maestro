@@ -21,8 +21,8 @@ import jakarta.inject.Inject;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
-import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
-import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSetRunDTO;
+import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
+import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSuiteRunDTO;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.ObjectMapperBuilder;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
@@ -83,8 +83,8 @@ public class TestRunSocketController {
     private void triggerTestRuns(String testSetId, String message) {
         LOG.info("Triggering test runs for client {} with message: {}",testSetId, message);
         try {
-            TestSetRun testSetRun = serDes.deserialize(message, TestSetRunDTO.class).getBusinessObject();
-            maestroService.executeTestSet(testSetId, testSetRun);
+            TestSuiteRun testSuiteRun = serDes.deserialize(message, TestSuiteRunDTO.class).getBusinessObject();
+            maestroService.executeTestSet(testSetId, testSuiteRun);
         } catch (Exception e) {
             LOG.error("Unable to trigger testRun for message {}: {}", testSetId, e.getMessage());
         }

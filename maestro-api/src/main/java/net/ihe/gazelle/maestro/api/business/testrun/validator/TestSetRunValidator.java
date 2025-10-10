@@ -5,9 +5,9 @@ import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory
 import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
 import net.ihe.gazelle.maestro.api.business.acl.validator.AccessControlListValidator;
 import net.ihe.gazelle.maestro.api.business.testreport.validator.SystemUnderTestValidator;
-import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
+import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 
-public class TestSetRunValidator extends AbstractValidator<TestSetRun> {
+public class TestSetRunValidator extends AbstractValidator<TestSuiteRun> {
 
     private final TestRunValidator testRunValidator;
     private final AccessControlListValidator accessControlListValidator;
@@ -21,18 +21,18 @@ public class TestSetRunValidator extends AbstractValidator<TestSetRun> {
     }
 
     @Override
-    protected ValidatorBuilder<? extends TestSetRun> instantiateValidatorBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
-        return validatorBuilderFactory.getBuilder(TestSetRun.class);
+    protected ValidatorBuilder<? extends TestSuiteRun> instantiateValidatorBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
+        return validatorBuilderFactory.getBuilder(TestSuiteRun.class);
     }
 
     @Override
-    protected void addRulesAndMembers(ValidatorBuilder<? extends TestSetRun> validatorBuilder) {
+    protected void addRulesAndMembers(ValidatorBuilder<? extends TestSuiteRun> validatorBuilder) {
         validatorBuilder
-                .addRule("testSuiteNameValid", TestSetRun::isTestSuiteNameValid, "Test Suite name must be set and not empty")
-                .addRule("testSetRunIdValid", TestSetRun::isTestSetRunIdValid, "Test Set Run ID must be set and not empty")
-                .addMember("testRuns", TestSetRun::getTestRuns, testRunValidator::getAssembledValidatorBuilder)
-                .addMember("accessControlList", TestSetRun::getAccessControlList, accessControlListValidator::getAssembledValidatorBuilder)
-                .addMember("systemUnderTest", TestSetRun::getSystemsUnderTest, systemUnderTestValidator::getAssembledValidatorBuilder)
+                .addRule("testSuiteNameValid", TestSuiteRun::isTestSuiteNameValid, "Test Suite name must be set and not empty")
+                .addRule("testSetRunIdValid", TestSuiteRun::isTestSetRunIdValid, "Test Set Run ID must be set and not empty")
+                .addMember("testRuns", TestSuiteRun::getTestRuns, testRunValidator::getAssembledValidatorBuilder)
+                .addMember("accessControlList", TestSuiteRun::getAccessControlList, accessControlListValidator::getAssembledValidatorBuilder)
+                .addMember("systemUnderTest", TestSuiteRun::getSystemsUnderTest, systemUnderTestValidator::getAssembledValidatorBuilder)
         ;
     }
 }

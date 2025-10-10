@@ -49,7 +49,7 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
      * @return the created item ID of the main TestReport
      */
     @Override
-    public String recordTestReportWithReferences(TestReport report) {
+    public ItemReference recordTestReportWithReferences(TestReport report) {
         // 1) Upload all inputs as attachments and set refs (URL in report, ID in Reference)
         List<Reference> attachmentRefs = createAttachmentsFromTestRunInputs(report.getTestRunReports());
 
@@ -158,7 +158,7 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
         return outputRefs;
     }
 
-    private String recordTestReport(TestReport testReport, List<TestReportReference> testReportReferences, List<Reference> attachmentRefs, List<Reference> outputItemRefs) {
+    private ItemReference recordTestReport(TestReport testReport, List<TestReportReference> testReportReferences, List<Reference> attachmentRefs, List<Reference> outputItemRefs) {
         try {
             // Build entity with sub-report references
             TestReportEntity entity = new TestReportEntity(testReport);
@@ -196,7 +196,8 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
                             .setContent(jsonContent)
                             .setReferences(references);
 
-            return recordItemClient.recordItem(item);
+           String itemId = recordItemClient.recordItem(item);
+           return new ItemReference(itemId, constructUrlToDatahouse(itemId));
         } catch (Exception e) {
             throw new TestReportRecordException("Failed to record TestReport", e);
         }
@@ -207,9 +208,9 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
         if (report.getSubReports() == null) return subRefs;
         for (TestReport sub : report.getSubReports()) {
             // Reuse full flow for each sub-report
-            String subItemId = recordTestReportWithReferences(sub);
+            ItemReference itemRef = recordTestReportWithReferences(sub);
             TestReportReference ref = new TestReportReference();
-            ref.setTestReportId(subItemId);
+            ref.setTestReportId(itemRef.id());
             ref.setResult(sub.getResult());
             ref.setTestSuiteName(sub.getTestSuiteName());
             subRefs.add(ref);

@@ -23,6 +23,7 @@ import io.restassured.response.Response;
 import jakarta.ws.rs.core.MediaType;
 import net.ihe.gazelle.maestro.api.business.testreport.Result;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
+import net.ihe.gazelle.maestro.api.business.testreport.validator.TestReportSummaryValidator;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
 import org.apache.http.HttpHeaders;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -46,6 +47,8 @@ class TestRunControllerIT implements QuarkusTestProfile {
 
     @ConfigProperty(name = "gzl.it.port")
     int port;
+
+    TestReportSummaryValidator summaryValidator = new TestReportSummaryValidator();
 
     @BeforeAll
     void setUp() throws IOException {
@@ -81,7 +84,7 @@ class TestRunControllerIT implements QuarkusTestProfile {
         assertNotNull(response);
         System.out.println(response.asString());
         TestReportSummary testReport = response.as(TestReportSummaryDTO.class).getBusinessObject();
-        assertTrue(testReport.isValid());
+        summaryValidator.assertValid(testReport);
         assertEquals(Result.FAILED, testReport.getResult());
     }
 
@@ -96,7 +99,7 @@ class TestRunControllerIT implements QuarkusTestProfile {
                 .statusCode(202);
 
         TestReportSummary testReport = WireMockSingleton.awaitTestReport();
-        assertTrue(testReport.isValid());
+        summaryValidator.assertValid(testReport);
         assertEquals(Result.FAILED, testReport.getResult());
     }
 
@@ -120,7 +123,7 @@ class TestRunControllerIT implements QuarkusTestProfile {
                 Arguments.of("/invalid_step_type.json", "Could not resolve type id"),
                 Arguments.of("/invalid_property_type.json", "Unsupported property type"),
                 Arguments.of("/invalid_property_name.json", "Property invalid is neither a validation step property nor a content to validate"),
-                Arguments.of("/invalid_structure.json", "Unable to parse TestRun structure")
+                Arguments.of("/invalid_structure.json", "Unable to parse TestSuite structure")
         );
     }
 }

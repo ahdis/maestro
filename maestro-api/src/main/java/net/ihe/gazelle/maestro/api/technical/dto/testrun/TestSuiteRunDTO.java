@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
+import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.api.technical.dto.report.SystemUnderTestDTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
@@ -35,22 +35,22 @@ import java.util.List;
         "systemsUnderTest",
         "testSetRunId"
 })
-public class TestSetRunDTO implements DTO<TestSetRun> {
+public class TestSuiteRunDTO implements DTO<TestSuiteRun> {
 
     @JsonIgnore
-    private final TestSetRun testSetRun;
+    private final TestSuiteRun testSuiteRun;
 
-    public TestSetRunDTO() {
-        this(new TestSetRun());
+    public TestSuiteRunDTO() {
+        this(new TestSuiteRun());
     }
 
-    public TestSetRunDTO(TestSetRun testSetRun) {
-        this.testSetRun = testSetRun;
+    public TestSuiteRunDTO(TestSuiteRun testSuiteRun) {
+        this.testSuiteRun = testSuiteRun;
     }
 
     @Override
-    public TestSetRun getBusinessObject() {
-        return testSetRun;
+    public TestSuiteRun getBusinessObject() {
+        return testSuiteRun;
     }
 
     @JsonProperty("testSuiteName")
@@ -95,10 +95,10 @@ public class TestSetRunDTO implements DTO<TestSetRun> {
 
     @JsonProperty("testSetRunId")
     public String getTestSetRunId() {
-        return getBusinessObject().getTestSetRunId();
+        return getBusinessObject().getTestSuiteClientId();
     }
 
     public void setTestSetRunId(String testSetRunId) {
-        getBusinessObject().setTestSetRunId(testSetRunId);
+        getBusinessObject().setTestSuiteClientId(testSetRunId);
     }
 }

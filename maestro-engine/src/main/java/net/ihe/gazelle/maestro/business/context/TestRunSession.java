@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.api.business.testrun.context;
+package net.ihe.gazelle.maestro.business.context;
 
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.StepCursor;
@@ -28,14 +28,14 @@ import java.util.List;
  * and StepRunReportBuilder of executed step during TestRun execution.
  * It also contains a reference to the TestRun.
  */
-public class TestRunSessionStore {
+public class TestRunSession {
 
     private Context context;
     private TestRun testRun;
     private List<StepRunReportBuilder> stepReports;
     private StepCursor stepCursor;
 
-    public TestRunSessionStore(Context context, TestRun testRun, List<StepRunReportBuilder> stepReports, StepCursor stepCursor) {
+    public TestRunSession(Context context, TestRun testRun, List<StepRunReportBuilder> stepReports, StepCursor stepCursor) {
         this.context = context;
         this.testRun = testRun;
         this.stepReports = new ArrayList<>(stepReports);

@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.api.business.testrun.runner;
+package net.ihe.gazelle.maestro.api.technical.event;
 
-/**
- * Step message used by producer to notify a subscriber to launch step execution
- */
-public class StartStepCommand extends StepMessage {
+public interface Message {
 
-    public StartStepCommand(StepRun stepRun) {
-        super(stepRun);
-    }
+
 }

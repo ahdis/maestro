@@ -27,19 +27,20 @@ import net.ihe.gazelle.maestro.api.business.testrun.Maestro;
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.api.business.testrun.PropertyRef;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
+import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.api.business.testrun.UnsupportedPropertyTypeException;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestRunDTO;
-import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSetRunDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSuiteRunDTO;
 import net.ihe.gazelle.maestro.business.MaestroImpl;
-import net.ihe.gazelle.maestro.business.MissingArgumentException;
-import net.ihe.gazelle.maestro.quarkus.NotProvidedStep;
-import net.ihe.gazelle.maestro.business.SessionStoreContextImpl;
+import net.ihe.gazelle.maestro.quarkus.ws.async.tmintegration.MissingArgumentException;
+import net.ihe.gazelle.maestro.business.context.SessionStoreImpl;
+import net.ihe.gazelle.maestro.quarkus.UnknownStepType;
+import net.ihe.gazelle.maestro.quarkus.client.MaestroCaller;
 import net.ihe.gazelle.maestro.quarkus.factory.TestRunMockEvent;
 import net.ihe.gazelle.maestro.quarkus.jobs.EventMaestroProducer;
 import net.ihe.gazelle.maestro.quarkus.jobs.SynchronousMaestro;
 import net.ihe.gazelle.maestro.quarkus.mock.InMemoryTestReportRecordService;
-import net.ihe.gazelle.maestro.quarkus.mock.StepMockEvent;
 import net.ihe.gazelle.maestro.quarkus.ws.async.AsynchronousMaestro;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
@@ -56,6 +57,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -73,16 +76,16 @@ class TestRunControllerTest {
     @BeforeEach
     void setUp() {
         controller = new TestRunControllerImpl(synchronousMaestro, asynchronousMaestro);
-        controller.dataHouseUrl = "http://datahouse";
     }
 
     @Test
     void runWithoutCallbackReturnsOkResponseWithSummaryLocation() throws Exception {
         TestReportSummary summary = new TestReportSummary()
                 .setId("summary-id")
+                .setLocation("http://datahouse/items/summary-id")
                 .setResult(Result.PASSED)
                 .setDateTime(new Date());
-        when(synchronousMaestro.executeTestSet(any())).thenReturn(summary);
+        when(synchronousMaestro.executeTestSuite(any())).thenReturn(summary);
 
         Response response = controller.run(null, testSetRunDto());
 
@@ -91,8 +94,8 @@ class TestRunControllerTest {
         assertNotNull(entity);
         assertEquals("http://datahouse/items/summary-id", entity.getLocation());
 
-        ArgumentCaptor<net.ihe.gazelle.maestro.api.business.testrun.TestSetRun> testSetRunCaptor = ArgumentCaptor.forClass(net.ihe.gazelle.maestro.api.business.testrun.TestSetRun.class);
-        verify(synchronousMaestro).executeTestSet(testSetRunCaptor.capture());
+        ArgumentCaptor<TestSuiteRun> testSetRunCaptor = ArgumentCaptor.forClass(TestSuiteRun.class);
+        verify(synchronousMaestro).executeTestSuite(testSetRunCaptor.capture());
         assertEquals(1, testSetRunCaptor.getValue().getTestRuns().size());
         verifyNoInteractions(asynchronousMaestro);
     }
@@ -103,15 +106,16 @@ class TestRunControllerTest {
 
         assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus());
 
-        ArgumentCaptor<net.ihe.gazelle.maestro.api.business.testrun.TestSetRun> testSetRunCaptor = ArgumentCaptor.forClass(net.ihe.gazelle.maestro.api.business.testrun.TestSetRun.class);
-        verify(asynchronousMaestro).executeTestSet(eq("http://callback"), testSetRunCaptor.capture());
+        ArgumentCaptor<TestSuiteRun> testSetRunCaptor = ArgumentCaptor.forClass(TestSuiteRun.class);
+        ArgumentCaptor<MaestroCaller> callerCaptor = ArgumentCaptor.forClass(MaestroCaller.class);
+        verify(asynchronousMaestro).executeTestSuite(testSetRunCaptor.capture(), callerCaptor.capture());
         assertEquals(1, testSetRunCaptor.getValue().getTestRuns().size());
         verifyNoInteractions(synchronousMaestro);
     }
 
     @Test
     void runWithoutCallbackInvalidTestRunReturnsBadRequest() throws Exception {
-        when(synchronousMaestro.executeTestSet(any())).thenThrow(new InvalidTestRunException("invalid"));
+        when(synchronousMaestro.executeTestSuite(any())).thenThrow(new InvalidTestRunException("invalid"));
 
         Response response = controller.run(null, testSetRunDto());
 
@@ -121,7 +125,7 @@ class TestRunControllerTest {
 
     @Test
     void runWithoutCallbackTimeoutReturnsGatewayTimeout() throws Exception {
-        when(synchronousMaestro.executeTestSet(any())).thenThrow(new TimeoutException("too long"));
+        when(synchronousMaestro.executeTestSuite(any())).thenThrow(new TimeoutException("too long"));
 
         Response response = controller.run(null, testSetRunDto());
 
@@ -131,7 +135,7 @@ class TestRunControllerTest {
 
     @Test
     void runWithoutCallbackWebApplicationExceptionReturnsGatewayTimeout() throws Exception {
-        when(synchronousMaestro.executeTestSet(any())).thenThrow(new WebApplicationException("timeout"));
+        when(synchronousMaestro.executeTestSuite(any())).thenThrow(new WebApplicationException("timeout"));
 
         Response response = controller.run(null, testSetRunDto());
 
@@ -141,17 +145,20 @@ class TestRunControllerTest {
 
     @Test
     void runWithoutCallbackNotProvidedStepReturnsBadRequest() throws Exception {
-        when(synchronousMaestro.executeTestSet(any())).thenThrow(new NotProvidedStep("missing step"));
+        when(synchronousMaestro.executeTestSuite(any())).thenThrow(new UnknownStepType("aStep"));
 
         Response response = controller.run(null, testSetRunDto());
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
-        assertTrue(response.getEntity().toString().contains("non provided"));
+        assertThat(
+              response.getEntity().toString(),
+              containsString("Unknown step type: aStep")
+        );
     }
 
     @Test
     void runWithoutCallbackUnexpectedExceptionInterruptsThreadAndReturnsInternalServerError() throws Exception {
-        when(synchronousMaestro.executeTestSet(any())).thenThrow(new RuntimeException("boom"));
+        when(synchronousMaestro.executeTestSuite(any())).thenThrow(new RuntimeException("boom"));
 
         Response response = controller.run(null, testSetRunDto());
 
@@ -164,7 +171,7 @@ class TestRunControllerTest {
     @Test
     void runWithCallbackInvalidTestRunReturnsBadRequest() {
         doThrow(new InvalidTestRunException("invalid"))
-                .when(asynchronousMaestro).executeTestSet(anyString(), any());
+                .when(asynchronousMaestro).executeTestSuite(any(), any());
 
         Response response = controller.run("http://callback", testSetRunDto());
 
@@ -174,19 +181,22 @@ class TestRunControllerTest {
 
     @Test
     void runWithCallbackNotProvidedStepReturnsBadRequest() {
-        doThrow(new NotProvidedStep("missing"))
-                .when(asynchronousMaestro).executeTestSet(anyString(), any());
+        doThrow(new UnknownStepType("missing"))
+                .when(asynchronousMaestro).executeTestSuite(any(), any());
 
         Response response = controller.run("http://callback", testSetRunDto());
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
-        assertTrue(response.getEntity().toString().contains("non provided"));
+        assertThat(
+              response.getEntity().toString(),
+              containsString("Unknown step type: missing")
+        );
     }
 
     @Test
     void runWithCallbackWebApplicationExceptionReturnsGatewayTimeout() {
         doThrow(new WebApplicationException("timeout"))
-                .when(asynchronousMaestro).executeTestSet(anyString(), any());
+                .when(asynchronousMaestro).executeTestSuite(any(), any());
 
         Response response = controller.run("http://callback", testSetRunDto());
 
@@ -197,7 +207,7 @@ class TestRunControllerTest {
     @Test
     void runWithCallbackUnexpectedExceptionReturnsInternalServerError() {
         doThrow(new RuntimeException("boom"))
-                .when(asynchronousMaestro).executeTestSet(anyString(), any());
+                .when(asynchronousMaestro).executeTestSuite(any(), any());
 
         Response response = controller.run("http://callback", testSetRunDto());
 
@@ -246,7 +256,7 @@ class TestRunControllerTest {
         Response response = controller.handleJsonProcessingException(exception);
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
-        assertEquals("Unable to parse TestRun structure.", response.getEntity());
+        assertEquals("Unable to parse TestSuite structure.", response.getEntity());
     }
 
     @Test
@@ -277,11 +287,11 @@ class TestRunControllerTest {
     }
 
     private Maestro getEngine() {
-        return new MaestroImpl(new EventMaestroProducer(new TestRunMockEvent(), new StepMockEvent()), new SessionStoreContextImpl(), new InMemoryTestReportRecordService(), "999.0.0");
+        return new MaestroImpl(new EventMaestroProducer(new TestRunMockEvent()), new SessionStoreImpl(), new InMemoryTestReportRecordService(), "999.0.0");
     }
 
-    private TestSetRunDTO testSetRunDto() {
-        TestSetRunDTO dto = new TestSetRunDTO();
+    private TestSuiteRunDTO testSetRunDto() {
+        TestSuiteRunDTO dto = new TestSuiteRunDTO();
         TestRun testRun = new TestRun().setTestSetId("test-set");
         dto.setTestRuns(List.of(new TestRunDTO(testRun)));
         dto.setAccessControlList(new AccessControlList());

@@ -23,6 +23,7 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import net.ihe.gazelle.maestro.api.business.testreport.Result;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
+import net.ihe.gazelle.maestro.api.business.testreport.validator.TestReportSummaryValidator;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.*;
 
@@ -37,75 +38,77 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TMTestRunControllerIT implements QuarkusTestProfile {
 
-    @ConfigProperty(name = "gzl.it.port")
-    int port;
+   @ConfigProperty(name = "gzl.it.port")
+   int port;
 
-    @BeforeAll
-    void beforeAll() throws IOException {
-        MockDatahouseServer.start(34501);
-        WireMockSingleton.startServer(port);
-        WireMockSingleton.mockCallback();
-        WireMockSingleton.mockServiceRegistry();
-        WireMockSingleton.mockGetProfiles();
-    }
+   TestReportSummaryValidator summaryValidator = new TestReportSummaryValidator();
 
-    @BeforeEach
-    void beforeEach() throws IOException {
-        WireMockSingleton.mockCallback();
-        WireMockSingleton.mockServiceRegistry();
-        WireMockSingleton.mockGetProfiles();
-        WireMockSingleton.mockKeycloak();
-    }
+   @BeforeAll
+   void beforeAll() throws IOException {
+      MockDatahouseServer.start(34501);
+      WireMockSingleton.startServer(port);
+      WireMockSingleton.mockCallback();
+      WireMockSingleton.mockServiceRegistry();
+      WireMockSingleton.mockGetProfiles();
+   }
 
-    @AfterEach
-    void afterEach() {
-        WireMockSingleton.getWireMockServer().resetAll();
-    }
+   @BeforeEach
+   void beforeEach() throws IOException {
+      WireMockSingleton.mockCallback();
+      WireMockSingleton.mockServiceRegistry();
+      WireMockSingleton.mockGetProfiles();
+      WireMockSingleton.mockKeycloak();
+   }
 
-    @AfterAll
-    void afterAll() throws IOException {
-        MockDatahouseServer.stop();
-        WireMockSingleton.stop();
-    }
+   @AfterEach
+   void afterEach() {
+      WireMockSingleton.getWireMockServer().resetAll();
+   }
 
-    @Test
-    void runPASSEDTestFromTM() throws IOException {
-        WireMockSingleton.mockValidate("/tmintegration/passed_response.json");
+   @AfterAll
+   void afterAll() throws IOException {
+      MockDatahouseServer.stop();
+      WireMockSingleton.stop();
+   }
 
-        String tmRequestBody = assertDoesNotThrow(() -> getResourceAsString("tmintegration/script.json"));
-        tmRequestBody = tmRequestBody.replace(":port", ":" + port);
+   @Test
+   void runPASSEDTestFromTM() throws IOException {
+      WireMockSingleton.mockValidate("/tmintegration/passed_response.json");
 
-        given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-                .body(tmRequestBody)
-                .when().post("/v0/run")
-                .then().statusCode(200);
+      String tmRequestBody = assertDoesNotThrow(() -> getResourceAsString("tmintegration/script.json"));
+      tmRequestBody = tmRequestBody.replace(":port", ":" + port);
 
-        TestReportSummary testReport =  WireMockSingleton.awaitTestReport();
-        assertTrue(testReport.isValid());
-        assertEquals(Result.PASSED, testReport.getResult());
-    }
+      given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+            .body(tmRequestBody)
+            .when().post("/v0/run")
+            .then().statusCode(200);
 
-    @Test
-    void runFAILEDTestFromTM() throws IOException {
-        WireMockSingleton.mockValidate("/tmintegration/failed_response.json");
+      TestReportSummary reportSummary = WireMockSingleton.awaitTestReport();
+      summaryValidator.assertValid(reportSummary);
+      assertEquals(Result.PASSED, reportSummary.getResult());
+   }
 
-        String tmRequestBody = assertDoesNotThrow(() -> getResourceAsString("tmintegration/script.json"));
-        tmRequestBody = tmRequestBody.replace(":port", ":" + port);
+   @Test
+   void runFAILEDTestFromTM() throws IOException {
+      WireMockSingleton.mockValidate("/tmintegration/failed_response.json");
 
-        given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-                .body(tmRequestBody)
-                .when().post("/v0/run")
-                .then().statusCode(200);
+      String tmRequestBody = assertDoesNotThrow(() -> getResourceAsString("tmintegration/script.json"));
+      tmRequestBody = tmRequestBody.replace(":port", ":" + port);
 
-        TestReportSummary testReport = WireMockSingleton.awaitTestReport();
-        assertTrue(testReport.isValid());
-        assertEquals(Result.FAILED, testReport.getResult());
-    }
+      given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+            .body(tmRequestBody)
+            .when().post("/v0/run")
+            .then().statusCode(200);
 
-    public static String getResourceAsString(String resourcePath) throws IOException {
-        try(InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourcePath)) {
-            assert stream != null;
-            return new String(stream.readAllBytes());
-        }
-    }
+      TestReportSummary reportSummary = WireMockSingleton.awaitTestReport();
+      summaryValidator.assertValid(reportSummary);
+      assertEquals(Result.FAILED, reportSummary.getResult());
+   }
+
+   public static String getResourceAsString(String resourcePath) throws IOException {
+      try (InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourcePath)) {
+         assert stream != null;
+         return new String(stream.readAllBytes());
+      }
+   }
 }

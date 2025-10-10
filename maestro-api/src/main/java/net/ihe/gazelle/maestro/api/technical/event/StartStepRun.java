@@ -16,22 +16,19 @@
 
 package net.ihe.gazelle.maestro.api.technical.event;
 
-
-import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 
 /**
- * A message to start TestRun Execution
+ * Step message used by producer to notify a subscriber to launch step execution
  */
-public class StartTestRunCommand implements TestRunEvent {
+public class StartStepRun implements Message {
+   private final StepRun stepRun;
 
-    private final TestRun testRun;
+   public StartStepRun(StepRun stepRun) {
+      this.stepRun = stepRun;
+   }
 
-    public StartTestRunCommand(TestRun testRun) {
-        this.testRun = testRun;
-    }
-
-    public TestRun getTestRun() {
-        return testRun;
-    }
-
+   public StepRun getStepRun() {
+      return stepRun;
+   }
 }

@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.quarkus;
+package net.ihe.gazelle.maestro.api.technical.event;
 
-public class NotProvidedStep extends RuntimeException {
-    public NotProvidedStep(String message){super(message);}
+import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
+
+/**
+ * A message to launch test set execution
+ */
+public record StartTestSuite(TestSuiteRun testSuiteRun) implements Message {
+
 }

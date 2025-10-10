@@ -27,9 +27,9 @@ public class TestReportSummaryValidator extends AbstractValidator<TestReportSumm
     @Override
     protected void addRulesAndMembers(ValidatorBuilder<? extends TestReportSummary> validatorBuilder) {
         validatorBuilder
-                .addRule("idValid", TestReportSummary::isIdValid, "Id must be set and not empty")
-                .addRule("dateTimeValid", TestReportSummary::isDateTimeValid, "DateTime must be set and not in the future")
-                .addRule("resultValid", TestReportSummary::isResultValid, "Result must be set and reflect the global result of the test testreport")
+                .addRule("idValid", TestReportSummary::isIdDefined, "Id must be set and not empty")
+                .addRule("dateTimeValid", TestReportSummary::isDateTimeDefined, "DateTime must be set and not in the future")
+                .addRule("resultValid", TestReportSummary::isResultDefined, "Result must be set and reflect the global result of the test testreport")
                 .addMember("unexpectedErrors", TestReportSummary::getUnexpectedErrors, unexpectedErrorValidator::getAssembledValidatorBuilder)
                 ;
 

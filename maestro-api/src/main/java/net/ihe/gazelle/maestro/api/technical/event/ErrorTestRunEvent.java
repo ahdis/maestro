@@ -19,7 +19,8 @@ package net.ihe.gazelle.maestro.api.technical.event;
 /**
  * A message to Describe an error in TestRun Execution
  */
-public class ErrorTestRunEvent implements TestRunEvent {
+@Deprecated
+public class ErrorTestRunEvent implements Message {
 
     private final Exception exception;
 

@@ -21,8 +21,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import net.ihe.gazelle.maestro.api.business.testreport.EntityIdentification;
 import net.ihe.gazelle.maestro.api.business.testreport.SystemUnderTest;
 import net.ihe.gazelle.maestro.api.business.testrun.*;
-import net.ihe.gazelle.maestro.business.MissingArgumentException;
-import net.ihe.gazelle.maestro.quarkus.ws.async.TestRunStore;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 
 import java.nio.charset.StandardCharsets;
@@ -51,7 +49,7 @@ public class TMScriptMapper {
     }
 
     /**
-     * New method that returns a TestSetRun for the updated JSON structure
+     * New method that returns a TestSuiteRun for the updated JSON structure
      * Expected JSON structure:
      * {
      *   "testSuiteName": "...",
@@ -67,7 +65,7 @@ public class TMScriptMapper {
      *   "testRuns": [ ... ]
      * }
      */
-    public static TestSetRun convertToTestSetRun(JsonNode jsonNode, TestRunStore testRunDAO) {
+    public static TestSuiteRun convertToTestSetRun(JsonNode jsonNode, RestCallbackId testRunDAO) {
         try {
             validateScript(jsonNode);
             // Extract root level properties
@@ -77,15 +75,15 @@ public class TMScriptMapper {
             JsonNode systemsUnderTestNode = jsonNode.get("systemsUnderTest");
             ArrayNode testRunNodes = (ArrayNode) jsonNode.get(TEST_RUNS);
 
-            // Create TestSetRun instance
-            TestSetRun testSetRun = new TestSetRun();
-            testSetRun.setTestSuiteName(testSuiteName);
-            testSetRun.setTestSetRunId(testSetRunId);
+            // Create TestSuiteRun instance
+            TestSuiteRun testSuiteRun = new TestSuiteRun();
+            testSuiteRun.setTestSuiteName(testSuiteName);
+            testSuiteRun.setTestSuiteClientId(testSetRunId);
 
             // Parse access control list if present
             if (accessControlListNode != null && !accessControlListNode.isNull()) {
                 AccessControlList acl = parseAccessControlList(accessControlListNode);
-                testSetRun.setAccessControlList(acl);
+                testSuiteRun.setAccessControlList(acl);
             }
 
             // Parse systemsUnderTest (optional)
@@ -93,16 +91,16 @@ public class TMScriptMapper {
             if (systemsUnderTestNode != null && systemsUnderTestNode.isArray()) {
                 systemsUnderTest = parseSystemsUnderTest((ArrayNode) systemsUnderTestNode);
             }
-            testSetRun.setSystemsUnderTest(systemsUnderTest);
+            testSuiteRun.setSystemsUnderTest(systemsUnderTest);
 
             // Parse test runs
             List<TestRun> testRuns = new ArrayList<>();
             for (JsonNode testRunNode : testRunNodes) {
-                parseTestRunNode(testRunDAO, testRunNode, testSetRun, testRuns);
+                parseTestRunNode(testRunDAO, testRunNode, testSuiteRun, testRuns);
             }
 
-            testSetRun.setTestRuns(testRuns);
-            return testSetRun;
+            testSuiteRun.setTestRuns(testRuns);
+            return testSuiteRun;
 
         } catch (NullPointerException e) {
             throw new MissingArgumentException("Required root properties (testSuiteName, testRuns) are missing");
@@ -162,9 +160,9 @@ public class TMScriptMapper {
         return values;
     }
 
-    private static void parseTestRunNode(TestRunStore testRunDAO, JsonNode testRunNode, TestSetRun testSetRun, List<TestRun> testRuns) {
+    private static void parseTestRunNode(RestCallbackId testRunDAO, JsonNode testRunNode, TestSuiteRun testSuiteRun, List<TestRun> testRuns) {
         try {
-            testRunDAO.setClientCallback(testRunNode.get("clientCallback").asText());
+            testRunDAO.setCallbackUrl(testRunNode.get("clientCallback").asText());
             testRunDAO.setCallbackAuthorization(testRunNode.get("callbackAuthorization").asText());
             TestRun testRun = new TestRun();
             JsonNode testNode = testRunNode.get("test");
@@ -172,7 +170,7 @@ public class TMScriptMapper {
             ArrayNode inputNodes = (ArrayNode) testRunNode.get("inputs");
             Set<String> availableKeys = parseInputs(inputNodes, testRun, inputDefinitions);
             trimOptionalMissingStepRefs(testRun, inputDefinitions, availableKeys);
-            testRun.setTestSetId(testSetRun.getTestSetId());
+            testRun.setTestSetId(testSuiteRun.getInternalId());
             testRuns.add(testRun);
         } catch (NullPointerException e) {
             throw new MissingArgumentException("Argument inputs is missing in testRun", e);

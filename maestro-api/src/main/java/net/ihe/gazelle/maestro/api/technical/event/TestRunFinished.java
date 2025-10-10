@@ -22,21 +22,6 @@ import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 /**
  * A Message to notify that a TestRun execution ended and to send a TestRunReportBuilder
  */
-public class FinishTestRunEvent implements TestRunEvent {
+public record TestRunFinished(TestRun testRun, TestRunReportBuilder testRunReportBuilder) implements Message {
 
-    private final TestRunReportBuilder testRunReportBuilder;
-    private final TestRun testRun;
-
-    public FinishTestRunEvent(TestRun testRun, TestRunReportBuilder testReport) {
-        this.testRun = testRun;
-        this.testRunReportBuilder = testReport;
-    }
-
-    public TestRunReportBuilder getTestRunReportBuilder() {
-        return testRunReportBuilder;
-    }
-
-    public TestRun getTestRun() {
-        return testRun;
-    }
 }

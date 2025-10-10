@@ -14,44 +14,44 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.api.business.testrun.context;
+package net.ihe.gazelle.maestro.business.context;
 
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRunCursor;
-import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
+import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 /**
- * TestSetSessionStore is a structure used to store report builder from executed TestRun,
+ * TestSuiteSession is a structure used to store report builder from executed TestRun,
  * testSet's id and reference to this testSet.
  */
-public class TestSetSessionStore {
+public class TestSuiteSession {
 
-    private final String setId;
-    private final TestSetRun testSetRun;
+    private final String testSuiteId;
+    private final TestSuiteRun testSuiteRun;
     private final List<TestRunReportBuilder> testRunReportBuilders;
     private TestRunCursor testRunCursor;
 
-    public TestSetSessionStore(String setId, TestSetRun testRuns) {
-        this(setId, testRuns, TestRunCursor.from(testRuns));
+    public TestSuiteSession(String setId, TestSuiteRun testSuiteRun) {
+        this(setId, testSuiteRun, TestRunCursor.from(testSuiteRun));
     }
 
-    public TestSetSessionStore(String setId, TestSetRun testRuns, TestRunCursor testRunCursor) {
-        this.setId = setId;
-        this.testSetRun = testRuns;
+    public TestSuiteSession(String testSuiteId, TestSuiteRun testSuiteRun, TestRunCursor testRunCursor) {
+        this.testSuiteId = testSuiteId;
+        this.testSuiteRun = testSuiteRun;
         this.testRunReportBuilders = new ArrayList<>();
         this.testRunCursor = testRunCursor;
     }
 
-    public String getSetId() {
-        return setId;
+    public String getTestSuiteId() {
+        return testSuiteId;
     }
 
-    public TestSetRun getTestSetRun() {
-        return testSetRun;
+    public TestSuiteRun getTestSuiteRun() {
+        return testSuiteRun;
     }
 
     public List<TestRunReportBuilder> getTestRunReportBuilders() {
@@ -72,15 +72,15 @@ public class TestSetSessionStore {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof TestSetSessionStore store)) return false;
-        return Objects.equals(setId, store.setId)
-                && Objects.equals(testSetRun, store.testSetRun)
+        if (!(o instanceof TestSuiteSession store)) return false;
+        return Objects.equals(testSuiteId, store.testSuiteId)
+                && Objects.equals(testSuiteRun, store.testSuiteRun)
                 && Objects.equals(testRunReportBuilders, store.testRunReportBuilders)
                 && Objects.equals(testRunCursor, store.testRunCursor);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(setId, testSetRun, testRunReportBuilders, testRunCursor);
+        return Objects.hash(testSuiteId, testSuiteRun, testRunReportBuilders, testRunCursor);
     }
 }

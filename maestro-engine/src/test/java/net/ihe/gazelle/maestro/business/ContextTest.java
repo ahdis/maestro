@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.api.business.testrun;
+package net.ihe.gazelle.maestro.business;
 
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.UnexpectedErrorBuilder;
-import net.ihe.gazelle.maestro.api.business.testrun.context.Context;
 import net.ihe.gazelle.maestro.api.business.testrun.StepCursor;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRunCursor;
-import net.ihe.gazelle.maestro.api.business.testrun.context.TestRunSessionStore;
-import net.ihe.gazelle.maestro.api.business.testrun.context.TestSetSessionStore;
+import net.ihe.gazelle.maestro.business.context.Context;
+import net.ihe.gazelle.maestro.business.context.TestRunSession;
+import net.ihe.gazelle.maestro.business.context.TestSuiteSession;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,21 +36,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ContextTest {
 
-    TestRunSessionStore testRunSessionStore;
+    TestRunSession testRunSession;
 
     @BeforeEach
     void setUp() {
         Context context = new Context();
         TestRun testRun = new TestRun();
         List<StepRunReportBuilder> stepRunReportBuilders = new ArrayList<>();
-        testRunSessionStore = new TestRunSessionStore(context, testRun, stepRunReportBuilders, StepCursor.empty());
+        testRunSession = new TestRunSession(context, testRun, stepRunReportBuilders, StepCursor.empty());
     }
 
     @Test
     void setContextTest() {
         Context context = new Context();
-        testRunSessionStore.setContext(context);
-        assertEquals(context, testRunSessionStore.getContext());
+        testRunSession.setContext(context);
+        assertEquals(context, testRunSession.getContext());
     }
 
     @Test
@@ -58,10 +58,10 @@ class ContextTest {
         StepRunReportBuilder stepRunReportBuilder = new StepRunReportBuilder();
         List<StepRunReportBuilder> stepRunReportBuilders = new ArrayList<>();
         stepRunReportBuilders.add(stepRunReportBuilder);
-        testRunSessionStore.setStepReports(stepRunReportBuilders);
-        assertEquals(stepRunReportBuilders, testRunSessionStore.getStepReports());
-        assertEquals(1, testRunSessionStore.getStepReports().size());
-        assertEquals(stepRunReportBuilder, testRunSessionStore.getStepReports().getFirst());
+        testRunSession.setStepReports(stepRunReportBuilders);
+        assertEquals(stepRunReportBuilders, testRunSession.getStepReports());
+        assertEquals(1, testRunSession.getStepReports().size());
+        assertEquals(stepRunReportBuilder, testRunSession.getStepReports().getFirst());
     }
 
     @Test
@@ -77,7 +77,7 @@ class ContextTest {
         TestRunReportBuilder testRunReportBuilder2 = new TestRunReportBuilder().addUnexpectedError(error2);
 
         EqualsVerifier.simple()
-                .forClass(TestSetSessionStore.class)
+                .forClass(TestSuiteSession.class)
                 .withPrefabValues(TestRunReportBuilder.class, testRunReportBuilder1, testRunReportBuilder2)
                 .withPrefabValues(TestRunCursor.class, TestRunCursor.empty(), new TestRunCursor(List.of(new TestRun())))
                 .verify();

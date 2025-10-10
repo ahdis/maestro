@@ -21,7 +21,7 @@ import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunner;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunnerFactory;
 import net.ihe.gazelle.maestro.quarkus.handler.HandlerProvider;
-import net.ihe.gazelle.maestro.quarkus.jobs.StepRunnerProvider;
+import net.ihe.gazelle.maestro.business.StepRunnerProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

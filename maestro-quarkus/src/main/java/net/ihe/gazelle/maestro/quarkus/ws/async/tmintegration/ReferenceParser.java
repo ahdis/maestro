@@ -17,15 +17,12 @@
 package net.ihe.gazelle.maestro.quarkus.ws.async.tmintegration;
 
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
-import net.ihe.gazelle.maestro.api.business.testrun.context.TestRunSessionStore;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * <p>In Maestro context, a reference is the name of a Property store in TestRun inputs or TestRunSessionStore context
- * {@link TestRun}
- * {@link TestRunSessionStore}
+ * <p>In Maestro context, a reference is the name of a Property store in TestRun inputs or context
  * To recognize if a String is a reference, it shall follow syntax describ in PATTERN field.
  * </p>
  * <p>

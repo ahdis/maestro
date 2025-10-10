@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.quarkus.jobs;
+package net.ihe.gazelle.maestro.api.technical.event;
 
-import net.ihe.gazelle.maestro.api.business.testrun.Step;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunner;
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
+import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 
-public interface StepRunnerProvider {
-    /**
-     * @param step The step we want StepRunner to execute
-     * @return A StepRunner able to run step
-     */
-    StepRunner create(Step step);
+/**
+ * Step message used by a producer to notify listener that a step execution ended.
+ * It contains a report builder loaded with infos to build executed step's report
+ */
+public record StepRunFinished(StepRun stepRun, StepRunReportBuilder stepRunReportBuilder) implements Message {
+
 }

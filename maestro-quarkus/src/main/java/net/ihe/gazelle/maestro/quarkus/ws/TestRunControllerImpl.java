@@ -24,121 +24,123 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
 import net.ihe.gazelle.maestro.api.business.testrun.InvalidTestRunException;
-import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
+import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.api.business.testrun.UnsupportedPropertyTypeException;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
-import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSetRunDTO;
-import net.ihe.gazelle.maestro.quarkus.NotProvidedStep;
+import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSuiteRunDTO;
+import net.ihe.gazelle.maestro.quarkus.UnknownStepType;
+import net.ihe.gazelle.maestro.quarkus.client.ApacheTestReportClient;
 import net.ihe.gazelle.maestro.quarkus.jobs.SynchronousMaestro;
 import net.ihe.gazelle.maestro.quarkus.ws.async.AsynchronousMaestro;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+import net.ihe.gazelle.maestro.simulation.step.business.TimeoutRuntimeException;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.MessageFormat;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
 
 @ApplicationScoped
 public class TestRunControllerImpl implements TestRunController {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TestRunControllerImpl.class);
+   private static final Logger LOG = LoggerFactory.getLogger(TestRunControllerImpl.class);
 
-    private final SynchronousMaestro synchronousMaestro;
-    private final AsynchronousMaestro asynchronousMaestro;
+   private final SynchronousMaestro synchronousMaestro;
+   private final AsynchronousMaestro asynchronousMaestro;
 
-    @ConfigProperty(name = "datahouse.url")
-    String dataHouseUrl;
+   @Inject
+   public TestRunControllerImpl(SynchronousMaestro synchronousMaestro, AsynchronousMaestro asynchronousMaestro) {
+      this.synchronousMaestro = synchronousMaestro;
+      this.asynchronousMaestro = asynchronousMaestro;
+   }
 
-    @Inject
-    public TestRunControllerImpl(SynchronousMaestro synchronousMaestro, AsynchronousMaestro asynchronousMaestro) {
-        this.synchronousMaestro = synchronousMaestro;
-        this.asynchronousMaestro = asynchronousMaestro;
-    }
+   @Override
+   public Response run(String callback, TestSuiteRunDTO testSuiteRunDTO) {
+      TestSuiteRun testSuiteRun = testSuiteRunDTO.getBusinessObject();
+      testSuiteRun.getTestRuns().forEach(
+            testRun -> testRun.setTestSetId(testSuiteRun.getInternalId())
+      );
+      if (callback != null) {
+         return handleErrors(() -> runAsynchronously(testSuiteRun, callback));
+      } else {
+         return handleErrors(() -> runSynchronously(testSuiteRun));
+      }
+   }
 
-    @Override
-    public Response run(String callback, TestSetRunDTO testSetRunDTO) {
-        TestSetRun testSetRun = testSetRunDTO.getBusinessObject();
-        testSetRun.getTestRuns().forEach(
-                testRun -> testRun.setTestSetId(testSetRun.getTestSetId())
-        );
-        if (callback != null) {
-            return runAsynchronously(callback, testSetRun);
-        } else {
-            return runSynchronously(testSetRun);
-        }
-    }
+   private Response handleErrors(Supplier<Response> serviceCall) {
+      try {
+         return serviceCall.get();
+      } catch (InvalidTestRunException | IllegalArgumentException e) {
+         LOG.debug("TestRun format Exception", e);
+         return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
+               .entity("The request contains a testRun with bad format" + e).build();
+      } catch (UnknownStepType e) {
+         LOG.debug(e.getMessage());
+         return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
+               .entity(MessageFormat.format("Unknown step type: {0}", e.getMessage())).build();
+      } catch (TimeoutRuntimeException | WebApplicationException e) {
+         return Response.status(Response.Status.GATEWAY_TIMEOUT.getStatusCode())
+               .entity(SynchronousMaestro.TIMEOUT_MESSAGE).build();
+      } catch (Exception e) {
+         LOG.error("Unknown error", e);
+         Thread.currentThread().interrupt();
+         return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
+               .entity("an error occurred during execution: " + e).build();
+      }
+   }
 
-    private Response runSynchronously(TestSetRun testSetRun) {
-        try {
-            TestReportSummary reportSummary = synchronousMaestro.executeTestSet(testSetRun);
-            String locationPrefix = dataHouseUrl + "/items";
-            return Response.ok(new TestReportSummaryDTO(reportSummary, locationPrefix)).build();
-        } catch (InvalidTestRunException | IllegalArgumentException e) {
-            LOG.debug("TestRun format Exception", e);
-            return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity("The request contains a testRun with bad format" + e).build();
-        } catch (NotProvidedStep e) {
-            LOG.debug(e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity("Your script contains a non provided test report" + e).build();
-        } catch (TimeoutException e) {
-            LOG.error("Timeout during test execution", e);
-            return Response.status(Response.Status.GATEWAY_TIMEOUT.getStatusCode()).entity(SynchronousMaestro.TIMEOUT_MESSAGE).build();
-        } catch (WebApplicationException e) {
-            return Response.status(Response.Status.GATEWAY_TIMEOUT.getStatusCode()).entity(SynchronousMaestro.TIMEOUT_MESSAGE).build();
-        }  catch (Exception e) {
-            LOG.error("Unknown error", e);
-            Thread.currentThread().interrupt();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).entity("an error occurred during execution: " + e).build();
-        }
-    }
+   private Response runSynchronously(TestSuiteRun testSuiteRun) {
+      try {
+         TestReportSummary reportSummary = synchronousMaestro.executeTestSuite(testSuiteRun);
+         return Response.ok(new TestReportSummaryDTO(reportSummary)).build();
+      } catch (TimeoutException e) {
+         throw new TimeoutRuntimeException(e);
+      } catch (InterruptedException e) {
+         Thread.currentThread().interrupt();
+         throw new RuntimeException(e);
+      }
+   }
 
-    private Response runAsynchronously(String callback, TestSetRun testSetRun) {
-        try {
-            asynchronousMaestro.executeTestSet(callback, testSetRun);
-            return Response.accepted().build();
-        } catch (InvalidTestRunException | IllegalArgumentException e) {
-            LOG.debug("TestRun format Exception", e);
-            return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity("The request contains a testRun with bad format" + e).build();
-        } catch (NotProvidedStep e) {
-            LOG.debug(e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity("Your script contains a non provided testreport" + e).build();
-        } catch (WebApplicationException e) {
-            return Response.status(Response.Status.GATEWAY_TIMEOUT.getStatusCode()).entity(SynchronousMaestro.TIMEOUT_MESSAGE).build();
-        } catch (Exception e) {
-            LOG.error("Unknown error", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).entity("an error occurred during execution: " + e).build();
-        }
-    }
+   private Response runAsynchronously(TestSuiteRun testSuiteRun, String callback) {
+      asynchronousMaestro.executeTestSuite(testSuiteRun, new ApacheTestReportClient(callback));
+      return Response.accepted().build();
+   }
 
-    /**
-     * This method is automatically triggered by Jakarta Jackson if the received JSON couldn't be deserialized into TestRunDTO object
-     * @param exception The exception Jakarta Jackson thrown while deserializing received JSON
-     * @return A Bad Request status code with error message from Jackson
-     */
-    @ServerExceptionMapper
-    public Response handleJsonProcessingException(Exception exception) {
-        String message;
+   /**
+    * This method is automatically triggered by Jakarta Jackson if the received JSON couldn't be deserialized into
+    * TestRunDTO object
+    *
+    * @param exception The exception Jakarta Jackson thrown while deserializing received JSON
+    *
+    * @return A Bad Request status code with error message from Jackson
+    */
+   @ServerExceptionMapper
+   public Response handleJsonProcessingException(Exception exception) {
+      String message;
 
-        if (exception.getCause() != null && exception.getCause().getCause() != null) {
-            if (exception.getCause().getCause() instanceof IllegalArgumentException illegalArgumentException) {
-                message = illegalArgumentException.getMessage();
-            } else if (exception.getCause().getCause() instanceof UnsupportedPropertyTypeException unsupportedPropertyTypeException) {
-                message = unsupportedPropertyTypeException.getMessage();
-            } else {
-                LOG.error(exception.getMessage(), exception);
-                message = "Unable to parse TestRun structure.";
-            }
-        } else {
-            if (exception instanceof InvalidTypeIdException invalidTypeIdException) {
-                message = invalidTypeIdException.getOriginalMessage();
-            } else {
-                LOG.error(exception.getMessage(), exception);
-                message = "Unable to parse TestRun structure.";
-            }
-        }
+      if (exception.getCause() != null && exception.getCause().getCause() != null) {
+         if (exception.getCause().getCause() instanceof IllegalArgumentException illegalArgumentException) {
+            message = illegalArgumentException.getMessage();
+         } else if (exception.getCause()
+               .getCause() instanceof UnsupportedPropertyTypeException unsupportedPropertyTypeException) {
+            message = unsupportedPropertyTypeException.getMessage();
+         } else {
+            LOG.error(exception.getMessage(), exception);
+            message = "Unable to parse TestSuite structure.";
+         }
+      } else {
+         if (exception instanceof InvalidTypeIdException invalidTypeIdException) {
+            message = invalidTypeIdException.getOriginalMessage();
+         } else {
+            LOG.error(exception.getMessage(), exception);
+            message = "Unable to parse TestSuite structure.";
+         }
+      }
 
-        return Response.status(Response.Status.BAD_REQUEST)
-                .entity(message)
-                .type(MediaType.APPLICATION_JSON)
-                .build();
-    }
+      return Response.status(Response.Status.BAD_REQUEST)
+            .entity(message)
+            .type(MediaType.APPLICATION_JSON)
+            .build();
+   }
 }

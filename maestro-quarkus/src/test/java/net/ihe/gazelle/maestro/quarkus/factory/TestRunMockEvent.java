@@ -16,7 +16,6 @@
 
 package net.ihe.gazelle.maestro.quarkus.factory;
 
-import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.NotificationOptions;
 import jakarta.enterprise.util.TypeLiteral;
 import net.ihe.gazelle.maestro.api.technical.event.*;
@@ -29,7 +28,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
-public class TestRunMockEvent implements Event<TestRunEvent> {
+public class TestRunMockEvent implements jakarta.enterprise.event.Event<Message> {
 
     ExecutorService executorService = new ScheduledThreadPoolExecutor(5);
     List<EventListener> listeners = new ArrayList<>();
@@ -46,52 +45,62 @@ public class TestRunMockEvent implements Event<TestRunEvent> {
     }
 
     @Override
-    public void fire(TestRunEvent testRunEvent) {
-        if (testRunEvent instanceof StartTestSetCommand startTestSetCommand) {
+    public void fire(Message message) {
+        if (message instanceof StartTestSuite startTestSuite) {
             listeners.forEach(listener ->
-                    executorService.submit(() -> listener.onStartTestSet(startTestSetCommand))
+                    executorService.submit(() -> listener.onStartTestSet(startTestSuite))
             );
         }
-        if (testRunEvent instanceof FinishTestSetEvent finishTestSetEvent) {
+        if (message instanceof TestSuiteFinished testSuiteFinished) {
             listeners.forEach(listener ->
-                    executorService.submit(() -> listener.onFinishTestSet(finishTestSetEvent))
+                    executorService.submit(() -> listener.onFinishTestSet(testSuiteFinished))
             );
         }
-        if (testRunEvent instanceof StartTestRunCommand startTestRunCommand) {
+        if (message instanceof StartTestRun startTestRun) {
             listeners.forEach(listener ->
-                    executorService.submit(() -> listener.onStartTestRun(startTestRunCommand))
+                    executorService.submit(() -> listener.onStartTestRun(startTestRun))
             );
         }
-        if (testRunEvent instanceof FinishTestRunEvent finishTestRunEvent) {
+        if (message instanceof TestRunFinished testRunFinished) {
             listeners.forEach(listener ->
-                    executorService.submit(() -> listener.onFinishTestRun(finishTestRunEvent))
+                    executorService.submit(() -> listener.onFinishTestRun(testRunFinished))
+            );
+        }
+        if(message instanceof StartStepRun startStepRun) {
+            listeners.forEach(listener ->
+                    executorService.submit(() -> listener.onStartStep(startStepRun))
+            );
+        }
+        if(message instanceof StepRunFinished stepRunFinished) {
+            listeners.forEach(listener ->
+                    executorService.submit(() -> listener.onFinishStep(stepRunFinished))
             );
         }
     }
 
     @Override
-    public <U extends TestRunEvent> CompletionStage<U> fireAsync(U testRunEvent) {
+    public <U extends Message> CompletionStage<U> fireAsync(U testRunEvent) {
         fire(testRunEvent);
         return null;
     }
 
     @Override
-    public <U extends TestRunEvent> CompletionStage<U> fireAsync(U u, NotificationOptions notificationOptions) {
+    public <U extends Message> CompletionStage<U> fireAsync(U u, NotificationOptions notificationOptions) {
         return null;
     }
 
     @Override
-    public Event<TestRunEvent> select(Annotation... annotations) {
+    public jakarta.enterprise.event.Event<Message> select(Annotation... annotations) {
         return null;
     }
 
     @Override
-    public <U extends TestRunEvent> Event<U> select(Class<U> aClass, Annotation... annotations) {
+    public <U extends Message> jakarta.enterprise.event.Event<U> select(Class<U> aClass, Annotation... annotations) {
         return null;
     }
 
     @Override
-    public <U extends TestRunEvent> Event<U> select(TypeLiteral<U> typeLiteral, Annotation... annotations) {
+    public <U extends Message> jakarta.enterprise.event.Event<U> select(TypeLiteral<U> typeLiteral, Annotation... annotations) {
         return null;
     }
 }
