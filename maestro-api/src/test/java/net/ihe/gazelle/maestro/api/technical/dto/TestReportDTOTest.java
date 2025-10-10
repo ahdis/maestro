@@ -16,12 +16,14 @@
 
 package net.ihe.gazelle.maestro.api.technical.dto;
 
-import net.ihe.gazelle.lang.UnexpectedError;
+import net.ihe.gazelle.errorhandling.business.UnexpectedError;
+import net.ihe.gazelle.errorhandling.business.UnexpectedErrorBuilder;
+import net.ihe.gazelle.errorhandling.business.UnexpectedErrorValidator;
+import net.ihe.gazelle.errorhandling.technical.UnexpectedErrorDTO;
 import net.ihe.gazelle.maestro.api.business.testreport.*;
 import net.ihe.gazelle.maestro.api.technical.dto.report.OutputDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.report.SystemUnderTestDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
-import net.ihe.gazelle.maestro.api.technical.dto.report.UnexpectedErrorDTO;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
 import org.junit.jupiter.api.Test;
@@ -30,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TestReportDTOTest {
@@ -83,7 +86,7 @@ class TestReportDTOTest {
                 )
         );
         UnexpectedError error =  SER_DES.deserialize(json, UnexpectedError.class);
-        assertTrue(error.isValid());
+        assertDoesNotThrow(() -> new UnexpectedErrorValidator().assertValid(error.getCause()));
     }
 
     private TestRunReportBuilder createTestRunBuilder() {

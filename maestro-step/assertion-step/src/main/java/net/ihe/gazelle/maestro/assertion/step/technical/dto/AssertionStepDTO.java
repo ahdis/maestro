@@ -31,7 +31,6 @@ public class AssertionStepDTO extends StepDTO<AssertionStep> {
         super(assertionStep);
     }
 
-    @Override
     public Class<AssertionStep> getBusinessObjectClass() {
         return AssertionStep.class;
     }

@@ -3,9 +3,9 @@ package net.ihe.gazelle.maestro.api.business.testrun.validator;
 import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilder;
 import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory;
 import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
-import net.ihe.gazelle.maestro.api.business.acl.validator.AccessControlListValidator;
 import net.ihe.gazelle.maestro.api.business.testreport.validator.SystemUnderTestValidator;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSetRun;
+import net.ihe.gazelle.security.business.acl.AccessControlListValidator;
 
 public class TestSetRunValidator extends AbstractValidator<TestSetRun> {
 
