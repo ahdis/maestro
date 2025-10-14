@@ -22,11 +22,13 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.Produces;
 import net.ihe.gazelle.maestro.api.business.testrun.Maestro;
 import net.ihe.gazelle.maestro.api.business.testrun.MaestroEventProducer;
+import net.ihe.gazelle.maestro.business.MaestroFacade;
 import net.ihe.gazelle.maestro.business.MaestroImpl;
 import net.ihe.gazelle.maestro.business.context.SessionStore;
 import net.ihe.gazelle.maestro.business.TestReportRecordService;
 import net.ihe.gazelle.maestro.business.StepRunnerJob;
 import net.ihe.gazelle.maestro.business.StepRunnerProvider;
+import net.ihe.gazelle.maestro.business.SynchronousMaestro;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 
@@ -36,6 +38,9 @@ public class MaestroFactory {
 
    @ConfigProperty(name = "quarkus.application.version")
    String applicationVersion;
+
+   @ConfigProperty(name = "gzl.maestro.timeout", defaultValue = "60")
+   int timeoutSeconds;
 
    private final MaestroEventProducer maestroEventProducer;
    private final SessionStore sessionStore;
@@ -51,6 +56,18 @@ public class MaestroFactory {
       this.sessionStore = sessionStore;
       this.testReportRecordService = testReportRecordService;
       this.stepRunnerProvider = stepRunnerProvider;
+   }
+
+   @Produces
+   @Default
+   public SynchronousMaestro getSynchronousMaestro() {
+      return new SynchronousMaestro(timeoutSeconds, getMaestroFacade());
+   }
+
+   @Produces
+   @Default
+   public MaestroFacade getMaestroFacade() {
+      return new MaestroFacade(maestroEventProducer);
    }
 
    @Produces

@@ -27,4 +27,5 @@ public class UserInteractionHandlerImpl implements UserInteractionHandler {
     public boolean isAvailable() {
         return true;
     }
+
 }

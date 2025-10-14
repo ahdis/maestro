@@ -19,14 +19,18 @@ package net.ihe.gazelle.maestro.quarkus.jobs;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
+import net.ihe.gazelle.maestro.api.business.message.Message;
+import net.ihe.gazelle.maestro.api.business.message.StartTestSuiteRun;
+import net.ihe.gazelle.maestro.api.business.message.TestRunFinished;
+import net.ihe.gazelle.maestro.api.business.message.TestSuiteRunFinished;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.MaestroEventProducer;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
-import net.ihe.gazelle.maestro.api.technical.event.StepRunFinished;
-import net.ihe.gazelle.maestro.api.technical.event.StartStepRun;
+import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
+import net.ihe.gazelle.maestro.api.business.message.StartStepRun;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 import net.ihe.gazelle.maestro.api.technical.event.*;
 
@@ -49,12 +53,12 @@ public class EventMaestroProducer implements MaestroEventProducer {
 
     @Override
     public void executeTestSet(TestSuiteRun testSuiteRun) {
-        messageEvent.fireAsync(new StartTestSuite(testSuiteRun));
+        messageEvent.fireAsync(new StartTestSuiteRun(testSuiteRun));
     }
 
     @Override
     public void returnTestSetReport(TestSuiteRun testSuiteRun, TestReportSummary reportSummary) {
-        messageEvent.fireAsync(new TestSuiteFinished(testSuiteRun, reportSummary));
+        messageEvent.fireAsync(new TestSuiteRunFinished(testSuiteRun, reportSummary));
     }
 
     @Override

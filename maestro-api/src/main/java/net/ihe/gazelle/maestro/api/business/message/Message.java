@@ -14,14 +14,10 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.api.technical.event;
+package net.ihe.gazelle.maestro.api.business.message;
 
+import java.io.Serializable;
 
-import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
-
-/**
- * A message to start TestRun Execution
- */
-public record StartTestRun(TestRun testRun) implements Message {
+public interface Message extends Serializable {
 
 }

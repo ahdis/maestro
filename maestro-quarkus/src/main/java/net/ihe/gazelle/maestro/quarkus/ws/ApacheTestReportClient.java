@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.quarkus.client;
+package net.ihe.gazelle.maestro.quarkus.ws;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.HttpHeaders;
+import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
-import net.ihe.gazelle.maestro.api.technical.event.StepRunFinished;
-import net.ihe.gazelle.maestro.api.technical.event.StepRunStarted;
-import net.ihe.gazelle.maestro.api.technical.event.TestRunFinished;
-import net.ihe.gazelle.maestro.api.technical.event.TestRunStarted;
-import net.ihe.gazelle.maestro.api.technical.event.TestSuiteFinished;
+import net.ihe.gazelle.maestro.api.business.message.TestSuiteRunFinished;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.entity.EntityBuilder;
 import org.apache.hc.client5.http.impl.classic.BasicHttpClientResponseHandler;
@@ -41,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * <br> It uses the callback URL and authorization token stored
  */
 @ApplicationScoped
-public class ApacheTestReportClient implements MaestroCaller {
+public class ApacheTestReportClient implements MaestroObserver {
 
    private static final Logger LOG = LoggerFactory.getLogger(ApacheTestReportClient.class);
 
@@ -58,8 +55,8 @@ public class ApacheTestReportClient implements MaestroCaller {
    }
 
    @Override
-   public void onTestSuiteFinished(TestSuiteFinished testSuiteFinished) {
-      sendTestReport(testSuiteFinished.reportSummary());
+   public void onTestSuiteFinished(TestSuiteRunFinished testSuiteRunFinished) {
+      sendTestReport(testSuiteRunFinished.reportSummary());
    }
 
    private void sendTestReport(TestReportSummary testReportSummary) {

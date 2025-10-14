@@ -18,7 +18,13 @@ package net.ihe.gazelle.maestro.quarkus.factory;
 
 import jakarta.enterprise.event.NotificationOptions;
 import jakarta.enterprise.util.TypeLiteral;
-import net.ihe.gazelle.maestro.api.technical.event.*;
+import net.ihe.gazelle.maestro.api.business.message.Message;
+import net.ihe.gazelle.maestro.api.business.message.StartStepRun;
+import net.ihe.gazelle.maestro.api.business.message.StartTestRun;
+import net.ihe.gazelle.maestro.api.business.message.StartTestSuiteRun;
+import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
+import net.ihe.gazelle.maestro.api.business.message.TestRunFinished;
+import net.ihe.gazelle.maestro.api.business.message.TestSuiteRunFinished;
 import net.ihe.gazelle.maestro.quarkus.jobs.EventListener;
 
 import java.lang.annotation.Annotation;
@@ -46,14 +52,14 @@ public class TestRunMockEvent implements jakarta.enterprise.event.Event<Message>
 
     @Override
     public void fire(Message message) {
-        if (message instanceof StartTestSuite startTestSuite) {
+        if (message instanceof StartTestSuiteRun startTestSuiteRun) {
             listeners.forEach(listener ->
-                    executorService.submit(() -> listener.onStartTestSet(startTestSuite))
+                    executorService.submit(() -> listener.onStartTestSet(startTestSuiteRun))
             );
         }
-        if (message instanceof TestSuiteFinished testSuiteFinished) {
+        if (message instanceof TestSuiteRunFinished testSuiteRunFinished) {
             listeners.forEach(listener ->
-                    executorService.submit(() -> listener.onFinishTestSet(testSuiteFinished))
+                    executorService.submit(() -> listener.onFinishTestSet(testSuiteRunFinished))
             );
         }
         if (message instanceof StartTestRun startTestRun) {

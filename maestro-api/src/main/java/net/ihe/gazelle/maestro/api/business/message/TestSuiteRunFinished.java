@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.api.technical.event;
+package net.ihe.gazelle.maestro.api.business.message;
 
-public interface Message {
+import net.ihe.gazelle.lang.Event;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
+import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 
+/**
+ * A message to notify that a TestSet Execution Ended and to send a TestReport
+ */
+@Event
+public record TestSuiteRunFinished(TestSuiteRun testSuiteRun, TestReportSummary reportSummary) implements Message {
 
 }

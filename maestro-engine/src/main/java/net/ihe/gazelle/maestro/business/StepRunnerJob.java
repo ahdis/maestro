@@ -22,7 +22,7 @@ import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.MaestroEventProducer;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunner;
-import net.ihe.gazelle.maestro.api.technical.event.StartStepRun;
+import net.ihe.gazelle.maestro.api.business.message.StartStepRun;
 import org.slf4j.Logger;
 
 /**
@@ -45,7 +45,7 @@ public class StepRunnerJob {
      * @param startStepRun Message containing step to run
      */
     public void launchStepExecution(StartStepRun startStepRun) {
-        StepRun stepRun = startStepRun.getStepRun();
+        StepRun stepRun = startStepRun.stepRun();
         try {
             StepRunner runner = stepRunnerProvider.create(stepRun.step());
             runner.run(stepRun)

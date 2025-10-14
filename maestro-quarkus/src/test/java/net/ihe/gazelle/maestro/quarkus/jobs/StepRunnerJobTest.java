@@ -6,7 +6,7 @@ package net.ihe.gazelle.maestro.quarkus.jobs;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.MaestroEventProducer;
 import net.ihe.gazelle.maestro.api.business.testrun.Step;
-import net.ihe.gazelle.maestro.api.technical.event.StartStepRun;
+import net.ihe.gazelle.maestro.api.business.message.StartStepRun;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunner;
 import net.ihe.gazelle.maestro.business.StepRunnerJob;

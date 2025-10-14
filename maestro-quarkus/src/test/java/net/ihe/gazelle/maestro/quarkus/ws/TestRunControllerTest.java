@@ -30,12 +30,12 @@ import net.ihe.gazelle.maestro.business.MaestroImpl;
 import net.ihe.gazelle.maestro.quarkus.ws.async.tmintegration.MissingArgumentException;
 import net.ihe.gazelle.maestro.business.context.SessionStoreImpl;
 import net.ihe.gazelle.maestro.quarkus.UnknownStepType;
-import net.ihe.gazelle.maestro.quarkus.client.MaestroCaller;
+import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.quarkus.factory.TestRunMockEvent;
 import net.ihe.gazelle.maestro.quarkus.jobs.EventMaestroProducer;
-import net.ihe.gazelle.maestro.quarkus.jobs.SynchronousMaestro;
+import net.ihe.gazelle.maestro.business.SynchronousMaestro;
 import net.ihe.gazelle.maestro.quarkus.mock.InMemoryTestReportRecordService;
-import net.ihe.gazelle.maestro.quarkus.ws.async.AsynchronousMaestro;
+import net.ihe.gazelle.maestro.business.MaestroFacade;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
 import net.ihe.gazelle.security.technical.acl.AccessControlListDTO;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,13 +63,13 @@ class TestRunControllerTest {
     SynchronousMaestro synchronousMaestro;
 
     @Mock
-    AsynchronousMaestro asynchronousMaestro;
+    MaestroFacade maestroFacade;
 
     TestRunControllerImpl controller;
 
     @BeforeEach
     void setUp() {
-        controller = new TestRunControllerImpl(synchronousMaestro, asynchronousMaestro);
+        controller = new TestRunControllerImpl(synchronousMaestro, maestroFacade);
     }
 
     @Test
@@ -91,7 +91,7 @@ class TestRunControllerTest {
         ArgumentCaptor<TestSuiteRun> testSetRunCaptor = ArgumentCaptor.forClass(TestSuiteRun.class);
         verify(synchronousMaestro).executeTestSuite(testSetRunCaptor.capture());
         assertEquals(1, testSetRunCaptor.getValue().getTestRuns().size());
-        verifyNoInteractions(asynchronousMaestro);
+        verifyNoInteractions(maestroFacade);
     }
 
     @Test
@@ -101,8 +101,8 @@ class TestRunControllerTest {
         assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus());
 
         ArgumentCaptor<TestSuiteRun> testSetRunCaptor = ArgumentCaptor.forClass(TestSuiteRun.class);
-        ArgumentCaptor<MaestroCaller> callerCaptor = ArgumentCaptor.forClass(MaestroCaller.class);
-        verify(asynchronousMaestro).executeTestSuite(testSetRunCaptor.capture(), callerCaptor.capture());
+        ArgumentCaptor<MaestroObserver> callerCaptor = ArgumentCaptor.forClass(MaestroObserver.class);
+        verify(maestroFacade).executeTestSuite(testSetRunCaptor.capture(), callerCaptor.capture());
         assertEquals(1, testSetRunCaptor.getValue().getTestRuns().size());
         verifyNoInteractions(synchronousMaestro);
     }
@@ -165,7 +165,7 @@ class TestRunControllerTest {
     @Test
     void runWithCallbackInvalidTestRunReturnsBadRequest() {
         doThrow(new InvalidTestRunException("invalid"))
-                .when(asynchronousMaestro).executeTestSuite(any(), any());
+                .when(maestroFacade).executeTestSuite(any(), any());
 
         Response response = controller.run("http://callback", testSetRunDto());
 
@@ -176,7 +176,7 @@ class TestRunControllerTest {
     @Test
     void runWithCallbackNotProvidedStepReturnsBadRequest() {
         doThrow(new UnknownStepType("missing"))
-                .when(asynchronousMaestro).executeTestSuite(any(), any());
+                .when(maestroFacade).executeTestSuite(any(), any());
 
         Response response = controller.run("http://callback", testSetRunDto());
 
@@ -190,7 +190,7 @@ class TestRunControllerTest {
     @Test
     void runWithCallbackWebApplicationExceptionReturnsGatewayTimeout() {
         doThrow(new WebApplicationException("timeout"))
-                .when(asynchronousMaestro).executeTestSuite(any(), any());
+                .when(maestroFacade).executeTestSuite(any(), any());
 
         Response response = controller.run("http://callback", testSetRunDto());
 
@@ -201,7 +201,7 @@ class TestRunControllerTest {
     @Test
     void runWithCallbackUnexpectedExceptionReturnsInternalServerError() {
         doThrow(new RuntimeException("boom"))
-                .when(asynchronousMaestro).executeTestSuite(any(), any());
+                .when(maestroFacade).executeTestSuite(any(), any());
 
         Response response = controller.run("http://callback", testSetRunDto());
 

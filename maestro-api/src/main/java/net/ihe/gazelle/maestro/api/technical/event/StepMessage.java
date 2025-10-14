@@ -16,6 +16,8 @@
 
 package net.ihe.gazelle.maestro.api.technical.event;
 
+import net.ihe.gazelle.maestro.api.business.message.StartStepRun;
+import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 
 /**

@@ -14,21 +14,17 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.api.technical.event;
+package net.ihe.gazelle.maestro.api.business.message;
 
+import net.ihe.gazelle.lang.Event;
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 
 /**
- * Step message used by producer to notify a subscriber to launch step execution
+ * Step message used by a producer to notify listener that a step execution ended.
+ * It contains a report builder loaded with infos to build executed step's report
  */
-public class StartStepRun implements Message {
-   private final StepRun stepRun;
+@Event
+public record StepRunFinished(StepRun stepRun, StepRunReportBuilder stepRunReportBuilder) implements Message {
 
-   public StartStepRun(StepRun stepRun) {
-      this.stepRun = stepRun;
-   }
-
-   public StepRun getStepRun() {
-      return stepRun;
-   }
 }

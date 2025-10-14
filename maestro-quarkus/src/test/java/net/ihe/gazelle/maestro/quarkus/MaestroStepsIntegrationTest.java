@@ -33,9 +33,9 @@ import net.ihe.gazelle.maestro.quarkus.handler.HandlerProviderMock;
 import net.ihe.gazelle.maestro.quarkus.jobs.EventListener;
 import net.ihe.gazelle.maestro.quarkus.jobs.EventMaestroProducer;
 import net.ihe.gazelle.maestro.business.StepRunnerJob;
-import net.ihe.gazelle.maestro.quarkus.jobs.SynchronousMaestro;
+import net.ihe.gazelle.maestro.business.SynchronousMaestro;
 import net.ihe.gazelle.maestro.quarkus.mock.InMemoryTestReportRecordService;
-import net.ihe.gazelle.maestro.quarkus.ws.async.AsynchronousMaestro;
+import net.ihe.gazelle.maestro.business.MaestroFacade;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationStep;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
@@ -61,7 +61,7 @@ class MaestroStepsIntegrationTest {
 
    private static SynchronousMaestro synchronousMaestro;
    private static InMemoryTestReportRecordService testReportRecordService;
-   private static AsynchronousMaestro asynchronousMaestro;
+   private static MaestroFacade maestroFacade;
 
    @BeforeAll
    static void setUp() {
@@ -73,13 +73,13 @@ class MaestroStepsIntegrationTest {
             new SessionStoreImpl(),
             testReportRecordService, "999.0.0"
       );
-      asynchronousMaestro = new AsynchronousMaestro(eventProducer);
-      synchronousMaestro = new SynchronousMaestro(10, asynchronousMaestro);
+      maestroFacade = new MaestroFacade(eventProducer);
+      synchronousMaestro = new SynchronousMaestro(10, maestroFacade);
       StepRunnerJob stepRunnerJob = new StepRunnerJob(
             new StepRunnerProviderSPI(new HandlerProviderMock()),
             eventProducer
       );
-      EventListener eventListener = new EventListener(maestro, synchronousMaestro, asynchronousMaestro, stepRunnerJob);
+      EventListener eventListener = new EventListener(maestro, synchronousMaestro, maestroFacade, stepRunnerJob);
       testRunMockEvent.addListener(eventListener);
    }
 

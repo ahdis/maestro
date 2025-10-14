@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.api.technical.event;
+package net.ihe.gazelle.maestro.api.business.message;
 
-import net.ihe.gazelle.maestro.api.business.testreport.TestRunReportBuilder;
-import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
+import net.ihe.gazelle.lang.Command;
+import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 
 /**
- * A Message to notify that a TestRun execution ended and to send a TestRunReportBuilder
+ * A message to launch test set execution
  */
-public record TestRunFinished(TestRun testRun, TestRunReportBuilder testRunReportBuilder) implements Message {
+@Command
+public record StartTestSuiteRun(TestSuiteRun testSuiteRun) implements Message {
 
 }

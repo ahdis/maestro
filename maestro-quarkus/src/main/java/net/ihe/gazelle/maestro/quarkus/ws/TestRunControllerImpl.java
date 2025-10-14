@@ -29,9 +29,8 @@ import net.ihe.gazelle.maestro.api.business.testrun.UnsupportedPropertyTypeExcep
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSuiteRunDTO;
 import net.ihe.gazelle.maestro.quarkus.UnknownStepType;
-import net.ihe.gazelle.maestro.quarkus.client.ApacheTestReportClient;
-import net.ihe.gazelle.maestro.quarkus.jobs.SynchronousMaestro;
-import net.ihe.gazelle.maestro.quarkus.ws.async.AsynchronousMaestro;
+import net.ihe.gazelle.maestro.business.SynchronousMaestro;
+import net.ihe.gazelle.maestro.business.MaestroFacade;
 import net.ihe.gazelle.maestro.simulation.step.business.TimeoutRuntimeException;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 import org.slf4j.Logger;
@@ -47,12 +46,12 @@ public class TestRunControllerImpl implements TestRunController {
    private static final Logger LOG = LoggerFactory.getLogger(TestRunControllerImpl.class);
 
    private final SynchronousMaestro synchronousMaestro;
-   private final AsynchronousMaestro asynchronousMaestro;
+   private final MaestroFacade maestroFacade;
 
    @Inject
-   public TestRunControllerImpl(SynchronousMaestro synchronousMaestro, AsynchronousMaestro asynchronousMaestro) {
+   public TestRunControllerImpl(SynchronousMaestro synchronousMaestro, MaestroFacade maestroFacade) {
       this.synchronousMaestro = synchronousMaestro;
-      this.asynchronousMaestro = asynchronousMaestro;
+      this.maestroFacade = maestroFacade;
    }
 
    @Override
@@ -103,7 +102,7 @@ public class TestRunControllerImpl implements TestRunController {
    }
 
    private Response runAsynchronously(TestSuiteRun testSuiteRun, String callback) {
-      asynchronousMaestro.executeTestSuite(testSuiteRun, new ApacheTestReportClient(callback));
+      maestroFacade.executeTestSuite(testSuiteRun, new ApacheTestReportClient(callback));
       return Response.accepted().build();
    }
 

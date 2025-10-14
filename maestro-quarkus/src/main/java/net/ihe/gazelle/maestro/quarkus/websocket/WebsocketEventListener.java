@@ -6,10 +6,10 @@ import jakarta.websocket.SendResult;
 import jakarta.websocket.Session;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
-import net.ihe.gazelle.maestro.api.technical.event.StepRunFinished;
+import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
 import net.ihe.gazelle.maestro.api.technical.dto.report.StepRunReportDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
-import net.ihe.gazelle.maestro.api.technical.event.TestSuiteFinished;
+import net.ihe.gazelle.maestro.api.business.message.TestSuiteRunFinished;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
 import org.slf4j.Logger;
@@ -27,10 +27,10 @@ public class WebsocketEventListener {
     public WebsocketEventListener() {
     }
 
-    public void onFinishTestSet(@ObservesAsync TestSuiteFinished testSuiteFinished) throws IOException {
-        String testSetId = testSuiteFinished.testSuiteRun().getInternalId();
+    public void onFinishTestSet(@ObservesAsync TestSuiteRunFinished testSuiteRunFinished) throws IOException {
+        String testSetId = testSuiteRunFinished.testSuiteRun().getInternalId();
         if (WebsocketSessionsInMemory.hasSession(testSetId)) {
-            sendTestRunCompleted(testSuiteFinished);
+            sendTestRunCompleted(testSuiteRunFinished);
         }
     }
 
@@ -40,9 +40,9 @@ public class WebsocketEventListener {
         }
     }
 
-    private void sendTestRunCompleted(TestSuiteFinished testSuiteFinished) throws IOException {
-        String testSetId = testSuiteFinished.testSuiteRun().getInternalId();
-        TestReportSummary testReportSummary = testSuiteFinished.reportSummary();
+    private void sendTestRunCompleted(TestSuiteRunFinished testSuiteRunFinished) throws IOException {
+        String testSetId = testSuiteRunFinished.testSuiteRun().getInternalId();
+        TestReportSummary testReportSummary = testSuiteRunFinished.reportSummary();
         String content = serDes.serializeAsString(new TestReportSummaryDTO(testReportSummary));
         WSMessageDTO message = new WSMessageDTO(testSetId, "testRunCompleted", content);
         String serializedMessage = serDes.serializeAsString(message);

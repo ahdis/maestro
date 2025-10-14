@@ -19,12 +19,17 @@ package net.ihe.gazelle.maestro.quarkus.jobs;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.event.ObservesAsync;
 import jakarta.inject.Inject;
+import net.ihe.gazelle.maestro.api.business.message.StartTestRun;
+import net.ihe.gazelle.maestro.api.business.message.StartTestSuiteRun;
+import net.ihe.gazelle.maestro.api.business.message.TestRunFinished;
+import net.ihe.gazelle.maestro.api.business.message.TestSuiteRunFinished;
 import net.ihe.gazelle.maestro.api.business.testrun.Maestro;
-import net.ihe.gazelle.maestro.api.technical.event.StepRunFinished;
-import net.ihe.gazelle.maestro.api.technical.event.StartStepRun;
+import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
+import net.ihe.gazelle.maestro.api.business.message.StartStepRun;
 import net.ihe.gazelle.maestro.api.technical.event.*;
 import net.ihe.gazelle.maestro.business.StepRunnerJob;
-import net.ihe.gazelle.maestro.quarkus.ws.async.AsynchronousMaestro;
+import net.ihe.gazelle.maestro.business.MaestroFacade;
+import net.ihe.gazelle.maestro.business.SynchronousMaestro;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,22 +42,22 @@ public class EventListener {
     private static final Logger LOG = LoggerFactory.getLogger(EventListener.class);
 
     private final Maestro engine;
-    private final AsynchronousMaestro asynchronousMaestro;
+    private final MaestroFacade maestroFacade;
     private final StepRunnerJob stepRunnerJob;
 
     @Inject
-    public EventListener(Maestro engine, SynchronousMaestro synchronousMaestro, AsynchronousMaestro asynchronousMaestro, StepRunnerJob stepRunnerJob) {
+    public EventListener(Maestro engine, SynchronousMaestro synchronousMaestro, MaestroFacade maestroFacade, StepRunnerJob stepRunnerJob) {
         this.engine = engine;
-        this.asynchronousMaestro = asynchronousMaestro;
+        this.maestroFacade = maestroFacade;
         this.stepRunnerJob = stepRunnerJob;
     }
 
-    public void onStartTestSet(@ObservesAsync StartTestSuite startTestSuite) {
-        engine.run(startTestSuite.testSuiteRun());
+    public void onStartTestSet(@ObservesAsync StartTestSuiteRun startTestSuiteRun) {
+        engine.run(startTestSuiteRun.testSuiteRun());
     }
 
-    public void onFinishTestSet(@ObservesAsync TestSuiteFinished testSuiteFinished) {
-       asynchronousMaestro.onTestSuiteFinished(testSuiteFinished);
+    public void onFinishTestSet(@ObservesAsync TestSuiteRunFinished testSuiteRunFinished) {
+       maestroFacade.onTestSuiteFinished(testSuiteRunFinished);
     }
 
     public void onStartTestRun(@Observes StartTestRun startTestRun) {

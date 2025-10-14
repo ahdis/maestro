@@ -16,6 +16,8 @@
 
 package net.ihe.gazelle.maestro.api.technical.event;
 
+import net.ihe.gazelle.maestro.api.business.message.Message;
+
 /**
  * A message to Describe an error in TestRun Execution
  */

@@ -14,40 +14,37 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.quarkus.ws.async;
+package net.ihe.gazelle.maestro.business;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.api.business.testrun.MaestroEventProducer;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.api.business.testrun.validator.TestSetRunValidator;
-import net.ihe.gazelle.maestro.api.technical.event.TestSuiteFinished;
-import net.ihe.gazelle.maestro.quarkus.client.MaestroCaller;
+import net.ihe.gazelle.maestro.api.business.message.TestSuiteRunFinished;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@ApplicationScoped
-public class AsynchronousMaestro {
 
-   private static final Map<String, MaestroCaller> RUNNING_SESSIONS = new ConcurrentHashMap<>();
+public class MaestroFacade {
+
+   private static final Map<String, MaestroObserver> OBSERVERS = new ConcurrentHashMap<>();
    private final TestSetRunValidator testSetRunValidator = new TestSetRunValidator();
    private final MaestroEventProducer maestroEventProducer;
 
-   @Inject
-   public AsynchronousMaestro(MaestroEventProducer maestroEventProducer) {
+   public MaestroFacade(MaestroEventProducer maestroEventProducer) {
       this.maestroEventProducer = maestroEventProducer;
    }
 
-   public void executeTestSuite(TestSuiteRun testSuiteRun, MaestroCaller caller) {
+   public void executeTestSuite(TestSuiteRun testSuiteRun, MaestroObserver observer) {
       testSetRunValidator.assertValid(testSuiteRun);
-      RUNNING_SESSIONS.put(testSuiteRun.getInternalId(), caller);
+      OBSERVERS.put(testSuiteRun.getInternalId(), observer);
       maestroEventProducer.executeTestSet(testSuiteRun);
    }
 
-   public void onTestSuiteFinished(TestSuiteFinished testSuiteFinished) {
-      MaestroCaller caller = RUNNING_SESSIONS.get(testSuiteFinished.testSuiteRun().getInternalId());
-      caller.onTestSuiteFinished(testSuiteFinished);
+   public void onTestSuiteFinished(TestSuiteRunFinished testSuiteRunFinished) {
+      MaestroObserver observer = OBSERVERS.get(testSuiteRunFinished.testSuiteRun().getInternalId());
+      observer.onTestSuiteFinished(testSuiteRunFinished);
    }
 
 }
