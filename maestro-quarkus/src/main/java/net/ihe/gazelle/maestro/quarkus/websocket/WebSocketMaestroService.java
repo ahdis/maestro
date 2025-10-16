@@ -18,7 +18,8 @@ package net.ihe.gazelle.maestro.quarkus.websocket;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import net.ihe.gazelle.maestro.api.business.testrun.MaestroEventProducer;
+import net.ihe.gazelle.maestro.api.business.message.StartTestSuiteRun;
+import net.ihe.gazelle.maestro.engine.business.MaestroEventProducer;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 
 @ApplicationScoped
@@ -33,6 +34,6 @@ public class WebSocketMaestroService {
 
     public void executeTestSet(String testSetId, TestSuiteRun testSuiteRun) {
         testSuiteRun.setInternalId(testSetId);
-        maestroEventProducer.executeTestSet(testSuiteRun);
+        maestroEventProducer.command(new StartTestSuiteRun(testSuiteRun));
     }
 }

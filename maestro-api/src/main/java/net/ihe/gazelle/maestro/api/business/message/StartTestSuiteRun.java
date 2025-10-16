@@ -16,6 +16,7 @@
 
 package net.ihe.gazelle.maestro.api.business.message;
 
+import java.io.Serial;
 import net.ihe.gazelle.lang.Command;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 
@@ -23,6 +24,23 @@ import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
  * A message to launch test set execution
  */
 @Command
-public record StartTestSuiteRun(TestSuiteRun testSuiteRun) implements Message {
+public class StartTestSuiteRun implements Message {
+    @Serial
+    private static final long serialVersionUID = 1L;
+    private TestSuiteRun testSuiteRun;
 
+    public StartTestSuiteRun() {}
+
+    public StartTestSuiteRun(TestSuiteRun testSuiteRun) {
+        this.testSuiteRun = testSuiteRun;
+    }
+
+    public TestSuiteRun getTestSuiteRun() {
+        return testSuiteRun;
+    }
+
+    public StartTestSuiteRun setTestSuiteRun(TestSuiteRun testSuiteRun) {
+        this.testSuiteRun = testSuiteRun;
+        return this;
+    }
 }

@@ -32,7 +32,7 @@ import java.util.UUID;
  */
 public class TestSuiteRun {
 
-   private String internalId; // internal use only
+   private final String internalId; // internal use only
    private String testSuiteName;
    private String testSuiteClientId;
    private List<TestRun> testRuns;
@@ -47,15 +47,11 @@ public class TestSuiteRun {
 
    public TestSuiteRun(List<TestRun> testRuns) {
       this();
-      this.testRuns = testRuns;
+      this.testRuns = new ArrayList<>(testRuns);
    }
 
    public String getInternalId() {
       return internalId;
-   }
-
-   public void setInternalId(String internalId) {
-      this.internalId = internalId;
    }
 
    public String getTestSuiteName() {
@@ -110,4 +106,9 @@ public class TestSuiteRun {
    public boolean isTestSetRunIdValid() {
       return testSuiteClientId != null && !testSuiteClientId.isBlank();
    }
+
+   public boolean hasAtLeastOneTestRun() {
+      return testRuns != null && !testRuns.isEmpty();
+   }
+
 }

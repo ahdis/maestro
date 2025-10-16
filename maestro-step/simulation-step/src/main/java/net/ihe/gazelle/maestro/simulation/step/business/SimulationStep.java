@@ -17,7 +17,7 @@
 package net.ihe.gazelle.maestro.simulation.step.business;
 
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
-import net.ihe.gazelle.maestro.api.business.testrun.Step;
+import net.ihe.gazelle.maestro.api.business.test.Step;
 
 import java.util.ArrayList;
 import java.util.List;

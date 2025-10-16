@@ -23,8 +23,6 @@ import net.ihe.gazelle.maestro.api.business.testreport.Output;
 import net.ihe.gazelle.maestro.api.business.testreport.OutputBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
-import net.ihe.gazelle.maestro.api.business.testrun.MaestroEventProducer;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 import net.ihe.gazelle.maestro.itb.step.technical.gateway.client.ItbHttpClient;
 import net.ihe.gazelle.maestro.itb.step.technical.gateway.dto.ItbTriggerDTO;
 import org.slf4j.Logger;
@@ -51,12 +49,10 @@ public class CatchItbReportService {
     public static final String PDF_ITB_VALIDATION_REPORT = "PDF_ITB_Validation_Report";
     public static final String XML_ITB_VALIDATION_REPORT = "XML_ITB_Validation_Report";
     private final ItbHttpClient itbHttpClient;
-    private final MaestroEventProducer maestroProducer;
 
     @Inject
-    public CatchItbReportService(MaestroEventProducer maestroProducer, ItbHttpClient itbHttpClient) {
+    public CatchItbReportService(ItbHttpClient itbHttpClient) {
         this.itbHttpClient = itbHttpClient;
-        this.maestroProducer = maestroProducer;
     }
 
     /**
@@ -103,13 +99,6 @@ public class CatchItbReportService {
         } catch (IllegalArgumentException ignored) {
             // Some XML parsers may not support these attributes; ignore if unsupported
         }
-    }
-
-    /**
-     * Method to push report to the messaging channel
-     */
-    public void pushReport(StepRun stepRun, StepRunReportBuilder stepRunReportBuilder) {
-        maestroProducer.returnStepReport(stepRun, stepRunReportBuilder);
     }
 
     private static StepResult getResult(NodeList element) {

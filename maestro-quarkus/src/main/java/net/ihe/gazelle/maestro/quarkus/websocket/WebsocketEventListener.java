@@ -28,21 +28,21 @@ public class WebsocketEventListener {
     }
 
     public void onFinishTestSet(@ObservesAsync TestSuiteRunFinished testSuiteRunFinished) throws IOException {
-        String testSetId = testSuiteRunFinished.testSuiteRun().getInternalId();
+        String testSetId = testSuiteRunFinished.getTestSuiteRun().getInternalId();
         if (WebsocketSessionsInMemory.hasSession(testSetId)) {
             sendTestRunCompleted(testSuiteRunFinished);
         }
     }
 
     public void onFinishStep(@ObservesAsync StepRunFinished stepRunFinished) {
-        if (WebsocketSessionsInMemory.hasSession(stepRunFinished.stepRun().testSetId())) {
+        if (WebsocketSessionsInMemory.hasSession(stepRunFinished.getStepRun().testSetId())) {
             sendTestStepCompleted(stepRunFinished);
         }
     }
 
     private void sendTestRunCompleted(TestSuiteRunFinished testSuiteRunFinished) throws IOException {
-        String testSetId = testSuiteRunFinished.testSuiteRun().getInternalId();
-        TestReportSummary testReportSummary = testSuiteRunFinished.reportSummary();
+        String testSetId = testSuiteRunFinished.getTestSuiteRun().getInternalId();
+        TestReportSummary testReportSummary = testSuiteRunFinished.getReportSummary();
         String content = serDes.serializeAsString(new TestReportSummaryDTO(testReportSummary));
         WSMessageDTO message = new WSMessageDTO(testSetId, "testRunCompleted", content);
         String serializedMessage = serDes.serializeAsString(message);
@@ -56,8 +56,8 @@ public class WebsocketEventListener {
     }
 
     private void sendTestStepCompleted(StepRunFinished stepRunFinished) {
-        String testSetId = stepRunFinished.stepRun().testSetId();
-        StepRunReport stepRunReport = stepRunFinished.stepRunReportBuilder().build();
+        String testSetId = stepRunFinished.getStepRun().testSetId();
+        StepRunReport stepRunReport = stepRunFinished.getStepRunReportBuilder().build();
         String content = serDes.serializeAsString(new StepRunReportDTO(stepRunReport));
         WSMessageDTO message = new WSMessageDTO(testSetId, "testStepCompleted", content);
         String serializedMessage = serDes.serializeAsString(message);

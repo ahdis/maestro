@@ -16,6 +16,7 @@
 
 package net.ihe.gazelle.maestro.api.business.message;
 
+import java.io.Serial;
 import net.ihe.gazelle.lang.Event;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
@@ -24,6 +25,34 @@ import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
  * A message to notify that a TestSet Execution Ended and to send a TestReport
  */
 @Event
-public record TestSuiteRunFinished(TestSuiteRun testSuiteRun, TestReportSummary reportSummary) implements Message {
+public class TestSuiteRunFinished implements Message {
+    @Serial
+    private static final long serialVersionUID = 1L;
+    private TestSuiteRun testSuiteRun;
+    private TestReportSummary reportSummary;
 
+    public TestSuiteRunFinished() {}
+
+    public TestSuiteRunFinished(TestSuiteRun testSuiteRun, TestReportSummary reportSummary) {
+        this.testSuiteRun = testSuiteRun;
+        this.reportSummary = reportSummary;
+    }
+
+    public TestSuiteRun getTestSuiteRun() {
+        return testSuiteRun;
+    }
+
+    public TestSuiteRunFinished setTestSuiteRun(TestSuiteRun testSuiteRun) {
+        this.testSuiteRun = testSuiteRun;
+        return this;
+    }
+
+    public TestReportSummary getReportSummary() {
+        return reportSummary;
+    }
+
+    public TestSuiteRunFinished setReportSummary(TestReportSummary reportSummary) {
+        this.reportSummary = reportSummary;
+        return this;
+    }
 }

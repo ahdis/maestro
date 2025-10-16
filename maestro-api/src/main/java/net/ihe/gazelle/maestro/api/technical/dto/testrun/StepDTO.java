@@ -18,7 +18,7 @@ package net.ihe.gazelle.maestro.api.technical.dto.testrun;
 
 import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
-import net.ihe.gazelle.maestro.api.business.testrun.Step;
+import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
 
 import java.util.ArrayList;

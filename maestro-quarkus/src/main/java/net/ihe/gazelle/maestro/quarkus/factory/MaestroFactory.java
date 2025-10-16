@@ -20,15 +20,15 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Produces;
-import net.ihe.gazelle.maestro.api.business.testrun.Maestro;
-import net.ihe.gazelle.maestro.api.business.testrun.MaestroEventProducer;
-import net.ihe.gazelle.maestro.business.MaestroFacade;
-import net.ihe.gazelle.maestro.business.MaestroImpl;
-import net.ihe.gazelle.maestro.business.context.SessionStore;
-import net.ihe.gazelle.maestro.business.TestReportRecordService;
-import net.ihe.gazelle.maestro.business.StepRunnerJob;
-import net.ihe.gazelle.maestro.business.StepRunnerProvider;
-import net.ihe.gazelle.maestro.business.SynchronousMaestro;
+import net.ihe.gazelle.maestro.api.business.Maestro;
+import net.ihe.gazelle.maestro.engine.business.MaestroEventProducer;
+import net.ihe.gazelle.maestro.engine.business.MaestroImpl;
+import net.ihe.gazelle.maestro.engine.business.TestRunner;
+import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
+import net.ihe.gazelle.maestro.engine.business.TestReportRecordService;
+import net.ihe.gazelle.maestro.engine.business.StepRunner;
+import net.ihe.gazelle.maestro.engine.business.StepRunnerProvider;
+import net.ihe.gazelle.maestro.api.business.SynchronousMaestro;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 
@@ -66,20 +66,20 @@ public class MaestroFactory {
 
    @Produces
    @Default
-   public MaestroFacade getMaestroFacade() {
-      return new MaestroFacade(maestroEventProducer);
+   public MaestroImpl getMaestroFacade() {
+      return new MaestroImpl(maestroEventProducer);
    }
 
    @Produces
    @Default
    public Maestro getMaestro() {
-      return new MaestroImpl(maestroEventProducer, sessionStore, testReportRecordService, applicationVersion);
+      return new TestRunner(maestroEventProducer, sessionStore, testReportRecordService, applicationVersion);
    }
 
    @Produces
    @Default
-   public StepRunnerJob getStepRunnerJob() {
-      return new StepRunnerJob(stepRunnerProvider, maestroEventProducer);
+   public StepRunner getStepRunnerJob() {
+      return new StepRunner(stepRunnerProvider, maestroEventProducer);
    }
 
 }

@@ -16,12 +16,12 @@
 
 package net.ihe.gazelle.maestro.quarkus.factory;
 
-import net.ihe.gazelle.maestro.api.business.testrun.Step;
+import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.quarkus.StepRunnerProviderSPI;
 import net.ihe.gazelle.maestro.quarkus.configuration.ServiceRegistryDAOImpl;
 import net.ihe.gazelle.maestro.quarkus.configuration.ServiceRegistryImpl;
 import net.ihe.gazelle.maestro.quarkus.handler.HandlerProviderSPI;
-import net.ihe.gazelle.maestro.business.StepRunnerProvider;
+import net.ihe.gazelle.maestro.engine.business.StepRunnerProvider;
 import net.ihe.gazelle.maestro.quarkus.mock.DummyStep;
 import org.junit.jupiter.api.Test;
 

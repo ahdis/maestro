@@ -16,15 +16,59 @@
 
 package net.ihe.gazelle.maestro.api.business.message;
 
+import java.io.Serial;
+
 import net.ihe.gazelle.lang.Event;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 
 /**
- * Step message used by a producer to notify listener that a step execution ended.
- * It contains a report builder loaded with infos to build executed step's report
+ * Step message used by a producer to notify listener that a step execution ended. It contains a report builder loaded
+ * with infos to build executed step's report
  */
 @Event
-public record StepRunFinished(StepRun stepRun, StepRunReportBuilder stepRunReportBuilder) implements Message {
+public class StepRunFinished implements Message {
+   @Serial
+   private static final long serialVersionUID = 1L;
+   private String testRunId;
+   private String testId;
+   private StepRun stepRun;
+   private StepRunReportBuilder stepRunReportBuilder;
 
+   public StepRunFinished() {
+   }
+
+   public StepRunFinished(String testRunId, String testId, StepRun stepRun, StepRunReportBuilder stepRunReportBuilder) {
+      this.testRunId = testRunId;
+      this.testId = testId;
+      this.stepRun = stepRun;
+      this.stepRunReportBuilder = stepRunReportBuilder;
+   }
+
+   public String getTestRunId() {
+      return testRunId;
+   }
+
+   public StepRunFinished setTestRunId(String testRunId) {
+      this.testRunId = testRunId;
+      return this;
+   }
+
+   public StepRun getStepRun() {
+      return stepRun;
+   }
+
+   public StepRunFinished setStepRun(StepRun stepRun) {
+      this.stepRun = stepRun;
+      return this;
+   }
+
+   public StepRunReportBuilder getStepRunReportBuilder() {
+      return stepRunReportBuilder;
+   }
+
+   public StepRunFinished setStepRunReportBuilder(StepRunReportBuilder stepRunReportBuilder) {
+      this.stepRunReportBuilder = stepRunReportBuilder;
+      return this;
+   }
 }

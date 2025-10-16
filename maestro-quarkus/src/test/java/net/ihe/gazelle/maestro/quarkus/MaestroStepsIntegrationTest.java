@@ -22,20 +22,19 @@ import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.api.business.testrun.PropertyRef;
-import net.ihe.gazelle.maestro.api.business.testrun.Step;
+import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.assertion.step.business.AssertionStep;
-import net.ihe.gazelle.maestro.business.MaestroImpl;
-import net.ihe.gazelle.maestro.business.context.SessionStoreImpl;
+import net.ihe.gazelle.maestro.engine.business.TestRunner;
+import net.ihe.gazelle.maestro.engine.business.context.SessionStoreImpl;
 import net.ihe.gazelle.maestro.quarkus.factory.TestRunMockEvent;
 import net.ihe.gazelle.maestro.quarkus.handler.HandlerProviderMock;
-import net.ihe.gazelle.maestro.quarkus.jobs.EventListener;
-import net.ihe.gazelle.maestro.quarkus.jobs.EventMaestroProducer;
-import net.ihe.gazelle.maestro.business.StepRunnerJob;
-import net.ihe.gazelle.maestro.business.SynchronousMaestro;
+import net.ihe.gazelle.maestro.quarkus.broker.MaestroEventController;
+import net.ihe.gazelle.maestro.engine.business.StepRunner;
+import net.ihe.gazelle.maestro.api.business.SynchronousMaestro;
 import net.ihe.gazelle.maestro.quarkus.mock.InMemoryTestReportRecordService;
-import net.ihe.gazelle.maestro.business.MaestroFacade;
+import net.ihe.gazelle.maestro.engine.business.MaestroImpl;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationStep;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
@@ -61,25 +60,25 @@ class MaestroStepsIntegrationTest {
 
    private static SynchronousMaestro synchronousMaestro;
    private static InMemoryTestReportRecordService testReportRecordService;
-   private static MaestroFacade maestroFacade;
+   private static MaestroImpl maestroImpl;
 
    @BeforeAll
    static void setUp() {
       TestRunMockEvent testRunMockEvent = new TestRunMockEvent();
       EventMaestroProducer eventProducer = new EventMaestroProducer(testRunMockEvent);
       testReportRecordService = new InMemoryTestReportRecordService();
-      MaestroImpl maestro = new MaestroImpl(
+      TestRunner maestro = new TestRunner(
             eventProducer,
             new SessionStoreImpl(),
             testReportRecordService, "999.0.0"
       );
-      maestroFacade = new MaestroFacade(eventProducer);
-      synchronousMaestro = new SynchronousMaestro(10, maestroFacade);
-      StepRunnerJob stepRunnerJob = new StepRunnerJob(
+      maestroImpl = new MaestroImpl(eventProducer);
+      synchronousMaestro = new SynchronousMaestro(10, maestroImpl);
+      StepRunner stepRunner = new StepRunner(
             new StepRunnerProviderSPI(new HandlerProviderMock()),
             eventProducer
       );
-      EventListener eventListener = new EventListener(maestro, synchronousMaestro, maestroFacade, stepRunnerJob);
+      MaestroEventController eventListener = new MaestroEventController(maestro, maestroImpl, stepRunner);
       testRunMockEvent.addListener(eventListener);
    }
 
@@ -249,8 +248,8 @@ class MaestroStepsIntegrationTest {
             new Property<>(ValidationStep.VALIDATION_PROFILE, "Parameters"),
             new ArrayList<>(List.of(contentToValidate))
       );
-      net.ihe.gazelle.maestro.api.business.testrun.Test test =
-            new net.ihe.gazelle.maestro.api.business.testrun.Test().addStep(
+      net.ihe.gazelle.maestro.api.business.test.Test test =
+            new net.ihe.gazelle.maestro.api.business.test.Test().addStep(
             validationStep);
       test.setName("validationTest");
       test.setId(UUID.randomUUID().toString());
@@ -258,7 +257,7 @@ class MaestroStepsIntegrationTest {
       TestRun testRun = new TestRun();
       testRun.setTest(test);
       testRun.addInputs(contentToValidate);
-      testRun.setTestSetId(testSuiteRun.getInternalId());
+      testRun.setTestSuiteId(testSuiteRun.getInternalId());
       testRuns.add(testRun);
       return testSuiteRun
             .setTestSuiteName("Test Suite")
@@ -281,13 +280,13 @@ class MaestroStepsIntegrationTest {
             new Property<>(SimulationStep.TIMEOUT_SECONDS, 60),
             inputs);
       TestSuiteRun testSuiteRun = new TestSuiteRun();
-      net.ihe.gazelle.maestro.api.business.testrun.Test test =
-            new net.ihe.gazelle.maestro.api.business.testrun.Test().addStep(
+      net.ihe.gazelle.maestro.api.business.test.Test test =
+            new net.ihe.gazelle.maestro.api.business.test.Test().addStep(
             simulationStep);
       test.setName("simulationTest");
       test.setId(UUID.randomUUID().toString());
       TestRun testRun = new TestRun()
-            .setTestSetId(testSuiteRun.getInternalId())
+            .setTestSuiteId(testSuiteRun.getInternalId())
             .setInputs(inputs);
       testRun.setTest(test);
       testRuns.add(testRun);
@@ -305,13 +304,13 @@ class MaestroStepsIntegrationTest {
             new Property<>(AssertionStep.ASSERTION_SERVICE, "toto")
       );
       TestSuiteRun testSuiteRun = getTestRunsWithOneValidationStep();
-      net.ihe.gazelle.maestro.api.business.testrun.Test test =
-            new net.ihe.gazelle.maestro.api.business.testrun.Test().addStep(
+      net.ihe.gazelle.maestro.api.business.test.Test test =
+            new net.ihe.gazelle.maestro.api.business.test.Test().addStep(
             assertionStep);
       test.setName("assertionTest");
       test.setId(UUID.randomUUID().toString());
       TestRun testRun = new TestRun()
-            .setTestSetId(testSuiteRun.getInternalId())
+            .setTestSuiteId(testSuiteRun.getInternalId())
             .setInputs(List.of(new Property<>("assertion", "liyvfgljv".getBytes())));
       testRun.setTest(test);
       testSuiteRun.getTestRuns().add(testRun);

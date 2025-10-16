@@ -20,22 +20,22 @@ import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
+import net.ihe.gazelle.maestro.api.business.Maestro;
 import net.ihe.gazelle.maestro.api.business.testreport.Result;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
 import net.ihe.gazelle.maestro.api.business.testrun.*;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestRunDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSuiteRunDTO;
-import net.ihe.gazelle.maestro.business.MaestroImpl;
+import net.ihe.gazelle.maestro.engine.business.TestRunner;
 import net.ihe.gazelle.maestro.quarkus.ws.async.tmintegration.MissingArgumentException;
-import net.ihe.gazelle.maestro.business.context.SessionStoreImpl;
+import net.ihe.gazelle.maestro.engine.business.context.SessionStoreImpl;
 import net.ihe.gazelle.maestro.quarkus.UnknownStepType;
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.quarkus.factory.TestRunMockEvent;
-import net.ihe.gazelle.maestro.quarkus.jobs.EventMaestroProducer;
-import net.ihe.gazelle.maestro.business.SynchronousMaestro;
+import net.ihe.gazelle.maestro.api.business.SynchronousMaestro;
 import net.ihe.gazelle.maestro.quarkus.mock.InMemoryTestReportRecordService;
-import net.ihe.gazelle.maestro.business.MaestroFacade;
+import net.ihe.gazelle.maestro.engine.business.MaestroImpl;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
 import net.ihe.gazelle.security.technical.acl.AccessControlListDTO;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,13 +63,13 @@ class TestRunControllerTest {
     SynchronousMaestro synchronousMaestro;
 
     @Mock
-    MaestroFacade maestroFacade;
+    MaestroImpl maestroImpl;
 
     TestRunControllerImpl controller;
 
     @BeforeEach
     void setUp() {
-        controller = new TestRunControllerImpl(synchronousMaestro, maestroFacade);
+        controller = new TestRunControllerImpl(synchronousMaestro, maestroImpl);
     }
 
     @Test
@@ -91,7 +91,7 @@ class TestRunControllerTest {
         ArgumentCaptor<TestSuiteRun> testSetRunCaptor = ArgumentCaptor.forClass(TestSuiteRun.class);
         verify(synchronousMaestro).executeTestSuite(testSetRunCaptor.capture());
         assertEquals(1, testSetRunCaptor.getValue().getTestRuns().size());
-        verifyNoInteractions(maestroFacade);
+        verifyNoInteractions(maestroImpl);
     }
 
     @Test
@@ -102,7 +102,7 @@ class TestRunControllerTest {
 
         ArgumentCaptor<TestSuiteRun> testSetRunCaptor = ArgumentCaptor.forClass(TestSuiteRun.class);
         ArgumentCaptor<MaestroObserver> callerCaptor = ArgumentCaptor.forClass(MaestroObserver.class);
-        verify(maestroFacade).executeTestSuite(testSetRunCaptor.capture(), callerCaptor.capture());
+        verify(maestroImpl).executeTestSuite(testSetRunCaptor.capture(), callerCaptor.capture());
         assertEquals(1, testSetRunCaptor.getValue().getTestRuns().size());
         verifyNoInteractions(synchronousMaestro);
     }
@@ -165,7 +165,7 @@ class TestRunControllerTest {
     @Test
     void runWithCallbackInvalidTestRunReturnsBadRequest() {
         doThrow(new InvalidTestRunException("invalid"))
-                .when(maestroFacade).executeTestSuite(any(), any());
+                .when(maestroImpl).executeTestSuite(any(), any());
 
         Response response = controller.run("http://callback", testSetRunDto());
 
@@ -176,7 +176,7 @@ class TestRunControllerTest {
     @Test
     void runWithCallbackNotProvidedStepReturnsBadRequest() {
         doThrow(new UnknownStepType("missing"))
-                .when(maestroFacade).executeTestSuite(any(), any());
+                .when(maestroImpl).executeTestSuite(any(), any());
 
         Response response = controller.run("http://callback", testSetRunDto());
 
@@ -190,7 +190,7 @@ class TestRunControllerTest {
     @Test
     void runWithCallbackWebApplicationExceptionReturnsGatewayTimeout() {
         doThrow(new WebApplicationException("timeout"))
-                .when(maestroFacade).executeTestSuite(any(), any());
+                .when(maestroImpl).executeTestSuite(any(), any());
 
         Response response = controller.run("http://callback", testSetRunDto());
 
@@ -201,7 +201,7 @@ class TestRunControllerTest {
     @Test
     void runWithCallbackUnexpectedExceptionReturnsInternalServerError() {
         doThrow(new RuntimeException("boom"))
-                .when(maestroFacade).executeTestSuite(any(), any());
+                .when(maestroImpl).executeTestSuite(any(), any());
 
         Response response = controller.run("http://callback", testSetRunDto());
 
@@ -257,7 +257,7 @@ class TestRunControllerTest {
     void reportValidationStep() throws MissingArgumentException {
         TestRun testRun = new TestRun();
 
-        net.ihe.gazelle.maestro.api.business.testrun.Test test = new net.ihe.gazelle.maestro.api.business.testrun.Test();
+        net.ihe.gazelle.maestro.api.business.test.Test test = new net.ihe.gazelle.maestro.api.business.test.Test();
         test.setId("iti78-request");
         test.setName("ITI-78 Request");
         test.addStep(new ValidationStep(
@@ -281,12 +281,12 @@ class TestRunControllerTest {
     }
 
     private Maestro getEngine() {
-        return new MaestroImpl(new EventMaestroProducer(new TestRunMockEvent()), new SessionStoreImpl(), new InMemoryTestReportRecordService(), "999.0.0");
+        return new TestRunner(new EventMaestroProducer(new TestRunMockEvent()), new SessionStoreImpl(), new InMemoryTestReportRecordService(), "999.0.0");
     }
 
     private TestSuiteRunDTO testSetRunDto() {
         TestSuiteRunDTO dto = new TestSuiteRunDTO();
-        TestRun testRun = new TestRun().setTestSetId("test-set");
+        TestRun testRun = new TestRun().setTestSuiteId("test-set");
         dto.setTestRuns(List.of(new TestRunDTO(testRun)));
         dto.setAccessControlList(new AccessControlListDTO());
         return dto;

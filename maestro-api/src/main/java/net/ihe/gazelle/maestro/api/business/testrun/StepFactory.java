@@ -16,6 +16,8 @@
 
 package net.ihe.gazelle.maestro.api.business.testrun;
 
+import net.ihe.gazelle.maestro.api.business.test.Step;
+
 import java.util.Map;
 
 public interface StepFactory {

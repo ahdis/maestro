@@ -1,8 +1,7 @@
 package net.ihe.gazelle.maestro.quarkus.record;
 
 import net.ihe.gazelle.maestro.api.business.testreport.*;
-import net.ihe.gazelle.maestro.business.TestReportRecordService;
-import net.ihe.gazelle.maestro.business.TestReportRecordService.ItemReference;
+import net.ihe.gazelle.maestro.engine.business.TestReportRecordService.ItemReference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

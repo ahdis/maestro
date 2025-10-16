@@ -17,7 +17,7 @@
 package net.ihe.gazelle.maestro.simulation.step.technical.factory;
 
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
-import net.ihe.gazelle.maestro.api.business.testrun.Step;
+import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationStep;
 import org.junit.jupiter.api.Test;
 

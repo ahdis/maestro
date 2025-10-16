@@ -10,8 +10,8 @@ import com.kereval.gazelle.datahouse.technical.rest.client.RecordItemClientProvi
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import net.ihe.gazelle.maestro.api.business.testreport.*;
-import net.ihe.gazelle.maestro.business.TestReportRecordException;
-import net.ihe.gazelle.maestro.business.TestReportRecordService;
+import net.ihe.gazelle.maestro.engine.business.TestReportRecordException;
+import net.ihe.gazelle.maestro.engine.business.TestReportRecordService;
 import net.ihe.gazelle.maestro.quarkus.record.entity.TestReportEntity;
 import net.ihe.gazelle.maestro.quarkus.record.entity.TestReportReference;
 import net.ihe.gazelle.security.business.acl.AccessControlList;

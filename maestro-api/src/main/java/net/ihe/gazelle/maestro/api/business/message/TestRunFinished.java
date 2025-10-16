@@ -16,6 +16,8 @@
 
 package net.ihe.gazelle.maestro.api.business.message;
 
+import java.io.Serial;
+
 import net.ihe.gazelle.lang.Event;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
@@ -24,6 +26,47 @@ import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
  * A Message to notify that a TestRun execution ended and to send a TestRunReportBuilder
  */
 @Event
-public record TestRunFinished(TestRun testRun, TestRunReportBuilder testRunReportBuilder) implements Message {
+public class TestRunFinished implements Message {
+   @Serial
+   private static final long serialVersionUID = 1L;
 
+   private String testSuiteRunId;
+   private TestRun testRun;
+   private TestRunReportBuilder testRunReportBuilder;
+
+   public TestRunFinished() {
+   }
+
+   public TestRunFinished(String testSuiteRunId, TestRun testRun, TestRunReportBuilder testRunReportBuilder) {
+      this.testSuiteRunId = testSuiteRunId;
+      this.testRun = testRun;
+      this.testRunReportBuilder = testRunReportBuilder;
+   }
+
+   public String getTestSuiteRunId() {
+      return testSuiteRunId;
+   }
+
+   public TestRunFinished setTestSuiteRunId(String testSuiteRunId) {
+      this.testSuiteRunId = testSuiteRunId;
+      return this;
+   }
+
+   public TestRun getTestRun() {
+      return testRun;
+   }
+
+   public TestRunFinished setTestRun(TestRun testRun) {
+      this.testRun = testRun;
+      return this;
+   }
+
+   public TestRunReportBuilder getTestRunReportBuilder() {
+      return testRunReportBuilder;
+   }
+
+   public TestRunFinished setTestRunReportBuilder(TestRunReportBuilder testRunReportBuilder) {
+      this.testRunReportBuilder = testRunReportBuilder;
+      return this;
+   }
 }

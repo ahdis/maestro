@@ -87,16 +87,16 @@ class TestRunTest {
     void setTestSetIdReturnsSameInstance() {
         TestRun testRun = new TestRun();
 
-        TestRun returned = testRun.setTestSetId("identifier");
+        TestRun returned = testRun.setTestSuiteId("identifier");
 
         assertSame(testRun, returned);
-        assertEquals("identifier", testRun.getTestSetId());
+        assertEquals("identifier", testRun.getTestSuiteId());
     }
 
     @Test
     void setTestStoresProvidedInstance() {
         TestRun testRun = new TestRun();
-        net.ihe.gazelle.maestro.api.business.testrun.Test domainTest = new net.ihe.gazelle.maestro.api.business.testrun.Test();
+        net.ihe.gazelle.maestro.api.business.test.Test domainTest = new net.ihe.gazelle.maestro.api.business.test.Test();
 
         testRun.setTest(domainTest);
 

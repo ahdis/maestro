@@ -16,6 +16,8 @@
 
 package net.ihe.gazelle.maestro.api.business.message;
 
+import java.io.Serial;
+
 import net.ihe.gazelle.lang.Command;
 import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
 
@@ -23,5 +25,57 @@ import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
  * Step message used by producer to notify a subscriber to launch step execution
  */
 @Command
-public record StartStepRun(StepRun stepRun) implements Message {
+public class StartStepRun implements Message {
+   @Serial
+   private static final long serialVersionUID = 1L;
+   private String testSuiteRunId; // internal
+   private String testRunId; // internal
+   private String testId;
+   private StepRun stepRun;
+
+   public StartStepRun() {
+   }
+
+   public StartStepRun(String testSuiteRunId, String testRunId, String testId, StepRun stepRun) {
+      this.testSuiteRunId = testSuiteRunId;
+      this.testRunId = testRunId;
+      this.testId = testId;
+      this.stepRun = stepRun;
+   }
+
+   public String getTestSuiteRunId() {
+      return testSuiteRunId;
+   }
+
+   public StartStepRun setTestSuiteRunId(String testSuiteRunId) {
+      this.testSuiteRunId = testSuiteRunId;
+      return this;
+   }
+
+   public String getTestRunId() {
+      return testRunId;
+   }
+
+   public StartStepRun setTestRunId(String testRunId) {
+      this.testRunId = testRunId;
+      return this;
+   }
+
+   public String getTestId() {
+      return testId;
+   }
+
+   public StartStepRun setTestId(String testId) {
+      this.testId = testId;
+      return this;
+   }
+
+   public StepRun getStepRun() {
+      return stepRun;
+   }
+
+   public StartStepRun setStepRun(StepRun stepRun) {
+      this.stepRun = stepRun;
+      return this;
+   }
 }

@@ -29,8 +29,8 @@ import net.ihe.gazelle.maestro.api.business.testrun.UnsupportedPropertyTypeExcep
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSuiteRunDTO;
 import net.ihe.gazelle.maestro.quarkus.UnknownStepType;
-import net.ihe.gazelle.maestro.business.SynchronousMaestro;
-import net.ihe.gazelle.maestro.business.MaestroFacade;
+import net.ihe.gazelle.maestro.api.business.SynchronousMaestro;
+import net.ihe.gazelle.maestro.engine.business.MaestroImpl;
 import net.ihe.gazelle.maestro.simulation.step.business.TimeoutRuntimeException;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 import org.slf4j.Logger;
@@ -46,19 +46,19 @@ public class TestRunControllerImpl implements TestRunController {
    private static final Logger LOG = LoggerFactory.getLogger(TestRunControllerImpl.class);
 
    private final SynchronousMaestro synchronousMaestro;
-   private final MaestroFacade maestroFacade;
+   private final MaestroImpl maestroImpl;
 
    @Inject
-   public TestRunControllerImpl(SynchronousMaestro synchronousMaestro, MaestroFacade maestroFacade) {
+   public TestRunControllerImpl(SynchronousMaestro synchronousMaestro, MaestroImpl maestroImpl) {
       this.synchronousMaestro = synchronousMaestro;
-      this.maestroFacade = maestroFacade;
+      this.maestroImpl = maestroImpl;
    }
 
    @Override
    public Response run(String callback, TestSuiteRunDTO testSuiteRunDTO) {
       TestSuiteRun testSuiteRun = testSuiteRunDTO.getBusinessObject();
       testSuiteRun.getTestRuns().forEach(
-            testRun -> testRun.setTestSetId(testSuiteRun.getInternalId())
+            testRun -> testRun.setTestSuiteId(testSuiteRun.getInternalId())
       );
       if (callback != null) {
          return handleErrors(() -> runAsynchronously(testSuiteRun, callback));
@@ -102,7 +102,7 @@ public class TestRunControllerImpl implements TestRunController {
    }
 
    private Response runAsynchronously(TestSuiteRun testSuiteRun, String callback) {
-      maestroFacade.executeTestSuite(testSuiteRun, new ApacheTestReportClient(callback));
+      maestroImpl.executeTestSuite(testSuiteRun, new ApacheTestReportClient(callback));
       return Response.accepted().build();
    }
 

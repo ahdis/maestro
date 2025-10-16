@@ -25,7 +25,7 @@ import net.ihe.gazelle.maestro.api.business.message.StartTestSuiteRun;
 import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
 import net.ihe.gazelle.maestro.api.business.message.TestRunFinished;
 import net.ihe.gazelle.maestro.api.business.message.TestSuiteRunFinished;
-import net.ihe.gazelle.maestro.quarkus.jobs.EventListener;
+import net.ihe.gazelle.maestro.quarkus.broker.MaestroEventController;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -37,13 +37,13 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 public class TestRunMockEvent implements jakarta.enterprise.event.Event<Message> {
 
     ExecutorService executorService = new ScheduledThreadPoolExecutor(5);
-    List<EventListener> listeners = new ArrayList<>();
+    List<MaestroEventController> listeners = new ArrayList<>();
 
     public TestRunMockEvent() {
         // mocked method
     }
 
-    public TestRunMockEvent addListener(EventListener listener) {
+    public TestRunMockEvent addListener(MaestroEventController listener) {
         if (listener != null) {
             listeners.add(listener);
         }
@@ -54,12 +54,12 @@ public class TestRunMockEvent implements jakarta.enterprise.event.Event<Message>
     public void fire(Message message) {
         if (message instanceof StartTestSuiteRun startTestSuiteRun) {
             listeners.forEach(listener ->
-                    executorService.submit(() -> listener.onStartTestSet(startTestSuiteRun))
+                    executorService.submit(() -> listener.onStartTestSuiteRun(startTestSuiteRun))
             );
         }
         if (message instanceof TestSuiteRunFinished testSuiteRunFinished) {
             listeners.forEach(listener ->
-                    executorService.submit(() -> listener.onFinishTestSet(testSuiteRunFinished))
+                    executorService.submit(() -> listener.onTestSuiteRunFinished(testSuiteRunFinished))
             );
         }
         if (message instanceof StartTestRun startTestRun) {
@@ -69,17 +69,17 @@ public class TestRunMockEvent implements jakarta.enterprise.event.Event<Message>
         }
         if (message instanceof TestRunFinished testRunFinished) {
             listeners.forEach(listener ->
-                    executorService.submit(() -> listener.onFinishTestRun(testRunFinished))
+                    executorService.submit(() -> listener.onTestRunFinished(testRunFinished))
             );
         }
         if(message instanceof StartStepRun startStepRun) {
             listeners.forEach(listener ->
-                    executorService.submit(() -> listener.onStartStep(startStepRun))
+                    executorService.submit(() -> listener.onStartStepRun(startStepRun))
             );
         }
         if(message instanceof StepRunFinished stepRunFinished) {
             listeners.forEach(listener ->
-                    executorService.submit(() -> listener.onFinishStep(stepRunFinished))
+                    executorService.submit(() -> listener.onStepRunFinished(stepRunFinished))
             );
         }
     }

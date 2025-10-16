@@ -56,7 +56,7 @@ public class ApacheTestReportClient implements MaestroObserver {
 
    @Override
    public void onTestSuiteFinished(TestSuiteRunFinished testSuiteRunFinished) {
-      sendTestReport(testSuiteRunFinished.reportSummary());
+      sendTestReport(testSuiteRunFinished.getReportSummary());
    }
 
    private void sendTestReport(TestReportSummary testReportSummary) {

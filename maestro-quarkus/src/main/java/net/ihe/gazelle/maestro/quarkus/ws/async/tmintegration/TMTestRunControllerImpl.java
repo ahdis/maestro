@@ -25,9 +25,9 @@ import net.ihe.gazelle.maestro.api.business.testrun.InvalidTestRunException;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.quarkus.UnknownStepType;
 import net.ihe.gazelle.maestro.quarkus.ws.ApacheTestReportClient;
-import net.ihe.gazelle.maestro.business.SynchronousMaestro;
+import net.ihe.gazelle.maestro.api.business.SynchronousMaestro;
 import net.ihe.gazelle.maestro.quarkus.ws.ParsingErrorException;
-import net.ihe.gazelle.maestro.business.MaestroFacade;
+import net.ihe.gazelle.maestro.engine.business.MaestroImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,11 +36,11 @@ public class TMTestRunControllerImpl implements TMTestRunController {
 
     private static final Logger LOG = LoggerFactory.getLogger(TMTestRunControllerImpl.class);
 
-    private final MaestroFacade maestroFacade;
+    private final MaestroImpl maestroImpl;
 
     @Inject
-    public TMTestRunControllerImpl(MaestroFacade tmTestRunMaestro) {
-        this.maestroFacade = tmTestRunMaestro;
+    public TMTestRunControllerImpl(MaestroImpl tmTestRunMaestro) {
+        this.maestroImpl = tmTestRunMaestro;
     }
 
     @Override
@@ -48,7 +48,7 @@ public class TMTestRunControllerImpl implements TMTestRunController {
         try {
            RestCallbackId callbackId = new RestCallbackId();
            TestSuiteRun testSuiteRun = TMScriptMapper.convertToTestSetRun(testSetNode, callbackId);
-           maestroFacade.executeTestSuite(
+           maestroImpl.executeTestSuite(
                  testSuiteRun,
                  new ApacheTestReportClient(callbackId.getCallbackAuthorization(), callbackId.getCallbackUrl())
            );

@@ -16,73 +16,82 @@
 
 package net.ihe.gazelle.maestro.api.business.testrun;
 
+import net.ihe.gazelle.maestro.api.business.test.Test;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * A structure contains in a TestSet, defining all the data to execute an automated step suit
  * <p>
- *     - <b>testSetId</b> the testSet's id <br>
- *     - <b>test</b> structure containing step suit {@link Test} <br>
- *     - <b>inputs</b> a list of properties that can be referenced in each step {@link Property}
+ * - <b>testSetId</b> the testSet's id <br> - <b>test</b> structure containing step suit {@link Test} <br> -
+ * <b>inputs</b> a list of properties that can be referenced in each step {@link Property}
  * </p>
  */
 public class TestRun {
 
-    private String testSetId;
-    private Test test = null;
-    private List<Property<?>> inputs = new ArrayList<>();
+   private final String internalId; // internal use only
+   private Test test = null;
+   private List<Property<?>> inputs;
 
-    public String getTestSetId() {
-        return testSetId;
-    }
+   public TestRun() {
+      this.internalId = UUID.randomUUID().toString();
+      this.inputs = new ArrayList<>();
+   }
 
-    public TestRun setTestSetId(String testSetId) {
-        this.testSetId = testSetId;
-        return this;
-    }
+   public TestRun(TestRun other) {
+      this.internalId = other.internalId;
+      this.test = other.test;
+      this.inputs = new ArrayList<>(other.inputs);
+   }
 
-    public Test getTest() {
-        return test;
-    }
+   public String getInternalId() {
+      return internalId;
+   }
 
-    public void setTest(Test test) {
-        this.test = test;
-    }
+   public Test getTest() {
+      return test;
+   }
 
-    // Suppress generic wildcard warning
-    @SuppressWarnings("java:S1452")
-    public List<Property<?>> getInputs() {
-        return new ArrayList<>(inputs);
-    }
+   public TestRun setTest(Test test) {
+      this.test = test;
+      return this;
+   }
 
-    public TestRun setInputs(List<Property<?>> inputs) {
-        this.inputs = new ArrayList<>(inputs);
-        return this;
-    }
+   // Suppress generic wildcard warning
+   @SuppressWarnings("java:S1452")
+   public List<Property<?>> getInputs() {
+      return new ArrayList<>(inputs);
+   }
 
-    public TestRun addInputs(Property<?> property) {
-        inputs.add(property);
-        return this;
-    }
+   public TestRun setInputs(List<Property<?>> inputs) {
+      this.inputs = new ArrayList<>(inputs);
+      return this;
+   }
 
-    public boolean isTestValid() {
-        return test != null;
-    }
+   public TestRun addInputs(Property<?> property) {
+      inputs.add(property);
+      return this;
+   }
 
+   public boolean isTestDefined() {
+      return test != null;
+   }
 
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof TestRun testRun)) return false;
-        return Objects.equals(testSetId, testRun.testSetId)
-                && Objects.equals(test, testRun.test)
-                && Objects.equals(inputs, testRun.inputs);
-    }
+   @Override
+   public boolean equals(Object o) {
+      if (!(o instanceof TestRun testRun)) {
+         return false;
+      }
+      return Objects.equals(internalId, testRun.internalId) && Objects.equals(test,
+            testRun.test) && Objects.equals(inputs, testRun.inputs);
+   }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(testSetId, test, inputs);
-    }
+   @Override
+   public int hashCode() {
+      return Objects.hash(internalId, test, inputs);
+   }
 }
 

@@ -18,6 +18,8 @@ package net.ihe.gazelle.maestro.quarkus.ws.async.tmintegration;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import net.ihe.gazelle.maestro.api.business.test.Step;
+import net.ihe.gazelle.maestro.api.business.test.Test;
 import net.ihe.gazelle.maestro.api.business.testreport.EntityIdentification;
 import net.ihe.gazelle.maestro.api.business.testreport.SystemUnderTest;
 import net.ihe.gazelle.maestro.api.business.testrun.*;
@@ -170,7 +172,7 @@ public class TMScriptMapper {
             ArrayNode inputNodes = (ArrayNode) testRunNode.get("inputs");
             Set<String> availableKeys = parseInputs(inputNodes, testRun, inputDefinitions);
             trimOptionalMissingStepRefs(testRun, inputDefinitions, availableKeys);
-            testRun.setTestSetId(testSuiteRun.getInternalId());
+            testRun.setTestSuiteId(testSuiteRun.getInternalId());
             testRuns.add(testRun);
         } catch (NullPointerException e) {
             throw new MissingArgumentException("Argument inputs is missing in testRun", e);
