@@ -16,7 +16,7 @@
 
 package net.ihe.gazelle.maestro.userinteraction.step.business;
 
-import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
+import net.ihe.gazelle.maestro.spi.business.runner.Handler;
 
 public interface UserInteractionHandler extends Handler {
 

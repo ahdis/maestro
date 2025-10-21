@@ -17,7 +17,7 @@
 package net.ihe.gazelle.maestro.validation.step.technical.dto;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import net.ihe.gazelle.maestro.api.technical.dto.testrun.StepDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.test.StepDTO;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
 
 @JsonTypeName(ValidationStep.TYPE)

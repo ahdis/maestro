@@ -26,6 +26,43 @@
               "type": "byteArray"
             }
           ]
+        },
+        {
+          "name": "step1",
+          "type": "VALIDATION",
+          "validationService": "matchbox",
+          "validationProfile": "bundle",
+          "properties": [
+            {
+              "name": "input1",
+              "value": "${inputFile1}",
+              "type": "byteArray"
+            },
+            {
+              "name": "input2",
+              "value": "${inputFile1}",
+              "type": "byteArray"
+            }
+          ]
+        },
+        {
+          "name": "step2",
+          "type": "SIMULATION",
+          "simulationService": "mCSD",
+          "sequenceId": "iti-108",
+          "timeoutSeconds": 120,
+          "properties": [
+            {
+              "name": "input1",
+              "value": "${inputFile1}",
+              "type": "byteArray"
+            },
+            {
+              "name": "input2",
+              "value": "${inputFile1}",
+              "type": "byteArray"
+            }
+          ]
         }
       ]
     },

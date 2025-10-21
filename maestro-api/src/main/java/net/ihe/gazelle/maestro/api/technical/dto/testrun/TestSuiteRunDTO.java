@@ -22,6 +22,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.api.technical.dto.report.SystemUnderTestDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.test.TestDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.test.TestSuiteDTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 import net.ihe.gazelle.security.technical.acl.AccessControlListDTO;
 
@@ -29,76 +31,77 @@ import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
-        "testSuiteName",
-        "testRuns",
-        "accessControlList",
-        "systemsUnderTest",
-        "testSetRunId"
+      "testSuite",
+      "tests",
+      "inputs",
+      "systemsUnderTest",
+      "accessControlList"
 })
 public class TestSuiteRunDTO implements DTO<TestSuiteRun> {
 
-    @JsonIgnore
-    private final TestSuiteRun testSuiteRun;
+   @JsonIgnore
+   private final TestSuiteRun testSuiteRun;
 
-    public TestSuiteRunDTO() {
-        this(new TestSuiteRun());
-    }
+   public TestSuiteRunDTO() {
+      this(new TestSuiteRun());
+   }
 
-    public TestSuiteRunDTO(TestSuiteRun testSuiteRun) {
-        this.testSuiteRun = testSuiteRun;
-    }
+   public TestSuiteRunDTO(TestSuiteRun testSuiteRun) {
+      this.testSuiteRun = testSuiteRun;
+   }
 
-    @Override
-    public TestSuiteRun getBusinessObject() {
-        return testSuiteRun;
-    }
+   @Override
+   @JsonIgnore
+   public TestSuiteRun getBusinessObject() {
+      return testSuiteRun;
+   }
 
-    @JsonProperty("testSuiteName")
-    public String getTestSuiteName() {
-        return getBusinessObject().getTestSuiteName();
-    }
+   @JsonProperty("testSuite")
+   public TestSuiteDTO getTestSuite() {
+      return new TestSuiteDTO(testSuiteRun.getTestSuite());
+   }
 
-    public void setTestSuiteName(String testSuiteName) {
-        getBusinessObject().setTestSuiteName(testSuiteName);
-    }
+   public void setTestSuite(TestSuiteDTO testSuiteDTO) {
+      testSuiteRun.setTestSuite(testSuiteDTO.getBusinessObject());
+   }
 
-    @JsonProperty("testRuns")
-    public List<TestRunDTO> getTestRuns() {
-        return getBusinessObject().getTestRuns().stream().map(TestRunDTO::new).toList();
-    }
+   @JsonProperty("tests")
+   public List<TestDTO> getTests() {
+      return testSuiteRun.getTests().stream().map(TestDTO::new).toList();
+   }
 
-    public void setTestRuns(List<TestRunDTO> testRuns) {
-        getBusinessObject().setTestRuns(
-                testRuns.stream().map(TestRunDTO::getBusinessObject).toList()
-        );
-    }
+   public void setTests(List<TestDTO> testDTOs) {
+      testSuiteRun.setTests(
+            testDTOs != null ?
+                  testDTOs.stream()
+                        .map(TestDTO::getBusinessObject)
+                        .toList() :
+                  null
+      );
+   }
 
-    @JsonProperty("accessControlList")
-    public AccessControlListDTO getAccessControlList() {
-        return new AccessControlListDTO(getBusinessObject().getAccessControlList());
-    }
+   @JsonProperty("accessControlList")
+   public AccessControlListDTO getAccessControlList() {
+      return new AccessControlListDTO(testSuiteRun.getAccessControlList());
+   }
 
-    public void setAccessControlList(AccessControlListDTO accessControlList) {
-        getBusinessObject().setAccessControlList(accessControlList.getBusinessObject());
-    }
+   public void setAccessControlList(AccessControlListDTO accessControlList) {
+      testSuiteRun.setAccessControlList(accessControlList.getBusinessObject());
+   }
 
-    @JsonProperty("systemsUnderTest")
-    public List<SystemUnderTestDTO> getSystemsUnderTest() {
-        return getBusinessObject().getSystemsUnderTest().stream().map(SystemUnderTestDTO::new).toList();
-    }
+   @JsonProperty("systemsUnderTest")
+   public List<SystemUnderTestDTO> getSystemsUnderTest() {
+      return testSuiteRun.getSystemsUnderTest().stream().map(SystemUnderTestDTO::new).toList();
+   }
 
-    public void setSystemsUnderTest(List<SystemUnderTestDTO> systemsUnderTest) {
-        getBusinessObject().setSystemsUnderTest(
-                systemsUnderTest.stream().map(SystemUnderTestDTO::getBusinessObject).toList()
-        );
-    }
+   public void setSystemsUnderTest(List<SystemUnderTestDTO> sutDTOs) {
+      testSuiteRun.setSystemsUnderTest(
+            sutDTOs != null ?
+                  sutDTOs.stream()
+                        .map(SystemUnderTestDTO::getBusinessObject)
+                        .toList() :
+                  null
+      );
+   }
 
-    @JsonProperty("testSetRunId")
-    public String getTestSetRunId() {
-        return getBusinessObject().getTestSuiteClientId();
-    }
-
-    public void setTestSetRunId(String testSetRunId) {
-        getBusinessObject().setTestSuiteClientId(testSetRunId);
-    }
 }

@@ -25,7 +25,7 @@ import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
 import net.ihe.gazelle.maestro.api.business.message.StepRunStarted;
 import net.ihe.gazelle.maestro.api.business.message.TestRunStarted;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
-import net.ihe.gazelle.maestro.api.business.testrun.validator.TestSuiteRunValidator;
+import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRunValidator;
 import net.ihe.gazelle.maestro.api.business.message.TestSuiteRunFinished;
 
 import java.util.Map;

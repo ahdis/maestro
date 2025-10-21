@@ -21,7 +21,7 @@ import net.ihe.gazelle.evsapi.client.business.ValidationClient;
 import net.ihe.gazelle.evsapi.client.business.ValidationServiceProfile;
 import net.ihe.gazelle.evsapi.client.business.request.ValidationRequest;
 import net.ihe.gazelle.evsapi.client.business.response.report.ValidationReport;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
+import net.ihe.gazelle.maestro.spi.business.runner.Handler;
 
 import java.util.List;
 

@@ -189,7 +189,7 @@ class MaestroStepsIntegrationTest {
             new ArrayList<>(List.of(contentToValidate))
       );
       testSuiteRun.getTestRuns().getFirst().getTest().addStep(validationStep);
-      testSuiteRun.getTestRuns().getFirst().addInputs(contentToValidate);
+      testSuiteRun.getTestRuns().getFirst().addInput(contentToValidate);
       TestReportSummary reportSummary = synchronousMaestro.executeTestSuite(testSuiteRun);
 
       // Verify the summary
@@ -256,7 +256,7 @@ class MaestroStepsIntegrationTest {
       TestSuiteRun testSuiteRun = new TestSuiteRun();
       TestRun testRun = new TestRun();
       testRun.setTest(test);
-      testRun.addInputs(contentToValidate);
+      testRun.addInput(contentToValidate);
       testRun.setTestSuiteId(testSuiteRun.getInternalId());
       testRuns.add(testRun);
       return testSuiteRun

@@ -17,7 +17,7 @@
 package net.ihe.gazelle.maestro.quarkus.ws.async.tmintegration;
 
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
-import net.ihe.gazelle.maestro.api.business.testrun.UnsupportedPropertyTypeException;
+import net.ihe.gazelle.maestro.api.business.UnsupportedPropertyTypeException;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

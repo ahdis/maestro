@@ -17,6 +17,7 @@
 package net.ihe.gazelle.maestro.engine.business;
 
 import net.ihe.gazelle.errorhandling.business.UnexpectedErrorBuilder;
+import net.ihe.gazelle.maestro.api.business.InvalidTestRunException;
 import net.ihe.gazelle.maestro.api.business.message.StartStepRun;
 import net.ihe.gazelle.maestro.api.business.message.StartTestRun;
 import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
@@ -25,7 +26,7 @@ import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.testreport.*;
 import net.ihe.gazelle.maestro.api.business.testrun.*;
 import net.ihe.gazelle.maestro.api.business.test.Test;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
+import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
 import net.ihe.gazelle.maestro.engine.business.context.Context;
 import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
 import net.ihe.gazelle.maestro.engine.business.context.StepCursor;

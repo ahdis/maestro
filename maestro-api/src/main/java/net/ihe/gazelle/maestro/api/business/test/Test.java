@@ -57,12 +57,26 @@ public class Test {
    }
 
    public Test setSteps(List<Step> steps) {
-      this.steps = new ArrayList<>(steps);
+      this.steps = steps != null ? new ArrayList<>(steps) : new ArrayList<>();
       return this;
    }
 
    public Test addStep(Step step) {
       steps.add(step);
+      return this;
+   }
+
+   public List<SupportedInput> getSupportedInputs() {
+      return supportedInputs;
+   }
+
+   public Test setSupportedInputs(List<SupportedInput> supportedInputs) {
+      this.supportedInputs = supportedInputs != null ? new ArrayList<>(supportedInputs) : new ArrayList<>();
+      return this;
+   }
+
+   public Test addSupportedInput(SupportedInput supportedInput) {
+      this.supportedInputs.add(supportedInput);
       return this;
    }
 

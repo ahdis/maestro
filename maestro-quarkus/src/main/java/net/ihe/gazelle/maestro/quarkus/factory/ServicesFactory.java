@@ -4,7 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Produces;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.ConfigProvider;
+import net.ihe.gazelle.maestro.spi.business.runner.ConfigProvider;
 import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
 import net.ihe.gazelle.maestro.engine.business.context.SessionStoreImpl;
 import net.ihe.gazelle.maestro.engine.business.StepRunnerProvider;

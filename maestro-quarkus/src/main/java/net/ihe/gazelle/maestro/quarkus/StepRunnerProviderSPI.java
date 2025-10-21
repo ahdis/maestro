@@ -17,9 +17,9 @@
 package net.ihe.gazelle.maestro.quarkus;
 
 import net.ihe.gazelle.maestro.api.business.test.Step;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunner;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunnerFactory;
+import net.ihe.gazelle.maestro.spi.business.runner.Handler;
+import net.ihe.gazelle.maestro.spi.business.runner.StepRunner;
+import net.ihe.gazelle.maestro.spi.business.runner.StepRunnerFactory;
 import net.ihe.gazelle.maestro.quarkus.handler.HandlerProvider;
 import net.ihe.gazelle.maestro.engine.business.StepRunnerProvider;
 import org.slf4j.Logger;

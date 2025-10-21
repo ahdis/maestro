@@ -59,7 +59,7 @@ class TestRunTest {
     @Test
     void getInputsReturnsCopy() {
         TestRun testRun = new TestRun();
-        testRun.addInputs(new Property<>("key", "value"));
+        testRun.addInput(new Property<>("key", "value"));
 
         List<Property<?>> firstCall = testRun.getInputs();
         List<Property<?>> secondCall = testRun.getInputs();
@@ -72,11 +72,11 @@ class TestRunTest {
     }
 
     @Test
-    void addInputsAppendsAndReturnsSameInstance() {
+    void addInputAppendsAndReturnsSameInstance() {
         TestRun testRun = new TestRun();
         Property<String> property = new Property<>("key", "value");
 
-        TestRun returned = testRun.addInputs(property);
+        TestRun returned = testRun.addInput(property);
 
         assertSame(testRun, returned);
         assertEquals(1, testRun.getInputs().size());

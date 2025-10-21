@@ -4,4 +4,7 @@ import java.util.List;
 
 public class SupportedFileInput extends SupportedInput {
 
+   public SupportedFileInput() {
+      //default constructor
+   }
 }

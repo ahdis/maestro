@@ -16,7 +16,7 @@
 
 package net.ihe.gazelle.maestro.simulation.step.business;
 
-import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
+import net.ihe.gazelle.maestro.spi.business.runner.Handler;
 import net.ihe.gazelle.simulation.client.business.SimulationClient;
 
 public interface SimulationHandler extends Handler, SimulationClient {

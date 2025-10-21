@@ -12,7 +12,7 @@ import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
 import net.ihe.gazelle.maestro.api.business.testreport.TestServiceBuilder;
-import net.ihe.gazelle.maestro.api.business.testrun.InvalidTestSuiteException;
+import net.ihe.gazelle.maestro.api.business.InvalidTestSuiteException;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.engine.business.context.SessionStore;

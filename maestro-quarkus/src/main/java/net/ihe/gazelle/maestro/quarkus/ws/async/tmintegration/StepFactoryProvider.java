@@ -16,10 +16,10 @@
 
 package net.ihe.gazelle.maestro.quarkus.ws.async.tmintegration;
 
-import net.ihe.gazelle.maestro.api.business.testrun.DuplicatedStepsException;
+import net.ihe.gazelle.maestro.api.business.DuplicatedStepsException;
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.api.business.test.Step;
-import net.ihe.gazelle.maestro.api.business.testrun.StepFactory;
+import net.ihe.gazelle.maestro.spi.business.runner.StepFactory;
 import net.ihe.gazelle.maestro.quarkus.UnknownStepType;
 
 import java.util.HashMap;

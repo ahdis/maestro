@@ -20,7 +20,7 @@ import java.io.Serial;
 
 import net.ihe.gazelle.lang.Event;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
+import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
 
 /**
  * Step message used by a producer to notify listener that a step execution ended. It contains a report builder loaded

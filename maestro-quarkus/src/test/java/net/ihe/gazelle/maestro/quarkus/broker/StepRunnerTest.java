@@ -7,7 +7,7 @@ import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.engine.business.MaestroEventProducer;
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.message.StartStepRun;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
+import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
 import net.ihe.gazelle.maestro.engine.business.StepRunner;
 import net.ihe.gazelle.maestro.engine.business.StepRunnerProvider;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
@@ -26,8 +26,8 @@ class StepRunnerTest {
 
     @Test
     void launchStepExecution_happyPath_sendsReport() {
-        net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunner runner = mock(
-              net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunner.class);
+        net.ihe.gazelle.maestro.spi.business.runner.StepRunner runner = mock(
+              net.ihe.gazelle.maestro.spi.business.runner.StepRunner.class);
         when(runner.run(any(StepRun.class))).thenReturn(CompletableFuture.completedFuture(new StepRunReportBuilder().setStepId("s").setType("t")));
         StepRunnerProvider provider = mock(StepRunnerProvider.class);
         when(provider.create(any(Step.class))).thenReturn(runner);

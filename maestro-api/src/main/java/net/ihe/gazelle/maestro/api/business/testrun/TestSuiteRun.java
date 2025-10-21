@@ -16,12 +16,15 @@
 
 package net.ihe.gazelle.maestro.api.business.testrun;
 
+import net.ihe.gazelle.maestro.api.business.property.Property;
+import net.ihe.gazelle.maestro.api.business.test.Test;
+import net.ihe.gazelle.maestro.api.business.test.TestReference;
+import net.ihe.gazelle.maestro.api.business.test.TestSuite;
 import net.ihe.gazelle.maestro.api.business.testreport.SystemUnderTest;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * A TestSuiteRun is a structure containing several TestRun that will be executed iteratively. {@link TestRun} testSetId
@@ -32,52 +35,43 @@ import java.util.UUID;
  */
 public class TestSuiteRun {
 
-   private final String internalId; // internal use only
-   private String testSuiteName;
-   private String testSuiteClientId;
-   private List<TestRun> testRuns;
-   private AccessControlList accessControlList;
+   private TestSuite testSuite;
+   private List<Test> tests;
+   private List<Property> inputs;
    private List<SystemUnderTest> systemsUnderTest;
+   private AccessControlList accessControlList;
 
    public TestSuiteRun() {
-      this.internalId = UUID.randomUUID().toString();
+      this.tests = new ArrayList<>();
+      this.inputs = new ArrayList<>();
       this.accessControlList = new AccessControlList();
       this.systemsUnderTest = new ArrayList<>();
    }
 
-   public TestSuiteRun(List<TestRun> testRuns) {
-      this();
-      this.testRuns = new ArrayList<>(testRuns);
+   public TestSuite getTestSuite() {
+      return testSuite;
    }
 
-   public String getInternalId() {
-      return internalId;
-   }
-
-   public String getTestSuiteName() {
-      return testSuiteName;
-   }
-
-   public TestSuiteRun setTestSuiteName(String testSuiteName) {
-      this.testSuiteName = testSuiteName;
+   public TestSuiteRun setTestSuite(TestSuite testSuite) {
+      this.testSuite = testSuite;
       return this;
    }
 
-   public List<TestRun> getTestRuns() {
-      return testRuns;
+   public List<Test> getTests() {
+      return tests;
    }
 
-   public TestSuiteRun setTestRuns(List<TestRun> testRuns) {
-      this.testRuns = testRuns;
+   public TestSuiteRun setTests(List<Test> tests) {
+      this.tests = tests != null ? new ArrayList<>(tests) : new ArrayList<>();
       return this;
    }
 
-   public AccessControlList getAccessControlList() {
-      return accessControlList;
+   public List<Property> getInputs() {
+      return inputs;
    }
 
-   public TestSuiteRun setAccessControlList(AccessControlList accessControlList) {
-      this.accessControlList = accessControlList;
+   public TestSuiteRun setInputs(List<Property> inputs) {
+      this.inputs = inputs != null ? new ArrayList<>(inputs) : new ArrayList<>();
       return this;
    }
 
@@ -86,29 +80,34 @@ public class TestSuiteRun {
    }
 
    public TestSuiteRun setSystemsUnderTest(List<SystemUnderTest> systemsUnderTest) {
-      this.systemsUnderTest = systemsUnderTest;
+      this.systemsUnderTest = systemsUnderTest != null ? new ArrayList<>(systemsUnderTest) : new ArrayList<>();
       return this;
    }
 
-   public String getTestSuiteClientId() {
-      return testSuiteClientId;
+   public AccessControlList getAccessControlList() {
+      return accessControlList;
    }
 
-   public TestSuiteRun setTestSuiteClientId(String testSuiteClientId) {
-      this.testSuiteClientId = testSuiteClientId;
+   public TestSuiteRun setAccessControlList(AccessControlList accessControlList) {
+      this.accessControlList = accessControlList != null ? accessControlList : new AccessControlList();
       return this;
    }
 
-   public boolean isTestSuiteNameValid() {
-      return testSuiteName != null && !testSuiteName.isBlank();
+   public boolean isTestSuiteDefined() {
+      return testSuite != null;
    }
 
-   public boolean isTestSetRunIdValid() {
-      return testSuiteClientId != null && !testSuiteClientId.isBlank();
-   }
-
-   public boolean hasAtLeastOneTestRun() {
-      return testRuns != null && !testRuns.isEmpty();
+   public boolean areAllReferencedTestsAttached() {
+      if (testSuite == null || tests == null) {
+         return false;
+      }
+      List<String> includedTestIds = tests.stream().map(Test::getId).toList();
+      for (TestReference testRef : testSuite.getTestReferences()) {
+         if (!includedTestIds.contains(testRef.getTestId())) {
+            return false;
+         }
+      }
+      return true;
    }
 
 }

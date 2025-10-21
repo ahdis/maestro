@@ -20,7 +20,7 @@ import net.ihe.gazelle.errorhandling.business.UnexpectedErrorBuilder;
 import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
+import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
 import net.ihe.gazelle.maestro.api.business.message.StartStepRun;
 import org.slf4j.Logger;
 
@@ -46,7 +46,7 @@ public class StepRunner {
     public void execute(StartStepRun startStepRun) {
         StepRun stepRun = startStepRun.getStepRun();
         try {
-            net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunner runner = stepRunnerProvider.create(stepRun.step());
+            net.ihe.gazelle.maestro.spi.business.runner.StepRunner runner = stepRunnerProvider.create(stepRun.step());
             runner.run(stepRun)
                     .thenAccept(
                           stepRunReportBuilder -> stepRunEventProducer.notify(new StepRunFinished(startStepRun.getTestRunId(), stepRun, stepRunReportBuilder))

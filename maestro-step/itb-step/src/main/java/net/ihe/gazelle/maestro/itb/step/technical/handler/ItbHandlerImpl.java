@@ -17,7 +17,7 @@
 package net.ihe.gazelle.maestro.itb.step.technical.handler;
 
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
+import net.ihe.gazelle.maestro.spi.business.runner.Handler;
 import net.ihe.gazelle.maestro.itb.step.business.ItbHandler;
 import net.ihe.gazelle.maestro.itb.step.business.ItbStep;
 import net.ihe.gazelle.maestro.itb.step.business.request.Parameter;

@@ -20,7 +20,9 @@ import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
+import net.ihe.gazelle.maestro.api.business.InvalidTestRunException;
 import net.ihe.gazelle.maestro.api.business.Maestro;
+import net.ihe.gazelle.maestro.api.business.UnsupportedPropertyTypeException;
 import net.ihe.gazelle.maestro.api.business.testreport.Result;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
 import net.ihe.gazelle.maestro.api.business.testrun.*;
@@ -270,8 +272,8 @@ class TestRunControllerTest {
         testRun.setTest(test);
 
         testRun
-                .addInputs(new Property<>("iti78-request", "eaozieuaozieuaozieauo".getBytes(StandardCharsets.UTF_8)))
-                .addInputs(new Property<>("matchbox", "https://gazelle.ihe.net/matchboxv3/gazelle/validation"))
+                .addInput(new Property<>("iti78-request", "eaozieuaozieuaozieauo".getBytes(StandardCharsets.UTF_8)))
+                .addInput(new Property<>("matchbox", "https://gazelle.ihe.net/matchboxv3/gazelle/validation"))
         ;
 
 
@@ -287,7 +289,7 @@ class TestRunControllerTest {
     private TestSuiteRunDTO testSetRunDto() {
         TestSuiteRunDTO dto = new TestSuiteRunDTO();
         TestRun testRun = new TestRun().setTestSuiteId("test-set");
-        dto.setTestRuns(List.of(new TestRunDTO(testRun)));
+        dto.setTests(List.of(new TestRunDTO(testRun)));
         dto.setAccessControlList(new AccessControlListDTO());
         return dto;
     }

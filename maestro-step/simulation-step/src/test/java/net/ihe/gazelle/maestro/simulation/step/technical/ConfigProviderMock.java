@@ -16,7 +16,7 @@
 
 package net.ihe.gazelle.maestro.simulation.step.technical;
 
-import net.ihe.gazelle.maestro.api.business.testrun.runner.ConfigProvider;
+import net.ihe.gazelle.maestro.spi.business.runner.ConfigProvider;
 
 public class ConfigProviderMock implements ConfigProvider {
 

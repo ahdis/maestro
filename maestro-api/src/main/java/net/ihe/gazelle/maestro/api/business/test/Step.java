@@ -16,22 +16,17 @@
 
 package net.ihe.gazelle.maestro.api.business.test;
 
-import net.ihe.gazelle.maestro.api.business.testrun.Property;
+import net.ihe.gazelle.maestro.api.business.property.Property;
 
+import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Define an automated step to execute with all its required information.
- * A step contains has some properties representing its different required inputs.
- * {@link Property}
- */
-public class Step {
+public abstract class Step {
 
    private String name;
-   private String type;
-   private List<Property<?>> properties;
+   private List<Property> properties = new ArrayList<>();
 
-   public Step() {
+   protected Step() {
       // Empty for serialization
    }
 
@@ -44,21 +39,12 @@ public class Step {
       return this;
    }
 
-   public String getType() {
-      return type;
-   }
-
-   public Step setType(String type) {
-      this.type = type;
-      return this;
-   }
-
-   public List<Property<?>> getProperties() {
+   public List<Property> getProperties() {
       return properties;
    }
 
-   public Step setProperties(List<Property<?>> properties) {
-      this.properties = properties;
+   public Step setProperties(List<Property> properties) {
+      this.properties = properties != null ? new ArrayList<>(properties) : new ArrayList<>();
       return this;
    }
 

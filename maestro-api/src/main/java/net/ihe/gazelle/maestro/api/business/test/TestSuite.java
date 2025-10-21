@@ -7,7 +7,58 @@ public class TestSuite {
 
    private String id;
    private String name;
-   private List<Test> tests = new ArrayList<>();
+   private List<TestReference> testReferences = new ArrayList<>();
    private List<SupportedInput> supportedInputs = new ArrayList<>();
 
+   public TestSuite() {
+      // Default constructor
+   }
+
+   public String getId() {
+      return id;
+   }
+
+   public TestSuite setId(String id) {
+      this.id = id;
+      return this;
+   }
+
+   public String getName() {
+      return name;
+   }
+
+   public TestSuite setName(String name) {
+      this.name = name;
+      return this;
+   }
+
+   public List<TestReference> getTestReferences() {
+      return testReferences;
+   }
+
+   public TestSuite setTestReferences(List<TestReference> testReferences) {
+      this.testReferences = testReferences != null ? new ArrayList<>(testReferences) : new ArrayList<>();
+      return this;
+   }
+
+   public List<SupportedInput> getSupportedInputs() {
+      return supportedInputs;
+   }
+
+   public TestSuite setSupportedInputs(List<SupportedInput> supportedInputs) {
+      this.supportedInputs = supportedInputs;
+      return this;
+   }
+
+   public boolean isNameDefined() {
+      return name != null && !name.isBlank();
+   }
+
+   public boolean isIdDefined() {
+      return id != null && !id.isBlank();
+   }
+
+   public boolean hasAtLeastOneTest() {
+      return testReferences != null && !testReferences.isEmpty();
+   }
 }

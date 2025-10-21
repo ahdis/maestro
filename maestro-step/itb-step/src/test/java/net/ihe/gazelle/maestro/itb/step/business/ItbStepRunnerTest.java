@@ -4,7 +4,7 @@
 package net.ihe.gazelle.maestro.itb.step.business;
 
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
+import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
 import net.ihe.gazelle.maestro.itb.step.business.dao.ItbTestExecutionDBInMemory;
 import org.junit.jupiter.api.Test;
 

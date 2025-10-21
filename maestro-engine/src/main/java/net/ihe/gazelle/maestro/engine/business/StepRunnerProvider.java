@@ -17,7 +17,7 @@
 package net.ihe.gazelle.maestro.engine.business;
 
 import net.ihe.gazelle.maestro.api.business.test.Step;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunner;
+import net.ihe.gazelle.maestro.spi.business.runner.StepRunner;
 
 public interface StepRunnerProvider {
     /**

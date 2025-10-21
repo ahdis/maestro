@@ -260,7 +260,7 @@ public class TMScriptMapper {
                 InputDefinition definition = entry.getValue();
                 boolean required = definition == null || definition.required();
                 if (required && !providedKeys.contains(key)) {
-                    testRun.addInputs(createDefaultProperty(key, definition));
+                    testRun.addInput(createDefaultProperty(key, definition));
                     availableKeys.add(key);
                 }
             }
@@ -286,7 +286,7 @@ public class TMScriptMapper {
             String propertyType = resolvePropertyType(declaredType, instanceType);
             String adjustedValue = adjustValueForInput(value, declaredType, instanceType, propertyType);
             PropertyDTO propertyDTO = new PropertyDTO(key, adjustedValue, propertyType);
-            testRun.addInputs(propertyDTO.createProperty());
+            testRun.addInput(propertyDTO.createProperty());
         } catch (NullPointerException e) {
             throw new MissingArgumentException("Argument inputs is missing in inputs");
         }

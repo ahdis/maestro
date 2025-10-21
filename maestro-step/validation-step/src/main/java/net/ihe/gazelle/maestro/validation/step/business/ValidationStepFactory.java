@@ -18,7 +18,7 @@ package net.ihe.gazelle.maestro.validation.step.business;
 
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.api.business.test.Step;
-import net.ihe.gazelle.maestro.api.business.testrun.StepFactory;
+import net.ihe.gazelle.maestro.spi.business.runner.StepFactory;
 
 import java.util.ArrayList;
 import java.util.List;

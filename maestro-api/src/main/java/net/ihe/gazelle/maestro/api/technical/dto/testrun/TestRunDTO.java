@@ -16,15 +16,20 @@
 
 package net.ihe.gazelle.maestro.api.technical.dto.testrun;
 
-import com.fasterxml.jackson.annotation.*;
-import net.ihe.gazelle.maestro.api.business.testrun.Property;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
+import net.ihe.gazelle.maestro.api.technical.dto.property.PropertyDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.test.TestDTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
+import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
 
-import java.util.ArrayList;
 import java.util.List;
 
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
         "test",
         "inputs"
@@ -48,27 +53,29 @@ public class TestRunDTO implements DTO<TestRun> {
         return testRun;
     }
 
-    @JsonGetter("test")
+    @JsonProperty("test")
     public TestDTO getTest() {
-        return new TestDTO(getBusinessObject().getTest());
+        return new TestDTO(testRun.getTest());
     }
 
-    @JsonSetter("test")
     public void setTest(TestDTO test) {
-        getBusinessObject().setTest(test.getBusinessObject());
+       testRun.setTest(test.getBusinessObject());
     }
 
-    @JsonGetter("inputs")
+    @JsonProperty("inputs")
     public List<PropertyDTO> getInputs() {
-        return getBusinessObject().getInputs().stream().map(PropertyDTO::new).toList();
+        return testRun.getInputs().stream()
+              .map(SubTypingDTO::fromBusinessObject)
+              .map(PropertyDTO.class::cast)
+              .toList();
     }
 
-    @JsonSetter("inputs")
     public void setInputs(List<PropertyDTO> inputs) {
-        List<Property<?>> properties = new ArrayList<>();
-        for (PropertyDTO propertyDTO : inputs) {
-            properties.add(propertyDTO.getBusinessObject());
-        }
-        getBusinessObject().setInputs(properties);
+        testRun.setInputs(
+              inputs != null ? inputs.stream()
+                    .map(DTO::getBusinessObject)
+                    .map(Property.class::cast).toList() :
+                     null
+        );
     }
 }

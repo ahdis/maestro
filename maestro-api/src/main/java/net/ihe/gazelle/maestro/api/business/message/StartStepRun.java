@@ -19,7 +19,7 @@ package net.ihe.gazelle.maestro.api.business.message;
 import java.io.Serial;
 
 import net.ihe.gazelle.lang.Command;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
+import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
 
 /**
  * Step message used by producer to notify a subscriber to launch step execution

@@ -17,9 +17,9 @@
 package net.ihe.gazelle.maestro.itb.step.technical.factory;
 
 import net.ihe.gazelle.maestro.api.business.test.Step;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunner;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunnerFactory;
+import net.ihe.gazelle.maestro.spi.business.runner.Handler;
+import net.ihe.gazelle.maestro.spi.business.runner.StepRunner;
+import net.ihe.gazelle.maestro.spi.business.runner.StepRunnerFactory;
 import net.ihe.gazelle.maestro.itb.step.business.ItbStep;
 import net.ihe.gazelle.maestro.itb.step.business.ItbStepRunner;
 import net.ihe.gazelle.maestro.itb.step.technical.handler.ItbHandlerImpl;

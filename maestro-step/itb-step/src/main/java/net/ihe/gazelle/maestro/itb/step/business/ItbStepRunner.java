@@ -17,8 +17,8 @@
 package net.ihe.gazelle.maestro.itb.step.business;
 
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRun;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.StepRunner;
+import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
+import net.ihe.gazelle.maestro.spi.business.runner.StepRunner;
 import net.ihe.gazelle.maestro.itb.step.business.dao.ItbTestExecutionDBInMemory;
 
 import java.util.concurrent.CompletableFuture;

@@ -1,0 +1,33 @@
+package net.ihe.gazelle.maestro.api.business.testrun;
+
+import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilder;
+import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory;
+import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
+import net.ihe.gazelle.maestro.api.business.property.PropertyValidator;
+import net.ihe.gazelle.maestro.api.business.test.TestValidator;
+
+public class TestRunValidator extends AbstractValidator<TestRun> {
+
+    private final PropertyValidator propertyValidator;
+    private final TestValidator testValidator;
+
+    public TestRunValidator() {
+        super();
+        this.propertyValidator = new PropertyValidator();
+        this.testValidator = new TestValidator();
+    }
+
+    @Override
+    protected ValidatorBuilder<? extends TestRun> instantiateValidatorBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
+        return validatorBuilderFactory.getBuilder(TestRun.class);
+    }
+
+    @Override
+    protected void addRulesAndMembers(ValidatorBuilder<? extends TestRun> validatorBuilder) {
+            validatorBuilder
+                    .addRule(TestRun::isTestDefined, "Test must be defined")
+                    .addMember("inputs", TestRun::getInputs, propertyValidator::getAssembledValidatorBuilder)
+                    .addMember("test", TestRun::getTest, testValidator::getAssembledValidatorBuilder)
+            ;
+    }
+}
