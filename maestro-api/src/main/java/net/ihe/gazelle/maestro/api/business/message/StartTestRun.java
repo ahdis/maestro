@@ -29,23 +29,23 @@ public class StartTestRun implements Message {
    @Serial
    private static final long serialVersionUID = 1L;
 
-   private String testSuiteRunId;
+   private String sessionId;
    private TestRun testRun;
 
    public StartTestRun() {
    }
 
-   public StartTestRun(String testSuiteRunId, TestRun testRun) {
-      this.testSuiteRunId = testSuiteRunId;
+   public StartTestRun(String sessionId, TestRun testRun) {
+      this.sessionId = sessionId;
       this.testRun = testRun;
    }
 
-   public String getTestSuiteRunId() {
-      return testSuiteRunId;
+   public String getSessionId() {
+      return sessionId;
    }
 
-   public StartTestRun setTestSuiteRunId(String testSuiteRunId) {
-      this.testSuiteRunId = testSuiteRunId;
+   public StartTestRun setSessionId(String sessionId) {
+      this.sessionId = sessionId;
       return this;
    }
 

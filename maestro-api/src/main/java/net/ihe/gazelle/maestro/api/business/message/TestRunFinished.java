@@ -30,25 +30,25 @@ public class TestRunFinished implements Message {
    @Serial
    private static final long serialVersionUID = 1L;
 
-   private String testSuiteRunId;
+   private String sessionId;
    private TestRun testRun;
    private TestRunReportBuilder testRunReportBuilder;
 
    public TestRunFinished() {
    }
 
-   public TestRunFinished(String testSuiteRunId, TestRun testRun, TestRunReportBuilder testRunReportBuilder) {
-      this.testSuiteRunId = testSuiteRunId;
+   public TestRunFinished(String sessionId, TestRun testRun, TestRunReportBuilder testRunReportBuilder) {
+      this.sessionId = sessionId;
       this.testRun = testRun;
       this.testRunReportBuilder = testRunReportBuilder;
    }
 
-   public String getTestSuiteRunId() {
-      return testSuiteRunId;
+   public String getSessionId() {
+      return sessionId;
    }
 
-   public TestRunFinished setTestSuiteRunId(String testSuiteRunId) {
-      this.testSuiteRunId = testSuiteRunId;
+   public TestRunFinished setSessionId(String sessionId) {
+      this.sessionId = sessionId;
       return this;
    }
 

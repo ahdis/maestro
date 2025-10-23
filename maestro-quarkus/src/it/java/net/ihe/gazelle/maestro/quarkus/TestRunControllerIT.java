@@ -74,7 +74,7 @@ class TestRunControllerIT implements QuarkusTestProfile {
     }
 
     @Test
-    void synchronous_test_run_with_one_validation() throws IOException {
+    void synchronous_test_executeTestSuite_with_one_validation() throws IOException {
         String testRun = WireMockSingleton.getResourceAsString("/Testrun.json");
         Response response = given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                 .body(testRun)
@@ -89,7 +89,7 @@ class TestRunControllerIT implements QuarkusTestProfile {
     }
 
     @Test
-    void asynchronous_test_run_with_one_validations() throws IOException {
+    void asynchronous_test_executeTestSuite_with_one_validations() throws IOException {
         String testRun = WireMockSingleton.getResourceAsString("/Testrun.json");
         String callback = "http://localhost:" + port + "/mock/gazelle/rest";
         given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
@@ -104,7 +104,7 @@ class TestRunControllerIT implements QuarkusTestProfile {
     }
 
     @ParameterizedTest
-    @MethodSource("invalidTestRunProvider")
+    @MethodSource("invalidTestExecuteTestSuiteProvider")
     void should_fail_deserialization(String filePath, String expectedMessage) throws IOException {
         String testRun = WireMockSingleton.getResourceAsString(filePath);
         String response = given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
@@ -118,7 +118,7 @@ class TestRunControllerIT implements QuarkusTestProfile {
         assertThat(response, containsString(expectedMessage));
     }
 
-    private static Stream<Arguments> invalidTestRunProvider() {
+    private static Stream<Arguments> invalidTestExecuteTestSuiteProvider() {
         return Stream.of(
                 Arguments.of("/invalid_step_type.json", "Could not resolve type id"),
                 Arguments.of("/invalid_property_type.json", "Unsupported property type"),

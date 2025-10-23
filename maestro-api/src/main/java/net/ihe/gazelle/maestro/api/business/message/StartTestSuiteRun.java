@@ -17,6 +17,7 @@
 package net.ihe.gazelle.maestro.api.business.message;
 
 import java.io.Serial;
+
 import net.ihe.gazelle.lang.Command;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 
@@ -25,22 +26,35 @@ import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
  */
 @Command
 public class StartTestSuiteRun implements Message {
-    @Serial
-    private static final long serialVersionUID = 1L;
-    private TestSuiteRun testSuiteRun;
+   @Serial
+   private static final long serialVersionUID = 1L;
 
-    public StartTestSuiteRun() {}
+   private String sessionId;
+   private TestSuiteRun testSuiteRun;
 
-    public StartTestSuiteRun(TestSuiteRun testSuiteRun) {
-        this.testSuiteRun = testSuiteRun;
-    }
+   public StartTestSuiteRun() {
+   }
 
-    public TestSuiteRun getTestSuiteRun() {
-        return testSuiteRun;
-    }
+   public StartTestSuiteRun(String sessionId, TestSuiteRun testSuiteRun) {
+      this.sessionId = sessionId;
+      this.testSuiteRun = testSuiteRun;
+   }
 
-    public StartTestSuiteRun setTestSuiteRun(TestSuiteRun testSuiteRun) {
-        this.testSuiteRun = testSuiteRun;
-        return this;
-    }
+   public String getSessionId() {
+      return sessionId;
+   }
+
+   public StartTestSuiteRun setSessionId(String sessionId) {
+      this.sessionId = sessionId;
+      return this;
+   }
+
+   public TestSuiteRun getTestSuiteRun() {
+      return testSuiteRun;
+   }
+
+   public StartTestSuiteRun setTestSuiteRun(TestSuiteRun testSuiteRun) {
+      this.testSuiteRun = testSuiteRun;
+      return this;
+   }
 }

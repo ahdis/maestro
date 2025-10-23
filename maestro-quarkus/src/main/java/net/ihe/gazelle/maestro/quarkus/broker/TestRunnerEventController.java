@@ -43,7 +43,7 @@ public class TestRunnerEventController implements TestRunEventProducer {
       this.messageEvent = messageEvent;
    }
 
-   public void onStartTestRun(@Observes StartTestRun startTestRun) {
+   public void onStartTestRun(@ObservesAsync StartTestRun startTestRun) {
       testRunner.execute(startTestRun);
    }
 

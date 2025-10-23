@@ -33,10 +33,6 @@ public class TestSuiteSession {
    private final List<TestRunReportBuilder> testRunReportBuilders;
    private final TestRunCursor testRunCursor;
 
-   public TestSuiteSession(TestSuiteRun testSuiteRun) {
-      this(testSuiteRun, TestRunCursor.from(testSuiteRun));
-   }
-
    public TestSuiteSession(TestSuiteRun testSuiteRun, TestRunCursor testRunCursor) {
       this.testSuiteRun = testSuiteRun;
       this.testRunReportBuilders = new ArrayList<>();

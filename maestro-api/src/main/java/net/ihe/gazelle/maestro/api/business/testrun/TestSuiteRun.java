@@ -25,6 +25,7 @@ import net.ihe.gazelle.security.business.acl.AccessControlList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * A TestSuiteRun is a structure containing several TestRun that will be executed iteratively. {@link TestRun} testSetId
@@ -91,6 +92,13 @@ public class TestSuiteRun {
    public TestSuiteRun setAccessControlList(AccessControlList accessControlList) {
       this.accessControlList = accessControlList != null ? accessControlList : new AccessControlList();
       return this;
+   }
+
+   public Test getTest(String id) {
+      return tests.stream()
+            .filter(test -> test.getId().equals(id))
+            .findFirst()
+            .orElseThrow(() -> new NoSuchElementException("No test with id " + id + " found in this TestSuiteRun"));
    }
 
    public boolean isTestSuiteDefined() {

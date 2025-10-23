@@ -17,6 +17,7 @@
 package net.ihe.gazelle.maestro.api.business.message;
 
 import java.io.Serial;
+
 import net.ihe.gazelle.lang.Event;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
@@ -26,33 +27,45 @@ import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
  */
 @Event
 public class TestSuiteRunFinished implements Message {
-    @Serial
-    private static final long serialVersionUID = 1L;
-    private TestSuiteRun testSuiteRun;
-    private TestReportSummary reportSummary;
+   @Serial
+   private static final long serialVersionUID = 1L;
+   private String sessionId;
+   private TestSuiteRun testSuiteRun;
+   private TestReportSummary reportSummary;
 
-    public TestSuiteRunFinished() {}
+   public TestSuiteRunFinished() {
+   }
 
-    public TestSuiteRunFinished(TestSuiteRun testSuiteRun, TestReportSummary reportSummary) {
-        this.testSuiteRun = testSuiteRun;
-        this.reportSummary = reportSummary;
-    }
+   public TestSuiteRunFinished(String sessionId, TestSuiteRun testSuiteRun, TestReportSummary reportSummary) {
+      this.sessionId = sessionId;
+      this.testSuiteRun = testSuiteRun;
+      this.reportSummary = reportSummary;
+   }
 
-    public TestSuiteRun getTestSuiteRun() {
-        return testSuiteRun;
-    }
+   public String getSessionId() {
+      return sessionId;
+   }
 
-    public TestSuiteRunFinished setTestSuiteRun(TestSuiteRun testSuiteRun) {
-        this.testSuiteRun = testSuiteRun;
-        return this;
-    }
+   public TestSuiteRunFinished setSessionId(String sessionId) {
+      this.sessionId = sessionId;
+      return this;
+   }
 
-    public TestReportSummary getReportSummary() {
-        return reportSummary;
-    }
+   public TestSuiteRun getTestSuiteRun() {
+      return testSuiteRun;
+   }
 
-    public TestSuiteRunFinished setReportSummary(TestReportSummary reportSummary) {
-        this.reportSummary = reportSummary;
-        return this;
-    }
+   public TestSuiteRunFinished setTestSuiteRun(TestSuiteRun testSuiteRun) {
+      this.testSuiteRun = testSuiteRun;
+      return this;
+   }
+
+   public TestReportSummary getReportSummary() {
+      return reportSummary;
+   }
+
+   public TestSuiteRunFinished setReportSummary(TestReportSummary reportSummary) {
+      this.reportSummary = reportSummary;
+      return this;
+   }
 }

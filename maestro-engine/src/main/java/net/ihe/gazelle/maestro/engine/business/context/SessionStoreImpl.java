@@ -26,43 +26,32 @@ import java.util.concurrent.ConcurrentHashMap;
  * So we want that only with its session id, we can figure out from which TestRunSession or TestSuiteSession
  * this SteRun/TestRun depend on.
  */
-public class SessionStoreImpl implements SessionStore {
+public class SessionStoreImpl<T> implements SessionStore<T> {
 
-    private static final Map<String, TestRunSession> TEST_RUN_CONTEXT = new ConcurrentHashMap<>();
-    private static final Map<String, TestSuiteSession> TEST_SUITE_CONTEXT = new ConcurrentHashMap<>();
+    private final Map<String, T> sessions = new ConcurrentHashMap<>();
 
     public SessionStoreImpl() {
         // For injection
     }
 
-    @Override
-    public TestRunSession getTestRunSession(String runId) {
-        return TEST_RUN_CONTEXT.get(runId);
+   @Override
+   public synchronized void addSession(String id, T session) {
+      sessions.put(id, session);
+   }
+
+   @Override
+   public synchronized boolean hasSession(String id) {
+      return sessions.containsKey(id);
+   }
+
+   @Override
+    public synchronized T getSession(String id) {
+        return (T) sessions.get(id);
     }
 
     @Override
-    public void addTestRunSession(String runId, TestRunSession testRunSession) {
-        TEST_RUN_CONTEXT.put(runId, testRunSession);
-    }
-
-    @Override
-    public void removeTestRun(String runId) {
-        TEST_RUN_CONTEXT.remove(runId);
-    }
-
-    @Override
-    public TestSuiteSession getTestSuite(String setId) {
-        return TEST_SUITE_CONTEXT.get(setId);
-    }
-
-    @Override
-    public void addTestSuite(String testSuiteId, TestSuiteSession testSuiteSession) {
-        TEST_SUITE_CONTEXT.put(testSuiteId, testSuiteSession);
-    }
-
-    @Override
-    public void removeTestSuite(String testSuiteId) {
-        TEST_SUITE_CONTEXT.remove(testSuiteId);
+    public synchronized void removeSession(String id) {
+        sessions.remove(id);
     }
 
 }

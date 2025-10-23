@@ -16,27 +16,14 @@
 
 package net.ihe.gazelle.maestro.engine.business.context;
 
-public interface SessionStore {
+public interface SessionStore<T> {
 
-   void addTestRunSession(String runId, TestRunSession testRunSession);
+   void addSession(String id, T session);
 
-   TestRunSession getTestRunSession(String runId);
+   boolean hasSession(String id);
 
-   /**
-    * Remove a TestRunSession in SESSION_CONTEXT
-    *
-    * @param runId id of TestRunSession to remove
-    */
-   void removeTestRun(String runId);
+   T getSession(String id);
 
-   void addTestSuite(String testSuiteId, TestSuiteSession testSuiteSession);
+   void removeSession(String id);
 
-   TestSuiteSession getTestSuite(String setId);
-
-   /**
-    * Remove a TestSuiteSession in SESSION_CONTEXT
-    *
-    * @param testSuiteId id of TestSuiteSession to remove
-    */
-   void removeTestSuite(String testSuiteId);
 }

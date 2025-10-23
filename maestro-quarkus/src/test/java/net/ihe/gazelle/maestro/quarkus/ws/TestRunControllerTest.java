@@ -75,7 +75,7 @@ class TestRunControllerTest {
     }
 
     @Test
-    void runWithoutCallbackReturnsOkResponseWithSummaryLocation() throws Exception {
+    void executeTestSuiteWithoutCallbackReturnsOkResponseWithSummaryLocation() throws Exception {
         TestReportSummary summary = new TestReportSummary()
                 .setId("summary-id")
                 .setLocation("http://datahouse/items/summary-id")
@@ -83,7 +83,7 @@ class TestRunControllerTest {
                 .setDateTime(new Date());
         when(synchronousMaestro.executeTestSuite(any())).thenReturn(summary);
 
-        Response response = controller.run(null, testSetRunDto());
+        Response response = controller.executeTestSuite(testSetExecuteTestSuiteDto(), null);
 
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         TestReportSummaryDTO entity = (TestReportSummaryDTO) response.getEntity();
@@ -97,8 +97,8 @@ class TestRunControllerTest {
     }
 
     @Test
-    void runWithCallbackTriggersAsyncExecutionAndReturnsAccepted() {
-        Response response = controller.run("http://callback", testSetRunDto());
+    void executeTestSuiteWithCallbackTriggersAsyncExecutionAndReturnsAccepted() {
+        Response response = controller.executeTestSuite(testSetExecuteTestSuiteDto(), "http://callback");
 
         assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus());
 
@@ -110,40 +110,40 @@ class TestRunControllerTest {
     }
 
     @Test
-    void runWithoutCallbackInvalidTestRunReturnsBadRequest() throws Exception {
+    void runWithoutCallbackInvalidTestExecuteTestSuiteReturnsBadRequest() throws Exception {
         when(synchronousMaestro.executeTestSuite(any())).thenThrow(new InvalidTestRunException("invalid"));
 
-        Response response = controller.run(null, testSetRunDto());
+        Response response = controller.executeTestSuite(testSetExecuteTestSuiteDto(), null);
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
         assertTrue(response.getEntity().toString().contains("bad format"));
     }
 
     @Test
-    void runWithoutCallbackTimeoutReturnsGatewayTimeout() throws Exception {
+    void executeTestSuiteWithoutCallbackTimeoutReturnsGatewayTimeout() throws Exception {
         when(synchronousMaestro.executeTestSuite(any())).thenThrow(new TimeoutException("too long"));
 
-        Response response = controller.run(null, testSetRunDto());
+        Response response = controller.executeTestSuite(testSetExecuteTestSuiteDto(), null);
 
         assertEquals(Response.Status.GATEWAY_TIMEOUT.getStatusCode(), response.getStatus());
         assertEquals(SynchronousMaestro.TIMEOUT_MESSAGE, response.getEntity());
     }
 
     @Test
-    void runWithoutCallbackWebApplicationExceptionReturnsGatewayTimeout() throws Exception {
+    void executeTestSuiteWithoutCallbackWebApplicationExceptionReturnsGatewayTimeout() throws Exception {
         when(synchronousMaestro.executeTestSuite(any())).thenThrow(new WebApplicationException("timeout"));
 
-        Response response = controller.run(null, testSetRunDto());
+        Response response = controller.executeTestSuite(testSetExecuteTestSuiteDto(), null);
 
         assertEquals(Response.Status.GATEWAY_TIMEOUT.getStatusCode(), response.getStatus());
         assertEquals(SynchronousMaestro.TIMEOUT_MESSAGE, response.getEntity());
     }
 
     @Test
-    void runWithoutCallbackNotProvidedStepReturnsBadRequest() throws Exception {
+    void executeTestSuiteWithoutCallbackNotProvidedStepReturnsBadRequest() throws Exception {
         when(synchronousMaestro.executeTestSuite(any())).thenThrow(new UnknownStepType("aStep"));
 
-        Response response = controller.run(null, testSetRunDto());
+        Response response = controller.executeTestSuite(testSetExecuteTestSuiteDto(), null);
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
         assertThat(
@@ -153,10 +153,10 @@ class TestRunControllerTest {
     }
 
     @Test
-    void runWithoutCallbackUnexpectedExceptionInterruptsThreadAndReturnsInternalServerError() throws Exception {
+    void executeTestSuiteWithoutCallbackUnexpectedExceptionInterruptsThreadAndReturnsInternalServerError() throws Exception {
         when(synchronousMaestro.executeTestSuite(any())).thenThrow(new RuntimeException("boom"));
 
-        Response response = controller.run(null, testSetRunDto());
+        Response response = controller.executeTestSuite(testSetExecuteTestSuiteDto(), null);
 
         assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
         assertTrue(Thread.currentThread().isInterrupted());
@@ -165,22 +165,22 @@ class TestRunControllerTest {
     }
 
     @Test
-    void runWithCallbackInvalidTestRunReturnsBadRequest() {
+    void runWithCallbackInvalidTestExecuteTestSuiteReturnsBadRequest() {
         doThrow(new InvalidTestRunException("invalid"))
                 .when(maestroImpl).executeTestSuite(any(), any());
 
-        Response response = controller.run("http://callback", testSetRunDto());
+        Response response = controller.executeTestSuite(testSetExecuteTestSuiteDto(), "http://callback");
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
         assertTrue(response.getEntity().toString().contains("bad format"));
     }
 
     @Test
-    void runWithCallbackNotProvidedStepReturnsBadRequest() {
+    void executeTestSuiteWithCallbackNotProvidedStepReturnsBadRequest() {
         doThrow(new UnknownStepType("missing"))
                 .when(maestroImpl).executeTestSuite(any(), any());
 
-        Response response = controller.run("http://callback", testSetRunDto());
+        Response response = controller.executeTestSuite(testSetExecuteTestSuiteDto(), "http://callback");
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
         assertThat(
@@ -190,22 +190,22 @@ class TestRunControllerTest {
     }
 
     @Test
-    void runWithCallbackWebApplicationExceptionReturnsGatewayTimeout() {
+    void executeTestSuiteWithCallbackWebApplicationExceptionReturnsGatewayTimeout() {
         doThrow(new WebApplicationException("timeout"))
                 .when(maestroImpl).executeTestSuite(any(), any());
 
-        Response response = controller.run("http://callback", testSetRunDto());
+        Response response = controller.executeTestSuite(testSetExecuteTestSuiteDto(), "http://callback");
 
         assertEquals(Response.Status.GATEWAY_TIMEOUT.getStatusCode(), response.getStatus());
         assertEquals(SynchronousMaestro.TIMEOUT_MESSAGE, response.getEntity());
     }
 
     @Test
-    void runWithCallbackUnexpectedExceptionReturnsInternalServerError() {
+    void executeTestSuiteWithCallbackUnexpectedExceptionReturnsInternalServerError() {
         doThrow(new RuntimeException("boom"))
                 .when(maestroImpl).executeTestSuite(any(), any());
 
-        Response response = controller.run("http://callback", testSetRunDto());
+        Response response = controller.executeTestSuite(testSetExecuteTestSuiteDto(), "http://callback");
 
         assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
         assertTrue(response.getEntity().toString().contains("an error occurred"));
@@ -286,7 +286,7 @@ class TestRunControllerTest {
         return new TestRunner(new EventMaestroProducer(new TestRunMockEvent()), new SessionStoreImpl(), new InMemoryTestReportRecordService(), "999.0.0");
     }
 
-    private TestSuiteRunDTO testSetRunDto() {
+    private TestSuiteRunDTO testSetExecuteTestSuiteDto() {
         TestSuiteRunDTO dto = new TestSuiteRunDTO();
         TestRun testRun = new TestRun().setTestSuiteId("test-set");
         dto.setTests(List.of(new TestRunDTO(testRun)));

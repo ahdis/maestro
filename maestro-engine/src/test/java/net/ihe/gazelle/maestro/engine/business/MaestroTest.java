@@ -141,8 +141,8 @@ class MaestroTest {
         Context context = new Context();
 
         // Mock for standalone test run - no testSuiteSession
-        when(sessionStore.getTestSuite(testSetId)).thenReturn(null);
-        when(sessionStore.getTestRunSession(anyString())).thenReturn(testRunSession);
+        when(sessionStore.getSession(testSetId)).thenReturn(null);
+        when(sessionStore.getSession(anyString())).thenReturn(testRunSession);
         when(testRunSession.getContext()).thenReturn(context);
         when(testRunSession.getTestRun()).thenReturn(testRun);
 
@@ -172,7 +172,7 @@ class MaestroTest {
         TestRunCursor testRunCursor = new TestRunCursor(List.of(testRun));
         testRunCursor.next(); // Move cursor to indicate this test run has executed
 
-        when(sessionStore.getTestSuite(testSetId)).thenReturn(testSuiteSession);
+        when(sessionStore.getSession(testSetId)).thenReturn(testSuiteSession);
         when(testSuiteSession.getTestSuiteRun()).thenReturn(testSuiteRun);
         when(testSuiteSession.getTestRunReportBuilders()).thenReturn(reportBuilders);
         when(testSuiteSession.getTestRunCursor()).thenReturn(testRunCursor);
@@ -184,8 +184,8 @@ class MaestroTest {
 
         // Assert
         verify(testSuiteSession).addTestRunReportBuilder(testRunReportBuilder);
-        verify(sessionStore).removeTestRun(testSetId);
-        verify(sessionStore).removeTestSuite(testSetId);
+        verify(sessionStore).removeSession(testSetId);
+        verify(sessionStore).removeSession(testSetId);
         verify(maestroEventProducer).returnTestSetReport(eq(testSuiteRun), any(TestReportSummary.class));
     }
 
@@ -209,13 +209,13 @@ class MaestroTest {
         TestRunCursor testRunCursor = new TestRunCursor(List.of(anotherTestRun));
         testRunCursor.next(); // Move cursor to indicate run has executed
 
-        when(sessionStore.getTestSuite(testSetId)).thenReturn(testSuiteSession);
+        when(sessionStore.getSession(testSetId)).thenReturn(testSuiteSession);
         when(testSuiteSession.getTestSuiteRun()).thenReturn(testSuiteRun);
         when(testSuiteSession.getTestRunCursor()).thenReturn(testRunCursor);
 
         testRunner.finishTest(testRun, mock(TestRunReportBuilder.class));
-        verify(sessionStore).removeTestRun(testSetId);
-        verify(sessionStore).removeTestSuite(testSetId);
+        verify(sessionStore).removeSession(testSetId);
+        verify(sessionStore).removeSession(testSetId);
         verify(maestroEventProducer).returnTestSetReport(eq(testSuiteRun), any(TestReportSummary.class));
     }
 
@@ -231,7 +231,7 @@ class MaestroTest {
         TestRunCursor testRunCursor = new TestRunCursor(List.of(testRun));
         testRunCursor.next(); // Move cursor to indicate run has executed
 
-        when(sessionStore.getTestSuite(testSetId)).thenReturn(testSuiteSession);
+        when(sessionStore.getSession(testSetId)).thenReturn(testSuiteSession);
         when(testSuiteSession.getTestSuiteRun()).thenReturn(testSuiteRun);
         when(testSuiteSession.getTestRunCursor()).thenReturn(testRunCursor);
         when(testReportRecordService.recordTestReportWithReferences(any())).thenThrow(new RuntimeException("db down"));
@@ -264,7 +264,7 @@ class MaestroTest {
         StepRun stepRun = new StepRun(testSetId, testRunId, step);
         StepRunReportBuilder stepRunReportBuilder = mock(StepRunReportBuilder.class);
 
-        when(sessionStore.getTestRunSession(testRunId)).thenReturn(testRunSession);
+        when(sessionStore.getSession(testRunId)).thenReturn(testRunSession);
         when(testRunSession.getTestRun()).thenReturn(testRun);
         when(testRunSession.getStepReports()).thenReturn(stepReports);
         when(testRunSession.getStepCursor()).thenReturn(stepCursor);
@@ -303,7 +303,7 @@ class MaestroTest {
         StepRun stepRun = new StepRun(testSetId, testRunId, step);
         StepRunReportBuilder stepRunReportBuilder = mock(StepRunReportBuilder.class);
 
-        when(sessionStore.getTestRunSession(testRunId)).thenReturn(testRunSession);
+        when(sessionStore.getSession(testRunId)).thenReturn(testRunSession);
         when(testRunSession.getTestRun()).thenReturn(testRun);
         when(testRunSession.getContext()).thenReturn(context);
         when(testRunSession.getStepCursor()).thenReturn(stepCursor);

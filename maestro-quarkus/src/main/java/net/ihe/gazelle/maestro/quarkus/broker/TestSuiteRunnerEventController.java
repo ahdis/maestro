@@ -57,4 +57,5 @@ public class TestSuiteRunnerEventController implements TestSuiteEventProducer {
    public void notify(TestSuiteRunFinished testSuiteRunFinished) {
       messageEvent.fireAsync(testSuiteRunFinished);
    }
+
 }

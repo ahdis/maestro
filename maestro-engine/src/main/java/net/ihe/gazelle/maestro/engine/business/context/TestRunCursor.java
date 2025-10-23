@@ -17,8 +17,8 @@
 package net.ihe.gazelle.maestro.engine.business.context;
 
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
-import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -27,57 +27,41 @@ import java.util.NoSuchElementException;
  */
 public final class TestRunCursor {
 
-    private final List<TestRun> testRuns;
-    private int nextIndex;
+   private final List<TestRun> tests = new ArrayList<>();
+   private int index = -1;
 
-    public TestRunCursor(List<TestRun> testRuns) {
-        this.testRuns = List.copyOf(testRuns == null ? List.of() : testRuns);
-        this.nextIndex = 0;
-    }
+   private TestRunCursor(List<TestRun> orderedTestRuns) {
+      tests.addAll(orderedTestRuns);
+   }
 
-    public static TestRunCursor empty() {
-        return new TestRunCursor(List.of());
-    }
+   public static TestRunCursor empty() {
+      return new TestRunCursor(List.of());
+   }
 
-    public static TestRunCursor from(TestSuiteRun testSuiteRun) {
-        if (testSuiteRun == null) {
-            return empty();
-        }
-        return new TestRunCursor(testSuiteRun.getTestRuns());
-    }
+   public static TestRunCursor from(List<TestRun> orderedTestRuns) {
+      return new TestRunCursor(orderedTestRuns);
+   }
 
-    public boolean hasNext() {
-        return nextIndex < testRuns.size();
-    }
+   public synchronized boolean hasNext() {
+      return index < tests.size() - 1;
+   }
 
-    public TestRun next() {
-        if (!hasNext()) {
-            throw new NoSuchElementException("No more test runs to execute");
-        }
-        return testRuns.get(nextIndex++);
-    }
+   public synchronized TestRun next() {
+      if (!hasNext()) {
+         throw new NoSuchElementException("No more test runs to execute");
+      }
+      return tests.get(index++);
+   }
 
-    public boolean hasExecutedRuns() {
-        return nextIndex > 0;
-    }
+   public synchronized boolean hasCurrent() {
+      return index > -1;
+   }
 
-    public TestRun current() {
-        if (!hasExecutedRuns()) {
-            throw new IllegalStateException("No test run has been executed yet");
-        }
-        return testRuns.get(nextIndex - 1);
-    }
+   public  synchronized TestRun current() {
+      if (!hasCurrent()) {
+         throw new IllegalStateException("No test run has been executed yet");
+      }
+      return tests.get(index);
+   }
 
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof TestRunCursor cursor)) {
-            return false;
-        }
-        return testRuns.equals(cursor.testRuns) && nextIndex == cursor.nextIndex;
-    }
-
-    @Override
-    public int hashCode() {
-        return 31 * testRuns.hashCode() + nextIndex;
-    }
 }

@@ -28,7 +28,7 @@ import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
 public class StartStepRun implements Message {
    @Serial
    private static final long serialVersionUID = 1L;
-   private String testSuiteRunId; // internal
+   private String sessionId; // internal
    private String testRunId; // internal
    private String testId;
    private StepRun stepRun;
@@ -36,19 +36,19 @@ public class StartStepRun implements Message {
    public StartStepRun() {
    }
 
-   public StartStepRun(String testSuiteRunId, String testRunId, String testId, StepRun stepRun) {
-      this.testSuiteRunId = testSuiteRunId;
+   public StartStepRun(String sessionId, String testRunId, String testId, StepRun stepRun) {
+      this.sessionId = sessionId;
       this.testRunId = testRunId;
       this.testId = testId;
       this.stepRun = stepRun;
    }
 
-   public String getTestSuiteRunId() {
-      return testSuiteRunId;
+   public String getSessionId() {
+      return sessionId;
    }
 
-   public StartStepRun setTestSuiteRunId(String testSuiteRunId) {
-      this.testSuiteRunId = testSuiteRunId;
+   public StartStepRun setSessionId(String sessionId) {
+      this.sessionId = sessionId;
       return this;
    }
 

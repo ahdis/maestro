@@ -72,7 +72,7 @@ class TMTestRunControllerIT implements QuarkusTestProfile {
    }
 
    @Test
-   void runPASSEDTestFromTM() throws IOException {
+   void executeTestSuitePASSEDTestFromTM() throws IOException {
       WireMockSingleton.mockValidate("/tmintegration/passed_response.json");
 
       String tmRequestBody = assertDoesNotThrow(() -> getResourceAsString("tmintegration/script.json"));
@@ -89,7 +89,7 @@ class TMTestRunControllerIT implements QuarkusTestProfile {
    }
 
    @Test
-   void runFAILEDTestFromTM() throws IOException {
+   void executeTestSuiteFAILEDTestFromTM() throws IOException {
       WireMockSingleton.mockValidate("/tmintegration/failed_response.json");
 
       String tmRequestBody = assertDoesNotThrow(() -> getResourceAsString("tmintegration/script.json"));

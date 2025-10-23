@@ -62,19 +62,19 @@ public class TestRunner {
       }
 
       try {
-         StepCursor stepCursor = createSession(startTestRun.getTestSuiteRunId(), testRun);
-         runStep(startTestRun.getTestSuiteRunId(), stepCursor.next(), testRun);
+         StepCursor stepCursor = createSession(startTestRun.getSessionId(), testRun);
+         runStep(startTestRun.getSessionId(), stepCursor.next(), testRun);
       } catch (Exception e) {
          Test test = testRun.getTest();
          LOG.atError().setCause(e).log("Error running test {}", test.getName());
-         finishTest(startTestRun.getTestSuiteRunId(), testRun, newTestRunReportBuilder(test)
+         finishTest(startTestRun.getSessionId(), testRun, newTestRunReportBuilder(test)
                .addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e))
          );
       }
    }
 
    public void listen(StepRunFinished stepRunFinished) {
-      TestRunSession testRunSession = sessionStore.getTestRunSession(stepRunFinished.getTestRunId());
+      T testRunSession = sessionStore.getSession(stepRunFinished.getTestRunId());
       testRunSession.addStepRunReport(stepRunFinished.getStepRunReportBuilder());
 
       StepCursor stepCursor = testRunSession.getStepCursor();
@@ -91,13 +91,13 @@ public class TestRunner {
    }
 
    private void finishTest(String testSuiteRunId, TestRun testRun, final TestRunReportBuilder testRunReportBuilder) {
-      sessionStore.removeTestRun(testRun.getInternalId());
+      sessionStore.removeSession(testRun.getInternalId());
       testRunEventProducer.notify(new TestRunFinished(testSuiteRunId, testRun, testRunReportBuilder));
    }
 
    private StepCursor createSession(String testSuiteRunId, TestRun testRun) {
       TestRunSession testRunSession = new TestRunSession(testSuiteRunId, testRun);
-      sessionStore.addTestRunSession(testRun.getInternalId(), testRunSession);
+      sessionStore.addSession(testRun.getInternalId(), testRunSession);
       return testRunSession.getStepCursor();
    }
 
@@ -122,7 +122,7 @@ public class TestRunner {
     * @return Context from TestRunSession with corresponding id
     */
    private Context getContextFromStore(String testRunID) {
-      return sessionStore.getTestRunSession(testRunID).getContext();
+      return sessionStore.getSession(testRunID).getContext();
    }
 
    private List<Property<?>> proxifyProperties(List<Property<?>> properties, Context context) {

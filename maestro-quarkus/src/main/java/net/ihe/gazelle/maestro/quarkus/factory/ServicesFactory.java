@@ -4,6 +4,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Produces;
+import net.ihe.gazelle.maestro.engine.business.context.TestRunSession;
+import net.ihe.gazelle.maestro.engine.business.context.TestSuiteSession;
 import net.ihe.gazelle.maestro.spi.business.runner.ConfigProvider;
 import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
 import net.ihe.gazelle.maestro.engine.business.context.SessionStoreImpl;
@@ -31,9 +33,17 @@ public class ServicesFactory {
 
    @ApplicationScoped
    @Produces
-   @Default
-   public SessionStore getSessionStore() {
-      return new SessionStoreImpl();
+   @TestSuiteStore
+   public SessionStore<TestSuiteSession> getTestSuiteSessionStore() {
+      return new SessionStoreImpl<TestSuiteSession>();
    }
+
+   @ApplicationScoped
+   @Produces
+   @TestRunStore
+   public SessionStore<TestRunSession> getTestRunSessionStore() {
+      return new SessionStoreImpl<TestRunSession>();
+   }
+
 
 }

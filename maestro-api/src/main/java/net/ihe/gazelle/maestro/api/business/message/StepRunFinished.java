@@ -30,6 +30,7 @@ import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
 public class StepRunFinished implements Message {
    @Serial
    private static final long serialVersionUID = 1L;
+   private String sessionId;
    private String testRunId;
    private String testId;
    private StepRun stepRun;
@@ -38,11 +39,21 @@ public class StepRunFinished implements Message {
    public StepRunFinished() {
    }
 
-   public StepRunFinished(String testRunId, String testId, StepRun stepRun, StepRunReportBuilder stepRunReportBuilder) {
+   public StepRunFinished(String sessionId, String testRunId, String testId, StepRun stepRun, StepRunReportBuilder stepRunReportBuilder) {
+      this.sessionId = sessionId;
       this.testRunId = testRunId;
       this.testId = testId;
       this.stepRun = stepRun;
       this.stepRunReportBuilder = stepRunReportBuilder;
+   }
+
+   public String getSessionId() {
+      return sessionId;
+   }
+
+   public StepRunFinished setSessionId(String sessionId) {
+      this.sessionId = sessionId;
+      return this;
    }
 
    public String getTestRunId() {

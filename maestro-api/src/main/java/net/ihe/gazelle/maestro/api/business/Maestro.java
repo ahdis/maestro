@@ -16,6 +16,7 @@
 
 package net.ihe.gazelle.maestro.api.business;
 
+import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 
 /**
@@ -23,7 +24,8 @@ import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
  */
 public interface Maestro {
 
-
    void executeTestSuite(TestSuiteRun testSuiteRun, MaestroObserver observer);
+
+   void executeTest(TestRun testRun, MaestroObserver observer);
 
 }

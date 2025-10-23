@@ -55,7 +55,7 @@ public class TestRunControllerImpl implements TestRunController {
    }
 
    @Override
-   public Response run(String callback, TestSuiteRunDTO testSuiteRunDTO) {
+   public Response executeTestSuite(TestSuiteRunDTO testSuiteRunDTO, String callback) {
       TestSuiteRun testSuiteRun = testSuiteRunDTO.getBusinessObject();
       testSuiteRun.getTestRuns().forEach(
             testRun -> testRun.setTestSuiteId(testSuiteRun.getInternalId())
