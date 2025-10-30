@@ -17,11 +17,12 @@
 package net.ihe.gazelle.maestro.quarkus;
 
 import net.ihe.gazelle.maestro.api.business.test.Step;
-import net.ihe.gazelle.maestro.spi.business.runner.Handler;
-import net.ihe.gazelle.maestro.spi.business.runner.StepRunner;
-import net.ihe.gazelle.maestro.spi.business.runner.StepRunnerFactory;
+import net.ihe.gazelle.maestro.engine.business.StepExecutorProvider;
+import net.ihe.gazelle.maestro.engine.business.UnknownStepException;
 import net.ihe.gazelle.maestro.quarkus.handler.HandlerProvider;
-import net.ihe.gazelle.maestro.engine.business.StepRunnerProvider;
+import net.ihe.gazelle.maestro.spi.business.runner.Handler;
+import net.ihe.gazelle.maestro.spi.business.runner.StepExecutor;
+import net.ihe.gazelle.maestro.spi.business.runner.StepRunnerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,13 +30,13 @@ import java.util.HashSet;
 import java.util.ServiceLoader;
 import java.util.Set;
 
-public class StepRunnerProviderSPI implements StepRunnerProvider {
+public class StepExecutorProviderSPI implements StepExecutorProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StepRunnerProviderSPI.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StepExecutorProviderSPI.class);
 
     private final HandlerProvider handlerProvider;
 
-    public StepRunnerProviderSPI(HandlerProvider handlerProvider) {
+    public StepExecutorProviderSPI(HandlerProvider handlerProvider) {
         this.handlerProvider = handlerProvider;
     }
 
@@ -45,19 +46,17 @@ public class StepRunnerProviderSPI implements StepRunnerProvider {
      * @return a stepRunner corresponding to testreport
      */
     @Override
-    public StepRunner create(Step step) {
+    public StepExecutor getExecutor(Step step) {
         ServiceLoader<StepRunnerFactory> serviceLoader = ServiceLoader.load(StepRunnerFactory.class);
         for (StepRunnerFactory runnerFactory : serviceLoader) {
-            if (runnerFactory.getSupportedStep().equals(step.getClass().getCanonicalName())) {
+            if (runnerFactory.getSupportedStep().equals(step.getType())) {
                 return buildStepRunner(step, runnerFactory);
             }
         }
-        IllegalArgumentException illegalArgumentException = new IllegalArgumentException("Step class " + step.getClass() + " is not supported");
-        LOGGER.error(illegalArgumentException.getMessage(), illegalArgumentException);
-        throw illegalArgumentException;
+        throw new UnknownStepException("Step " + step.getType() + " is not supported");
     }
 
-    private StepRunner buildStepRunner(Step step, StepRunnerFactory runnerFactory) {
+    private StepExecutor buildStepRunner(Step step, StepRunnerFactory runnerFactory) {
         Set<Handler> handlers = new HashSet<>();
         runnerFactory.getRequiredServices(step).forEach(
                 (serviceName, handlerType) -> addHandlerIfAvailable(serviceName, handlerType, handlers)

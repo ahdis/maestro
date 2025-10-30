@@ -4,10 +4,15 @@ package net.ihe.gazelle.maestro.api.business.test;
 
 import net.ihe.gazelle.maestro.api.business.property.Property;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TestReference {
+public class TestReference implements Serializable {
+
+   @Serial
+   private static final long serialVersionUID = 1312276848438863528L;
 
    private String testId;
    private List<Property> properties = new ArrayList<>();

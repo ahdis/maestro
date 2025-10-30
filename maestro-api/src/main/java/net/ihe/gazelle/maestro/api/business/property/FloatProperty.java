@@ -1,6 +1,11 @@
 package net.ihe.gazelle.maestro.api.business.property;
 
+import java.io.Serial;
+
 public class FloatProperty extends Property {
+
+   @Serial
+   private static final long serialVersionUID = -5840963846126882752L;
 
    public FloatProperty() {
       super();
@@ -13,5 +18,10 @@ public class FloatProperty extends Property {
    @Override
    public Double getValue() {
       return super.getValue();
+   }
+
+   @Override
+   public Property copy() {
+      return new FloatProperty(getName(), getValue());
    }
 }

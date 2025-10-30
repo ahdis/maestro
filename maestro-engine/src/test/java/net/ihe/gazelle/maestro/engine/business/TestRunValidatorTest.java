@@ -16,8 +16,8 @@
 
 package net.ihe.gazelle.maestro.engine.business;
 
-import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.api.business.test.Step;
+import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRunValidator;
 import org.junit.jupiter.api.BeforeEach;

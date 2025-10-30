@@ -18,7 +18,7 @@ package net.ihe.gazelle.maestro.api.business.testreport;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class StepRunReportTest {
 

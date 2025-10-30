@@ -17,12 +17,12 @@
 package net.ihe.gazelle.maestro.itb.step.technical.factory;
 
 import net.ihe.gazelle.maestro.api.business.test.Step;
-import net.ihe.gazelle.maestro.spi.business.runner.Handler;
-import net.ihe.gazelle.maestro.spi.business.runner.StepRunner;
-import net.ihe.gazelle.maestro.spi.business.runner.StepRunnerFactory;
 import net.ihe.gazelle.maestro.itb.step.business.ItbStep;
-import net.ihe.gazelle.maestro.itb.step.business.ItbStepRunner;
+import net.ihe.gazelle.maestro.itb.step.business.ItbStepExecutor;
 import net.ihe.gazelle.maestro.itb.step.technical.handler.ItbHandlerImpl;
+import net.ihe.gazelle.maestro.spi.business.runner.Handler;
+import net.ihe.gazelle.maestro.spi.business.runner.StepExecutor;
+import net.ihe.gazelle.maestro.spi.business.runner.StepRunnerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +31,7 @@ import java.util.Set;
 public class ItbStepRunnerFactory implements StepRunnerFactory {
     @Override
     public String getSupportedStep() {
-        return ItbStep.class.getCanonicalName();
+        return ItbStep.TYPE;
     }
 
     @Override
@@ -43,9 +43,9 @@ public class ItbStepRunnerFactory implements StepRunnerFactory {
     }
 
     @Override
-    public StepRunner createStepRunner(Step step, Set<Handler> handlers) {
+    public StepExecutor createStepRunner(Step step, Set<Handler> handlers) {
         return handlers.stream().filter(ItbHandlerImpl.class::isInstance).findFirst()
-                .map(handler -> new ItbStepRunner((ItbHandlerImpl) handler))
+                .map(handler -> new ItbStepExecutor((ItbHandlerImpl) handler))
                 .orElseThrow(() -> new IllegalArgumentException("No itb handler provided"));
     }
 

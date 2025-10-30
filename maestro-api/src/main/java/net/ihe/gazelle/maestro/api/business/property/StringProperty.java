@@ -1,8 +1,11 @@
 package net.ihe.gazelle.maestro.api.business.property;
 
-import net.ihe.gazelle.maestro.api.business.testreport.Input;
+import java.io.Serial;
 
 public class StringProperty extends Property {
+
+   @Serial
+   private static final long serialVersionUID = 1003640813281866135L;
 
    public StringProperty() {
       super();
@@ -17,4 +20,8 @@ public class StringProperty extends Property {
       return super.getValue();
    }
 
+   @Override
+   public Property copy() {
+      return new StringProperty(getName(), getValue());
+   }
 }

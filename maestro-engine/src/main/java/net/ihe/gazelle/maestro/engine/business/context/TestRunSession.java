@@ -16,7 +16,9 @@
 
 package net.ihe.gazelle.maestro.engine.business.context;
 
-import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
+import net.ihe.gazelle.maestro.api.business.property.Property;
+import net.ihe.gazelle.maestro.api.business.test.Step;
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 
 import java.util.ArrayList;
@@ -28,45 +30,43 @@ import java.util.List;
  */
 public class TestRunSession {
 
-   private final String testSuiteRunId;
-   private final Context context;
    private final TestRun testRun;
-   private final List<StepRunReportBuilder> stepReports;
+   private final List<Property> context;
    private final StepCursor stepCursor;
+   private final List<StepRunReport> stepReports;
 
-   public TestRunSession(String testSuiteRunId, TestRun testRun) {
-      this(testSuiteRunId, testRun, StepCursor.from(testRun.getTest()), new Context(testRun.getInputs()));
-   }
-
-   public TestRunSession(String testSuiteRunId, TestRun testRun, StepCursor stepCursor, Context context) {
-      this.testSuiteRunId = testSuiteRunId;
-      this.context = context;
+   public TestRunSession(TestRun testRun) {
       this.testRun = testRun;
-      this.stepCursor = stepCursor;
+      this.context = new ArrayList<>(testRun.getInputs());
+      this.stepCursor = StepCursor.from(testRun.getTest().getSteps());
       this.stepReports = new ArrayList<>();
-   }
-
-   public String getTestSuiteRunId() {
-      return testSuiteRunId;
-   }
-
-   public Context getContext() {
-      return context;
    }
 
    public TestRun getTestRun() {
       return testRun;
    }
 
-   public List<StepRunReportBuilder> getStepReports() {
-      return new ArrayList<>(stepReports);
-   }
-
-   public void addStepRunReport(StepRunReportBuilder stepReportBuilder) {
-      stepReports.add(stepReportBuilder);
+   public List<Property> getContext() {
+      return context;
    }
 
    public StepCursor getStepCursor() {
       return stepCursor;
+   }
+
+   public boolean hasNextStep() {
+      return stepCursor.hasNext();
+   }
+
+   public Step nextStep() {
+      return stepCursor.next();
+   }
+
+   public List<StepRunReport> getStepReports() {
+      return new ArrayList<>(stepReports);
+   }
+
+   public void addStepRunReport(StepRunReport stepReportBuilder) {
+      stepReports.add(stepReportBuilder);
    }
 }

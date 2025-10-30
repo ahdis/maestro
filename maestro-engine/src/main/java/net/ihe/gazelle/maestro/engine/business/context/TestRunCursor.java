@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
- * Tracks iteration over the ordered list of {@link TestRun} instances within a test set.
+ * Tracks iteration over the ordered list of {@link TestRun}.
  */
 public final class TestRunCursor {
 

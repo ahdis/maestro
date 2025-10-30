@@ -20,17 +20,16 @@ import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
-import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
 import net.ihe.gazelle.maestro.assertion.step.technical.handler.AssertionHandlerImpl;
+import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class AssertionStepRunnerTest {
+class AssertionStepExecutorTest {
 
     private static AssertionStep buildStep(String name) {
         Property<byte[]> assertion = new Property<>(AssertionStep.ASSERTION, new byte[]{1});
@@ -39,7 +38,7 @@ class AssertionStepRunnerTest {
     }
 
     @Test
-    void run_returnsPassedReport_whenHandlerReturnsTrue() throws Exception {
+    void execute_returnsPassedReport_whenHandlerReturnsTrue() throws Exception {
         AssertionHandler handler = new AssertionHandler() {
             @Override
             public boolean assertion(AssertionStep assertionStep) {
@@ -52,11 +51,11 @@ class AssertionStepRunnerTest {
             }
         };
 
-        AssertionStepRunner runner = new AssertionStepRunner(handler);
+        AssertionStepExecutor runner = new AssertionStepExecutor(handler);
         AssertionStep step = buildStep("assert-step-pass");
         StepRun stepRun = new StepRun("ts", "tr", step);
 
-        CompletableFuture<StepRunReportBuilder> future = runner.run(stepRun);
+        CompletableFuture<StepRunReportBuilder> future = runner.execute(stepRun);
         StepRunReportBuilder builder = future.get(1, TimeUnit.SECONDS);
         StepRunReport report = builder.build();
 
@@ -67,7 +66,7 @@ class AssertionStepRunnerTest {
     }
 
     @Test
-    void run_returnsFailedReport_whenHandlerReturnsFalse() throws Exception {
+    void execute_returnsFailedReport_whenHandlerReturnsFalse() throws Exception {
         AssertionHandler handler = new AssertionHandler() {
             @Override
             public boolean assertion(AssertionStep assertionStep) {
@@ -80,11 +79,11 @@ class AssertionStepRunnerTest {
             }
         };
 
-        AssertionStepRunner runner = new AssertionStepRunner(handler);
+        AssertionStepExecutor runner = new AssertionStepExecutor(handler);
         AssertionStep step = buildStep("assert-step-fail");
         StepRun stepRun = new StepRun("ts", "tr", step);
 
-        CompletableFuture<StepRunReportBuilder> future = runner.run(stepRun);
+        CompletableFuture<StepRunReportBuilder> future = runner.execute(stepRun);
         StepRunReportBuilder builder = future.get(1, TimeUnit.SECONDS);
         StepRunReport report = builder.build();
 
@@ -96,7 +95,7 @@ class AssertionStepRunnerTest {
 
     @Test
     void getSupportedStep_returnsAssertionType() {
-        AssertionStepRunner runner = new AssertionStepRunner(new AssertionHandlerImpl());
+        AssertionStepExecutor runner = new AssertionStepExecutor(new AssertionHandlerImpl());
         assertEquals(AssertionStep.TYPE, runner.getSupportedStep());
     }
 }

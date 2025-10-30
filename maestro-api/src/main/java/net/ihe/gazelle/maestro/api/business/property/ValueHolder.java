@@ -1,6 +1,8 @@
 package net.ihe.gazelle.maestro.api.business.property;
 
-interface ValueHolder {
+import java.io.Serializable;
+
+interface ValueHolder extends Serializable {
 
    Object getValue();
 

@@ -16,8 +16,6 @@
 
 package net.ihe.gazelle.maestro.quarkus.ws.async.tmintegration;
 
-import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

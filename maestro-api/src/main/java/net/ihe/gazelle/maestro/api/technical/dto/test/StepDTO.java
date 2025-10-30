@@ -16,7 +16,10 @@
 
 package net.ihe.gazelle.maestro.api.technical.dto.test;
 
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.technical.dto.property.PropertyDTO;
@@ -26,14 +29,26 @@ import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
-@JsonPropertyOrder({"name", "type", "properties"})
-public abstract class StepDTO<T extends Step> implements SubTypingDTO<T> {
+@JsonPropertyOrder({"id", "name", "type", "properties"})
+public class StepDTO implements DTO<Step> {
 
-   protected T step;
+   private Step step;
 
-   protected StepDTO(T step) {
-      initWithBusinessObject(step);
+   public StepDTO() {
+      this(new Step());
+   }
+
+   public StepDTO(Step step) {
+      this.step = step;
+   }
+
+   @JsonProperty("id")
+   public String getId() {
+      return step.getId();
+   }
+
+   public void setId(String id) {
+      step.setId(id);
    }
 
    @JsonProperty("name")
@@ -43,6 +58,15 @@ public abstract class StepDTO<T extends Step> implements SubTypingDTO<T> {
 
    public void setName(String name) {
       step.setName(name);
+   }
+
+   @JsonProperty("type")
+   public String getType() {
+      return step.getType();
+   }
+
+   public void setType(String type) {
+      step.setType(type);
    }
 
    @JsonProperty("properties")
@@ -64,14 +88,7 @@ public abstract class StepDTO<T extends Step> implements SubTypingDTO<T> {
 
    @Override
    @JsonIgnore
-   public SubTypingDTO<T> initWithBusinessObject(T step) {
-      this.step = step;
-      return this;
-   }
-
-   @Override
-   @JsonIgnore
-   public T getBusinessObject() {
+   public Step getBusinessObject() {
       return step;
    }
 }

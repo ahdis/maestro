@@ -1,6 +1,7 @@
 package net.ihe.gazelle.maestro.api.technical.dto.test;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.test.TestReference;
 import net.ihe.gazelle.maestro.api.technical.dto.property.PropertyDTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
@@ -42,7 +43,7 @@ public class TestReferenceDTO implements DTO<TestReference> {
             propertyDTOs != null ?
                   propertyDTOs.stream()
                         .map(DTO::getBusinessObject)
-                        .map(net.ihe.gazelle.maestro.api.business.property.Property.class::cast)
+                        .map(Property.class::cast)
                         .toList() :
                   null
       );

@@ -37,7 +37,7 @@ public class StepRunnerEventController implements StepRunEventProducer {
    }
 
    public void onStartStepRun(@ObservesAsync StartStepRun startStepRun) {
-      stepRunner.execute(startStepRun);
+      stepRunner.run(startStepRun);
    }
 
    @Override

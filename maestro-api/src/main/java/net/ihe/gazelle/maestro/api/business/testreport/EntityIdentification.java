@@ -16,69 +16,73 @@
 
 package net.ihe.gazelle.maestro.api.business.testreport;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * Business rules: <br>
- * name is mandatory
+ * Business rules: <br> name is mandatory
  */
-public class EntityIdentification {
+public class EntityIdentification implements Serializable {
 
-    private String version;
-    private String name;
+   @Serial
+   private static final long serialVersionUID = 8403054616731250869L;
 
-    public EntityIdentification() {
-    }
+   private String version;
+   private String name;
 
-    public EntityIdentification(String name) {
-        this.name = name;
-    }
+   public EntityIdentification() {
+   }
 
-    public EntityIdentification(String version, String name) {
-        this(name);
-        this.version = version;
-    }
+   public EntityIdentification(String name) {
+      this.name = name;
+   }
 
-    public String getVersion() {
-        return version;
-    }
+   public EntityIdentification(String version, String name) {
+      this(name);
+      this.version = version;
+   }
 
-    public EntityIdentification setVersion(String version) {
-        this.version = version;
-        return this;
-    }
+   public String getVersion() {
+      return version;
+   }
 
-    public String getName() {
-        return name;
-    }
+   public EntityIdentification setVersion(String version) {
+      this.version = version;
+      return this;
+   }
 
-    public EntityIdentification setName(String name) {
-        this.name = name;
-        return this;
-    }
+   public String getName() {
+      return name;
+   }
 
-    public boolean isVersionValid() {
-        return version == null || !version.isBlank();
-    }
+   public EntityIdentification setName(String name) {
+      this.name = name;
+      return this;
+   }
 
-    public boolean isNameValid() {
-        return name != null && !name.isBlank();
-    }
+   public boolean isVersionValid() {
+      return version == null || !version.isBlank();
+   }
 
-    public boolean isValid() {
-        return isVersionValid() && isNameValid();
-    }
+   public boolean isNameValid() {
+      return name != null && !name.isBlank();
+   }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof EntityIdentification that)) return false;
-        return Objects.equals(version, that.version)
-                && Objects.equals(name, that.name);
-    }
+   @Override
+   public boolean equals(Object o) {
+      if (this == o) {
+         return true;
+      }
+      if (!(o instanceof EntityIdentification that)) {
+         return false;
+      }
+      return Objects.equals(version, that.version)
+             && Objects.equals(name, that.name);
+   }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(version, name);
-    }
+   @Override
+   public int hashCode() {
+      return Objects.hash(version, name);
+   }
 }

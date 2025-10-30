@@ -17,10 +17,10 @@
 package net.ihe.gazelle.maestro.quarkus.handler;
 
 import net.ihe.gazelle.lang.GzlCollectors;
+import net.ihe.gazelle.maestro.quarkus.ServiceRegistry;
 import net.ihe.gazelle.maestro.spi.business.runner.ConfigProvider;
 import net.ihe.gazelle.maestro.spi.business.runner.Handler;
 import net.ihe.gazelle.maestro.spi.business.runner.HandlerFactory;
-import net.ihe.gazelle.maestro.quarkus.ServiceRegistry;
 import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterface;
 import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterface;
 import net.ihe.gazelle.servicemetadata.api.business.Service;

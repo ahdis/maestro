@@ -16,9 +16,9 @@
 
 package net.ihe.gazelle.maestro.quarkus.ws.async.tmintegration;
 
+import net.ihe.gazelle.maestro.api.business.UnsupportedPropertyTypeException;
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.api.business.testrun.PropertyRef;
-import net.ihe.gazelle.maestro.api.business.UnsupportedPropertyTypeException;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

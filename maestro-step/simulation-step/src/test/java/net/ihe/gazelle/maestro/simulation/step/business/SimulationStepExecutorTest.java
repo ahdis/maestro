@@ -20,11 +20,18 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-class SimulationStepRunnerTest {
+class SimulationStepExecutorTest {
 
     private SimulationStep step() {
         return new SimulationStep(
@@ -62,16 +69,16 @@ class SimulationStepRunnerTest {
             return null;
         }).when(simHandler).simulate(any(), any(), any());
 
-        SimulationStepRunner runner = new SimulationStepRunner(serializer, simHandler, ui);
+        SimulationStepExecutor runner = new SimulationStepExecutor(serializer, simHandler, ui);
 
-        StepRunReportBuilder builder = runner.run(stepRun()).join();
+        StepRunReportBuilder builder = runner.execute(stepRun()).join();
         StepRunReport report = builder.build();
 
         assertNotNull(report.getResult());
         assertEquals("sim-step", report.getStepId());
         assertEquals(SimulationStep.TYPE, report.getType());
         assertFalse(report.getOutputs().isEmpty());
-        assertEquals(SimulationStepRunner.SIMULATION_REPORT, report.getOutputs().getFirst().getName());
+        assertEquals(SimulationStepExecutor.SIMULATION_REPORT, report.getOutputs().getFirst().getName());
         assertEquals(Output.FORMAT_JSON, report.getOutputs().getFirst().getFormat());
         verify(ui).displayMessage(anyString());
     }
@@ -91,9 +98,9 @@ class SimulationStepRunnerTest {
             return null;
         }).when(simHandler).simulate(any(), any(), any());
 
-        SimulationStepRunner runner = new SimulationStepRunner(serializer, simHandler, ui);
+        SimulationStepExecutor runner = new SimulationStepExecutor(serializer, simHandler, ui);
 
-        StepRunReport report = runner.run(stepRun()).join().build();
+        StepRunReport report = runner.execute(stepRun()).join().build();
         assertNotNull(report.getResult());
     }
 
@@ -106,8 +113,8 @@ class SimulationStepRunnerTest {
 
         doThrow(new ServiceUnavailableException("down")).when(simHandler).simulate(any(), any(), any());
 
-        SimulationStepRunner runner = new SimulationStepRunner(serializer, simHandler, ui);
-        StepRunReport report = runner.run(stepRun()).join().build();
+        SimulationStepExecutor runner = new SimulationStepExecutor(serializer, simHandler, ui);
+        StepRunReport report = runner.execute(stepRun()).join().build();
         assertEquals(StepResult.UNDEFINED, report.getResult());
         assertFalse(report.getUnexpectedErrors().isEmpty());
         assertEquals("Service Unavailable", report.getUnexpectedErrors().getFirst().getName());
@@ -115,7 +122,7 @@ class SimulationStepRunnerTest {
 
     @Test
     void getSupportedStep_returnsCanonicalName() {
-        SimulationStepRunner runner = new SimulationStepRunner(mock(ReportSerialization.class), mock(SimulationHandler.class), mock(UserInteractionHandler.class));
+        SimulationStepExecutor runner = new SimulationStepExecutor(mock(ReportSerialization.class), mock(SimulationHandler.class), mock(UserInteractionHandler.class));
         assertEquals(SimulationStep.class.getCanonicalName(), runner.getSupportedStep());
     }
 
@@ -124,8 +131,8 @@ class SimulationStepRunnerTest {
         SimulationHandler simHandler = mock(SimulationHandler.class);
         doThrow(new net.ihe.gazelle.simulation.business.setup.MissingRequiredParameterException("missing"))
                 .when(simHandler).simulate(any(), any(), any());
-        SimulationStepRunner runner = new SimulationStepRunner(mock(ReportSerialization.class), simHandler, mock(UserInteractionHandler.class));
-        StepRunReport report = runner.run(stepRun()).join().build();
+        SimulationStepExecutor runner = new SimulationStepExecutor(mock(ReportSerialization.class), simHandler, mock(UserInteractionHandler.class));
+        StepRunReport report = runner.execute(stepRun()).join().build();
         assertEquals(StepResult.UNDEFINED, report.getResult());
         assertEquals("Missing Required Parameter", report.getUnexpectedErrors().getFirst().getName());
     }
@@ -135,8 +142,8 @@ class SimulationStepRunnerTest {
         SimulationHandler simHandler = mock(SimulationHandler.class);
         doThrow(new net.ihe.gazelle.simulation.business.setup.InvalidParameterValueException("invalid"))
                 .when(simHandler).simulate(any(), any(), any());
-        SimulationStepRunner runner = new SimulationStepRunner(mock(ReportSerialization.class), simHandler, mock(UserInteractionHandler.class));
-        StepRunReport report = runner.run(stepRun()).join().build();
+        SimulationStepExecutor runner = new SimulationStepExecutor(mock(ReportSerialization.class), simHandler, mock(UserInteractionHandler.class));
+        StepRunReport report = runner.execute(stepRun()).join().build();
         assertEquals("Invalid Parameter Value", report.getUnexpectedErrors().getFirst().getName());
     }
 
@@ -145,8 +152,8 @@ class SimulationStepRunnerTest {
         SimulationHandler simHandler = mock(SimulationHandler.class);
         doThrow(new net.ihe.gazelle.simulation.business.setup.UnknownSequenceException("unknown seq"))
                 .when(simHandler).simulate(any(), any(), any());
-        SimulationStepRunner runner = new SimulationStepRunner(mock(ReportSerialization.class), simHandler, mock(UserInteractionHandler.class));
-        StepRunReport report = runner.run(stepRun()).join().build();
+        SimulationStepExecutor runner = new SimulationStepExecutor(mock(ReportSerialization.class), simHandler, mock(UserInteractionHandler.class));
+        StepRunReport report = runner.execute(stepRun()).join().build();
         assertEquals("Unknown Simulation Sequence", report.getUnexpectedErrors().getFirst().getName());
     }
 
@@ -155,8 +162,8 @@ class SimulationStepRunnerTest {
         SimulationHandler simHandler = mock(SimulationHandler.class);
         doThrow(new net.ihe.gazelle.simulation.business.setup.UnknownSimulationException("unknown sim"))
                 .when(simHandler).simulate(any(), any(), any());
-        SimulationStepRunner runner = new SimulationStepRunner(mock(ReportSerialization.class), simHandler, mock(UserInteractionHandler.class));
-        StepRunReport report = runner.run(stepRun()).join().build();
+        SimulationStepExecutor runner = new SimulationStepExecutor(mock(ReportSerialization.class), simHandler, mock(UserInteractionHandler.class));
+        StepRunReport report = runner.execute(stepRun()).join().build();
         assertEquals("Unknown Simulation session", report.getUnexpectedErrors().getFirst().getName());
     }
 
@@ -165,8 +172,8 @@ class SimulationStepRunnerTest {
         SimulationHandler simHandler = mock(SimulationHandler.class);
         doThrow(new net.ihe.gazelle.simulation.business.setup.AlreadyRunningException("running"))
                 .when(simHandler).simulate(any(), any(), any());
-        SimulationStepRunner runner = new SimulationStepRunner(mock(ReportSerialization.class), simHandler, mock(UserInteractionHandler.class));
-        StepRunReport report = runner.run(stepRun()).join().build();
+        SimulationStepExecutor runner = new SimulationStepExecutor(mock(ReportSerialization.class), simHandler, mock(UserInteractionHandler.class));
+        StepRunReport report = runner.execute(stepRun()).join().build();
         assertEquals("Simulation already running", report.getUnexpectedErrors().getFirst().getName());
     }
 
@@ -175,8 +182,8 @@ class SimulationStepRunnerTest {
         SimulationHandler simHandler = mock(SimulationHandler.class);
         doThrow(new RuntimeException("oops"))
                 .when(simHandler).simulate(any(), any(), any());
-        SimulationStepRunner runner = new SimulationStepRunner(mock(ReportSerialization.class), simHandler, mock(UserInteractionHandler.class));
-        StepRunReport report = runner.run(stepRun()).join().build();
+        SimulationStepExecutor runner = new SimulationStepExecutor(mock(ReportSerialization.class), simHandler, mock(UserInteractionHandler.class));
+        StepRunReport report = runner.execute(stepRun()).join().build();
         assertEquals("Error from simulator", report.getUnexpectedErrors().getFirst().getName());
     }
 
@@ -187,8 +194,8 @@ class SimulationStepRunnerTest {
         // Set TIMEOUT_SECONDS as String property instead of Integer
         s.setProperties(List.of(new Property<>(SimulationStep.TIMEOUT_SECONDS, "bad")));
         StepRun sr = new StepRun("ts", "tr", s);
-        SimulationStepRunner runner = new SimulationStepRunner(mock(ReportSerialization.class), mock(SimulationHandler.class), mock(UserInteractionHandler.class));
-        StepRunReport report = runner.run(sr).join().build();
+        SimulationStepExecutor runner = new SimulationStepExecutor(mock(ReportSerialization.class), mock(SimulationHandler.class), mock(UserInteractionHandler.class));
+        StepRunReport report = runner.execute(sr).join().build();
         assertEquals("Error on property type", report.getUnexpectedErrors().getFirst().getName());
     }
 
@@ -206,8 +213,8 @@ class SimulationStepRunnerTest {
         SimulationHandler simHandler = mock(SimulationHandler.class);
         // Do nothing: don't complete the report consumer -> future.get times out immediately
         doAnswer(inv -> null).when(simHandler).simulate(any(), any(), any());
-        SimulationStepRunner runner = new SimulationStepRunner(mock(ReportSerialization.class), simHandler, mock(UserInteractionHandler.class));
-        StepRunReport report = runner.run(sr).join().build();
+        SimulationStepExecutor runner = new SimulationStepExecutor(mock(ReportSerialization.class), simHandler, mock(UserInteractionHandler.class));
+        StepRunReport report = runner.execute(sr).join().build();
         assertEquals("Error from simulator", report.getUnexpectedErrors().getFirst().getName());
     }
 }

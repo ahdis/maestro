@@ -16,6 +16,8 @@
 
 package net.ihe.gazelle.maestro.api.business.test;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -27,7 +29,10 @@ import java.util.Objects;
  * </p>
  * {@link Step}
  */
-public class Test {
+public class Test implements Serializable {
+
+   @Serial
+   private static final long serialVersionUID = -7394123287397209441L;
 
    private String id;
    private String name;

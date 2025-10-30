@@ -17,8 +17,13 @@
 package net.ihe.gazelle.maestro.api.business.testreport;
 
 import net.ihe.gazelle.errorhandling.business.UnexpectedError;
+import net.ihe.gazelle.maestro.api.business.property.Property;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Business rules <br>
@@ -31,8 +36,8 @@ public class TestRunReport {
     private Date dateTime;
     private Result result;
     private Test test;
-    private List<Input> inputs;
-    private List<Output> outputs;
+    private List<Property> inputs;
+    private List<Property> outputs;
     private List<StepRunReport> stepRunReports;
     private String urlToTestRun;
     private List<UnexpectedError> unexpectedErrors;
@@ -85,40 +90,40 @@ public class TestRunReport {
         return this;
     }
 
-    public List<Input> getInputs() {
+    public List<Property> getInputs() {
         return new ArrayList<>(inputs);
     }
 
-    public TestRunReport setInputs(List<Input> inputs) {
-        this.inputs = new ArrayList<>(inputs);
+    public TestRunReport setInputs(List<Property> inputs) {
+        this.inputs = inputs != null ? new ArrayList<>(inputs) : new ArrayList<>();
         return this;
     }
 
-    public TestRunReport addInput(Input input) {
+    public TestRunReport addInput(Property input) {
         inputs.add(input);
         return this;
     }
 
-    public TestRunReport addInputs(List<Input> inputs) {
+    public TestRunReport addInputs(List<Property> inputs) {
         this.inputs.addAll(inputs);
         return this;
     }
 
-    public List<Output> getOutputs() {
+    public List<Property> getOutputs() {
         return new ArrayList<>(outputs);
     }
 
-    public TestRunReport setOutputs(List<Output> outputs) {
-        this.outputs = new ArrayList<>(outputs);
+    public TestRunReport setOutputs(List<Property> outputs) {
+        this.outputs = outputs != null ? new ArrayList<>(outputs) : new ArrayList<>();
         return this;
     }
 
-    public TestRunReport addOutput(Output output) {
+    public TestRunReport addOutput(Property output) {
         outputs.add(output);
         return this;
     }
 
-    public TestRunReport addOutputs(List<Output> outputs) {
+    public TestRunReport addOutputs(List<Property> outputs) {
         this.outputs.addAll(outputs);
         return this;
     }
@@ -137,7 +142,7 @@ public class TestRunReport {
     }
 
     public TestRunReport setStepRunReports(List<StepRunReport> stepRunReports) {
-        this.stepRunReports = new ArrayList<>(stepRunReports);
+        this.stepRunReports =  stepRunReports != null ? new ArrayList<>(stepRunReports) : new ArrayList<>();
         return this;
     }
 
@@ -165,7 +170,7 @@ public class TestRunReport {
     }
 
     public TestRunReport setUnexpectedErrors(List<UnexpectedError> unexpectedErrors) {
-        this.unexpectedErrors = new ArrayList<>(unexpectedErrors);
+        this.unexpectedErrors = unexpectedErrors!= null ? new ArrayList<>(unexpectedErrors) : new ArrayList<>();
         return this;
     }
 
@@ -215,13 +220,6 @@ public class TestRunReport {
 
     public boolean isUrlToTestRunValid() {
         return urlToTestRun == null || !urlToTestRun.isBlank();
-    }
-
-    public boolean isValid() {
-        return isDateTimeValid()
-                && isResultValid()
-                && isTestValid()
-                && isUrlToTestRunValid();
     }
 
     @Override

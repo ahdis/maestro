@@ -16,99 +16,120 @@
 
 package net.ihe.gazelle.maestro.api.technical.dto.report;
 
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import net.ihe.gazelle.errorhandling.technical.UnexpectedErrorDTO;
+import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
+import net.ihe.gazelle.maestro.api.technical.dto.property.PropertyDTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
+import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
 
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
-        "stepId",
-        "type",
-        "result",
-        "outputs"
+      "stepId",
+      "type",
+      "result",
+      "outputs"
 })
 public class StepRunReportDTO implements DTO<StepRunReport> {
 
-    @JsonIgnore
-    private final StepRunReport stepRunReport;
+   @JsonIgnore
+   private final StepRunReport stepRunReport;
 
-    public StepRunReportDTO() {
-       this(new StepRunReport());
-    }
+   public StepRunReportDTO() {
+      this(new StepRunReport());
+   }
 
-    public StepRunReportDTO(StepRunReport stepRunReport) {
-        this.stepRunReport = stepRunReport;
-    }
+   public StepRunReportDTO(StepRunReport stepRunReport) {
+      this.stepRunReport = stepRunReport;
+   }
 
-    @Override
-    @JsonIgnore
-    public StepRunReport getBusinessObject() {
-        return stepRunReport;
-    }
+   @Override
+   @JsonIgnore
+   public StepRunReport getBusinessObject() {
+      return stepRunReport;
+   }
 
-    @JsonGetter(value = "stepId")
-    public String getStepId() {
-        return getBusinessObject().getStepId();
-    }
+   @JsonGetter(value = "stepId")
+   public String getStepId() {
+      return stepRunReport.getStepId();
+   }
 
-    @JsonSetter(value = "stepId")
-    public void setStepId(String stepId) {
-        getBusinessObject().setStepId(stepId);
-    }
+   @JsonSetter(value = "stepId")
+   public void setStepId(String stepId) {
+      stepRunReport.setStepId(stepId);
+   }
 
-    @JsonGetter(value = "type")
-    public String getType() {
-        return getBusinessObject().getType();
-    }
+   @JsonGetter(value = "stepName")
+   public String getStepName() {
+      return stepRunReport.getStepName();
+   }
 
-    @JsonSetter(value = "type")
-    public void setType(String type) {
-        getBusinessObject().setType(type);
-    }
+   @JsonSetter(value = "stepName")
+   public void setStepName(String stepName) {
+      stepRunReport.setStepName(stepName);
+   }
 
-    @JsonGetter(value = "result")
-    public String getResult() {
-        return getBusinessObject().getResult().name();
-    }
+   @JsonGetter(value = "type")
+   public String getType() {
+      return stepRunReport.getType();
+   }
 
-    @JsonSetter(value = "result")
-    public void setResult(String result) {
-        getBusinessObject().setResult(StepResult.valueOf(result));
-    }
+   @JsonSetter(value = "type")
+   public void setType(String type) {
+      stepRunReport.setType(type);
+   }
 
-    @JsonGetter(value = "outputs")
-    public List<OutputDTO> outputs() {
-        return getBusinessObject()
-                .getOutputs()
-                .stream()
-                .map(OutputDTO::new)
-                .toList();
-    }
+   @JsonGetter(value = "result")
+   public String getResult() {
+      return stepRunReport.getResult().name();
+   }
 
-    @JsonSetter(value = "outputs")
-    public void setOutputs(List<OutputDTO> outputs) {
-        getBusinessObject().setOutputs(
-                outputs.stream().map(OutputDTO::getBusinessObject).toList()
-        );
-    }
+   @JsonSetter(value = "result")
+   public void setResult(String result) {
+      stepRunReport.setResult(StepResult.valueOf(result));
+   }
 
-    @JsonGetter(value = "unexpectedErrors")
-    public List<UnexpectedErrorDTO> getUnexpectedErrors() {
-        return getBusinessObject()
-                .getUnexpectedErrors()
-                .stream()
-                .map(UnexpectedErrorDTO::new)
-                .toList();
-    }
+   @JsonGetter(value = "outputs")
+   public List<PropertyDTO> outputs() {
+      return stepRunReport.getOutputs().stream()
+            .map(SubTypingDTO::fromBusinessObject)
+            .map(PropertyDTO.class::cast)
+            .toList();
+   }
 
-    @JsonSetter(value = "unexpectedErrors")
-    public void setUnexpectedErrors(List<UnexpectedErrorDTO> unexpectedErrors) {
-        getBusinessObject().setUnexpectedErrors(
-                unexpectedErrors.stream().map(UnexpectedErrorDTO::getBusinessObject).toList()
-        );
-    }
+   @JsonSetter(value = "outputs")
+   public void setOutputs(List<PropertyDTO> outputs) {
+      stepRunReport.setOutputs(
+            outputs != null ?
+                  outputs.stream()
+                        .map(PropertyDTO::getBusinessObject)
+                        .map(Property.class::cast)
+                        .toList() :
+                  null
+      );
+   }
+
+   @JsonGetter(value = "unexpectedErrors")
+   public List<UnexpectedErrorDTO> getUnexpectedErrors() {
+      return stepRunReport
+            .getUnexpectedErrors()
+            .stream()
+            .map(UnexpectedErrorDTO::new)
+            .toList();
+   }
+
+   @JsonSetter(value = "unexpectedErrors")
+   public void setUnexpectedErrors(List<UnexpectedErrorDTO> unexpectedErrors) {
+      stepRunReport.setUnexpectedErrors(
+            unexpectedErrors.stream().map(UnexpectedErrorDTO::getBusinessObject).toList()
+      );
+   }
 }

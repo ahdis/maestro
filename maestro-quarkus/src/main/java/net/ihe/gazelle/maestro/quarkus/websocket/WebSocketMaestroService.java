@@ -19,8 +19,8 @@ package net.ihe.gazelle.maestro.quarkus.websocket;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import net.ihe.gazelle.maestro.api.business.message.StartTestSuiteRun;
-import net.ihe.gazelle.maestro.engine.business.MaestroEventProducer;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
+import net.ihe.gazelle.maestro.engine.business.MaestroEventProducer;
 
 @ApplicationScoped
 public class WebSocketMaestroService {

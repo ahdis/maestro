@@ -2,7 +2,11 @@ package net.ihe.gazelle.maestro.quarkus.record.entity;
 
 import net.ihe.gazelle.errorhandling.technical.UnexpectedErrorDTO;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
-import net.ihe.gazelle.maestro.api.technical.dto.report.*;
+import net.ihe.gazelle.maestro.api.technical.dto.report.SystemUnderTestDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.report.TestCountersDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.report.TestRunReportDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.report.TestServiceDTO;
 
 import java.util.ArrayList;
 import java.util.Date;

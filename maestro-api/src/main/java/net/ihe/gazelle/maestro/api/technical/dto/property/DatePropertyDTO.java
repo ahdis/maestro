@@ -2,7 +2,6 @@ package net.ihe.gazelle.maestro.api.technical.dto.property;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.DateProperty;
 
 import java.time.Instant;

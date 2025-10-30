@@ -30,8 +30,8 @@ import java.util.Objects;
 public class TestSuiteSession {
 
    private final TestSuiteRun testSuiteRun;
-   private final List<TestRunReportBuilder> testRunReportBuilders;
    private final TestRunCursor testRunCursor;
+   private final List<TestRunReportBuilder> testRunReportBuilders;
 
    public TestSuiteSession(TestSuiteRun testSuiteRun, TestRunCursor testRunCursor) {
       this.testSuiteRun = testSuiteRun;

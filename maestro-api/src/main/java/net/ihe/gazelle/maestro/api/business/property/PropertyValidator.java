@@ -6,18 +6,18 @@ import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator
 
 public class PropertyValidator extends AbstractValidator<Property> {
 
-   private ReferencedValueValidator referencedValueValidator;
-   private DirectValueValidator directValueValidator;
+   private final ReferenceValueValidator referenceValueValidator;
+   private final DirectValueValidator directValueValidator;
 
    public PropertyValidator() {
       super();
-      referencedValueValidator = new ReferencedValueValidator();
+      referenceValueValidator = new ReferenceValueValidator();
       directValueValidator = new DirectValueValidator();
    }
 
    public PropertyValidator(ValidatorBuilderFactory validatorBuilderFactory) {
       super(validatorBuilderFactory);
-      referencedValueValidator = new ReferencedValueValidator(validatorBuilderFactory);
+      referenceValueValidator = new ReferenceValueValidator(validatorBuilderFactory);
       directValueValidator = new DirectValueValidator(validatorBuilderFactory);
    }
 
@@ -32,7 +32,7 @@ public class PropertyValidator extends AbstractValidator<Property> {
       validatorBuilder
             .addRule(Property::isNameDefined, "Name must be set and not empty")
             .addMember("valueHolder", Property::getValueHolder,
-                  referencedValueValidator::getAssembledValidatorBuilder,
+                  referenceValueValidator::getAssembledValidatorBuilder,
                   directValueValidator::getAssembledValidatorBuilder);
    }
 }

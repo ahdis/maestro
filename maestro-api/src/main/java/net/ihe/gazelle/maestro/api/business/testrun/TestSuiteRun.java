@@ -23,6 +23,8 @@ import net.ihe.gazelle.maestro.api.business.test.TestSuite;
 import net.ihe.gazelle.maestro.api.business.testreport.SystemUnderTest;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -34,7 +36,10 @@ import java.util.NoSuchElementException;
  * systemsUnderTest the list of systems under test that will be spread to each element of testRuns <br> testSetRunId
  * today maps the TestInstance ID in Gazelle Test Management
  */
-public class TestSuiteRun {
+public class TestSuiteRun  implements Serializable {
+
+   @Serial
+   private static final long serialVersionUID = -4027777114820632058L;
 
    private TestSuite testSuite;
    private List<Test> tests;

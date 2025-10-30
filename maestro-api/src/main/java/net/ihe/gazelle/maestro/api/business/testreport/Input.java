@@ -1,5 +1,6 @@
 package net.ihe.gazelle.maestro.api.business.testreport;
 
+@Deprecated(forRemoval = true)
 public class Input {
 
     public static final String BYTE_ARRAY_TYPE = "byteArray";
@@ -86,8 +87,4 @@ public class Input {
         return type != null && !type.isBlank();
     }
 
-
-    public boolean isValid() {
-        return isNameValid() && isContentValid() && isReferenceValid();
-    }
 }

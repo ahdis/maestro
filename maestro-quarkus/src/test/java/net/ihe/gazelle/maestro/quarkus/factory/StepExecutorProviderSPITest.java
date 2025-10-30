@@ -17,23 +17,23 @@
 package net.ihe.gazelle.maestro.quarkus.factory;
 
 import net.ihe.gazelle.maestro.api.business.test.Step;
-import net.ihe.gazelle.maestro.quarkus.StepRunnerProviderSPI;
+import net.ihe.gazelle.maestro.engine.business.StepExecutorProvider;
+import net.ihe.gazelle.maestro.quarkus.StepExecutorProviderSPI;
 import net.ihe.gazelle.maestro.quarkus.configuration.ServiceRegistryDAOImpl;
 import net.ihe.gazelle.maestro.quarkus.configuration.ServiceRegistryImpl;
 import net.ihe.gazelle.maestro.quarkus.handler.HandlerProviderSPI;
-import net.ihe.gazelle.maestro.engine.business.StepRunnerProvider;
 import net.ihe.gazelle.maestro.quarkus.mock.DummyStep;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class StepRunnerProviderSPITest {
+class StepExecutorProviderSPITest {
 
     @Test
-    void createNotSupportedStep(){
+    void getExecutorNotSupportedStep(){
         Step step = new DummyStep();
-        StepRunnerProvider provider = new StepRunnerProviderSPI(new HandlerProviderSPI(new ServiceRegistryImpl(new ServiceRegistryDAOImpl()), null));
-        assertThrows(IllegalArgumentException.class, () -> provider.create(step));
+        StepExecutorProvider provider = new StepExecutorProviderSPI(new HandlerProviderSPI(new ServiceRegistryImpl(new ServiceRegistryDAOImpl()), null));
+        assertThrows(IllegalArgumentException.class, () -> provider.getExecutor(step));
     }
 
 }

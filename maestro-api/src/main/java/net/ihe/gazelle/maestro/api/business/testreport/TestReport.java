@@ -20,7 +20,11 @@ import net.ihe.gazelle.errorhandling.business.UnexpectedError;
 import net.ihe.gazelle.security.business.ProtectedResource;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 import static net.ihe.gazelle.maestro.api.business.testreport.Result.UNDEFINED;
 
@@ -364,16 +368,6 @@ public class TestReport implements ProtectedResource {
 
     public boolean hasAtLeastOneResult() {
         return !(subReports.isEmpty() && testRunReports.isEmpty() && unexpectedErrors.isEmpty());
-    }
-
-    public boolean isValid() {
-        return isUuidValid()
-                && isDateTimeValid()
-                && isResultValid()
-                && isTestSuiteNameValid()
-                && isNoteValid()
-                && isUrlToTestSuiteResultValid()
-                && hasAtLeastOneResult();
     }
 
     @Override

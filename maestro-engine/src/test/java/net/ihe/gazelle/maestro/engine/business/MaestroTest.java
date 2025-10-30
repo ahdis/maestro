@@ -16,22 +16,22 @@
 
 package net.ihe.gazelle.maestro.engine.business;
 
+import net.ihe.gazelle.maestro.api.business.InvalidTestSuiteException;
 import net.ihe.gazelle.maestro.api.business.Maestro;
+import net.ihe.gazelle.maestro.api.business.message.Context;
+import net.ihe.gazelle.maestro.api.business.test.Step;
+import net.ihe.gazelle.maestro.api.business.test.Test;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReportBuilder;
-import net.ihe.gazelle.maestro.api.business.InvalidTestSuiteException;
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
-import net.ihe.gazelle.maestro.api.business.test.Step;
-import net.ihe.gazelle.maestro.api.business.test.Test;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
-import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
 import net.ihe.gazelle.maestro.engine.business.TestReportRecordService.ItemReference;
-import net.ihe.gazelle.maestro.engine.business.context.Context;
 import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
 import net.ihe.gazelle.maestro.engine.business.context.StepCursor;
 import net.ihe.gazelle.maestro.engine.business.context.TestRunCursor;
+import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,8 +47,13 @@ import java.util.concurrent.Executors;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -61,7 +66,7 @@ class MaestroTest {
     private TestReportRecordService testReportRecordService;
 
     @Mock
-    StepRunnerProvider stepRunnerProvider;
+    StepExecutorProvider stepExecutorProvider;
 
     private Maestro maestro;
     private TestSuiteRunner testSuiteRunner;
@@ -82,7 +87,7 @@ class MaestroTest {
         maestro = new MaestroImpl(broker);
         testSuiteRunner = new TestSuiteRunner(sessionStore, broker, testReportRecordService, new MetadataServiceMock());
         testRunner = new TestRunner(sessionStore, broker);
-        stepRunner = new StepRunner(stepRunnerProvider, broker);
+        stepRunner = new StepRunner(stepExecutorProvider, broker);
 
     }
 

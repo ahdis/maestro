@@ -22,6 +22,7 @@ import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractBuilder;
 import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
 import net.ihe.gazelle.maestro.api.business.testreport.validator.OutputValidator;
 
+@Deprecated(forRemoval = true)
 public class OutputBuilder extends AbstractBuilder<Output> {
 
     private String name;

@@ -1,9 +1,14 @@
 package net.ihe.gazelle.maestro.api.business.test;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TestSuite {
+public class TestSuite implements Serializable {
+
+   @Serial
+   private static final long serialVersionUID = 6316961081179645096L;
 
    private String id;
    private String name;

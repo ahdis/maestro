@@ -16,8 +16,8 @@
 
 package net.ihe.gazelle.maestro.simulation.step.business;
 
-import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.api.business.UnsupportedPropertyTypeException;
+import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.simulation.business.setup.ParameterBuilder;
 import net.ihe.gazelle.simulation.business.setup.ParameterType;
 import net.ihe.gazelle.simulation.business.setup.SimulationRequest;

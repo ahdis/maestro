@@ -1,8 +1,13 @@
 package net.ihe.gazelle.maestro.api.business.property;
 
+import java.io.Serial;
+
 class DirectValue implements ValueHolder {
 
-    private final Object value;
+   @Serial
+   private static final long serialVersionUID = 5435920465930342207L;
+
+   private final Object value;
 
     public DirectValue(Object value) {
         this.value = value;
@@ -15,6 +20,10 @@ class DirectValue implements ValueHolder {
 
     public boolean isValueDefined() {
         return value != null;
+    }
+
+    public boolean isValueOptional() {
+       return true;
     }
 
 }

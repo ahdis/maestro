@@ -16,8 +16,8 @@
 
 package net.ihe.gazelle.maestro.simulation.step.business;
 
-import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.api.business.UnsupportedPropertyTypeException;
+import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.simulation.business.setup.Parameter;
 import net.ihe.gazelle.simulation.business.setup.SimulationRequest;
 import net.ihe.gazelle.simulation.business.setup.SimulationRequestValidator;
@@ -26,7 +26,10 @@ import org.junit.jupiter.api.Test;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class SimulationRequestMapperTest {
 

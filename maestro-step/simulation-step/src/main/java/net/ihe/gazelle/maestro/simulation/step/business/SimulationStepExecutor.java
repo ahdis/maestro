@@ -18,15 +18,25 @@ package net.ihe.gazelle.maestro.simulation.step.business;
 
 import net.ihe.gazelle.errorhandling.business.UnexpectedErrorBuilder;
 import net.ihe.gazelle.lang.ExecutionRuntimeException;
-import net.ihe.gazelle.maestro.api.business.testreport.*;
+import net.ihe.gazelle.maestro.api.business.testreport.Output;
+import net.ihe.gazelle.maestro.api.business.testreport.OutputBuilder;
+import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
+import net.ihe.gazelle.maestro.spi.business.runner.StepExecutor;
 import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
-import net.ihe.gazelle.maestro.spi.business.runner.StepRunner;
 import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandler;
 import net.ihe.gazelle.simulation.business.callback.Result;
 import net.ihe.gazelle.simulation.business.callback.SimulationReport;
 import net.ihe.gazelle.simulation.business.callback.SimulationReportValidator;
 import net.ihe.gazelle.simulation.business.sequence.ServiceUnavailableException;
-import net.ihe.gazelle.simulation.business.setup.*;
+import net.ihe.gazelle.simulation.business.setup.AdditionalInstructions;
+import net.ihe.gazelle.simulation.business.setup.AlreadyRunningException;
+import net.ihe.gazelle.simulation.business.setup.InvalidParameterValueException;
+import net.ihe.gazelle.simulation.business.setup.MissingRequiredParameterException;
+import net.ihe.gazelle.simulation.business.setup.Parameter;
+import net.ihe.gazelle.simulation.business.setup.SimulationRequest;
+import net.ihe.gazelle.simulation.business.setup.UnknownSequenceException;
+import net.ihe.gazelle.simulation.business.setup.UnknownSimulationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,23 +46,23 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class SimulationStepRunner implements StepRunner {
+public class SimulationStepExecutor implements StepExecutor {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SimulationStepRunner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SimulationStepExecutor.class);
     public static final String SIMULATION_REPORT = "SIMULATION_REPORT";
 
     private final ReportSerialization serializer;
     private final SimulationHandler simulationHandler;
     private final UserInteractionHandler userInteractionHandler;
 
-    public SimulationStepRunner(ReportSerialization serializer, SimulationHandler simulationHandler, UserInteractionHandler userInteractionHandler) {
+    public SimulationStepExecutor(ReportSerialization serializer, SimulationHandler simulationHandler, UserInteractionHandler userInteractionHandler) {
         this.serializer = serializer;
         this.simulationHandler = simulationHandler;
         this.userInteractionHandler = userInteractionHandler;
     }
 
     @Override
-    public CompletableFuture<StepRunReportBuilder> run(StepRun stepRun) {
+    public CompletableFuture<StepRunReportBuilder> execute(StepRun stepRun) {
         try {
             SimulationRequest simulationRequest = SimulationRequestMapper
                     .createSimulationRequest((SimulationStep) stepRun.step());

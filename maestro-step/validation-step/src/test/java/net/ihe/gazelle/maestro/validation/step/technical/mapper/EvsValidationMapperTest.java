@@ -2,7 +2,13 @@ package net.ihe.gazelle.maestro.validation.step.technical.mapper;
 
 import net.ihe.gazelle.evsapi.client.business.request.HandledObject;
 import net.ihe.gazelle.evsapi.client.business.request.ValidationRequest;
-import net.ihe.gazelle.evsapi.client.business.response.report.*;
+import net.ihe.gazelle.evsapi.client.business.response.report.ConstraintPriority;
+import net.ihe.gazelle.evsapi.client.business.response.report.ConstraintValidation;
+import net.ihe.gazelle.evsapi.client.business.response.report.SeverityLevel;
+import net.ihe.gazelle.evsapi.client.business.response.report.ValidationCounters;
+import net.ihe.gazelle.evsapi.client.business.response.report.ValidationOverview;
+import net.ihe.gazelle.evsapi.client.business.response.report.ValidationSubReport;
+import net.ihe.gazelle.evsapi.client.business.response.report.ValidationTestResult;
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
@@ -10,7 +16,11 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EvsValidationMapperTest {
 

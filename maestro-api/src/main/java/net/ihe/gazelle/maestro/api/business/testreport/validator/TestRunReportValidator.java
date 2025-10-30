@@ -24,46 +24,53 @@ import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
 
 public class TestRunReportValidator extends AbstractValidator<TestRunReport> {
 
-    private final TestValidator testValidator;
-    private final OutputValidator outputValidator;
-    private final InputValidator inputValidator;
-    private final StepRunReportValidator stepRunReportValidator;
-    private final UnexpectedErrorValidator unexpectedErrorValidator;
+   private final TestValidator testValidator;
+   private final PropertyInReportValidator propertyValidator;
+   private final ByteArrayItemPropertyValidator itemPropertyValidator;
+   private final StepRunReportValidator stepRunReportValidator;
+   private final UnexpectedErrorValidator unexpectedErrorValidator;
 
-    public TestRunReportValidator() {
-        super();
-        testValidator = new TestValidator();
-        outputValidator = new OutputValidator();
-        stepRunReportValidator = new StepRunReportValidator();
-        unexpectedErrorValidator = new UnexpectedErrorValidator();
-        inputValidator = new InputValidator();
-    }
+   public TestRunReportValidator() {
+      super();
+      testValidator = new TestValidator();
+      propertyValidator = new PropertyInReportValidator();
+      itemPropertyValidator = new ByteArrayItemPropertyValidator();
+      stepRunReportValidator = new StepRunReportValidator();
+      unexpectedErrorValidator = new UnexpectedErrorValidator();
+   }
 
-    public TestRunReportValidator(ValidatorBuilderFactory validatorBuilderFactory) {
-        super(validatorBuilderFactory);
-        testValidator = new TestValidator();
-        outputValidator = new OutputValidator();
-        stepRunReportValidator = new StepRunReportValidator();
-        unexpectedErrorValidator = new UnexpectedErrorValidator();
-        inputValidator = new InputValidator();
-    }
+   public TestRunReportValidator(ValidatorBuilderFactory validatorBuilderFactory) {
+      super(validatorBuilderFactory);
+      testValidator = new TestValidator(validatorBuilderFactory);
+      propertyValidator = new PropertyInReportValidator(validatorBuilderFactory);
+      itemPropertyValidator = new ByteArrayItemPropertyValidator(validatorBuilderFactory);
+      stepRunReportValidator = new StepRunReportValidator(validatorBuilderFactory);
+      unexpectedErrorValidator = new UnexpectedErrorValidator(validatorBuilderFactory);
+   }
 
-    @Override
-    protected ValidatorBuilder<? extends TestRunReport> instantiateValidatorBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
-        return validatorBuilderFactory.getBuilder(TestRunReport.class);
-    }
+   @Override
+   protected ValidatorBuilder<? extends TestRunReport> instantiateValidatorBuilder(
+         ValidatorBuilderFactory validatorBuilderFactory) {
+      return validatorBuilderFactory.getBuilder(TestRunReport.class);
+   }
 
-    @Override
-    protected void addRulesAndMembers(ValidatorBuilder<? extends TestRunReport> validatorBuilder) {
-        validatorBuilder
-                .addRule("dateTimeValid", TestRunReport::isDateTimeValid, "DateTime must be set and not in the future")
-                .addRule("resultValid", TestRunReport::isResultValid, "Result must be set adn reflect global steps result")
-                .addRule("testValid", TestRunReport::isTestValid, "Test must be set")
-                .addRule("urlToTestRun", TestRunReport::isUrlToTestRunValid, "URL must be set and not empty if present")
-                .addMember("test", TestRunReport::getTest, testValidator::getAssembledValidatorBuilder)
-                .addMember("inputs", TestRunReport::getInputs, inputValidator::getAssembledValidatorBuilder)
-                .addMember("outputs", TestRunReport::getOutputs, outputValidator::getAssembledValidatorBuilder)
-                .addMember("stepRunReports", TestRunReport::getStepRunReports, stepRunReportValidator::getAssembledValidatorBuilder)
-                .addMember("unexpectedErrors", TestRunReport::getUnexpectedErrors, unexpectedErrorValidator::getAssembledValidatorBuilder);
-    }
+   @Override
+   protected void addRulesAndMembers(ValidatorBuilder<? extends TestRunReport> validatorBuilder) {
+      validatorBuilder
+            .addRule("dateTimeValid", TestRunReport::isDateTimeValid, "DateTime must be set and not in the future")
+            .addRule("resultValid", TestRunReport::isResultValid, "Result must be set adn reflect global steps result")
+            .addRule("testValid", TestRunReport::isTestValid, "Test must be set")
+            .addRule("urlToTestRun", TestRunReport::isUrlToTestRunValid, "URL must be set and not empty if present")
+            .addMember("test", TestRunReport::getTest, testValidator::getAssembledValidatorBuilder)
+            .addMember("inputs", TestRunReport::getInputs,
+                  propertyValidator::getAssembledValidatorBuilder,
+                  itemPropertyValidator::getAssembledValidatorBuilder)
+            .addMember("outputs", TestRunReport::getOutputs,
+                  propertyValidator::getAssembledValidatorBuilder,
+                  itemPropertyValidator::getAssembledValidatorBuilder)
+            .addMember("stepRunReports", TestRunReport::getStepRunReports,
+                  stepRunReportValidator::getAssembledValidatorBuilder)
+            .addMember("unexpectedErrors", TestRunReport::getUnexpectedErrors,
+                  unexpectedErrorValidator::getAssembledValidatorBuilder);
+   }
 }

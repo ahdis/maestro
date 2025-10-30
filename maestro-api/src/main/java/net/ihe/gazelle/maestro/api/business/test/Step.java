@@ -18,16 +18,48 @@ package net.ihe.gazelle.maestro.api.business.test;
 
 import net.ihe.gazelle.maestro.api.business.property.Property;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
-public abstract class Step {
+public class Step implements Serializable {
 
+   @Serial
+   private static final long serialVersionUID = 4126739543481925460L;
+
+   private String id;
    private String name;
-   private List<Property> properties = new ArrayList<>();
+   private String type;
+   // The base Map interface is not serializable, so we declare properties as ConcurrentHashMap.
+   protected ConcurrentHashMap<String, Property> properties = new ConcurrentHashMap<>();
 
-   protected Step() {
+   public Step() {
       // Empty for serialization
+   }
+
+   public Step(Step other) {
+      this.id = other.id;
+      this.name = other.name;
+      this.type = other.type;
+      // not only we copied the map, but also each property to avoid shared references.
+      this.properties = other.properties.values().stream().collect(
+            ConcurrentHashMap::new,
+            (map, property) -> map.put(property.getName(), property.copy()),
+            ConcurrentHashMap::putAll
+      );
+   }
+
+   public String getId() {
+      return id;
+   }
+
+   public Step setId(String id) {
+      this.id = id;
+      return this;
    }
 
    public String getName() {
@@ -39,13 +71,45 @@ public abstract class Step {
       return this;
    }
 
-   public List<Property> getProperties() {
-      return properties;
+   public String getType() {
+      return type;
    }
 
-   public Step setProperties(List<Property> properties) {
-      this.properties = properties != null ? new ArrayList<>(properties) : new ArrayList<>();
+   public Step setType(String type) {
+      this.type = type;
       return this;
+   }
+
+   public List<Property> getProperties() {
+      return new ArrayList<>(properties.values());
+   }
+
+   public boolean hasProperty(String name) {
+      return properties.containsKey(name);
+   }
+
+   public <T> T getPropertyValue(String name) {
+      return Optional.ofNullable(properties.get(name))
+            .orElseThrow(() -> new NoSuchElementException("No property found with name: " + name))
+            .getValue();
+   }
+
+   public synchronized Step setProperties(List<Property> properties) {
+      this.properties = properties != null ? buildMap(properties) : new ConcurrentHashMap<>();
+      return this;
+   }
+
+   public synchronized Step addProperties(List<Property> properties) {
+      properties.forEach(property -> this.properties.put(property.getName(), property));
+      return this;
+   }
+
+   private ConcurrentHashMap<String, Property> buildMap(List<Property> properties) {
+      return properties.stream().collect(
+            ConcurrentHashMap::new,
+            (map, property) -> map.put(property.getName(), property),
+            ConcurrentHashMap::putAll
+      );
    }
 
 }

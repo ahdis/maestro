@@ -4,12 +4,12 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.ObservesAsync;
 import jakarta.websocket.SendResult;
 import jakarta.websocket.Session;
+import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
+import net.ihe.gazelle.maestro.api.business.message.TestSuiteRunFinished;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
-import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
 import net.ihe.gazelle.maestro.api.technical.dto.report.StepRunReportDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
-import net.ihe.gazelle.maestro.api.business.message.TestSuiteRunFinished;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
 import org.slf4j.Logger;
@@ -57,7 +57,7 @@ public class WebsocketEventListener {
 
     private void sendTestStepCompleted(StepRunFinished stepRunFinished) {
         String testSetId = stepRunFinished.getStepRun().testSetId();
-        StepRunReport stepRunReport = stepRunFinished.getStepRunReportBuilder().build();
+        StepRunReport stepRunReport = stepRunFinished.getStepRunReport().build();
         String content = serDes.serializeAsString(new StepRunReportDTO(stepRunReport));
         WSMessageDTO message = new WSMessageDTO(testSetId, "testStepCompleted", content);
         String serializedMessage = serDes.serializeAsString(message);

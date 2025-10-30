@@ -22,89 +22,106 @@ import net.ihe.gazelle.maestro.api.business.message.StartStepRun;
 import net.ihe.gazelle.maestro.api.business.message.StartTestRun;
 import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
 import net.ihe.gazelle.maestro.api.business.message.TestRunFinished;
-import net.ihe.gazelle.maestro.api.business.test.Step;
-import net.ihe.gazelle.maestro.api.business.testreport.*;
-import net.ihe.gazelle.maestro.api.business.testrun.*;
+import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.test.Test;
-import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
-import net.ihe.gazelle.maestro.engine.business.context.Context;
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
+import net.ihe.gazelle.maestro.api.business.testreport.TestBuilder;
+import net.ihe.gazelle.maestro.api.business.testreport.TestRunReportBuilder;
+import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
+import net.ihe.gazelle.maestro.api.business.testrun.TestRunValidator;
 import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
-import net.ihe.gazelle.maestro.engine.business.context.StepCursor;
 import net.ihe.gazelle.maestro.engine.business.context.TestRunSession;
+import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import static java.util.stream.Collectors.toList;
 
 public class TestRunner {
 
    private static final Logger LOG = LoggerFactory.getLogger(TestRunner.class);
 
-   private final SessionStore sessionStore;
+   private final SessionStore<TestRunSession> sessionStore;
    private final TestRunEventProducer testRunEventProducer;
+   private final TestRunValidator testRunValidator = new TestRunValidator();
 
-   public TestRunner(SessionStore sessionStore, TestRunEventProducer testRunEventProducer) {
+   public TestRunner(SessionStore<TestRunSession> sessionStore, TestRunEventProducer testRunEventProducer) {
       this.sessionStore = sessionStore;
       this.testRunEventProducer = testRunEventProducer;
    }
 
 
-   public void execute(StartTestRun startTestRun) {
+   public void run(StartTestRun startTestRun) {
+      String sessionId = startTestRun.getSessionId();
       TestRun testRun = startTestRun.getTestRun();
-      if (testRun == null) {
-         throw new InvalidTestRunException("TestRun is null");
-      }
-
       try {
-         StepCursor stepCursor = createSession(startTestRun.getSessionId(), testRun);
-         runStep(startTestRun.getSessionId(), stepCursor.next(), testRun);
+         testRunValidator.validate(testRun).orThrow(InvalidTestRunException::new);
+
+         TestRunSession testRunSession = new TestRunSession(testRun);
+         sessionStore.addSession(sessionId, testRunSession);
+         testRunEventProducer.command(
+               new StartStepRun(sessionId, testRun.getTest().getId(),
+                     new StepRun(testRunSession.nextStep(), testRunSession.getContext()))
+         );
       } catch (Exception e) {
          Test test = testRun.getTest();
          LOG.atError().setCause(e).log("Error running test {}", test.getName());
-         finishTest(startTestRun.getSessionId(), testRun, newTestRunReportBuilder(test)
-               .addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e))
+         sessionStore.removeSession(sessionId);
+         testRunEventProducer.notify(
+               new TestRunFinished(sessionId, testRun,
+                     newTestRunReportBuilder(test)
+                           .addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e))
+               )
          );
       }
    }
 
    public void listen(StepRunFinished stepRunFinished) {
-      T testRunSession = sessionStore.getSession(stepRunFinished.getTestRunId());
-      testRunSession.addStepRunReport(stepRunFinished.getStepRunReportBuilder());
+      String sessionId = stepRunFinished.getSessionId();
+      TestRunSession testRunSession = sessionStore.getSession(sessionId);
+      if (testRunSession != null) {
 
-      StepCursor stepCursor = testRunSession.getStepCursor();
-      if (stepCursor.hasNext()) {
-         runStep(testRunSession.getTestSuiteRunId(), stepCursor.next(), testRunSession.getTestRun());
-      } else {
-         finishTest(
-               testRunSession.getTestRun(),
-               newTestRunReportBuilder(testRunSession.getTestRun().getTest())
-                     .addStepRunReports(testRunSession.getStepReports())
-                     .setInputs(convertPropertiesToItems(testRunSession.getTestRun().getInputs()))
+         StepRunReport stepRunReport = stepRunFinished.getStepRunReport();
+         testRunSession.addStepRunReport(stepRunReport);
+         testRunSession.getContext().addAll(
+               contextualizeProperties(stepRunReport.getStepId(), stepRunReport.getOutputs())
          );
+
+         if (testRunSession.hasNextStep()) {
+            testRunEventProducer.command(
+                  new StartStepRun(sessionId, stepRunFinished.getTestId(),
+                        new StepRun(testRunSession.nextStep(), testRunSession.getContext()))
+            );
+         } else {
+            sessionStore.removeSession(sessionId);
+            testRunEventProducer.notify(
+                  new TestRunFinished(sessionId, testRunSession.getTestRun(),
+                        newTestRunReportBuilder(
+                              testRunSession.getTestRun().getTest())
+                              .addStepRunReports(testRunSession.getStepReports())
+                              .setInputs(testRunSession.getTestRun().getInputs())
+                  )
+            );
+         }
       }
    }
 
-   private void finishTest(String testSuiteRunId, TestRun testRun, final TestRunReportBuilder testRunReportBuilder) {
-      sessionStore.removeSession(testRun.getInternalId());
-      testRunEventProducer.notify(new TestRunFinished(testSuiteRunId, testRun, testRunReportBuilder));
-   }
-
-   private StepCursor createSession(String testSuiteRunId, TestRun testRun) {
-      TestRunSession testRunSession = new TestRunSession(testSuiteRunId, testRun);
-      sessionStore.addSession(testRun.getInternalId(), testRunSession);
-      return testRunSession.getStepCursor();
-   }
-
-   private void runStep(String testSuiteRunId, final Step step, TestRun testRun) {
-      StepRun stepRun = new StepRun(step);
-      stepRun.step().setProperties(proxifyProperties(stepRun.step().getProperties(), getContextFromStore(testRun.getInternalId())));
-      testRunEventProducer.command(new StartStepRun(testSuiteRunId, testRun.getInternalId(), testRun.getTest().getId(), stepRun));
+   /**
+    * Contextualize properties by prefixing their name with the stepId and a dot before introducing them into the test
+    * context.
+    *
+    * @param stepId  the step identifier
+    * @param outputs the list of output properties to contextualize
+    *
+    * @return the list of contextualized properties
+    */
+   private List<Property> contextualizeProperties(String stepId, List<Property> outputs) {
+      return outputs.stream()
+            .map(Property::copy)
+            .map(p -> p.setName(stepId + "." + p.getName()))
+            .toList();
    }
 
 
@@ -116,64 +133,4 @@ public class TestRunner {
                   .setName(test.getName()));
    }
 
-   /**
-    * @param testRunID id of currently executed testRun
-    *
-    * @return Context from TestRunSession with corresponding id
-    */
-   private Context getContextFromStore(String testRunID) {
-      return sessionStore.getSession(testRunID).getContext();
-   }
-
-   private List<Property<?>> proxifyProperties(List<Property<?>> properties, Context context) {
-      return properties.stream()
-            .map(p -> proxifyProperty(p, context))
-            .collect(toList());
-   }
-
-   private Property<?> proxifyProperty(Property<?> property, Context context) {
-      if (property instanceof PropertyRef<?> propertyRef) {
-         return new ResolvablePropertyRef<>(propertyRef, context);
-      } else {
-         return property;
-      }
-   }
-
-
-   private List<InputBuilder> convertPropertiesToItems(List<Property<?>> properties) {
-      List<InputBuilder> items = new ArrayList<>();
-      for (Property<?> property : properties) {
-         if (property instanceof PropertyRef<?> propertyRef) {
-            InputBuilder item = new InputBuilder()
-                  .setName(property.getName())
-                  .setContent(("${" + propertyRef.getReference() + "}").getBytes(StandardCharsets.UTF_8));
-            items.add(item);
-         } else if (property.getValue() instanceof byte[] content) {
-            InputBuilder item = new InputBuilder()
-                  .setName(property.getName())
-                  .setContent(content)
-                  .setType(Input.BYTE_ARRAY_TYPE);
-            items.add(item);
-         } else if (property.getValue() instanceof String value) {
-            InputBuilder item = new InputBuilder()
-                  .setName(property.getName())
-                  .setContent(value.getBytes(StandardCharsets.UTF_8))
-                  .setType(Input.TEXT_TYPE);
-            items.add(item);
-         } else if (property.getValue() instanceof Boolean value) {
-            InputBuilder item = new InputBuilder()
-                  .setName(property.getName())
-                  .setContent(new byte[]{(byte) (Boolean.TRUE.equals(value) ? 1 : 0)})
-                  .setType(Input.BOOLEAN_TYPE);
-            items.add(item);
-         } else if (property.getValue() instanceof Number value) {
-            InputBuilder item = new InputBuilder()
-                  .setName(property.getName())
-                  .setContent(value.toString().getBytes(StandardCharsets.UTF_8))
-                  .setType(Input.NUMBER_TYPE);
-            items.add(item);
-         }
-      }
-      return items;
-   }
 }

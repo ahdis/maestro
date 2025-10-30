@@ -17,58 +17,79 @@
 package net.ihe.gazelle.maestro.engine.business;
 
 import net.ihe.gazelle.errorhandling.business.UnexpectedErrorBuilder;
-import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
-import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
-import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
-import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
 import net.ihe.gazelle.maestro.api.business.message.StartStepRun;
+import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
+import net.ihe.gazelle.maestro.api.business.property.MissingPropertyException;
+import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
+import net.ihe.gazelle.maestro.api.business.testreport.validator.StepRunReportValidator;
+import net.ihe.gazelle.maestro.spi.business.runner.StepExecutor;
+import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
 import org.slf4j.Logger;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * A stepRunnerJob receive message from producer to execute Step, launch execution and send result to Maestro Listener
  */
 public class StepRunner {
 
-    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(StepRunner.class);
+   private static final Logger logger = org.slf4j.LoggerFactory.getLogger(StepRunner.class);
 
-    private final StepRunnerProvider stepRunnerProvider;
-    private final StepRunEventProducer stepRunEventProducer;
+   private final StepExecutorProvider stepExecutorProvider;
+   private final StepRunEventProducer stepRunEventProducer;
+   private final StepRunReportValidator stepRunReportValidator = new StepRunReportValidator();
 
-    public StepRunner(StepRunnerProvider stepRunnerProvider, StepRunEventProducer stepRunEventProducer) {
-        this.stepRunnerProvider = stepRunnerProvider;
-       this.stepRunEventProducer = stepRunEventProducer;
-    }
+   public StepRunner(StepExecutorProvider stepExecutorProvider, StepRunEventProducer stepRunEventProducer) {
+      this.stepExecutorProvider = stepExecutorProvider;
+      this.stepRunEventProducer = stepRunEventProducer;
+   }
 
-    /**
-     * Execute Step with a stepRunner corresponding to the step
-     * @param startStepRun Message containing step to run
-     */
-    public void execute(StartStepRun startStepRun) {
-        StepRun stepRun = startStepRun.getStepRun();
-        try {
-            net.ihe.gazelle.maestro.spi.business.runner.StepRunner runner = stepRunnerProvider.create(stepRun.step());
-            runner.run(stepRun)
-                    .thenAccept(
-                          stepRunReportBuilder -> stepRunEventProducer.notify(new StepRunFinished(startStepRun.getTestRunId(), stepRun, stepRunReportBuilder))
-                    )
-                    .exceptionally(e -> {
-                        returnUnexpectedError(e, startStepRun.getTestRunId(), stepRun);
-                        return null;
-                    });
-        } catch (Exception e) {
-            returnUnexpectedError(e, startStepRun.getTestRunId(), stepRun);
-        }
-    }
+   /**
+    * Execute Step with a stepRunner corresponding to the step
+    *
+    * @param startStepRun Message containing step to run
+    */
+   public void run(StartStepRun startStepRun) {
+      StepRun stepRun = startStepRun.getStepRun();
+      try {
+         StepExecutor executor = stepExecutorProvider.getExecutor(stepRun);
+         StepRunReport report = executor.execute(stepRun)
+               .get((Integer) stepRun.getPropertyValue("timeout"), TimeUnit.MILLISECONDS); // blocking call
 
-    private void returnUnexpectedError(Throwable e, String testRunId, StepRun stepRun) {
-        logger.error("Unexpected error during step execution", e);
-        UnexpectedErrorBuilder unexpectedErrorBuilder = new UnexpectedErrorBuilder().fromThrowable(e);
-        StepRunReportBuilder builder = new StepRunReportBuilder()
-                .setStepId(stepRun.step().getName())
-                .setType(stepRun.step().getType())
-                .setResult(StepResult.UNDEFINED)
-                .addUnexpectedError(unexpectedErrorBuilder);
-       stepRunEventProducer.notify(new StepRunFinished(testRunId, stepRun, builder));
-    }
+         stepRunReportValidator.validate(report).orThrow(IllegalStateException::new);
+         stepRunEventProducer.notify(
+               new StepRunFinished(startStepRun.getSessionId(), startStepRun.getTestId(), stepRun, report)
+         );
+      } catch (InterruptedException e) {
+         Thread.currentThread().interrupt();
+         // nothing to do, shutting down
+      } catch (UnknownStepException | MissingPropertyException | ClassCastException e) {
+         // User error, due to bad test definition
+         logger.atDebug().setCause(e).log("Unable to run step");
+         stepRunEventProducer.notify(
+               new StepRunFinished(startStepRun.getSessionId(), startStepRun.getTestId(), stepRun,
+                     buildErrorReport(stepRun, e))
+         );
+      } catch (Exception e) {
+         // Unexpected error
+         logger.atError().setCause(e).log("Unexepcted error while running step");
+         stepRunEventProducer.notify(
+               new StepRunFinished(startStepRun.getSessionId(), startStepRun.getTestId(), stepRun,
+                     buildErrorReport(stepRun, e))
+         );
+      }
+   }
+
+   private static StepRunReport buildErrorReport(StepRun stepRun, Throwable e) {
+      return new StepRunReportBuilder()
+            .setStepId(stepRun.getId())
+            .setStepName(stepRun.getName())
+            .setType(stepRun.getType())
+            .setResult(StepResult.UNDEFINED)
+            .addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e))
+            .build();
+   }
 
 }

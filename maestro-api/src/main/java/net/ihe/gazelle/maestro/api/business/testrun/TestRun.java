@@ -18,22 +18,27 @@ package net.ihe.gazelle.maestro.api.business.testrun;
 
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.test.Test;
+import net.ihe.gazelle.maestro.api.business.testreport.SystemUnderTest;
+import net.ihe.gazelle.security.business.acl.AccessControlList;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 /**
- * A structure contains in a TestSet, defining all the data to execute an automated step suit
- * <p>
- * - <b>testSetId</b> the testSet's id <br> - <b>test</b> structure containing step suit {@link Test} <br> -
- * <b>inputs</b> a list of properties that can be referenced in each step {@link Property}
- * </p>
+ * TestRun is the execution of a Test with specific inputs.
  */
-public class TestRun {
+public class TestRun implements Serializable {
+
+   @Serial
+   private static final long serialVersionUID = -6069446503327802519L;
 
    private Test test = null;
    private List<Property> inputs;
+   private List<SystemUnderTest> systemsUnderTest;
+   private AccessControlList accessControlList;
 
    public TestRun() {
       this.inputs = new ArrayList<>();
@@ -67,6 +72,24 @@ public class TestRun {
       return this;
    }
 
+   public List<SystemUnderTest> getSystemsUnderTest() {
+      return systemsUnderTest;
+   }
+
+   public TestRun setSystemsUnderTest(List<SystemUnderTest> systemsUnderTest) {
+      this.systemsUnderTest = systemsUnderTest != null ? new ArrayList<>(systemsUnderTest) : new ArrayList<>();
+      return this;
+   }
+
+   public AccessControlList getAccessControlList() {
+      return accessControlList;
+   }
+
+   public TestRun setAccessControlList(AccessControlList accessControlList) {
+      this.accessControlList = accessControlList;
+      return this;
+   }
+
    public boolean isTestDefined() {
       return test != null;
    }
@@ -76,12 +99,14 @@ public class TestRun {
       if (!(o instanceof TestRun testRun)) {
          return false;
       }
-      return Objects.equals(test, testRun.test) && Objects.equals(inputs, testRun.inputs);
+      return Objects.equals(test, testRun.test) && Objects.equals(inputs,
+            testRun.inputs) && Objects.equals(systemsUnderTest,
+            testRun.systemsUnderTest) && Objects.equals(accessControlList, testRun.accessControlList);
    }
 
    @Override
    public int hashCode() {
-      return Objects.hash(test, inputs);
+      return Objects.hash(test, inputs, systemsUnderTest, accessControlList);
    }
 }
 

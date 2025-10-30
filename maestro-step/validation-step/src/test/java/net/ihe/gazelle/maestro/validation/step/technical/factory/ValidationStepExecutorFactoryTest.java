@@ -16,9 +16,9 @@
 
 package net.ihe.gazelle.maestro.validation.step.technical.factory;
 
+import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.api.business.testrun.PropertyRef;
-import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +27,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class ValidationStepRunnerFactoryTest {
+class ValidationStepExecutorFactoryTest {
 
     ValidationStepRunnerFactory validationStepRunnerFactory;
 

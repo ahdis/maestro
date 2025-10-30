@@ -16,8 +16,8 @@
 
 package net.ihe.gazelle.maestro.simulation.step.technical.factory;
 
-import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.api.business.test.Step;
+import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationStep;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +25,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class SimulationStepRunnerFactoryTest {
+class SimulationStepExecutorFactoryTest {
 
     private final SimulationStepRunnerFactory factory = new SimulationStepRunnerFactory();
 

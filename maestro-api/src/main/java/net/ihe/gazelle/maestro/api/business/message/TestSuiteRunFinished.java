@@ -16,11 +16,11 @@
 
 package net.ihe.gazelle.maestro.api.business.message;
 
-import java.io.Serial;
-
 import net.ihe.gazelle.lang.Event;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
+
+import java.io.Serial;
 
 /**
  * A message to notify that a TestSet Execution Ended and to send a TestReport

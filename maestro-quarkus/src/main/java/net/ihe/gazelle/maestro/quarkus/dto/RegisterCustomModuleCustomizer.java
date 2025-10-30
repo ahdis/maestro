@@ -19,7 +19,6 @@ package net.ihe.gazelle.maestro.quarkus.dto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.jackson.ObjectMapperCustomizer;
 import jakarta.inject.Singleton;
-import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSubTypingDTOModule;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.ObjectMapperBuilder;
 
 @Singleton

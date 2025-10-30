@@ -24,6 +24,7 @@ import java.util.Objects;
  * name is mandatory <br>
  * content xor reference <br>
  */
+@Deprecated(forRemoval = true)
 public class Output {
 
     public static final String FORMAT_XML = "XML";
@@ -31,12 +32,10 @@ public class Output {
     public static final String FORMAT_PDF = "PDF";
     public static final String FORMAT_TEXT = "TEXT";
 
-
     private String name;
     private byte[] content;
     private String reference;
     private String format;
-
 
     public Output() {
     }
@@ -111,10 +110,6 @@ public class Output {
 
     public boolean isFormatValid() {
         return format != null && !format.isBlank();
-    }
-
-    public boolean isValid() {
-        return isNameValid() && isContentValid() && isReferenceValid();
     }
 
     @Override

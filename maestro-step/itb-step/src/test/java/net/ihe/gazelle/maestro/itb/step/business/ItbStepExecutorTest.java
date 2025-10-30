@@ -4,8 +4,8 @@
 package net.ihe.gazelle.maestro.itb.step.business;
 
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
-import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
 import net.ihe.gazelle.maestro.itb.step.business.dao.ItbTestExecutionDBInMemory;
+import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -14,10 +14,10 @@ import java.util.concurrent.CompletableFuture;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-class ItbStepRunnerTest {
+class ItbStepExecutorTest {
 
     @Test
-    void run_registersFutureInDB_withSessionId_fromHandler() {
+    void execute_registersFutureInDB_withSessionId_fromHandler() {
         String sessionId = "SESSION-123";
         ItbHandler handler = new ItbHandler() {
             @Override
@@ -25,7 +25,7 @@ class ItbStepRunnerTest {
             @Override
             public boolean isAvailable() { return true; }
         };
-        ItbStepRunner runner = new ItbStepRunner(handler);
+        ItbStepExecutor runner = new ItbStepExecutor(handler);
 
         ItbStep step = new ItbStep("itb",
                 new Property<>(ItbStep.TEST_CASE, "TC"),
@@ -34,14 +34,14 @@ class ItbStepRunnerTest {
                 List.of());
         StepRun stepRun = new StepRun("ts", "tr", step);
 
-        CompletableFuture<?> future = runner.run(stepRun);
+        CompletableFuture<?> future = runner.execute(stepRun);
 
         assertSame(future, ItbTestExecutionDBInMemory.getStepRunReportFuture(sessionId));
     }
 
     @Test
     void getSupportedStep_returnsType() {
-        ItbStepRunner runner = new ItbStepRunner(new ItbHandler() {
+        ItbStepExecutor runner = new ItbStepExecutor(new ItbHandler() {
             @Override
             public String handle(ItbStep step) { return "s"; }
             @Override

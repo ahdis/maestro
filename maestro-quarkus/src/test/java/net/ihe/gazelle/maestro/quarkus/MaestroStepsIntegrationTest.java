@@ -16,25 +16,25 @@
 
 package net.ihe.gazelle.maestro.quarkus;
 
+import net.ihe.gazelle.maestro.api.business.SynchronousMaestro;
+import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.testreport.Result;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.api.business.testrun.PropertyRef;
-import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.assertion.step.business.AssertionStep;
+import net.ihe.gazelle.maestro.engine.business.MaestroImpl;
+import net.ihe.gazelle.maestro.engine.business.StepRunner;
 import net.ihe.gazelle.maestro.engine.business.TestRunner;
 import net.ihe.gazelle.maestro.engine.business.context.SessionStoreImpl;
+import net.ihe.gazelle.maestro.quarkus.broker.MaestroEventController;
 import net.ihe.gazelle.maestro.quarkus.factory.TestRunMockEvent;
 import net.ihe.gazelle.maestro.quarkus.handler.HandlerProviderMock;
-import net.ihe.gazelle.maestro.quarkus.broker.MaestroEventController;
-import net.ihe.gazelle.maestro.engine.business.StepRunner;
-import net.ihe.gazelle.maestro.api.business.SynchronousMaestro;
 import net.ihe.gazelle.maestro.quarkus.mock.InMemoryTestReportRecordService;
-import net.ihe.gazelle.maestro.engine.business.MaestroImpl;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationStep;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
@@ -75,7 +75,7 @@ class MaestroStepsIntegrationTest {
       maestroImpl = new MaestroImpl(eventProducer);
       synchronousMaestro = new SynchronousMaestro(10, maestroImpl);
       StepRunner stepRunner = new StepRunner(
-            new StepRunnerProviderSPI(new HandlerProviderMock()),
+            new StepExecutorProviderSPI(new HandlerProviderMock()),
             eventProducer
       );
       MaestroEventController eventListener = new MaestroEventController(maestro, maestroImpl, stepRunner);

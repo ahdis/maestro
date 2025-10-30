@@ -17,7 +17,6 @@
 package net.ihe.gazelle.maestro.itb.step.technical.handler;
 
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
-import net.ihe.gazelle.maestro.spi.business.runner.Handler;
 import net.ihe.gazelle.maestro.itb.step.business.ItbHandler;
 import net.ihe.gazelle.maestro.itb.step.business.ItbStep;
 import net.ihe.gazelle.maestro.itb.step.business.request.Parameter;
@@ -25,9 +24,16 @@ import net.ihe.gazelle.maestro.itb.step.business.request.TestCase;
 import net.ihe.gazelle.maestro.itb.step.business.request.TestRequest;
 import net.ihe.gazelle.maestro.itb.step.technical.gateway.client.ItbHttpClient;
 import net.ihe.gazelle.maestro.itb.step.technical.gateway.service.runitbtest.RunItbTestService;
+import net.ihe.gazelle.maestro.spi.business.runner.Handler;
 import org.eclipse.microprofile.config.ConfigProvider;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
 public class ItbHandlerImpl implements ItbHandler {
 

@@ -16,10 +16,10 @@
 
 package net.ihe.gazelle.maestro.api.business.message;
 
-import java.io.Serial;
-
 import net.ihe.gazelle.lang.Command;
 import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
+
+import java.io.Serial;
 
 /**
  * Step message used by producer to notify a subscriber to launch step execution
@@ -28,17 +28,17 @@ import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
 public class StartStepRun implements Message {
    @Serial
    private static final long serialVersionUID = 1L;
+
    private String sessionId; // internal
-   private String testRunId; // internal
    private String testId;
    private StepRun stepRun;
 
    public StartStepRun() {
+      this(null, null,  null);
    }
 
-   public StartStepRun(String sessionId, String testRunId, String testId, StepRun stepRun) {
+   public StartStepRun(String sessionId, String testId, StepRun stepRun) {
       this.sessionId = sessionId;
-      this.testRunId = testRunId;
       this.testId = testId;
       this.stepRun = stepRun;
    }
@@ -49,15 +49,6 @@ public class StartStepRun implements Message {
 
    public StartStepRun setSessionId(String sessionId) {
       this.sessionId = sessionId;
-      return this;
-   }
-
-   public String getTestRunId() {
-      return testRunId;
-   }
-
-   public StartStepRun setTestRunId(String testRunId) {
-      this.testRunId = testRunId;
       return this;
    }
 
@@ -78,4 +69,5 @@ public class StartStepRun implements Message {
       this.stepRun = stepRun;
       return this;
    }
+
 }

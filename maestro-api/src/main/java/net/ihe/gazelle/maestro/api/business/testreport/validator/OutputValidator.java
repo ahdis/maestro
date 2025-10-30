@@ -21,6 +21,7 @@ import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory
 import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
 import net.ihe.gazelle.maestro.api.business.testreport.Output;
 
+@Deprecated(forRemoval = true)
 public class OutputValidator extends AbstractValidator<Output> {
 
     public OutputValidator() {

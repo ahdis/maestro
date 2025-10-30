@@ -31,7 +31,7 @@ public class HardWiredEventBroker implements MaestroEventProducer, TestSuiteEven
 
    @Override
    public void command(StartTestSuiteRun startTestSuiteRun) {
-      executorService.submit(() -> testSuiteRunner.execute(startTestSuiteRun));
+      executorService.submit(() -> testSuiteRunner.run(startTestSuiteRun));
    }
 
    @Override
@@ -41,7 +41,7 @@ public class HardWiredEventBroker implements MaestroEventProducer, TestSuiteEven
 
    @Override
    public void command(StartStepRun startStepRun) {
-      executorService.submit(() -> stepRunner.execute(startStepRun));
+      executorService.submit(() -> stepRunner.run(startStepRun));
    }
 
    @Override
@@ -51,7 +51,7 @@ public class HardWiredEventBroker implements MaestroEventProducer, TestSuiteEven
 
    @Override
    public void command(StartTestRun startTestRun) {
-      executorService.submit(() -> testRunner.execute(startTestRun));
+      executorService.submit(() -> testRunner.run(startTestRun));
    }
 
    @Override

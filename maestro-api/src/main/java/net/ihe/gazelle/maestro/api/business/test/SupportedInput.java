@@ -1,12 +1,18 @@
 package net.ihe.gazelle.maestro.api.business.test;
 
-public abstract class SupportedInput {
+import java.io.Serial;
+import java.io.Serializable;
+
+public abstract class SupportedInput implements Serializable {
+
+   @Serial
+   private static final long serialVersionUID = 5443082512534032315L;
 
    private String id;
    private String label;
    private boolean required;
 
-   public SupportedInput() {
+   protected SupportedInput() {
       // Default constructor
    }
 

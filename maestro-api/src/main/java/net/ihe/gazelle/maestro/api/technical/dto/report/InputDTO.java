@@ -16,7 +16,11 @@
 
 package net.ihe.gazelle.maestro.api.technical.dto.report;
 
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import net.ihe.gazelle.maestro.api.business.testreport.Input;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 
@@ -28,6 +32,7 @@ import java.util.Base64;
         "content",
         "reference"
 })
+@Deprecated(forRemoval = true)
 public class InputDTO implements DTO<Input> {
 
     @JsonIgnore

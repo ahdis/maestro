@@ -1,9 +1,11 @@
 package net.ihe.gazelle.maestro.api.technical.dto.property;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 
+@JsonPropertyOrder({"name", "type", "value", "fileName", "mimeType"})
 @JsonTypeName(ByteArrayPropertyDTO.TYPE)
 public class ByteArrayPropertyDTO extends PropertyDTO<ByteArrayProperty> {
 
@@ -33,6 +35,15 @@ public class ByteArrayPropertyDTO extends PropertyDTO<ByteArrayProperty> {
 
    public void setFileName(String originalFileName) {
       property.setFileName(originalFileName);
+   }
+
+   @JsonProperty("mimeType")
+   public String getMimeType() {
+      return property.getMimeType();
+   }
+
+   public void setMimeType(String mimeType) {
+      property.setMimeType(mimeType);
    }
 
    @Override

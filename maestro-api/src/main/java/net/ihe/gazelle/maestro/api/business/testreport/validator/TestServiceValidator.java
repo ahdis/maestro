@@ -32,7 +32,7 @@ public class TestServiceValidator extends AbstractValidator<TestService> {
 
     public TestServiceValidator(ValidatorBuilderFactory validatorBuilderFactory) {
         super(validatorBuilderFactory);
-        entityIdentificationValidator = new EntityIdentificationValidator();
+        entityIdentificationValidator = new EntityIdentificationValidator(validatorBuilderFactory);
     }
 
     @Override

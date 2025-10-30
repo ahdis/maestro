@@ -20,7 +20,20 @@ import net.ihe.gazelle.errorhandling.business.UnexpectedError;
 import net.ihe.gazelle.errorhandling.business.UnexpectedErrorBuilder;
 import net.ihe.gazelle.errorhandling.business.UnexpectedErrorValidator;
 import net.ihe.gazelle.errorhandling.technical.UnexpectedErrorDTO;
-import net.ihe.gazelle.maestro.api.business.testreport.*;
+import net.ihe.gazelle.maestro.api.business.testreport.EntityIdentification;
+import net.ihe.gazelle.maestro.api.business.testreport.EntityIdentificationBuilder;
+import net.ihe.gazelle.maestro.api.business.testreport.InputBuilder;
+import net.ihe.gazelle.maestro.api.business.testreport.Output;
+import net.ihe.gazelle.maestro.api.business.testreport.OutputBuilder;
+import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
+import net.ihe.gazelle.maestro.api.business.testreport.SystemUnderTest;
+import net.ihe.gazelle.maestro.api.business.testreport.SystemUnderTestBuilder;
+import net.ihe.gazelle.maestro.api.business.testreport.TestBuilder;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReportBuilder;
+import net.ihe.gazelle.maestro.api.business.testreport.TestRunReportBuilder;
+import net.ihe.gazelle.maestro.api.business.testreport.TestServiceBuilder;
 import net.ihe.gazelle.maestro.api.technical.dto.report.OutputDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.report.SystemUnderTestDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
@@ -33,7 +46,6 @@ import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TestReportDTOTest {
 

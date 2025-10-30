@@ -16,27 +16,6 @@
 
 package net.ihe.gazelle.maestro.quarkus.itb;
 
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
-import io.restassured.response.Response;
-import jakarta.ws.rs.core.MediaType;
-import net.ihe.gazelle.maestro.api.business.testreport.Result;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
-import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
-import net.ihe.gazelle.maestro.quarkus.MockDatahouseServer;
-import net.ihe.gazelle.maestro.quarkus.WireMockSingleton;
-import org.apache.http.HttpHeaders;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-
-import java.io.IOException;
-
-import static io.restassured.RestAssured.given;
-import static org.junit.jupiter.api.Assertions.*;
-
 /*@QuarkusTest
 @TestProfile(ItbStepProfile.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

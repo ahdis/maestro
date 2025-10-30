@@ -41,7 +41,7 @@ public class TestSuiteRunnerEventController implements TestSuiteEventProducer {
    }
 
    public void onStartTestSuiteRun(@ObservesAsync StartTestSuiteRun startTestSuiteRun) {
-      testSuiteRunner.execute(startTestSuiteRun);
+      testSuiteRunner.run(startTestSuiteRun);
    }
 
    public void onTestRunFinished(@ObservesAsync TestRunFinished testRunFinished) {

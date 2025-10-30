@@ -18,24 +18,24 @@ package net.ihe.gazelle.maestro.assertion.step.business;
 
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
+import net.ihe.gazelle.maestro.spi.business.runner.StepExecutor;
 import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
-import net.ihe.gazelle.maestro.spi.business.runner.StepRunner;
 
 import java.util.concurrent.CompletableFuture;
 
 /**
  * Assertion Step is not implemented. It exists just for test purpose
  */
-public class AssertionStepRunner implements StepRunner {
+public class AssertionStepExecutor implements StepExecutor {
 
     private final AssertionHandler handler;
 
-    public AssertionStepRunner(AssertionHandler assertionHandler) {
+    public AssertionStepExecutor(AssertionHandler assertionHandler) {
         handler = assertionHandler;
     }
 
     @Override
-    public CompletableFuture<StepRunReportBuilder> run(StepRun stepRun) {
+    public CompletableFuture<StepRunReportBuilder> execute(StepRun stepRun) {
         boolean result = handler.assertion((AssertionStep) stepRun.step());
         return CompletableFuture.completedFuture(new StepRunReportBuilder()
                 .setStepId(stepRun.step().getName())

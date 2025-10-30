@@ -21,18 +21,18 @@ import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Produces;
 import net.ihe.gazelle.maestro.api.business.Maestro;
+import net.ihe.gazelle.maestro.api.business.SynchronousMaestro;
 import net.ihe.gazelle.maestro.engine.business.MaestroEventProducer;
 import net.ihe.gazelle.maestro.engine.business.MaestroImpl;
+import net.ihe.gazelle.maestro.engine.business.StepExecutorProvider;
 import net.ihe.gazelle.maestro.engine.business.StepRunEventProducer;
+import net.ihe.gazelle.maestro.engine.business.StepRunner;
+import net.ihe.gazelle.maestro.engine.business.TestReportRecordService;
 import net.ihe.gazelle.maestro.engine.business.TestRunEventProducer;
 import net.ihe.gazelle.maestro.engine.business.TestRunner;
 import net.ihe.gazelle.maestro.engine.business.TestSuiteEventProducer;
 import net.ihe.gazelle.maestro.engine.business.TestSuiteRunner;
 import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
-import net.ihe.gazelle.maestro.engine.business.TestReportRecordService;
-import net.ihe.gazelle.maestro.engine.business.StepRunner;
-import net.ihe.gazelle.maestro.engine.business.StepRunnerProvider;
-import net.ihe.gazelle.maestro.api.business.SynchronousMaestro;
 import net.ihe.gazelle.maestro.engine.business.context.TestRunSession;
 import net.ihe.gazelle.maestro.engine.business.context.TestSuiteSession;
 import net.ihe.gazelle.servicemetadata.api.business.MetadataService;
@@ -51,7 +51,7 @@ public class MaestroFactory {
    private final TestSuiteEventProducer testSuiteEventProducer;
    private final TestRunEventProducer testRunEventProducer;
    private final StepRunEventProducer stepRunEventProducer;
-   private final StepRunnerProvider stepRunnerProvider;
+   private final StepExecutorProvider stepExecutorProvider;
    private final TestReportRecordService testReportRecordService;
    private final MetadataService metadataService;
 
@@ -63,7 +63,7 @@ public class MaestroFactory {
                          TestRunEventProducer testRunEventProducer,
                          StepRunEventProducer stepRunEventProducer,
                          TestReportRecordService testReportRecordService,
-                         StepRunnerProvider stepRunnerProvider,
+                         StepExecutorProvider stepExecutorProvider,
                          MetadataService metadataService) {
       this.suiteSessionStore = suiteSessionStore;
       this.testSessionStore = testSessionStore;
@@ -72,7 +72,7 @@ public class MaestroFactory {
       this.testRunEventProducer = testRunEventProducer;
       this.stepRunEventProducer = stepRunEventProducer;
       this.testReportRecordService = testReportRecordService;
-      this.stepRunnerProvider = stepRunnerProvider;
+      this.stepExecutorProvider = stepExecutorProvider;
       this.metadataService = metadataService;
    }
 
@@ -103,7 +103,7 @@ public class MaestroFactory {
    @Produces
    @Default
    public StepRunner getStepRunnerJob() {
-      return new StepRunner(stepRunnerProvider, stepRunEventProducer);
+      return new StepRunner(stepExecutorProvider, stepRunEventProducer);
    }
 
 }

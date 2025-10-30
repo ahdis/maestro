@@ -1,6 +1,7 @@
 package net.ihe.gazelle.maestro.api.business.property;
 
-import net.ihe.gazelle.maestro.api.business.testreport.Input;
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * Abstract class representing a property with a name and a value holder.
@@ -8,10 +9,13 @@ import net.ihe.gazelle.maestro.api.business.testreport.Input;
  * @param <T> the type of the property's value
  * @param <S> the type of the subclass extending Property
  */
-public abstract class Property {
+public abstract class Property implements Serializable {
+
+   @Serial
+   private static final long serialVersionUID = -5410177558892768955L;
 
    private String name;
-   ValueHolder valueHolder;
+   private ValueHolder valueHolder;
 
    Property() {
    }
@@ -31,8 +35,8 @@ public abstract class Property {
    }
 
    public Property setValue(Object value) {
-      if (value instanceof String strValue && strValue.matches(ReferencedValue.REFERENCE_REGEX)) {
-         this.valueHolder = new ReferencedValue(strValue);
+      if (value instanceof String strValue && strValue.matches(ReferenceValue.REFERENCE_REGEX)) {
+         this.valueHolder = new ReferenceValue(strValue);
       } else {
          this.valueHolder = new DirectValue(value);
       }
@@ -43,12 +47,14 @@ public abstract class Property {
       return (T) valueHolder.getValue();
    }
 
+   public abstract Property copy();
+
    ValueHolder getValueHolder() {
       return valueHolder;
    }
 
-   public boolean isReference() {
-      return valueHolder instanceof ReferencedValue;
+   boolean isReference() {
+      return valueHolder instanceof ReferenceValue;
    }
 
    public boolean isNameDefined() {

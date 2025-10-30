@@ -16,20 +16,26 @@
 
 package net.ihe.gazelle.maestro.spi.business.runner;
 
-import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
+import net.ihe.gazelle.maestro.api.business.property.MissingPropertyException;
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 
 import java.util.concurrent.CompletableFuture;
 
-public interface StepRunner {
+public interface StepExecutor {
 
-    /**
-     * @param stepRun contain step to run
-     * @return report builder with information to build report of step execution
-     */
-    CompletableFuture<StepRunReportBuilder> run(StepRun stepRun);
+   /**
+    * @param stepRun contain step to run
+    *
+    * @return report builder with information to build report of step execution
+    *
+    * @throws MissingPropertyException if a required property is missing to execute the step
+    * @throws ClassCastException if a property has not the expected type
+    */
+   CompletableFuture<StepRunReport> execute(StepRun stepRun);
 
-    /**
-     * @return Canonical name of step that stepRunner can manage
-     */
-    String getSupportedStep();
+   /**
+    * @return Canonical name of step that stepRunner can manage
+    */
+   String getSupportedStep();
+
 }

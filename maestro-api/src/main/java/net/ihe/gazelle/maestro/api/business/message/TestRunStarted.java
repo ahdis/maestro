@@ -1,7 +1,8 @@
 package net.ihe.gazelle.maestro.api.business.message;
 
-import java.io.Serial;
 import net.ihe.gazelle.lang.Event;
+
+import java.io.Serial;
 
 @Event
 public class TestRunStarted implements Message {

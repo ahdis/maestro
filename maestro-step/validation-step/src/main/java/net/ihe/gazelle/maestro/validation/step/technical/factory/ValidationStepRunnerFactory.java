@@ -18,10 +18,10 @@ package net.ihe.gazelle.maestro.validation.step.technical.factory;
 
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.spi.business.runner.Handler;
-import net.ihe.gazelle.maestro.spi.business.runner.StepRunner;
+import net.ihe.gazelle.maestro.spi.business.runner.StepExecutor;
 import net.ihe.gazelle.maestro.spi.business.runner.StepRunnerFactory;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
-import net.ihe.gazelle.maestro.validation.step.business.ValidationStepRunner;
+import net.ihe.gazelle.maestro.validation.step.business.ValidationStepExecutor;
 import net.ihe.gazelle.maestro.validation.step.technical.dto.ReportSerializationImpl;
 
 import java.util.HashMap;
@@ -33,7 +33,7 @@ public class ValidationStepRunnerFactory implements StepRunnerFactory {
 
     @Override
     public String getSupportedStep() {
-        return ValidationStep.class.getCanonicalName();
+        return ValidationStep.TYPE;
     }
 
     @Override
@@ -46,9 +46,9 @@ public class ValidationStepRunnerFactory implements StepRunnerFactory {
     }
 
     @Override
-    public StepRunner createStepRunner(Step step, Set<Handler> handlers) {
+    public StepExecutor createStepRunner(Step step, Set<Handler> handlers) {
         return handlers.stream().filter(Objects::nonNull).findFirst()
-                .map(handler -> new ValidationStepRunner(new ReportSerializationImpl(), handler))
+                .map(handler -> new ValidationStepExecutor(new ReportSerializationImpl(), handler))
                 .orElseThrow(() -> new IllegalArgumentException("No validation handler provided"));
     }
 }

@@ -16,10 +16,10 @@
 
 package net.ihe.gazelle.maestro.api.business.message;
 
-import java.io.Serial;
-
 import net.ihe.gazelle.lang.Command;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
+
+import java.io.Serial;
 
 /**
  * A message to start TestRun Execution
@@ -33,6 +33,7 @@ public class StartTestRun implements Message {
    private TestRun testRun;
 
    public StartTestRun() {
+      this(null, null);
    }
 
    public StartTestRun(String sessionId, TestRun testRun) {
@@ -57,4 +58,5 @@ public class StartTestRun implements Message {
       this.testRun = testRun;
       return this;
    }
+
 }

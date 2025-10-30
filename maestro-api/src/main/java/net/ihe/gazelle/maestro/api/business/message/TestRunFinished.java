@@ -16,11 +16,11 @@
 
 package net.ihe.gazelle.maestro.api.business.message;
 
-import java.io.Serial;
-
 import net.ihe.gazelle.lang.Event;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
+
+import java.io.Serial;
 
 /**
  * A Message to notify that a TestRun execution ended and to send a TestRunReportBuilder

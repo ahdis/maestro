@@ -2,19 +2,20 @@ package net.ihe.gazelle.maestro.engine.business;
 
 import net.ihe.gazelle.errorhandling.business.UnexpectedError;
 import net.ihe.gazelle.errorhandling.business.UnexpectedErrorBuilder;
+import net.ihe.gazelle.maestro.api.business.InvalidTestSuiteException;
 import net.ihe.gazelle.maestro.api.business.message.StartTestRun;
 import net.ihe.gazelle.maestro.api.business.message.StartTestSuiteRun;
 import net.ihe.gazelle.maestro.api.business.message.TestRunFinished;
 import net.ihe.gazelle.maestro.api.business.message.TestSuiteRunFinished;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.test.TestReference;
+import net.ihe.gazelle.maestro.api.business.test.TestSuite;
 import net.ihe.gazelle.maestro.api.business.testreport.EntityIdentificationBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.SystemUnderTestBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
 import net.ihe.gazelle.maestro.api.business.testreport.TestServiceBuilder;
-import net.ihe.gazelle.maestro.api.business.InvalidTestSuiteException;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRunValidator;
@@ -40,7 +41,7 @@ public class TestSuiteRunner {
    private final TestSuiteEventProducer testSuiteEventProducer;
    private final TestReportRecordService testReportRecordService;
    private final Service maestroService;
-   private TestSuiteRunValidator testSuiteRunValidator = new TestSuiteRunValidator();
+   private final TestSuiteRunValidator testSuiteRunValidator = new TestSuiteRunValidator();
 
    public TestSuiteRunner(SessionStore<TestSuiteSession> sessionStore,
                           TestSuiteEventProducer testSuiteEventProducer,
@@ -58,7 +59,7 @@ public class TestSuiteRunner {
     *
     * @throws NullPointerException if startTestSuiteRun is null
     */
-   public void execute(StartTestSuiteRun startTestSuiteRun) {
+   public void run(StartTestSuiteRun startTestSuiteRun) {
       TestSuiteRun testSuiteRun = startTestSuiteRun.getTestSuiteRun();
       try {
          testSuiteRunValidator.validate(testSuiteRun).orThrow(InvalidTestSuiteException::new);
@@ -67,10 +68,11 @@ public class TestSuiteRunner {
          sessionStore.addSession(startTestSuiteRun.getSessionId(), new TestSuiteSession(testSuiteRun, testRunCursor));
          testSuiteEventProducer.command(new StartTestRun(startTestSuiteRun.getSessionId(), testRunCursor.next()));
       } catch (Exception e) {
-         LOG.atError().setCause(e).log("Error when starting test suite {}", startTestSuiteRun.getSessionId());
+         LOG.atError().setCause(e).log("Error when starting test suite for session {}", startTestSuiteRun.getSessionId());
          TestReportBuilder testReportBuilder = buildGenericTestReport(testSuiteRun)
                .addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e));
          TestReportSummary reportSummary = recordTestReport(testReportBuilder.build());
+         sessionStore.removeSession(startTestSuiteRun.getSessionId());
          testSuiteEventProducer.notify(
                new TestSuiteRunFinished(startTestSuiteRun.getSessionId(), testSuiteRun, reportSummary));
       }
@@ -103,7 +105,9 @@ public class TestSuiteRunner {
                   .addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e))
                   .build();
             sessionStore.removeSession(sessionId);
-            recordAndReturnTestReport(testReport, testSuiteRun);
+            TestReportSummary reportSummary = recordTestReport(testReport);
+            testSuiteEventProducer.notify(
+                  new TestSuiteRunFinished(sessionId, testSuiteSession.getTestSuiteRun(), reportSummary));
          }
       }
 
@@ -145,57 +149,39 @@ public class TestSuiteRunner {
       TestReportBuilder testReportBuilder = new TestReportBuilder()
             .setTestService(getTestServiceBuilder())
             .setDateTime(Date.from(Instant.now()))
-            .setTestSuiteName(testSuiteRun.getTestSuite().getName())
             .setAccessControlList(new AccessControlListBuilder(testSuiteRun.getAccessControlList()))
             .setSystemsUnderTest(testSuiteRun.getSystemsUnderTest().stream().map(SystemUnderTestBuilder::new).toList());
-      if ((testSuiteRun.getInternalId() != null && !testSuiteRun.getInternalId().isBlank()) ||
-          (testSuiteRun.getTestSuiteName() != null && !testSuiteRun.getTestSuiteName().isBlank())) {
-         StringBuilder noteBuilder = buildNote(testSuiteRun);
-         testReportBuilder.setNote(noteBuilder.toString());
+      if (testSuiteRun.getTestSuite() != null) {
+         testReportBuilder.setTestSuiteName(testSuiteRun.getTestSuite().getName());
+         testReportBuilder.setNote(buildNote(testSuiteRun.getTestSuite()));
       }
       return testReportBuilder;
    }
 
-   private TestReportBuilder buildSafeTestReport(TestSuiteRun testSuiteRun) {
-      TestReportBuilder testReportBuilder = new TestReportBuilder()
-            .setTestService(getTestServiceBuilder())
-            .setDateTime(Date.from(Instant.now()));
-      if(testSuiteRun.getTestSuite() != null)
-         testReportBuilder.setTestSuiteName(testSuiteRun.getTestSuite().getName())
-            .setAccessControlList(new AccessControlListBuilder(testSuiteRun.getAccessControlList()))
-            .setSystemsUnderTest(testSuiteRun.getSystemsUnderTest().stream().map(SystemUnderTestBuilder::new).toList());
-      if ((testSuiteRun.getInternalId() != null && !testSuiteRun.getInternalId().isBlank()) ||
-          (testSuiteRun.getTestSuiteName() != null && !testSuiteRun.getTestSuiteName().isBlank())) {
-         StringBuilder noteBuilder = buildNote(testSuiteRun);
-         testReportBuilder.setNote(noteBuilder.toString());
+   private String buildNote(TestSuite testSuite) {
+      if (testSuite.getName() != null || testSuite.getId() != null) {
+         StringBuilder noteBuilder = new StringBuilder("Tests executed as part of the suite");
+         if (testSuite.getName() != null) {
+            noteBuilder.append(" ");
+            noteBuilder.append(testSuite.getName());
+         }
+         if (testSuite.getId() != null) {
+            noteBuilder.append(" #");
+            noteBuilder.append(testSuite.getId());
+         }
+         return noteBuilder.toString();
       }
-      return testReportBuilder;
-   }
-
-   private StringBuilder buildNote(TestSuiteRun testSuiteRun) {
-      StringBuilder noteBuilder = new StringBuilder("Tests executed as part of the suite ");
-      if (testSuiteRun.getTestSuiteName() != null && !testSuiteRun.getTestSuiteName().isBlank()) {
-         noteBuilder.append(testSuiteRun.getTestSuiteName());
-      }
-      if (!noteBuilder.isEmpty()) {
-         noteBuilder.append("#");
-      }
-      if (testSuiteRun.getTestSuiteClientId() != null && !testSuiteRun.getTestSuiteClientId().isBlank()) {
-         noteBuilder.append(testSuiteRun.getTestSuiteClientId());
-      }
-      return noteBuilder;
+      return null;
    }
 
    private TestReportSummary recordTestReport(TestReport testReport) {
       TestReportSummary reportSummary = null;
       try {
-         TestReportRecordService.ItemReference reportRef = testReportRecordService.recordTestReportWithReferences(
-               testReport);
+         TestReportRecordService.ItemReference reportRef = testReportRecordService.recordTestReportWithReferences(testReport);
          reportSummary = buildReportSummary(testReport, reportRef);
-      } catch (Exception e) {
+      } catch (TestReportRecordException e) {
          List<UnexpectedError> errors = new ArrayList<>(testReport.getUnexpectedErrors());
-         errors.add(new UnexpectedErrorBuilder().fromThrowable(
-               new ReportRecordingException("Unable to record test report", e)).build());
+         errors.add(new UnexpectedErrorBuilder().fromThrowable(e).build());
          reportSummary = new TestReportSummary()
                .setDateTime(testReport.getDateTime())
                .setResult(testReport.getResult())

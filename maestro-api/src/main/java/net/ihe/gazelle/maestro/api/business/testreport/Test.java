@@ -88,13 +88,6 @@ public class Test {
         return description == null || !description.isBlank();
     }
 
-    public boolean isValid() {
-        return isIdValid()
-                && isNameValid()
-                && isVersionValid()
-                && isDescriptionValid();
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

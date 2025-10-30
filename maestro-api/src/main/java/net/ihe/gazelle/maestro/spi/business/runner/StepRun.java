@@ -16,16 +16,27 @@
 
 package net.ihe.gazelle.maestro.spi.business.runner;
 
+import net.ihe.gazelle.maestro.api.business.property.Property;
+import net.ihe.gazelle.maestro.api.business.property.PropertyResolver;
 import net.ihe.gazelle.maestro.api.business.test.Step;
 
-/**
- * A structure containing infos to manage its execution
- * @param step the step to execute
- */
-public record StepRun(Step step) {
+import java.io.Serial;
+import java.util.List;
 
-   public String getStepId() {
-      return step.getName();
+/**
+ * StepRun is the execution of a Step with the test context to be able to resolve reference-properties.
+ */
+public class StepRun extends Step {
+
+   @Serial
+   private static final long serialVersionUID = 6529685098267757690L;
+
+   public StepRun(Step step, List<Property> context) {
+      super(step);
+      // we copy the context properties to avoid shared references
+      super.addProperties(context.stream().map(Property::copy).toList());
+      // Now we can resolve all properties for this step run only.
+      PropertyResolver.resolveProperties(this.properties.values());
    }
 
 }

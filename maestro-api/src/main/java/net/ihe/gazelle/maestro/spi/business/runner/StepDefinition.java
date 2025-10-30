@@ -2,9 +2,10 @@ package net.ihe.gazelle.maestro.spi.business.runner;
 
 import net.ihe.gazelle.maestro.api.business.test.SupportedInput;
 
+import java.io.Serializable;
 import java.util.List;
 
-public interface StepDefinition {
+public interface StepDefinition extends Serializable {
 
    String getType();
 

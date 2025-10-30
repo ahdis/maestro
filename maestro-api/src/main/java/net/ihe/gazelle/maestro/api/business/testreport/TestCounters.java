@@ -139,14 +139,6 @@ public class TestCounters {
         return unexpectedErrors >= 0;
     }
 
-    public boolean isValid() {
-        return isTotalValid()
-                && isPassedValid()
-                && isFailedValid()
-                && isUndefinedValid()
-                && isUnexpectedErrorsValid();
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -18,13 +18,13 @@ package net.ihe.gazelle.maestro.simulation.step.technical.factory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import net.ihe.gazelle.maestro.api.business.test.Step;
-import net.ihe.gazelle.maestro.spi.business.runner.Handler;
-import net.ihe.gazelle.maestro.spi.business.runner.StepRunner;
-import net.ihe.gazelle.maestro.spi.business.runner.StepRunnerFactory;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationHandler;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationStep;
-import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepRunner;
+import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepExecutor;
 import net.ihe.gazelle.maestro.simulation.step.technical.dto.ReportSerializationImpl;
+import net.ihe.gazelle.maestro.spi.business.runner.Handler;
+import net.ihe.gazelle.maestro.spi.business.runner.StepExecutor;
+import net.ihe.gazelle.maestro.spi.business.runner.StepRunnerFactory;
 import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandler;
 import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandlerImpl;
 
@@ -39,7 +39,7 @@ public class SimulationStepRunnerFactory implements StepRunnerFactory {
 
     @Override
     public String getSupportedStep() {
-        return SimulationStep.class.getCanonicalName();
+        return SimulationStep.TYPE;
     }
 
     @Override
@@ -53,9 +53,9 @@ public class SimulationStepRunnerFactory implements StepRunnerFactory {
     }
 
     @Override
-    public StepRunner createStepRunner(Step step, Set<Handler> handlers) {
+    public StepExecutor createStepRunner(Step step, Set<Handler> handlers) {
         return handlers.stream().filter(SimulationHandler.class::isInstance).findFirst()
-                .map(handler -> new SimulationStepRunner(new ReportSerializationImpl(), (SimulationHandler) handler, new UserInteractionHandlerImpl()))
+                .map(handler -> new SimulationStepExecutor(new ReportSerializationImpl(), (SimulationHandler) handler, new UserInteractionHandlerImpl()))
                 .orElseThrow(() -> new IllegalArgumentException("No simulation handler provided"));
     }
 }

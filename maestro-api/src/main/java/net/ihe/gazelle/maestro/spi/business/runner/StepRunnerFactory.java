@@ -24,7 +24,7 @@ import java.util.Set;
 public interface StepRunnerFactory {
 
     /**
-     * @return canonical name of the supported Step
+     * @return Type name of the supported Step
      */
     String getSupportedStep();
 
@@ -33,8 +33,8 @@ public interface StepRunnerFactory {
     /**
      * @param step step to run
      * @param handlers a set of handlers
-     * @return a StepRunner instance that can run step using a Handler from handlers
+     * @return a StepExecutor instance that can run step using a Handler from handlers
      * @throws IllegalArgumentException if no handler from handlers can execute step
      */
-    StepRunner createStepRunner(Step step, Set<Handler> handlers);
+    StepExecutor createStepRunner(Step step, Set<Handler> handlers);
 }

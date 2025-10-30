@@ -17,55 +17,51 @@
 package net.ihe.gazelle.maestro.engine.business.context;
 
 import net.ihe.gazelle.maestro.api.business.test.Step;
-import net.ihe.gazelle.maestro.api.business.test.Test;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
- * Tracks iteration over the ordered list of {@link Step} instances of a test run.
+ * Tracks iteration over the ordered list of {@link Step}.
  */
 public final class StepCursor {
 
-    private final List<Step> steps;
-    private int nextIndex;
+   private final List<Step> steps;
+   private int index;
 
-    public StepCursor(List<Step> steps) {
-        this.steps = List.copyOf(steps);
-        this.nextIndex = 0;
-    }
+   private StepCursor(List<Step> orderedSteps) {
+      this.steps = List.copyOf(orderedSteps);
+      this.index = -1;
+   }
 
-    public static StepCursor empty() {
-        return new StepCursor(List.of());
-    }
+   public static StepCursor empty() {
+      return new StepCursor(List.of());
+   }
 
-    public static StepCursor from(Test test) {
-        if (test == null) {
-            return empty();
-        }
-        return new StepCursor(test.getSteps());
-    }
+   public static StepCursor from(List<Step> orderedSteps) {
+      return new StepCursor(orderedSteps);
+   }
 
-    public boolean hasNext() {
-        return nextIndex < steps.size();
-    }
+   public boolean hasNext() {
+      return index < steps.size() - 1;
+   }
 
-    public Step next() {
-        if (!hasNext()) {
-            throw new NoSuchElementException("No more steps to execute");
-        }
-        return steps.get(nextIndex++);
-    }
+   public Step next() {
+      if (!hasNext()) {
+         throw new NoSuchElementException("No more steps to execute");
+      }
+      return steps.get(index++);
+   }
 
-    public boolean hasExecutedSteps() {
-        return nextIndex > 0;
-    }
+   public boolean hasCurrent() {
+      return index > -1;
+   }
 
-    public Step current() {
-        if (!hasExecutedSteps()) {
-            throw new IllegalStateException("No step has been executed yet");
-        }
-        return steps.get(nextIndex - 1);
-    }
+   public Step current() {
+      if (!hasCurrent()) {
+         throw new IllegalStateException("No step has been executed yet");
+      }
+      return steps.get(index);
+   }
 }
 

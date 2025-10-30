@@ -17,22 +17,22 @@
 package net.ihe.gazelle.maestro.itb.step.business;
 
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
-import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
-import net.ihe.gazelle.maestro.spi.business.runner.StepRunner;
 import net.ihe.gazelle.maestro.itb.step.business.dao.ItbTestExecutionDBInMemory;
+import net.ihe.gazelle.maestro.spi.business.runner.StepExecutor;
+import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
 
 import java.util.concurrent.CompletableFuture;
 
-public class ItbStepRunner implements StepRunner {
+public class ItbStepExecutor implements StepExecutor {
 
     private final ItbHandler handler;
 
-    public ItbStepRunner(ItbHandler itbHandler) {
+    public ItbStepExecutor(ItbHandler itbHandler) {
         this.handler = itbHandler;
     }
 
     @Override
-    public CompletableFuture<StepRunReportBuilder> run(StepRun stepRun) {
+    public CompletableFuture<StepRunReportBuilder> execute(StepRun stepRun) {
         String sessionId = handler.handle((ItbStep) stepRun.step());
         CompletableFuture<StepRunReportBuilder> future = new CompletableFuture<>();
         ItbTestExecutionDBInMemory.addStepRunReportFuture(sessionId, future);

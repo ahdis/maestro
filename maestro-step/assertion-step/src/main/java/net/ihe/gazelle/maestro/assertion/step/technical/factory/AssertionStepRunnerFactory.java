@@ -17,12 +17,12 @@
 package net.ihe.gazelle.maestro.assertion.step.technical.factory;
 
 import net.ihe.gazelle.maestro.api.business.test.Step;
-import net.ihe.gazelle.maestro.spi.business.runner.Handler;
-import net.ihe.gazelle.maestro.spi.business.runner.StepRunner;
-import net.ihe.gazelle.maestro.spi.business.runner.StepRunnerFactory;
 import net.ihe.gazelle.maestro.assertion.step.business.AssertionStep;
-import net.ihe.gazelle.maestro.assertion.step.business.AssertionStepRunner;
+import net.ihe.gazelle.maestro.assertion.step.business.AssertionStepExecutor;
 import net.ihe.gazelle.maestro.assertion.step.technical.handler.AssertionHandlerImpl;
+import net.ihe.gazelle.maestro.spi.business.runner.Handler;
+import net.ihe.gazelle.maestro.spi.business.runner.StepExecutor;
+import net.ihe.gazelle.maestro.spi.business.runner.StepRunnerFactory;
 
 import java.util.Map;
 import java.util.Set;
@@ -35,7 +35,7 @@ public class AssertionStepRunnerFactory implements StepRunnerFactory {
 
     @Override
     public String getSupportedStep() {
-        return AssertionStep.class.getCanonicalName();
+        return AssertionStep.TYPE;
     }
 
     @Override
@@ -44,8 +44,8 @@ public class AssertionStepRunnerFactory implements StepRunnerFactory {
     }
 
     @Override
-    public StepRunner createStepRunner(Step step, Set<Handler> handlers) {
-        return new AssertionStepRunner(new AssertionHandlerImpl());
+    public StepExecutor createStepRunner(Step step, Set<Handler> handlers) {
+        return new AssertionStepExecutor(new AssertionHandlerImpl());
     }
 
 }

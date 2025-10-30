@@ -17,7 +17,6 @@
 package net.ihe.gazelle.maestro.quarkus.broker;
 
 import jakarta.enterprise.event.Event;
-import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.event.ObservesAsync;
 import jakarta.inject.Inject;
 import net.ihe.gazelle.maestro.api.business.message.Message;
@@ -44,7 +43,7 @@ public class TestRunnerEventController implements TestRunEventProducer {
    }
 
    public void onStartTestRun(@ObservesAsync StartTestRun startTestRun) {
-      testRunner.execute(startTestRun);
+      testRunner.run(startTestRun);
    }
 
    public void onStepRunFinished(@ObservesAsync StepRunFinished stepRunFinished) {

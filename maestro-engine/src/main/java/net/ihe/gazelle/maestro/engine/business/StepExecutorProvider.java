@@ -17,12 +17,17 @@
 package net.ihe.gazelle.maestro.engine.business;
 
 import net.ihe.gazelle.maestro.api.business.test.Step;
-import net.ihe.gazelle.maestro.spi.business.runner.StepRunner;
+import net.ihe.gazelle.maestro.spi.business.runner.StepExecutor;
 
-public interface StepRunnerProvider {
-    /**
-     * @param step The step we want StepRunner to execute
-     * @return A StepRunner able to run step
-     */
-    StepRunner create(Step step);
+public interface StepExecutorProvider {
+
+   /**
+    * @param step The step we want StepExecutor to execute
+    *
+    * @return A StepExecutor able to run step
+    *
+    * @throws UnknownStepException if no StepExecutor is found for the given step
+    */
+   StepExecutor getExecutor(Step step);
+
 }

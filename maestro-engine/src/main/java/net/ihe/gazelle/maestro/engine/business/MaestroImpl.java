@@ -16,19 +16,19 @@
 
 package net.ihe.gazelle.maestro.engine.business;
 
+import net.ihe.gazelle.maestro.api.business.Maestro;
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.api.business.message.StartStepRun;
 import net.ihe.gazelle.maestro.api.business.message.StartTestRun;
 import net.ihe.gazelle.maestro.api.business.message.StartTestSuiteRun;
-import net.ihe.gazelle.maestro.api.business.Maestro;
 import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
 import net.ihe.gazelle.maestro.api.business.message.StepRunStarted;
 import net.ihe.gazelle.maestro.api.business.message.TestRunFinished;
 import net.ihe.gazelle.maestro.api.business.message.TestRunStarted;
+import net.ihe.gazelle.maestro.api.business.message.TestSuiteRunFinished;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRunValidator;
-import net.ihe.gazelle.maestro.api.business.message.TestSuiteRunFinished;
 
 import java.util.Map;
 import java.util.Optional;
@@ -69,7 +69,7 @@ public class MaestroImpl implements Maestro {
    public void listen(StartStepRun startStepRun) {
       Optional.ofNullable(OBSERVERS.get(startStepRun.getSessionId()))
             .ifPresent(observer -> observer.onStepRunStarted(
-                  new StepRunStarted(startStepRun.getTestId(), startStepRun.getStepRun().getStepId())
+                  new StepRunStarted(startStepRun.getTestId(), startStepRun.getStepRun().getId())
             ));
    }
 

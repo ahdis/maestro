@@ -1,0 +1,12 @@
+net.ihe.gazelle.maestro.api.technical.dto.property.PropertyDTO
+net.ihe.gazelle.maestro.api.technical.dto.property.StringPropertyDTO
+net.ihe.gazelle.maestro.api.technical.dto.property.BooleanPropertyDTO
+net.ihe.gazelle.maestro.api.technical.dto.property.IntegerPropertyDTO
+net.ihe.gazelle.maestro.api.technical.dto.property.FloatPropertyDTO
+net.ihe.gazelle.maestro.api.technical.dto.property.DatePropertyDTO
+
+net.ihe.gazelle.maestro.api.technical.dto.test.SupportedInputDTO
+net.ihe.gazelle.maestro.api.technical.dto.test.SupportedTextInputDTO
+net.ihe.gazelle.maestro.api.technical.dto.test.SupportedFileInputDTO
+net.ihe.gazelle.maestro.api.technical.dto.test.SupportedBooleanInputDTO
+net.ihe.gazelle.maestro.api.technical.dto.test.SupportedValueSetInputDTO

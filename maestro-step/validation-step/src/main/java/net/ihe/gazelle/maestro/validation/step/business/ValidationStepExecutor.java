@@ -21,8 +21,8 @@ import net.ihe.gazelle.maestro.api.business.testreport.OutputBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.spi.business.runner.Handler;
+import net.ihe.gazelle.maestro.spi.business.runner.StepExecutor;
 import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
-import net.ihe.gazelle.maestro.spi.business.runner.StepRunner;
 import net.ihe.gazelle.maestro.validation.step.technical.handler.EvsValidationHandler;
 import net.ihe.gazelle.maestro.validation.step.technical.handler.GazelleValidationServiceHandler;
 import net.ihe.gazelle.maestro.validation.step.technical.mapper.EvsValidationMapper;
@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * A StepRunner is an object used to run ValidationStep {@link ValidationStep}
+ * A StepExecutor is an object used to run ValidationStep {@link ValidationStep}
  * <br>
  * Translate ValidationStep into ValidationRequest via ValidationRequestMapper {@link ValidationRequestMapper}
  * <br>
@@ -43,20 +43,20 @@ import java.util.concurrent.CompletableFuture;
  * Assert ValidationReport to extract result and build a ValidationReportBuilder {@link net.ihe.gazelle.validation.v2.api.business.report.ValidationReportBuilder}
  * <br>
  */
-public class ValidationStepRunner implements StepRunner {
+public class ValidationStepExecutor implements StepExecutor {
 
     public static final String VALIDATION_REPORT = "VALIDATION_REPORT";
     private final ReportSerialization serializer;
     private final Handler handler;
     private final EvsValidationMapper evsValidationMapper = new EvsValidationMapper();
 
-    public ValidationStepRunner(ReportSerialization serializer, Handler validationHandler) {
+    public ValidationStepExecutor(ReportSerialization serializer, Handler validationHandler) {
         this.serializer = serializer;
         this.handler = validationHandler;
     }
 
     @Override
-    public CompletableFuture<StepRunReportBuilder> run(StepRun stepRun) {
+    public CompletableFuture<StepRunReportBuilder> execute(StepRun stepRun) {
         ValidationStep validationStep = (ValidationStep) stepRun.step();
         ValidationRequest validationRequest = ValidationRequestMapper.
                 createValidationRequest((ValidationStep) stepRun.step());

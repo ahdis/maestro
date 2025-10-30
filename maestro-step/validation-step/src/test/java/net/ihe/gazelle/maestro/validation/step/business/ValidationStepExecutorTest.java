@@ -20,9 +20,13 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-class ValidationStepRunnerTest {
+class ValidationStepExecutorTest {
 
     private ValidationStep buildStep(String name) {
         return new ValidationStep(name,
@@ -49,10 +53,10 @@ class ValidationStepRunnerTest {
     }
 
     @Test
-    void run_setsPassed_whenReportPassed() {
-        ValidationStepRunner runner = new ValidationStepRunner(serializerReturning("{}".getBytes(StandardCharsets.UTF_8)), handlerReturning(ValidationTestResult.PASSED));
+    void execute_setsPassed_whenReportPassed() {
+        ValidationStepExecutor runner = new ValidationStepExecutor(serializerReturning("{}".getBytes(StandardCharsets.UTF_8)), handlerReturning(ValidationTestResult.PASSED));
         StepRun stepRun = new StepRun("ts", "tr", buildStep("v1"));
-        StepRunReportBuilder b = runner.run(stepRun).join();
+        StepRunReportBuilder b = runner.execute(stepRun).join();
         StepRunReport report = b.build();
         assertEquals(StepResult.PASSED, report.getResult());
         assertEquals("v1", report.getStepId());
@@ -60,24 +64,24 @@ class ValidationStepRunnerTest {
     }
 
     @Test
-    void run_setsFailed_whenReportFailed() {
-        ValidationStepRunner runner = new ValidationStepRunner(serializerReturning("{}".getBytes(StandardCharsets.UTF_8)), handlerReturning(ValidationTestResult.FAILED));
+    void execute_setsFailed_whenReportFailed() {
+        ValidationStepExecutor runner = new ValidationStepExecutor(serializerReturning("{}".getBytes(StandardCharsets.UTF_8)), handlerReturning(ValidationTestResult.FAILED));
         StepRun stepRun = new StepRun("ts", "tr", buildStep("v2"));
-        StepRunReport report = runner.run(stepRun).join().build();
+        StepRunReport report = runner.execute(stepRun).join().build();
         assertEquals(StepResult.FAILED, report.getResult());
     }
 
     @Test
-    void run_setsUndefined_whenReportUndefined() {
-        ValidationStepRunner runner = new ValidationStepRunner(serializerReturning("{}".getBytes(StandardCharsets.UTF_8)), handlerReturning(null));
+    void execute_setsUndefined_whenReportUndefined() {
+        ValidationStepExecutor runner = new ValidationStepExecutor(serializerReturning("{}".getBytes(StandardCharsets.UTF_8)), handlerReturning(null));
         StepRun stepRun = new StepRun("ts", "tr", buildStep("v3"));
-        StepRunReport report = runner.run(stepRun).join().build();
+        StepRunReport report = runner.execute(stepRun).join().build();
         assertEquals(StepResult.UNDEFINED, report.getResult());
     }
 
     @Test
     void getSupportedStep_returnsCanonicalName() {
-        ValidationStepRunner runner = new ValidationStepRunner(serializerReturning(new byte[]{}), handlerReturning(ValidationTestResult.PASSED));
+        ValidationStepExecutor runner = new ValidationStepExecutor(serializerReturning(new byte[]{}), handlerReturning(ValidationTestResult.PASSED));
         assertEquals(ValidationStep.class.getCanonicalName(), runner.getSupportedStep());
     }
 }

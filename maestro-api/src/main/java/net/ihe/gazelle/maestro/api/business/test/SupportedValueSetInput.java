@@ -1,8 +1,11 @@
 package net.ihe.gazelle.maestro.api.business.test;
 
-import java.util.List;
+import java.io.Serial;
 
 public class SupportedValueSetInput extends SupportedInput {
+
+   @Serial
+   private static final long serialVersionUID = 4610026342138566392L;
 
    private String valueSetId;
    private String defaultValue;

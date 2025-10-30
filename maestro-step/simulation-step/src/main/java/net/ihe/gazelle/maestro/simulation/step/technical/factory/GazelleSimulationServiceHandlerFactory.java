@@ -16,10 +16,10 @@
 
 package net.ihe.gazelle.maestro.simulation.step.technical.factory;
 
+import net.ihe.gazelle.maestro.simulation.step.technical.handler.GazelleSimulationServiceHandler;
 import net.ihe.gazelle.maestro.spi.business.runner.ConfigProvider;
 import net.ihe.gazelle.maestro.spi.business.runner.Handler;
 import net.ihe.gazelle.maestro.spi.business.runner.HandlerFactory;
-import net.ihe.gazelle.maestro.simulation.step.technical.handler.GazelleSimulationServiceHandler;
 import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterface;
 import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterfaceBuilder;
 import net.ihe.gazelle.servicemetadata.api.business.HttpRestBinding;

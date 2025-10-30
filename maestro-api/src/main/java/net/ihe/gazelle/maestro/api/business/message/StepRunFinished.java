@@ -16,11 +16,11 @@
 
 package net.ihe.gazelle.maestro.api.business.message;
 
-import java.io.Serial;
-
 import net.ihe.gazelle.lang.Event;
-import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
+
+import java.io.Serial;
 
 /**
  * Step message used by a producer to notify listener that a step execution ended. It contains a report builder loaded
@@ -31,20 +31,18 @@ public class StepRunFinished implements Message {
    @Serial
    private static final long serialVersionUID = 1L;
    private String sessionId;
-   private String testRunId;
    private String testId;
    private StepRun stepRun;
-   private StepRunReportBuilder stepRunReportBuilder;
+   private StepRunReport steprunReport;
 
    public StepRunFinished() {
    }
 
-   public StepRunFinished(String sessionId, String testRunId, String testId, StepRun stepRun, StepRunReportBuilder stepRunReportBuilder) {
+   public StepRunFinished(String sessionId, String testId, StepRun stepRun, StepRunReport steprunReport) {
       this.sessionId = sessionId;
-      this.testRunId = testRunId;
       this.testId = testId;
       this.stepRun = stepRun;
-      this.stepRunReportBuilder = stepRunReportBuilder;
+      this.steprunReport = steprunReport;
    }
 
    public String getSessionId() {
@@ -56,12 +54,12 @@ public class StepRunFinished implements Message {
       return this;
    }
 
-   public String getTestRunId() {
-      return testRunId;
+   public String getTestId() {
+      return testId;
    }
 
-   public StepRunFinished setTestRunId(String testRunId) {
-      this.testRunId = testRunId;
+   public StepRunFinished setTestId(String testId) {
+      this.testId = testId;
       return this;
    }
 
@@ -74,12 +72,12 @@ public class StepRunFinished implements Message {
       return this;
    }
 
-   public StepRunReportBuilder getStepRunReportBuilder() {
-      return stepRunReportBuilder;
+   public StepRunReport getStepRunReport() {
+      return steprunReport;
    }
 
-   public StepRunFinished setStepRunReportBuilder(StepRunReportBuilder stepRunReportBuilder) {
-      this.stepRunReportBuilder = stepRunReportBuilder;
+   public StepRunFinished setSteprunReport(StepRunReport steprunReport) {
+      this.steprunReport = steprunReport;
       return this;
    }
 }

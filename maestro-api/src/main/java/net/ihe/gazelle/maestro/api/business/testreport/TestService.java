@@ -69,12 +69,6 @@ public class TestService {
         return disclaimer != null && !disclaimer.isBlank();
     }
 
-    public boolean isValid() {
-        return isServiceIdentificationValid()
-                && isServiceVersionValid()
-                && isDisclaimerValid();
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

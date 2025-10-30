@@ -16,8 +16,8 @@
 
 package net.ihe.gazelle.maestro.quarkus.mock;
 
-import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.api.business.test.Step;
+import net.ihe.gazelle.maestro.api.business.testrun.Property;
 
 import java.util.List;
 

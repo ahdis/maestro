@@ -20,11 +20,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
+import net.ihe.gazelle.maestro.api.technical.dto.property.PropertyDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.report.SystemUnderTestDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.test.TestDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.test.TestSuiteDTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
+import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
 import net.ihe.gazelle.security.technical.acl.AccessControlListDTO;
 
 import java.util.List;
@@ -80,13 +83,21 @@ public class TestSuiteRunDTO implements DTO<TestSuiteRun> {
       );
    }
 
-   @JsonProperty("accessControlList")
-   public AccessControlListDTO getAccessControlList() {
-      return new AccessControlListDTO(testSuiteRun.getAccessControlList());
+   @JsonProperty("inputs")
+   public List<PropertyDTO> getInputs() {
+      return testSuiteRun.getInputs().stream()
+            .map(SubTypingDTO::fromBusinessObject)
+            .map(PropertyDTO.class::cast)
+            .toList();
    }
 
-   public void setAccessControlList(AccessControlListDTO accessControlList) {
-      testSuiteRun.setAccessControlList(accessControlList.getBusinessObject());
+   public void setInputs(List<PropertyDTO> inputs) {
+      testSuiteRun.setInputs(
+            inputs != null ? inputs.stream()
+                  .map(DTO::getBusinessObject)
+                  .map(Property.class::cast).toList() :
+                  null
+      );
    }
 
    @JsonProperty("systemsUnderTest")
@@ -102,6 +113,15 @@ public class TestSuiteRunDTO implements DTO<TestSuiteRun> {
                         .toList() :
                   null
       );
+   }
+
+   @JsonProperty("accessControlList")
+   public AccessControlListDTO getAccessControlList() {
+      return new AccessControlListDTO(testSuiteRun.getAccessControlList());
+   }
+
+   public void setAccessControlList(AccessControlListDTO accessControlList) {
+      testSuiteRun.setAccessControlList(accessControlList.getBusinessObject());
    }
 
 }

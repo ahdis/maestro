@@ -1,6 +1,11 @@
 package net.ihe.gazelle.maestro.api.business.property;
 
+import java.io.Serial;
+
 public class BooleanProperty extends Property {
+
+   @Serial
+   private static final long serialVersionUID = -8823778950334584409L;
 
    public BooleanProperty() {
    }
@@ -12,6 +17,11 @@ public class BooleanProperty extends Property {
    @Override
    public Boolean getValue() {
       return super.getValue();
+   }
+
+   @Override
+   public Property copy() {
+      return new BooleanProperty(getName(), getValue());
    }
 
 }
