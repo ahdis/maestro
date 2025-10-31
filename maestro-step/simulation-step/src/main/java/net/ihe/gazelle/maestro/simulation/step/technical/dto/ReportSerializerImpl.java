@@ -25,15 +25,11 @@ import net.ihe.gazelle.simulation.jaxrs.api.technical.dto.callback.SimulationRep
 
 public class ReportSerializerImpl implements ReportSerializer {
 
-    @Override
-    public byte[] toByteArray(SimulationReport report) {
-        try {
-            SerDes serDes = new JacksonSerDes();
-            SimulationReportDTO dto = new SimulationReportDTO(report);
+   private final SerDes serDes = new JacksonSerDes();
 
-            return serDes.serialize(dto);
-        } catch (SerializationException e) {
-            throw new IllegalStateException(e.getMessage());
-        }
-    }
+   @Override
+   public byte[] toByteArray(SimulationReport report) {
+      return serDes.serialize(new SimulationReportDTO(report));
+   }
+
 }

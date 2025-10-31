@@ -16,15 +16,18 @@
 
 package net.ihe.gazelle.maestro.simulation.step.business;
 
+import net.ihe.gazelle.modelmarshaller.technical.serialization.SerializationException;
 import net.ihe.gazelle.simulation.business.callback.SimulationReport;
 
 public interface ReportSerializer {
 
     /**
-     * Convert a ValidationReport object to byte array
+     * Convert a SimulationReport object to byte array
+     *
      * @param report object to convert
      * @return same report as byte array
-     * @throws IllegalStateException if report can't be converted
+     * @throws SerializationException if report can't be converted
      */
     byte[] toByteArray(SimulationReport report);
+
 }
