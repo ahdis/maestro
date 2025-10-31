@@ -11,6 +11,7 @@ import net.ihe.gazelle.evsapi.client.business.response.report.ValidationSubRepor
 import net.ihe.gazelle.evsapi.client.business.response.report.ValidationTestResult;
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
+import net.ihe.gazelle.maestro.validation.step.technical.handler.EvsValidationMapper;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
 import org.junit.jupiter.api.Test;
 

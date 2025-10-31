@@ -91,6 +91,11 @@ public class StepRunReportBuilder extends AbstractBuilder<StepRunReport> {
       return this;
    }
 
+   public StepRunReportBuilder addUnexpectedErrors(List<UnexpectedErrorBuilder> unexpectedErrors) {
+      this.unexpectedErrors.addAll(unexpectedErrors);
+      return this;
+   }
+
    public StepRunReportBuilder addUnexpectedError(UnexpectedErrorBuilder unexpectedError) {
       unexpectedErrors.add(unexpectedError);
       return this;

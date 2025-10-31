@@ -19,43 +19,46 @@ package net.ihe.gazelle.maestro.simulation.step.technical.factory;
 import jakarta.enterprise.context.ApplicationScoped;
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationHandler;
-import net.ihe.gazelle.maestro.simulation.step.business.SimulationStep;
+import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepDefinition;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepExecutor;
-import net.ihe.gazelle.maestro.simulation.step.technical.dto.ReportSerializationImpl;
+import net.ihe.gazelle.maestro.simulation.step.technical.dto.ReportSerializerImpl;
 import net.ihe.gazelle.maestro.spi.business.runner.Handler;
 import net.ihe.gazelle.maestro.spi.business.runner.StepExecutor;
 import net.ihe.gazelle.maestro.spi.business.runner.StepRunnerFactory;
 import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandler;
-import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandlerImpl;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-
-import static net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandler.NAME;
+import java.util.Optional;
 
 @ApplicationScoped
 public class SimulationStepRunnerFactory implements StepRunnerFactory {
 
-    @Override
-    public String getSupportedStep() {
-        return SimulationStep.TYPE;
-    }
+   private static final String USER_INTERACTION_SERVICE = "User Interaction Service";
 
-    @Override
-    public Map<String, Class<? extends Handler>> getRequiredServices(Step step) {
-        Map<String, Class<? extends Handler>> requiredHandlers = new HashMap<>();
-        if (step instanceof SimulationStep simulationStep) {
-            requiredHandlers.put(simulationStep.getSimulationService().getValue(), SimulationHandler.class);
-        }
-        requiredHandlers.put(NAME, UserInteractionHandler.class);
-        return requiredHandlers;
-    }
+   @Override
+   public String getSupportedStep() {
+      return SimulationStepDefinition.TYPE;
+   }
 
-    @Override
-    public StepExecutor createStepRunner(Step step, Set<Handler> handlers) {
-        return handlers.stream().filter(SimulationHandler.class::isInstance).findFirst()
-                .map(handler -> new SimulationStepExecutor(new ReportSerializationImpl(), (SimulationHandler) handler, new UserInteractionHandlerImpl()))
-                .orElseThrow(() -> new IllegalArgumentException("No simulation handler provided"));
-    }
+   @Override
+   public Map<String, Class<? extends Handler>> getRequiredServices(Step step) {
+      return Map.of(
+            step.getPropertyValue(SimulationStepDefinition.SIMULATION_SERVICE), SimulationHandler.class,
+            USER_INTERACTION_SERVICE, UserInteractionHandler.class
+      );
+   }
+
+
+   @Override
+   public StepExecutor createStepExecutor(Step step, Map<String, Handler> handlers) {
+      String simulatorName = step.getPropertyValue(SimulationStepDefinition.SIMULATION_SERVICE);
+      return new SimulationStepExecutor(
+            Optional.ofNullable((SimulationHandler) handlers.get(simulatorName))
+                  .orElseThrow(() -> new IllegalArgumentException(
+                        "No simulation handler provided for service: " + simulatorName)),
+            Optional.ofNullable((UserInteractionHandler) handlers.get(USER_INTERACTION_SERVICE))
+                  .orElseThrow(() -> new IllegalArgumentException("No user interaction handler provided")),
+            new ReportSerializerImpl()
+      );
+   }
 }

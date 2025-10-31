@@ -60,7 +60,7 @@ class GazelleSimulationServiceHandlerFactoryTest {
         providedInterface.addBinding(binding);
         providedInterface.setInterfaceVersion("1.0.0");
         providedInterface.setInterfaceName("test");
-        Handler handler = factory.createHandler(providedInterface, new ConfigProviderMock());
+        Handler handler = factory.createHandler(, providedInterface, new ConfigProviderMock());
         assertNotNull(handler);
         assertInstanceOf(GazelleSimulationServiceHandler.class, handler);
     }
@@ -73,7 +73,7 @@ class GazelleSimulationServiceHandlerFactoryTest {
         ConfigProviderMock configProvider = new ConfigProviderMock();
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> factory.createHandler(providedInterface, configProvider)
+                () -> factory.createHandler(, providedInterface, configProvider)
         );
         assertEquals("Service test has no bindings", exception.getMessage());
     }

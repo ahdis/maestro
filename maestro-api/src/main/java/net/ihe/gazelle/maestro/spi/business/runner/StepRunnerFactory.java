@@ -23,18 +23,28 @@ import java.util.Set;
 
 public interface StepRunnerFactory {
 
-    /**
-     * @return Type name of the supported Step
-     */
-    String getSupportedStep();
+   /**
+    * @return Type name of the supported Step
+    */
+   String getSupportedStep();
 
-    Map<String, Class<? extends Handler>> getRequiredServices(Step step);
+   /**
+    * Get the list of required services to run the step
+    *
+    * @param step
+    *
+    * @return a map containing the service names as keys and the required Handler class as values
+    */
+   Map<String, Class<? extends Handler>> getRequiredServices(Step step);
 
-    /**
-     * @param step step to run
-     * @param handlers a set of handlers
-     * @return a StepExecutor instance that can run step using a Handler from handlers
-     * @throws IllegalArgumentException if no handler from handlers can execute step
-     */
-    StepExecutor createStepRunner(Step step, Set<Handler> handlers);
+   /**
+    * @param step     step to run
+    * @param handlers a map of services (name as key and, and handlers as value) that can be used to run the step
+    *
+    * @return a StepExecutor instance that can run step using a Handler from handlers
+    *
+    * @throws IllegalArgumentException if the provided handlers are not suitable to run the step
+    */
+   StepExecutor createStepExecutor(Step step, Map<String, Handler> handlers);
+
 }

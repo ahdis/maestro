@@ -23,51 +23,61 @@ import net.ihe.gazelle.maestro.quarkus.handler.HandlerProvider;
 import net.ihe.gazelle.maestro.spi.business.runner.Handler;
 import net.ihe.gazelle.maestro.spi.business.runner.StepExecutor;
 import net.ihe.gazelle.maestro.spi.business.runner.StepRunnerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
+import java.util.AbstractMap;
+import java.util.Map;
 import java.util.ServiceLoader;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 public class StepExecutorProviderSPI implements StepExecutorProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StepExecutorProviderSPI.class);
+   private final HandlerProvider handlerProvider;
 
-    private final HandlerProvider handlerProvider;
+   public StepExecutorProviderSPI(HandlerProvider handlerProvider) {
+      this.handlerProvider = handlerProvider;
+   }
 
-    public StepExecutorProviderSPI(HandlerProvider handlerProvider) {
-        this.handlerProvider = handlerProvider;
-    }
+   /**
+    * Will throw an IllegalArgumentException if it can't provide corresponding stepRunner
+    *
+    * @param step The testreport we are want to run
+    *
+    * @return a stepRunner corresponding to testreport
+    */
+   @Override
+   public StepExecutor getExecutor(Step step) {
+      ServiceLoader<StepRunnerFactory> serviceLoader = ServiceLoader.load(StepRunnerFactory.class);
+      for (StepRunnerFactory runnerFactory : serviceLoader) {
+         if (runnerFactory.getSupportedStep().equals(step.getType())) {
+            return runnerFactory.createStepExecutor(
+                  step,
+                  getHandlers(runnerFactory.getRequiredServices(step))
+            );
+         }
+      }
+      throw new UnknownStepException("Step " + step.getType() + " is not supported");
+   }
 
-    /**
-     * Will throw an IllegalArgumentException if it can't provide corresponding stepRunner
-     * @param step The testreport we are want to run
-     * @return a stepRunner corresponding to testreport
-     */
-    @Override
-    public StepExecutor getExecutor(Step step) {
-        ServiceLoader<StepRunnerFactory> serviceLoader = ServiceLoader.load(StepRunnerFactory.class);
-        for (StepRunnerFactory runnerFactory : serviceLoader) {
-            if (runnerFactory.getSupportedStep().equals(step.getType())) {
-                return buildStepRunner(step, runnerFactory);
-            }
-        }
-        throw new UnknownStepException("Step " + step.getType() + " is not supported");
-    }
+   private Map<String, Handler> getHandlers(final Map<String, Class<? extends Handler>> requiredServices) {
+      return requiredServices.entrySet().stream()
+            .map(this::injectHandler)
+            .filter(this::isHandlerAvailable)
+            .collect(Collectors.toMap(
+                  Map.Entry::getKey,
+                  Map.Entry::getValue
+            ));
+   }
 
-    private StepExecutor buildStepRunner(Step step, StepRunnerFactory runnerFactory) {
-        Set<Handler> handlers = new HashSet<>();
-        runnerFactory.getRequiredServices(step).forEach(
-                (serviceName, handlerType) -> addHandlerIfAvailable(serviceName, handlerType, handlers)
-        );
-        return runnerFactory.createStepRunner(step, handlers);
-    }
+   private Map.Entry<String, Handler> injectHandler(Map.Entry<String, Class<? extends Handler>> requiredHandler) {
+      return new AbstractMap<>.SimpleEntry<>(
+            requiredHandler.getKey(),
+            handlerProvider.getHandler(requiredHandler.getKey(), requiredHandler.getValue())
+      );
+   }
 
-    private void addHandlerIfAvailable(String serviceName, Class<? extends Handler> handlerType, Set<Handler> handlers) {
-        Handler handler = handlerProvider.getHandler(handlerType, serviceName);
-        if (handler.isAvailable()) {
-            handlers.add(handler);
-        }
-    }
+   private boolean isHandlerAvailable(Map.Entry<String, Handler> serviceHandler) {
+      return serviceHandler.getValue().isAvailable();
+   }
+
+
 }

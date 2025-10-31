@@ -33,9 +33,4 @@ public interface StepExecutor {
     */
    CompletableFuture<StepRunReport> execute(StepRun stepRun);
 
-   /**
-    * @return Canonical name of step that stepRunner can manage
-    */
-   String getSupportedStep();
-
 }

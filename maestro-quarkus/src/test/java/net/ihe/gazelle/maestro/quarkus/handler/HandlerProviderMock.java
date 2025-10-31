@@ -25,7 +25,7 @@ import net.ihe.gazelle.maestro.validation.step.business.ValidationHandler;
 public class HandlerProviderMock implements HandlerProvider {
 
     @Override
-    public Handler getHandler(Class<? extends Handler> handlerType, String serviceName) {
+    public Handler getHandler(String serviceName, Class<? extends Handler> handlerType) {
         if (handlerType.isAssignableFrom(ValidationHandler.class)) {
             return new ValidationHandlerMock();
         } else if (handlerType.isAssignableFrom(SimulationHandler.class)) {

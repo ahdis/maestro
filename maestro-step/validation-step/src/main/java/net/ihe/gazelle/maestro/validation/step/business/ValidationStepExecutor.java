@@ -16,19 +16,20 @@
 
 package net.ihe.gazelle.maestro.validation.step.business;
 
-import net.ihe.gazelle.maestro.api.business.testreport.Output;
-import net.ihe.gazelle.maestro.api.business.testreport.OutputBuilder;
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
-import net.ihe.gazelle.maestro.spi.business.runner.Handler;
 import net.ihe.gazelle.maestro.spi.business.runner.StepExecutor;
 import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
-import net.ihe.gazelle.maestro.validation.step.technical.handler.EvsValidationHandler;
-import net.ihe.gazelle.maestro.validation.step.technical.handler.GazelleValidationServiceHandler;
-import net.ihe.gazelle.maestro.validation.step.technical.mapper.EvsValidationMapper;
+import net.ihe.gazelle.validation.v2.api.business.UnknownValidationProfileException;
+import net.ihe.gazelle.validation.v2.api.business.profile.SupportedInput;
+import net.ihe.gazelle.validation.v2.api.business.profile.ValidationProfile;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationTestResult;
+import net.ihe.gazelle.validation.v2.api.business.request.InputInRequestBuilder;
 import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
+import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequestBuilder;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -40,68 +41,108 @@ import java.util.concurrent.CompletableFuture;
  * <br>
  * Use ValidationHandler to validate content which return a ValidationReport {@link ValidationHandler}
  * <br>
- * Assert ValidationReport to extract result and build a ValidationReportBuilder {@link net.ihe.gazelle.validation.v2.api.business.report.ValidationReportBuilder}
+ * Assert ValidationReport to extract result and build a ValidationReportBuilder
+ * {@link net.ihe.gazelle.validation.v2.api.business.report.ValidationReportBuilder}
  * <br>
  */
 public class ValidationStepExecutor implements StepExecutor {
 
-    public static final String VALIDATION_REPORT = "VALIDATION_REPORT";
-    private final ReportSerialization serializer;
-    private final Handler handler;
-    private final EvsValidationMapper evsValidationMapper = new EvsValidationMapper();
+   public static final String REPORT = "report";
 
-    public ValidationStepExecutor(ReportSerialization serializer, Handler validationHandler) {
-        this.serializer = serializer;
-        this.handler = validationHandler;
-    }
+   private final ReportSerializer serializer;
+   private final ValidationHandler handler;
 
-    @Override
-    public CompletableFuture<StepRunReportBuilder> execute(StepRun stepRun) {
-        ValidationStep validationStep = (ValidationStep) stepRun.step();
-        ValidationRequest validationRequest = ValidationRequestMapper.
-                createValidationRequest((ValidationStep) stepRun.step());
-        ValidationReport validationReport = new ValidationReport();
+   public ValidationStepExecutor(ValidationHandler validationHandler, ReportSerializer serializer) {
+      this.handler = validationHandler;
+      this.serializer = serializer;
+   }
 
-        if(handler instanceof EvsValidationHandler evsHandler) {
-            net.ihe.gazelle.evsapi.client.business.request.ValidationRequest evsRequest = evsValidationMapper.mapToEvsRequest(validationStep);
-            net.ihe.gazelle.evsapi.client.business.response.report.ValidationReport evsReport = evsHandler.validate(evsRequest);
-            validationReport = evsValidationMapper.mapEvsReportToValidationReport(evsReport, evsRequest);
-        }
-        if(handler instanceof GazelleValidationServiceHandler validationServiceHandler) {
-            validationReport = validationServiceHandler.validate(validationRequest);
-        }
+   @Override
+   public CompletableFuture<StepRunReport> execute(StepRun stepRun) {
+      String validationService = stepRun.getPropertyValue(ValidationStep.VALIDATION_SERVICE);
+      String validationProfile = stepRun.getPropertyValue(ValidationStep.VALIDATION_PROFILE);
 
-        OutputBuilder outputBuilder = new OutputBuilder()
-                .setContent(serializer.toByteArray(validationReport))
-                .setName(VALIDATION_REPORT)
-                .setFormat(Output.FORMAT_JSON)
-                ;
-        StepRunReportBuilder stepRunReportBuilder = new StepRunReportBuilder()
-                .setOutputs(List.of(outputBuilder))
-                .setStepId(stepRun.step().getName())
-                .setType(ValidationStep.TYPE);
-        computeResult(validationReport, stepRunReportBuilder);
-        return CompletableFuture.completedFuture(stepRunReportBuilder);
-    }
+      ValidationRequest validationRequest = buildValidationRequest(
+            stepRun,
+            validationProfile,
+            getSupportedInputs(validationService, validationProfile)
+      );
+      ValidationReport validationReport = new ValidationReport();
 
-    /**
-     * Compute the validation step result from the received validation report from external validation tool
-     *
-     * @param validationReport     The received validation report
-     * @param stepRunReportBuilder An object to build the Step run report
-     */
-    private void computeResult(ValidationReport validationReport, StepRunReportBuilder stepRunReportBuilder) {
-        if (ValidationTestResult.PASSED.equals(validationReport.getOverallResult())) {
-            stepRunReportBuilder.setResult(StepResult.PASSED);
-        } else if (ValidationTestResult.FAILED.equals(validationReport.getOverallResult())) {
-            stepRunReportBuilder.setResult(StepResult.FAILED);
-        } else {
-            stepRunReportBuilder.setResult(StepResult.UNDEFINED);
-        }
-    }
+      validationReport = handler.validate(validationRequest);
 
-    @Override
-    public final String getSupportedStep() {
-        return ValidationStep.class.getCanonicalName();
-    }
+
+      ByteArrayProperty reportOutput =
+            new ByteArrayProperty(REPORT, serializer.toByteArray(validationReport))
+            .setFileName("validation-report.json")
+            .setMimeType("application/json");
+
+      StepRunReportBuilder stepRunReportBuilder = new StepRunReportBuilder()
+            .setStepId(stepRun.getId())
+            .setStepName(stepRun.getName())
+            .setType(ValidationStep.TYPE)
+            .setResult(mapResult(validationReport.getOverallResult()))
+            .setOutputs(List.of(reportOutput));
+      return CompletableFuture.completedFuture(stepRunReportBuilder.build());
+   }
+
+   private ValidationRequest buildValidationRequest(StepRun stepRun, String validationProfile,
+                                                    final List<SupportedInput> supportedInputs) {
+      ValidationRequestBuilder requestBuilder = new ValidationRequestBuilder()
+            .setValidationProfileId(validationProfile);
+
+      if(supportedInputs.isEmpty()) {
+         // If no supported inputs defined for this profile, then use the fallback CONTENT_TO_VALIDATE input
+         requestBuilder.addInput(
+               getInputInRequest(ValidationStep.CONTENT_TO_VALIDATE, stepRun)
+         );
+      } else {
+         for (SupportedInput supportedInput : supportedInputs) {
+            if (supportedInput.isRequired()) {
+               requestBuilder.addInput(
+                     getInputInRequest(supportedInput.getId(), stepRun)
+               );
+            } else {
+               if (stepRun.hasProperty(supportedInput.getId())) {
+                  requestBuilder.addInput(
+                        getInputInRequest(supportedInput.getId(), stepRun)
+                  );
+               }
+            }
+         }
+      }
+      return requestBuilder.build();
+   }
+
+   private static InputInRequestBuilder getInputInRequest(String contentToValidate, StepRun stepRun) {
+      return new InputInRequestBuilder()
+            .setId(contentToValidate)
+            .setContent((byte[]) stepRun.getPropertyValue(contentToValidate));
+   }
+
+   private List<SupportedInput> getSupportedInputs(String validationService, String validationProfile) {
+      List<ValidationProfile> profiles = handler.getValidationProfiles();
+      return profiles.stream()
+            .filter(p -> validationProfile.equals(p.getProfileID()))
+            .findFirst()
+            .orElseThrow(() -> new UnknownValidationProfileException(
+                  "Validation Profile " + validationProfile + " not found on Validation Service " + validationService
+            ))
+            .getSupportedInputs();
+   }
+
+   /**
+    * Compute the validation step result from the received validation report from external validation tool
+    *
+    * @param validationResult     The received validation report
+    * @param stepRunReportBuilder An object to build the Step run report
+    */
+   private StepResult mapResult(ValidationTestResult validationResult) {
+      return switch (validationResult) {
+         case PASSED -> StepResult.PASSED;
+         case FAILED -> StepResult.FAILED;
+         default -> StepResult.UNDEFINED;
+      };
+   }
+
 }

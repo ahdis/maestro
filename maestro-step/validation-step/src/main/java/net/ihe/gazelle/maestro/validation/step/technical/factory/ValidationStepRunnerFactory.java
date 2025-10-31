@@ -20,35 +20,37 @@ import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.spi.business.runner.Handler;
 import net.ihe.gazelle.maestro.spi.business.runner.StepExecutor;
 import net.ihe.gazelle.maestro.spi.business.runner.StepRunnerFactory;
+import net.ihe.gazelle.maestro.validation.step.business.ValidationHandler;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStepExecutor;
-import net.ihe.gazelle.maestro.validation.step.technical.dto.ReportSerializationImpl;
+import net.ihe.gazelle.maestro.validation.step.technical.dto.ReportSerializerImpl;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 public class ValidationStepRunnerFactory implements StepRunnerFactory {
 
-    @Override
-    public String getSupportedStep() {
-        return ValidationStep.TYPE;
-    }
+   @Override
+   public String getSupportedStep() {
+      return ValidationStep.TYPE;
+   }
 
-    @Override
-    public Map<String, Class<? extends Handler>> getRequiredServices(Step step) {
-        Map<String, Class<? extends Handler>> requiredHandlers = new HashMap<>();
-        if (step instanceof ValidationStep validationStep) {
-            requiredHandlers.put(validationStep.getValidationService().getValue(), Handler.class);
-        }
-        return requiredHandlers;
-    }
+   @Override
+   public Map<String, Class<? extends Handler>> getRequiredServices(Step step) {
+      return Map.of(
+            step.getPropertyValue(ValidationStep.VALIDATION_SERVICE), ValidationHandler.class
+      );
+   }
 
-    @Override
-    public StepExecutor createStepRunner(Step step, Set<Handler> handlers) {
-        return handlers.stream().filter(Objects::nonNull).findFirst()
-                .map(handler -> new ValidationStepExecutor(new ReportSerializationImpl(), handler))
-                .orElseThrow(() -> new IllegalArgumentException("No validation handler provided"));
-    }
+   @Override
+   public StepExecutor createStepExecutor(Step step, Map<String, Handler> handlers) {
+      String serviceName = step.getPropertyValue(ValidationStep.VALIDATION_SERVICE);
+      return new ValidationStepExecutor(
+            Optional.ofNullable((ValidationHandler) handlers.get(serviceName))
+                  .orElseThrow(() -> new IllegalArgumentException("No validation handler provided for " + serviceName)),
+            new ReportSerializerImpl()
+      );
+   }
+
 }

@@ -6,12 +6,16 @@ import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator
 
 public class TestValidator extends AbstractValidator<Test> {
 
+   private final StepValidator stepValidator;
+
    public TestValidator() {
       super();
+      this.stepValidator = new StepValidator();
    }
 
    public TestValidator(ValidatorBuilderFactory validatorBuilderFactory) {
       super(validatorBuilderFactory);
+      this.stepValidator = new StepValidator(validatorBuilderFactory);
    }
 
    @Override
@@ -27,6 +31,6 @@ public class TestValidator extends AbstractValidator<Test> {
             .addRule(Test::isNameDefined, "Name must be set and not empty")
             .addRule(Test::atLeastOneStep, "Test must contain at least one step")
             .addRule(Test::areStepsUnique, "Steps must be unique")
-      ;
+            .addMember("steps", Test::getSteps, stepValidator::getAssembledValidatorBuilder);
    }
 }

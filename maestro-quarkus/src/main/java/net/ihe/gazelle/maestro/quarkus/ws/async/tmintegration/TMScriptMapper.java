@@ -18,6 +18,7 @@ package net.ihe.gazelle.maestro.quarkus.ws.async.tmintegration;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.test.Test;
 import net.ihe.gazelle.maestro.api.business.testreport.EntityIdentification;
@@ -227,8 +228,11 @@ public class TMScriptMapper {
                 String type = stepNode.get("@type").asText();
                 type = adaptTypeIfNeeded(type);
                 ArrayNode propertyNodes = (ArrayNode) stepNode.get("properties");
-                StepFactoryProvider provider = new StepFactoryProvider();
-                Step step = provider.create(type, name, parseProperties(propertyNodes));
+                Step step = new Step()
+                      .setId(name)
+                      .setName(name)
+                      .setType(type)
+                      .setProperties(parseProperties(propertyNodes));
                 test.addStep(step);
             } catch (NullPointerException e) {
                 throw new MissingArgumentException("Argument inputs is missing in steps");
@@ -236,17 +240,17 @@ public class TMScriptMapper {
         }
     }
 
-    private static Map<String, Property<?>> parseProperties(ArrayNode propertyNodes) {
-        Map<String, Property<?>> properties = new HashMap<>();
+    private static List<Property> parseProperties(ArrayNode propertyNodes) {
+        List<Property> properties = new ArrayList<>();
         for (JsonNode propertyNode : propertyNodes) {
             try {
                 String key = propertyNode.get("key").asText();
                 String value = propertyNode.get("value").asText();
                 ReferenceParser referenceParser = new ReferenceParser();
                 if (referenceParser.isReference(value)) {
-                    properties.put(key, new PropertyDTO(key, value, BYTE_ARRAY).createPropertyRef(referenceParser.getReference(value)));
+                    properties.add(new PropertyDTO(key, value, BYTE_ARRAY).createPropertyRef(referenceParser.getReference(value)));
                 } else  {
-                    properties.put(key, new PropertyDTO(key, value, STRING).createProperty());
+                    properties.add(new PropertyDTO(key, value, STRING).createProperty());
                 }
             } catch (NullPointerException e) {
                 throw new MissingArgumentException("Argument inputs is missing in properties");

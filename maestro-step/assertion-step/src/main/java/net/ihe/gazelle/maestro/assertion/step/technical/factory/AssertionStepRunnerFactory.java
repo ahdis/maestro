@@ -44,7 +44,7 @@ public class AssertionStepRunnerFactory implements StepRunnerFactory {
     }
 
     @Override
-    public StepExecutor createStepRunner(Step step, Set<Handler> handlers) {
+    public StepExecutor createStepExecutor(Step step, Set<Handler> handlers) {
         return new AssertionStepExecutor(new AssertionHandlerImpl());
     }
 

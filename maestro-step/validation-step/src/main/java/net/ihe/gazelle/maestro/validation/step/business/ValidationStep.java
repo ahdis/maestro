@@ -16,106 +16,58 @@
 
 package net.ihe.gazelle.maestro.validation.step.business;
 
-import net.ihe.gazelle.maestro.api.business.test.Step;
-import net.ihe.gazelle.maestro.api.business.testrun.Property;
+import net.ihe.gazelle.maestro.api.business.test.SupportedFileInput;
+import net.ihe.gazelle.maestro.api.business.test.SupportedInput;
+import net.ihe.gazelle.maestro.api.business.test.SupportedTextInput;
+import net.ihe.gazelle.maestro.spi.business.runner.StepDefinition;
 
-import java.util.ArrayList;
+import java.io.Serial;
 import java.util.List;
 
 /**
  * <p>
- * A Validation Step is an automated step used to validate some content with validation service.
- * This step has 3 properties :
+ * A Validation Step is an automated step used to validate some content with validation service. This step has 3
+ * properties :
  * </p>
  * <p>
- *         <b>VALIDATION_SERVICE</b> String name of validation service name.
- *          ServiceRegistryDAO will return a list of services with a name field.
- *          VALIDATION_SERVICE must be in this list.
+ * <b>VALIDATION_SERVICE</b> String name of validation service name.
+ * ServiceRegistryDAO will return a list of services with a name field. VALIDATION_SERVICE must be in this list.
  * </p>
  * <p>
- *          <b>VALIDATION_PROFILE</b> String name of validation Profile provided by validation service
+ * <b>VALIDATION_PROFILE</b> String name of validation Profile provided by validation service
  * </p>
  * <p>
- *          <b>CONTENT_TO_VALIDATE</b> Byte array of content to validate with validation profile on validation service
+ * <b>CONTENT_TO_VALIDATE</b> Byte array of content to validate with validation profile on validation service
  * </p>
  */
-public class ValidationStep implements Step {
+public class ValidationStep implements StepDefinition {
 
-    public static final String TYPE = "VALIDATION";
+   public static final String TYPE = "VALIDATION";
 
-    public static final String VALIDATION_SERVICE = "validationService";
-    public static final String VALIDATION_PROFILE = "validationProfile";
+   public static final String VALIDATION_SERVICE = "validationService";
+   public static final String VALIDATION_PROFILE = "validationProfile";
+   public static final String CONTENT_TO_VALIDATE = "contentToValidate";
 
-    private String name;
-    private Property<String> validationService;
-    private Property<String> validationProfile;
-    private List<Property<byte[]>> contentsToValidate = new ArrayList<>();
+   @Serial
+   private static final long serialVersionUID = 7657361003088468932L;
 
-    public ValidationStep() {
-    }
+   public ValidationStep() {
+   }
 
-    public ValidationStep(String name, Property<String> validationService, Property<String> validationProfile, List<Property<byte[]>> contentsToValidate) {
-        this.name = name;
-        this.validationService = validationService;
-        this.validationProfile = validationProfile;
-        this.contentsToValidate = contentsToValidate;
-    }
+   @Override
+   public String getType() {
+      return TYPE;
+   }
 
-    @Override
-    public String getName() {
-        return name;
-    }
+   @Override
+   public List<SupportedInput> getSupportedInputs() {
+      return List.of(
+            new SupportedTextInput().setId(VALIDATION_SERVICE).setLabel("Validation service").setRequired(true),
+            new SupportedTextInput().setId(VALIDATION_PROFILE).setLabel("Validation profile").setRequired(true),
+            // CONTENT_TO_VALIDATE is not required because it's only a fallback in case the validation profile does not
+            // define any expected inputs.
+            new SupportedFileInput().setId(CONTENT_TO_VALIDATE).setLabel("Content to validate").setRequired(false)
+      );
+   }
 
-    @Override
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Property<String> getValidationService() {
-        return validationService;
-    }
-
-    public Property<String> getValidationProfile() {
-        return validationProfile;
-    }
-
-    public List<Property<byte[]>> getContentsToValidate() {
-        return contentsToValidate;
-    }
-
-    @Override
-    public List<Property<?>> getProperties() {
-        List<Property<?>> props = new ArrayList<>();
-        props.add(validationService);
-        props.add(validationProfile);
-        props.addAll(contentsToValidate);
-        return props;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public void setProperties(List<Property<?>> properties) {
-        if (properties == null) {
-            throw new IllegalArgumentException("Property shouldn't be null");
-        }
-        contentsToValidate = new ArrayList<>();
-        properties.forEach(property -> {
-            if (property.getName().equals(VALIDATION_SERVICE)) {
-                validationService = (Property<String>) property;
-            } else if (property.getName().equals(VALIDATION_PROFILE)) {
-                validationProfile = (Property<String>) property;
-            } else if (byte[].class.equals(property.getType())) {
-                contentsToValidate.add((Property<byte[]>) property);
-            }
-            else {
-                throw new IllegalArgumentException("Property " + property.getName()
-                        + " is neither a validation step property nor a content to validate");
-            }
-        });
-    }
-
-    @Override
-    public String getType() {
-        return TYPE;
-    }
 }

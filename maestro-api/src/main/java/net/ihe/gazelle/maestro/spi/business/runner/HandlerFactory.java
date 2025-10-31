@@ -30,11 +30,14 @@ public interface HandlerFactory {
 
     /**
      *
+     * @param serviceName
      * @param providedInterface The provided interface used by the handler
+     *
      * @return A Handler that can provide interaction with service
+     *
      * @throws IllegalArgumentException if service has no binding set
      */
-    Handler createHandler(ProvidedInterface providedInterface, ConfigProvider configProvider) throws IllegalArgumentException;
+    Handler createHandler(String serviceName, ProvidedInterface providedInterface, ConfigProvider configProvider) throws IllegalArgumentException;
 
     /**
      * Get the list of consumed interfaces by this handler factory.

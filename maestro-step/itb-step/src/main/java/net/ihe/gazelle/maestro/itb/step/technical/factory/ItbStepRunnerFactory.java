@@ -43,7 +43,7 @@ public class ItbStepRunnerFactory implements StepRunnerFactory {
     }
 
     @Override
-    public StepExecutor createStepRunner(Step step, Set<Handler> handlers) {
+    public StepExecutor createStepExecutor(Step step, Set<Handler> handlers) {
         return handlers.stream().filter(ItbHandlerImpl.class::isInstance).findFirst()
                 .map(handler -> new ItbStepExecutor((ItbHandlerImpl) handler))
                 .orElseThrow(() -> new IllegalArgumentException("No itb handler provided"));

@@ -35,7 +35,7 @@ public class ItbHandlerFactory implements HandlerFactory {
     }
 
     @Override
-    public Handler createHandler(ProvidedInterface providedInterface, ConfigProvider configProvider) throws IllegalArgumentException {
+    public Handler createHandler(String serviceName, ProvidedInterface providedInterface, ConfigProvider configProvider) throws IllegalArgumentException {
         return new ItbHandlerImpl();
     }
 

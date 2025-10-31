@@ -14,25 +14,22 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.validation.step.technical.dto;
+package net.ihe.gazelle.maestro.simulation.step.technical.dto;
 
-import net.ihe.gazelle.maestro.validation.step.business.ReportSerialization;
+import net.ihe.gazelle.maestro.simulation.step.business.ReportSerializer;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.SerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.SerializationException;
-import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
-import net.ihe.gazelle.validation.v2.api.technical.dto.report.ValidationReportDTO;
+import net.ihe.gazelle.simulation.business.callback.SimulationReport;
+import net.ihe.gazelle.simulation.jaxrs.api.technical.dto.callback.SimulationReportDTO;
 
-/**
- * Provided implementation for serializing validation report in Validation Step runner
- */
-public class ReportSerializationImpl implements ReportSerialization {
+public class ReportSerializerImpl implements ReportSerializer {
 
     @Override
-    public byte[] toByteArray(ValidationReport report) {
+    public byte[] toByteArray(SimulationReport report) {
         try {
             SerDes serDes = new JacksonSerDes();
-            ValidationReportDTO dto = new ValidationReportDTO(report);
+            SimulationReportDTO dto = new SimulationReportDTO(report);
 
             return serDes.serialize(dto);
         } catch (SerializationException e) {

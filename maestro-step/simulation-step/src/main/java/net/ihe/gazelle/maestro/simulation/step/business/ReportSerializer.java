@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.validation.step.business;
+package net.ihe.gazelle.maestro.simulation.step.business;
 
-import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
+import net.ihe.gazelle.simulation.business.callback.SimulationReport;
 
-public interface ReportSerialization {
+public interface ReportSerializer {
 
     /**
      * Convert a ValidationReport object to byte array
@@ -26,5 +26,5 @@ public interface ReportSerialization {
      * @return same report as byte array
      * @throws IllegalStateException if report can't be converted
      */
-    byte[] toByteArray(ValidationReport report);
+    byte[] toByteArray(SimulationReport report);
 }

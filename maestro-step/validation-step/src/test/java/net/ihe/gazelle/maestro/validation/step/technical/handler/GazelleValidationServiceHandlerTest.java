@@ -56,21 +56,8 @@ class GazelleValidationServiceHandlerTest {
     }
 
     @Test
-    void should_create_handler_with_validation_service_controller() {
-        // Given & When
-        GazelleValidationServiceHandler handler = new GazelleValidationServiceHandler();
-
-        // Then
-        assertNotNull(handler);
-    }
-
-    @Test
     void should_create_handler_with_null_controller() {
-        // Given & When
-        GazelleValidationServiceHandler handler = new GazelleValidationServiceHandler(null);
-
-        // Then
-        assertNotNull(handler);
+        assertThrows(IllegalArgumentException.class, () -> new GazelleValidationServiceHandler(null));
     }
 
     @Test

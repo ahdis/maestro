@@ -40,13 +40,13 @@ public class HandlerProviderSPI implements HandlerProvider {
     }
 
     @Override
-    public Handler getHandler(Class<? extends Handler> requestedHandlerType, String serviceName) {
+    public Handler getHandler(String serviceName, Class<? extends Handler> requestedHandlerType) {
         ServiceLoader<HandlerFactory> serviceLoader = ServiceLoader.load(HandlerFactory.class);
         Service service = serviceRegistry.getService(serviceName);
         for (HandlerFactory handlerFactory : serviceLoader) {
             ProvidedInterface providedInterface = getMatchingInterface(service, handlerFactory.getConsumedInterfaces());
             if (providedInterface != null && requestedHandlerType.isAssignableFrom(handlerFactory.getHandlerType())) {
-                return handlerFactory.createHandler(providedInterface, configProvider);
+                return handlerFactory.createHandler(serviceName, providedInterface, configProvider);
             }
         }
         throw new HandlerNotFoundException("Unable to find a handler implementation for type: " + requestedHandlerType.getCanonicalName());

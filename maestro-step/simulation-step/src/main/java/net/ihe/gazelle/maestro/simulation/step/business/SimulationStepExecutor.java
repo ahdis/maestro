@@ -17,10 +17,13 @@
 package net.ihe.gazelle.maestro.simulation.step.business;
 
 import net.ihe.gazelle.errorhandling.business.UnexpectedErrorBuilder;
+import net.ihe.gazelle.framework.modelvalidator.business.ObjectResult;
 import net.ihe.gazelle.lang.ExecutionRuntimeException;
-import net.ihe.gazelle.maestro.api.business.testreport.Output;
-import net.ihe.gazelle.maestro.api.business.testreport.OutputBuilder;
+import net.ihe.gazelle.lang.TimeoutRuntimeException;
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
+import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.spi.business.runner.StepExecutor;
 import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
@@ -29,17 +32,22 @@ import net.ihe.gazelle.simulation.business.callback.Result;
 import net.ihe.gazelle.simulation.business.callback.SimulationReport;
 import net.ihe.gazelle.simulation.business.callback.SimulationReportValidator;
 import net.ihe.gazelle.simulation.business.sequence.ServiceUnavailableException;
+import net.ihe.gazelle.simulation.business.sequence.SupportedParameter;
 import net.ihe.gazelle.simulation.business.setup.AdditionalInstructions;
 import net.ihe.gazelle.simulation.business.setup.AlreadyRunningException;
 import net.ihe.gazelle.simulation.business.setup.InvalidParameterValueException;
 import net.ihe.gazelle.simulation.business.setup.MissingRequiredParameterException;
 import net.ihe.gazelle.simulation.business.setup.Parameter;
+import net.ihe.gazelle.simulation.business.setup.ParameterBuilder;
+import net.ihe.gazelle.simulation.business.setup.ParameterType;
 import net.ihe.gazelle.simulation.business.setup.SimulationRequest;
+import net.ihe.gazelle.simulation.business.setup.SimulationRequestBuilder;
 import net.ihe.gazelle.simulation.business.setup.UnknownSequenceException;
 import net.ihe.gazelle.simulation.business.setup.UnknownSimulationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -48,123 +56,189 @@ import java.util.concurrent.TimeoutException;
 
 public class SimulationStepExecutor implements StepExecutor {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SimulationStepExecutor.class);
-    public static final String SIMULATION_REPORT = "SIMULATION_REPORT";
+   private static final Logger LOG = LoggerFactory.getLogger(SimulationStepExecutor.class);
+   public static final String REPORT = "report";
+   public static final int DEFAULT_TIMEOUT = 60;
 
-    private final ReportSerialization serializer;
-    private final SimulationHandler simulationHandler;
-    private final UserInteractionHandler userInteractionHandler;
+   private final SimulationHandler simulationHandler;
+   private final UserInteractionHandler userInteractionHandler;
+   private final ReportSerializer serializer;
+   private final SimulationReportValidator reportValidator = new SimulationReportValidator();
 
-    public SimulationStepExecutor(ReportSerialization serializer, SimulationHandler simulationHandler, UserInteractionHandler userInteractionHandler) {
-        this.serializer = serializer;
-        this.simulationHandler = simulationHandler;
-        this.userInteractionHandler = userInteractionHandler;
-    }
+   public SimulationStepExecutor(SimulationHandler simulationHandler, UserInteractionHandler userInteractionHandler,
+                                 ReportSerializer serializer) {
+      this.simulationHandler = simulationHandler;
+      this.userInteractionHandler = userInteractionHandler;
+      this.serializer = serializer;
+   }
 
-    @Override
-    public CompletableFuture<StepRunReportBuilder> execute(StepRun stepRun) {
-        try {
-            SimulationRequest simulationRequest = SimulationRequestMapper
-                    .createSimulationRequest((SimulationStep) stepRun.step());
-            CompletableFuture<SimulationReport> futureReport = new CompletableFuture<>();
-            simulationHandler.simulate(simulationRequest, this::showInstructions, futureReport::complete);
-            SimulationReport simulationReport = getSimulationReport(simulationRequest, futureReport);
-            OutputBuilder outputBuilder = new OutputBuilder()
-                    .setContent(serializer.toByteArray(simulationReport))
-                    .setName(SIMULATION_REPORT)
-                    .setFormat(Output.FORMAT_JSON)
-                    ;
-            StepRunReportBuilder stepRunReportBuilder = prepareStepReport(stepRun)
-                    .setOutputs(List.of(outputBuilder));
-            computeResult(simulationReport, stepRunReportBuilder);
-            return CompletableFuture.completedFuture(stepRunReportBuilder);
-        } catch (MissingRequiredParameterException e) {
-            return buildReportWithError(stepRun, e, "Missing Required Parameter");
-        } catch (InvalidParameterValueException e) {
-            return buildReportWithError(stepRun, e, "Invalid Parameter Value");
-        } catch (UnknownSequenceException e) {
-            return buildReportWithError(stepRun, e, "Unknown Simulation Sequence");
-        } catch (UnknownSimulationException e) {
-            return buildReportWithError(stepRun, e, "Unknown Simulation session");
-        } catch (AlreadyRunningException e) {
-            return buildReportWithError(stepRun, e, "Simulation already running");
-        } catch (ServiceUnavailableException e) {
-            return buildReportWithError(stepRun, e, "Service Unavailable");
-        } catch (ClassCastException e) {
-            return buildReportWithError(stepRun, e, "Error on property type");
-        } catch (RuntimeException e) {
-            return buildReportWithError(stepRun, e, "Error from simulator");
-        }
-    }
+   @Override
+   public CompletableFuture<StepRunReport> execute(StepRun stepRun) {
+      try {
+         String simulationService = stepRun.getPropertyValue(SimulationStepDefinition.SIMULATION_SERVICE);
+         String sequenceId = stepRun.getPropertyValue(SimulationStepDefinition.SEQUENCE_ID);
 
-    private SimulationReport getSimulationReport(SimulationRequest simulationRequest, CompletableFuture<SimulationReport> futureReport) {
-        long timeout = simulationRequest.getTimeoutSeconds() + 10L;
-        try {
-            return futureReport.get(timeout, TimeUnit.SECONDS);
-        } catch (TimeoutException e) {
-            LOG.error("Simulation timed out after {} seconds", timeout);
-            throw new TimeoutRuntimeException("Simulation timed out after " + timeout + " seconds");
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return null;
-        } catch (ExecutionException e) {
-            throw new ExecutionRuntimeException(e);
-        }
-    }
+         SimulationRequest simulationRequest = createSimulationRequest(
+               sequenceId,
+               getTimeoutSeconds(stepRun),
+               stepRun,
+               getSupportedParameters(simulationService, sequenceId)
+         );
 
-    private StepRunReportBuilder prepareStepReport(StepRun stepRun) {
-        return new StepRunReportBuilder()
-                .setStepId(stepRun.step().getName())
-                .setType(SimulationStep.TYPE);
-    }
+         CompletableFuture<SimulationReport> futureReport = new CompletableFuture<>();
+         simulationHandler.simulate(simulationRequest, this::showInstructions, futureReport::complete);
+         SimulationReport simulationReport = waitSimulationReport(simulationRequest, futureReport);
 
-    private CompletableFuture<StepRunReportBuilder> buildReportWithError(StepRun stepRun, Exception e, String name) {
-        return CompletableFuture.completedFuture(prepareStepReport(stepRun)
-                .addUnexpectedError(
-                        new UnexpectedErrorBuilder()
-                                .setName(name)
-                                .setMessage(name)
-                                .setCause(new UnexpectedErrorBuilder().fromThrowable(e))
-                ));
-    }
+         return CompletableFuture.completedFuture(buildStepRunReport(stepRun, simulationReport));
+      } catch (MissingRequiredParameterException e) {
+         return buildReportWithError(stepRun, e, "Missing Required Parameter");
+      } catch (InvalidParameterValueException e) {
+         return buildReportWithError(stepRun, e, "Invalid Parameter Value");
+      } catch (UnknownSequenceException e) {
+         return buildReportWithError(stepRun, e, "Unknown Simulation Sequence");
+      } catch (UnknownSimulationException e) {
+         return buildReportWithError(stepRun, e, "Unknown Simulation session");
+      } catch (AlreadyRunningException e) {
+         return buildReportWithError(stepRun, e, "Simulation already running");
+      } catch (ServiceUnavailableException e) {
+         return buildReportWithError(stepRun, e, "Service Unavailable");
+      } catch (ClassCastException e) {
+         return buildReportWithError(stepRun, e, "Error on property type");
+      } catch (RuntimeException e) {
+         return buildReportWithError(stepRun, e, "Error from simulator");
+      }
+   }
 
-    /**
-     * Compute the simulation step result from the received simulation report from external simulation tool
-     * @param simulationReport The received simulation report
-     * @param stepRunReportBuilder An object to build the Step run report
-     */
-    private void computeResult(SimulationReport simulationReport, StepRunReportBuilder stepRunReportBuilder) {
-        SimulationReportValidator validator = new SimulationReportValidator();
-        validator.validate(simulationReport).getAllInvalidRules().forEach(
-                ruleResult -> stepRunReportBuilder.addUnexpectedError(
-                        new UnexpectedErrorBuilder()
-                                .setName(ruleResult.getId())
-                                .setMessage(ruleResult.getDescription())
-                )
-        );
-        if (Result.PASSED.equals(simulationReport.getResult())) {
-            stepRunReportBuilder.setResult(StepResult.PASSED);
-        } else if (Result.FAILED.equals(simulationReport.getResult())) {
-            stepRunReportBuilder.setResult(StepResult.FAILED);
-        } else {
-            stepRunReportBuilder.setResult(StepResult.UNDEFINED);
-        }
-    }
+   private static int getTimeoutSeconds(StepRun stepRun) {
+      return stepRun.hasProperty(SimulationStepDefinition.TIMEOUT_SECONDS) ?
+            stepRun.getPropertyValue(SimulationStepDefinition.TIMEOUT_SECONDS) :
+            DEFAULT_TIMEOUT;
+   }
 
-    private void showInstructions(AdditionalInstructions additionalInstructions) {
-        StringBuilder instructions = new StringBuilder()
-                .append(additionalInstructions.getInstruction())
-                .append("\n");
-        for (Parameter parameter : additionalInstructions.getParameters()) {
-            instructions
-                    .append("name : ").append(parameter.getName()).append("\n")
-                    .append("value : ").append(parameter.getValue()).append("\n");
-        }
-        userInteractionHandler.displayMessage(instructions.toString());
-    }
+   private List<SupportedParameter> getSupportedParameters(String simulationService, String sequenceId) {
+      return simulationHandler.getSimulationSequences().stream()
+            .filter(seq -> sequenceId.equals(seq.getId()))
+            .findFirst().orElseThrow(() ->
+                  new UnknownSequenceException(
+                        "Unknown Simulation Sequence with id: " + sequenceId + " for service: " + simulationService))
+            .getSupportedParameters();
+   }
 
-    @Override
-    public String getSupportedStep() {
-        return SimulationStep.class.getCanonicalName();
-    }
+   public static SimulationRequest createSimulationRequest(String sequenceId, int timeoutSeconds, StepRun stepRun,
+                                                           List<SupportedParameter> supportedParameters) {
+      SimulationRequestBuilder simulationRequest = new SimulationRequestBuilder()
+            .setSequenceId(sequenceId)
+            .setTimeoutSeconds(timeoutSeconds);
+
+      if (!supportedParameters.isEmpty()) {
+         for (SupportedParameter supportedParameter : supportedParameters) {
+            if (supportedParameter.isRequired()) {
+               simulationRequest.addSimulationParameter(
+                     toParameter(stepRun.getProperty(supportedParameter.getName()), supportedParameter)
+               );
+            } else {
+               if (stepRun.hasProperty(supportedParameter.getName())) {
+                  simulationRequest.addSimulationParameter(
+                        toParameter(stepRun.getProperty(supportedParameter.getName()), supportedParameter)
+                  );
+               }
+            }
+         }
+      }
+
+      return simulationRequest.build();
+   }
+
+   private static ParameterBuilder toParameter(final Property property, SupportedParameter supportedParameter) {
+      return new ParameterBuilder()
+            .setName(supportedParameter.getName())
+            .setType(supportedParameter.getType())
+            .setValue(toParameterValue(
+                  property, supportedParameter.getType()
+            ));
+   }
+
+   private static String toParameterValue(Property property, ParameterType expectedType) {
+      return switch (expectedType) {
+         case TEXT -> (String) property.getValue();
+         case BOOLEAN -> ((Boolean) property.getValue()).toString();
+         case FILE -> Base64.getEncoder().encodeToString((byte[]) property.getValue());
+      };
+   }
+
+   private void showInstructions(AdditionalInstructions additionalInstructions) {
+      StringBuilder instructions = new StringBuilder()
+            .append(additionalInstructions.getInstruction())
+            .append("\n");
+      for (Parameter parameter : additionalInstructions.getParameters()) {
+         instructions
+               .append("name : ").append(parameter.getName()).append("\n")
+               .append("value : ").append(parameter.getValue()).append("\n");
+      }
+      userInteractionHandler.displayMessage(instructions.toString());
+   }
+
+   private SimulationReport waitSimulationReport(SimulationRequest simulationRequest,
+                                                 CompletableFuture<SimulationReport> futureReport) {
+      long timeout = simulationRequest.getTimeoutSeconds() + 10L;
+      try {
+         return futureReport.get(timeout, TimeUnit.SECONDS);
+      } catch (TimeoutException e) {
+         LOG.error("Simulation timed out after {} seconds", timeout);
+         throw new TimeoutRuntimeException("Simulation timed out after " + timeout + " seconds");
+      } catch (InterruptedException e) {
+         Thread.currentThread().interrupt();
+         // FIXME returning a null report will cause NPE later.
+         // After an interrupt, we should immediatly stop and leave the SimulationStepExecutor.
+         return null;
+      } catch (ExecutionException e) {
+         throw new ExecutionRuntimeException(e);
+      }
+   }
+
+   private StepRunReport buildStepRunReport(StepRun stepRun, SimulationReport simulationReport) {
+
+      ObjectResult reportValidationResult = reportValidator.validate(simulationReport);
+      return prepareStepReport(stepRun)
+            .setResult(toStepResult(simulationReport.getResult()))
+            .setOutputs(List.of(
+                  new ByteArrayProperty(REPORT, serializer.toByteArray(simulationReport))
+                        .setFileName("simulation-report.json")
+                        .setMimeType("application/json")
+            ))
+            .addUnexpectedErrors(
+                  reportValidationResult.getAllInvalidRules().stream()
+                        .map(ruleResult -> new UnexpectedErrorBuilder()
+                              .setName("Invalid simulation report (" + ruleResult.getId() + ")")
+                              .setMessage(ruleResult.getDescription())
+                        ).toList()
+            )
+            .build();
+   }
+
+   private StepRunReportBuilder prepareStepReport(StepRun stepRun) {
+      return new StepRunReportBuilder()
+            .setStepId(stepRun.getId())
+            .setStepName(stepRun.getName())
+            .setType(SimulationStepDefinition.TYPE);
+   }
+
+   private CompletableFuture<StepRunReport> buildReportWithError(StepRun stepRun, Exception e, String name) {
+      return CompletableFuture.completedFuture(prepareStepReport(stepRun)
+            .addUnexpectedError(
+                  new UnexpectedErrorBuilder()
+                        .setName(name)
+                        .setMessage(name)
+                        .setCause(new UnexpectedErrorBuilder().fromThrowable(e))
+            )
+            .build());
+   }
+
+   private StepResult toStepResult(Result result) {
+      return switch (result) {
+         case PASSED -> StepResult.PASSED;
+         case FAILED -> StepResult.FAILED;
+         default -> StepResult.UNDEFINED;
+      };
+   }
 }

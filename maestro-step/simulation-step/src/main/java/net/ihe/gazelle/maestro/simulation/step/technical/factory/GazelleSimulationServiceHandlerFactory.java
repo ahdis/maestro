@@ -41,7 +41,7 @@ public class GazelleSimulationServiceHandlerFactory implements HandlerFactory {
     }
 
     @Override
-    public Handler createHandler(ProvidedInterface providedInterface, ConfigProvider configProvider) throws IllegalArgumentException {
+    public Handler createHandler(String serviceName, ProvidedInterface providedInterface, ConfigProvider configProvider) throws IllegalArgumentException {
         try {
             HttpRestBinding binding = (HttpRestBinding) providedInterface.getBindings().getFirst();
             return new GazelleSimulationServiceHandler(

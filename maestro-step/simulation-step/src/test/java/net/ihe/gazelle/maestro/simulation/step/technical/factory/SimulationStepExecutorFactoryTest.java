@@ -18,7 +18,7 @@ package net.ihe.gazelle.maestro.simulation.step.technical.factory;
 
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
-import net.ihe.gazelle.maestro.simulation.step.business.SimulationStep;
+import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepDefinition;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -37,9 +37,9 @@ class SimulationStepExecutorFactoryTest {
     @Test
     void getRequiredServicesOfSimulationStep(){
         Step simulationStep = new SimulationStep("simulationStep",
-                new Property<>(SimulationStep.SIMULATION_SERVICE, "MCSD"),
-                new Property<>(SimulationStep.SEQUENCE_ID, "sequencId"),
-                new Property<>(SimulationStep.TIMEOUT_SECONDS, 60),
+                new Property<>(SimulationStepDefinition.SIMULATION_SERVICE, "MCSD"),
+                new Property<>(SimulationStepDefinition.SEQUENCE_ID, "sequencId"),
+                new Property<>(SimulationStepDefinition.TIMEOUT_SECONDS, 60),
                 List.of(
                         new Property<>("Patient Id", "1.1.1.1"),
                         new Property<>("Boolean prop", true),

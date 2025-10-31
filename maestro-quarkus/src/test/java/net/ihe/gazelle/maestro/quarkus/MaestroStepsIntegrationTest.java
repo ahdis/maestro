@@ -35,7 +35,7 @@ import net.ihe.gazelle.maestro.quarkus.broker.MaestroEventController;
 import net.ihe.gazelle.maestro.quarkus.factory.TestRunMockEvent;
 import net.ihe.gazelle.maestro.quarkus.handler.HandlerProviderMock;
 import net.ihe.gazelle.maestro.quarkus.mock.InMemoryTestReportRecordService;
-import net.ihe.gazelle.maestro.simulation.step.business.SimulationStep;
+import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepDefinition;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 import org.junit.jupiter.api.BeforeAll;
@@ -275,9 +275,9 @@ class MaestroStepsIntegrationTest {
             new Property<>("File prop", "test".getBytes())
       );
       Step simulationStep = new SimulationStep("simulationStep",
-            new Property<>(SimulationStep.SIMULATION_SERVICE, "MCSD"),
-            new Property<>(SimulationStep.SEQUENCE_ID, "sequencId"),
-            new Property<>(SimulationStep.TIMEOUT_SECONDS, 60),
+            new Property<>(SimulationStepDefinition.SIMULATION_SERVICE, "MCSD"),
+            new Property<>(SimulationStepDefinition.SEQUENCE_ID, "sequencId"),
+            new Property<>(SimulationStepDefinition.TIMEOUT_SECONDS, 60),
             inputs);
       TestSuiteRun testSuiteRun = new TestSuiteRun();
       net.ihe.gazelle.maestro.api.business.test.Test test =

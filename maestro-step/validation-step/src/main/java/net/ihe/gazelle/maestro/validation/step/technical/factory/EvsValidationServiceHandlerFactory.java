@@ -40,7 +40,7 @@ public class EvsValidationServiceHandlerFactory implements HandlerFactory {
     }
 
     @Override
-    public Handler createHandler(ProvidedInterface providedInterface, ConfigProvider configProvider) {
+    public Handler createHandler(String serviceName, ProvidedInterface providedInterface, ConfigProvider configProvider) {
         if (providedInterface == null) {
             throw new IllegalArgumentException("ProvidedInterface cannot be null");
         }
@@ -57,7 +57,7 @@ public class EvsValidationServiceHandlerFactory implements HandlerFactory {
                 throw new IllegalArgumentException("Provided interface has no valid service URL");
             }
 
-            return new EvsValidationHandler(new ValidationClientHttpImpl(evsRestUrl.trim()));
+            return new EvsValidationHandler(serviceName, new ValidationClientHttpImpl(evsRestUrl.trim()));
 
         } catch (ClassCastException e) {
             throw new IllegalArgumentException("First binding is not an HttpRestBinding", e);

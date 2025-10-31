@@ -16,6 +16,7 @@
 
 package net.ihe.gazelle.maestro.api.business.test;
 
+import net.ihe.gazelle.maestro.api.business.property.MissingPropertyException;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 
 import java.io.Serial;
@@ -88,10 +89,32 @@ public class Step implements Serializable {
       return properties.containsKey(name);
    }
 
-   public <T> T getPropertyValue(String name) {
+   /**
+    * Get the property with the given name.
+    *
+    * @param name the name of the property
+    *
+    * @return the property
+    *
+    * @throws MissingPropertyException if no property with the given name is found
+    */
+   public Property getProperty(String name) {
       return Optional.ofNullable(properties.get(name))
-            .orElseThrow(() -> new NoSuchElementException("No property found with name: " + name))
-            .getValue();
+            .orElseThrow(() -> new MissingPropertyException("No property found with name: " + name));
+   }
+
+   /**
+    * Get the value of the property with the given name.
+    *
+    * @param name the name of the property
+    * @param <T>  the type of the property value
+    *
+    * @return the value of the property
+    *
+    * @throws MissingPropertyException if no property with the given name is found
+    */
+   public <T> T getPropertyValue(String name) {
+      return getProperty(name).getValue();
    }
 
    public synchronized Step setProperties(List<Property> properties) {
@@ -104,6 +127,18 @@ public class Step implements Serializable {
       return this;
    }
 
+   public boolean isIdDefined() {
+      return id != null && !id.isEmpty();
+   }
+
+   public boolean isNameDefined() {
+      return name != null && !name.isEmpty();
+   }
+
+   public boolean isTypeDefined() {
+      return type != null && !type.isEmpty();
+   }
+
    private ConcurrentHashMap<String, Property> buildMap(List<Property> properties) {
       return properties.stream().collect(
             ConcurrentHashMap::new,
@@ -111,6 +146,5 @@ public class Step implements Serializable {
             ConcurrentHashMap::putAll
       );
    }
-
 }
 

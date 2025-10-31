@@ -16,12 +16,15 @@
 
 package net.ihe.gazelle.maestro.validation.step.business;
 
-public class ServiceClientException extends RuntimeException {
-    public ServiceClientException(String message) {
-        super(message);
-    }
+import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
 
-    public ServiceClientException(String message, Throwable cause) {
-      super(message, cause);
-    }
+public interface ReportSerializer {
+
+    /**
+     * Convert a ValidationReport object to byte array
+     * @param report object to convert
+     * @return same report as byte array
+     * @throws IllegalStateException if report can't be converted
+     */
+    byte[] toByteArray(ValidationReport report);
 }

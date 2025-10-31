@@ -35,8 +35,8 @@ class ValidationStepExecutorTest {
                 List.of(new Property<>("content", "abc".getBytes(StandardCharsets.UTF_8))));
     }
 
-    private ReportSerialization serializerReturning(byte[] bytes) {
-        ReportSerialization s = mock(ReportSerialization.class);
+    private ReportSerializer serializerReturning(byte[] bytes) {
+        ReportSerializer s = mock(ReportSerializer.class);
         when(s.toByteArray(any(ValidationReport.class))).thenReturn(bytes);
         return s;
     }
@@ -54,7 +54,8 @@ class ValidationStepExecutorTest {
 
     @Test
     void execute_setsPassed_whenReportPassed() {
-        ValidationStepExecutor runner = new ValidationStepExecutor(serializerReturning("{}".getBytes(StandardCharsets.UTF_8)), handlerReturning(ValidationTestResult.PASSED));
+        ValidationStepExecutor runner = new ValidationStepExecutor(handlerReturning(ValidationTestResult.PASSED),
+              serializerReturning("{}".getBytes(StandardCharsets.UTF_8)));
         StepRun stepRun = new StepRun("ts", "tr", buildStep("v1"));
         StepRunReportBuilder b = runner.execute(stepRun).join();
         StepRunReport report = b.build();
@@ -65,7 +66,8 @@ class ValidationStepExecutorTest {
 
     @Test
     void execute_setsFailed_whenReportFailed() {
-        ValidationStepExecutor runner = new ValidationStepExecutor(serializerReturning("{}".getBytes(StandardCharsets.UTF_8)), handlerReturning(ValidationTestResult.FAILED));
+        ValidationStepExecutor runner = new ValidationStepExecutor(handlerReturning(ValidationTestResult.FAILED),
+              serializerReturning("{}".getBytes(StandardCharsets.UTF_8)));
         StepRun stepRun = new StepRun("ts", "tr", buildStep("v2"));
         StepRunReport report = runner.execute(stepRun).join().build();
         assertEquals(StepResult.FAILED, report.getResult());
@@ -73,7 +75,8 @@ class ValidationStepExecutorTest {
 
     @Test
     void execute_setsUndefined_whenReportUndefined() {
-        ValidationStepExecutor runner = new ValidationStepExecutor(serializerReturning("{}".getBytes(StandardCharsets.UTF_8)), handlerReturning(null));
+        ValidationStepExecutor runner = new ValidationStepExecutor(handlerReturning(null),
+              serializerReturning("{}".getBytes(StandardCharsets.UTF_8)));
         StepRun stepRun = new StepRun("ts", "tr", buildStep("v3"));
         StepRunReport report = runner.execute(stepRun).join().build();
         assertEquals(StepResult.UNDEFINED, report.getResult());
@@ -81,7 +84,8 @@ class ValidationStepExecutorTest {
 
     @Test
     void getSupportedStep_returnsCanonicalName() {
-        ValidationStepExecutor runner = new ValidationStepExecutor(serializerReturning(new byte[]{}), handlerReturning(ValidationTestResult.PASSED));
+        ValidationStepExecutor runner = new ValidationStepExecutor(handlerReturning(ValidationTestResult.PASSED),
+              serializerReturning(new byte[]{}));
         assertEquals(ValidationStep.class.getCanonicalName(), runner.getSupportedStep());
     }
 }
