@@ -23,14 +23,14 @@ import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.testreport.validator.TestRunReportValidator;
 
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class TestRunReportBuilder extends AbstractBuilder<TestRunReport> {
 
    private String runId;
-   private Date dateTime;
+   private Instant dateTime;
    private TestBuilder test;
    private List<Property> inputs;
    private List<Property> outputs;
@@ -41,7 +41,7 @@ public class TestRunReportBuilder extends AbstractBuilder<TestRunReport> {
 
    public TestRunReportBuilder() {
       super();
-      dateTime = new Date();
+      dateTime = Instant.now();
       inputs = new ArrayList<>();
       outputs = new ArrayList<>();
       stepRunReportBuilders = new ArrayList<>();
@@ -51,7 +51,7 @@ public class TestRunReportBuilder extends AbstractBuilder<TestRunReport> {
 
    public TestRunReportBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
       super(validatorBuilderFactory);
-      dateTime = new Date();
+      dateTime = Instant.now();
       inputs = new ArrayList<>();
       outputs = new ArrayList<>();
       stepRunReportBuilders = new ArrayList<>();
@@ -64,8 +64,8 @@ public class TestRunReportBuilder extends AbstractBuilder<TestRunReport> {
       return this;
    }
 
-   public TestRunReportBuilder setDateTime(Date dateTime) {
-      this.dateTime = new Date(dateTime.getTime());
+   public TestRunReportBuilder setDateTime(Instant dateTime) {
+      this.dateTime = dateTime;
       return this;
    }
 

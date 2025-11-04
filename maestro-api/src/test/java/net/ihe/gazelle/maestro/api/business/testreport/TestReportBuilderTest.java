@@ -211,7 +211,7 @@ class TestReportBuilderTest {
                         .setIpAddresses(new ArrayList<>())
                         .setIpAddresses(new ArrayList<>())
                         .addIpAddress("ip"))
-                .setTestRunReports(new ArrayList<>())
+                .addTestRunReports(new ArrayList<>())
                 .setSubReports(new ArrayList<>())
                 .setUnexpectedErrors(new ArrayList<>());
     }

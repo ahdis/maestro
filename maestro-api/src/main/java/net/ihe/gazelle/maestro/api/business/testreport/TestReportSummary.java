@@ -2,15 +2,20 @@ package net.ihe.gazelle.maestro.api.business.testreport;
 
 import net.ihe.gazelle.errorhandling.business.UnexpectedError;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-public class TestReportSummary {
+public class TestReportSummary implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = -1344193617744601144L;
 
     private String id;
     private String location;
-    private Date dateTime;
+    private Instant dateTime;
     private Result result;
     private List<UnexpectedError> unexpectedErrors;
 
@@ -18,7 +23,7 @@ public class TestReportSummary {
         this.unexpectedErrors = new ArrayList<>();
     }
 
-    public TestReportSummary(String id, Date dateTime, Result result) {
+    public TestReportSummary(String id, Instant dateTime, Result result) {
         this.id = id;
         this.dateTime = dateTime;
         this.result = result;
@@ -50,11 +55,11 @@ public class TestReportSummary {
       return this;
    }
 
-   public Date getDateTime() {
+   public Instant getDateTime() {
         return dateTime;
     }
 
-    public TestReportSummary setDateTime(Date dateTime) {
+    public TestReportSummary setDateTime(Instant dateTime) {
         this.dateTime = dateTime;
         return this;
     }
@@ -87,7 +92,7 @@ public class TestReportSummary {
     }
 
     public boolean isDateTimeDefined() {
-        return dateTime != null && !dateTime.after(new Date());
+        return dateTime != null && !dateTime.isAfter(Instant.now());
     }
 
     public boolean isResultDefined() {

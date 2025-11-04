@@ -10,12 +10,7 @@ import net.ihe.gazelle.maestro.api.business.message.TestSuiteRunFinished;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.test.TestReference;
 import net.ihe.gazelle.maestro.api.business.test.TestSuite;
-import net.ihe.gazelle.maestro.api.business.testreport.EntityIdentificationBuilder;
-import net.ihe.gazelle.maestro.api.business.testreport.SystemUnderTestBuilder;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReportBuilder;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
-import net.ihe.gazelle.maestro.api.business.testreport.TestServiceBuilder;
+import net.ihe.gazelle.maestro.api.business.testreport.*;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRunValidator;
@@ -28,9 +23,7 @@ import net.ihe.gazelle.servicemetadata.api.business.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class TestSuiteRunner {
@@ -84,11 +77,11 @@ public class TestSuiteRunner {
          TestSuiteSession testSuiteSession = sessionStore.getSession(sessionId);
          try {
             if (testSuiteSession != null) {
-               testSuiteSession.addTestRunReportBuilder(testRunFinished.getTestRunReportBuilder());
+               testSuiteSession.addTestRunReport(testRunFinished.getTestRunReport());
                TestRunCursor testRunCursor = testSuiteSession.getTestRunCursor();
                if (!testRunCursor.hasNext()) {
                   TestReport testReport = buildGenericTestReport(testSuiteSession.getTestSuiteRun())
-                        .setTestRunReports(testSuiteSession.getTestRunReportBuilders())
+                        .addTestRunReports(testSuiteSession.getTestRunReports())
                         .build();
                   TestReportSummary reportSummary = recordTestReport(testReport);
                   sessionStore.removeSession(sessionId);
@@ -101,7 +94,7 @@ public class TestSuiteRunner {
          } catch (Exception e) {
             LOG.atError().setCause(e).log("Error listening testRun finished on session {}", sessionId);
             TestReport testReport = buildGenericTestReport(testSuiteSession.getTestSuiteRun())
-                  .setTestRunReports(testSuiteSession.getTestRunReportBuilders())
+                  .addTestRunReports(testSuiteSession.getTestRunReports())
                   .addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e))
                   .build();
             sessionStore.removeSession(sessionId);
@@ -148,7 +141,6 @@ public class TestSuiteRunner {
    private TestReportBuilder buildGenericTestReport(TestSuiteRun testSuiteRun) {
       TestReportBuilder testReportBuilder = new TestReportBuilder()
             .setTestService(getTestServiceBuilder())
-            .setDateTime(Date.from(Instant.now()))
             .setAccessControlList(new AccessControlListBuilder(testSuiteRun.getAccessControlList()))
             .setSystemsUnderTest(testSuiteRun.getSystemsUnderTest().stream().map(SystemUnderTestBuilder::new).toList());
       if (testSuiteRun.getTestSuite() != null) {

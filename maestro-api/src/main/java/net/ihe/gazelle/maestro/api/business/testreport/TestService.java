@@ -16,6 +16,8 @@
 
 package net.ihe.gazelle.maestro.api.business.testreport;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
@@ -23,7 +25,10 @@ import java.util.Objects;
  * all mandatory <br>
  * serviceIdentification.version mandatory (version "unknown" is accepted)
  */
-public class TestService {
+public class TestService implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 4438062754526037863L;
 
     private EntityIdentification serviceIdentification;
     private String disclaimer;

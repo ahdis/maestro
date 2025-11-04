@@ -33,16 +33,16 @@ public class StepRunFinished implements Message {
    private String sessionId;
    private String testId;
    private StepRun stepRun;
-   private StepRunReport steprunReport;
+   private StepRunReport stepRunReport;
 
    public StepRunFinished() {
    }
 
-   public StepRunFinished(String sessionId, String testId, StepRun stepRun, StepRunReport steprunReport) {
+   public StepRunFinished(String sessionId, String testId, StepRun stepRun, StepRunReport stepRunReport) {
       this.sessionId = sessionId;
       this.testId = testId;
       this.stepRun = stepRun;
-      this.steprunReport = steprunReport;
+      this.stepRunReport = stepRunReport;
    }
 
    public String getSessionId() {
@@ -73,11 +73,11 @@ public class StepRunFinished implements Message {
    }
 
    public StepRunReport getStepRunReport() {
-      return steprunReport;
+      return stepRunReport;
    }
 
-   public StepRunFinished setSteprunReport(StepRunReport steprunReport) {
-      this.steprunReport = steprunReport;
+   public StepRunFinished setSteprunReport(StepRunReport stepRunReport) {
+      this.stepRunReport = stepRunReport;
       return this;
    }
 }

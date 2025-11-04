@@ -21,6 +21,7 @@ import net.ihe.gazelle.maestro.api.business.property.Property;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -37,14 +38,16 @@ public class StepRunReport implements Serializable {
    private String stepId;
    private String stepName;
    private String type;
+   private Instant dateTime;
    private StepResult result;
    private List<Property> outputs;
    private List<UnexpectedError> unexpectedErrors;
 
    public StepRunReport() {
-      result = StepResult.UNDEFINED;
-      outputs = new ArrayList<>();
-      unexpectedErrors = new ArrayList<>();
+       dateTime = Instant.now();
+       result = StepResult.UNDEFINED;
+       outputs = new ArrayList<>();
+       unexpectedErrors = new ArrayList<>();
    }
 
    public StepRunReport(String stepId, String type, StepResult result) {
@@ -78,6 +81,15 @@ public class StepRunReport implements Serializable {
 
    public StepRunReport setType(String type) {
       this.type = type;
+      return this;
+   }
+
+   public Instant getDateTime() {
+      return dateTime;
+   }
+
+   public StepRunReport setDateTime(Instant dateTime) {
+      this.dateTime = dateTime;
       return this;
    }
 

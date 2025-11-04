@@ -16,28 +16,26 @@
 
 package net.ihe.gazelle.maestro.api.technical.dto.report;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.errorhandling.technical.UnexpectedErrorDTO;
 import net.ihe.gazelle.maestro.api.business.testreport.Result;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 
-import java.util.Date;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
         "modelVersion",
         "uuid",
-        "date",
+        "dateTime",
         "testService",
         "systemsUnderTest",
-        "status",
+        "result",
         "testSuiteName",
         "testCounters",
         "note",
@@ -47,8 +45,6 @@ import java.util.List;
         "unexpectedErrors"
 })
 public class TestReportDTO implements DTO<TestReport> {
-
-    public static final String ISO_8601_DATETIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
 
     @JsonIgnore
     private final TestReport testReport;
@@ -87,16 +83,17 @@ public class TestReportDTO implements DTO<TestReport> {
         getBusinessObject().setUuid(uuid);
     }
 
-    @JsonGetter(value = "date")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = ISO_8601_DATETIME_PATTERN) // ISO 8601
-    public Date getDateTime() {
-        return getBusinessObject().getDateTime();
+    @JsonGetter(value = "dateTime")
+    public String getDateTime() {
+        return ZonedDateTime.ofInstant(getBusinessObject().getDateTime(), ZoneId.systemDefault())
+                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     }
 
-    @JsonSetter(value = "date")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = ISO_8601_DATETIME_PATTERN) // ISO 8601
-    public void setDateTime(Date dateTime) {
-        getBusinessObject().setDateTime(dateTime);
+    @JsonSetter(value = "dateTime")
+    public void setDateTime(String dateTime) {
+        getBusinessObject().setDateTime(
+                Instant.from(ZonedDateTime.parse(dateTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+        );
     }
 
     @JsonGetter(value = "testService")
@@ -128,12 +125,12 @@ public class TestReportDTO implements DTO<TestReport> {
         );
     }
 
-    @JsonGetter(value = "status")
+    @JsonGetter(value = "result")
     public String getResult() {
         return getBusinessObject().getResult().name();
     }
 
-    @JsonSetter(value = "status")
+    @JsonSetter(value = "result")
     public void setResult(String result) {
         getBusinessObject().setResult(Result.valueOf(result));
     }

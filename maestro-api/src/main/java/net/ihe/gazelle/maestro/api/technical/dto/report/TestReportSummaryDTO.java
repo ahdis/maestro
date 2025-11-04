@@ -9,7 +9,10 @@ import net.ihe.gazelle.maestro.api.business.testreport.Result;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 
-import java.util.Date;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -48,12 +51,15 @@ public class TestReportSummaryDTO implements DTO<TestReportSummary> {
     }
 
     @JsonProperty("dateTime")
-    public Date getDateTime() {
-        return getBusinessObject().getDateTime();
+    public String getDateTime() {
+        return ZonedDateTime.ofInstant(getBusinessObject().getDateTime(), ZoneId.systemDefault())
+                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     }
 
-    public void setDateTime(Date datetime) {
-        getBusinessObject().setDateTime(datetime);
+    public void setDateTime(String dateTime) {
+        getBusinessObject().setDateTime(
+                Instant.from(ZonedDateTime.parse(dateTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+        );
     }
 
     @JsonProperty("result")

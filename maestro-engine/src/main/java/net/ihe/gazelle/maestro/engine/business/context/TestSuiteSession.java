@@ -16,7 +16,7 @@
 
 package net.ihe.gazelle.maestro.engine.business.context;
 
-import net.ihe.gazelle.maestro.api.business.testreport.TestRunReportBuilder;
+import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 
 import java.util.ArrayList;
@@ -31,24 +31,24 @@ public class TestSuiteSession {
 
    private final TestSuiteRun testSuiteRun;
    private final TestRunCursor testRunCursor;
-   private final List<TestRunReportBuilder> testRunReportBuilders;
+   private final List<TestRunReport> testRunReports;
 
    public TestSuiteSession(TestSuiteRun testSuiteRun, TestRunCursor testRunCursor) {
       this.testSuiteRun = testSuiteRun;
-      this.testRunReportBuilders = new ArrayList<>();
       this.testRunCursor = testRunCursor;
+       this.testRunReports = new ArrayList<>();
    }
 
    public TestSuiteRun getTestSuiteRun() {
       return testSuiteRun;
    }
 
-   public List<TestRunReportBuilder> getTestRunReportBuilders() {
-      return new ArrayList<>(testRunReportBuilders);
+   public List<TestRunReport> getTestRunReports() {
+      return new ArrayList<>(testRunReports);
    }
 
-   public void addTestRunReportBuilder(TestRunReportBuilder reportBuilder) {
-      testRunReportBuilders.add(reportBuilder);
+   public void addTestRunReport(TestRunReport report) {
+       testRunReports.add(report);
    }
 
    public TestRunCursor getTestRunCursor() {
@@ -62,12 +62,12 @@ public class TestSuiteSession {
          return false;
       }
       return Objects.equals(testSuiteRun, store.testSuiteRun)
-             && Objects.equals(testRunReportBuilders, store.testRunReportBuilders)
+             && Objects.equals(testRunReports, store.testRunReports)
              && Objects.equals(testRunCursor, store.testRunCursor);
    }
 
    @Override
    public int hashCode() {
-      return Objects.hash(testSuiteRun, testRunReportBuilders, testRunCursor);
+      return Objects.hash(testSuiteRun, testRunReports, testRunCursor);
    }
 }

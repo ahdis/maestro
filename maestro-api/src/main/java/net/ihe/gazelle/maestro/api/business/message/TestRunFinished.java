@@ -17,7 +17,7 @@
 package net.ihe.gazelle.maestro.api.business.message;
 
 import net.ihe.gazelle.lang.Event;
-import net.ihe.gazelle.maestro.api.business.testreport.TestRunReportBuilder;
+import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 
 import java.io.Serial;
@@ -32,15 +32,15 @@ public class TestRunFinished implements Message {
 
    private String sessionId;
    private TestRun testRun;
-   private TestRunReportBuilder testRunReportBuilder;
+   private TestRunReport testRunReport;
 
    public TestRunFinished() {
    }
 
-   public TestRunFinished(String sessionId, TestRun testRun, TestRunReportBuilder testRunReportBuilder) {
+   public TestRunFinished(String sessionId, TestRun testRun, TestRunReport testRunReport) {
       this.sessionId = sessionId;
       this.testRun = testRun;
-      this.testRunReportBuilder = testRunReportBuilder;
+      this.testRunReport = testRunReport;
    }
 
    public String getSessionId() {
@@ -61,12 +61,12 @@ public class TestRunFinished implements Message {
       return this;
    }
 
-   public TestRunReportBuilder getTestRunReportBuilder() {
-      return testRunReportBuilder;
+   public TestRunReport getTestRunReport() {
+      return testRunReport;
    }
 
-   public TestRunFinished setTestRunReportBuilder(TestRunReportBuilder testRunReportBuilder) {
-      this.testRunReportBuilder = testRunReportBuilder;
+   public TestRunFinished setTestRunReport(TestRunReport testRunReport) {
+      this.testRunReport = testRunReport;
       return this;
    }
 }

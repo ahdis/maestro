@@ -16,12 +16,7 @@
 
 package net.ihe.gazelle.maestro.api.technical.dto.report;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.errorhandling.technical.UnexpectedErrorDTO;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.testreport.Result;
@@ -30,7 +25,10 @@ import net.ihe.gazelle.maestro.api.technical.dto.property.PropertyDTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
 
-import java.util.Date;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -77,15 +75,16 @@ public class TestRunReportDTO implements DTO<TestRunReport> {
    }
 
    @JsonGetter(value = "dateTime")
-   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = ISO_8601_DATETIME_PATTERN)
-   public Date getDateTime() {
-      return testRunReport.getDateTime();
+   public String getDateTime() {
+       return ZonedDateTime.ofInstant(getBusinessObject().getDateTime(), ZoneId.systemDefault())
+               .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
    }
 
    @JsonSetter(value = "dateTime")
-   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = ISO_8601_DATETIME_PATTERN)
-   public void setDateTime(Date dateTime) {
-      testRunReport.setDateTime(dateTime);
+   public void setDateTime(String dateTime) {
+       getBusinessObject().setDateTime(
+               Instant.from(ZonedDateTime.parse(dateTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+       );
    }
 
    @JsonGetter(value = "result")

@@ -19,8 +19,10 @@ package net.ihe.gazelle.maestro.api.business.testreport;
 import net.ihe.gazelle.errorhandling.business.UnexpectedError;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -30,10 +32,13 @@ import java.util.Optional;
  * mandatory fields : dateTime, result, test
  *
  */
-public class TestRunReport {
+public class TestRunReport implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 6739258918175686572L;
 
     private String runId;
-    private Date dateTime;
+    private Instant dateTime;
     private Result result;
     private Test test;
     private List<Property> inputs;
@@ -43,6 +48,7 @@ public class TestRunReport {
     private List<UnexpectedError> unexpectedErrors;
 
     public TestRunReport() {
+        dateTime = Instant.now();
         result = Result.UNDEFINED;
         inputs = new ArrayList<>();
         outputs = new ArrayList<>();
@@ -72,12 +78,12 @@ public class TestRunReport {
         return this;
     }
 
-    public Date getDateTime() {
-        return new Date(dateTime.getTime());
+    public Instant getDateTime() {
+        return dateTime;
     }
 
-    public TestRunReport setDateTime(Date dateTime) {
-        this.dateTime = new Date(dateTime.getTime());
+    public TestRunReport setDateTime(Instant dateTime) {
+        this.dateTime = dateTime;
         return this;
     }
 
@@ -205,7 +211,7 @@ public class TestRunReport {
     }
 
     public boolean isDateTimeValid() {
-        return dateTime != null && !dateTime.after(new Date());
+        return dateTime != null && !dateTime.isAfter(Instant.now());
     }
 
     public boolean isResultValid() {

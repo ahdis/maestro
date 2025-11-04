@@ -29,14 +29,19 @@ import net.ihe.gazelle.maestro.api.technical.dto.property.PropertyDTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
-      "stepId",
-      "type",
-      "result",
-      "outputs"
+        "stepId",
+        "type",
+        "dateTime",
+        "result",
+        "outputs"
 })
 public class StepRunReportDTO implements DTO<StepRunReport> {
 
@@ -86,6 +91,19 @@ public class StepRunReportDTO implements DTO<StepRunReport> {
    public void setType(String type) {
       stepRunReport.setType(type);
    }
+
+    @JsonGetter(value = "dateTime")
+    public String getDateTime() {
+        return ZonedDateTime.ofInstant(getBusinessObject().getDateTime(), ZoneId.systemDefault())
+                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+    }
+
+    @JsonSetter(value = "dateTime")
+    public void setDateTime(String dateTime) {
+        getBusinessObject().setDateTime(
+                Instant.from(ZonedDateTime.parse(dateTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+        );
+    }
 
    @JsonGetter(value = "result")
    public String getResult() {
