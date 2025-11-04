@@ -18,105 +18,114 @@ package net.ihe.gazelle.maestro.quarkus.websocket;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.websocket.CloseReason;
-import jakarta.websocket.OnClose;
-import jakarta.websocket.OnError;
 import jakarta.websocket.OnMessage;
-import jakarta.websocket.OnOpen;
-import jakarta.websocket.SendResult;
 import jakarta.websocket.Session;
-import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
-import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
-import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSuiteRunDTO;
+import net.ihe.gazelle.maestro.api.business.Maestro;
+import net.ihe.gazelle.maestro.api.business.MaestroObserver;
+import net.ihe.gazelle.maestro.api.business.message.*;
+import net.ihe.gazelle.maestro.api.business.testreport.Result;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
+import net.ihe.gazelle.maestro.quarkus.websocket.dto.*;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
-import net.ihe.gazelle.modelmarshaller.technical.jackson.ObjectMapperBuilder;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.List;
+import java.time.Instant;
 
-@ServerEndpoint("/v1/runs/{testSetId}")
 @ApplicationScoped
+@ServerEndpoint("/v1/runs")
 public class TestRunSocketController {
 
     private static final Logger LOG = LoggerFactory.getLogger(TestRunSocketController.class.getName());
-    public static final String INTERNAL_TEST_RUN_ID = "internal";
-    private final TextSerDes serDes = new JacksonSerDes(new ObjectMapperBuilder().build());
-    private final WebSocketMaestroService maestroService;
-    private final String websocketToken;
+
+    private final TextSerDes serDes = new JacksonSerDes();
+    private final Maestro maestro;
+    private StartTestSuiteRunDTO localStartTestSuite;
 
     @Inject
-    public TestRunSocketController(WebSocketMaestroService maestroService,
-                                   @ConfigProperty(name = "gzl.websocket.token") String websocketToken) {
-        this.maestroService = maestroService;
-        this.websocketToken = websocketToken;
-    }
-
-    @OnOpen
-    public void onOpen(Session session, @PathParam("testSetId") String testSetId) throws IOException {
-        List<String> tokenParams = session.getRequestParameterMap().get("token");
-        if (!providedTokenIsValid(tokenParams))
-            session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "Invalid token provided"));
-        if (!INTERNAL_TEST_RUN_ID.equals(testSetId))
-            WebsocketSessionsInMemory.addSession(testSetId, session);
-    }
-
-    @OnClose
-    public void onClose(Session session, @PathParam("testSetId") String testSetId) {
-        WebsocketSessionsInMemory.removeSession(testSetId);
-    }
-
-    @OnError
-    public void onError(Session session, @PathParam("testSetId") String testSetId, Throwable throwable) {
-        WebsocketSessionsInMemory.removeSession(testSetId);
-        LOG.error("Test set {} ended on error: {} ", testSetId, throwable.getMessage());
+    public TestRunSocketController(Maestro maestro) {
+        this.maestro = maestro;
     }
 
     @OnMessage
-    public void onMessage(String message, @PathParam("testSetId") String testSetId) {
-        // Ping for test purpose
-        if (message.equals("ping")) {
-            sendPongToClient(testSetId);
+    public void onMessage(Session session, String messageString) throws InterruptedException {
+        Object message = serDes.deserialize(messageString, MessageDTO.class).getBusinessObject();
+        WebsocketSession maestroCaller = new WebsocketSession(session);
+        Thread.sleep(1000);
+        if (message instanceof StartTestSuiteRunDTO startTestSuiteRun) {
+            this.localStartTestSuite = startTestSuiteRun;
+            if ("With additional instructions".equals(startTestSuiteRun.getTestSuiteRun().getTestSuite().getName())) {
+                maestroCaller.interactWithUser(new InteractWithUser("User interaction test", "Please click continue"));
+            } else {
+                maestroCaller.onTestSuiteFinished(createTestSuiteFinished());
+            }
+            //maestro.executeTestSuite(localStartTestSuite.getTestSuiteRun(), maestroCaller);
+        } else if (message instanceof UserInteractionCompletedDTO) {
+            maestroCaller.onTestSuiteFinished(createTestSuiteFinished());
         } else {
-            triggerTestRuns(testSetId, message);
+            throw new IllegalArgumentException("Unexpected message type: " + message.getClass().getName());
         }
     }
 
-    private void triggerTestRuns(String testSetId, String message) {
-        LOG.info("Triggering test runs for client {} with message: {}",testSetId, message);
-        try {
-            TestSuiteRun testSuiteRun = serDes.deserialize(message, TestSuiteRunDTO.class).getBusinessObject();
-            maestroService.executeTestSet(testSetId, testSuiteRun);
-        } catch (Exception e) {
-            LOG.error("Unable to trigger testRun for message {}: {}", testSetId, e.getMessage());
-        }
+    private TestSuiteRunFinished createTestSuiteFinished() {
+        return new TestSuiteRunFinished(
+                "sessionId",
+                localStartTestSuite.getBusinessObject(),
+                new TestReportSummary()
+                        .setDateTime(Instant.now())
+                        .setResult(Result.PASSED)
+                        .setLocation("http://localhost:8082/datahouse/rest/v1/items/68f0bf9e6575ab5cb50eeaeb")
+        );
     }
 
-    private boolean providedTokenIsValid(List<String> paramValues) {
-        if (paramValues == null || paramValues.isEmpty()) {
-            return websocketToken == null || websocketToken.isBlank();
+    public class WebsocketSession implements MaestroObserver {
+
+        private final Session session;
+
+        public WebsocketSession(Session session) {
+            this.session = session;
         }
-        String token = paramValues.getFirst();
-        if (token != null && !token.isEmpty()) {
-            return token.equals(websocketToken);
+
+        @Override
+        public void onTestRunStarted(TestRunStarted testRunStarted) {
+            String message = serDes.serializeAsString(new TestRunStartedDTO(testRunStarted.getTestId()));
+            this.session.getAsyncRemote().sendText(message);
         }
 
-        return true;
-    }
+        @Override
+        public void onStepRunStarted(StepRunStarted stepRunStarted) {
+            String message = serDes.serializeAsString(new StepRunStartedDTO(stepRunStarted));
+            this.session.getAsyncRemote().sendText(message);
+        }
 
-    private void sendPongToClient( String testSetId) {
-        Session session = WebsocketSessionsInMemory.getSession(testSetId);
-        session.getAsyncRemote()
-                .sendObject("pong", result -> logPotentialException(testSetId, result));
-    }
+        @Override
+        public void interactWithUser(InteractWithUser interactWithUser) {
+            String message = serDes.serializeAsString(new InteractWithUserDTO(interactWithUser));
+            LOG.info("send message: {}", message);
+            this.session.getAsyncRemote().sendText(message);
+        }
 
-    private static void logPotentialException(String testSetId, SendResult result) {
-        if (result.getException() != null) {
-            LOG.error("Unable to send message to {}: {}", testSetId, result.getException().getMessage());
+        @Override
+        public void onStepRunFinished(StepRunFinished stepRunFinished) {
+            String message = serDes.serializeAsString(new StepRunFinishedDTO(stepRunFinished));
+            this.session.getAsyncRemote().sendText(message);
+        }
+
+        @Override
+        public void onTestRunFinished(TestRunFinished testRunFinished) {
+            String message = serDes.serializeAsString(new TestRunFinishedDTO(testRunFinished));
+            this.session.getAsyncRemote().sendText(message);
+        }
+
+        @Override
+        public void onTestSuiteFinished(TestSuiteRunFinished testSuiteFinished) {
+            String message = serDes.serializeAsString(new TestSuiteRunFinishedDTO(testSuiteFinished.getReportSummary()));
+            LOG.info("send message: {}", message);
+            this.session.getAsyncRemote().sendText(message);
         }
     }
 }
+
+
