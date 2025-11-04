@@ -24,13 +24,14 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import net.ihe.gazelle.lang.TimeoutRuntimeException;
 import net.ihe.gazelle.maestro.api.business.InvalidTestRunException;
+import net.ihe.gazelle.maestro.api.business.Maestro;
 import net.ihe.gazelle.maestro.api.business.SynchronousMaestro;
 import net.ihe.gazelle.maestro.api.business.UnsupportedPropertyTypeException;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestRunDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSuiteRunDTO;
-import net.ihe.gazelle.maestro.engine.business.MaestroImpl;
 import net.ihe.gazelle.maestro.quarkus.UnknownStepType;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 import org.slf4j.Logger;
@@ -46,20 +47,17 @@ public class TestRunControllerImpl implements TestRunController {
    private static final Logger LOG = LoggerFactory.getLogger(TestRunControllerImpl.class);
 
    private final SynchronousMaestro synchronousMaestro;
-   private final MaestroImpl maestroImpl;
+   private final Maestro maestro;
 
    @Inject
-   public TestRunControllerImpl(SynchronousMaestro synchronousMaestro, MaestroImpl maestroImpl) {
+   public TestRunControllerImpl(SynchronousMaestro synchronousMaestro, Maestro maestro) {
       this.synchronousMaestro = synchronousMaestro;
-      this.maestroImpl = maestroImpl;
+      this.maestro = maestro;
    }
 
    @Override
    public Response executeTestSuite(TestSuiteRunDTO testSuiteRunDTO, String callback) {
       TestSuiteRun testSuiteRun = testSuiteRunDTO.getBusinessObject();
-      testSuiteRun.getTestRuns().forEach(
-            testRun -> testRun.setTestSuiteId(testSuiteRun.getInternalId())
-      );
       if (callback != null) {
          return handleErrors(() -> runAsynchronously(testSuiteRun, callback));
       } else {
@@ -67,7 +65,12 @@ public class TestRunControllerImpl implements TestRunController {
       }
    }
 
-   private Response handleErrors(Supplier<Response> serviceCall) {
+    @Override
+    public Response executeTest(TestRunDTO testRun, String callback) {
+        return null;
+    }
+
+    private Response handleErrors(Supplier<Response> serviceCall) {
       try {
          return serviceCall.get();
       } catch (InvalidTestRunException | IllegalArgumentException e) {
@@ -102,7 +105,7 @@ public class TestRunControllerImpl implements TestRunController {
    }
 
    private Response runAsynchronously(TestSuiteRun testSuiteRun, String callback) {
-      maestroImpl.executeTestSuite(testSuiteRun, new ApacheTestReportClient(callback));
+       maestro.executeTestSuite(testSuiteRun, new ApacheTestReportClient(callback));
       return Response.accepted().build();
    }
 

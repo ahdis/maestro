@@ -11,7 +11,7 @@ import java.util.List;
 
 public class TestSuiteDTO implements DTO<TestSuite> {
 
-   private TestSuite testSuite;
+   private final TestSuite testSuite;
 
    public TestSuiteDTO() {
       this(new TestSuite());

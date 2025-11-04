@@ -6,14 +6,14 @@ import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractBuilder;
 import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
 import net.ihe.gazelle.maestro.api.business.testreport.validator.TestReportSummaryValidator;
 
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class TestReportSummaryBuilder extends AbstractBuilder<TestReportSummary> {
 
     private String id;
-    private Date dateTime;
+    private Instant dateTime;
     private Result result;
     private List<UnexpectedErrorBuilder> unexpectedErrors = new ArrayList<>();
 
@@ -26,7 +26,7 @@ public class TestReportSummaryBuilder extends AbstractBuilder<TestReportSummary>
         return this;
     }
 
-    public TestReportSummaryBuilder setDateTime(Date datetime) {
+    public TestReportSummaryBuilder setDateTime(Instant datetime) {
         this.dateTime = datetime;
         return this;
     }

@@ -49,7 +49,6 @@ public abstract class PropertyDTO<T extends Property> implements SubTypingDTO<T>
       return this;
    }
 
-
    @JsonProperty("name")
    public String getName() {
       return property.getName();

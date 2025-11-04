@@ -9,11 +9,9 @@ import com.kereval.gazelle.datahouse.technical.rest.client.RecordItemClient;
 import com.kereval.gazelle.datahouse.technical.rest.client.RecordItemClientProvider;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
-import net.ihe.gazelle.maestro.api.business.testreport.Input;
-import net.ihe.gazelle.maestro.api.business.testreport.Output;
-import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
-import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
+import net.ihe.gazelle.maestro.api.business.property.Property;
+import net.ihe.gazelle.maestro.api.business.testreport.*;
 import net.ihe.gazelle.maestro.engine.business.TestReportRecordException;
 import net.ihe.gazelle.maestro.engine.business.TestReportRecordService;
 import net.ihe.gazelle.maestro.quarkus.record.entity.TestReportEntity;
@@ -83,7 +81,7 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
         return attachmentRefs;
     }
 
-    private void processInputsForAttachments(List<Input> inputs, List<Reference> attachmentRefs) {
+    private void processInputsForAttachments(List<Property> inputs, List<Reference> attachmentRefs) {
         if (inputs == null || inputs.isEmpty()) {
             return;
         }
@@ -96,32 +94,21 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
         mapIdsBackToInputs(inputs, plan.inputIndexes, ids, attachmentRefs);
     }
 
-    private UploadPlan buildInputUploadPlan(List<Input> inputs) {
+    private UploadPlan buildInputUploadPlan(List<Property> inputs) {
         List<Attachment> toUpload = new ArrayList<>();
         List<Integer> inputIndexes = new ArrayList<>();
         for (int i = 0; i < inputs.size(); i++) {
-            Input input = inputs.get(i);
+            Property input = inputs.get(i);
             if (shouldUploadAsAttachment(input)) {
-                toUpload.add(createAttachment(input.getName(), input.getContent()));
+                toUpload.add(createAttachment(input.getName(), input.getValue()));
                 inputIndexes.add(i);
             }
         }
         return new UploadPlan(toUpload, inputIndexes);
     }
 
-    private boolean hasContent(Input input) {
-        return input != null && input.getContent() != null && input.getContent().length > 0;
-    }
-
-    private boolean shouldUploadAsAttachment(Input input) {
-        if (!hasContent(input)) {
-            return false;
-        }
-        String type = input.getType();
-        if (type == null || type.isBlank()) {
-            return true;
-        }
-        return Input.BYTE_ARRAY_TYPE.equalsIgnoreCase(type);
+    private boolean shouldUploadAsAttachment(Property input) {
+        return input instanceof ByteArrayProperty;
     }
 
     private void validateUploadedIdsCount(int expected, int actual) {
@@ -130,13 +117,14 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
         }
     }
 
-    private void mapIdsBackToInputs(List<Input> inputs, List<Integer> inputIndexes, List<String> ids, List<Reference> attachmentRefs) {
+    private void mapIdsBackToInputs(List<Property> inputs, List<Integer> inputIndexes, List<String> ids, List<Reference> attachmentRefs) {
         for (int k = 0; k < inputIndexes.size(); k++) {
             int idx = inputIndexes.get(k);
             String attachmentId = ids.get(k);
-            Input input = inputs.get(idx);
-            input.setReference(constructPathToAttachment(attachmentId));
-            input.setContent(null);
+            Property input = inputs.get(idx);
+            ByteArrayItemProperty itemProperty = new ByteArrayItemProperty(input.getName(), null);
+            itemProperty.setReference(constructPathToAttachment(attachmentId));
+            inputs.set(idx, itemProperty);
             attachmentRefs.add(new Reference()
                     .setName(input.getName())
                     .setType(BYTE_ARRAY_TYPE)
@@ -155,7 +143,7 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
         for (TestRunReport testRunReport : testRunReports) {
             if (testRunReport.getStepRunReports() == null) continue;
             for (StepRunReport stepRunReport : testRunReport.getStepRunReports()) {
-                List<Output> outputs = stepRunReport.getOutputs();
+                List<Property> outputs = stepRunReport.getOutputs();
                 outputRefs.addAll(recordOutputs(outputs, acl));
             }
         }
@@ -222,16 +210,16 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
         return subRefs;
     }
 
-    private List<Reference> recordOutputs(List<Output> outputs, AccessControlList acl) {
+    private List<Reference> recordOutputs(List<Property> outputs, AccessControlList acl) {
         List<Reference> references = new ArrayList<>();
-        List<Output> nonJsonOutputs = new ArrayList<>();
+        List<ByteArrayProperty> nonJsonOutputs = new ArrayList<>();
         if (outputs == null || outputs.isEmpty()) return references;
-        for (Output output : outputs) {
+        for (Property output : outputs) {
             if (output == null) continue;
-            if (Output.FORMAT_JSON.equals(output.getFormat())) {
-                recordOutputAsItem(acl, output, references);
+            if (shouldUploadAsAttachment(output)) {
+                nonJsonOutputs.add((ByteArrayProperty) output);
             } else {
-                nonJsonOutputs.add(output);
+                recordOutputAsItem(acl, output, references);
             }
         }
         // Batch record non-JSON outputs as attachments
@@ -241,11 +229,11 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
         return references;
     }
 
-    private void recordOutputAsItem(AccessControlList acl, Output output, List<Reference> references) {
+    private void recordOutputAsItem(AccessControlList acl, Property output, List<Reference> references) {
         Item datahouseItem = buildDatahouseItemFromOutput(output, acl);
         String itemId = recordItemClient.recordItem(datahouseItem);
-        output.setReference(constructUrlToDatahouse(itemId));
-        output.setContent(null); // Clear content after recording to avoid duplication
+        output = new ByteArrayItemProperty(output.getName(), null)
+                .setReference(constructUrlToDatahouse(itemId));
         references.add(new Reference()
                 .setType(output.getName())
                 .setValue(itemId)
@@ -253,7 +241,7 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
         );
     }
 
-    private void recordOutputsAsAttachments(List<Output> outputs, List<Reference> references) {
+    private void recordOutputsAsAttachments(List<ByteArrayProperty> outputs, List<Reference> references) {
         UploadPlan plan = buildOutputUploadPlan(outputs);
         if (plan.toUpload.isEmpty()) {
             return;
@@ -263,9 +251,9 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
         mapIdsBackToOutputs(outputs, plan.inputIndexes, ids, references);
     }
 
-    private Item buildDatahouseItemFromOutput(Output maestroOutput, AccessControlList acl) {
-        String content = maestroOutput.getContent() != null
-                ? new String(maestroOutput.getContent(), StandardCharsets.UTF_8)
+    private Item buildDatahouseItemFromOutput(Property maestroOutput, AccessControlList acl) {
+        String content = maestroOutput.getValue() != null
+                ? new String(maestroOutput.getValue(), StandardCharsets.UTF_8)
                 : "";
         return new Item()
                 .setAccessControlList(acl)
@@ -294,33 +282,28 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
     }
 
 
-    private UploadPlan buildOutputUploadPlan(List<Output> outputs) {
+    private UploadPlan buildOutputUploadPlan(List<ByteArrayProperty> outputs) {
         List<Attachment> toUpload = new ArrayList<>();
         List<Integer> outputIndexes = new ArrayList<>();
         for (int i = 0; i < outputs.size(); i++) {
-            Output output = outputs.get(i);
-            if (hasContent(output)) {
-                toUpload.add(createAttachment(output.getName(), output.getContent()));
-                outputIndexes.add(i);
-            }
+            Property output = outputs.get(i);
+            toUpload.add(createAttachment(output.getName(), output.getValue()));
+            outputIndexes.add(i);
         }
         return new UploadPlan(toUpload, outputIndexes);
     }
 
-    private boolean hasContent(Output output) {
-        return output != null && output.getContent() != null && output.getContent().length > 0;
-    }
-
-    private void mapIdsBackToOutputs(List<Output> outputs, List<Integer> outputIndexes, List<String> ids, List<Reference> attachmentRefs) {
+    private void mapIdsBackToOutputs(List<ByteArrayProperty> outputs, List<Integer> outputIndexes, List<String> ids, List<Reference> attachmentRefs) {
         for (int k = 0; k < outputIndexes.size(); k++) {
             int idx = outputIndexes.get(k);
             String attachmentId = ids.get(k);
-            Output output = outputs.get(idx);
-            output.setReference(constructPathToAttachment(attachmentId));
-            output.setContent(null);
+            Property output = outputs.get(idx);
+            ByteArrayItemProperty itemProperty = new ByteArrayItemProperty(output.getName(), output.getValue());
+            itemProperty.setReference(constructPathToAttachment(attachmentId));
+            outputs.set(idx, new ByteArrayItemProperty(output.getName(), output.getValue()));
             attachmentRefs.add(new Reference()
-                    .setName(output.getName())
-                    .setType(output.getFormat())
+                    .setName(itemProperty.getName())
+                    .setType(itemProperty.getMimeType())
                     .setValue(attachmentId)
                     .setRefType(RefType.ATTACHMENT)
             );

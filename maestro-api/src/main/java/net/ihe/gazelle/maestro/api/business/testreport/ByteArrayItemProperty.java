@@ -2,9 +2,14 @@ package net.ihe.gazelle.maestro.api.business.testreport;
 
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 
+import java.io.Serial;
+
 public class ByteArrayItemProperty extends ByteArrayProperty {
 
-   public ByteArrayItemProperty() {
+    @Serial
+    private static final long serialVersionUID = 7729334463586120850L;
+
+    public ByteArrayItemProperty() {
       super();
    }
 

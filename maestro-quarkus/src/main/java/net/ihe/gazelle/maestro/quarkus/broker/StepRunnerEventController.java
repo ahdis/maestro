@@ -16,6 +16,7 @@
 
 package net.ihe.gazelle.maestro.quarkus.broker;
 
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.ObservesAsync;
 import jakarta.inject.Inject;
@@ -25,6 +26,7 @@ import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
 import net.ihe.gazelle.maestro.engine.business.StepRunEventProducer;
 import net.ihe.gazelle.maestro.engine.business.StepRunner;
 
+@RequestScoped
 public class StepRunnerEventController implements StepRunEventProducer {
 
    private final StepRunner stepRunner;

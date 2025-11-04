@@ -16,6 +16,7 @@
 
 package net.ihe.gazelle.maestro.quarkus.broker;
 
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.ObservesAsync;
 import jakarta.inject.Inject;
@@ -31,6 +32,7 @@ import net.ihe.gazelle.maestro.engine.business.TestRunner;
  * This class is the event broker that listen to all kind of messages used in Maestro application It will trigger
  * application code depending on which event is fired.
  */
+@RequestScoped
 public class TestRunnerEventController implements TestRunEventProducer {
 
    private final TestRunner testRunner;

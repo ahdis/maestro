@@ -5,9 +5,6 @@ import java.io.Serializable;
 
 /**
  * Abstract class representing a property with a name and a value holder.
- *
- * @param <T> the type of the property's value
- * @param <S> the type of the subclass extending Property
  */
 public abstract class Property implements Serializable {
 

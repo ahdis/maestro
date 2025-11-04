@@ -14,19 +14,8 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.quarkus.ws.async.tmintegration;
+package net.ihe.gazelle.maestro.api.business.message;
 
-public class MissingArgumentException extends RuntimeException{
-
-    public MissingArgumentException(String message) {
-        super(message);
-    }
-
-    public MissingArgumentException(Throwable cause) {
-        super(cause);
-    }
-
-    public MissingArgumentException(String message, Throwable cause) {
-        super(message, cause);
-    }
+public class UserInteractionCompleted implements Message {
 }
+

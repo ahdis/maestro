@@ -69,7 +69,7 @@ public class StepExecutorProviderSPI implements StepExecutorProvider {
    }
 
    private Map.Entry<String, Handler> injectHandler(Map.Entry<String, Class<? extends Handler>> requiredHandler) {
-      return new AbstractMap<>.SimpleEntry<>(
+      return new AbstractMap.SimpleEntry<>(
             requiredHandler.getKey(),
             handlerProvider.getHandler(requiredHandler.getKey(), requiredHandler.getValue())
       );

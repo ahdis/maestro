@@ -2,14 +2,9 @@ package net.ihe.gazelle.maestro.quarkus.record.entity;
 
 import net.ihe.gazelle.errorhandling.technical.UnexpectedErrorDTO;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
-import net.ihe.gazelle.maestro.api.technical.dto.report.SystemUnderTestDTO;
-import net.ihe.gazelle.maestro.api.technical.dto.report.TestCountersDTO;
-import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
-import net.ihe.gazelle.maestro.api.technical.dto.report.TestRunReportDTO;
-import net.ihe.gazelle.maestro.api.technical.dto.report.TestServiceDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.report.*;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class TestReportEntity {
@@ -45,12 +40,12 @@ public class TestReportEntity {
         return this;
     }
 
-    public Date getDateTime() {
-        return new Date(testReport.getDateTime().getTime());
+    public String getDateTime() {
+        return testReport.getDateTime();
     }
 
-    public TestReportEntity setDateTime(Date dateTime) {
-        this.testReport.setDateTime(new Date(dateTime.getTime()));
+    public TestReportEntity setDateTime(String dateTime) {
+        this.testReport.setDateTime(dateTime);
         return this;
     }
 

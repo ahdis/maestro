@@ -20,18 +20,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Produces;
-import net.ihe.gazelle.maestro.api.business.Maestro;
 import net.ihe.gazelle.maestro.api.business.SynchronousMaestro;
-import net.ihe.gazelle.maestro.engine.business.MaestroEventProducer;
-import net.ihe.gazelle.maestro.engine.business.MaestroImpl;
-import net.ihe.gazelle.maestro.engine.business.StepExecutorProvider;
-import net.ihe.gazelle.maestro.engine.business.StepRunEventProducer;
-import net.ihe.gazelle.maestro.engine.business.StepRunner;
-import net.ihe.gazelle.maestro.engine.business.TestReportRecordService;
-import net.ihe.gazelle.maestro.engine.business.TestRunEventProducer;
-import net.ihe.gazelle.maestro.engine.business.TestRunner;
-import net.ihe.gazelle.maestro.engine.business.TestSuiteEventProducer;
-import net.ihe.gazelle.maestro.engine.business.TestSuiteRunner;
+import net.ihe.gazelle.maestro.engine.business.*;
 import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
 import net.ihe.gazelle.maestro.engine.business.context.TestRunSession;
 import net.ihe.gazelle.maestro.engine.business.context.TestSuiteSession;
@@ -84,7 +74,7 @@ public class MaestroFactory {
 
    @Produces
    @Default
-   public Maestro getMaestro() {
+   public MaestroImpl getMaestro() {
       return new MaestroImpl(maestroEventProducer);
    }
 
