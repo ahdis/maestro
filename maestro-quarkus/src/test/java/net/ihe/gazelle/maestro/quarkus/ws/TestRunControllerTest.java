@@ -34,7 +34,7 @@ import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestRunDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSuiteRunDTO;
 import net.ihe.gazelle.maestro.engine.business.MaestroImpl;
 import net.ihe.gazelle.maestro.engine.business.TestRunner;
-import net.ihe.gazelle.maestro.engine.business.context.SessionStoreImpl;
+import technical.dao.SessionStoreImpl;
 import net.ihe.gazelle.maestro.quarkus.UnknownStepType;
 import net.ihe.gazelle.maestro.quarkus.factory.TestRunMockEvent;
 import net.ihe.gazelle.maestro.quarkus.mock.InMemoryTestReportRecordService;

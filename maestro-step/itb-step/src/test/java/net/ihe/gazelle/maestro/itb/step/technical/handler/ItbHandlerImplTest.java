@@ -1,10 +1,10 @@
 package net.ihe.gazelle.maestro.itb.step.technical.handler;
 
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
-import net.ihe.gazelle.maestro.itb.step.business.ItbStep;
-import net.ihe.gazelle.maestro.itb.step.business.request.Parameter;
-import net.ihe.gazelle.maestro.itb.step.business.request.TestCase;
-import net.ihe.gazelle.maestro.itb.step.business.request.TestRequest;
+import net.ihe.gazelle.maestro.itb.step.business.ItbStepDefinition;
+import net.ihe.gazelle.itb.gateway.business.request.Parameter;
+import net.ihe.gazelle.itb.gateway.business.request.TestCase;
+import net.ihe.gazelle.itb.gateway.business.request.TestRequest;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
@@ -20,17 +20,17 @@ class ItbHandlerImplTest {
     @Test
     void stepToTestRequestMapper_supportsTextAndFileInputs() throws Exception {
         ItbHandlerImpl handler = new ItbHandlerImpl();
-        ItbStep step = new ItbStep();
+        ItbStepDefinition step = new ItbStepDefinition();
 
-        Property<String> testCase = new Property<>(ItbStep.TEST_CASE, "TC-42");
-        Property<String> systemId = new Property<>(ItbStep.SYSTEM_ID, "SYS-9");
-        Property<String> actorId = new Property<>(ItbStep.ACTOR_ID, "ACT-7");
+        Property<String> testCase = new Property<>(ItbStepDefinition.TEST_CASE, "TC-42");
+        Property<String> systemId = new Property<>(ItbStepDefinition.SYSTEM_ID, "SYS-9");
+        Property<String> actorId = new Property<>(ItbStepDefinition.ACTOR_ID, "ACT-7");
         Property<String> textInput = new Property<>("note", "hello world");
         Property<byte[]> fileInput = new Property<>("payload", "bytes".getBytes(StandardCharsets.UTF_8));
 
         step.setProperties(List.of(testCase, systemId, actorId, textInput, fileInput));
 
-        Method mapper = ItbHandlerImpl.class.getDeclaredMethod("stepToTestRequestMapper", ItbStep.class);
+        Method mapper = ItbHandlerImpl.class.getDeclaredMethod("stepToTestRequestMapper", ItbStepDefinition.class);
         mapper.setAccessible(true);
         TestRequest request = (TestRequest) mapper.invoke(handler, step);
 

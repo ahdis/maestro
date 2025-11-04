@@ -10,7 +10,7 @@ import net.ihe.gazelle.maestro.engine.business.MaestroEventProducer;
 import net.ihe.gazelle.maestro.engine.business.StepExecutorProvider;
 import net.ihe.gazelle.maestro.engine.business.StepRun;
 import net.ihe.gazelle.maestro.engine.business.StepRunner;
-import net.ihe.gazelle.maestro.spi.business.runner.StepExecutor;
+import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
 import org.junit.jupiter.api.Test;
 

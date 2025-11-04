@@ -20,8 +20,8 @@ import net.ihe.gazelle.maestro.api.business.Maestro;
 import net.ihe.gazelle.maestro.engine.business.StepExecutorProvider;
 import net.ihe.gazelle.maestro.engine.business.TestReportRecordService.ItemReference;
 import net.ihe.gazelle.maestro.engine.business.TestRunner;
-import net.ihe.gazelle.maestro.engine.business.context.SessionStoreImpl;
-import net.ihe.gazelle.maestro.quarkus.StepExecutorProviderSPI;
+import technical.dao.SessionStoreImpl;
+import technical.provider.StepExecutorSPIProvider;
 import net.ihe.gazelle.maestro.quarkus.configuration.ServiceRegistryDAOImpl;
 import net.ihe.gazelle.maestro.quarkus.configuration.ServiceRegistryImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,7 +64,7 @@ class FactoryTest {
    void getStepRunnerProviderTest() {
       StepExecutorProvider provider = servicesFactory.getStepRunnerProvider();
       assertNotNull(provider);
-      assertInstanceOf(StepExecutorProviderSPI.class, provider);
+      assertInstanceOf(StepExecutorSPIProvider.class, provider);
    }
 
 }

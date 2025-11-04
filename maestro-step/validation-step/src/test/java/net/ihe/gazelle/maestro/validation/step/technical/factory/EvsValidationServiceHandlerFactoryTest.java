@@ -16,7 +16,7 @@
 
 package net.ihe.gazelle.maestro.validation.step.technical.factory;
 
-import net.ihe.gazelle.maestro.spi.business.runner.Handler;
+import net.ihe.gazelle.maestro.spi.business.Handler;
 import net.ihe.gazelle.maestro.validation.step.technical.handler.EvsValidationHandler;
 import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterface;
 import net.ihe.gazelle.servicemetadata.api.business.HttpRestBinding;

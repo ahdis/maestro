@@ -16,7 +16,7 @@
 
 package net.ihe.gazelle.maestro.assertion.step.business;
 
-import net.ihe.gazelle.maestro.spi.business.runner.Handler;
+import net.ihe.gazelle.maestro.spi.business.Handler;
 
 public interface AssertionHandler extends Handler {
 

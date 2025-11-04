@@ -7,7 +7,7 @@ import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
-import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
+import net.ihe.gazelle.maestro.spi.business.StepRun;
 import net.ihe.gazelle.maestro.validation.step.technical.handler.GazelleValidationServiceHandler;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationTestResult;

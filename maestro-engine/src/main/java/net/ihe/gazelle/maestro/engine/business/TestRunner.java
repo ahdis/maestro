@@ -31,7 +31,7 @@ import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRunValidator;
 import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
 import net.ihe.gazelle.maestro.engine.business.context.TestRunSession;
-import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
+import net.ihe.gazelle.maestro.spi.business.StepRun;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

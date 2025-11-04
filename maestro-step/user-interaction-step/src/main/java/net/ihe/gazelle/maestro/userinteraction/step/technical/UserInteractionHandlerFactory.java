@@ -16,9 +16,9 @@
 
 package net.ihe.gazelle.maestro.userinteraction.step.technical;
 
-import net.ihe.gazelle.maestro.spi.business.runner.ConfigProvider;
-import net.ihe.gazelle.maestro.spi.business.runner.Handler;
-import net.ihe.gazelle.maestro.spi.business.runner.HandlerFactory;
+import net.ihe.gazelle.maestro.spi.technical.ConfigProvider;
+import net.ihe.gazelle.maestro.spi.business.Handler;
+import net.ihe.gazelle.maestro.spi.technical.HandlerFactory;
 import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandler;
 import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandlerImpl;
 import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterface;

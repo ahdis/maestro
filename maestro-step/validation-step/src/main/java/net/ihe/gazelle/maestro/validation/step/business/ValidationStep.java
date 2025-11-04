@@ -16,13 +16,16 @@
 
 package net.ihe.gazelle.maestro.validation.step.business;
 
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
+import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.test.SupportedFileInput;
 import net.ihe.gazelle.maestro.api.business.test.SupportedInput;
 import net.ihe.gazelle.maestro.api.business.test.SupportedTextInput;
-import net.ihe.gazelle.maestro.spi.business.runner.StepDefinition;
+import net.ihe.gazelle.maestro.spi.business.StepDefinition;
 
 import java.io.Serial;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -44,9 +47,12 @@ public class ValidationStep implements StepDefinition {
 
    public static final String TYPE = "VALIDATION";
 
+   // inputs
    public static final String VALIDATION_SERVICE = "validationService";
    public static final String VALIDATION_PROFILE = "validationProfile";
    public static final String CONTENT_TO_VALIDATE = "contentToValidate";
+   // outputs
+   public static final String REPORT = "report";
 
    @Serial
    private static final long serialVersionUID = 7657361003088468932L;
@@ -67,6 +73,13 @@ public class ValidationStep implements StepDefinition {
             // CONTENT_TO_VALIDATE is not required because it's only a fallback in case the validation profile does not
             // define any expected inputs.
             new SupportedFileInput().setId(CONTENT_TO_VALIDATE).setLabel("Content to validate").setRequired(false)
+      );
+   }
+
+   @Override
+   public Map<String, Class<? extends Property>> getOutputsDefinition() {
+      return Map.of(
+         REPORT, ByteArrayProperty.class
       );
    }
 

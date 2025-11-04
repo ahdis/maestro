@@ -25,8 +25,8 @@ import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
-import net.ihe.gazelle.maestro.spi.business.runner.StepExecutor;
-import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
+import net.ihe.gazelle.maestro.spi.business.StepExecutor;
+import net.ihe.gazelle.maestro.spi.business.StepRun;
 import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandler;
 import net.ihe.gazelle.simulation.business.callback.Result;
 import net.ihe.gazelle.simulation.business.callback.SimulationReport;
@@ -57,7 +57,6 @@ import java.util.concurrent.TimeoutException;
 public class SimulationStepExecutor implements StepExecutor {
 
    private static final Logger LOG = LoggerFactory.getLogger(SimulationStepExecutor.class);
-   public static final String REPORT = "report";
    public static final int DEFAULT_TIMEOUT = 60;
 
    private final SimulationHandler simulationHandler;
@@ -202,7 +201,7 @@ public class SimulationStepExecutor implements StepExecutor {
       return prepareStepReport(stepRun)
             .setResult(toStepResult(simulationReport.getResult()))
             .setOutputs(List.of(
-                  new ByteArrayProperty(REPORT, serializer.toByteArray(simulationReport))
+                  new ByteArrayProperty(SimulationStepDefinition.REPORT, serializer.toByteArray(simulationReport))
                         .setFileName("simulation-report.json")
                         .setMimeType("application/json")
             ))

@@ -29,11 +29,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ValidationStepExecutorFactoryTest {
 
-    ValidationStepRunnerFactory validationStepRunnerFactory;
+    ValidationStepExecutorFactory validationStepRunnerFactory;
 
     @BeforeEach
     void setUp() {
-        validationStepRunnerFactory = new ValidationStepRunnerFactory();
+        validationStepRunnerFactory = new ValidationStepExecutorFactory();
     }
 
     @Test

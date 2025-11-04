@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SimulationStepExecutorFactoryTest {
 
-    private final SimulationStepRunnerFactory factory = new SimulationStepRunnerFactory();
+    private final SimulationStepExecutorFactory factory = new SimulationStepExecutorFactory();
 
     @Test
     void canonicalNameTest(){

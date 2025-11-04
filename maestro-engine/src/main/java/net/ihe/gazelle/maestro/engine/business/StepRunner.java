@@ -24,8 +24,8 @@ import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.validator.StepRunReportValidator;
-import net.ihe.gazelle.maestro.spi.business.runner.StepExecutor;
-import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
+import net.ihe.gazelle.maestro.spi.business.StepExecutor;
+import net.ihe.gazelle.maestro.spi.business.StepRun;
 import org.slf4j.Logger;
 
 import java.util.concurrent.TimeUnit;

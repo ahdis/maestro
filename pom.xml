@@ -90,7 +90,7 @@
             **/gazelle/maestro/technical/ws/async/tmintegration/**
             **/gazelle/maestro/websocket/**
             **/gazelle/maestro/mlang/**</sonar.coverage.exclusions>
-    </properties>
+        </properties>
 
     <dependencyManagement>
         <dependencies>

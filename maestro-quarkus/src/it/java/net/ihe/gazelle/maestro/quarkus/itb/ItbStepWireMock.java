@@ -16,7 +16,7 @@
 
 package net.ihe.gazelle.maestro.quarkus.itb;
 
-import net.ihe.gazelle.maestro.itb.step.business.dao.ItbTestExecutionDBInMemory;
+import net.ihe.gazelle.itb.gateway.technical.dao.ItbSessionStoreImpl;
 import net.ihe.gazelle.maestro.quarkus.WireMockSingleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,7 +75,7 @@ public class ItbStepWireMock {
                 // Wait a bit to ensure the test execution has started
                 await()
                         .atMost(5, TimeUnit.SECONDS)
-                        .until(() -> ItbTestExecutionDBInMemory.getStepRunReportFuture(sessionId) != null);
+                        .until(() -> ItbSessionStoreImpl.get(sessionId) != null);
 
                 // Get the callback payload
                 String callbackPayload = WireMockSingleton.getResourceAsString("/itb/ItbCallbackSuccess.json");

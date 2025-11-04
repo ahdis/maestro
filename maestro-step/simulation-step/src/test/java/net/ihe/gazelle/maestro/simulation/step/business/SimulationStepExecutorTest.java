@@ -8,7 +8,7 @@ import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
-import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
+import net.ihe.gazelle.maestro.spi.business.StepRun;
 import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandler;
 import net.ihe.gazelle.simulation.business.callback.Result;
 import net.ihe.gazelle.simulation.business.callback.SimulationReport;
@@ -78,7 +78,7 @@ class SimulationStepExecutorTest {
         assertEquals("sim-step", report.getStepId());
         assertEquals(SimulationStepDefinition.TYPE, report.getType());
         assertFalse(report.getOutputs().isEmpty());
-        assertEquals(SimulationStepExecutor.REPORT, report.getOutputs().getFirst().getName());
+        assertEquals(SimulationStepDefinition.REPORT, report.getOutputs().getFirst().getName());
         assertEquals(Output.FORMAT_JSON, report.getOutputs().getFirst().getFormat());
         verify(ui).displayMessage(anyString());
     }

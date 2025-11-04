@@ -16,7 +16,7 @@
 
 package net.ihe.gazelle.maestro.quarkus.broker;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.ObservesAsync;
 import jakarta.inject.Inject;
@@ -28,7 +28,7 @@ import net.ihe.gazelle.maestro.api.business.message.TestSuiteRunFinished;
 import net.ihe.gazelle.maestro.engine.business.TestSuiteEventProducer;
 import net.ihe.gazelle.maestro.engine.business.TestSuiteRunner;
 
-@ApplicationScoped
+@RequestScoped
 public class TestSuiteRunnerEventController implements TestSuiteEventProducer {
 
    private final TestSuiteRunner testSuiteRunner;

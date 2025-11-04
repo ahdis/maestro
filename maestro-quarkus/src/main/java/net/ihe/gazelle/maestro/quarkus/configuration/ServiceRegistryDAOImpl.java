@@ -46,9 +46,7 @@ public class ServiceRegistryDAOImpl implements ServiceRegistryDAO {
                     new Range(0, Integer.MAX_VALUE),
                     null
             ));
-            return new ArrayList<>(searchResult.objects().stream().map(
-                    Service.class::cast
-            ).toList());
+            return new ArrayList<>(searchResult.objects());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new InterruptedRuntimeException(e);

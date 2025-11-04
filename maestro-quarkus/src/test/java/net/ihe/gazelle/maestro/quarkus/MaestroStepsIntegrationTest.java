@@ -30,7 +30,7 @@ import net.ihe.gazelle.maestro.assertion.step.business.AssertionStep;
 import net.ihe.gazelle.maestro.engine.business.MaestroImpl;
 import net.ihe.gazelle.maestro.engine.business.StepRunner;
 import net.ihe.gazelle.maestro.engine.business.TestRunner;
-import net.ihe.gazelle.maestro.engine.business.context.SessionStoreImpl;
+import technical.dao.SessionStoreImpl;
 import net.ihe.gazelle.maestro.quarkus.broker.MaestroEventController;
 import net.ihe.gazelle.maestro.quarkus.factory.TestRunMockEvent;
 import net.ihe.gazelle.maestro.quarkus.handler.HandlerProviderMock;
@@ -40,6 +40,7 @@ import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import technical.provider.StepExecutorSPIProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,7 +76,7 @@ class MaestroStepsIntegrationTest {
       maestroImpl = new MaestroImpl(eventProducer);
       synchronousMaestro = new SynchronousMaestro(10, maestroImpl);
       StepRunner stepRunner = new StepRunner(
-            new StepExecutorProviderSPI(new HandlerProviderMock()),
+            new StepExecutorSPIProvider(new HandlerProviderMock()),
             eventProducer
       );
       MaestroEventController eventListener = new MaestroEventController(maestro, maestroImpl, stepRunner);

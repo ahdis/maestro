@@ -31,7 +31,7 @@ import net.ihe.gazelle.maestro.engine.business.TestReportRecordService.ItemRefer
 import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
 import net.ihe.gazelle.maestro.engine.business.context.StepCursor;
 import net.ihe.gazelle.maestro.engine.business.context.TestRunCursor;
-import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
+import net.ihe.gazelle.maestro.spi.business.StepRun;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -88,6 +88,8 @@ class MaestroTest {
         testSuiteRunner = new TestSuiteRunner(sessionStore, broker, testReportRecordService, new MetadataServiceMock());
         testRunner = new TestRunner(sessionStore, broker);
         stepRunner = new StepRunner(stepExecutorProvider, broker);
+
+        broker.setServices(maestro, testSuiteRunner, testRunner, stepRunner);
 
     }
 

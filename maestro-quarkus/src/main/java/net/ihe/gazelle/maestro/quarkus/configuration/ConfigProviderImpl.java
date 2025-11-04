@@ -19,7 +19,7 @@ package net.ihe.gazelle.maestro.quarkus.configuration;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
-import net.ihe.gazelle.maestro.spi.business.runner.ConfigProvider;
+import net.ihe.gazelle.maestro.spi.technical.ConfigProvider;
 import org.eclipse.microprofile.config.Config;
 
 @Default

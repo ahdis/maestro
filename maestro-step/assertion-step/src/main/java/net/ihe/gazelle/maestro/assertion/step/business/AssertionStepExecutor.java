@@ -18,8 +18,8 @@ package net.ihe.gazelle.maestro.assertion.step.business;
 
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
-import net.ihe.gazelle.maestro.spi.business.runner.StepExecutor;
-import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
+import net.ihe.gazelle.maestro.spi.business.StepExecutor;
+import net.ihe.gazelle.maestro.spi.business.StepRun;
 
 import java.util.concurrent.CompletableFuture;
 

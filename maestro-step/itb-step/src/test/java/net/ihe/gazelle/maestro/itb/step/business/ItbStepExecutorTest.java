@@ -4,8 +4,8 @@
 package net.ihe.gazelle.maestro.itb.step.business;
 
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
-import net.ihe.gazelle.maestro.itb.step.business.dao.ItbTestExecutionDBInMemory;
-import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
+import net.ihe.gazelle.itb.gateway.technical.dao.ItbSessionStoreImpl;
+import net.ihe.gazelle.maestro.spi.business.StepRun;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -21,32 +21,32 @@ class ItbStepExecutorTest {
         String sessionId = "SESSION-123";
         ItbHandler handler = new ItbHandler() {
             @Override
-            public String handle(ItbStep step) { return sessionId; }
+            public String handle(ItbStepDefinition step) { return sessionId; }
             @Override
             public boolean isAvailable() { return true; }
         };
         ItbStepExecutor runner = new ItbStepExecutor(handler);
 
-        ItbStep step = new ItbStep("itb",
-                new Property<>(ItbStep.TEST_CASE, "TC"),
-                new Property<>(ItbStep.SYSTEM_ID, "SYS"),
-                new Property<>(ItbStep.ACTOR_ID, "ACT"),
+        ItbStepDefinition step = new ItbStepDefinition("itb",
+                new Property<>(ItbStepDefinition.TEST_CASE, "TC"),
+                new Property<>(ItbStepDefinition.SYSTEM_ID, "SYS"),
+                new Property<>(ItbStepDefinition.ACTOR_ID, "ACT"),
                 List.of());
         StepRun stepRun = new StepRun("ts", "tr", step);
 
         CompletableFuture<?> future = runner.execute(stepRun);
 
-        assertSame(future, ItbTestExecutionDBInMemory.getStepRunReportFuture(sessionId));
+        assertSame(future, ItbSessionStoreImpl.get(sessionId));
     }
 
     @Test
     void getSupportedStep_returnsType() {
         ItbStepExecutor runner = new ItbStepExecutor(new ItbHandler() {
             @Override
-            public String handle(ItbStep step) { return "s"; }
+            public String handle(ItbStepDefinition step) { return "s"; }
             @Override
             public boolean isAvailable() { return true; }
         });
-        assertEquals(ItbStep.TYPE, runner.getSupportedStep());
+        assertEquals(ItbStepDefinition.TYPE, runner.getSupportedStep());
     }
 }

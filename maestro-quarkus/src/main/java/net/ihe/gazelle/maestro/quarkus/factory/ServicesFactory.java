@@ -6,29 +6,28 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.Produces;
 import net.ihe.gazelle.maestro.engine.business.StepExecutorProvider;
 import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
-import net.ihe.gazelle.maestro.engine.business.context.SessionStoreImpl;
+import net.ihe.gazelle.maestro.spi.technical.HandlerProvider;
+import technical.dao.SessionStoreImpl;
 import net.ihe.gazelle.maestro.engine.business.context.TestRunSession;
 import net.ihe.gazelle.maestro.engine.business.context.TestSuiteSession;
-import net.ihe.gazelle.maestro.quarkus.ServiceRegistry;
-import net.ihe.gazelle.maestro.quarkus.StepExecutorProviderSPI;
-import net.ihe.gazelle.maestro.quarkus.handler.HandlerProviderSPI;
-import net.ihe.gazelle.maestro.spi.business.runner.ConfigProvider;
+import technical.provider.ServiceRegistry;
+import technical.provider.StepExecutorSPIProvider;
+import technical.provider.HandlerProviderSPI;
+import net.ihe.gazelle.maestro.spi.technical.ConfigProvider;
 
 public class ServicesFactory {
 
-   private final ServiceRegistry serviceRegistry;
-   private final ConfigProvider configProvider;
+   private final HandlerProvider handlerProvider;
 
    @Inject
-   public ServicesFactory(ServiceRegistry serviceRegistry, ConfigProvider configProvider) {
-      this.serviceRegistry = serviceRegistry;
-      this.configProvider = configProvider;
+   public ServicesFactory(HandlerProvider handlerProvider) {
+      this.handlerProvider = handlerProvider;
    }
 
    @Produces
    @Default
    public StepExecutorProvider getStepRunnerProvider() {
-      return new StepExecutorProviderSPI(new HandlerProviderSPI(serviceRegistry, configProvider));
+      return new StepExecutorSPIProvider(handlerProvider);
    }
 
    @ApplicationScoped

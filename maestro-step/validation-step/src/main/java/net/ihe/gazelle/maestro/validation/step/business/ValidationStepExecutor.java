@@ -20,8 +20,8 @@ import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
-import net.ihe.gazelle.maestro.spi.business.runner.StepExecutor;
-import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
+import net.ihe.gazelle.maestro.spi.business.StepExecutor;
+import net.ihe.gazelle.maestro.spi.business.StepRun;
 import net.ihe.gazelle.validation.v2.api.business.UnknownValidationProfileException;
 import net.ihe.gazelle.validation.v2.api.business.profile.SupportedInput;
 import net.ihe.gazelle.validation.v2.api.business.profile.ValidationProfile;
@@ -47,8 +47,6 @@ import java.util.concurrent.CompletableFuture;
  */
 public class ValidationStepExecutor implements StepExecutor {
 
-   public static final String REPORT = "report";
-
    private final ReportSerializer serializer;
    private final ValidationHandler handler;
 
@@ -73,7 +71,7 @@ public class ValidationStepExecutor implements StepExecutor {
 
 
       ByteArrayProperty reportOutput =
-            new ByteArrayProperty(REPORT, serializer.toByteArray(validationReport))
+            new ByteArrayProperty(ValidationStep.REPORT, serializer.toByteArray(validationReport))
             .setFileName("validation-report.json")
             .setMimeType("application/json");
 

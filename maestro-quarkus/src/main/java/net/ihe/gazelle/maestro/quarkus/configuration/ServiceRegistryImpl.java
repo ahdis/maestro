@@ -18,7 +18,7 @@ package net.ihe.gazelle.maestro.quarkus.configuration;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import net.ihe.gazelle.maestro.quarkus.ServiceRegistry;
+import technical.provider.ServiceRegistry;
 import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandler;
 import net.ihe.gazelle.servicemetadata.api.business.HttpRestBindingBuilder;
 import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterfaceBuilder;

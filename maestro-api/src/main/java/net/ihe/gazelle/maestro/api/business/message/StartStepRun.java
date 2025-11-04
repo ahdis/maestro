@@ -17,7 +17,7 @@
 package net.ihe.gazelle.maestro.api.business.message;
 
 import net.ihe.gazelle.lang.Command;
-import net.ihe.gazelle.maestro.spi.business.runner.StepRun;
+import net.ihe.gazelle.maestro.spi.business.StepRun;
 
 import java.io.Serial;
 

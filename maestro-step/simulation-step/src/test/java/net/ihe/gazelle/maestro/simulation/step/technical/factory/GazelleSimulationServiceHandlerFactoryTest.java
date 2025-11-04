@@ -19,7 +19,7 @@ package net.ihe.gazelle.maestro.simulation.step.technical.factory;
 import io.quarkus.test.junit.QuarkusTest;
 import net.ihe.gazelle.maestro.simulation.step.technical.ConfigProviderMock;
 import net.ihe.gazelle.maestro.simulation.step.technical.handler.GazelleSimulationServiceHandler;
-import net.ihe.gazelle.maestro.spi.business.runner.Handler;
+import net.ihe.gazelle.maestro.spi.business.Handler;
 import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterface;
 import net.ihe.gazelle.servicemetadata.api.business.HttpRestBinding;
 import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterface;
