@@ -17,25 +17,22 @@
 package net.ihe.gazelle.maestro.assertion.step.technical.factory;
 
 import net.ihe.gazelle.maestro.api.business.test.Step;
-import net.ihe.gazelle.maestro.assertion.step.business.AssertionStep;
-import net.ihe.gazelle.maestro.assertion.step.business.AssertionStepExecutor;
-import net.ihe.gazelle.maestro.assertion.step.technical.handler.AssertionHandlerImpl;
+import net.ihe.gazelle.maestro.assertion.step.business.equals.AssertEqualsStepDefinition;
+import net.ihe.gazelle.maestro.assertion.step.business.equals.AssertEqualsStepExecutor;
 import net.ihe.gazelle.maestro.spi.business.Handler;
 import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 import net.ihe.gazelle.maestro.spi.technical.StepExecutorFactory;
 
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Assertion Step is not implemented. It exists just for test purpose
  */
-public class AssertionStepExecutorFactory implements StepExecutorFactory {
+public class AssertEqualsStepExecutorFactory implements StepExecutorFactory {
 
-
-    @Override
+   @Override
     public String getSupportedStep() {
-        return AssertionStep.TYPE;
+        return AssertEqualsStepDefinition.TYPE;
     }
 
     @Override
@@ -43,9 +40,10 @@ public class AssertionStepExecutorFactory implements StepExecutorFactory {
         return Map.of();
     }
 
-    @Override
-    public StepExecutor createStepExecutor(Step step, Set<Handler> handlers) {
-        return new AssertionStepExecutor(new AssertionHandlerImpl());
-    }
+
+   @Override
+   public StepExecutor createStepExecutor(Step step, Map<String, Handler> handlers) {
+      return new AssertEqualsStepExecutor();
+   }
 
 }

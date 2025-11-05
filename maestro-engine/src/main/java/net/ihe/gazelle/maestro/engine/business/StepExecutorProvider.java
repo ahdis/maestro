@@ -22,6 +22,8 @@ import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 public interface StepExecutorProvider {
 
    /**
+    * Get the StepExecutor able to execute the given step
+    *
     * @param step The step we want StepExecutor to execute
     *
     * @return A StepExecutor able to run step

@@ -37,13 +37,6 @@ public class StepExecutorSPIProvider implements StepExecutorProvider {
       this.handlerProvider = handlerProvider;
    }
 
-   /**
-    * Will throw an IllegalArgumentException if it can't provide corresponding stepRunner
-    *
-    * @param step The testreport we are want to run
-    *
-    * @return a stepRunner corresponding to testreport
-    */
    @Override
    public StepExecutor getExecutor(Step step) {
       ServiceLoader<StepExecutorFactory> serviceLoader = ServiceLoader.load(StepExecutorFactory.class);

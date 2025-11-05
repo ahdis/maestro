@@ -19,8 +19,6 @@ package net.ihe.gazelle.maestro.assertion.step.technical.handler;
 import net.ihe.gazelle.maestro.assertion.step.business.AssertionHandler;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 class AssertionHandlerTest {
 
     @Test
