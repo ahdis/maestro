@@ -1,6 +1,7 @@
 package net.ihe.gazelle.maestro.api.technical.dto.property;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import net.ihe.gazelle.maestro.api.business.property.BooleanProperty;
 
@@ -22,8 +23,9 @@ public class BooleanPropertyDTO extends PropertyDTO<BooleanProperty> {
       return property.getValue();
    }
 
-   public void setValue(Boolean value) {
-      property.setValue(value);
+   @JsonSetter(VALUE)
+   public void setValue(Object value) {
+       super.setResolvedValue(Boolean.class, Boolean::valueOf, value);
    }
 
    @Override

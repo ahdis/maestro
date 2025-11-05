@@ -94,7 +94,7 @@ public class TestRunDTO implements DTO<TestRun> {
 
    @JsonProperty("systemsUnderTest")
    public List<SystemUnderTestDTO> getSystemsUnderTest() {
-      return testRun.getSystemsUnderTest().stream().map(SystemUnderTestDTO::new).toList();
+      return testRun.getSystemsUnderTest() != null ? testRun.getSystemsUnderTest().stream().map(SystemUnderTestDTO::new).toList() : null;
    }
 
    public void setSystemsUnderTest(List<SystemUnderTestDTO> sutDTOs) {

@@ -2,6 +2,7 @@ package net.ihe.gazelle.maestro.api.technical.dto.property;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 
@@ -24,8 +25,17 @@ public class ByteArrayPropertyDTO extends PropertyDTO<ByteArrayProperty> {
       return property.getValue();
    }
 
-   public void setValue(byte[] value) {
-      property.setValue(value);
+   public void setValue(String value) {
+      if(value == null) {
+         property.setValue(null);
+         return;
+      }
+      if(isReference(value)){
+         property.setValue(value);
+      }
+      else{
+          property.setValue(decodeBase64(value));
+      }
    }
 
    @JsonProperty("fileName")
@@ -49,6 +59,18 @@ public class ByteArrayPropertyDTO extends PropertyDTO<ByteArrayProperty> {
    @Override
    public Class<ByteArrayProperty> getBusinessObjectClass() {
       return ByteArrayProperty.class;
+   }
+
+   //This parses a base64 string, removing the data:...;base64, part if present
+   private byte[] decodeBase64(String value) {
+      String trimmed = value.strip();
+      if (trimmed.startsWith("data:")) {
+         int commaIndex = trimmed.indexOf(',');
+         if (commaIndex >= 0 && commaIndex + 1 < trimmed.length()) {
+            trimmed = trimmed.substring(commaIndex + 1);
+         }
+      }
+      return java.util.Base64.getDecoder().decode(trimmed.replaceAll("\\s", ""));
    }
 
 }

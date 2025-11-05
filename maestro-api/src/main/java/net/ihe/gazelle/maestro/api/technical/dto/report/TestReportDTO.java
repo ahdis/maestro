@@ -106,7 +106,7 @@ public class TestReportDTO implements DTO<TestReport> {
 
     @JsonSetter(value = "testService")
     public void setTestService(TestServiceDTO testServiceDTO) {
-        getBusinessObject().setTestService(testServiceDTO.getBusinessObject());
+        getBusinessObject().setTestService(testServiceDTO != null ? testServiceDTO.getBusinessObject() : null);
     }
 
     @JsonGetter(value = "systemsUnderTest")
@@ -121,7 +121,8 @@ public class TestReportDTO implements DTO<TestReport> {
     @JsonSetter(value = "systemsUnderTest")
     public void setSystemsUnderTest(List<SystemUnderTestDTO> systemsUnderTest) {
         getBusinessObject().setSystemsUnderTest(
-                systemsUnderTest.stream().map(SystemUnderTestDTO::getBusinessObject).toList()
+                systemsUnderTest == null ? List.of() :
+                        systemsUnderTest.stream().map(SystemUnderTestDTO::getBusinessObject).toList()
         );
     }
 
@@ -154,7 +155,7 @@ public class TestReportDTO implements DTO<TestReport> {
 
     @JsonSetter(value = "testCounters")
     public void setTestCounters(TestCountersDTO testCounters) {
-        getBusinessObject().setTestCounters(testCounters.getBusinessObject());
+        getBusinessObject().setTestCounters(testCounters != null ? testCounters.getBusinessObject() : null);
     }
 
     @JsonGetter(value = "note")
@@ -189,7 +190,8 @@ public class TestReportDTO implements DTO<TestReport> {
     @JsonSetter(value = "testRunReports")
     public void setTestRunReports(List<TestRunReportDTO> testRunReports) {
         getBusinessObject().setTestRunReports(
-                testRunReports.stream().map(TestRunReportDTO::getBusinessObject).toList()
+                testRunReports == null ? List.of() :
+                        testRunReports.stream().map(TestRunReportDTO::getBusinessObject).toList()
         );
     }
 
@@ -205,7 +207,8 @@ public class TestReportDTO implements DTO<TestReport> {
     @JsonSetter(value = "subReports")
     public void setSubReports(List<TestReportDTO> subReports) {
         getBusinessObject().setSubReports(
-                subReports.stream().map(TestReportDTO::getBusinessObject).toList()
+                subReports == null ? List.of() :
+                        subReports.stream().map(TestReportDTO::getBusinessObject).toList()
         );
     }
 
@@ -221,7 +224,8 @@ public class TestReportDTO implements DTO<TestReport> {
     @JsonSetter(value = "unexpectedErrors")
     public void setUnexpectedErrors(List<UnexpectedErrorDTO> unexpectedErrors) {
         getBusinessObject().setUnexpectedErrors(
-                unexpectedErrors.stream().map(UnexpectedErrorDTO::getBusinessObject).toList()
+                unexpectedErrors == null ? List.of() :
+                        unexpectedErrors.stream().map(UnexpectedErrorDTO::getBusinessObject).toList()
         );
     }
 }

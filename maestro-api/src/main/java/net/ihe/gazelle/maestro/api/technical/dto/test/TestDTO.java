@@ -97,8 +97,7 @@ public class TestDTO implements DTO<Test> {
    @JsonProperty("steps")
    public List<StepDTO> getSteps() {
       return test.getSteps().stream()
-            .map(SubTypingDTO::fromBusinessObject)
-            .map(StepDTO.class::cast)
+            .map(StepDTO::new)
             .toList();
    }
 

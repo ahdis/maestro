@@ -1,6 +1,7 @@
 package net.ihe.gazelle.maestro.api.technical.dto.property;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import net.ihe.gazelle.maestro.api.business.property.FloatProperty;
 
@@ -22,8 +23,9 @@ public class FloatPropertyDTO extends PropertyDTO<FloatProperty> {
       return property.getValue();
    }
 
-   public void setValue(Double value) {
-      property.setValue(value);
+   @JsonSetter(VALUE)
+   public void setValue(Object value) {
+      super.setResolvedValue(Double.class, Double::valueOf, value);
    }
 
    @Override

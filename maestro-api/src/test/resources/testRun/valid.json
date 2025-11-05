@@ -1,5 +1,8 @@
 [
   {
+    "accessControlList": {
+      "owners": ["user1"]
+    },
     "test": {
       "id": "1",
       "name": "name1",
@@ -11,32 +14,32 @@
             {
               "name": "stringProperty",
               "value": "string",
-              "type": "string"
+              "type": "STRING"
             },
             {
               "name": "integerProperty",
               "value": "3",
-              "type": "integer"
+              "type": "INTEGER"
             },
             {
               "name": "booleanProperty",
               "value": "true",
-              "type": "boolean"
+              "type": "BOOLEAN"
             },
             {
               "name": "doubleProperty",
               "value": "0.5",
-              "type": "double"
+              "type": "FLOAT"
             },
             {
               "name": "byteArrayProperty",
               "value": "ihfeorhqifrghqpervgh",
-              "type": "byteArray"
+              "type": "BYTE_ARRAY"
             },
             {
               "name": "dateProperty",
-              "value": "2024-11-08T11:19:36.385+0000",
-              "type": "date"
+              "value": "2024-11-08T11:19:36.385+00:00",
+              "type": "DATE"
             }
           ]
         },
@@ -47,32 +50,32 @@
             {
               "name": "stringProperty",
               "value": "${stringInput}",
-              "type": "string"
+              "type": "STRING"
             },
             {
               "name": "integerProperty",
               "value": "${integerInput}",
-              "type": "integer"
+              "type": "INTEGER"
             },
             {
               "name": "booleanProperty",
               "value": "${booleanInput}",
-              "type": "boolean"
+              "type": "BOOLEAN"
             },
             {
               "name": "doubleProperty",
               "value": "${doubleInput}",
-              "type": "double"
+              "type": "FLOAT"
             },
             {
               "name": "byteArrayProperty",
               "value": "${byteArrayInput}",
-              "type": "byteArray"
+              "type": "BYTE_ARRAY"
             },
             {
               "name": "dateProperty",
               "value": "${dateInput}",
-              "type": "date"
+              "type": "DATE"
             }
           ]
         }
@@ -82,37 +85,37 @@
       {
         "name": "inputFile1",
         "value": "ihfeorhqifrghqpervgh",
-        "type": "byteArray"
+        "type": "BYTE_ARRAY"
       },
       {
         "name": "stringInput",
         "value": "string",
-        "type": "string"
+        "type": "STRING"
       },
       {
         "name": "integerInput",
         "value": "3",
-        "type": "integer"
+        "type": "INTEGER"
       },
       {
         "name": "booleanInput",
         "value": "true",
-        "type": "boolean"
+        "type": "BOOLEAN"
       },
       {
         "name": "doubleInput",
         "value": "0.5",
-        "type": "double"
+        "type": "FLOAT"
       },
       {
         "name": "byteArrayInput",
         "value": "ihfeorhqifrghqpervgh",
-        "type": "string"
+        "type": "BYTE_ARRAY"
       },
       {
         "name": "dateInput",
-        "value": "2024-11-08T11:19:36.385+0000",
-        "type": "date"
+        "value": "2024-11-08T11:19:36.385+00:00",
+        "type": "DATE"
       }
     ]
   }

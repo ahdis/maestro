@@ -16,13 +16,11 @@
 
 package net.ihe.gazelle.maestro.api.technical.dto.property;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
+
+import java.util.function.Function;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({"name", "type", "value"})
@@ -56,6 +54,31 @@ public abstract class PropertyDTO<T extends Property> implements SubTypingDTO<T>
 
    public void setName(String name) {
       property.setName(name);
+   }
+
+
+   protected boolean isReference(String value) {
+      return value != null && value.startsWith("${") && value.endsWith("}");
+   }
+
+   <R> void setResolvedValue(Class<R> expectedType, Function<String, R> parser, Object value) {
+      if (value == null) {
+         property.setValue(null);
+         return;
+      }
+      if (value instanceof String strValue) {
+         if (isReference(strValue)) {
+            property.setValue(strValue);
+         } else {
+            property.setValue(parser.apply(strValue));
+         }
+         return;
+      }
+      if (expectedType.isInstance(value)) {
+         property.setValue(expectedType.cast(value));
+         return;
+      }
+      throw new IllegalArgumentException("Unsupported value type for " + getClass() + ": " + value.getClass());
    }
 
 }

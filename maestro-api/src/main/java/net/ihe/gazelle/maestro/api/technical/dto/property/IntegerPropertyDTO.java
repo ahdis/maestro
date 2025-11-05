@@ -1,6 +1,7 @@
 package net.ihe.gazelle.maestro.api.technical.dto.property;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import net.ihe.gazelle.maestro.api.business.property.IntegerProperty;
 
@@ -22,8 +23,9 @@ public class IntegerPropertyDTO extends PropertyDTO<IntegerProperty> {
       return property.getValue();
    }
 
-   public void setValue(Integer value) {
-      property.setValue(value);
+   @JsonSetter(VALUE)
+   public void setValue(Object value) {
+      super.setResolvedValue(Integer.class, Integer::valueOf, value);
    }
 
    @Override

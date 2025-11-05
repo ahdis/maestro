@@ -1,6 +1,7 @@
 package net.ihe.gazelle.maestro.api.technical.dto.property;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import net.ihe.gazelle.maestro.api.business.property.DateProperty;
 
@@ -29,7 +30,12 @@ public class DatePropertyDTO extends PropertyDTO<DateProperty> {
    }
 
    public void setValue(String value) {
-      property.setValue(Instant.from(ZonedDateTime.parse(value, DateTimeFormatter.ISO_OFFSET_DATE_TIME)));
+      if(isReference(value)){
+         property.setValue(value);
+      }
+      else{
+         property.setValue(Instant.from(ZonedDateTime.parse(value, DateTimeFormatter.ISO_OFFSET_DATE_TIME)));
+      }
    }
 
    @Override

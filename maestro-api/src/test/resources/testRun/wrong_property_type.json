@@ -11,7 +11,7 @@
             {
               "name": "stringProperty",
               "value": "string",
-              "type": "wrong"
+              "type": "WRONG"
             }
           ]
         }
@@ -21,37 +21,37 @@
       {
         "name": "inputFile1",
         "value": "ihfeorhqifrghqpervgh",
-        "type": "byteArray"
+        "type": "BYTE_ARRAY"
       },
       {
         "name": "stringInput",
         "value": "string",
-        "type": "string"
+        "type": "STRING"
       },
       {
         "name": "integerInput",
         "value": "3",
-        "type": "integer"
+        "type": "INTEGER"
       },
       {
         "name": "booleanInput",
         "value": "true",
-        "type": "boolean"
+        "type": "BOOLEAN"
       },
       {
         "name": "doubleInput",
         "value": "0.5",
-        "type": "double"
+        "type": "FLOAT"
       },
       {
         "name": "byteArrayInput",
         "value": "ihfeorhqifrghqpervgh",
-        "type": "string"
+        "type": "BYTE_ARRAY"
       },
       {
         "name": "dateInput",
-        "value": "2024-11-08T11:19:36.385+0000",
-        "type": "date"
+        "value": "2024-11-08T11:19:36.385+00:00",
+        "type": "DATE"
       }
     ]
   }
