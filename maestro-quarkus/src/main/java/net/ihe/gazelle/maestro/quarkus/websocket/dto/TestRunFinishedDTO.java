@@ -16,10 +16,7 @@
 
 package net.ihe.gazelle.maestro.quarkus.websocket.dto;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.errorhandling.technical.UnexpectedErrorDTO;
 import net.ihe.gazelle.maestro.api.business.message.TestRunFinished;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
@@ -30,6 +27,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @JsonTypeName(TestRunFinishedDTO.TYPE)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
         "type",
         "testId",

@@ -64,7 +64,7 @@ public class ServiceRegistryImpl implements ServiceRegistry {
                 .setVersion("1.0.0")
                 .setInstanceId("112233")
                 .setReplicaId("112")
-                .setName(UserInteractionHandler.NAME)
+                .setName(UserInteractionHandler.SERVICE_NAME)
                 .addProvidedInterfaceBuilder(new ProvidedInterfaceBuilder()
                         .setInterfaceVersion("1.0.0")
                         .setInterfaceName(UserInteractionHandler.INTERFACE_NAME)

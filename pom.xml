@@ -122,12 +122,12 @@
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
-                <artifactId>assertion-step</artifactId>
+                <artifactId>itb-step</artifactId>
                 <version>0.4.1-NPD-1449-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
-                <artifactId>itb-step</artifactId>
+                <artifactId>assertion-step</artifactId>
                 <version>0.4.1-NPD-1449-SNAPSHOT</version>
             </dependency>
             <!-- to be removed when maestro-websocket has it own tests -->

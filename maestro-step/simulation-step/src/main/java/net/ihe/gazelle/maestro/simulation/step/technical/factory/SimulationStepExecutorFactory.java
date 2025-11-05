@@ -33,8 +33,6 @@ import java.util.Optional;
 @ApplicationScoped
 public class SimulationStepExecutorFactory implements StepExecutorFactory {
 
-   private static final String USER_INTERACTION_SERVICE = "User Interaction Service";
-
    @Override
    public String getSupportedStep() {
       return SimulationStepDefinition.TYPE;
@@ -44,10 +42,9 @@ public class SimulationStepExecutorFactory implements StepExecutorFactory {
    public Map<String, Class<? extends Handler>> getRequiredServices(Step step) {
       return Map.of(
             step.getPropertyValue(SimulationStepDefinition.SIMULATION_SERVICE), SimulationHandler.class,
-            USER_INTERACTION_SERVICE, UserInteractionHandler.class
+              UserInteractionHandler.SERVICE_NAME, UserInteractionHandler.class
       );
    }
-
 
    @Override
    public StepExecutor createStepExecutor(Step step, Map<String, Handler> handlers) {
@@ -56,7 +53,7 @@ public class SimulationStepExecutorFactory implements StepExecutorFactory {
             Optional.ofNullable((SimulationHandler) handlers.get(simulatorName))
                   .orElseThrow(() -> new IllegalArgumentException(
                         "No simulation handler provided for service: " + simulatorName)),
-            Optional.ofNullable((UserInteractionHandler) handlers.get(USER_INTERACTION_SERVICE))
+            Optional.ofNullable((UserInteractionHandler) handlers.get(UserInteractionHandler.SERVICE_NAME))
                   .orElseThrow(() -> new IllegalArgumentException("No user interaction handler provided")),
             new ReportSerializerImpl()
       );

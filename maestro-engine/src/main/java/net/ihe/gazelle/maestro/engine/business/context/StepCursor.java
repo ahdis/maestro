@@ -50,7 +50,7 @@ public final class StepCursor {
       if (!hasNext()) {
          throw new NoSuchElementException("No more steps to execute");
       }
-      return steps.get(index++);
+      return steps.get(++index);
    }
 
    public boolean hasCurrent() {

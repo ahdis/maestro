@@ -56,7 +56,7 @@ public class StepRunner {
       try {
          StepExecutor executor = stepExecutorProvider.getExecutor(stepRun);
          StepRunReport report = executor.execute(stepRun)
-               .get((Integer) stepRun.getPropertyValue("timeout"), TimeUnit.MILLISECONDS); // blocking call
+               .get((Integer) stepRun.getPropertyValue("timeoutSeconds"), TimeUnit.SECONDS); // blocking call
 
          stepRunReportValidator.validate(report).orThrow(IllegalStateException::new);
          stepRunEventProducer.notify(

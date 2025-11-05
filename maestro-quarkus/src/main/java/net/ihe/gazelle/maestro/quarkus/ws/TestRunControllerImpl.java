@@ -32,7 +32,6 @@ import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestRunDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSuiteRunDTO;
-import net.ihe.gazelle.maestro.quarkus.UnknownStepType;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,10 +76,6 @@ public class TestRunControllerImpl implements TestRunController {
          LOG.debug("TestRun format Exception", e);
          return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
                .entity("The request contains a testRun with bad format" + e).build();
-      } catch (UnknownStepType e) {
-         LOG.debug(e.getMessage());
-         return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
-               .entity(MessageFormat.format("Unknown step type: {0}", e.getMessage())).build();
       } catch (TimeoutRuntimeException | WebApplicationException e) {
          return Response.status(Response.Status.GATEWAY_TIMEOUT.getStatusCode())
                .entity(SynchronousMaestro.TIMEOUT_MESSAGE).build();

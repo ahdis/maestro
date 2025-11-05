@@ -50,7 +50,7 @@ public final class TestRunCursor {
       if (!hasNext()) {
          throw new NoSuchElementException("No more test runs to execute");
       }
-      return tests.get(index++);
+      return tests.get(++index);
    }
 
    public synchronized boolean hasCurrent() {

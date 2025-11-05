@@ -37,7 +37,7 @@ import java.time.format.DateTimeFormatter;
 public class StepRunStartedDTO extends MessageDTO<StepRunStarted> {
 
     @JsonIgnore
-    public static final String TYPE = "START_STEP_RUN";
+    public static final String TYPE = "STEP_RUN_STARTED";
 
     public StepRunStartedDTO() {
         super(new StepRunStarted());

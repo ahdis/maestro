@@ -17,6 +17,12 @@ public class ByteArrayItemProperty extends ByteArrayProperty {
       super(name, value);
    }
 
+   public ByteArrayItemProperty(ByteArrayProperty property) {
+        super(property.getName(), property.getValue());
+        super.setFileName(property.getFileName());
+        super.setMimeType(property.getMimeType());
+   }
+
    private String reference;
 
    public String getReference() {

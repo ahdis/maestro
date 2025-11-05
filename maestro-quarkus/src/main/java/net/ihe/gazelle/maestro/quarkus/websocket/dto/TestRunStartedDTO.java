@@ -29,7 +29,7 @@ import java.time.format.DateTimeFormatter;
 @JsonTypeName(TestRunStartedDTO.TYPE)
 @JsonPropertyOrder({
         "type",
-        "testRunId",
+        "testId",
         "dateTime"
 })
 public class TestRunStartedDTO extends MessageDTO<String> {

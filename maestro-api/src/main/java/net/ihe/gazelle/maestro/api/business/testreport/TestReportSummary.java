@@ -20,6 +20,7 @@ public class TestReportSummary implements Serializable {
     private List<UnexpectedError> unexpectedErrors;
 
     public TestReportSummary() {
+        this.dateTime = Instant.now();
         this.unexpectedErrors = new ArrayList<>();
     }
 

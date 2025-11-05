@@ -16,10 +16,7 @@
 
 package net.ihe.gazelle.maestro.quarkus.websocket.dto;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.errorhandling.technical.UnexpectedErrorDTO;
 import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
 
@@ -29,6 +26,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @JsonTypeName(StepRunFinishedDTO.TYPE)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
         "type",
         "testId",
@@ -40,7 +38,7 @@ import java.util.List;
 public class StepRunFinishedDTO extends MessageDTO<StepRunFinished> {
 
     @JsonIgnore
-    public static final String TYPE = "START_STEP_RUN";
+    public static final String TYPE = "STEP_RUN_FINISHED";
 
     public StepRunFinishedDTO() {
         super(new StepRunFinished());

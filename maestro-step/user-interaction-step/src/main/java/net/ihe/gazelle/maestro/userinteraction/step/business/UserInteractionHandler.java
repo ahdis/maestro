@@ -20,7 +20,7 @@ import net.ihe.gazelle.maestro.spi.business.Handler;
 
 public interface UserInteractionHandler extends Handler {
 
-    String NAME = "UserInteractionHandler";
+    String SERVICE_NAME = "User Interaction Service";
     String INTERFACE_NAME = "User Interaction API";
 
     void displayMessage(String message);

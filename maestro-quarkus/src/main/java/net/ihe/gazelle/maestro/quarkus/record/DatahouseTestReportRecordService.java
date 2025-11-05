@@ -297,10 +297,10 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
         for (int k = 0; k < outputIndexes.size(); k++) {
             int idx = outputIndexes.get(k);
             String attachmentId = ids.get(k);
-            Property output = outputs.get(idx);
-            ByteArrayItemProperty itemProperty = new ByteArrayItemProperty(output.getName(), output.getValue());
-            itemProperty.setReference(constructPathToAttachment(attachmentId));
-            outputs.set(idx, new ByteArrayItemProperty(output.getName(), output.getValue()));
+            ByteArrayProperty output = outputs.get(idx);
+            ByteArrayItemProperty itemProperty = new ByteArrayItemProperty(output)
+                    .setReference(constructUrlToDatahouse(attachmentId));
+            outputs.set(idx, itemProperty);
             attachmentRefs.add(new Reference()
                     .setName(itemProperty.getName())
                     .setType(itemProperty.getMimeType())

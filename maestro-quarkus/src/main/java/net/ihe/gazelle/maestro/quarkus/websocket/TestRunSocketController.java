@@ -24,15 +24,20 @@ import jakarta.websocket.server.ServerEndpoint;
 import net.ihe.gazelle.maestro.api.business.Maestro;
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.api.business.message.*;
-import net.ihe.gazelle.maestro.api.business.testreport.Result;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
+import net.ihe.gazelle.maestro.api.business.test.Step;
+import net.ihe.gazelle.maestro.api.business.test.Test;
+import net.ihe.gazelle.maestro.api.business.testreport.*;
+import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
+import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.quarkus.websocket.dto.*;
+import net.ihe.gazelle.maestro.spi.business.StepRun;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
+import java.util.ArrayList;
 
 @ApplicationScoped
 @ServerEndpoint("/v1/runs")
@@ -42,7 +47,7 @@ public class TestRunSocketController {
 
     private final TextSerDes serDes = new JacksonSerDes();
     private final Maestro maestro;
-    private StartTestSuiteRunDTO localStartTestSuite;
+    private TestSuiteRun localTestSuiteRun;
 
     @Inject
     public TestRunSocketController(Maestro maestro) {
@@ -54,25 +59,61 @@ public class TestRunSocketController {
         Object message = serDes.deserialize(messageString, MessageDTO.class).getBusinessObject();
         WebsocketSession maestroCaller = new WebsocketSession(session);
         Thread.sleep(1000);
-        if (message instanceof StartTestSuiteRunDTO startTestSuiteRun) {
-            this.localStartTestSuite = startTestSuiteRun;
-            if ("With additional instructions".equals(startTestSuiteRun.getTestSuiteRun().getTestSuite().getName())) {
+        if (message instanceof TestSuiteRun testSuiteRun) {
+            this.localTestSuiteRun = testSuiteRun;
+            maestro.executeTestSuite(localTestSuiteRun, maestroCaller);
+            /*Test test = localTestSuiteRun.getTests().getFirst();
+            Step step = test.getSteps().getFirst();
+            maestroCaller.onTestRunStarted(new TestRunStarted(test.getId()));
+            Thread.sleep(1000);
+            maestroCaller.onStepRunStarted(new StepRunStarted(test.getId(), step.getId()));
+            Thread.sleep(1000);
+            if ("With additional instructions".equals(localTestSuiteRun.getTestSuite().getName())) {
                 maestroCaller.interactWithUser(new InteractWithUser("User interaction test", "Please click continue"));
             } else {
+                Thread.sleep(1000);
+                maestroCaller.onStepRunFinished(new StepRunFinished("sessionId", test.getId(), new StepRun(step, new ArrayList<>()), createStepRunReport()));
+                Thread.sleep(1000);
+                maestroCaller.onTestRunFinished(new TestRunFinished("sessionId", new TestRun(), createTestRunReport()));
+                Thread.sleep(1000);
                 maestroCaller.onTestSuiteFinished(createTestSuiteFinished());
-            }
-            //maestro.executeTestSuite(localStartTestSuite.getTestSuiteRun(), maestroCaller);
-        } else if (message instanceof UserInteractionCompletedDTO) {
+            }*/
+        } else if (message instanceof UserInteractionCompleted) {
+            Test test = localTestSuiteRun.getTests().getFirst();
+            Step step = test.getSteps().getFirst();
+            Thread.sleep(1000);
+            maestroCaller.onStepRunFinished(new StepRunFinished("sessionId", test.getId(), new StepRun(step, new ArrayList<>()), createStepRunReport()));
+            Thread.sleep(1000);
+            maestroCaller.onTestRunFinished(new TestRunFinished("sessionId", new TestRun(), createTestRunReport()));
+            Thread.sleep(1000);
             maestroCaller.onTestSuiteFinished(createTestSuiteFinished());
         } else {
             throw new IllegalArgumentException("Unexpected message type: " + message.getClass().getName());
         }
     }
 
+    private StepRunReport createStepRunReport() {
+        return new StepRunReportBuilder()
+                .setStepId("mock step")
+                .setStepName("mock step")
+                .setType("SIMULATION")
+                .setResult(StepResult.PASSED)
+                .build();
+    }
+
+    private TestRunReport createTestRunReport() {
+        Test test = localTestSuiteRun.getTests().getFirst();
+        return new TestRunReportBuilder()
+                .setRunId(test.getId())
+                .setTest(new TestBuilder().setId(test.getId()).setName(test.getName()))
+                .addStepRunReport(createStepRunReport())
+                .build();
+    }
+
     private TestSuiteRunFinished createTestSuiteFinished() {
         return new TestSuiteRunFinished(
                 "sessionId",
-                localStartTestSuite.getBusinessObject(),
+                localTestSuiteRun,
                 new TestReportSummary()
                         .setDateTime(Instant.now())
                         .setResult(Result.PASSED)
@@ -91,38 +132,42 @@ public class TestRunSocketController {
         @Override
         public void onTestRunStarted(TestRunStarted testRunStarted) {
             String message = serDes.serializeAsString(new TestRunStartedDTO(testRunStarted.getTestId()));
+            LOG.info("Test Run Started: {}", message);
             this.session.getAsyncRemote().sendText(message);
         }
 
         @Override
         public void onStepRunStarted(StepRunStarted stepRunStarted) {
             String message = serDes.serializeAsString(new StepRunStartedDTO(stepRunStarted));
+            LOG.info("Step Run Started: {}", message);
             this.session.getAsyncRemote().sendText(message);
         }
 
         @Override
         public void interactWithUser(InteractWithUser interactWithUser) {
             String message = serDes.serializeAsString(new InteractWithUserDTO(interactWithUser));
-            LOG.info("send message: {}", message);
+            LOG.info("Interact with user: {}", message);
             this.session.getAsyncRemote().sendText(message);
         }
 
         @Override
         public void onStepRunFinished(StepRunFinished stepRunFinished) {
             String message = serDes.serializeAsString(new StepRunFinishedDTO(stepRunFinished));
+            LOG.info("Step Run Finished: {}", message);
             this.session.getAsyncRemote().sendText(message);
         }
 
         @Override
         public void onTestRunFinished(TestRunFinished testRunFinished) {
             String message = serDes.serializeAsString(new TestRunFinishedDTO(testRunFinished));
+            LOG.info("Test Run Finished: {}", message);
             this.session.getAsyncRemote().sendText(message);
         }
 
         @Override
         public void onTestSuiteFinished(TestSuiteRunFinished testSuiteFinished) {
             String message = serDes.serializeAsString(new TestSuiteRunFinishedDTO(testSuiteFinished.getReportSummary()));
-            LOG.info("send message: {}", message);
+            LOG.info("Test Suite Finished: {}", message);
             this.session.getAsyncRemote().sendText(message);
         }
     }

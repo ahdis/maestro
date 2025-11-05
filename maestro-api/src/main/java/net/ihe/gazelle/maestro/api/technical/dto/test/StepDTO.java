@@ -32,7 +32,7 @@ import java.util.List;
 @JsonPropertyOrder({"id", "name", "type", "properties"})
 public class StepDTO implements DTO<Step> {
 
-   private Step step;
+   private final Step step;
 
    public StepDTO() {
       this(new Step());
