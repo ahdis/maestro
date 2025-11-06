@@ -36,8 +36,9 @@ class PropertyResolverTest {
       Property first = new StringProperty("first", "${second}");
       Property second = new StringProperty("second", "${first}");
 
+      List<Property> props = List.of(first, second);
       assertThrows(IllegalStateException.class, () ->
-            PropertyResolver.resolveProperties(List.of(first, second))
+            PropertyResolver.resolveProperties(props)
       );
    }
 
@@ -45,8 +46,9 @@ class PropertyResolverTest {
    void shouldDetectMissingReference() {
       Property orphan = new StringProperty("orphan", "${missing}");
 
+      List<Property> orphans = List.of(orphan);
       assertThrows(MissingPropertyException.class, () ->
-            PropertyResolver.resolveProperties(List.of(orphan))
+            PropertyResolver.resolveProperties(orphans)
       );
    }
 
@@ -55,8 +57,9 @@ class PropertyResolverTest {
       Property integerProperty = new IntegerProperty("number", 42);
       Property stringReference = new StringProperty("stringRef", "${number}");
 
+      List<Property> properties = List.of(integerProperty, stringReference);
       assertThrows(PropertyTypeMismatchException.class, () ->
-            PropertyResolver.resolveProperties(List.of(integerProperty, stringReference))
+            PropertyResolver.resolveProperties(properties)
       );
    }
 }

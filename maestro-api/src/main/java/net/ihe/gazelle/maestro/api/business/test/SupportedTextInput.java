@@ -32,4 +32,22 @@ public class SupportedTextInput extends SupportedInput {
       this.defaultValue = defaultValue;
       return this;
    }
+
+   @Override
+   public SupportedTextInput setId(String id) {
+      super.setId(id);
+      return this;
+   }
+
+   @Override
+   public SupportedTextInput setLabel(String label) {
+      super.setLabel(label);
+      return this;
+   }
+
+   @Override
+   public SupportedTextInput setRequired(boolean required) {
+      super.setRequired(required);
+      return this;
+   }
 }
