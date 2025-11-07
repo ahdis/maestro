@@ -21,6 +21,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.Produces;
 import net.ihe.gazelle.itb.gateway.technical.client.ItbClient;
 import net.ihe.gazelle.maestro.itb.step.business.ItbHandler;
+import net.ihe.gazelle.maestro.spi.technical.HandlerContext;
 import net.ihe.gazelle.maestro.spi.technical.HandlerProvider;
 
 /**
@@ -41,7 +42,7 @@ public class ItbClientFactory {
    @Produces
    @RequestScoped
    public ItbClient createItbClient() {
-      return (ItbClient) handlerProvider.getHandler(ItbHandler.ITB_SERVICE_NAME, ItbHandler.class);
+      return (ItbClient) handlerProvider.getHandler(new HandlerContext(ItbHandler.ITB_SERVICE_NAME), ItbHandler.class);
    }
 
 }

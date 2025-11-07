@@ -4,8 +4,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import net.ihe.gazelle.maestro.api.business.test.SupportedValueSetInput;
-@JsonPropertyOrder({"id", "type", "label", "required", "valueSetId", "defaultValue"})
+
 @JsonTypeName(SupportedValueSetInputDTO.TYPE)
+@JsonPropertyOrder({"id", "type", "label", "required", "valueSetId", "defaultValue"})
 public class SupportedValueSetInputDTO extends SupportedInputDTO<SupportedValueSetInput> {
 
    public static final String TYPE = "VALUE_SET";

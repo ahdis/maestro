@@ -20,6 +20,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Produces;
+import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.api.business.SynchronousMaestro;
 import net.ihe.gazelle.maestro.engine.business.*;
 import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
@@ -37,6 +38,7 @@ public class MaestroFactory {
 
    private final SessionStore<TestSuiteSession> suiteSessionStore;
    private final SessionStore<TestRunSession> testSessionStore;
+    private final SessionStore<MaestroObserver> observerStore;
    private final MaestroEventProducer maestroEventProducer;
    private final TestSuiteEventProducer testSuiteEventProducer;
    private final TestRunEventProducer testRunEventProducer;
@@ -48,6 +50,7 @@ public class MaestroFactory {
    @Inject
    public MaestroFactory(@TestSuiteStore SessionStore<TestSuiteSession> suiteSessionStore,
                          @TestRunStore SessionStore<TestRunSession> testSessionStore,
+                         @ObserverStore SessionStore<MaestroObserver> observerStore,
                          MaestroEventProducer maestroEventProducer,
                          TestSuiteEventProducer testSuitetestReportRecordService,
                          TestRunEventProducer testRunEventProducer,
@@ -57,6 +60,7 @@ public class MaestroFactory {
                          MetadataService metadataService) {
       this.suiteSessionStore = suiteSessionStore;
       this.testSessionStore = testSessionStore;
+      this.observerStore = observerStore;
       this.maestroEventProducer = maestroEventProducer;
       this.testSuiteEventProducer = testSuitetestReportRecordService;
       this.testRunEventProducer = testRunEventProducer;
@@ -75,7 +79,7 @@ public class MaestroFactory {
    @Produces
    @Default
    public MaestroImpl getMaestro() {
-      return new MaestroImpl(maestroEventProducer);
+      return new MaestroImpl(observerStore, maestroEventProducer, testSuiteEventProducer);
    }
 
    @Produces

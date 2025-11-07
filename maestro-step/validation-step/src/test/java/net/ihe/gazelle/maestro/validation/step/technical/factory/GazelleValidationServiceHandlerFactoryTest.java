@@ -60,14 +60,14 @@ class GazelleValidationServiceHandlerFactoryTest {
         ProvidedInterface providedInterface = new ProvidedInterface();
         providedInterface.addBinding(binding);
         providedInterface.setInterfaceVersion("1.0.0");
-        Handler handler = factory.createHandler(null, providedInterface, null);
+        Handler handler = factory.createHandler(null, , providedInterface, null);
         assertNotNull(handler);
     }
 
     @Test
     void no_binding_simulation_handler_throws_exception() {
         ProvidedInterface providedInterface = new ProvidedInterface();
-        assertThrows(NoSuchElementException.class,() -> factory.createHandler(null, providedInterface, null));
+        assertThrows(NoSuchElementException.class,() -> factory.createHandler(null, , providedInterface, null));
     }
 
     @Test
@@ -76,7 +76,7 @@ class GazelleValidationServiceHandlerFactoryTest {
         binding.setServiceUrl("bad uri");
         ProvidedInterface providedInterface = new ProvidedInterface();
         providedInterface.addBinding(binding);
-//        assertThrows(ServiceClientException.class,() -> factory.createHandler(, providedInterface, null));
+//        assertThrows(ServiceClientException.class,() -> factory.createHandler(, , providedInterface, null));
     }
 
 }

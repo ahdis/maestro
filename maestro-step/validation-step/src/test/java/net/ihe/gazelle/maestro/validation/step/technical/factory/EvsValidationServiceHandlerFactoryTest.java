@@ -97,7 +97,7 @@ class EvsValidationServiceHandlerFactoryTest {
             ProvidedInterface providedInterface = new ProvidedInterface();
             providedInterface.addBinding(binding);
             providedInterface.setInterfaceVersion("1.0.0");
-            assertNotNull(factory.createHandler(null, providedInterface, null));
+            assertNotNull(factory.createHandler(null, , providedInterface, null));
 
     }
 
@@ -107,7 +107,7 @@ class EvsValidationServiceHandlerFactoryTest {
 
         ProvidedInterface emptyProvidedInterface = new ProvidedInterface();
         // No bindings added
-        Throwable throwable = assertThrows(IllegalArgumentException.class, () -> factory.createHandler(null,
+        Throwable throwable = assertThrows(IllegalArgumentException.class, () -> factory.createHandler(null, ,
               emptyProvidedInterface, null));
         assertNotNull(throwable);
         assertEquals("Provided interface has no bindings configured", throwable.getMessage());
@@ -123,7 +123,7 @@ class EvsValidationServiceHandlerFactoryTest {
         providedInterface.addBinding(binding);
         providedInterface.setInterfaceVersion("1.0.0");
 
-        Throwable throwable = assertThrows(IllegalArgumentException.class, () -> factory.createHandler(null,
+        Throwable throwable = assertThrows(IllegalArgumentException.class, () -> factory.createHandler(null, ,
               providedInterface, null));
         assertNotNull(throwable);
         assertEquals("Provided interface has no valid service URL", throwable.getMessage());
@@ -134,7 +134,7 @@ class EvsValidationServiceHandlerFactoryTest {
     void should_throw_exception_when_first_binding_is_not_http_rest() {
         ProvidedInterface providedInterface = new ProvidedInterface();
         providedInterface.addBinding(new WebBinding()); // Adding a non-HttpRestBinding
-        Throwable throwable = assertThrows(IllegalArgumentException.class, () -> factory.createHandler(null,
+        Throwable throwable = assertThrows(IllegalArgumentException.class, () -> factory.createHandler(null, ,
               providedInterface, null));
         assertNotNull(throwable);
         assertEquals("First binding is not an HttpRestBinding", throwable.getMessage());

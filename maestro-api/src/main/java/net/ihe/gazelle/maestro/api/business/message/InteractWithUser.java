@@ -16,13 +16,18 @@
 
 package net.ihe.gazelle.maestro.api.business.message;
 
+import java.io.Serial;
+
 public class InteractWithUser implements Message {
+
+    @Serial
+    private static final long serialVersionUID = 5192092115743420623L;
 
     private String interactionTitle;
     private String message;
 
     public InteractWithUser() {
-        // For serialization
+        this(null, null);
     }
 
     public InteractWithUser(String interactionTitle, String message) {

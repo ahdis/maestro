@@ -14,3 +14,4 @@
 # limitations under the License.
 #
 
+net.ihe.gazelle.maestro.userinteraction.step.technical.UserInteractionStepExecutorFactory

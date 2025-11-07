@@ -1,11 +1,6 @@
 package net.ihe.gazelle.maestro.engine.business;
 
-import net.ihe.gazelle.maestro.api.business.message.StartStepRun;
-import net.ihe.gazelle.maestro.api.business.message.StartTestRun;
-import net.ihe.gazelle.maestro.api.business.message.StartTestSuiteRun;
-import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
-import net.ihe.gazelle.maestro.api.business.message.TestRunFinished;
-import net.ihe.gazelle.maestro.api.business.message.TestSuiteRunFinished;
+import net.ihe.gazelle.maestro.api.business.message.*;
 
 import java.util.concurrent.ExecutorService;
 
@@ -34,7 +29,7 @@ public class HardWiredEventBroker implements MaestroEventProducer, TestSuiteEven
       executorService.submit(() -> testSuiteRunner.run(startTestSuiteRun));
    }
 
-   @Override
+    @Override
    public void notify(StepRunFinished stepRunFinished) {
       executorService.submit(() -> testRunner.listen(stepRunFinished));
    }

@@ -14,18 +14,9 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.userinteraction.step.business;
+package net.ihe.gazelle.maestro.engine.business.context;
 
-public class UserInteractionHandlerImpl implements UserInteractionHandler {
+public interface ReadSessionStore<T> {
 
-    @Override
-    public void displayMessage(String message) {
-        // Not yet implemented
-    }
-
-    @Override
-    public boolean isAvailable() {
-        return true;
-    }
-
+    T getSession(String id);
 }

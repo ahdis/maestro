@@ -18,6 +18,7 @@ package net.ihe.gazelle.maestro.validation.step.technical.factory;
 
 import net.ihe.gazelle.maestro.spi.technical.ConfigProvider;
 import net.ihe.gazelle.maestro.spi.business.Handler;
+import net.ihe.gazelle.maestro.spi.technical.HandlerContext;
 import net.ihe.gazelle.maestro.spi.technical.HandlerFactory;
 import net.ihe.gazelle.maestro.validation.step.technical.handler.GazelleValidationServiceHandler;
 import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterface;
@@ -39,7 +40,7 @@ public class GazelleValidationServiceHandlerFactory implements HandlerFactory {
     }
 
     @Override
-    public Handler createHandler(String serviceName, ProvidedInterface providedInterface, ConfigProvider configProvider) throws IllegalArgumentException {
+    public Handler createHandler(HandlerContext handlerContext, ProvidedInterface providedInterface, ConfigProvider configProvider) throws IllegalArgumentException {
         try {
             HttpRestBinding binding = (HttpRestBinding) providedInterface.getBindings().getFirst();
             String interfaceVersion = providedInterface.getInterfaceVersion();

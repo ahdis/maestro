@@ -1,6 +1,8 @@
 package net.ihe.gazelle.maestro.api.technical.dto.test;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.test.TestReference;
 import net.ihe.gazelle.maestro.api.technical.dto.property.PropertyDTO;
@@ -9,6 +11,11 @@ import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
 
 import java.util.List;
 
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonPropertyOrder({
+        "testId",
+        "properties",
+})
 public class TestReferenceDTO implements DTO<TestReference> {
 
    private final TestReference testReference;

@@ -28,7 +28,7 @@ import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
 
 import java.util.List;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({"id", "name", "type", "properties"})
 public class StepDTO implements DTO<Step> {
 

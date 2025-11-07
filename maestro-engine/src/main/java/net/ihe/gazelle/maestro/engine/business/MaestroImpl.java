@@ -18,73 +18,76 @@ package net.ihe.gazelle.maestro.engine.business;
 
 import net.ihe.gazelle.maestro.api.business.Maestro;
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
-import net.ihe.gazelle.maestro.api.business.message.StartStepRun;
-import net.ihe.gazelle.maestro.api.business.message.StartTestRun;
-import net.ihe.gazelle.maestro.api.business.message.StartTestSuiteRun;
-import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
-import net.ihe.gazelle.maestro.api.business.message.StepRunStarted;
-import net.ihe.gazelle.maestro.api.business.message.TestRunFinished;
-import net.ihe.gazelle.maestro.api.business.message.TestRunStarted;
-import net.ihe.gazelle.maestro.api.business.message.TestSuiteRunFinished;
+import net.ihe.gazelle.maestro.api.business.message.*;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
+import net.ihe.gazelle.maestro.api.business.testrun.TestRunValidator;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRunValidator;
+import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 
 public class MaestroImpl implements Maestro {
 
-   private static final Map<String, MaestroObserver> OBSERVERS = new ConcurrentHashMap<>();
    private final TestSuiteRunValidator testSuiteRunValidator = new TestSuiteRunValidator();
+   private final TestRunValidator testRunValidator = new TestRunValidator();
+    private final SessionStore<MaestroObserver> observers;
    private final MaestroEventProducer maestroEventProducer;
+   private final TestSuiteEventProducer testSuiteEventProducer;
 
-   public MaestroImpl(MaestroEventProducer maestroEventProducer) {
-      this.maestroEventProducer = maestroEventProducer;
+   public MaestroImpl(SessionStore<MaestroObserver> observers, MaestroEventProducer maestroEventProducer, TestSuiteEventProducer testSuiteEventProducer) {
+       this.observers = observers;
+       this.maestroEventProducer = maestroEventProducer;
+      this.testSuiteEventProducer = testSuiteEventProducer;
    }
 
    @Override
    public void executeTestSuite(TestSuiteRun testSuiteRun, MaestroObserver observer) {
       testSuiteRunValidator.assertValid(testSuiteRun);
       String sessionId = UUID.randomUUID().toString();
-      OBSERVERS.put(sessionId, observer);
+      observers.addSession(sessionId, observer);
       maestroEventProducer.command(new StartTestSuiteRun(sessionId, testSuiteRun));
    }
 
    @Override
    public void executeTest(TestRun testRun, MaestroObserver observer) {
-      // TODO to implement
+       testRunValidator.assertValid(testRun);
+       String sessionId = UUID.randomUUID().toString();
+       observers.addSession(sessionId, observer);
+       testSuiteEventProducer.command(new StartTestRun(sessionId, testRun));
    }
 
    public void listen(StartTestRun startTestRun) {
-      Optional.ofNullable(OBSERVERS.get(startTestRun.getSessionId()))
+      Optional.ofNullable(observers.getSession(startTestRun.getSessionId()))
             .ifPresent(observer -> observer.onTestRunStarted(
                   new TestRunStarted(startTestRun.getTestRun().getTest().getId())
             ));
    }
 
    public void listen(StartStepRun startStepRun) {
-      Optional.ofNullable(OBSERVERS.get(startStepRun.getSessionId()))
+      Optional.ofNullable(observers.getSession(startStepRun.getSessionId()))
             .ifPresent(observer -> observer.onStepRunStarted(
                   new StepRunStarted(startStepRun.getTestId(), startStepRun.getStepRun().getId())
             ));
    }
 
    public void listen(StepRunFinished stepRunFinished) {
-      Optional.ofNullable(OBSERVERS.get(stepRunFinished.getSessionId()))
+      Optional.ofNullable(observers.getSession(stepRunFinished.getSessionId()))
             .ifPresent(observer -> observer.onStepRunFinished(stepRunFinished));
    }
 
    public void listen(TestRunFinished testRunFinished) {
-      Optional.ofNullable(OBSERVERS.get(testRunFinished.getSessionId()))
+      Optional.ofNullable(observers.getSession(testRunFinished.getSessionId()))
             .ifPresent(observer -> observer.onTestRunFinished(testRunFinished));
    }
 
    public void listen(TestSuiteRunFinished testSuiteRunFinished) {
-      Optional.ofNullable(OBSERVERS.get(testSuiteRunFinished.getSessionId()))
-            .ifPresent(observer -> observer.onTestSuiteFinished(testSuiteRunFinished));
+      Optional.ofNullable(observers.getSession(testSuiteRunFinished.getSessionId()))
+            .ifPresent(observer -> {
+                observer.onTestSuiteFinished(testSuiteRunFinished);
+                observers.removeSession(testSuiteRunFinished.getSessionId());
+            });
    }
 }

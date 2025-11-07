@@ -16,6 +16,30 @@
 
 package net.ihe.gazelle.maestro.api.business.message;
 
+import java.io.Serial;
+
 public class UserInteractionCompleted implements Message {
+
+    @Serial
+    private static final long serialVersionUID = 8043799892319471672L;
+
+    private String sessionId;
+
+    public UserInteractionCompleted() {
+        this(null);
+    }
+
+    public UserInteractionCompleted(String sessionId) {
+        this.sessionId = sessionId;
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public UserInteractionCompleted setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+        return this;
+    }
 }
 

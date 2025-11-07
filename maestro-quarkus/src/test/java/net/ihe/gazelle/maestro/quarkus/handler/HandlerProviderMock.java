@@ -18,15 +18,16 @@ package net.ihe.gazelle.maestro.quarkus.handler;
 
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationHandler;
 import net.ihe.gazelle.maestro.spi.business.Handler;
-import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandler;
-import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandlerImpl;
+import net.ihe.gazelle.maestro.api.business.UserInteractionHandler;
+import net.ihe.gazelle.maestro.spi.technical.HandlerContext;
+import technical.userinteract.UserInteractionHandlerImpl;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationHandler;
 import net.ihe.gazelle.maestro.spi.technical.HandlerProvider;
 
 public class HandlerProviderMock implements HandlerProvider {
 
     @Override
-    public Handler getHandler(String serviceName, Class<? extends Handler> handlerType) {
+    public Handler getHandler(HandlerContext handlerContext, Class<? extends Handler> handlerType) {
         if (handlerType.isAssignableFrom(ValidationHandler.class)) {
             return new ValidationHandlerMock();
         } else if (handlerType.isAssignableFrom(SimulationHandler.class)) {

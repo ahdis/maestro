@@ -17,14 +17,15 @@
 package technical.provider;
 
 import net.ihe.gazelle.lang.GzlCollectors;
-import net.ihe.gazelle.maestro.spi.technical.ConfigProvider;
+import net.ihe.gazelle.maestro.api.business.MaestroObserver;
+import net.ihe.gazelle.maestro.api.business.UserInteractionHandler;
+import net.ihe.gazelle.maestro.engine.business.context.ReadSessionStore;
 import net.ihe.gazelle.maestro.spi.business.Handler;
-import net.ihe.gazelle.maestro.spi.technical.HandlerFactory;
-import net.ihe.gazelle.maestro.spi.technical.HandlerNotFoundException;
-import net.ihe.gazelle.maestro.spi.technical.HandlerProvider;
+import net.ihe.gazelle.maestro.spi.technical.*;
 import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterface;
 import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterface;
 import net.ihe.gazelle.servicemetadata.api.business.Service;
+import technical.userinteract.UserInteractionHandlerImpl;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -34,20 +35,25 @@ public class HandlerProviderSPI implements HandlerProvider {
 
     private final ServiceRegistry serviceRegistry;
     private final ConfigProvider configProvider;
+    private final ReadSessionStore<MaestroObserver> observerStore;
 
-    public HandlerProviderSPI(ServiceRegistry serviceRegistry, ConfigProvider configProvider) {
+    public HandlerProviderSPI(ServiceRegistry serviceRegistry, ConfigProvider configProvider, ReadSessionStore<MaestroObserver> observerStore) {
         this.serviceRegistry = serviceRegistry;
         this.configProvider = configProvider;
+        this.observerStore = observerStore;
     }
 
     @Override
-    public Handler getHandler(String serviceName, Class<? extends Handler> requestedHandlerType) {
+    public Handler getHandler(HandlerContext handlerContext, Class<? extends Handler> requestedHandlerType) {
+        if (requestedHandlerType.equals(UserInteractionHandler.class)) {
+            return new UserInteractionHandlerImpl(observerStore.getSession(handlerContext.sessionId()));
+        }
         ServiceLoader<HandlerFactory> serviceLoader = ServiceLoader.load(HandlerFactory.class);
-        Service service = serviceRegistry.getService(serviceName);
+        Service service = serviceRegistry.getService(handlerContext.serviceName());
         for (HandlerFactory handlerFactory : serviceLoader) {
             ProvidedInterface providedInterface = getMatchingInterface(service, handlerFactory.getConsumedInterfaces());
             if (providedInterface != null && requestedHandlerType.isAssignableFrom(handlerFactory.getHandlerType())) {
-                return handlerFactory.createHandler(serviceName, providedInterface, configProvider);
+                return handlerFactory.createHandler(handlerContext, providedInterface, configProvider);
             }
         }
         throw new HandlerNotFoundException("Unable to find a handler implementation for type: " + requestedHandlerType.getCanonicalName());

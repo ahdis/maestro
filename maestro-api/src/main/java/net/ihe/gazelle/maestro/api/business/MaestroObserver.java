@@ -2,6 +2,8 @@ package net.ihe.gazelle.maestro.api.business;
 
 import net.ihe.gazelle.maestro.api.business.message.*;
 
+import java.util.concurrent.CompletableFuture;
+
 public interface MaestroObserver {
 
    default void onTestRunStarted(TestRunStarted testRunStarted) {
@@ -12,9 +14,7 @@ public interface MaestroObserver {
        // Override only if needed
    }
 
-   default void interactWithUser(InteractWithUser interactWithUser) {
-       // Override only if needed
-   }
+   CompletableFuture<UserInteractionCompleted> interactWithUser(InteractWithUser interactWithUser);
 
    default void onStepRunFinished(StepRunFinished stepRunFinished) {
        // Override only if needed

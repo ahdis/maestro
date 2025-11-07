@@ -25,7 +25,7 @@ import net.ihe.gazelle.maestro.simulation.step.technical.dto.ReportSerializerImp
 import net.ihe.gazelle.maestro.spi.business.Handler;
 import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 import net.ihe.gazelle.maestro.spi.technical.StepExecutorFactory;
-import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandler;
+import net.ihe.gazelle.maestro.api.business.UserInteractionHandler;
 
 import java.util.Map;
 import java.util.Optional;

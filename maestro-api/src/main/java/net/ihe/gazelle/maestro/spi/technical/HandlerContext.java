@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.userinteraction.step.business;
+package net.ihe.gazelle.maestro.spi.technical;
 
-import net.ihe.gazelle.maestro.spi.business.Handler;
+public record HandlerContext(String serviceName, String sessionId) {
 
-public interface UserInteractionHandler extends Handler {
-
-    String SERVICE_NAME = "User Interaction Service";
-    String INTERFACE_NAME = "User Interaction API";
-
-    void displayMessage(String message);
+    public HandlerContext(String serviceName) {
+        this(serviceName, null);
+    }
 }

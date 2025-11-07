@@ -31,7 +31,7 @@ import net.ihe.gazelle.security.technical.acl.AccessControlListDTO;
 
 import java.util.List;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
       "test",
       "inputs",
