@@ -20,6 +20,7 @@ import net.ihe.gazelle.maestro.itb.step.business.ItbHandler;
 import net.ihe.gazelle.maestro.itb.step.technical.handler.ItbHandlerImpl;
 import net.ihe.gazelle.maestro.spi.technical.ConfigProvider;
 import net.ihe.gazelle.maestro.spi.business.Handler;
+import net.ihe.gazelle.maestro.spi.technical.HandlerContext;
 import net.ihe.gazelle.maestro.spi.technical.HandlerFactory;
 import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterface;
 import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterfaceBuilder;
@@ -36,7 +37,7 @@ public class ItbHandlerFactory implements HandlerFactory {
     }
 
     @Override
-    public Handler createHandler(String serviceName, ProvidedInterface providedInterface, ConfigProvider configProvider) throws IllegalArgumentException {
+    public Handler createHandler(HandlerContext handlerContext, ProvidedInterface providedInterface, ConfigProvider configProvider) throws IllegalArgumentException {
        String baseItbUrl = ((HttpRestBinding) providedInterface.getBindings().getFirst()).getServiceUrl();
        String itbApiKey = configProvider.getConfig("itb.api.key");
        return new ItbHandlerImpl(baseItbUrl, itbApiKey);

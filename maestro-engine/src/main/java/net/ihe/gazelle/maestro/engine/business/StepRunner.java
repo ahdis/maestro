@@ -54,7 +54,7 @@ public class StepRunner {
    public void run(StartStepRun startStepRun) {
       StepRun stepRun = startStepRun.getStepRun();
       try {
-         StepExecutor executor = stepExecutorProvider.getExecutor(stepRun);
+         StepExecutor executor = stepExecutorProvider.getExecutor(startStepRun.getSessionId(), stepRun);
          StepRunReport report = executor.execute(stepRun)
                .get((Integer) stepRun.getPropertyValue("timeoutSeconds"), TimeUnit.SECONDS); // blocking call
 

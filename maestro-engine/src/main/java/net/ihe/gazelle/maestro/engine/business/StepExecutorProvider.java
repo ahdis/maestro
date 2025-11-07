@@ -30,6 +30,6 @@ public interface StepExecutorProvider {
     *
     * @throws UnknownStepException if no StepExecutor is found for the given step
     */
-   StepExecutor getExecutor(Step step);
+   StepExecutor getExecutor(String sessionId, Step step);
 
 }

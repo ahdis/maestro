@@ -1,0 +1,51 @@
+/*
+ * Copyright 2025 Kereval.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package net.ihe.gazelle.maestro.userinteraction.step.business;
+
+import net.ihe.gazelle.maestro.api.business.property.Property;
+import net.ihe.gazelle.maestro.api.business.test.SupportedInput;
+import net.ihe.gazelle.maestro.api.business.test.SupportedTextInput;
+import net.ihe.gazelle.maestro.spi.business.StepDefinition;
+
+import java.util.List;
+import java.util.Map;
+
+public class UserInteractionStepDefinition implements StepDefinition {
+
+    public static final String TYPE = "USER_INTERACTION";
+
+    public static final String INTERACTION_TITLE = "interactionTitle";
+    public static final String MESSAGE = "message";
+
+    @Override
+    public String getType() {
+        return TYPE;
+    }
+
+    @Override
+    public List<SupportedInput> getSupportedInputs() {
+        return List.of(
+                new SupportedTextInput().setId(INTERACTION_TITLE).setLabel("Title").setRequired(true),
+                new SupportedTextInput().setId(MESSAGE).setLabel("Message").setRequired(true)
+        );
+    }
+
+    @Override
+    public Map<String, Class<? extends Property>> getOutputsDefinition() {
+        return Map.of();
+    }
+}

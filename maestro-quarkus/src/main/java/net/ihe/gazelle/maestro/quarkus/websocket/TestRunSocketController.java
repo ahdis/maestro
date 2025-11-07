@@ -18,26 +18,29 @@ package net.ihe.gazelle.maestro.quarkus.websocket;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.websocket.OnClose;
 import jakarta.websocket.OnMessage;
+import jakarta.websocket.OnOpen;
 import jakarta.websocket.Session;
 import jakarta.websocket.server.ServerEndpoint;
+import net.ihe.gazelle.lang.IORuntimeException;
 import net.ihe.gazelle.maestro.api.business.Maestro;
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.api.business.message.*;
-import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.test.Test;
 import net.ihe.gazelle.maestro.api.business.testreport.*;
-import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.quarkus.websocket.dto.*;
-import net.ihe.gazelle.maestro.spi.business.StepRun;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.time.Instant;
-import java.util.ArrayList;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 @ApplicationScoped
 @ServerEndpoint("/v1/runs")
@@ -45,20 +48,34 @@ public class TestRunSocketController {
 
     private static final Logger LOG = LoggerFactory.getLogger(TestRunSocketController.class.getName());
 
+    private final Map<String, WebsocketSession> sessions = new ConcurrentHashMap<>();
     private final TextSerDes serDes = new JacksonSerDes();
     private final Maestro maestro;
     private TestSuiteRun localTestSuiteRun;
 
     @Inject
     public TestRunSocketController(Maestro maestro) {
+        LOG.info("Test Run Socket Controller created");
         this.maestro = maestro;
     }
 
-    @OnMessage
-    public void onMessage(Session session, String messageString) throws InterruptedException {
-        Object message = serDes.deserialize(messageString, MessageDTO.class).getBusinessObject();
+    @OnOpen
+    public void onOpen(Session session) {
+        LOG.info("Test Run Socket Connected: {}", session.getId());
         WebsocketSession maestroCaller = new WebsocketSession(session);
-        Thread.sleep(1000);
+        sessions.put(session.getId(), maestroCaller);
+    }
+
+    @OnClose
+    public void onClose(Session session) {
+        LOG.info("Test Run Socket Disconnected: {}", session.getId());
+        sessions.remove(session.getId());
+    }
+
+    @OnMessage
+    public void onMessage(Session session, String messageString) {
+        Object message = serDes.deserialize(messageString, MessageDTO.class).getBusinessObject();
+        WebsocketSession maestroCaller = sessions.get(session.getId());
         if (message instanceof TestSuiteRun testSuiteRun) {
             this.localTestSuiteRun = testSuiteRun;
             maestro.executeTestSuite(localTestSuiteRun, maestroCaller);
@@ -78,15 +95,16 @@ public class TestRunSocketController {
                 Thread.sleep(1000);
                 maestroCaller.onTestSuiteFinished(createTestSuiteFinished());
             }*/
-        } else if (message instanceof UserInteractionCompleted) {
-            Test test = localTestSuiteRun.getTests().getFirst();
+        } else if (message instanceof UserInteractionCompleted userInteractionCompleted) {
+            maestroCaller.interactionFuture.complete(userInteractionCompleted);
+            /*Test test = localTestSuiteRun.getTests().getFirst();
             Step step = test.getSteps().getFirst();
             Thread.sleep(1000);
             maestroCaller.onStepRunFinished(new StepRunFinished("sessionId", test.getId(), new StepRun(step, new ArrayList<>()), createStepRunReport()));
             Thread.sleep(1000);
             maestroCaller.onTestRunFinished(new TestRunFinished("sessionId", new TestRun(), createTestRunReport()));
             Thread.sleep(1000);
-            maestroCaller.onTestSuiteFinished(createTestSuiteFinished());
+            maestroCaller.onTestSuiteFinished(createTestSuiteFinished());*/
         } else {
             throw new IllegalArgumentException("Unexpected message type: " + message.getClass().getName());
         }
@@ -124,6 +142,7 @@ public class TestRunSocketController {
     public class WebsocketSession implements MaestroObserver {
 
         private final Session session;
+        private CompletableFuture<UserInteractionCompleted> interactionFuture;
 
         public WebsocketSession(Session session) {
             this.session = session;
@@ -144,10 +163,12 @@ public class TestRunSocketController {
         }
 
         @Override
-        public void interactWithUser(InteractWithUser interactWithUser) {
+        public CompletableFuture<UserInteractionCompleted> interactWithUser(InteractWithUser interactWithUser) {
             String message = serDes.serializeAsString(new InteractWithUserDTO(interactWithUser));
             LOG.info("Interact with user: {}", message);
             this.session.getAsyncRemote().sendText(message);
+            this.interactionFuture = new CompletableFuture<>();
+            return interactionFuture;
         }
 
         @Override
@@ -169,6 +190,11 @@ public class TestRunSocketController {
             String message = serDes.serializeAsString(new TestSuiteRunFinishedDTO(testSuiteFinished.getReportSummary()));
             LOG.info("Test Suite Finished: {}", message);
             this.session.getAsyncRemote().sendText(message);
+            try {
+                session.close();
+            } catch (IOException e) {
+                throw new IORuntimeException(e);
+            }
         }
     }
 }

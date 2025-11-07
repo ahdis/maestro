@@ -16,14 +16,12 @@
 
 package net.ihe.gazelle.maestro.engine.business.context;
 
-public interface SessionStore<T> {
+public interface SessionStore<T> extends ReadSessionStore<T> {
 
    void addSession(String id, T session);
 
    boolean hasSession(String id);
 
-   T getSession(String id);
-
-   void removeSession(String id);
+    void removeSession(String id);
 
 }

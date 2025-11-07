@@ -17,6 +17,9 @@
 package net.ihe.gazelle.maestro.api.business;
 
 import net.ihe.gazelle.lang.ExecutionRuntimeException;
+import net.ihe.gazelle.maestro.api.business.message.InteractWithUser;
+import net.ihe.gazelle.maestro.api.business.message.TestSuiteRunFinished;
+import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 
@@ -66,7 +69,7 @@ public class SynchronousMaestro {
       CompletableFuture<TestReportSummary> future = new CompletableFuture<>();
       maestro.executeTestSuite(
             testSuiteRun,
-            testSuiteRunFinished -> future.complete(testSuiteRunFinished.getReportSummary())
+            new SynchronousObserver(future)
       );
 
       try {
@@ -74,6 +77,25 @@ public class SynchronousMaestro {
       } catch (ExecutionException e) {
          throw new ExecutionRuntimeException(e);
       }
+   }
+
+   private class SynchronousObserver implements MaestroObserver {
+
+       private final CompletableFuture<TestReportSummary> future;
+
+       public SynchronousObserver(CompletableFuture<TestReportSummary> future) {
+           this.future = future;
+       }
+
+       @Override
+       public CompletableFuture<UserInteractionCompleted> interactWithUser(InteractWithUser interactWithUser) {
+           throw new UnsupportedOperationException("User interaction is not supported via REST API.");
+       }
+
+       @Override
+       public void onTestSuiteFinished(TestSuiteRunFinished testSuiteRunFinished) {
+            future.complete(testSuiteRunFinished.getReportSummary());
+       }
    }
 
 }

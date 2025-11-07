@@ -20,6 +20,7 @@ import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.engine.business.StepExecutorProvider;
 import net.ihe.gazelle.maestro.engine.business.UnknownStepException;
 import net.ihe.gazelle.maestro.spi.business.Handler;
+import net.ihe.gazelle.maestro.spi.technical.HandlerContext;
 import net.ihe.gazelle.maestro.spi.technical.HandlerProvider;
 import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 import net.ihe.gazelle.maestro.spi.technical.StepExecutorFactory;
@@ -38,22 +39,22 @@ public class StepExecutorSPIProvider implements StepExecutorProvider {
    }
 
    @Override
-   public StepExecutor getExecutor(Step step) {
+   public StepExecutor getExecutor(String sessionId, Step step) {
       ServiceLoader<StepExecutorFactory> serviceLoader = ServiceLoader.load(StepExecutorFactory.class);
       for (StepExecutorFactory runnerFactory : serviceLoader) {
          if (runnerFactory.getSupportedStep().equals(step.getType())) {
             return runnerFactory.createStepExecutor(
                   step,
-                  getHandlers(runnerFactory.getRequiredServices(step))
+                  getHandlers(runnerFactory.getRequiredServices(step), sessionId)
             );
          }
       }
       throw new UnknownStepException("Step " + step.getType() + " is not supported");
    }
 
-   private Map<String, Handler> getHandlers(final Map<String, Class<? extends Handler>> requiredServices) {
+   private Map<String, Handler> getHandlers(final Map<String, Class<? extends Handler>> requiredServices, String sessionId) {
       return requiredServices.entrySet().stream()
-            .map(this::injectHandler)
+            .map(entry -> injectHandler(sessionId, entry))
             .filter(this::isHandlerAvailable)
             .collect(Collectors.toMap(
                   Map.Entry::getKey,
@@ -61,10 +62,10 @@ public class StepExecutorSPIProvider implements StepExecutorProvider {
             ));
    }
 
-   private Map.Entry<String, Handler> injectHandler(Map.Entry<String, Class<? extends Handler>> requiredHandler) {
+   private Map.Entry<String, Handler> injectHandler(String sessionId, Map.Entry<String, Class<? extends Handler>> requiredHandler) {
       return new AbstractMap.SimpleEntry<>(
             requiredHandler.getKey(),
-            handlerProvider.getHandler(requiredHandler.getKey(), requiredHandler.getValue())
+            handlerProvider.getHandler(new HandlerContext(requiredHandler.getKey(), sessionId), requiredHandler.getValue())
       );
    }
 

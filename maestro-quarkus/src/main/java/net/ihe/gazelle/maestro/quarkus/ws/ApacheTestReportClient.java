@@ -20,7 +20,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.HttpHeaders;
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
+import net.ihe.gazelle.maestro.api.business.message.InteractWithUser;
 import net.ihe.gazelle.maestro.api.business.message.TestSuiteRunFinished;
+import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
@@ -32,6 +34,8 @@ import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * This client is used to send the Test Report to TM once test set run execution ends
@@ -54,7 +58,12 @@ public class ApacheTestReportClient implements MaestroObserver {
       this.callBackUrl = callBackUrl;
    }
 
-   @Override
+    @Override
+    public CompletableFuture<UserInteractionCompleted> interactWithUser(InteractWithUser interactWithUser) {
+        throw new UnsupportedOperationException("User interaction is not supported via REST API.");
+    }
+
+    @Override
    public void onTestSuiteFinished(TestSuiteRunFinished testSuiteRunFinished) {
       sendTestReport(testSuiteRunFinished.getReportSummary());
    }
@@ -80,5 +89,4 @@ public class ApacheTestReportClient implements MaestroObserver {
          LOG.error(e.getMessage(), e);
       }
    }
-
 }
