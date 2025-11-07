@@ -26,12 +26,12 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class ValidationStepExecutorTest {
+class ValidationStepDefinitionExecutorTest {
 
-    private ValidationStep buildStep(String name) {
-        return new ValidationStep(name,
-                new Property<>(ValidationStep.VALIDATION_SERVICE, "service"),
-                new Property<>(ValidationStep.VALIDATION_PROFILE, "profile"),
+    private ValidationStepDefinition buildStep(String name) {
+        return new ValidationStepDefinition(name,
+                new Property<>(ValidationStepDefinition.VALIDATION_SERVICE, "service"),
+                new Property<>(ValidationStepDefinition.VALIDATION_PROFILE, "profile"),
                 List.of(new Property<>("content", "abc".getBytes(StandardCharsets.UTF_8))));
     }
 
@@ -61,7 +61,7 @@ class ValidationStepExecutorTest {
         StepRunReport report = b.build();
         assertEquals(StepResult.PASSED, report.getResult());
         assertEquals("v1", report.getStepId());
-        assertEquals(ValidationStep.TYPE, report.getType());
+        assertEquals(ValidationStepDefinition.TYPE, report.getType());
     }
 
     @Test
@@ -86,7 +86,7 @@ class ValidationStepExecutorTest {
     void getSupportedStep_returnsCanonicalName() {
         ValidationStepExecutor runner = new ValidationStepExecutor(handlerReturning(ValidationTestResult.PASSED),
               serializerReturning(new byte[]{}));
-        assertEquals(ValidationStep.class.getCanonicalName(), runner.getSupportedStep());
+        assertEquals(ValidationStepDefinition.class.getCanonicalName(), runner.getSupportedStep());
     }
 }
 

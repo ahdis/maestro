@@ -21,7 +21,7 @@ import net.ihe.gazelle.maestro.spi.business.Handler;
 import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 import net.ihe.gazelle.maestro.spi.technical.StepExecutorFactory;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationHandler;
-import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
+import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStepExecutor;
 import net.ihe.gazelle.maestro.validation.step.technical.dto.ReportSerializerImpl;
 
@@ -32,19 +32,19 @@ public class ValidationStepExecutorFactory implements StepExecutorFactory {
 
    @Override
    public String getSupportedStep() {
-      return ValidationStep.TYPE;
+      return ValidationStepDefinition.TYPE;
    }
 
    @Override
    public Map<String, Class<? extends Handler>> getRequiredServices(Step step) {
       return Map.of(
-            step.getPropertyValue(ValidationStep.VALIDATION_SERVICE), ValidationHandler.class
+            step.getPropertyValue(ValidationStepDefinition.VALIDATION_SERVICE), ValidationHandler.class
       );
    }
 
    @Override
    public StepExecutor createStepExecutor(Step step, Map<String, Handler> handlers) {
-      String serviceName = step.getPropertyValue(ValidationStep.VALIDATION_SERVICE);
+      String serviceName = step.getPropertyValue(ValidationStepDefinition.VALIDATION_SERVICE);
       return new ValidationStepExecutor(
             Optional.ofNullable((ValidationHandler) handlers.get(serviceName))
                   .orElseThrow(() -> new IllegalArgumentException("No validation handler provided for " + serviceName)),

@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class ValidationStepDTOTest {
+class ValidationStepDefinitionDTOTest {
 
     private static final TextSerDes SER_DES = new JacksonSerDes();
 

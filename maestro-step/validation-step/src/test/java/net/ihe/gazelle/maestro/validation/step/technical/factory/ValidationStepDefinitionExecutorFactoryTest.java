@@ -19,7 +19,7 @@ package net.ihe.gazelle.maestro.validation.step.technical.factory;
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.api.business.testrun.PropertyRef;
-import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
+import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +27,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class ValidationStepExecutorFactoryTest {
+class ValidationStepDefinitionExecutorFactoryTest {
 
     ValidationStepExecutorFactory validationStepRunnerFactory;
 
@@ -38,15 +38,15 @@ class ValidationStepExecutorFactoryTest {
 
     @Test
     void canonicalNameTest(){
-        assertEquals(ValidationStep.class.getCanonicalName(), validationStepRunnerFactory.getSupportedStep());
+        assertEquals(ValidationStepDefinition.class.getCanonicalName(), validationStepRunnerFactory.getSupportedStep());
     }
 
     @Test
     void getRequiredServicesOfValidationStep() {
-        Step validationStep = new ValidationStep(
+        Step validationStep = new ValidationStepDefinition(
                 "iti78-request-validation",
-                new Property<>(ValidationStep.VALIDATION_SERVICE, "matchbox"),
-                new Property<>(ValidationStep.VALIDATION_PROFILE, "Parameters"),
+                new Property<>(ValidationStepDefinition.VALIDATION_SERVICE, "matchbox"),
+                new Property<>(ValidationStepDefinition.VALIDATION_PROFILE, "Parameters"),
                 List.of(new PropertyRef<>("contentToValidate", "iti78-request", byte[].class))
         );
         assertEquals(1, validationStepRunnerFactory.getRequiredServices(validationStep).size());

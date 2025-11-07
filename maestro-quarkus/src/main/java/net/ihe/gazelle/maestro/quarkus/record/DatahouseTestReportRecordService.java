@@ -12,6 +12,16 @@ import jakarta.inject.Inject;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.testreport.*;
+import net.ihe.gazelle.maestro.api.business.testreport.dissection.AttachmentPlan;
+import net.ihe.gazelle.maestro.api.business.testreport.dissection.ItemPlan;
+import net.ihe.gazelle.maestro.api.business.testreport.dissection.ItemReferenceBinding;
+import net.ihe.gazelle.maestro.api.business.testreport.dissection.PropertyMutation;
+import net.ihe.gazelle.maestro.api.business.testreport.dissection.PropertyReferenceFactory;
+import net.ihe.gazelle.maestro.api.business.testreport.dissection.ReportReferenceBinding;
+import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputContext;
+import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputDissector;
+import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputDissectorProvider;
+import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputProjection;
 import net.ihe.gazelle.maestro.engine.business.TestReportRecordException;
 import net.ihe.gazelle.maestro.engine.business.TestReportRecordService;
 import net.ihe.gazelle.maestro.quarkus.record.entity.TestReportEntity;
@@ -19,9 +29,9 @@ import net.ihe.gazelle.maestro.quarkus.record.entity.TestReportReference;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequestScoped
 public class DatahouseTestReportRecordService implements TestReportRecordService {
@@ -31,17 +41,21 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
     private final RecordItemClient recordItemClient;
 
     private final String datahouseUrl;
+    private final StepOutputDissectorProvider dissectorProvider;
 
     @Inject
-    public DatahouseTestReportRecordService(@ConfigProperty(name = "datahouse.url") String datahouseUrl) {
-        this.recordItemClient = new RecordItemClientProvider().createClient();
-        this.datahouseUrl = datahouseUrl;
+    public DatahouseTestReportRecordService(@ConfigProperty(name = "datahouse.url") String datahouseUrl,
+                                            StepOutputDissectorProvider dissectorProvider) {
+        this(new RecordItemClientProvider().createClient(), datahouseUrl, dissectorProvider);
     }
 
     // Convenience constructor for tests to bypass config-backed client creation
-    DatahouseTestReportRecordService(RecordItemClient recordItemClient, @ConfigProperty(name = "datahouse.url") String datahouseUrl) {
+    DatahouseTestReportRecordService(RecordItemClient recordItemClient,
+                                     @ConfigProperty(name = "datahouse.url") String datahouseUrl,
+                                     StepOutputDissectorProvider dissectorProvider) {
         this.recordItemClient = recordItemClient;
         this.datahouseUrl = datahouseUrl;
+        this.dissectorProvider = dissectorProvider;
     }
 
     /**
@@ -137,17 +151,159 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
     private record UploadPlan(List<Attachment> toUpload, List<Integer> inputIndexes) {
     }
 
+    private record ItemPersistenceState(String[] itemIds, String[] itemUrls) {
+        private static final ItemPersistenceState EMPTY = new ItemPersistenceState(new String[0], new String[0]);
+    }
+
+    // Walks every step of every test run, invoking the right dissector and aggregating the references to return.
     private List<Reference> recordTestStepOutputs(List<TestRunReport> testRunReports, AccessControlList acl) {
-        List<Reference> outputRefs = new ArrayList<>();
-        if (testRunReports == null) return outputRefs;
+        List<Reference> aggregatedReferences = new ArrayList<>();
+        if (testRunReports == null) {
+            return aggregatedReferences;
+        }
         for (TestRunReport testRunReport : testRunReports) {
-            if (testRunReport.getStepRunReports() == null) continue;
-            for (StepRunReport stepRunReport : testRunReport.getStepRunReports()) {
-                List<Property> outputs = stepRunReport.getOutputs();
-                outputRefs.addAll(recordOutputs(outputs, acl));
+            List<StepRunReport> stepRunReports = testRunReport.getStepRunReports();
+            if (stepRunReports == null) {
+                continue;
+            }
+            for (StepRunReport stepRunReport : stepRunReports) {
+                StepOutputDissector dissector = dissectorProvider.resolve(stepRunReport);
+                StepOutputProjection projection = safeDissect(dissector,
+                        new StepOutputContext(stepRunReport, testRunReport, acl));
+                if (isEmpty(projection)) {
+                    continue;
+                }
+                List<Reference> stepReferences = processProjection(stepRunReport, projection, acl);
+                aggregatedReferences.addAll(stepReferences);
             }
         }
-        return outputRefs;
+        return aggregatedReferences;
+    }
+
+    // Defensive wrapper so a null projection from a dissector never bubbles up.
+    private StepOutputProjection safeDissect(StepOutputDissector dissector, StepOutputContext context) {
+        StepOutputProjection projection = dissector.dissect(context);
+        return projection != null ? projection : StepOutputProjection.empty();
+    }
+
+    // Helper to short-circuit processing when a dissector produced no work.
+    private boolean isEmpty(StepOutputProjection projection) {
+        return projection.items().isEmpty()
+                && projection.attachments().isEmpty()
+                && projection.propertyMutations().isEmpty()
+                && projection.reportReferences().isEmpty();
+    }
+
+    // Applies the projection to the StepRunReport: uploads attachments, persists items, updates outputs, and collects refs.
+    private List<Reference> processProjection(StepRunReport stepRunReport,
+                                              StepOutputProjection stepOutputProjection,
+                                              AccessControlList acl) {
+        List<Property> updatedOutputs = new ArrayList<>(stepRunReport.getOutputs());
+        ensureOutputCapacity(updatedOutputs, stepOutputProjection);
+
+        List<Reference> references = new ArrayList<>(uploadAttachments(stepOutputProjection.attachments(), updatedOutputs));
+
+        // persist step outputs as items
+        ItemPersistenceState persistenceState = persistItems(stepOutputProjection.items(), references, acl);
+        applyPropertyMutations(stepOutputProjection.propertyMutations(), updatedOutputs, persistenceState);
+
+        references.addAll(stepOutputProjection.reportReferences());
+        stepRunReport.setOutputs(updatedOutputs);
+        return references;
+    }
+
+    // Makes sure the outputs list is large enough so later mutations can safely slot in replacements.
+    private void ensureOutputCapacity(List<Property> outputs, StepOutputProjection projection) {
+        int required = projection.attachments().stream()
+                .mapToInt(AttachmentPlan::outputIndex)
+                .filter(idx -> idx >= 0)
+                .max()
+                .orElse(-1);
+        int requiredFromMutations = projection.propertyMutations().stream()
+                .mapToInt(PropertyMutation::outputIndex)
+                .max()
+                .orElse(-1);
+        required = Math.max(required, requiredFromMutations);
+        while (outputs.size() <= required) {
+            outputs.add(null);
+        }
+    }
+
+    // Streams attachment payloads to Datahouse, replaces the original properties, and returns the new references.
+    private List<Reference> uploadAttachments(List<AttachmentPlan> plans, List<Property> outputs) {
+        if (plans.isEmpty()) {
+            return List.of();
+        }
+        List<Attachment> attachments = plans.stream()
+                .map(AttachmentPlan::attachment)
+                .collect(Collectors.toCollection(ArrayList::new));
+        List<String> ids = recordItemClient.uploadAttachments(attachments);
+        validateUploadedIdsCount(plans.size(), ids.size());
+
+        List<Reference> references = new ArrayList<>();
+        for (int i = 0; i < plans.size(); i++) {
+            AttachmentPlan plan = plans.get(i);
+            String attachmentId = ids.get(i);
+            String url = constructUrlToDatahouse(attachmentId);
+            if (plan.propertyFactory() != null) {
+                Property replacement = plan.propertyFactory().create(attachmentId, url);
+                setOutput(outputs, plan.outputIndex(), replacement);
+            }
+            references.add(new Reference()
+                    .setName(plan.referenceName())
+                    .setType(plan.referenceType())
+                    .setValue(attachmentId)
+                    .setRefType(RefType.ATTACHMENT));
+        }
+        return references;
+    }
+
+    // Persists the ordered items, wiring parent/report references as we go, and returns the ids/urls for later mutations.
+    private ItemPersistenceState persistItems(List<ItemPlan> itemPlans,
+                                              List<Reference> reportReferences,
+                                              AccessControlList acl) {
+        if (itemPlans.isEmpty()) {
+            return ItemPersistenceState.EMPTY;
+        }
+
+        String[] ids = new String[itemPlans.size()];
+        String[] urls = new String[itemPlans.size()];
+
+        for (int i = 0; i < itemPlans.size(); i++) {
+            ItemPlan itemPlan = itemPlans.get(i);
+            Item item = prepareItemAclAndReferences(itemPlan.item(), acl);
+            String itemId = recordItemClient.recordItem(item);
+            ids[i] = itemId;
+            urls[i] = constructUrlToDatahouse(itemId);
+            appendReportBindings(reportReferences, itemPlan, itemId);
+            wireParentBindings(itemPlans, i, itemId, itemPlan);
+        }
+
+        return new ItemPersistenceState(ids, urls);
+    }
+
+    // Rewrites step outputs so they now point at freshly persisted items instead of inline payloads.
+    private void applyPropertyMutations(List<PropertyMutation> mutations,
+                                        List<Property> outputs,
+                                        ItemPersistenceState state) {
+        for (PropertyMutation mutation : mutations) {
+            String[] ids = state.itemIds();
+            String[] urls = state.itemUrls();
+            int sourceIndex = mutation.sourceItemIndex();
+            if (sourceIndex < 0 || sourceIndex >= ids.length) {
+                throw new IllegalStateException("Invalid source item index: " + sourceIndex);
+            }
+            Property replacement = mutation.factory().create(ids[sourceIndex], urls[sourceIndex]);
+            setOutput(outputs, mutation.outputIndex(), replacement);
+        }
+    }
+
+    // Utility to grow the outputs list lazily before writing the replacement property (because it's a list and not a map).
+    private void setOutput(List<Property> outputs, int index, Property replacement) {
+        while (outputs.size() <= index) {
+            outputs.add(null);
+        }
+        outputs.set(index, replacement);
     }
 
     private ItemReference recordTestReport(TestReport testReport, List<TestReportReference> testReportReferences, List<Reference> attachmentRefs, List<Reference> outputItemRefs) {
@@ -188,8 +344,8 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
                             .setContent(jsonContent)
                             .setReferences(references);
 
-           String itemId = recordItemClient.recordItem(item);
-           return new ItemReference(itemId, constructUrlToDatahouse(itemId));
+            String itemId = recordItemClient.recordItem(item);
+            return new ItemReference(itemId, constructUrlToDatahouse(itemId));
         } catch (Exception e) {
             throw new TestReportRecordException("Failed to record TestReport", e);
         }
@@ -210,65 +366,6 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
         return subRefs;
     }
 
-    private List<Reference> recordOutputs(List<Property> outputs, AccessControlList acl) {
-        List<Reference> references = new ArrayList<>();
-        List<ByteArrayProperty> nonJsonOutputs = new ArrayList<>();
-        if (outputs == null || outputs.isEmpty()) return references;
-        for (Property output : outputs) {
-            if (output == null) continue;
-            if (shouldUploadAsAttachment(output)) {
-                nonJsonOutputs.add((ByteArrayProperty) output);
-            } else {
-                recordOutputAsItem(acl, output, references);
-            }
-        }
-        // Batch record non-JSON outputs as attachments
-        if (!nonJsonOutputs.isEmpty()) {
-            recordOutputsAsAttachments(nonJsonOutputs, references);
-        }
-        return references;
-    }
-
-    private void recordOutputAsItem(AccessControlList acl, Property output, List<Reference> references) {
-        Item datahouseItem = buildDatahouseItemFromOutput(output, acl);
-        String itemId = recordItemClient.recordItem(datahouseItem);
-        output = new ByteArrayItemProperty(output.getName(), null)
-                .setReference(constructUrlToDatahouse(itemId));
-        references.add(new Reference()
-                .setType(output.getName())
-                .setValue(itemId)
-                .setRefType(RefType.ITEM_ID)
-        );
-    }
-
-    private void recordOutputsAsAttachments(List<ByteArrayProperty> outputs, List<Reference> references) {
-        UploadPlan plan = buildOutputUploadPlan(outputs);
-        if (plan.toUpload.isEmpty()) {
-            return;
-        }
-        List<String> ids = recordItemClient.uploadAttachments(plan.toUpload);
-        validateUploadedIdsCount(plan.toUpload.size(), ids.size());
-        mapIdsBackToOutputs(outputs, plan.inputIndexes, ids, references);
-    }
-
-    private Item buildDatahouseItemFromOutput(Property maestroOutput, AccessControlList acl) {
-        String content = maestroOutput.getValue() != null
-                ? new String(maestroOutput.getValue(), StandardCharsets.UTF_8)
-                : "";
-        return new Item()
-                .setAccessControlList(acl)
-                .setType(maestroOutput.getName())
-                .setContent(content);
-    }
-
-    private Attachment createAttachment(String name, byte[] content) {
-        return new Attachment()
-                .setType(name)
-                .setContent(content)
-                .setType(BYTE_ARRAY_TYPE)
-                ;
-    }
-
     private String constructUrlToDatahouse(String itemId) {
         return datahouseUrl + "/items/" + itemId;
     }
@@ -281,33 +378,52 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
         return "/attachments/" + attachmentId;
     }
 
-
-    private UploadPlan buildOutputUploadPlan(List<ByteArrayProperty> outputs) {
-        List<Attachment> toUpload = new ArrayList<>();
-        List<Integer> outputIndexes = new ArrayList<>();
-        for (int i = 0; i < outputs.size(); i++) {
-            Property output = outputs.get(i);
-            toUpload.add(createAttachment(output.getName(), output.getValue()));
-            outputIndexes.add(i);
-        }
-        return new UploadPlan(toUpload, outputIndexes);
+    private Attachment createAttachment(String name, byte[] content) {
+        return new Attachment()
+                .setFilename(name)
+                .setType(BYTE_ARRAY_TYPE)
+                .setContent(content);
     }
 
-    private void mapIdsBackToOutputs(List<ByteArrayProperty> outputs, List<Integer> outputIndexes, List<String> ids, List<Reference> attachmentRefs) {
-        for (int k = 0; k < outputIndexes.size(); k++) {
-            int idx = outputIndexes.get(k);
-            String attachmentId = ids.get(k);
-            ByteArrayProperty output = outputs.get(idx);
-            ByteArrayItemProperty itemProperty = new ByteArrayItemProperty(output)
-                    .setReference(constructUrlToDatahouse(attachmentId));
-            outputs.set(idx, itemProperty);
-            attachmentRefs.add(new Reference()
-                    .setName(itemProperty.getName())
-                    .setType(itemProperty.getMimeType())
-                    .setValue(attachmentId)
-                    .setRefType(RefType.ATTACHMENT)
-            );
+
+    private Item prepareItemAclAndReferences(Item item, AccessControlList fallbackAcl) {
+        if (item.getAccessControlList() == null) {
+            item.setAccessControlList(fallbackAcl);
+        }
+        if (item.getReferences() == null) {
+            item.setReferences(new ArrayList<>());
+        }
+        return item;
+    }
+
+    private void appendReportBindings(List<Reference> reportReferences, ItemPlan itemPlan, String itemId) {
+        for (ReportReferenceBinding binding : itemPlan.reportBindings()) {
+            reportReferences.add(new Reference()
+                    .setName(binding.referenceName())
+                    .setType(binding.referenceType())
+                    .setRefType(binding.refType())
+                    .setValue(itemId));
         }
     }
 
+    private void wireParentBindings(List<ItemPlan> itemPlans, int currentIndex, String childItemId, ItemPlan childPlan) {
+        for (ItemReferenceBinding binding : childPlan.parentBindings()) {
+            validateParentIndex(binding.parentItemIndex(), currentIndex, itemPlans.size());
+            Item parent = itemPlans.get(binding.parentItemIndex()).item();
+            if (parent.getReferences() == null) {
+                parent.setReferences(new ArrayList<>());
+            }
+            parent.addReference(new Reference()
+                    .setName(binding.referenceName())
+                    .setType(binding.referenceType())
+                    .setRefType(binding.refType())
+                    .setValue(childItemId));
+        }
+    }
+
+    private void validateParentIndex(int parentIndex, int childIndex, int maxSize) {
+        if (parentIndex <= childIndex || parentIndex >= maxSize) {
+            throw new IllegalStateException("Parent item index must refer to an item persisted after the child");
+        }
+    }
 }

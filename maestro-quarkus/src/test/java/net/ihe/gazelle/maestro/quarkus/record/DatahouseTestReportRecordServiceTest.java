@@ -6,7 +6,9 @@ import net.ihe.gazelle.maestro.api.business.testreport.Result;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
+import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputDissectorProvider;
 import net.ihe.gazelle.maestro.engine.business.TestReportRecordService.ItemReference;
+import net.ihe.gazelle.maestro.engine.business.record.FallbackAttachmentStepOutputDissector;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,7 +25,8 @@ class DatahouseTestReportRecordServiceTest {
     @BeforeEach
     void setUp() {
         recordItemClientMock = new RecordItemClientMock();
-        service = new DatahouseTestReportRecordService(recordItemClientMock, "http://dh");
+        StepOutputDissectorProvider provider = step -> new FallbackAttachmentStepOutputDissector();
+        service = new DatahouseTestReportRecordService(recordItemClientMock, "http://dh", provider);
     }
 
     @Test

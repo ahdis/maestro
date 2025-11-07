@@ -39,7 +39,7 @@ import net.ihe.gazelle.maestro.quarkus.UnknownStepType;
 import net.ihe.gazelle.maestro.quarkus.factory.TestRunMockEvent;
 import net.ihe.gazelle.maestro.quarkus.mock.InMemoryTestReportRecordService;
 import net.ihe.gazelle.maestro.quarkus.ws.async.tmintegration.MissingArgumentException;
-import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
+import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;
 import net.ihe.gazelle.security.technical.acl.AccessControlListDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -269,10 +269,10 @@ class TestRunControllerTest {
         net.ihe.gazelle.maestro.api.business.test.Test test = new net.ihe.gazelle.maestro.api.business.test.Test();
         test.setId("iti78-request");
         test.setName("ITI-78 Request");
-        test.addStep(new ValidationStep(
+        test.addStep(new ValidationStepDefinition(
                 "iti78-request-validation",
-                new Property<>(ValidationStep.VALIDATION_SERVICE, "matchbox"),
-                new Property<>(ValidationStep.VALIDATION_PROFILE, "Parameters"),
+                new Property<>(ValidationStepDefinition.VALIDATION_SERVICE, "matchbox"),
+                new Property<>(ValidationStepDefinition.VALIDATION_PROFILE, "Parameters"),
                 new ArrayList<>(List.of(new PropertyRef<>("content", "iti78-request", byte[].class))))
         );
 

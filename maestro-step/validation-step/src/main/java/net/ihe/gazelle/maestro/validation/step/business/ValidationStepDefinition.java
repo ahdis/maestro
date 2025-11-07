@@ -43,7 +43,7 @@ import java.util.Map;
  * <b>CONTENT_TO_VALIDATE</b> Byte array of content to validate with validation profile on validation service
  * </p>
  */
-public class ValidationStep implements StepDefinition {
+public class ValidationStepDefinition implements StepDefinition {
 
    public static final String TYPE = "VALIDATION";
 
@@ -52,12 +52,12 @@ public class ValidationStep implements StepDefinition {
    public static final String VALIDATION_PROFILE = "validationProfile";
    public static final String CONTENT_TO_VALIDATE = "contentToValidate";
    // outputs
-   public static final String REPORT = "report";
+   public static final String REPORT = "VALIDATION_REPORT";
 
    @Serial
    private static final long serialVersionUID = 7657361003088468932L;
 
-   public ValidationStep() {
+   public ValidationStepDefinition() {
    }
 
    @Override

@@ -33,9 +33,9 @@ class ValidationRequestMapperTest {
 
     @Test
     void createValidationRequestTest() {
-        ValidationStep step = new ValidationStep("validationStep",
-                new Property<>(ValidationStep.VALIDATION_SERVICE, "matchbox"),
-                new Property<>(ValidationStep.VALIDATION_PROFILE, "default"),
+        ValidationStepDefinition step = new ValidationStepDefinition("validationStep",
+                new Property<>(ValidationStepDefinition.VALIDATION_SERVICE, "matchbox"),
+                new Property<>(ValidationStepDefinition.VALIDATION_PROFILE, "default"),
                 new ArrayList<>(List.of(new Property<>("contentToValidate", "content".getBytes(StandardCharsets.UTF_8))))
         );
         ValidationRequest request = ValidationRequestMapper.createValidationRequest(step);

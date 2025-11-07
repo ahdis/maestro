@@ -36,7 +36,7 @@ import net.ihe.gazelle.maestro.quarkus.factory.TestRunMockEvent;
 import net.ihe.gazelle.maestro.quarkus.handler.HandlerProviderMock;
 import net.ihe.gazelle.maestro.quarkus.mock.InMemoryTestReportRecordService;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepDefinition;
-import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
+import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -184,9 +184,9 @@ class MaestroStepsIntegrationTest {
 
       TestSuiteRun testSuiteRun = getTestRunsWithOneValidationStep();
       Property<byte[]> contentToValidate = new Property<>("content", "liyvfgljv".getBytes());
-      Step validationStep = new ValidationStep("test-validation-two",
-            new Property<>(ValidationStep.VALIDATION_SERVICE, "matchbox"),
-            new Property<>(ValidationStep.VALIDATION_PROFILE, "Parameters"),
+      Step validationStep = new ValidationStepDefinition("test-validation-two",
+            new Property<>(ValidationStepDefinition.VALIDATION_SERVICE, "matchbox"),
+            new Property<>(ValidationStepDefinition.VALIDATION_PROFILE, "Parameters"),
             new ArrayList<>(List.of(contentToValidate))
       );
       testSuiteRun.getTestRuns().getFirst().getTest().addStep(validationStep);
@@ -221,9 +221,9 @@ class MaestroStepsIntegrationTest {
       testReportRecordService.clear(); // Clear previous test data
 
       TestSuiteRun testSuiteRun = getTestRunsWithOneValidationStep();
-      Step validationStep = new ValidationStep("test-validation",
-            new Property<>(ValidationStep.VALIDATION_SERVICE, "matchbox"),
-            new Property<>(ValidationStep.VALIDATION_PROFILE, "Parameters"),
+      Step validationStep = new ValidationStepDefinition("test-validation",
+            new Property<>(ValidationStepDefinition.VALIDATION_SERVICE, "matchbox"),
+            new Property<>(ValidationStepDefinition.VALIDATION_PROFILE, "Parameters"),
             List.of(new Property<>("content", "liyvfgljv".getBytes()))
       );
       testSuiteRun.getTestRuns().getFirst().getTest().addStep(validationStep);
@@ -238,15 +238,15 @@ class MaestroStepsIntegrationTest {
       return testRuns.stream()
             .filter(tr -> tr != null && tr.getTest() != null && tr.getTest().getSteps() != null)
             .flatMap(tr -> tr.getTest().getSteps().stream())
-            .anyMatch(ValidationStep.class::isInstance);
+            .anyMatch(ValidationStepDefinition.class::isInstance);
    }
 
    private static TestSuiteRun getTestRunsWithOneValidationStep() {
       List<TestRun> testRuns = new ArrayList<>();
       Property<byte[]> contentToValidate = new Property<>("content", "liyvfgljv".getBytes());
-      Step validationStep = new ValidationStep("test-validation",
-            new Property<>(ValidationStep.VALIDATION_SERVICE, "matchbox"),
-            new Property<>(ValidationStep.VALIDATION_PROFILE, "Parameters"),
+      Step validationStep = new ValidationStepDefinition("test-validation",
+            new Property<>(ValidationStepDefinition.VALIDATION_SERVICE, "matchbox"),
+            new Property<>(ValidationStepDefinition.VALIDATION_PROFILE, "Parameters"),
             new ArrayList<>(List.of(contentToValidate))
       );
       net.ihe.gazelle.maestro.api.business.test.Test test =

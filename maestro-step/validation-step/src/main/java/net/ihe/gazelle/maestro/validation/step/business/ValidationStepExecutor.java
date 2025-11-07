@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * A StepExecutor is an object used to run ValidationStep {@link ValidationStep}
+ * A StepExecutor is an object used to run ValidationStep {@link ValidationStepDefinition}
  * <br>
  * Translate ValidationStep into ValidationRequest via ValidationRequestMapper {@link ValidationRequestMapper}
  * <br>
@@ -57,8 +57,8 @@ public class ValidationStepExecutor implements StepExecutor {
 
    @Override
    public CompletableFuture<StepRunReport> execute(StepRun stepRun) {
-      String validationService = stepRun.getPropertyValue(ValidationStep.VALIDATION_SERVICE);
-      String validationProfile = stepRun.getPropertyValue(ValidationStep.VALIDATION_PROFILE);
+      String validationService = stepRun.getPropertyValue(ValidationStepDefinition.VALIDATION_SERVICE);
+      String validationProfile = stepRun.getPropertyValue(ValidationStepDefinition.VALIDATION_PROFILE);
 
       ValidationRequest validationRequest = buildValidationRequest(
             stepRun,
@@ -71,14 +71,14 @@ public class ValidationStepExecutor implements StepExecutor {
 
 
       ByteArrayProperty reportOutput =
-            new ByteArrayProperty(ValidationStep.REPORT, serializer.toByteArray(validationReport))
+            new ByteArrayProperty(ValidationStepDefinition.REPORT, serializer.toByteArray(validationReport))
             .setFileName("validation-report.json")
             .setMimeType("application/json");
 
       StepRunReportBuilder stepRunReportBuilder = new StepRunReportBuilder()
             .setStepId(stepRun.getId())
             .setStepName(stepRun.getName())
-            .setType(ValidationStep.TYPE)
+            .setType(ValidationStepDefinition.TYPE)
             .setResult(mapResult(validationReport.getOverallResult()))
             .setOutputs(List.of(reportOutput));
       return CompletableFuture.completedFuture(stepRunReportBuilder.build());
@@ -92,7 +92,7 @@ public class ValidationStepExecutor implements StepExecutor {
       if(supportedInputs.isEmpty()) {
          // If no supported inputs defined for this profile, then use the fallback CONTENT_TO_VALIDATE input
          requestBuilder.addInput(
-               getInputInRequest(ValidationStep.CONTENT_TO_VALIDATE, stepRun)
+               getInputInRequest(ValidationStepDefinition.CONTENT_TO_VALIDATE, stepRun)
          );
       } else {
          for (SupportedInput supportedInput : supportedInputs) {

@@ -11,7 +11,7 @@ import net.ihe.gazelle.maestro.engine.business.StepExecutorProvider;
 import net.ihe.gazelle.maestro.engine.business.StepRun;
 import net.ihe.gazelle.maestro.engine.business.StepRunner;
 import net.ihe.gazelle.maestro.spi.business.StepExecutor;
-import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
+import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.CompletableFuture;
@@ -39,7 +39,7 @@ class StepExecutorTest {
         MaestroEventProducer producer = mock(MaestroEventProducer.class);
 
         StepRunner job = new StepRunner(provider, producer);
-        Step step = new ValidationStep();
+        Step step = new ValidationStepDefinition();
         step.setName("s");
         StartStepRun cmd = new StartStepRun(stepRunFor(step));
         job.run(cmd);
@@ -54,7 +54,7 @@ class StepExecutorTest {
         when(provider.getExecutor(any(Step.class))).thenThrow(new RuntimeException("err"));
 
         StepRunner job = new StepRunner(provider, producer);
-        Step step = new ValidationStep();
+        Step step = new ValidationStepDefinition();
         step.setName("s");
         job.run(new StartStepRun(stepRunFor(step)));
 
@@ -65,7 +65,7 @@ class StepExecutorTest {
     void returnUnexpectedError_buildsUndefinedReport() {
         MaestroEventProducer producer = mock(MaestroEventProducer.class);
         StepRunner job = new StepRunner(mock(StepExecutorProvider.class), producer);
-        Step step = new ValidationStep();
+        Step step = new ValidationStepDefinition();
         step.setName("s");
         StepRun sr = stepRunFor(step);
 

@@ -10,7 +10,7 @@ import net.ihe.gazelle.evsapi.client.business.response.report.ValidationOverview
 import net.ihe.gazelle.evsapi.client.business.response.report.ValidationSubReport;
 import net.ihe.gazelle.evsapi.client.business.response.report.ValidationTestResult;
 import net.ihe.gazelle.maestro.api.business.testrun.Property;
-import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
+import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;
 import net.ihe.gazelle.maestro.validation.step.technical.handler.EvsValidationMapper;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
 import org.junit.jupiter.api.Test;
@@ -156,10 +156,10 @@ class EvsValidationMapperTest {
                                 .setContent("test content".getBytes())
                 );
     }
-    private ValidationStep createValidationStep() {
-        return new ValidationStep("validationStep",
-                new Property<>(ValidationStep.VALIDATION_SERVICE, "testService"),
-                new Property<>(ValidationStep.VALIDATION_PROFILE, "ITI-44"),
+    private ValidationStepDefinition createValidationStep() {
+        return new ValidationStepDefinition("validationStep",
+                new Property<>(ValidationStepDefinition.VALIDATION_SERVICE, "testService"),
+                new Property<>(ValidationStepDefinition.VALIDATION_PROFILE, "ITI-44"),
                 List.of(new Property<>("contentToValidate", "content".getBytes()))
                 );
     }
