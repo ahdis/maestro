@@ -50,7 +50,6 @@ public class TestRunner {
         this.testRunEventProducer = testRunEventProducer;
     }
 
-
     public void run(StartTestRun startTestRun) {
         String sessionId = startTestRun.getSessionId();
         TestRun testRun = startTestRun.getTestRun();

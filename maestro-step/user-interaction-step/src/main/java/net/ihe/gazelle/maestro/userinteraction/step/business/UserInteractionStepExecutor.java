@@ -39,7 +39,6 @@ public class UserInteractionStepExecutor implements StepExecutor {
         String message = stepRun.getPropertyValue(UserInteractionStepDefinition.MESSAGE);
 
         userInteractionHandler.displayMessage(interactionTitle, message);
-
         return CompletableFuture.completedFuture(buildStepRunReport(stepRun));
     }
 

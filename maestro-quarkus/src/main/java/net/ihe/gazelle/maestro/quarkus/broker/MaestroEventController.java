@@ -45,6 +45,11 @@ public class MaestroEventController implements MaestroEventProducer {
       messageEvent.fireAsync(startTestSuiteRun);
    }
 
+    @Override
+    public void command(StartTestRun startTestRun) {
+        messageEvent.fireAsync(startTestRun);
+    }
+
    public void onStartTestRun(@ObservesAsync StartTestRun startTestRun) {
       maestroImpl.listen(startTestRun);
    }

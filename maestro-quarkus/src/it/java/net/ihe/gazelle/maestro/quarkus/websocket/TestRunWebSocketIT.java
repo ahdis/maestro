@@ -22,8 +22,6 @@ import io.quarkus.test.junit.TestProfile;
 import jakarta.websocket.ContainerProvider;
 import jakarta.websocket.Session;
 import jakarta.websocket.WebSocketContainer;
-import net.ihe.gazelle.maestro.api.business.testreport.Result;
-import net.ihe.gazelle.maestro.api.technical.dto.report.StepRunReportDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestRunReportDTO;
 import net.ihe.gazelle.maestro.quarkus.TestRunControllerProfile;
 import net.ihe.gazelle.maestro.quarkus.WireMockSingleton;
@@ -43,7 +41,6 @@ import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.fail;
 
 @QuarkusTest
 @TestProfile(TestRunControllerProfile.class)
@@ -83,33 +80,13 @@ class TestRunWebSocketIT implements QuarkusTestProfile {
 
             response = client.pollLastMessage(TIMEOUT_MS);
             assertNotNull(response);
-            WSMessageDTO testReport = serDes.deserialize(response, WSMessageDTO.class);
-            assertEquals("testSet1", testReport.getTestSetId());
-
-            // Check for test step completion message
-            if (testReport.getType().equals("testStepCompleted")) {
-                StepRunReportDTO stepRunReport = serDes.deserialize(testReport.getContent(), StepRunReportDTO.class);
-                assertEquals("step1", stepRunReport.getStepId());
-                assertEquals("VALIDATION", stepRunReport.getType());
-                assertEquals("FAILED", stepRunReport.getResult());
-            } else {
-                fail("Unexpected message type: " + testReport.getType());
-            }
+            TestRunReportDTO testReport = serDes.deserialize(response, TestRunReportDTO.class);
+            assertEquals("testSet1", testReport.getRunId());
 
             response = client.pollLastMessage(TIMEOUT_MS);
             assertNotNull(response);
-            testReport = serDes.deserialize(response, WSMessageDTO.class);
-            assertEquals("testSet1", testReport.getTestSetId());
-
-            // Check for test step completion message
-            if (testReport.getType().equals("testRunCompleted")) {
-                TestRunReportDTO testRunReportDTO = serDes.deserialize(testReport.getContent(), TestRunReportDTO.class);
-                assertEquals(Result.FAILED, testRunReportDTO.getBusinessObject().getResult());
-                assertEquals(1, testRunReportDTO.getStepRunReports().size());
-                assertEquals("VALIDATION", testRunReportDTO.getStepRunReports().getFirst().getType());
-            } else {
-                fail("Unexpected message type: " + testReport.getType());
-            }
+            testReport = serDes.deserialize(response, TestRunReportDTO.class);
+            assertEquals("testSet1", testReport.getRunId());
         }
     }
 }

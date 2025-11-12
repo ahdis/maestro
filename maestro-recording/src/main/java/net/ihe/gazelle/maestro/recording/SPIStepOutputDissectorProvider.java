@@ -1,5 +1,6 @@
 package net.ihe.gazelle.maestro.recording;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputDissector;
 import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputDissectorFactory;
@@ -15,6 +16,7 @@ import java.util.ServiceLoader;
  * that claims support for the provided step. When no factory matches, the
  * legacy attachment-only dissector is returned.
  */
+@ApplicationScoped
 public class SPIStepOutputDissectorProvider implements StepOutputDissectorProvider {
 
    private final List<StepOutputDissectorFactory> factories;

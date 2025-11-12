@@ -16,12 +16,14 @@
 
 package technical.userinteract;
 
+import net.ihe.gazelle.lang.ExecutionRuntimeException;
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.api.business.UserInteractionHandler;
 import net.ihe.gazelle.maestro.api.business.message.InteractWithUser;
 import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 public class UserInteractionHandlerImpl implements UserInteractionHandler {
 
@@ -32,8 +34,16 @@ public class UserInteractionHandlerImpl implements UserInteractionHandler {
     }
 
     @Override
-    public CompletableFuture<UserInteractionCompleted> displayMessage(String interactionTitle, String message) {
-        return observer.interactWithUser(new InteractWithUser(interactionTitle, message));
+    public void displayMessage(String interactionTitle, String message) {
+        CompletableFuture<UserInteractionCompleted> future = observer.interactWithUser(new InteractWithUser(interactionTitle, message));
+
+        try {
+            future.get();
+        } catch (ExecutionException e) {
+            throw new ExecutionRuntimeException(e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     @Override

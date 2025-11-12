@@ -76,6 +76,11 @@
             <artifactId>security</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.kereval.gazelle</groupId>
+            <artifactId>datahouse-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
         <!--logging -->
         <dependency>

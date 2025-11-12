@@ -20,6 +20,7 @@ import net.ihe.gazelle.errorhandling.business.UnexpectedErrorBuilder;
 import net.ihe.gazelle.framework.modelvalidator.business.ObjectResult;
 import net.ihe.gazelle.lang.ExecutionRuntimeException;
 import net.ihe.gazelle.lang.TimeoutRuntimeException;
+import net.ihe.gazelle.maestro.api.business.UserInteractionHandler;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
@@ -27,28 +28,16 @@ import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 import net.ihe.gazelle.maestro.spi.business.StepRun;
-import net.ihe.gazelle.maestro.api.business.UserInteractionHandler;
 import net.ihe.gazelle.simulation.business.callback.Result;
 import net.ihe.gazelle.simulation.business.callback.SimulationReport;
 import net.ihe.gazelle.simulation.business.callback.SimulationReportValidator;
 import net.ihe.gazelle.simulation.business.sequence.ServiceUnavailableException;
 import net.ihe.gazelle.simulation.business.sequence.SupportedParameter;
-import net.ihe.gazelle.simulation.business.setup.AdditionalInstructions;
-import net.ihe.gazelle.simulation.business.setup.AlreadyRunningException;
-import net.ihe.gazelle.simulation.business.setup.InvalidParameterValueException;
-import net.ihe.gazelle.simulation.business.setup.MissingRequiredParameterException;
-import net.ihe.gazelle.simulation.business.setup.Parameter;
-import net.ihe.gazelle.simulation.business.setup.ParameterBuilder;
-import net.ihe.gazelle.simulation.business.setup.ParameterType;
-import net.ihe.gazelle.simulation.business.setup.SimulationRequest;
-import net.ihe.gazelle.simulation.business.setup.SimulationRequestBuilder;
-import net.ihe.gazelle.simulation.business.setup.UnknownSequenceException;
-import net.ihe.gazelle.simulation.business.setup.UnknownSimulationException;
+import net.ihe.gazelle.simulation.business.setup.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Base64;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -64,7 +53,8 @@ public class SimulationStepExecutor implements StepExecutor {
    private final ReportSerializer serializer;
    private final SimulationReportValidator reportValidator = new SimulationReportValidator();
 
-   public SimulationStepExecutor(SimulationHandler simulationHandler, UserInteractionHandler userInteractionHandler,
+   public SimulationStepExecutor(SimulationHandler simulationHandler,
+                                 UserInteractionHandler userInteractionHandler,
                                  ReportSerializer serializer) {
       this.simulationHandler = simulationHandler;
       this.userInteractionHandler = userInteractionHandler;
@@ -174,7 +164,7 @@ public class SimulationStepExecutor implements StepExecutor {
                .append("name : ").append(parameter.getName()).append("\n")
                .append("value : ").append(parameter.getValue()).append("\n");
       }
-      userInteractionHandler.displayMessage("Additional instructions", instructions.toString());
+       userInteractionHandler.displayMessage("Additional instructions", instructions.toString());
    }
 
    private SimulationReport waitSimulationReport(SimulationRequest simulationRequest,

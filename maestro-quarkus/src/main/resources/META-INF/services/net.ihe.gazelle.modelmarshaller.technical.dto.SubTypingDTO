@@ -15,6 +15,7 @@
 #
 
 net.ihe.gazelle.maestro.quarkus.websocket.dto.StartTestSuiteRunDTO
+net.ihe.gazelle.maestro.quarkus.websocket.dto.StartTestRunDTO
 net.ihe.gazelle.maestro.quarkus.websocket.dto.TestRunStartedDTO
 net.ihe.gazelle.maestro.quarkus.websocket.dto.StepRunStartedDTO
 net.ihe.gazelle.maestro.quarkus.websocket.dto.InteractWithUserDTO

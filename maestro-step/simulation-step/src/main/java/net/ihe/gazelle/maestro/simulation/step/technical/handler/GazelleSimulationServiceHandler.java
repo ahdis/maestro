@@ -18,6 +18,7 @@ package net.ihe.gazelle.maestro.simulation.step.technical.handler;
 
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationHandler;
 import net.ihe.gazelle.simulation.business.callback.SimulationReport;
+import net.ihe.gazelle.simulation.business.sequence.SimulationChecksumService;
 import net.ihe.gazelle.simulation.business.sequence.SimulationSequence;
 import net.ihe.gazelle.simulation.business.setup.AdditionalInstructions;
 import net.ihe.gazelle.simulation.business.setup.SimulationRequest;
@@ -41,7 +42,8 @@ public class GazelleSimulationServiceHandler implements SimulationHandler {
     @Override
     public boolean isAvailable() {
         try {
-            return getSimulationSequences() != null;
+            String checksum = simulationClient.getChecksum(List.of());
+            return !SimulationChecksumService.DEFAULT_CHECKSUM.equals(checksum);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             return false;

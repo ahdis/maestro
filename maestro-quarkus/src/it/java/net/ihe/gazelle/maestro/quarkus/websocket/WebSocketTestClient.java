@@ -51,13 +51,4 @@ public class WebSocketTestClient {
         public String pollLastMessage(long timeoutMs) throws InterruptedException {
                 return messages.poll(timeoutMs, TimeUnit.MILLISECONDS);
         }
-
-        public void sendWSMessage(WSMessageDTO message) {
-                try {
-                        String jsonMessage = serDes.serializeAsString(message);
-                        session.getAsyncRemote().sendText(jsonMessage);
-                } catch (Exception e) {
-                        throw new RuntimeException("Erreur lors de la sérialisation du message", e);
-                }
-        }
 }

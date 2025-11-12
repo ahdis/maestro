@@ -130,8 +130,8 @@ public class TestSuiteRunner {
    /**
     * Propagate test suite run inputs to test run inputs.
     *
-    * @param testSuiteRun
-    * @param testRef
+    * @param testSuiteRun the test suite run
+    * @param testRef the test reference
     *
     * @return a merged list of properties to be consumed by the concerned test run
     */

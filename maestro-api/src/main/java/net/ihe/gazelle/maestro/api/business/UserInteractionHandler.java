@@ -16,15 +16,12 @@
 
 package net.ihe.gazelle.maestro.api.business;
 
-import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
 import net.ihe.gazelle.maestro.spi.business.Handler;
-
-import java.util.concurrent.CompletableFuture;
 
 public interface UserInteractionHandler extends Handler {
 
     String SERVICE_NAME = "User Interaction Service";
     String INTERFACE_NAME = "User Interaction API";
 
-    CompletableFuture<UserInteractionCompleted> displayMessage(String interactionTitle, String message);
+    void displayMessage(String interactionTitle, String message);
 }

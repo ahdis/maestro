@@ -25,6 +25,7 @@ import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRunValidator;
 import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -56,7 +57,7 @@ public class MaestroImpl implements Maestro {
        testRunValidator.assertValid(testRun);
        String sessionId = UUID.randomUUID().toString();
        observers.addSession(sessionId, observer);
-       testSuiteEventProducer.command(new StartTestRun(sessionId, testRun));
+       maestroEventProducer.command(new StartTestRun(sessionId, testRun));
    }
 
    public void listen(StartTestRun startTestRun) {

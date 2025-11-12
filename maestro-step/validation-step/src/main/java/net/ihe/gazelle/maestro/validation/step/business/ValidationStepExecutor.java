@@ -37,7 +37,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * A StepExecutor is an object used to run ValidationStep {@link ValidationStepDefinition}
  * <br>
- * Translate ValidationStep into ValidationRequest via ValidationRequestMapper {@link ValidationRequestMapper}
+ * Translate ValidationStep into ValidationRequest
  * <br>
  * Use ValidationHandler to validate content which return a ValidationReport {@link ValidationHandler}
  * <br>
