@@ -15,7 +15,7 @@ public class XmlExtractorStepDefinition implements StepDefinition {
    public static final String TYPE = "XML_EXTRACTION";
 
    // inputs
-   public static final String SOURCE_XML = "sourceXml";
+   public static final String SOURCE_XML = "xmlFile";
    public static final String XML_PATH = "xmlPath";
 
    // outputs

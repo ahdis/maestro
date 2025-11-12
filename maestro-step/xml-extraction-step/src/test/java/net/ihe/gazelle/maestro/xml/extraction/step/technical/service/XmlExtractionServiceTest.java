@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class XmlExtractionServiceTest {
+class XmlExtractionServiceTest {
 
     private final XmlExtractionService service = new XmlExtractionServiceImpl();
 
@@ -24,7 +24,7 @@ public class XmlExtractionServiceTest {
             """;
 
     @Test
-    public void testExtractValue() {
+    void testExtractValue() {
         String result1 = service.extractValue(sampleXml, "/root/element/child[1]");
         assertEquals("value1", result1);
 
@@ -36,19 +36,19 @@ public class XmlExtractionServiceTest {
     }
 
     @Test
-    public void testExtractMultipleValue() {
+    void testExtractMultipleValue() {
         String result = service.extractValue(sampleXml, "/root/element/child");
         assertEquals("value1,value2", result);
     }
 
     @Test
-    public void testExtractEmptyValue() {
+    void testExtractEmptyValue() {
         String result = service.extractValue(sampleXml, "/root/element/empty");
         assertEquals("", result);
     }
 
     @Test
-    public void testExtractNonExistingXPath() {
+    void testExtractNonExistingXPath() {
         assertThrows(XmlExtractionException.class, () -> {
             service.extractValue(sampleXml, "/root/nonExisting");
         });
@@ -59,7 +59,7 @@ public class XmlExtractionServiceTest {
     }
 
     @Test
-    public void testExtractInvalidXPath() {
+    void testExtractInvalidXPath() {
         assertThrows(XmlExtractionException.class, () -> {
             service.extractValue(sampleXml, ".?invalid_xpath");
         });

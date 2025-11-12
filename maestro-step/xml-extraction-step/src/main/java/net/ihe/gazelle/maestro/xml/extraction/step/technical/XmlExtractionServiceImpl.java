@@ -26,12 +26,12 @@ public class XmlExtractionServiceImpl implements XmlExtractionService {
     }
 
     @Override
-    public String extractValue(String sourceXml, String xmlPath) throws XmlExtractionException {
-        assertParamsAreValid(sourceXml, xmlPath);
+    public String extractValue(String xmlFile, String xmlPath) throws XmlExtractionException {
+        assertParamsAreValid(xmlFile, xmlPath);
 
         try {
             DocumentBuilder builder = documentBuilderFactory.newDocumentBuilder();
-            Document document = builder.parse(new InputSource(new StringReader(sourceXml)));
+            Document document = builder.parse(new InputSource(new StringReader(xmlFile)));
 
             XPath xpath = xPathFactory.newXPath();
             NodeList nodeList = (NodeList) xpath.evaluate(xmlPath, document, XPathConstants.NODESET);
@@ -53,8 +53,8 @@ public class XmlExtractionServiceImpl implements XmlExtractionService {
         }
     }
 
-    private static void assertParamsAreValid(String sourceXml, String xmlPath) {
-        if (sourceXml == null || sourceXml.isEmpty())
+    private static void assertParamsAreValid(String xmlFile, String xmlPath) {
+        if (xmlFile == null || xmlFile.isEmpty())
             throw new XmlExtractionException("Source XML is null or empty.");
         if (xmlPath == null || xmlPath.isEmpty())
             throw new XmlExtractionException("XML path is null or empty.");
