@@ -1,4 +1,4 @@
-package net.ihe.gazelle.maestro.engine.business.record;
+package net.ihe.gazelle.maestro.recording;
 
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputDissector;
@@ -18,15 +18,13 @@ import java.util.ServiceLoader;
 public class SPIStepOutputDissectorProvider implements StepOutputDissectorProvider {
 
    private final List<StepOutputDissectorFactory> factories;
-   private final StepOutputDissector fallback;
 
    public SPIStepOutputDissectorProvider() {
-      this(loadFactories(), new FallbackAttachmentStepOutputDissector());
+      this(loadFactories());
    }
 
-   SPIStepOutputDissectorProvider(List<StepOutputDissectorFactory> factories, StepOutputDissector fallback) {
+   SPIStepOutputDissectorProvider(List<StepOutputDissectorFactory> factories) {
       this.factories = List.copyOf(Objects.requireNonNull(factories, "factories"));
-      this.fallback = Objects.requireNonNull(fallback, "fallback");
    }
 
    @Override
@@ -35,7 +33,7 @@ public class SPIStepOutputDissectorProvider implements StepOutputDissectorProvid
             .filter(factory -> factory.supports(stepRunReport))
             .findFirst()
             .map(StepOutputDissectorFactory::create)
-            .orElse(fallback);
+            .orElse(null);
    }
 
    private static List<StepOutputDissectorFactory> loadFactories() {

@@ -1,6 +1,6 @@
 package net.ihe.gazelle.maestro.api.business.testreport.dissection;
 
-import com.kereval.gazelle.datahouse.api.business.record.RefType;
+import net.ihe.gazelle.maestro.api.business.recording.MaestroRefType;
 
 import java.util.Objects;
 
@@ -9,15 +9,15 @@ import java.util.Objects;
  * current item once its identifier is known.
  *
  * @param parentItemIndex index of the parent entry inside {@link StepOutputProjection#items()}
- * @param referenceName   value for {@link com.kereval.gazelle.datahouse.api.business.record.Reference#setName(String)}
- * @param referenceType   value for {@link com.kereval.gazelle.datahouse.api.business.record.Reference#setType(String)}
- * @param refType         Datahouse reference type (defaults to {@link RefType#ITEM_ID})
+ * @param referenceName   name for the {@link net.ihe.gazelle.maestro.api.business.recording.MaestroReference}
+ * @param referenceType   type for the {@link net.ihe.gazelle.maestro.api.business.recording.MaestroReference}
+ * @param refType         reference classification (defaults to {@link MaestroRefType#ITEM_ID})
  */
 public record ItemReferenceBinding(
       int parentItemIndex,
       String referenceName,
       String referenceType,
-      RefType refType
+      MaestroRefType refType
 ) {
 
    public ItemReferenceBinding {
@@ -26,6 +26,6 @@ public record ItemReferenceBinding(
       }
       referenceName = Objects.requireNonNull(referenceName, "referenceName");
       referenceType = Objects.requireNonNull(referenceType, "referenceType");
-      refType = Objects.requireNonNullElse(refType, RefType.ITEM_ID);
+      refType = Objects.requireNonNullElse(refType, MaestroRefType.ITEM_ID);
    }
 }

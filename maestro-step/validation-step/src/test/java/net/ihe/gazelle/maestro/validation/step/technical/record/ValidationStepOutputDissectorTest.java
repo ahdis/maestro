@@ -6,14 +6,13 @@ import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.dissection.*;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;
+import net.ihe.gazelle.security.business.acl.AccessControlList;
 import net.ihe.gazelle.validation.v2.api.business.Input;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
-import net.ihe.gazelle.security.business.acl.AccessControlList;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 

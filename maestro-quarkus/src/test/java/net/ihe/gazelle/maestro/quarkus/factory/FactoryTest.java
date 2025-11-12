@@ -18,7 +18,7 @@ package net.ihe.gazelle.maestro.quarkus.factory;
 
 import net.ihe.gazelle.maestro.api.business.Maestro;
 import net.ihe.gazelle.maestro.engine.business.StepExecutorProvider;
-import net.ihe.gazelle.maestro.engine.business.TestReportRecordService.ItemReference;
+import net.ihe.gazelle.maestro.api.business.recording.ItemReference;
 import net.ihe.gazelle.maestro.engine.business.TestRunner;
 import technical.dao.SessionStoreImpl;
 import technical.provider.StepExecutorSPIProvider;

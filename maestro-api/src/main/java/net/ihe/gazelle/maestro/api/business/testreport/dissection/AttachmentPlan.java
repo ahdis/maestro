@@ -1,21 +1,21 @@
 package net.ihe.gazelle.maestro.api.business.testreport.dissection;
 
-import com.kereval.gazelle.datahouse.api.business.record.Attachment;
+import net.ihe.gazelle.maestro.api.business.recording.MaestroAttachment;
 
 import java.util.Objects;
 
 /**
- * Description of an attachment that must be uploaded to Datahouse.
+ * Description of an attachment that must be uploaded by the chosen recording implementation.
  *
  * @param attachment     payload to upload
  * @param outputIndex    index of the related output inside {@link net.ihe.gazelle.maestro.api.business.testreport.StepRunReport#getOutputs()}
  * @param propertyFactory factory used to build the replacement property once the attachment id is known
  *                        (may be {@code null} if no step output has to be mutated)
- * @param referenceName  value for {@link com.kereval.gazelle.datahouse.api.business.record.Reference#setName(String)}
- * @param referenceType  value for {@link com.kereval.gazelle.datahouse.api.business.record.Reference#setType(String)}
+ * @param referenceName  name used inside {@link net.ihe.gazelle.maestro.api.business.recording.MaestroReference}
+ * @param referenceType  type used inside {@link net.ihe.gazelle.maestro.api.business.recording.MaestroReference}
  */
 public record AttachmentPlan(
-      Attachment attachment,
+      MaestroAttachment attachment,
       int outputIndex,
       PropertyReferenceFactory propertyFactory,
       String referenceName,
@@ -32,7 +32,7 @@ public record AttachmentPlan(
    }
 
    public static AttachmentPlan forOutput(
-         Attachment attachment,
+         MaestroAttachment attachment,
          int outputIndex,
          PropertyReferenceFactory propertyFactory,
          String referenceName,
@@ -41,7 +41,7 @@ public record AttachmentPlan(
    }
 
    public static AttachmentPlan detached(
-         Attachment attachment,
+         MaestroAttachment attachment,
          String referenceName,
          String referenceType) {
       return new AttachmentPlan(attachment, -1, null, referenceName, referenceType);

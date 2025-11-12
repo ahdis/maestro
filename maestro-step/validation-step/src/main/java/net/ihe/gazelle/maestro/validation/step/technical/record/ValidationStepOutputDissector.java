@@ -1,13 +1,15 @@
 package net.ihe.gazelle.maestro.validation.step.technical.record;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kereval.gazelle.datahouse.api.business.record.Attachment;
-import com.kereval.gazelle.datahouse.api.business.record.Item;
-import com.kereval.gazelle.datahouse.api.business.record.RefType;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
+import net.ihe.gazelle.maestro.api.business.recording.MaestroAttachment;
+import net.ihe.gazelle.maestro.api.business.recording.MaestroItem;
+import net.ihe.gazelle.maestro.api.business.recording.MaestroRefType;
 import net.ihe.gazelle.maestro.api.business.testreport.ByteArrayItemProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.dissection.*;
+import net.ihe.gazelle.maestro.recording.DatahouseMaestroAttachment;
+import net.ihe.gazelle.maestro.recording.DatahouseMaestroItem;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;
 import net.ihe.gazelle.validation.v2.api.business.Input;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
@@ -42,14 +44,14 @@ public class ValidationStepOutputDissector implements StepOutputDissector {
         ValidationReport validationReport = deserializeReport(validationReportBytes);
         List<AttachmentPlan> inputAttachments = extractInputAttachments(validationReport);
         StepOutputProjectionBuilder builder = new StepOutputProjectionBuilder();
-        Item reportItem = createItem(serializeReport(validationReport), context);
+        MaestroItem reportItem = createItem(serializeReport(validationReport), context);
         ItemHandle handle = builder.addItem(reportItem);
         builder.addReportBinding(
                 handle,
                 new ReportReferenceBinding(
                         ValidationStepDefinition.REPORT,
                         ValidationStepDefinition.REPORT,
-                        RefType.ITEM_ID
+                        MaestroRefType.ITEM_ID
                 )
         );
 
@@ -85,13 +87,12 @@ public class ValidationStepOutputDissector implements StepOutputDissector {
         }
     }
 
-    private Item createItem(String content, StepOutputContext context) {
-        return new Item()
+    private MaestroItem createItem(String content, StepOutputContext context) {
+        return new DatahouseMaestroItem()
                 .setType(ValidationStepDefinition.REPORT)
                 .setContent(content)
                 .setAccessControlList(context.accessControlList())
                 .setReferences(new ArrayList<>());
-
     }
 
     private List<AttachmentPlan> extractInputAttachments(ValidationReport validationReport) {
@@ -107,18 +108,18 @@ public class ValidationStepOutputDissector implements StepOutputDissector {
         return plans;
     }
 
-    private Attachment createAttachmentFromInput(Input input) {
+    private MaestroAttachment createAttachmentFromInput(Input input) {
         if(input == null || input.getContent() == null) {
             throw new IllegalArgumentException("Input or input content cannot be null");
         }
-        return new Attachment()
+        return new DatahouseMaestroAttachment()
                 .setType(VALIDATION_INPUT)
                 .setContent(input.getContent())
                 .setFilename(input.getId());
     }
 
     private AttachmentPlan createAttachmentPlan(Input input) {
-        Attachment attachment = createAttachmentFromInput(input);
+        MaestroAttachment attachment = createAttachmentFromInput(input);
         input.setContent(null);
         return AttachmentPlan.detached(attachment, input.getId(), VALIDATION_INPUT);
     }

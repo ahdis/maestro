@@ -23,6 +23,10 @@
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>maestro-engine</artifactId>
         </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>maestro-recording</artifactId>
+        </dependency>
 
         <!-- Steps -->
         <dependency>
@@ -78,10 +82,6 @@
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>service-registry-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.kereval.gazelle</groupId>
-            <artifactId>datahouse-microprofile-rest-client</artifactId>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>

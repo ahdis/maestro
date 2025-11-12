@@ -52,6 +52,7 @@
         <module>maestro-engine</module>
         <module>maestro-step</module>
         <module>maestro-quarkus</module>
+        <module>maestro-recording</module>
     </modules>
 
     <scm>
@@ -103,6 +104,11 @@
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-engine</artifactId>
+                <version>0.4.1-NPD-1449-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>net.ihe.gazelle</groupId>
+                <artifactId>maestro-recording</artifactId>
                 <version>0.4.1-NPD-1449-SNAPSHOT</version>
             </dependency>
             <dependency>
@@ -188,6 +194,11 @@
             <dependency>
                 <groupId>com.kereval.gazelle</groupId>
                 <artifactId>datahouse-microprofile-rest-client</artifactId>
+                <version>${datahouse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.kereval.gazelle</groupId>
+                <artifactId>datahouse-api</artifactId>
                 <version>${datahouse.version}</version>
             </dependency>
             <dependency>

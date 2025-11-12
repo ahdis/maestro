@@ -1,4 +1,4 @@
-package net.ihe.gazelle.maestro.quarkus.record;
+package net.ihe.gazelle.maestro.recording;
 
 import com.kereval.gazelle.datahouse.api.business.record.Attachment;
 import com.kereval.gazelle.datahouse.technical.rest.client.RecordItemClient;

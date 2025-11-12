@@ -1,20 +1,15 @@
 package net.ihe.gazelle.maestro.simulation.step.record;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kereval.gazelle.datahouse.api.business.record.Item;
-import com.kereval.gazelle.datahouse.api.business.record.RefType;
 import net.ihe.gazelle.errorhandling.technical.UnexpectedErrorDTO;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
+import net.ihe.gazelle.maestro.api.business.recording.MaestroItem;
+import net.ihe.gazelle.maestro.api.business.recording.MaestroRefType;
 import net.ihe.gazelle.maestro.api.business.testreport.ByteArrayItemProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.PropertyReferenceFactory;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.ReportReferenceBinding;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputContext;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputDissector;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputProjection;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputProjectionBuilder;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.ItemHandle;
+import net.ihe.gazelle.maestro.api.business.testreport.dissection.*;
+import net.ihe.gazelle.maestro.recording.DatahouseMaestroItem;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepDefinition;
 import net.ihe.gazelle.simulation.business.callback.Message;
 import net.ihe.gazelle.simulation.business.callback.SimulationReport;
@@ -98,7 +93,7 @@ class SimulationStepOutputDissector implements StepOutputDissector {
                reportHandle,
                referenceName(transactionReport.getTransaction(), "transaction"),
                ITEM_TYPE_TRANSACTION,
-               com.kereval.gazelle.datahouse.api.business.record.RefType.ITEM_ID);
+               MaestroRefType.ITEM_ID);
 
          Map<String, ItemHandle> messageHandleByName = new HashMap<>();
          List<Message> messages = transactionReport.getMessages();
@@ -110,7 +105,7 @@ class SimulationStepOutputDissector implements StepOutputDissector {
                      transactionHandle,
                      referenceName(message.getName(), "message"),
                      ITEM_TYPE_MESSAGE,
-                     com.kereval.gazelle.datahouse.api.business.record.RefType.ITEM_ID);
+                     MaestroRefType.ITEM_ID);
                if (message.getName() != null && !message.getName().isBlank()) {
                   messageHandleByName.put(message.getName(), messageHandle);
                }
@@ -126,7 +121,7 @@ class SimulationStepOutputDissector implements StepOutputDissector {
                      transactionHandle,
                      referenceName(validation.getSubject(), "validation"),
                      ITEM_TYPE_VALIDATION,
-                     com.kereval.gazelle.datahouse.api.business.record.RefType.ITEM_ID);
+                     MaestroRefType.ITEM_ID);
 
                if (validation.getSubject() != null) {
                   ItemHandle targetMessage = messageHandleByName.get(validation.getSubject());
@@ -135,7 +130,7 @@ class SimulationStepOutputDissector implements StepOutputDissector {
                            targetMessage,
                            validation.getSubject(),
                            ITEM_TYPE_VALIDATION,
-                           com.kereval.gazelle.datahouse.api.business.record.RefType.ITEM_ID);
+                           MaestroRefType.ITEM_ID);
                   }
                }
             }
@@ -158,7 +153,7 @@ class SimulationStepOutputDissector implements StepOutputDissector {
                reportHandle,
                "unexpected-error",
                ITEM_TYPE_UNEXPECTED_ERROR,
-               com.kereval.gazelle.datahouse.api.business.record.RefType.ITEM_ID);
+               MaestroRefType.ITEM_ID);
       }
    }
 
@@ -166,38 +161,38 @@ class SimulationStepOutputDissector implements StepOutputDissector {
    private ItemHandle appendReportItem(StepOutputContext context,
          SimulationReport simulationReport,
          StepOutputProjectionBuilder builder) {
-      Item reportItem = createReportItem(context, simulationReport);
+      MaestroItem reportItem = createReportItem(context, simulationReport);
       ItemHandle handle = builder.addItem(reportItem);
       builder.addReportBinding(handle, new ReportReferenceBinding(
             SimulationStepDefinition.REPORT,
             ITEM_TYPE_REPORT,
-            RefType.ITEM_ID
+            MaestroRefType.ITEM_ID
       ));
       return handle;
    }
 
-   private Item createReportItem(StepOutputContext context, SimulationReport simulationReport) {
+   private MaestroItem createReportItem(StepOutputContext context, SimulationReport simulationReport) {
       SimulationReportDTO dto = new SimulationReportDTO(simulationReport);
        return createItem(context, ITEM_TYPE_REPORT, dto);
    }
 
-   private Item createTransactionItem(StepOutputContext context, TransactionReport transactionReport) {
+   private MaestroItem createTransactionItem(StepOutputContext context, TransactionReport transactionReport) {
       TransactionReportDTO dto = new TransactionReportDTO(transactionReport);
        return createItem(context, ITEM_TYPE_TRANSACTION, dto);
    }
 
-   private Item createMessageItem(StepOutputContext context, Message message) {
+   private MaestroItem createMessageItem(StepOutputContext context, Message message) {
       MessageDTO dto = new MessageDTO(message);
        return createItem(context, ITEM_TYPE_MESSAGE, dto);
    }
 
-   private Item createValidationItem(StepOutputContext context, ValidationReport validationReport) {
+   private MaestroItem createValidationItem(StepOutputContext context, ValidationReport validationReport) {
       ValidationReportDTO dto = new ValidationReportDTO(validationReport);
        return createItem(context, ITEM_TYPE_VALIDATION, dto);
    }
 
-   private Item createErrorItem(StepOutputContext context, UnexpectedErrorDTO errorDTO) {
-      Item item = createItem(context, ITEM_TYPE_UNEXPECTED_ERROR, errorDTO);
+   private MaestroItem createErrorItem(StepOutputContext context, UnexpectedErrorDTO errorDTO) {
+      DatahouseMaestroItem item = createItem(context, ITEM_TYPE_UNEXPECTED_ERROR, errorDTO);
       if (errorDTO.getName() != null) {
          item.addAdditionalParameter("errorName", errorDTO.getName());
       }
@@ -219,8 +214,8 @@ class SimulationStepOutputDissector implements StepOutputDissector {
    }
 
    // Creates a bare Item with the correct ACL, type, serialized payload, and empty references list.
-   private Item createItem(StepOutputContext context, String type, Object payload) {
-      Item item = new Item()
+   private DatahouseMaestroItem createItem(StepOutputContext context, String type, Object payload) {
+      DatahouseMaestroItem item = new DatahouseMaestroItem()
             .setAccessControlList(context.accessControlList())
             .setType(type)
             .setContent(serialize(payload));

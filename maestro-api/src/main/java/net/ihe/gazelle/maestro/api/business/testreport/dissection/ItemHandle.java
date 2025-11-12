@@ -1,10 +1,10 @@
 package net.ihe.gazelle.maestro.api.business.testreport.dissection;
 
-import com.kereval.gazelle.datahouse.api.business.record.Item;
+import net.ihe.gazelle.maestro.api.business.recording.MaestroItem;
 
 /**
- * Symbolic handle returned by {@link StepOutputProjectionBuilder#addItem(Item)}.
- * The builder resolves it to an index when {@link #build()} is called.
+ * Symbolic handle returned by {@link StepOutputProjectionBuilder#addItem(MaestroItem)}.
+ * The builder resolves it to an index when {@link StepOutputProjectionBuilder#build()} is called.
  */
 public final class ItemHandle {
     private final long id;

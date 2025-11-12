@@ -1,11 +1,12 @@
 package net.ihe.gazelle.maestro.quarkus.mock;
 
+import net.ihe.gazelle.maestro.api.business.recording.ItemReference;
 import net.ihe.gazelle.maestro.api.business.testreport.Input;
 import net.ihe.gazelle.maestro.api.business.testreport.Output;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
-import net.ihe.gazelle.maestro.engine.business.TestReportRecordService;
+import net.ihe.gazelle.maestro.api.business.recording.TestReportRecordService;
 
 import java.util.List;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package net.ihe.gazelle.maestro.quarkus.record.entity;
+package net.ihe.gazelle.maestro.recording.entity;
 
 import net.ihe.gazelle.errorhandling.technical.UnexpectedErrorDTO;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;

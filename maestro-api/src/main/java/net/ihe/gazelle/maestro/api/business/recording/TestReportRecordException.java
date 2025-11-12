@@ -1,4 +1,4 @@
-package net.ihe.gazelle.maestro.engine.business;
+package net.ihe.gazelle.maestro.api.business.recording;
 
 public class TestReportRecordException extends RuntimeException {
 

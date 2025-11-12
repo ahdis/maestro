@@ -1,6 +1,6 @@
 package net.ihe.gazelle.maestro.api.business.testreport.dissection;
 
-import com.kereval.gazelle.datahouse.api.business.record.RefType;
+import net.ihe.gazelle.maestro.api.business.recording.MaestroRefType;
 
 import java.util.Objects;
 
@@ -11,12 +11,12 @@ import java.util.Objects;
 public record ReportReferenceBinding(
       String referenceName,
       String referenceType,
-      RefType refType
+      MaestroRefType refType
 ) {
 
    public ReportReferenceBinding {
       referenceName = Objects.requireNonNull(referenceName, "referenceName");
       referenceType = Objects.requireNonNull(referenceType, "referenceType");
-      refType = Objects.requireNonNullElse(refType, RefType.ITEM_ID);
+      refType = Objects.requireNonNullElse(refType, MaestroRefType.ITEM_ID);
    }
 }

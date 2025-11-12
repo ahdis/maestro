@@ -1,8 +1,8 @@
 package net.ihe.gazelle.maestro.api.business.testreport.dissection;
 
-import com.kereval.gazelle.datahouse.api.business.record.Item;
-import com.kereval.gazelle.datahouse.api.business.record.RefType;
-import com.kereval.gazelle.datahouse.api.business.record.Reference;
+import net.ihe.gazelle.maestro.api.business.recording.MaestroItem;
+import net.ihe.gazelle.maestro.api.business.recording.MaestroReference;
+import net.ihe.gazelle.maestro.api.business.recording.MaestroRefType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,13 +27,13 @@ public final class StepOutputProjectionBuilder {
 
    private final Map<ItemHandle, ItemNode> nodes = new LinkedHashMap<>();
    private final List<AttachmentPlan> attachmentPlans = new ArrayList<>();
-   private final List<Reference> reportReferences = new ArrayList<>();
+   private final List<MaestroReference> reportReferences = new ArrayList<>();
    private final List<PropertyMutationRequest> propertyMutationRequests = new ArrayList<>();
 
    /**
     * Creates a new handle, registers the supplied item, and returns the handle so callers can attach bindings.
     */
-   public ItemHandle addItem(Item item) {
+   public ItemHandle addItem(MaestroItem item) {
       Objects.requireNonNull(item, "item");
       ItemHandle handle = new ItemHandle(HANDLE_SEQUENCE.incrementAndGet());
       nodes.put(handle, new ItemNode(item));
@@ -55,7 +55,7 @@ public final class StepOutputProjectionBuilder {
          ItemHandle parentHandle,
          String referenceName,
          String referenceType,
-         RefType refType) {
+         MaestroRefType refType) {
       ItemNode child = getNode(childHandle);
       ensureHandleExists(parentHandle);
       child.parentBindings.add(new ParentBinding(parentHandle, referenceName, referenceType, refType));
@@ -71,7 +71,7 @@ public final class StepOutputProjectionBuilder {
    /**
     * Adds a reference that must be appended directly to the TestReport (for legacy flows).
     */
-   public void addReportReference(Reference reference) {
+   public void addReportReference(MaestroReference reference) {
       reportReferences.add(Objects.requireNonNull(reference, "reference"));
    }
 
@@ -190,7 +190,7 @@ public final class StepOutputProjectionBuilder {
    private record ParentBinding(ItemHandle parentHandle,
                                 String referenceName,
                                 String referenceType,
-                                RefType refType) {
+                                MaestroRefType refType) {
    }
 
    private record PropertyMutationRequest(int outputIndex, ItemHandle sourceHandle, PropertyReferenceFactory factory) {
@@ -198,11 +198,11 @@ public final class StepOutputProjectionBuilder {
 
    // Mutable staging structure mirroring ItemPlan until handles are resolved to indexes.
    private static final class ItemNode {
-      private final Item item;
+      private final MaestroItem item;
       private final List<ParentBinding> parentBindings = new ArrayList<>();
       private final List<ReportReferenceBinding> reportBindings = new ArrayList<>();
 
-      private ItemNode(Item item) {
+      private ItemNode(MaestroItem item) {
          this.item = item;
       }
    }

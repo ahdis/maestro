@@ -8,6 +8,9 @@ import net.ihe.gazelle.maestro.api.business.message.StartTestSuiteRun;
 import net.ihe.gazelle.maestro.api.business.message.TestRunFinished;
 import net.ihe.gazelle.maestro.api.business.message.TestSuiteRunFinished;
 import net.ihe.gazelle.maestro.api.business.property.Property;
+import net.ihe.gazelle.maestro.api.business.recording.ItemReference;
+import net.ihe.gazelle.maestro.api.business.recording.TestReportRecordException;
+import net.ihe.gazelle.maestro.api.business.recording.TestReportRecordService;
 import net.ihe.gazelle.maestro.api.business.test.TestReference;
 import net.ihe.gazelle.maestro.api.business.test.TestSuite;
 import net.ihe.gazelle.maestro.api.business.testreport.*;
@@ -169,7 +172,7 @@ public class TestSuiteRunner {
    private TestReportSummary recordTestReport(TestReport testReport) {
       TestReportSummary reportSummary = null;
       try {
-         TestReportRecordService.ItemReference reportRef = testReportRecordService.recordTestReportWithReferences(testReport);
+         ItemReference reportRef = testReportRecordService.recordTestReportWithReferences(testReport);
          reportSummary = buildReportSummary(testReport, reportRef);
       } catch (TestReportRecordException e) {
          List<UnexpectedError> errors = new ArrayList<>(testReport.getUnexpectedErrors());
@@ -196,7 +199,7 @@ public class TestSuiteRunner {
    }
 
    private static TestReportSummary buildReportSummary(TestReport testReport,
-                                                       TestReportRecordService.ItemReference reportRef) {
+                                                       ItemReference reportRef) {
       TestReportSummary reportSummary = new TestReportSummary()
             .setId(reportRef.id())
             .setLocation(reportRef.location())
