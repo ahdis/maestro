@@ -15,9 +15,10 @@ import net.ihe.gazelle.simulation.business.callback.Message;
 import net.ihe.gazelle.simulation.business.callback.SimulationReport;
 import net.ihe.gazelle.simulation.business.callback.TransactionReport;
 import net.ihe.gazelle.simulation.business.callback.ValidationReport;
+import net.ihe.gazelle.maestro.simulation.step.record.dto.SimulationReportItemDTO;
+import net.ihe.gazelle.maestro.simulation.step.record.dto.TransactionReportItemDTO;
 import net.ihe.gazelle.simulation.jaxrs.api.technical.dto.callback.MessageDTO;
 import net.ihe.gazelle.simulation.jaxrs.api.technical.dto.callback.SimulationReportDTO;
-import net.ihe.gazelle.simulation.jaxrs.api.technical.dto.callback.TransactionReportDTO;
 import net.ihe.gazelle.simulation.jaxrs.api.technical.dto.callback.ValidationReportDTO;
 
 import java.io.IOException;
@@ -25,6 +26,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static net.ihe.gazelle.maestro.simulation.step.record.ReferenceNames.resolve;
 
 /**
  * Structures the simulation step report into a set of hierarchical Datahouse items.
@@ -91,7 +94,7 @@ class SimulationStepOutputDissector implements StepOutputDissector {
          ItemHandle transactionHandle = builder.addItem(createTransactionItem(context, transactionReport));
          builder.linkParent(transactionHandle,
                reportHandle,
-               referenceName(transactionReport.getTransaction(), "transaction"),
+               resolve(transactionReport.getTransaction(), "transaction"),
                ITEM_TYPE_TRANSACTION,
                MaestroRefType.ITEM_ID);
 
@@ -103,7 +106,7 @@ class SimulationStepOutputDissector implements StepOutputDissector {
                ItemHandle messageHandle = builder.addItem(createMessageItem(context, message));
                builder.linkParent(messageHandle,
                      transactionHandle,
-                     referenceName(message.getName(), "message"),
+                     resolve(message.getName(), "message"),
                      ITEM_TYPE_MESSAGE,
                      MaestroRefType.ITEM_ID);
                if (message.getName() != null && !message.getName().isBlank()) {
@@ -119,7 +122,7 @@ class SimulationStepOutputDissector implements StepOutputDissector {
                ItemHandle validationHandle = builder.addItem(createValidationItem(context, validation));
                builder.linkParent(validationHandle,
                      transactionHandle,
-                     referenceName(validation.getSubject(), "validation"),
+                     resolve(validation.getSubject(), "validation"),
                      ITEM_TYPE_VALIDATION,
                      MaestroRefType.ITEM_ID);
 
@@ -172,13 +175,15 @@ class SimulationStepOutputDissector implements StepOutputDissector {
    }
 
    private MaestroItem createReportItem(StepOutputContext context, SimulationReport simulationReport) {
-      SimulationReportDTO dto = new SimulationReportDTO(simulationReport);
-       return createItem(context, ITEM_TYPE_REPORT, dto);
+      SimulationReportItemDTO dto = new SimulationReportItemDTO(simulationReport);
+      return createItem(context, ITEM_TYPE_REPORT, dto);
    }
 
    private MaestroItem createTransactionItem(StepOutputContext context, TransactionReport transactionReport) {
-      TransactionReportDTO dto = new TransactionReportDTO(transactionReport);
-       return createItem(context, ITEM_TYPE_TRANSACTION, dto);
+      TransactionReportItemDTO dto = new TransactionReportItemDTO(transactionReport,
+            ITEM_TYPE_MESSAGE,
+            ITEM_TYPE_VALIDATION);
+      return createItem(context, ITEM_TYPE_TRANSACTION, dto);
    }
 
    private MaestroItem createMessageItem(StepOutputContext context, Message message) {
@@ -243,7 +248,4 @@ class SimulationStepOutputDissector implements StepOutputDissector {
       return -1;
    }
 
-   private String referenceName(String candidate, String fallback) {
-      return (candidate == null || candidate.isBlank()) ? fallback : candidate;
-   }
 }
