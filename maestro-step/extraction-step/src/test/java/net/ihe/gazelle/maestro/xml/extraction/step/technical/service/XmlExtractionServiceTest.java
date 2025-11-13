@@ -5,6 +5,10 @@ import net.ihe.gazelle.maestro.xml.extraction.step.technical.xml.XmlExtractionEx
 import net.ihe.gazelle.maestro.xml.extraction.step.technical.xml.XmlExtractionServiceImpl;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class XmlExtractionServiceTest {
@@ -22,16 +26,35 @@ class XmlExtractionServiceTest {
             </root>
             """;
 
+    private final String samlAssertionXml;
+
+    public XmlExtractionServiceTest() {
+        try {
+            samlAssertionXml = Files.readString(Paths.get("src/test/resources/xml/SAMLAssertion.xml"));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load SAMLAssertion.xml", e);
+        }
+    }
+
     @Test
     void testExtractValue() {
         String result1 = service.extractValue(sampleXml, "/root/element/child[1]");
-        assertEquals("value1", result1);
+        assertEquals("<child>value1</child>", result1);
 
-        String result2 = service.extractValue(sampleXml, "/root/single");
+        String result2 = service.extractValue(sampleXml, "/root/single/text()");
         assertEquals("singleValue", result2);
 
-        String result3 = service.extractValue(sampleXml, "/root/element/child[2]");
+        String result3 = service.extractValue(sampleXml, "/root/element/child[2]/text()");
         assertEquals("value2", result3);
+    }
+
+    @Test
+    void testExtractXMLFragment() {
+        String result1 = service.extractValue(sampleXml, "/root/element");
+        assertEquals("<element><child>value1</child><child>value2</child><empty/></element>", result1);
+
+        String result2 = service.extractValue(sampleXml, "/root");
+        assertEquals("<root><element><child>value1</child><child>value2</child><empty/></element><single>singleValue</single></root>", result2);
     }
 
     @Test
@@ -43,8 +66,11 @@ class XmlExtractionServiceTest {
 
     @Test
     void testExtractEmptyValue() {
-        String result = service.extractValue(sampleXml, "/root/element/empty");
-        assertEquals("", result);
+        String result1 = service.extractValue(sampleXml, "/root/element/empty");
+        assertEquals("<empty/>", result1);
+
+        String result2 = service.extractValue(sampleXml, "/root/element/empty/text()");
+        assertNull(result2);
     }
 
     @Test
@@ -60,5 +86,38 @@ class XmlExtractionServiceTest {
     void testExtractInvalidXPath() {
         assertThrows(XmlExtractionException.class,
                 () -> service.extractValue(sampleXml, ".?invalid_xpath"));
+    }
+
+    @Test
+    void testExtractFromSAMLAssertion() {
+        // Test with namespace saml2:
+        String extractValue1 = service.extractValue(samlAssertionXml, "/saml2:Assertion/saml2:Issuer/text()");
+        assertEquals("urn:idp:ES:countryB", extractValue1);
+
+        // Test with local-name() (no namespace)
+        String extractedValue2 = service.extractValue(samlAssertionXml, "//*[local-name()='Assertion']/*[local-name()='Issuer']/text()");
+        assertEquals("urn:idp:ES:countryB", extractedValue2);
+
+        // Test with namespace ds:
+        String extractValue3 = service.extractValue(samlAssertionXml, "/saml2:Assertion/ds:Signature/ds:KeyInfo/ds:X509Data/ds:X509Certificate/text()");
+        assertNotNull(extractValue3);
+        assertTrue(extractValue3.startsWith("MIIGYDCCBEigAw"));
+
+        // Test with namespace ec:
+        String extractValue5 = service.extractValue(samlAssertionXml, "/saml2:Assertion/ds:Signature/ds:SignedInfo/ds:Reference/ds:Transforms/ds:Transform[2]/ec:InclusiveNamespaces/@PrefixList");
+        assertEquals("xsd", extractValue5);
+    }
+
+    @Test
+    void testExtractFromSAMLAssertionComplex() {
+        // Test extraction of the 5th Attribute element which contains "Pharmacy"
+        String extractValue6 = service.extractValue(samlAssertionXml, "/saml2:Assertion/saml2:AttributeStatement/saml2:Attribute[5]/saml2:AttributeValue");
+        assertTrue(extractValue6.contains("Pharmacy"));
+        assertTrue(extractValue6.contains("xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""));
+        assertTrue(extractValue6.contains("xsi:type=\"xsd:string\""));
+
+        // Or test just the text content
+        String extractValue7 = service.extractValue(samlAssertionXml, "/saml2:Assertion/saml2:AttributeStatement/saml2:Attribute[5]/saml2:AttributeValue/text()");
+        assertEquals("Pharmacy", extractValue7);
     }
 }
