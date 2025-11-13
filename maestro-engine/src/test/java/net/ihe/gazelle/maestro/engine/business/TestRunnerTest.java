@@ -1,0 +1,143 @@
+package net.ihe.gazelle.maestro.engine.business;
+
+import net.ihe.gazelle.maestro.api.business.message.StartStepRun;
+import net.ihe.gazelle.maestro.api.business.message.StartTestRun;
+import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
+import net.ihe.gazelle.maestro.api.business.message.TestRunFinished;
+import net.ihe.gazelle.maestro.api.business.property.StringProperty;
+import net.ihe.gazelle.maestro.api.business.test.Step;
+import net.ihe.gazelle.maestro.api.business.test.Test;
+import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
+import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
+import net.ihe.gazelle.maestro.engine.business.context.TestRunSession;
+import org.junit.jupiter.api.BeforeEach;
+import technical.dao.SessionStoreImpl;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+
+class TestRunnerTest {
+
+   private SessionStoreImpl<TestRunSession> sessionStore;
+   private RecordingTestRunEventProducer eventProducer;
+   private TestRunner testRunner;
+   private Step firstStep;
+   private Step secondStep;
+   private TestRun testRun;
+
+   @BeforeEach
+   void setUp() {
+      sessionStore = new SessionStoreImpl<>();
+      eventProducer = new RecordingTestRunEventProducer();
+      testRunner = new TestRunner(sessionStore, eventProducer);
+
+      firstStep = new Step().setId("step-1").setName("First").setType("SIM");
+      secondStep = new Step().setId("step-2").setName("Second").setType("SIM");
+
+      Test test = new Test()
+            .setId("test-1")
+            .setName("Test 1")
+            .setSteps(List.of(firstStep, secondStep));
+
+      testRun = new TestRun()
+            .setTest(test)
+            .setInputs(List.of(new StringProperty("input", "value")));
+   }
+
+   @org.junit.jupiter.api.Test
+   void runStoresSessionAndStartsFirstStep() {
+      testRunner.run(new StartTestRun("session-1", testRun));
+
+      assertThat(sessionStore.hasSession("session-1"), is(true));
+      assertThat(eventProducer.getCommands(), hasSize(1));
+
+      StartStepRun command = eventProducer.getCommands().get(0);
+      assertThat(command.getStepRun().hasProperty("input"), is(true));
+      assertThat(command.getTestId(), equalTo(testRun.getTest().getId()));
+   }
+
+   @org.junit.jupiter.api.Test
+   void listenAddsOutputsAndTriggersNextStep() {
+      testRunner.run(new StartTestRun("session-ctx", testRun));
+      StartStepRun firstCommand = eventProducer.getCommands().get(0);
+
+      StepRunReport report = new StepRunReport()
+            .setStepId("step-1")
+            .setStepName("First")
+            .setType("SIM")
+            .setResult(StepResult.PASSED)
+            .setOutputs(List.of(new StringProperty("payload", "abc")));
+
+      testRunner.listen(new StepRunFinished("session-ctx", testRun.getTest().getId(), firstCommand.getStepRun(), report));
+
+      assertThat(sessionStore.getSession("session-ctx").getContext(), hasItem(hasProperty("name", equalTo("step-1.payload"))));
+      assertThat(eventProducer.getCommands(), hasSize(2));
+      StartStepRun secondCommand = eventProducer.getCommands().get(1);
+      assertThat(secondCommand.getStepRun().hasProperty("step-1.payload"), is(true));
+   }
+
+   @org.junit.jupiter.api.Test
+   void listenOnLastStepBuildsTestRunReportAndClearsSession() {
+      testRunner.run(new StartTestRun("session-last", testRun));
+      StartStepRun firstCommand = eventProducer.getCommands().getFirst();
+
+      StepRunReport firstReport = new StepRunReport()
+            .setStepId("step-1")
+            .setStepName("First")
+            .setType("SIM")
+            .setResult(StepResult.PASSED);
+
+      testRunner.listen(new StepRunFinished("session-last", testRun.getTest().getId(), firstCommand.getStepRun(), firstReport));
+
+      StartStepRun secondCommand = eventProducer.getCommands().get(1);
+      StepRunReport secondReport = new StepRunReport()
+            .setStepId("step-2")
+            .setStepName("Second")
+            .setType("SIM")
+            .setResult(StepResult.PASSED);
+
+      testRunner.listen(new StepRunFinished("session-last", testRun.getTest().getId(), secondCommand.getStepRun(), secondReport));
+
+      assertThat(sessionStore.hasSession("session-last"), is(false));
+      assertThat(eventProducer.getNotifications(), hasSize(1));
+      TestRunFinished notification = eventProducer.getNotifications().get(0);
+      assertThat(notification.getTestRunReport().getStepRunReports(), hasSize(2));
+   }
+
+
+   @org.junit.jupiter.api.Test
+   void listenWithoutSessionDoesNothing() {
+      StepRunReport report = new StepRunReport().setStepId("any").setStepName("Any").setType("SIM");
+      testRunner.listen(new StepRunFinished("missing", "test", new net.ihe.gazelle.maestro.spi.business.StepRun(firstStep, new ArrayList<>()), report));
+      assertThat(eventProducer.getCommands(), empty());
+      assertThat(eventProducer.getNotifications(), empty());
+   }
+
+   private static final class RecordingTestRunEventProducer implements TestRunEventProducer {
+
+      private final List<StartStepRun> commands = new ArrayList<>();
+      private final List<TestRunFinished> notifications = new ArrayList<>();
+
+      @Override
+      public void command(StartStepRun startStepRun) {
+         commands.add(startStepRun);
+      }
+
+      @Override
+      public void notify(TestRunFinished testRunFinished) {
+         notifications.add(testRunFinished);
+      }
+
+      List<StartStepRun> getCommands() {
+         return commands;
+      }
+
+      List<TestRunFinished> getNotifications() {
+         return notifications;
+      }
+   }
+}

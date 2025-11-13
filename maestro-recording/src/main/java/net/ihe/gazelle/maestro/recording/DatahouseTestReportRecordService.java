@@ -164,7 +164,7 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
                 StepOutputDissector dissector = dissectorProvider.resolve(stepRunReport);
                 if(dissector != null) {
                     StepOutputProjection projection = safeDissect(dissector,
-                            new StepOutputContext(stepRunReport, testRunReport, acl));
+                            new StepOutputContext(stepRunReport, acl));
                     if (isEmpty(projection)) {
                         continue;
                     }

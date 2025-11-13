@@ -1,18 +1,12 @@
 package net.ihe.gazelle.maestro.recording;
 
 import com.kereval.gazelle.datahouse.api.business.record.Item;
-import com.kereval.gazelle.datahouse.api.business.record.RefType;
-import com.kereval.gazelle.datahouse.api.business.record.Reference;
 import net.ihe.gazelle.maestro.api.business.recording.MaestroItem;
-import net.ihe.gazelle.maestro.api.business.recording.MaestroRefType;
 import net.ihe.gazelle.maestro.api.business.recording.MaestroReference;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class DatahouseMaestroItem implements MaestroItem {
 
