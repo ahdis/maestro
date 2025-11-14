@@ -12,7 +12,7 @@ import java.util.Map;
 public class XmlExtractionStepDefinition implements StepDefinition {
 
    // type
-   public static final String TYPE = "XML_EXTRACTION";
+   public static final String TYPE = "EXTRACTION_XML";
 
    // inputs
    public static final String XML_FILE = "xmlFile";

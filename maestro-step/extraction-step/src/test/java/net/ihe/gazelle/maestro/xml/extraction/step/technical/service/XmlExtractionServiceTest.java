@@ -32,7 +32,7 @@ class XmlExtractionServiceTest {
         try {
             samlAssertionXml = Files.readString(Paths.get("src/test/resources/xml/SAMLAssertion.xml"));
         } catch (IOException e) {
-            throw new RuntimeException("Failed to load SAMLAssertion.xml", e);
+            throw new RuntimeException("Failed to load XML Test files", e);
         }
     }
 
@@ -119,5 +119,12 @@ class XmlExtractionServiceTest {
         // Or test just the text content
         String extractValue7 = service.extractValue(samlAssertionXml, "/saml2:Assertion/saml2:AttributeStatement/saml2:Attribute[5]/saml2:AttributeValue/text()");
         assertEquals("Pharmacy", extractValue7);
+    }
+
+    @Test
+    void testExtractFromSoapCDA() throws IOException {
+        String soapCDA = Files.readString(Paths.get("src/test/resources/xml/W8_SOAP_MURC_CDAL1.xml"), java.nio.charset.StandardCharsets.ISO_8859_1);
+        String extractValue1 = service.extractValue(soapCDA, "/urn:ClinicalDocument/urn:component/urn:nonXMLBody/urn:text/text()");
+        assertTrue(extractValue1.startsWith("JVBERi0x"));
     }
 }

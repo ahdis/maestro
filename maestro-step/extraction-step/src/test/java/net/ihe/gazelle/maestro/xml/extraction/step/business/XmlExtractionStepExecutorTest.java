@@ -39,9 +39,9 @@ class XmlExtractionStepExecutorTest {
 
     private Step buildStep(String xmlFile, String xmlPath) {
         return new Step()
-                .setId("xmlExtractionStep")
-                .setName("xmlExtractionStep")
-                .setType("XML_EXTRACTION")
+                .setId("extractionXmlStep")
+                .setName("extractionXmlStep")
+                .setType("EXTRACTION_XML")
                 .setProperties(List.of(
                         new StringProperty(XML_FILE, xmlFile),
                         new StringProperty(XML_PATH, xmlPath)

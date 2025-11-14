@@ -61,9 +61,9 @@ Possible results :
     "name": "XML Extraction and Validation",
     "steps": [
       {
-        "id": "extractionStep1",
-        "name": "XML Extraction Step",
-        "type": "XML_EXTRACTION",
+        "id": "step1",
+        "name": "Extraction XML Step",
+        "type": "EXTRACTION_XML",
         "properties": [
           {
             "name": "xmlFile",
@@ -73,12 +73,12 @@ Possible results :
           {
             "name": "xmlPath",
             "type": "string",
-            "value": "/note/body"
+            "value": "/note/body/text()"
           }
         ]
       },
       {
-        "id": "validationStep2",
+        "id": "step2",
         "name": "Validation Step",
         "type": "VALIDATION",
         "properties": [
@@ -95,7 +95,7 @@ Possible results :
           {
             "name": "contentToValidate",
             "type": "byteArray",
-            "value": "${extractionStep1.extractedValue}"
+            "value": "${step1.extractedValue}"
           }
         ]
       }
@@ -103,48 +103,7 @@ Possible results :
   },
   "inputs": [
     {
-      "name": "xmlInput",
-      "type": "byteArray",
-      "value": "PG5vdGU+Cjx0bz5Ub3ZlPC90bz4KPGZyb20+SmFuaTwvZnJvbT4KPGhlYWRpbmc+UmVtaW5kZXI8L2hlYWRpbmc+Cjxib2R5PkRvbid0IGZvcmdldCBtZSB0aGlzIHdlZWtlbmQhPC9ib2R5Pgo8L25vdGU+"
-    }
-  ]
-}
-```
-
-```json
-{
-  "testRunId": "XML Extraction and Validation Test Run",
-  "test": {
-    "id": "XML Extraction and Validation",
-    "name": "XML Extraction and Validation",
-    "steps": [
-      {
-        "id": "validationStep1",
-        "name": "Validation Step",
-        "type": "VALIDATION",
-        "properties": [
-          {
-            "name": "validationService",
-            "type": "string",
-            "value": "matchbox"
-          },
-          {
-            "name": "validationProfile",
-            "type": "string",
-            "value": "https://profiles.ihe.net/RAD/IRA/StructureDefinition/diagnosticreportcontext|1.0.0"
-          },
-          {
-            "name": "contentToValidate",
-            "type": "byteArray",
-            "value": "${xmlInput.parse(/note/body)}"
-          }
-        ]
-      }
-    ]
-  },
-  "inputs": [
-    {
-      "name": "xmlInput",
+      "name": "xmlFile",
       "type": "byteArray",
       "value": "PG5vdGU+Cjx0bz5Ub3ZlPC90bz4KPGZyb20+SmFuaTwvZnJvbT4KPGhlYWRpbmc+UmVtaW5kZXI8L2hlYWRpbmc+Cjxib2R5PkRvbid0IGZvcmdldCBtZSB0aGlzIHdlZWtlbmQhPC9ib2R5Pgo8L25vdGU+"
     }
