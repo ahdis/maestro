@@ -42,8 +42,15 @@ public class StoreFactory {
 
     @ApplicationScoped
     @Produces
-    @ObserverStore
-    public SessionStore<MaestroObserver> getObserverStore() {
+    @TestRunObserverStore
+    public SessionStore<MaestroObserver> getTestRunObserverStore() {
+        return new SessionStoreImpl<>();
+    }
+
+    @ApplicationScoped
+    @Produces
+    @TestSuiteRunObserverStore
+    public SessionStore<MaestroObserver> getTestSuiteRunObserverStore() {
         return new SessionStoreImpl<>();
     }
 }

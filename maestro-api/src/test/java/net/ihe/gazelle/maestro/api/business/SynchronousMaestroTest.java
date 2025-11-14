@@ -1,8 +1,8 @@
 package net.ihe.gazelle.maestro.api.business;
 
-import net.ihe.gazelle.maestro.api.business.message.TestSuiteRunFinished;
+import net.ihe.gazelle.maestro.api.business.message.ExecutionFinished;
 import net.ihe.gazelle.maestro.api.business.testreport.Result;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import org.junit.jupiter.api.Test;
@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import java.time.Instant;
 import java.util.concurrent.TimeoutException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -19,17 +18,17 @@ class SynchronousMaestroTest {
    @Test
    void shouldReturnReportSummaryWhenExecutionCompletes() throws Exception {
       TestSuiteRun testSuiteRun = new TestSuiteRun();
-      TestReportSummary expectedSummary = new TestReportSummary()
-            .setId("summary-1")
+      TestReport expectedReport = new TestReport()
+            .setUuid("summary-1")
             .setDateTime(Instant.parse("2025-01-01T00:00:00Z"))
             .setResult(Result.PASSED);
 
-      CapturingMaestro maestro = new CapturingMaestro(expectedSummary);
+      CapturingMaestro maestro = new CapturingMaestro(expectedReport);
       SynchronousMaestro synchronousMaestro = new SynchronousMaestro(5, maestro);
 
-      TestReportSummary summary = synchronousMaestro.executeTestSuite(testSuiteRun);
+      TestReport report = synchronousMaestro.executeTestSuite(testSuiteRun, false);
 
-      assertSame(expectedSummary, summary);
+      assertSame(expectedReport, report);
       assertSame(testSuiteRun, maestro.lastTestSuiteRun);
    }
 
@@ -38,28 +37,28 @@ class SynchronousMaestroTest {
       BlockingMaestro maestro = new BlockingMaestro();
       SynchronousMaestro synchronousMaestro = new SynchronousMaestro(1, maestro);
 
-      assertThrows(TimeoutException.class, () -> synchronousMaestro.executeTestSuite(new TestSuiteRun()));
+      assertThrows(TimeoutException.class, () -> synchronousMaestro.executeTestSuite(new TestSuiteRun(), false));
    }
 
    private static final class CapturingMaestro implements Maestro {
 
-      private final TestReportSummary reportSummary;
+      private final TestReport report;
       private TestSuiteRun lastTestSuiteRun;
 
-      private CapturingMaestro(TestReportSummary reportSummary) {
-         this.reportSummary = reportSummary;
+      private CapturingMaestro(TestReport report) {
+         this.report = report;
       }
 
       @Override
-      public void executeTestSuite(TestSuiteRun testSuiteRun, MaestroObserver observer) {
+      public void executeTestSuite(TestSuiteRun testSuiteRun, boolean persist, MaestroObserver observer) {
          this.lastTestSuiteRun = testSuiteRun;
-         observer.onTestSuiteFinished(new TestSuiteRunFinished()
-               .setTestSuiteRun(testSuiteRun)
-               .setReportSummary(reportSummary));
+         observer.onExecutionFinished(new ExecutionFinished()
+               .setRun(testSuiteRun)
+               .setReport(report));
       }
 
       @Override
-      public void executeTest(TestRun testRun, MaestroObserver observer) {
+      public void executeTest(TestRun testRun, boolean persist, MaestroObserver observer) {
          // Not needed for this test
       }
    }
@@ -67,12 +66,12 @@ class SynchronousMaestroTest {
    private static final class BlockingMaestro implements Maestro {
 
       @Override
-      public void executeTestSuite(TestSuiteRun testSuiteRun, MaestroObserver observer) {
+      public void executeTestSuite(TestSuiteRun testSuiteRun, boolean persist, MaestroObserver observer) {
          // Intentionally left blank to trigger timeout
       }
 
       @Override
-      public void executeTest(TestRun testRun, MaestroObserver observer) {
+      public void executeTest(TestRun testRun, boolean persist, MaestroObserver observer) {
          // Not needed for this test
       }
    }

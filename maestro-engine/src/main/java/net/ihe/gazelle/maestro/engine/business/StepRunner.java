@@ -55,6 +55,7 @@ public class StepRunner {
       StepRun stepRun = startStepRun.getStepRun();
       try {
          StepExecutor executor = stepExecutorProvider.getExecutor(startStepRun.getSessionId(), stepRun);
+         // TODO : move to maestroImpl timeout setting
          Integer timeout = 60000;
          if (stepRun.hasProperty("timeout")) {
              timeout = (Integer) stepRun.getPropertyValue("timeout");

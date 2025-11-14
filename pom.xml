@@ -202,11 +202,6 @@
                 <version>${datahouse.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.kereval.gazelle</groupId>
-                <artifactId>datahouse-api</artifactId>
-                <version>${datahouse.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>security</artifactId>
                 <version>${sso.client.version}</version>

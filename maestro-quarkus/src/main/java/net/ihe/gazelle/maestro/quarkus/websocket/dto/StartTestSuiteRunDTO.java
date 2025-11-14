@@ -23,19 +23,23 @@ import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSuiteRunDTO;
 @JsonTypeName(StartTestSuiteRunDTO.TYPE)
 @JsonPropertyOrder({
         "type",
-        "testSuiteRun"
+        "testSuiteRun",
+        "persist"
 })
 public class StartTestSuiteRunDTO extends MessageDTO<TestSuiteRun> {
 
     @JsonIgnore
     public static final String TYPE = "START_TEST_SUITE_RUN";
 
+    private boolean persist;
+
     public StartTestSuiteRunDTO() {
-        super(new TestSuiteRun());
+        this(new TestSuiteRun());
     }
 
     public StartTestSuiteRunDTO(TestSuiteRun testSuiteRun) {
         super(testSuiteRun);
+        this.persist = true;
     }
 
     @JsonGetter("testSuiteRun")
@@ -46,6 +50,16 @@ public class StartTestSuiteRunDTO extends MessageDTO<TestSuiteRun> {
     @JsonSetter("testSuiteRun")
     public void setTestSuiteRun(TestSuiteRunDTO testSuiteRun) {
         this.message = testSuiteRun.getBusinessObject();
+    }
+
+    @JsonGetter("persist")
+    public boolean isPersist() {
+        return persist;
+    }
+
+    @JsonSetter("persist")
+    public void setPersist(boolean persist) {
+        this.persist = persist;
     }
 
     @Override

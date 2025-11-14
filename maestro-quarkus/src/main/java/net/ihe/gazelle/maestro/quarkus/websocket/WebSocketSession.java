@@ -36,15 +36,9 @@ public class WebSocketSession implements MaestroObserver {
     private final TextSerDes serDes = new JacksonSerDes();
     private final Session session;
     private CompletableFuture<UserInteractionCompleted> interactionFuture;
-    private boolean isTestSuite = false;
 
     public WebSocketSession(Session session) {
         this.session = session;
-    }
-
-    public WebSocketSession(Session session, boolean isTestSuite) {
-        this(session);
-        this.isTestSuite = isTestSuite;
     }
 
     public void completeInteraction(UserInteractionCompleted userInteractionCompleted) {
@@ -86,15 +80,12 @@ public class WebSocketSession implements MaestroObserver {
         String message = serDes.serializeAsString(new TestRunFinishedDTO(testRunFinished));
         LOG.info("Test Run Finished: {}", message);
         this.session.getAsyncRemote().sendText(message);
-        if (!isTestSuite) {
-            closeSession();
-        }
     }
 
     @Override
-    public void onTestSuiteFinished(TestSuiteRunFinished testSuiteFinished) {
-        String message = serDes.serializeAsString(new TestSuiteRunFinishedDTO(testSuiteFinished.getReportSummary()));
-        LOG.info("Test Suite Finished: {}", message);
+    public void onExecutionFinished(ExecutionFinished executionFinished) {
+        String message = serDes.serializeAsString(new ExecutionFinishedDTO(executionFinished));
+        LOG.info("Execution Finished: {}", message);
         this.session.getAsyncRemote().sendText(message);
         closeSession();
     }

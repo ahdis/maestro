@@ -23,7 +23,11 @@ public class InMemoryTestReportRecordService implements TestReportRecordService 
     private final AtomicLong attachmentIdCounter = new AtomicLong(1);
 
     @Override
-    public ItemReference recordTestReportWithReferences(TestReport report) {
+    public String recordTestReport(TestReport report) {
+        return recordTestReportWithReferences(report).location();
+    }
+
+    private ItemReference recordTestReportWithReferences(TestReport report) {
         // 1) Process inputs as attachments and update references
         processTestRunInputs(report.getTestRunReports());
 

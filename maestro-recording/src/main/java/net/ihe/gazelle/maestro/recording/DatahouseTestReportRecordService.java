@@ -54,14 +54,18 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
         this.stepOutputRecordService = new StepOutputRecordService(recordItemClient, datahouseUrl);
     }
 
+    @Override
+    public String recordTestReport(TestReport report) {
+        return recordTestReportWithReferences(report).location();
+    }
+
     /**
      * Pre-upload input attachments and update the report to reference them; record step outputs;
      * persist sub-reports; then persist the main TestReport with References[] including inputs and sub-reports.
      *
      * @return the created item ID of the main TestReport
      */
-    @Override
-    public ItemReference recordTestReportWithReferences(TestReport report) {
+    private ItemReference recordTestReportWithReferences(TestReport report) {
         // 1) Upload all inputs as attachments and set refs (URL in report, ID in Reference)
         List<Reference> attachmentRefs = createAttachmentsFromTestRunInputs(report.getTestRunReports());
 

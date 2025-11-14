@@ -16,8 +16,12 @@ public class InMemoryTestReportRecordService implements TestReportRecordService 
    private final AtomicInteger counter = new AtomicInteger();
    private final AtomicReference<TestReportRecordException> nextFailure = new AtomicReference<>();
 
-   @Override
-   public ItemReference recordTestReportWithReferences(TestReport report) {
+    @Override
+    public String recordTestReport(TestReport report) {
+        return recordTestReportWithReferences(report).location();
+    }
+
+   private ItemReference recordTestReportWithReferences(TestReport report) {
       TestReportRecordException failure = nextFailure.getAndSet(null);
       if (failure != null) {
          throw failure;

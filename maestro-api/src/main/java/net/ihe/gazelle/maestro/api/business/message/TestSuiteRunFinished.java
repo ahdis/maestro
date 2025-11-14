@@ -16,30 +16,37 @@
 
 package net.ihe.gazelle.maestro.api.business.message;
 
+import net.ihe.gazelle.errorhandling.business.UnexpectedError;
 import net.ihe.gazelle.lang.Event;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
+import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 
 import java.io.Serial;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A message to notify that a TestSet Execution Ended and to send a TestReport
  */
 @Event
 public class TestSuiteRunFinished implements Message {
+
    @Serial
    private static final long serialVersionUID = 1L;
    private String sessionId;
    private TestSuiteRun testSuiteRun;
-   private TestReportSummary reportSummary;
+   private List<TestRunReport> testRunReports;
+   private List<UnexpectedError> unexpectedErrors;
 
    public TestSuiteRunFinished() {
+       this(null, null, null);
    }
 
-   public TestSuiteRunFinished(String sessionId, TestSuiteRun testSuiteRun, TestReportSummary reportSummary) {
+   public TestSuiteRunFinished(String sessionId, TestSuiteRun testSuiteRun, List<TestRunReport> testRunReports) {
       this.sessionId = sessionId;
       this.testSuiteRun = testSuiteRun;
-      this.reportSummary = reportSummary;
+       this.testRunReports = testRunReports != null ? new ArrayList<>(testRunReports) : new ArrayList<>();
+       this.unexpectedErrors = new ArrayList<>();
    }
 
    public String getSessionId() {
@@ -60,12 +67,21 @@ public class TestSuiteRunFinished implements Message {
       return this;
    }
 
-   public TestReportSummary getReportSummary() {
-      return reportSummary;
-   }
+    public List<TestRunReport> getTestRunReports() {
+        return new ArrayList<>(testRunReports);
+    }
 
-   public TestSuiteRunFinished setReportSummary(TestReportSummary reportSummary) {
-      this.reportSummary = reportSummary;
-      return this;
-   }
+    public TestSuiteRunFinished setTestRunReports(List<TestRunReport> testRunReports) {
+       this.testRunReports = testRunReports != null ? new ArrayList<>(testRunReports) : new ArrayList<>();
+        return this;
+    }
+
+    public List<UnexpectedError> getUnexpectedErrors() {
+        return new ArrayList<>(unexpectedErrors);
+    }
+
+    public TestSuiteRunFinished setUnexpectedErrors(List<UnexpectedError> unexpectedErrors) {
+        this.unexpectedErrors = unexpectedErrors != null ? new ArrayList<>(unexpectedErrors) : new ArrayList<>();
+        return this;
+    }
 }

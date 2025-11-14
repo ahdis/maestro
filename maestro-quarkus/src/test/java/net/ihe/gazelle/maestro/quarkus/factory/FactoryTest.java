@@ -55,7 +55,7 @@ class FactoryTest {
 
    @Test
    void getMaestroTest() {
-      Maestro maestro = maestroFactory.getMaestro();
+      Maestro maestro = maestroFactory.getRedordMaestro();
       assertNotNull(maestro);
       assertInstanceOf(TestRunner.class, maestro);
    }

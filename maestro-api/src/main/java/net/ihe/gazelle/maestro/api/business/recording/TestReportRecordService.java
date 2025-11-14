@@ -12,8 +12,8 @@ public interface TestReportRecordService {
      *
      * @param report the TestReport to record
      * @throws TestReportRecordException if it can't record the TestReport
-     * @return the id of the recorded TestReport
+     * @return the location of the recorded TestReport
      */
-    ItemReference recordTestReportWithReferences(TestReport report);
+    String recordTestReport(TestReport report);
 
 }

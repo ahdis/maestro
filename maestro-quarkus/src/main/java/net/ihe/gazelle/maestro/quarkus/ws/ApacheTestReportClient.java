@@ -16,15 +16,16 @@
 
 package net.ihe.gazelle.maestro.quarkus.ws;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.HttpHeaders;
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
+import net.ihe.gazelle.maestro.api.business.message.ExecutionFinished;
 import net.ihe.gazelle.maestro.api.business.message.InteractWithUser;
-import net.ihe.gazelle.maestro.api.business.message.TestSuiteRunFinished;
 import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
-import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
+import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
+import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.entity.EntityBuilder;
 import org.apache.hc.client5.http.impl.classic.BasicHttpClientResponseHandler;
@@ -64,19 +65,19 @@ public class ApacheTestReportClient implements MaestroObserver {
     }
 
     @Override
-   public void onTestSuiteFinished(TestSuiteRunFinished testSuiteRunFinished) {
-      sendTestReport(testSuiteRunFinished.getReportSummary());
+   public void onExecutionFinished(ExecutionFinished executionFinished) {
+      sendTestReport(executionFinished.getReport());
    }
 
-   private void sendTestReport(TestReportSummary testReportSummary) {
+   private void sendTestReport(TestReport testReport) {
       try (CloseableHttpClient client = HttpClients.createDefault()) {
          HttpPost httpPost = new HttpPost(callBackUrl);
          if (callBackAuthorization != null) {
             httpPost.setHeader(HttpHeaders.AUTHORIZATION, callBackAuthorization);
          }
 
-         ObjectMapper mapper = new ObjectMapper();
-         String json = mapper.writeValueAsString(new TestReportSummaryDTO(testReportSummary));
+         TextSerDes serDes = new JacksonSerDes();
+         String json = serDes.serializeAsString(new TestReportDTO(testReport));
 
          httpPost.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
          try (HttpEntity entity = EntityBuilder.create()

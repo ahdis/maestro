@@ -19,7 +19,7 @@ public class HandlerProviderFactory {
    private final ReadSessionStore<MaestroObserver> observerStore;
 
    @Inject
-   public HandlerProviderFactory(ServiceRegistry serviceRegistry, ConfigProvider configProvider, @ObserverStore ReadSessionStore<MaestroObserver> observerStore) {
+   public HandlerProviderFactory(ServiceRegistry serviceRegistry, ConfigProvider configProvider, @TestRunObserverStore ReadSessionStore<MaestroObserver> observerStore) {
       this.serviceRegistry = serviceRegistry;
       this.configProvider = configProvider;
       this.observerStore = observerStore;

@@ -1,6 +1,5 @@
 package net.ihe.gazelle.maestro.simulation.step.record;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import net.ihe.gazelle.errorhandling.technical.UnexpectedErrorDTO;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
@@ -11,6 +10,8 @@ import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.dissection.*;
 import net.ihe.gazelle.maestro.recording.DatahouseMaestroItem;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepDefinition;
+import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
+import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
 import net.ihe.gazelle.simulation.business.callback.Message;
 import net.ihe.gazelle.simulation.business.callback.SimulationReport;
 import net.ihe.gazelle.simulation.business.callback.TransactionReport;
@@ -21,7 +22,6 @@ import net.ihe.gazelle.simulation.jaxrs.api.technical.dto.callback.MessageDTO;
 import net.ihe.gazelle.simulation.jaxrs.api.technical.dto.callback.SimulationReportDTO;
 import net.ihe.gazelle.simulation.jaxrs.api.technical.dto.callback.ValidationReportDTO;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +35,7 @@ import static net.ihe.gazelle.maestro.simulation.step.record.ReferenceNames.reso
 class SimulationStepOutputDissector implements StepOutputDissector {
 
    // Shared mapper for translating between DTOs, business objects, and stored JSON content.
-   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final TextSerDes serDes = new JacksonSerDes();
 
    // Item type constants understood by the Datahouse persistence layer.
    private static final String ITEM_TYPE_REPORT = "SIMULATION_REPORT";
@@ -65,8 +65,8 @@ class SimulationStepOutputDissector implements StepOutputDissector {
 
       StepOutputProjectionBuilder builder = new StepOutputProjectionBuilder();
       ItemHandle reportHandle = appendReportItem(context, simulationReport, builder);
-      buildTransactionHierarchy(context, simulationReport, builder, reportHandle);
-      appendUnexpectedErrorItems(context, simulationReport, builder, reportHandle);
+      //buildTransactionHierarchy(context, simulationReport, builder, reportHandle);
+      //appendUnexpectedErrorItems(context, simulationReport, builder, reportHandle);
 
       // Replace the original byte[] output with a reference to the persisted report hierarchy.
       PropertyReferenceFactory factory = (itemId, itemUrl) -> {
@@ -210,12 +210,7 @@ class SimulationStepOutputDissector implements StepOutputDissector {
       if (value == null || value.length == 0) {
          throw new IllegalStateException("Simulation report output is empty");
       }
-      try {
-         SimulationReportDTO dto = OBJECT_MAPPER.readValue(value, SimulationReportDTO.class);
-         return dto.getBusinessObject();
-      } catch (IOException e) {
-         throw new IllegalStateException("Unable to parse simulation report output", e);
-      }
+       return serDes.deserialize(value, SimulationReportDTO.class).getBusinessObject();
    }
 
    // Creates a bare Item with the correct ACL, type, serialized payload, and empty references list.
@@ -230,11 +225,7 @@ class SimulationStepOutputDissector implements StepOutputDissector {
 
    // Serializes DTOs to JSON for persistence in Datahouse.
    private String serialize(Object payload) {
-      try {
-         return OBJECT_MAPPER.writeValueAsString(payload);
-      } catch (IOException e) {
-         throw new IllegalStateException("Unable to serialize payload of type " + payload.getClass(), e);
-      }
+       return serDes.serializeAsString(payload);
    }
 
    // Finds the index of the REPORT output property so we know which property to mutate later.

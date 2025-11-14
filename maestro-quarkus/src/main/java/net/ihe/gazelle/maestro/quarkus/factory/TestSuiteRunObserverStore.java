@@ -10,5 +10,5 @@ import java.lang.annotation.Target;
 @Qualifier
 @Retention(value = RetentionPolicy.RUNTIME)
 @Target(value = {ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.TYPE})
-public @interface ObserverStore {
+public @interface TestSuiteRunObserverStore {
 }

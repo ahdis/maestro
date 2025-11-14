@@ -32,7 +32,6 @@ import java.util.List;
 @JsonPropertyOrder({
         "type",
         "dateTime",
-        "location",
         "result",
         "unexpectedErrors"
 })
@@ -42,7 +41,7 @@ public class TestSuiteRunFinishedDTO extends MessageDTO<TestReportSummary> {
     public static final String TYPE = "TEST_SUITE_RUN_FINISHED";
 
     public TestSuiteRunFinishedDTO() {
-        super(new TestReportSummary());
+        this(new TestReportSummary());
     }
 
     public TestSuiteRunFinishedDTO(TestReportSummary testReportSummary) {
@@ -60,16 +59,6 @@ public class TestSuiteRunFinishedDTO extends MessageDTO<TestReportSummary> {
         getBusinessObject().setDateTime(
                 Instant.from(ZonedDateTime.parse(dateTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME))
         );
-    }
-
-    @JsonGetter("location")
-    public String getLocation() {
-        return getBusinessObject().getLocation();
-    }
-
-    @JsonSetter("location")
-    public void setLocation(String location) {
-        getBusinessObject().setLocation(location);
     }
 
     @JsonGetter("result")

@@ -1,8 +1,8 @@
 package net.ihe.gazelle.maestro.engine.business;
 
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
+import net.ihe.gazelle.maestro.api.business.message.ExecutionFinished;
 import net.ihe.gazelle.maestro.api.business.message.InteractWithUser;
-import net.ihe.gazelle.maestro.api.business.message.TestSuiteRunFinished;
 import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.recording.TestReportRecordException;
@@ -28,12 +28,8 @@ import technical.dao.SessionStoreImpl;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -54,16 +50,16 @@ class MaestroEngineTest {
       stepExecutorProvider = new ScriptedStepExecutorProvider();
       reportRecordService = new InMemoryTestReportRecordService();
 
-      SessionStoreImpl<MaestroObserver> observerStore = new SessionStoreImpl<>();
+      SessionStoreImpl<MaestroObserver> testRunObserverStore = new SessionStoreImpl<>();
+       SessionStoreImpl<MaestroObserver> testSuiteRunObserverStore = new SessionStoreImpl<>();
       SessionStoreImpl<TestSuiteSession> suiteSessionStore = new SessionStoreImpl<>();
       SessionStoreImpl<TestRunSession> testRunSessionStore = new SessionStoreImpl<>();
 
-      TestSuiteRunner testSuiteRunner = new TestSuiteRunner(suiteSessionStore, broker, reportRecordService,
-            new MetadataServiceMock());
+      TestSuiteRunner testSuiteRunner = new TestSuiteRunner(suiteSessionStore, broker);
       TestRunner testRunner = new TestRunner(testRunSessionStore, broker);
       StepRunner stepRunner = new StepRunner(stepExecutorProvider, broker);
 
-      maestro = new MaestroImpl(observerStore, broker, broker);
+      maestro = new MaestroImpl(testRunObserverStore, testSuiteRunObserverStore, broker, new MetadataServiceMock());
       broker.setServices(maestro, testSuiteRunner, testRunner, stepRunner);
    }
 
@@ -82,8 +78,8 @@ class MaestroEngineTest {
 
       maestro.executeTestSuite(testSuiteRun, observer);
 
-      TestSuiteRunFinished finished = observer.awaitSuiteFinished(Duration.ofSeconds(5));
-      assertThat(finished.getTestSuiteRun(), sameInstance(testSuiteRun));
+      ExecutionFinished finished = observer.awaitSuiteFinished(Duration.ofSeconds(5));
+      assertThat(finished.getRun(), sameInstance(testSuiteRun));
       assertThat(reportRecordService.getRecordedReports(), hasSize(1));
       TestReport report = reportRecordService.getRecordedReports().get(0);
       assertThat(report.getTestRunReports(), hasSize(1));
@@ -102,7 +98,7 @@ class MaestroEngineTest {
             .returnsReport("step-ok", passedReport("step-ok"))
             .failsWith("step-fail", new RuntimeException("boom"));
 
-      TestSuiteRunFinished finished = runSuite(observer, suiteRun);
+       ExecutionFinished finished = runSuite(observer, suiteRun);
 
       TestReport recorded = reportRecordService.getRecordedReports().get(0);
       boolean failingStepRecorded = recorded.getTestRunReports().stream()
@@ -110,7 +106,7 @@ class MaestroEngineTest {
             .anyMatch(stepReport -> stepReport.getStepId().equals("step-fail")
                                     && !stepReport.getUnexpectedErrors().isEmpty());
       assertThat(failingStepRecorded, is(true));
-      assertThat(finished.getReportSummary().getUnexpectedErrors(), empty());
+      assertThat(finished.getReport().getUnexpectedErrors(), empty());
    }
 
    @org.junit.jupiter.api.Test
@@ -204,10 +200,10 @@ class MaestroEngineTest {
       stepExecutorProvider.returnsReport("record-step", passedReport("record-step"));
       reportRecordService.failNextWith(new TestReportRecordException("datahouse unreachable"));
 
-      TestSuiteRunFinished finished = runSuite(observer, suiteRun);
+       ExecutionFinished finished = runSuite(observer, suiteRun);
 
       assertThat(reportRecordService.getRecordedReports(), empty());
-      assertThat(finished.getReportSummary().getUnexpectedErrors(), is(not(empty())));
+      assertThat(finished.getReport().getUnexpectedErrors(), is(not(empty())));
    }
 
    @org.junit.jupiter.api.Test
@@ -294,9 +290,9 @@ class MaestroEngineTest {
             .returnsReport("step-A", passedReport("step-A"))
             .returnsReport("step-B", passedReport("step-B"));
 
-      CompletableFuture<TestSuiteRunFinished> futureOne = CompletableFuture.supplyAsync(
+      CompletableFuture<ExecutionFinished> futureOne = CompletableFuture.supplyAsync(
             () -> runSuite(observerOne, suiteOne));
-      CompletableFuture<TestSuiteRunFinished> futureTwo = CompletableFuture.supplyAsync(
+      CompletableFuture<ExecutionFinished> futureTwo = CompletableFuture.supplyAsync(
             () -> runSuite(observerTwo, suiteTwo));
 
       CompletableFuture.allOf(futureOne, futureTwo).join();
@@ -310,7 +306,7 @@ class MaestroEngineTest {
             .toList(), containsInAnyOrder("Test test-concurrent-1", "Test test-concurrent-2"));
    }
 
-   private TestSuiteRunFinished runSuite(RecordingMaestroObserver observer, TestSuiteRun suiteRun) {
+   private ExecutionFinished runSuite(RecordingMaestroObserver observer, TestSuiteRun suiteRun) {
       maestro.executeTestSuite(suiteRun, observer);
       return observer.awaitSuiteFinished(Duration.ofSeconds(5));
    }

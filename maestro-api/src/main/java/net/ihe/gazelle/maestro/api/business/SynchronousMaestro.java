@@ -17,10 +17,11 @@
 package net.ihe.gazelle.maestro.api.business;
 
 import net.ihe.gazelle.lang.ExecutionRuntimeException;
+import net.ihe.gazelle.maestro.api.business.message.ExecutionFinished;
 import net.ihe.gazelle.maestro.api.business.message.InteractWithUser;
-import net.ihe.gazelle.maestro.api.business.message.TestSuiteRunFinished;
 import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 
 import java.util.concurrent.CompletableFuture;
@@ -33,69 +34,82 @@ import java.util.concurrent.TimeoutException;
  */
 public class SynchronousMaestro {
 
-   public static final String TIMEOUT_MESSAGE = "The test execution timed out. Either the test was too long for a " +
-                                                "synchronous call, either something fatal happened and you may need " +
-                                                "to contact an administrator";
+    public static final String TIMEOUT_MESSAGE = "The test execution timed out. Either the test was too long for a " +
+            "synchronous call, either something fatal happened and you may need " +
+            "to contact an administrator";
 
-   private final int timeoutSeconds;
-   private final Maestro maestro;
+    private final int timeoutSeconds;
+    private final Maestro maestro;
 
-   /**
-    * Constructor
-    *
-    * @param timeoutSeconds the timeout in seconds for the synchronous call. Must not be null and greater than 0.
-    * @param maestro  the Maestro Facade. Must not be null.
-    */
-   public SynchronousMaestro(int timeoutSeconds, Maestro maestro) {
-      this.timeoutSeconds = timeoutSeconds;
-      this.maestro = maestro;
-   }
+    /**
+     * Constructor
+     *
+     * @param timeoutSeconds the timeout in seconds for the synchronous call. Must not be null and greater than 0.
+     * @param maestro        the Maestro Facade. Must not be null.
+     */
+    public SynchronousMaestro(int timeoutSeconds, Maestro maestro) {
+        this.timeoutSeconds = timeoutSeconds;
+        this.maestro = maestro;
+    }
 
-   /**
-    * Execute a Test Suite. This method will block the current thread until the test execution is finished or timeout
-    * occurs.
-    *
-    * @param testSuiteRun the test suite to execute
-    *
-    * @return A test report summary.
-    *
-    * @throws IllegalArgumentException  if testSuiteRun is invalid
-    * @throws TimeoutException          if the timeout expires before the test execution is finished.
-    * @throws InterruptedException      if the current thread is interrupted while waiting.
-    * @throws ExecutionRuntimeException if an unexpected error occurs during the execution.
-    */
-   public TestReportSummary executeTestSuite(TestSuiteRun testSuiteRun) throws TimeoutException, InterruptedException {
+    /**
+     * Execute a Test Suite. This method will block the current thread until the test execution is finished or timeout
+     * occurs.
+     *
+     * @param testSuiteRun the test suite to execute
+     * @return A test report summary.
+     * @throws IllegalArgumentException  if testSuiteRun is invalid
+     * @throws TimeoutException          if the timeout expires before the test execution is finished.
+     * @throws InterruptedException      if the current thread is interrupted while waiting.
+     * @throws ExecutionRuntimeException if an unexpected error occurs during the execution.
+     */
+    public TestReport executeTestSuite(TestSuiteRun testSuiteRun, boolean persist) throws TimeoutException, InterruptedException {
+        CompletableFuture<TestReport> future = new CompletableFuture<>();
+        maestro.executeTestSuite(
+                testSuiteRun,
+                persist,
+                new SynchronousObserver(future)
+        );
 
-      CompletableFuture<TestReportSummary> future = new CompletableFuture<>();
-      maestro.executeTestSuite(
-            testSuiteRun,
-            new SynchronousObserver(future)
-      );
+        try {
+            return future.get(timeoutSeconds, TimeUnit.SECONDS);
+        } catch (ExecutionException e) {
+            throw new ExecutionRuntimeException(e);
+        }
+    }
 
-      try {
-         return future.get(timeoutSeconds, TimeUnit.SECONDS);
-      } catch (ExecutionException e) {
-         throw new ExecutionRuntimeException(e);
-      }
-   }
+    public TestReport executeTest(TestRun testRun, boolean persist) throws TimeoutException, InterruptedException {
+        CompletableFuture<TestReport> future = new CompletableFuture<>();
+        maestro.executeTest(
+                testRun,
+                persist,
+                new SynchronousObserver(future)
+        );
 
-   private class SynchronousObserver implements MaestroObserver {
+        try {
+            return future.get(timeoutSeconds, TimeUnit.SECONDS);
+        } catch (ExecutionException e) {
+            throw new ExecutionRuntimeException(e);
+        }
+    }
 
-       private final CompletableFuture<TestReportSummary> future;
+    private class SynchronousObserver implements MaestroObserver {
 
-       public SynchronousObserver(CompletableFuture<TestReportSummary> future) {
-           this.future = future;
-       }
+        private final CompletableFuture<TestReport> future;
 
-       @Override
-       public CompletableFuture<UserInteractionCompleted> interactWithUser(InteractWithUser interactWithUser) {
-           throw new UnsupportedOperationException("User interaction is not supported via REST API.");
-       }
+        public SynchronousObserver(CompletableFuture<TestReport> future) {
+            this.future = future;
+        }
 
-       @Override
-       public void onTestSuiteFinished(TestSuiteRunFinished testSuiteRunFinished) {
-            future.complete(testSuiteRunFinished.getReportSummary());
-       }
-   }
+        @Override
+        public CompletableFuture<UserInteractionCompleted> interactWithUser(InteractWithUser interactWithUser) {
+            throw new UnsupportedOperationException("User interaction is not supported via REST API.");
+        }
+
+        @Override
+        public void onExecutionFinished(ExecutionFinished executionFinished) {
+            future.complete(executionFinished.getReport());
+        }
+    }
 
 }

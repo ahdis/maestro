@@ -24,6 +24,5 @@ public interface MaestroObserver {
        // Override only if needed
    }
 
-   void onTestSuiteFinished(TestSuiteRunFinished testSuiteRunFinished);
-
+   void onExecutionFinished(ExecutionFinished executionFinished);
 }

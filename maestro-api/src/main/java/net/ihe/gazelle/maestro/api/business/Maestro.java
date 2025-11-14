@@ -24,8 +24,8 @@ import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
  */
 public interface Maestro {
 
-   void executeTestSuite(TestSuiteRun testSuiteRun, MaestroObserver observer);
+   void executeTestSuite(TestSuiteRun testSuiteRun, boolean persist, MaestroObserver observer);
 
-   void executeTest(TestRun testRun, MaestroObserver observer);
+   void executeTest(TestRun testRun, boolean persist, MaestroObserver observer);
 
 }

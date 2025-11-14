@@ -20,6 +20,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Produces;
+import net.ihe.gazelle.maestro.api.business.Maestro;
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.api.business.SynchronousMaestro;
 import net.ihe.gazelle.maestro.api.business.recording.TestReportRecordService;
@@ -39,7 +40,8 @@ public class MaestroFactory {
 
    private final SessionStore<TestSuiteSession> suiteSessionStore;
    private final SessionStore<TestRunSession> testSessionStore;
-    private final SessionStore<MaestroObserver> observerStore;
+    private final SessionStore<MaestroObserver> testRunObserverStore;
+    private final SessionStore<MaestroObserver> testSuiteRunObserverStore;
    private final MaestroEventProducer maestroEventProducer;
    private final TestSuiteEventProducer testSuiteEventProducer;
    private final TestRunEventProducer testRunEventProducer;
@@ -51,9 +53,10 @@ public class MaestroFactory {
    @Inject
    public MaestroFactory(@TestSuiteStore SessionStore<TestSuiteSession> suiteSessionStore,
                          @TestRunStore SessionStore<TestRunSession> testSessionStore,
-                         @ObserverStore SessionStore<MaestroObserver> observerStore,
+                         @TestRunObserverStore SessionStore<MaestroObserver> testRunObserverStore,
+                         @TestSuiteRunObserverStore SessionStore<MaestroObserver> testSuiteRunObserverStore,
                          MaestroEventProducer maestroEventProducer,
-                         TestSuiteEventProducer testSuitetestReportRecordService,
+                         TestSuiteEventProducer testSuiteTestReportRecordService,
                          TestRunEventProducer testRunEventProducer,
                          StepRunEventProducer stepRunEventProducer,
                          TestReportRecordService testReportRecordService,
@@ -61,9 +64,10 @@ public class MaestroFactory {
                          MetadataService metadataService) {
       this.suiteSessionStore = suiteSessionStore;
       this.testSessionStore = testSessionStore;
-      this.observerStore = observerStore;
+      this.testRunObserverStore = testRunObserverStore;
+      this.testSuiteRunObserverStore = testSuiteRunObserverStore;
       this.maestroEventProducer = maestroEventProducer;
-      this.testSuiteEventProducer = testSuitetestReportRecordService;
+      this.testSuiteEventProducer = testSuiteTestReportRecordService;
       this.testRunEventProducer = testRunEventProducer;
       this.stepRunEventProducer = stepRunEventProducer;
       this.testReportRecordService = testReportRecordService;
@@ -74,19 +78,32 @@ public class MaestroFactory {
    @Produces
    @Default
    public SynchronousMaestro getSynchronousMaestro() {
-      return new SynchronousMaestro(timeoutSeconds, getMaestro());
+      return new SynchronousMaestro(timeoutSeconds, getRedordMaestro());
    }
 
    @Produces
    @Default
    public MaestroImpl getMaestro() {
-      return new MaestroImpl(observerStore, maestroEventProducer, testSuiteEventProducer);
+       return new MaestroImpl(
+               testRunObserverStore,
+               testSuiteRunObserverStore,
+               maestroEventProducer,
+               metadataService
+       );
+   }
+
+   @Produces
+   @Default
+   public Maestro getRedordMaestro() {
+       return new MaestroRecorderImpl(
+               getMaestro(),
+              testReportRecordService);
    }
 
    @Produces
    @Default
    public TestSuiteRunner getTestSuiteRunner() {
-      return new TestSuiteRunner(suiteSessionStore, testSuiteEventProducer, testReportRecordService, metadataService);
+      return new TestSuiteRunner(suiteSessionStore, testSuiteEventProducer);
    }
 
    @Produces

@@ -15,7 +15,7 @@ public class RecordingMaestroObserver implements MaestroObserver {
    private final List<StepRunStarted> stepRunStartedEvents = new CopyOnWriteArrayList<>();
    private final List<StepRunFinished> stepRunFinishedEvents = new CopyOnWriteArrayList<>();
    private final List<TestRunFinished> testRunFinishedEvents = new CopyOnWriteArrayList<>();
-   private final CompletableFuture<TestSuiteRunFinished> suiteFinished = new CompletableFuture<>();
+   private final CompletableFuture<ExecutionFinished> future = new CompletableFuture<>();
 
    @Override
    public void onTestRunStarted(TestRunStarted testRunStarted) {
@@ -42,14 +42,14 @@ public class RecordingMaestroObserver implements MaestroObserver {
       testRunFinishedEvents.add(testRunFinished);
    }
 
-   @Override
-   public void onTestSuiteFinished(TestSuiteRunFinished testSuiteRunFinished) {
-      suiteFinished.complete(testSuiteRunFinished);
-   }
+    @Override
+    public void onExecutionFinished(ExecutionFinished executionFinished) {
+        future.complete(executionFinished);
+    }
 
-   public TestSuiteRunFinished awaitSuiteFinished(Duration timeout) {
+   public ExecutionFinished awaitSuiteFinished(Duration timeout) {
       try {
-         return suiteFinished.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+         return future.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
       } catch (Exception e) {
          throw new AssertionError("Test suite did not finish in time", e);
       }
