@@ -1,8 +1,8 @@
-package net.ihe.gazelle.maestro.xml.extraction.step.technical.service;
+package net.ihe.gazelle.maestro.extraction.step.technical.service;
 
-import net.ihe.gazelle.maestro.xml.extraction.step.business.xml.XmlExtractionService;
-import net.ihe.gazelle.maestro.xml.extraction.step.technical.xml.XmlExtractionException;
-import net.ihe.gazelle.maestro.xml.extraction.step.technical.xml.XmlExtractionServiceImpl;
+import net.ihe.gazelle.maestro.extraction.step.business.xml.XmlExtractionService;
+import net.ihe.gazelle.maestro.extraction.step.technical.xml.XmlExtractionException;
+import net.ihe.gazelle.maestro.extraction.step.technical.xml.XmlExtractionServiceImpl;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;

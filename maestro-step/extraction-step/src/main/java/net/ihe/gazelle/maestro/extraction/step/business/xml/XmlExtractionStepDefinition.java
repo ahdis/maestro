@@ -1,4 +1,4 @@
-package net.ihe.gazelle.maestro.xml.extraction.step.business.xml;
+package net.ihe.gazelle.maestro.extraction.step.business.xml;
 
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;

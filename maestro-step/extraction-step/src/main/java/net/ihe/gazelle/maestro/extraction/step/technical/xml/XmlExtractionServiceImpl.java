@@ -1,6 +1,6 @@
-package net.ihe.gazelle.maestro.xml.extraction.step.technical.xml;
+package net.ihe.gazelle.maestro.extraction.step.technical.xml;
 
-import net.ihe.gazelle.maestro.xml.extraction.step.business.xml.XmlExtractionService;
+import net.ihe.gazelle.maestro.extraction.step.business.xml.XmlExtractionService;
 import net.sf.saxon.s9api.*;
 
 import javax.xml.transform.stream.StreamSource;

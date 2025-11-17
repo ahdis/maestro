@@ -1,4 +1,4 @@
-package net.ihe.gazelle.maestro.xml.extraction.step.technical.xml;
+package net.ihe.gazelle.maestro.extraction.step.technical.xml;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;

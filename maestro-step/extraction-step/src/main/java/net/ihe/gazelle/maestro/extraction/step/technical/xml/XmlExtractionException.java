@@ -1,4 +1,4 @@
-package net.ihe.gazelle.maestro.xml.extraction.step.technical.xml;
+package net.ihe.gazelle.maestro.extraction.step.technical.xml;
 
 public class XmlExtractionException extends RuntimeException {
     public XmlExtractionException(String message) {

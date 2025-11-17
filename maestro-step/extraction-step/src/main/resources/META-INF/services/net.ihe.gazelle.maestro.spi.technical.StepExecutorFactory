@@ -14,4 +14,4 @@
 # limitations under the License.
 #
 
-net.ihe.gazelle.maestro.xml.extraction.step.technical.xml.factory.XmlExtractionStepExecutorFactory
+net.ihe.gazelle.maestro.extraction.step.technical.xml.factory.XmlExtractionStepExecutorFactory

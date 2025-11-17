@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.xml.extraction.step.technical.xml.factory;
+package net.ihe.gazelle.maestro.extraction.step.technical.xml.factory;
 
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.spi.business.Handler;
 import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 import net.ihe.gazelle.maestro.spi.technical.StepExecutorFactory;
-import net.ihe.gazelle.maestro.xml.extraction.step.business.xml.XmlExtractionStepDefinition;
-import net.ihe.gazelle.maestro.xml.extraction.step.business.xml.XmlExtractionStepExecutor;
-import net.ihe.gazelle.maestro.xml.extraction.step.technical.xml.XmlExtractionServiceImpl;
+import net.ihe.gazelle.maestro.extraction.step.business.xml.XmlExtractionStepDefinition;
+import net.ihe.gazelle.maestro.extraction.step.business.xml.XmlExtractionStepExecutor;
+import net.ihe.gazelle.maestro.extraction.step.technical.xml.XmlExtractionServiceImpl;
 
 import java.util.Map;
 

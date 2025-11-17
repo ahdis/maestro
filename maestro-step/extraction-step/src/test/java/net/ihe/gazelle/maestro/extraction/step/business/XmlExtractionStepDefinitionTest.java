@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.xml.extraction.step.business;
+package net.ihe.gazelle.maestro.extraction.step.business;
 
 import net.ihe.gazelle.maestro.api.business.test.SupportedInput;
-import net.ihe.gazelle.maestro.xml.extraction.step.business.xml.XmlExtractionStepDefinition;
+import net.ihe.gazelle.maestro.extraction.step.business.xml.XmlExtractionStepDefinition;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

@@ -1,4 +1,4 @@
-package net.ihe.gazelle.maestro.xml.extraction.step.business.xml;
+package net.ihe.gazelle.maestro.extraction.step.business.xml;
 
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
@@ -6,7 +6,7 @@ import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 import net.ihe.gazelle.maestro.spi.business.StepRun;
-import net.ihe.gazelle.maestro.xml.extraction.step.technical.xml.XmlExtractionException;
+import net.ihe.gazelle.maestro.extraction.step.technical.xml.XmlExtractionException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +15,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static net.ihe.gazelle.maestro.api.business.testreport.StepResult.DONE;
 import static net.ihe.gazelle.maestro.api.business.testreport.StepResult.UNDEFINED;
-import static net.ihe.gazelle.maestro.xml.extraction.step.business.xml.XmlExtractionStepDefinition.*;
+import static net.ihe.gazelle.maestro.extraction.step.business.xml.XmlExtractionStepDefinition.*;
 
 public class XmlExtractionStepExecutor implements StepExecutor {
 

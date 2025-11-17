@@ -1,6 +1,6 @@
-package net.ihe.gazelle.maestro.xml.extraction.step.business.xml;
+package net.ihe.gazelle.maestro.extraction.step.business.xml;
 
-import net.ihe.gazelle.maestro.xml.extraction.step.technical.xml.XmlExtractionException;
+import net.ihe.gazelle.maestro.extraction.step.technical.xml.XmlExtractionException;
 
 import java.util.Map;
 
