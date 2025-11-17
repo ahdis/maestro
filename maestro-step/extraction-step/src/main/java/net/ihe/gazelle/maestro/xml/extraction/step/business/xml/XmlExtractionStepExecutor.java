@@ -8,7 +8,9 @@ import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 import net.ihe.gazelle.maestro.spi.business.StepRun;
 import net.ihe.gazelle.maestro.xml.extraction.step.technical.xml.XmlExtractionException;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import static net.ihe.gazelle.maestro.api.business.testreport.StepResult.DONE;
@@ -33,8 +35,27 @@ public class XmlExtractionStepExecutor implements StepExecutor {
         String xmlPath = stepRun.getPropertyValue(XML_PATH);
         byte[] xmlFile = stepRun.getPropertyValue(XML_FILE);
 
+        Map<String,String> namespaces = new HashMap<>();
+
+        if (stepRun.hasProperty(DEFAULT_NAMESPACE)) {
+            String defaultNameSpace = stepRun.getPropertyValue(DEFAULT_NAMESPACE);
+            namespaces.put("", defaultNameSpace.split("=")[1]);
+        }
+        if (stepRun.hasProperty(NAMESPACES)) {
+            String nameSpacesRaw = stepRun.getPropertyValue(NAMESPACES);
+            for (String ns : nameSpacesRaw.split(",")) {
+                String[] parts = ns.split("=");
+                if (parts.length == 2) {
+                    namespaces.put(parts[0], parts[1]);
+                } else {
+                    String failureMessage = String.format("Invalid namespace format: '%s'. Expected format is 'prefix=URI'.", ns);
+                    return buildStepRunReportFailed(failureMessage, reportBuilder);
+                }
+            }
+        }
+
         try {
-            String extractedValue = xmlExtractionService.extractValue(xmlFile, xmlPath);
+            String extractedValue = xmlExtractionService.extractValue(xmlFile, xmlPath, namespaces);
             Property output = new StringProperty(EXTRACTED_VALUE, extractedValue);
             return CompletableFuture.completedFuture(reportBuilder.setResult(DONE)
                     .setOutputs(List.of(output))

@@ -12,37 +12,42 @@ import java.util.Map;
 
 public class XmlExtractionStepDefinition implements StepDefinition {
 
-   // type
-   public static final String TYPE = "EXTRACTION_XML";
+    // type
+    public static final String TYPE = "EXTRACT_XML";
 
-   // inputs
-   public static final String XML_FILE = "xmlFile";
-   public static final String XML_PATH = "xmlPath";
+    // inputs
+    public static final String XML_FILE = "xmlFile";
+    public static final String XML_PATH = "xmlPath";
+    public static final String NAMESPACES = "namespaces";
+    public static final String DEFAULT_NAMESPACE = "defaultNamespace";
 
-   // outputs
-   public static final String EXTRACTED_VALUE = "extractedValue";
-   public static final String FAILURE_MESSAGE = "failureMessage";
+    // outputs
+    public static final String EXTRACTED_VALUE = "extractedValue";
+    public static final String FAILURE_MESSAGE = "failureMessage";
 
-    public XmlExtractionStepDefinition() {}
+    public XmlExtractionStepDefinition() {
+    }
 
-   @Override
-   public String getType() {
-       return TYPE;
-   }
+    @Override
+    public String getType() {
+        return TYPE;
+    }
 
-   @Override
-   public List<SupportedInput> getSupportedInputs() {
-      return List.of(
-            new SupportedTextInput().setId(XML_PATH).setLabel(XML_FILE).setRequired(true),
-            new SupportedFileInput().setId(XML_FILE).setLabel(XML_PATH).setRequired(true)
-      );
-   }
+    @Override
+    public List<SupportedInput> getSupportedInputs() {
+        return List.of(
+                new SupportedTextInput().setId(XML_PATH).setLabel("Xpath that describe what should be extracted").setRequired(true),
+                new SupportedFileInput().setId(XML_FILE).setLabel("Source XML file for the extraction").setRequired(true),
+                new SupportedTextInput().setId(DEFAULT_NAMESPACE).setLabel("Default namespace under key=value format").setRequired(false),
+                new SupportedTextInput().setId(NAMESPACES).setLabel("List of namespaces comma separated (key1=value1,key2=value2)").setRequired(false)
+        );
+    }
 
-   @Override
-   public Map<String, Class<? extends Property>> getOutputsDefinition() {
-      return Map.of(
-              FAILURE_MESSAGE, StringProperty.class,
-              EXTRACTED_VALUE, StringProperty.class
-      );
-   }
+    @Override
+    public Map<String, Class<? extends Property>> getOutputsDefinition() {
+        return Map.of(
+                FAILURE_MESSAGE, StringProperty.class,
+                EXTRACTED_VALUE, StringProperty.class
+        );
+    }
 }

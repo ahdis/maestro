@@ -1,100 +1,159 @@
 package net.ihe.gazelle.maestro.xml.extraction.step.technical.xml;
 
 import net.ihe.gazelle.maestro.xml.extraction.step.business.xml.XmlExtractionService;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
+import net.sf.saxon.s9api.*;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-import java.io.IOException;
+import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
-import java.io.StringWriter;
-
-import static javax.xml.transform.TransformerFactory.newInstance;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 /**
- * Implementation of XmlExtractionService that extracts values from XML strings using XPath.
+ * Implementation of XmlExtractionService that extracts values from XML strings using XPath 2.0+ (via Saxon).
+ * This implementation uses Saxon-HE which supports XPath 2.0, 3.0, and 3.1.
  */
 public class XmlExtractionServiceImpl implements XmlExtractionService {
 
-    private final DocumentBuilderFactory documentBuilderFactory;
-    private final XPathFactory xPathFactory;
+    private final Processor processor;
 
     public XmlExtractionServiceImpl() {
-        this.documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        this.documentBuilderFactory.setNamespaceAware(true);
-        this.xPathFactory = XPathFactory.newInstance();
+        // Saxon Processor supports XPath 2.0, 3.0, and 3.1
+        this.processor = new Processor(false);
     }
 
     @Override
-    public String extractValue(byte[] xmlFile, String xmlPath) throws XmlExtractionException {
+    public String extractValue(byte[] xmlFile, String xmlPath, Map<String,String> namespaces) throws XmlExtractionException {
         assertParamsAreValid(xmlFile, xmlPath);
 
         // Normalize XML by removing all spaces between tags before parsing
-        String normalizedXml = normalizeXml(new String(xmlFile, java.nio.charset.StandardCharsets.UTF_8));
+        String normalizedXml = normalizeXml(new String(xmlFile, StandardCharsets.UTF_8));
 
         try {
-            DocumentBuilder builder = documentBuilderFactory.newDocumentBuilder();
-            Document document = builder.parse(new InputSource(new StringReader(normalizedXml)));
+            // Build the XML document using Saxon
+            DocumentBuilder builder = processor.newDocumentBuilder();
+            XdmNode document = builder.build(new StreamSource(new StringReader(normalizedXml)));
 
-            XPath xpath = xPathFactory.newXPath();
-            xpath.setNamespaceContext(new DocumentNamespaceContext(document));
-            NodeList nodeList = (NodeList) xpath.evaluate(xmlPath, document, XPathConstants.NODESET);
+            // Compile and evaluate the XPath expression
+            XPathCompiler xpathCompiler = processor.newXPathCompiler();
+            handleNameSpaces(namespaces, xpathCompiler, document);
+            XPathSelector selector = xpathCompiler.compile(xmlPath).load();
+            selector.setContextItem(document);
 
-            if (nodeList.getLength() == 0)
+            // Evaluate and get results
+            XdmValue result = selector.evaluate();
+            if (result.isEmpty()) {
                 return null;
-            else if (nodeList.getLength() > 1)
-                throw new XmlExtractionException("Multiple elements found for the given XML path (" + nodeList.getLength() + " elements). This is not supported yet by extraction step");
-
-            Node node = nodeList.item(0);
-
-            // Handle text nodes directly
-            if (node.getNodeType() == Node.TEXT_NODE) {
-                String value = node.getNodeValue();
-                return value != null ? value.trim() : null;
+            } else if (result.size() > 1) {
+                throw new XmlExtractionException("Multiple elements found for the given XML path (" + result.size() + " elements). This is not supported yet by extraction step");
             }
 
-            // Handle attribute nodes
-            if (node.getNodeType() == Node.ATTRIBUTE_NODE) {
-                return node.getNodeValue();
+            XdmItem item = result.itemAt(0);
+            if (item.isAtomicValue()) {
+                // For atomic values (text, numbers, etc.)
+                return item.getStringValue();
+            } else if (item instanceof XdmNode node) {
+                // Handle attribute nodes
+                if (node.getNodeKind() == XdmNodeKind.ATTRIBUTE) {
+                    return node.getStringValue();
+                }
+
+                // Handle text nodes
+                if (node.getNodeKind() == XdmNodeKind.TEXT) {
+                    String value = node.getStringValue();
+                    return value != null ? value.trim() : null;
+                }
+                return serializeNode(node);
             }
 
-            return nodeToString(node);
-        } catch (XPathExpressionException | ParserConfigurationException | IOException | SAXException e) {
+            return item.getStringValue();
+        } catch (SaxonApiException e) {
             throw new XmlExtractionException("Failed to extract value from XML using path: " + xmlPath, e);
         }
     }
 
+    private void handleNameSpaces(Map<String, String> namespaces, XPathCompiler xpathCompiler, XdmNode document) {
+        if (namespaces == null || namespaces.isEmpty()) {
+            // If no custom namespaces provided, auto-detect from document
+            declareNamespaces(xpathCompiler, document);
+        } else {
+            // Use provided custom namespaces
+            for (Map.Entry<String, String> namespace : namespaces.entrySet()) {
+                String prefix = namespace.getKey();
+                String uri = namespace.getValue();
+
+                // Handle default namespace (empty prefix)
+                if (prefix.isEmpty()) {
+                    // Saxon requires a non-empty prefix for XPath, use "default"
+                    xpathCompiler.declareNamespace("default", uri);
+                } else {
+                    xpathCompiler.declareNamespace(prefix, uri);
+                }
+            }
+        }
+    }
 
     /**
-     * Convert a DOM Node to its string representation.
-     * @param node the DOM Node to convert
-     * @return the string representation of the node
-     * @throws XmlExtractionException if conversion fails
+     * Declare namespaces from the document to the XPath compiler.
+     * This method extracts namespace declarations from the document and makes them available to XPath.
+     * It recursively collects all namespace declarations from all elements in the document.
      */
-    private String nodeToString(org.w3c.dom.Node node) throws XmlExtractionException {
-        try {
-            StringWriter writer = new StringWriter();
-            Transformer transformer = newInstance().newTransformer();
-            transformer.setOutputProperty(javax.xml.transform.OutputKeys.OMIT_XML_DECLARATION, "yes");
-            transformer.setOutputProperty(javax.xml.transform.OutputKeys.INDENT, "no");
-            transformer.transform(new DOMSource(node), new StreamResult(writer));
-            return writer.toString();
-        } catch (TransformerException e) {
-            throw new XmlExtractionException("Failed to convert node to string", e);
+    private void declareNamespaces(XPathCompiler compiler, XdmNode document) {
+        // Collect all namespace declarations from the entire document
+        java.util.Map<String, String> namespaceMap = new java.util.HashMap<>();
+        collectNamespaces(document, namespaceMap);
+
+        // Declare all collected namespaces
+        for (java.util.Map.Entry<String, String> entry : namespaceMap.entrySet()) {
+            String prefix = entry.getKey();
+            String uri = entry.getValue();
+
+            // Skip xml namespace (it's predefined)
+            if (!"xml".equals(prefix)) {
+                if (prefix.isEmpty()) {
+                    // Default namespace - assign a prefix for XPath usage
+                    compiler.declareNamespace("default", uri);
+                } else {
+                    compiler.declareNamespace(prefix, uri);
+                }
+            }
         }
+    }
+
+    /**
+     * Recursively collect all namespace declarations from a node and its descendants.
+     */
+    private void collectNamespaces(XdmNode node, java.util.Map<String, String> namespaceMap) {
+        if (node.getNodeKind() == XdmNodeKind.ELEMENT) {
+            // Collect namespaces from this element
+            XdmSequenceIterator<XdmNode> namespaces = node.axisIterator(Axis.NAMESPACE);
+            while (namespaces.hasNext()) {
+                XdmNode ns = namespaces.next();
+                String prefix = ns.getNodeName() != null ? ns.getNodeName().getLocalName() : "";
+                String uri = ns.getStringValue();
+                namespaceMap.put(prefix, uri);
+            }
+        }
+
+        // Recurse to children
+        for (XdmNode child : node.children()) {
+            collectNamespaces(child, namespaceMap);
+        }
+    }
+
+    /**
+     * Serialize an XdmNode to a compact XML string without indentation.
+     */
+    private String serializeNode(XdmNode node) throws SaxonApiException {
+        Serializer serializer = processor.newSerializer();
+        serializer.setOutputProperty(Serializer.Property.METHOD, "xml");
+        serializer.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
+        serializer.setOutputProperty(Serializer.Property.INDENT, "no");
+
+        java.io.StringWriter writer = new java.io.StringWriter();
+        serializer.setOutputWriter(writer);
+        serializer.serializeNode(node);
+
+        return writer.toString();
     }
 
     /**

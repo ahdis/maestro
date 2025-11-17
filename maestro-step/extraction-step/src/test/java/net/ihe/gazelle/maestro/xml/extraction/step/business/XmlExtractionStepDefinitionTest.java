@@ -16,6 +16,7 @@
 
 package net.ihe.gazelle.maestro.xml.extraction.step.business;
 
+import net.ihe.gazelle.maestro.api.business.test.SupportedInput;
 import net.ihe.gazelle.maestro.xml.extraction.step.business.xml.XmlExtractionStepDefinition;
 import org.junit.jupiter.api.Test;
 
@@ -31,8 +32,9 @@ class XmlExtractionStepDefinitionTest {
         assertNotNull(stepDefinition.getSupportedInputs());
         assertNotNull(stepDefinition.getOutputsDefinition());
 
-        assertEquals(2, stepDefinition.getSupportedInputs().size());
+        assertEquals(4, stepDefinition.getSupportedInputs().size());
         assertEquals(2, stepDefinition.getOutputsDefinition().size());
+        assertEquals(2, stepDefinition.getSupportedInputs().stream().filter(SupportedInput::isRequired).count());
     }
 
 }

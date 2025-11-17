@@ -1,5 +1,6 @@
 package net.ihe.gazelle.maestro.xml.extraction.step.business;
 
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
@@ -25,7 +26,7 @@ class XmlExtractionStepExecutorTest {
 
     @Test
     void executeStepEmptyField() {
-        Step step = buildStep("", "/root");
+        Step step = buildStep("".getBytes(), "/root");
         StepRun stepRun = new StepRun(step, List.of());
 
         StepRunReport stepRunReport = stepExecutor.execute(stepRun).join();
@@ -37,13 +38,13 @@ class XmlExtractionStepExecutorTest {
         ));
     }
 
-    private Step buildStep(String xmlFile, String xmlPath) {
+    private Step buildStep(byte[] xmlFile, String xmlPath) {
         return new Step()
                 .setId("extractionXmlStep")
                 .setName("extractionXmlStep")
-                .setType("EXTRACTION_XML")
+                .setType("EXTRACT_XML")
                 .setProperties(List.of(
-                        new StringProperty(XML_FILE, xmlFile),
+                        new ByteArrayProperty(XML_FILE, xmlFile),
                         new StringProperty(XML_PATH, xmlPath)
                 ));
     }
