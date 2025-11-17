@@ -2,6 +2,7 @@ package net.ihe.gazelle.maestro.xml.extraction.step.business.xml;
 
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
+import net.ihe.gazelle.maestro.api.business.test.SupportedFileInput;
 import net.ihe.gazelle.maestro.api.business.test.SupportedInput;
 import net.ihe.gazelle.maestro.api.business.test.SupportedTextInput;
 import net.ihe.gazelle.maestro.spi.business.StepDefinition;
@@ -33,7 +34,7 @@ public class XmlExtractionStepDefinition implements StepDefinition {
    public List<SupportedInput> getSupportedInputs() {
       return List.of(
             new SupportedTextInput().setId(XML_PATH).setLabel(XML_FILE).setRequired(true),
-            new SupportedTextInput().setId(XML_FILE).setLabel(XML_PATH).setRequired(true)
+            new SupportedFileInput().setId(XML_FILE).setLabel(XML_PATH).setRequired(true)
       );
    }
 

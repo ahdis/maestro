@@ -137,6 +137,17 @@
                 <artifactId>assertion-step</artifactId>
                 <version>0.6.1-SNAPSHOT</version>
             </dependency>
+            <dependency>
+                <groupId>net.ihe.gazelle</groupId>
+                <artifactId>extraction-step</artifactId>
+                <version>0.4.1-NPD-1449-SNAPSHOT</version>
+            </dependency>
+            <!-- to be removed when maestro-websocket has it own tests -->
+            <dependency>
+                <groupId>net.ihe.gazelle</groupId>
+                <artifactId>maestro-websocket</artifactId>
+                <version>0.4.1-SNAPSHOT</version>
+            </dependency>
 
             <!-- Stack BOM -->
             <dependency>

@@ -49,7 +49,10 @@
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>assertion-step</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>extraction-step</artifactId>
+        </dependency>
         <!-- Gazelle dependencies -->
         <dependency>
             <groupId>net.ihe.gazelle</groupId>

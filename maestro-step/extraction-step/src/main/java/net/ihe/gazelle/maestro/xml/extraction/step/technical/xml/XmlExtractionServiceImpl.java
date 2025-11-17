@@ -39,11 +39,11 @@ public class XmlExtractionServiceImpl implements XmlExtractionService {
     }
 
     @Override
-    public String extractValue(String xmlFile, String xmlPath) throws XmlExtractionException {
+    public String extractValue(byte[] xmlFile, String xmlPath) throws XmlExtractionException {
         assertParamsAreValid(xmlFile, xmlPath);
 
         // Normalize XML by removing all spaces between tags before parsing
-        String normalizedXml = normalizeXml(xmlFile);
+        String normalizedXml = normalizeXml(new String(xmlFile, java.nio.charset.StandardCharsets.UTF_8));
 
         try {
             DocumentBuilder builder = documentBuilderFactory.newDocumentBuilder();
@@ -77,6 +77,7 @@ public class XmlExtractionServiceImpl implements XmlExtractionService {
         }
     }
 
+
     /**
      * Convert a DOM Node to its string representation.
      * @param node the DOM Node to convert
@@ -99,8 +100,8 @@ public class XmlExtractionServiceImpl implements XmlExtractionService {
     /**
      * Validate that the input parameters are not null or empty.
      */
-    private void assertParamsAreValid(String xmlFile, String xmlPath) {
-        if (xmlFile == null || xmlFile.isEmpty())
+    private void assertParamsAreValid(byte[] xmlFile, String xmlPath) {
+        if (xmlFile == null || xmlFile.length == 0)
             throw new XmlExtractionException("Source XML is null or empty.");
         if (xmlPath == null || xmlPath.isEmpty())
             throw new XmlExtractionException("XML path is null or empty.");

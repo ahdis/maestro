@@ -11,5 +11,5 @@ public interface XmlExtractionService {
      * @return the extracted value or null if not found
      * @throws XmlExtractionException if extraction fails (bad xpath, multiple nodes found, etc.)
      */
-    String extractValue(String xmlFile, String xmlPath) throws XmlExtractionException;
+    String extractValue(byte[] xmlFile, String xmlPath) throws XmlExtractionException;
 }

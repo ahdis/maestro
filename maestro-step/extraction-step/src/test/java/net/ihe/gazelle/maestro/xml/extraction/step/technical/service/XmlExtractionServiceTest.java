@@ -6,6 +6,7 @@ import net.ihe.gazelle.maestro.xml.extraction.step.technical.xml.XmlExtractionSe
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -15,7 +16,7 @@ class XmlExtractionServiceTest {
 
     private final XmlExtractionService service = new XmlExtractionServiceImpl();
 
-    private final String sampleXml = """
+    private final byte[] sampleXml = """
             <root>
                 <element>
                     <child>value1</child>
@@ -24,13 +25,13 @@ class XmlExtractionServiceTest {
                 </element>
                 <single>singleValue</single>
             </root>
-            """;
+            """.getBytes(StandardCharsets.UTF_8);
 
-    private final String samlAssertionXml;
+    private final byte[] samlAssertionXml;
 
     public XmlExtractionServiceTest() {
         try {
-            samlAssertionXml = Files.readString(Paths.get("src/test/resources/xml/SAMLAssertion.xml"));
+            samlAssertionXml = Files.readAllBytes(Paths.get("src/test/resources/xml/SAMLAssertion.xml"));
         } catch (IOException e) {
             throw new RuntimeException("Failed to load XML Test files", e);
         }
@@ -123,7 +124,7 @@ class XmlExtractionServiceTest {
 
     @Test
     void testExtractFromSoapCDA() throws IOException {
-        String soapCDA = Files.readString(Paths.get("src/test/resources/xml/W8_SOAP_MURC_CDAL1.xml"), java.nio.charset.StandardCharsets.ISO_8859_1);
+        byte[] soapCDA = Files.readAllBytes(Paths.get("src/test/resources/xml/W8_SOAP_MURC_CDAL1.xml"));
         String extractValue1 = service.extractValue(soapCDA, "/urn:ClinicalDocument/urn:component/urn:nonXMLBody/urn:text/text()");
         assertTrue(extractValue1.startsWith("JVBERi0x"));
     }

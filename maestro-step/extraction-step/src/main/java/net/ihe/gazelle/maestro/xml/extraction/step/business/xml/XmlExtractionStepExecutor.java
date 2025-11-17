@@ -31,7 +31,7 @@ public class XmlExtractionStepExecutor implements StepExecutor {
                 .setType(stepRun.getType());
 
         String xmlPath = stepRun.getPropertyValue(XML_PATH);
-        String xmlFile = stepRun.getPropertyValue(XML_FILE);
+        byte[] xmlFile = stepRun.getPropertyValue(XML_FILE);
 
         try {
             String extractedValue = xmlExtractionService.extractValue(xmlFile, xmlPath);
