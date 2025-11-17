@@ -16,11 +16,6 @@ public class FloatProperty extends Property {
    }
 
    @Override
-   public Double getValue() {
-      return super.getValue();
-   }
-
-   @Override
    public Property copy() {
       return new FloatProperty(getName(), getValue());
    }

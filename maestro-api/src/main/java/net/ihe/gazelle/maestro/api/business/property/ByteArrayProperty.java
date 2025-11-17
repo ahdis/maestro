@@ -18,11 +18,6 @@ public class ByteArrayProperty extends Property {
       super(name, value);
    }
 
-   @Override
-   public byte[] getValue() {
-      return super.getValue();
-   }
-
    public String getFileName() {
       return fileName;
    }

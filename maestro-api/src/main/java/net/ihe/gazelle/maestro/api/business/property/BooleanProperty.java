@@ -15,11 +15,6 @@ public class BooleanProperty extends Property {
    }
 
    @Override
-   public Boolean getValue() {
-      return super.getValue();
-   }
-
-   @Override
    public Property copy() {
       return new BooleanProperty(getName(), getValue());
    }

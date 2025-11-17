@@ -17,11 +17,6 @@ public class DateProperty extends Property {
    }
 
    @Override
-   public Instant getValue() {
-      return super.getValue();
-   }
-
-   @Override
    public Property copy() {
       return new DateProperty(getName(), getValue());
    }

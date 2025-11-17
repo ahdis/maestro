@@ -16,11 +16,6 @@ public class IntegerProperty extends Property {
    }
 
    @Override
-   public Integer getValue() {
-      return super.getValue();
-   }
-
-   @Override
    public Property copy() {
       return new IntegerProperty(getName(), getValue());
    }

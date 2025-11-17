@@ -16,11 +16,6 @@ public class StringProperty extends Property {
    }
 
    @Override
-   public String getValue() {
-      return super.getValue();
-   }
-
-   @Override
    public Property copy() {
       return new StringProperty(getName(), getValue());
    }
