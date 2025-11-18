@@ -32,6 +32,7 @@
         <module>itb-step</module>
         <module>assertion-step</module>
         <module>extraction-step</module>
+        <module>conversion-step</module>
     </modules>
 
 </project>
