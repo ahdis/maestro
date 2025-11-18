@@ -53,6 +53,10 @@
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>extraction-step</artifactId>
         </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>conversion-step</artifactId>
+        </dependency>
         <!-- Gazelle dependencies -->
         <dependency>
             <groupId>net.ihe.gazelle</groupId>

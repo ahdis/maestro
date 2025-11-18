@@ -1,5 +1,6 @@
 package net.ihe.gazelle.maestro.extraction.step.conversion.step.business.base64.decode;
 
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
@@ -14,7 +15,6 @@ import static net.ihe.gazelle.maestro.api.business.testreport.StepResult.DONE;
 import static net.ihe.gazelle.maestro.api.business.testreport.StepResult.UNDEFINED;
 import static net.ihe.gazelle.maestro.extraction.step.conversion.step.business.base64.decode.DecodeBase64StepDefinition.CONTENT_TO_DECODE;
 import static net.ihe.gazelle.maestro.extraction.step.conversion.step.business.base64.decode.DecodeBase64StepDefinition.DECODED_CONTENT;
-import static net.ihe.gazelle.maestro.extraction.step.conversion.step.business.base64.encode.EncodeBase64StepDefinition.ENCODED_CONTENT;
 import static net.ihe.gazelle.maestro.extraction.step.conversion.step.business.base64.encode.EncodeBase64StepDefinition.FAILURE_MESSAGE;
 
 public class DecodeBase64StepExecutor implements StepExecutor {
@@ -38,8 +38,7 @@ public class DecodeBase64StepExecutor implements StepExecutor {
 
         try {
             byte[] decodedBytes = java.util.Base64.getDecoder().decode(contentToEncode);
-            String decodedContent = new String(decodedBytes);
-            Property output = new StringProperty(DECODED_CONTENT, decodedContent);
+            Property output = new ByteArrayProperty(DECODED_CONTENT, decodedBytes);
             return CompletableFuture.completedFuture(reportBuilder.setResult(DONE)
                     .setOutputs(List.of(output))
                     .build());

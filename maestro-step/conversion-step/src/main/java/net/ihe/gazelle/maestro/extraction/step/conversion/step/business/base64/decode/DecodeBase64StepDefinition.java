@@ -1,5 +1,6 @@
 package net.ihe.gazelle.maestro.extraction.step.conversion.step.business.base64.decode;
 
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.test.SupportedInput;
@@ -41,7 +42,7 @@ public class DecodeBase64StepDefinition implements StepDefinition {
     public Map<String, Class<? extends Property>> getOutputsDefinition() {
         return Map.of(
                 FAILURE_MESSAGE, StringProperty.class,
-                DECODED_CONTENT, StringProperty.class
+                DECODED_CONTENT, ByteArrayProperty.class
         );
     }
 }
