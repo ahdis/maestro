@@ -53,14 +53,14 @@ public class TestStreamSocketController {
 
     @OnOpen
     public void onOpen(Session session) {
-        LOG.info("Test Stream Socket Connected: {}", session.getId());
+        LOG.debug("Test Stream Socket Connected: {}", session.getId());
         WebSocketSession maestroCaller = new WebSocketSession(session);
         sessions.put(session.getId(), maestroCaller);
     }
 
     @OnClose
     public void onClose(Session session) {
-        LOG.info("Test Stream Socket Disconnected: {}", session.getId());
+        LOG.debug("Test Stream Socket Disconnected: {}", session.getId());
         sessions.remove(session.getId());
     }
 

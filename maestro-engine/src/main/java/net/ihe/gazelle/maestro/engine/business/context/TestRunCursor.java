@@ -34,10 +34,6 @@ public final class TestRunCursor {
       tests.addAll(orderedTestRuns);
    }
 
-   public static TestRunCursor empty() {
-      return new TestRunCursor(List.of());
-   }
-
    public static TestRunCursor from(List<TestRun> orderedTestRuns) {
       return new TestRunCursor(orderedTestRuns);
    }
@@ -51,17 +47,6 @@ public final class TestRunCursor {
          throw new NoSuchElementException("No more test runs to execute");
       }
       return tests.get(++index);
-   }
-
-   public synchronized boolean hasCurrent() {
-      return index > -1;
-   }
-
-   public  synchronized TestRun current() {
-      if (!hasCurrent()) {
-         throw new IllegalStateException("No test run has been executed yet");
-      }
-      return tests.get(index);
    }
 
 }

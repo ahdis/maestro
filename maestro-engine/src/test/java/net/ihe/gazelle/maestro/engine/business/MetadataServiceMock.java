@@ -7,6 +7,8 @@ public class MetadataServiceMock implements MetadataService {
 
    @Override
    public Service getMetadata() {
-      return new Service().setName("Maestro Engine").setVersion("999.0.0");
+      return new Service()
+              .setName("Maestro Engine")
+              .setVersion("999.0.0");
    }
 }

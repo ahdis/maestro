@@ -38,15 +38,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class MaestroEngineTest {
 
    private ExecutorService executorService;
-   private HardWiredEventBroker broker;
-   private MaestroImpl maestro;
+    private MaestroRecorderImpl maestro;
    private ScriptedStepExecutorProvider stepExecutorProvider;
    private InMemoryTestReportRecordService reportRecordService;
 
    @BeforeEach
    void setUp() {
       executorService = Executors.newCachedThreadPool();
-      broker = new HardWiredEventBroker(executorService);
+       HardWiredEventBroker broker = new HardWiredEventBroker(executorService);
       stepExecutorProvider = new ScriptedStepExecutorProvider();
       reportRecordService = new InMemoryTestReportRecordService();
 
@@ -59,8 +58,9 @@ class MaestroEngineTest {
       TestRunner testRunner = new TestRunner(testRunSessionStore, broker);
       StepRunner stepRunner = new StepRunner(stepExecutorProvider, broker);
 
-      maestro = new MaestroImpl(testRunObserverStore, testSuiteRunObserverStore, broker, new MetadataServiceMock());
-      broker.setServices(maestro, testSuiteRunner, testRunner, stepRunner);
+      MaestroImpl maestroImpl = new MaestroImpl(testRunObserverStore, testSuiteRunObserverStore, broker, new MetadataServiceMock());
+      maestro = new MaestroRecorderImpl(maestroImpl, reportRecordService);
+      broker.setServices(maestroImpl, testSuiteRunner, testRunner, stepRunner);
    }
 
    @AfterEach
@@ -76,17 +76,53 @@ class MaestroEngineTest {
             .returnsReport("step-1", passedReport("step-1"))
             .returnsReport("step-2", passedReport("step-2"));
 
-      maestro.executeTestSuite(testSuiteRun, observer);
+      maestro.executeTestSuite(testSuiteRun, true, observer);
 
       ExecutionFinished finished = observer.awaitSuiteFinished(Duration.ofSeconds(5));
       assertThat(finished.getRun(), sameInstance(testSuiteRun));
       assertThat(reportRecordService.getRecordedReports(), hasSize(1));
-      TestReport report = reportRecordService.getRecordedReports().get(0);
+      TestReport report = reportRecordService.getRecordedReports().getFirst();
       assertThat(report.getTestRunReports(), hasSize(1));
       assertThat(report.getUnexpectedErrors(), empty());
    }
 
-   @org.junit.jupiter.api.Test
+    @org.junit.jupiter.api.Test
+    void executeTestRunsEntireWorkflow() {
+        RecordingMaestroObserver observer = new RecordingMaestroObserver();
+        Test test = createTest("test-1", "step-1", "step-2");
+        TestRun testRun = new TestRun().setTest(test);
+        stepExecutorProvider
+                .returnsReport("step-1", passedReport("step-1"))
+                .returnsReport("step-2", passedReport("step-2"));
+
+        maestro.executeTest(testRun, true, observer);
+
+        ExecutionFinished finished = observer.awaitSuiteFinished(Duration.ofSeconds(5));
+        assertThat(finished.getRun(), sameInstance(testRun));
+        assertThat(reportRecordService.getRecordedReports(), hasSize(1));
+        TestReport report = reportRecordService.getRecordedReports().getFirst();
+        assertThat(report.getTestRunReports(), hasSize(1));
+        assertThat(report.getUnexpectedErrors(), empty());
+    }
+
+    @org.junit.jupiter.api.Test
+    void executeTestRunWithFailRecordingReport() {
+        RecordingMaestroObserver observer = new RecordingMaestroObserver();
+        TestSuiteRun testSuiteRun = buildSuiteRun("suite-1", createTest("test-1", "step-1", "step-2"));
+        stepExecutorProvider
+                .returnsReport("step-1", passedReport("step-1"))
+                .returnsReport("step-2", passedReport("step-2"));
+
+        reportRecordService.failNextWith(new TestReportRecordException("down"));
+        maestro.executeTestSuite(testSuiteRun, true, observer);
+
+        ExecutionFinished finished = observer.awaitSuiteFinished(Duration.ofSeconds(5));
+        assertThat(finished.getRun(), sameInstance(testSuiteRun));
+        assertThat(reportRecordService.getRecordedReports(), empty());
+        assertThat(finished.getReport().getUnexpectedErrors(), hasSize(1));
+    }
+
+    @org.junit.jupiter.api.Test
    void executeTestSuiteWithFailingStepStillCompletes() {
       RecordingMaestroObserver observer = new RecordingMaestroObserver();
       Step failingStep = step("step-fail", "Failing step");
@@ -100,7 +136,7 @@ class MaestroEngineTest {
 
        ExecutionFinished finished = runSuite(observer, suiteRun);
 
-      TestReport recorded = reportRecordService.getRecordedReports().get(0);
+      TestReport recorded = reportRecordService.getRecordedReports().getFirst();
       boolean failingStepRecorded = recorded.getTestRunReports().stream()
             .flatMap(run -> run.getStepRunReports().stream())
             .anyMatch(stepReport -> stepReport.getStepId().equals("step-fail")
@@ -114,7 +150,7 @@ class MaestroEngineTest {
       RecordingMaestroObserver observer = new RecordingMaestroObserver();
       TestSuiteRun invalidSuite = new TestSuiteRun();
 
-      assertThrows(IllegalArgumentException.class, () -> maestro.executeTestSuite(invalidSuite, observer));
+      assertThrows(IllegalArgumentException.class, () -> maestro.executeTestSuite(invalidSuite, true, observer));
       assertThat(reportRecordService.getRecordedReports(), empty());
    }
 
@@ -123,9 +159,26 @@ class MaestroEngineTest {
       RecordingMaestroObserver observer = new RecordingMaestroObserver();
       TestRun invalidRun = new TestRun();
 
-      assertThrows(IllegalArgumentException.class, () -> maestro.executeTest(invalidRun, observer));
+      assertThrows(IllegalArgumentException.class, () -> maestro.executeTest(invalidRun, true, observer));
       assertThat(reportRecordService.getRecordedReports(), empty());
    }
+
+    @org.junit.jupiter.api.Test
+    void executeTestSuiteWithoutPersisting() {
+        RecordingMaestroObserver observer = new RecordingMaestroObserver();
+        TestSuiteRun testSuiteRun = buildSuiteRun("suite-1", createTest("test-1", "step-1", "step-2"));
+        maestro.executeTestSuite(testSuiteRun, false, observer);
+        assertThat(reportRecordService.getRecordedReports(), empty());
+    }
+
+    @org.junit.jupiter.api.Test
+    void executeTestWithoutPersisting() {
+        RecordingMaestroObserver observer = new RecordingMaestroObserver();
+        Test test = createTest("test-1", "step-1", "step-2");
+        TestRun testRun = new TestRun().setTest(test);
+        maestro.executeTest(testRun, false, observer);
+        assertThat(reportRecordService.getRecordedReports(), empty());
+    }
 
    @org.junit.jupiter.api.Test
    void stepOutputsArePropagatedToNextStepContext() {
@@ -155,12 +208,12 @@ class MaestroEngineTest {
                return CompletableFuture.completedFuture(passedReport("consumer-step"));
             });
 
-      maestro.executeTestSuite(suiteRun, observer);
+      maestro.executeTestSuite(suiteRun, true, observer);
       observer.awaitSuiteFinished(Duration.ofSeconds(5));
 
       assertThat(observedValue.get(), equalTo("HELLO-CONTEXT"));
-      TestReport report = reportRecordService.getRecordedReports().get(0);
-      assertThat(report.getTestRunReports().get(0).getStepRunReports(), hasSize(2));
+      TestReport report = reportRecordService.getRecordedReports().getFirst();
+      assertThat(report.getTestRunReports().getFirst().getStepRunReports(), hasSize(2));
    }
 
    @org.junit.jupiter.api.Test
@@ -186,10 +239,10 @@ class MaestroEngineTest {
             .returnsReport("alpha-step", passedReport("alpha-step"))
             .returnsReport("beta-step", passedReport("beta-step"));
 
-      maestro.executeTestSuite(suiteRun, observer);
+      maestro.executeTestSuite(suiteRun, true, observer);
       observer.awaitSuiteFinished(Duration.ofSeconds(5));
 
-      TestReport report = reportRecordService.getRecordedReports().get(0);
+      TestReport report = reportRecordService.getRecordedReports().getFirst();
       assertThat(report.getTestRunReports(), hasSize(2));
    }
 
@@ -215,7 +268,7 @@ class MaestroEngineTest {
                   new InteractWithUser("Confirm", "Proceed?"))
             .thenApply(done -> passedReport("interaction-step")));
 
-      maestro.executeTestSuite(suiteRun, observer);
+      maestro.executeTestSuite(suiteRun,true, observer);
 
       observer.awaitInteraction(Duration.ofSeconds(2));
       assertThat(reportRecordService.getRecordedReports(), empty());
@@ -223,8 +276,8 @@ class MaestroEngineTest {
       observer.completeInteraction();
       observer.awaitSuiteFinished(Duration.ofSeconds(5));
 
-      TestRunReport runReport = reportRecordService.getRecordedReports().get(0).getTestRunReports().get(0);
-      assertThat(runReport.getStepRunReports().get(0).getResult(), is(StepResult.PASSED));
+      TestRunReport runReport = reportRecordService.getRecordedReports().getFirst().getTestRunReports().getFirst();
+      assertThat(runReport.getStepRunReports().getFirst().getResult(), is(StepResult.PASSED));
    }
 
    @org.junit.jupiter.api.Test
@@ -256,8 +309,8 @@ class MaestroEngineTest {
 
       runSuite(observer, suiteRun);
 
-      StepRunReport failingReport = reportRecordService.getRecordedReports().get(0)
-            .getTestRunReports().get(0).getStepRunReports().get(1);
+      StepRunReport failingReport = reportRecordService.getRecordedReports().getFirst()
+            .getTestRunReports().getFirst().getStepRunReports().get(1);
       assertThat(failingReport.getResult(), is(StepResult.UNDEFINED));
       assertThat(failingReport.getUnexpectedErrors(), is(not(empty())));
    }
@@ -274,7 +327,7 @@ class MaestroEngineTest {
       TestSuiteRun suiteRun = buildSuiteRun("suite-dup", duplicated);
 
       IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> maestro.executeTestSuite(suiteRun, observer));
+            () -> maestro.executeTestSuite(suiteRun, true, observer));
       assertThat(exception.getMessage(), containsString("Steps must be unique"));
    }
 
@@ -307,7 +360,7 @@ class MaestroEngineTest {
    }
 
    private ExecutionFinished runSuite(RecordingMaestroObserver observer, TestSuiteRun suiteRun) {
-      maestro.executeTestSuite(suiteRun, observer);
+      maestro.executeTestSuite(suiteRun, true, observer);
       return observer.awaitSuiteFinished(Duration.ofSeconds(5));
    }
 

@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.quarkus.itb;
+package net.ihe.gazelle.maestro.engine.technical.userinteract;
 
-import io.quarkus.test.junit.QuarkusTestProfile;
+import net.ihe.gazelle.maestro.engine.business.mock.RecordingMaestroObserver;
+import org.junit.jupiter.api.Test;
+import technical.userinteract.UserInteractionHandlerImpl;
 
-import java.util.HashMap;
-import java.util.Map;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ItbStepProfile implements QuarkusTestProfile {
+class UserInteractionHandlerTest {
 
-    @Override
-    public Map<String, String> getConfigOverrides() {
-        Map<String, String> overrides = new HashMap<>();
-        overrides.put("gzl.service.registry.file.path", this.getClass().getResource("/services.json").getPath());
-        overrides.put("itb.api.url", "http://localhost:${gzl.it.port}");
-        overrides.put("itb.api.key", "test-api-key");
-        return overrides;
+    @Test
+    void test_display_message() {
+        UserInteractionHandlerImpl handler = new UserInteractionHandlerImpl(new RecordingMaestroObserver());
+        assertTrue(handler.isAvailable());
+        handler.displayMessage("title", "message");
     }
 }

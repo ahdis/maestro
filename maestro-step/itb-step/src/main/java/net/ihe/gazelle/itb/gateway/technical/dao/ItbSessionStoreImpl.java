@@ -16,9 +16,8 @@
 
 package net.ihe.gazelle.itb.gateway.technical.dao;
 
-import net.ihe.gazelle.itb.gateway.business.reporting.ItbReporting;
-import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.itb.gateway.business.ItbSessionStore;
+import net.ihe.gazelle.itb.gateway.business.reporting.ItbReporting;
 
 import java.util.HashMap;
 import java.util.Map;

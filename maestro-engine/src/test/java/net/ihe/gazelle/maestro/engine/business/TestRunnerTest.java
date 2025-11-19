@@ -26,8 +26,7 @@ class TestRunnerTest {
    private RecordingTestRunEventProducer eventProducer;
    private TestRunner testRunner;
    private Step firstStep;
-   private Step secondStep;
-   private TestRun testRun;
+    private TestRun testRun;
 
    @BeforeEach
    void setUp() {
@@ -36,7 +35,7 @@ class TestRunnerTest {
       testRunner = new TestRunner(sessionStore, eventProducer);
 
       firstStep = new Step().setId("step-1").setName("First").setType("SIM");
-      secondStep = new Step().setId("step-2").setName("Second").setType("SIM");
+       Step secondStep = new Step().setId("step-2").setName("Second").setType("SIM");
 
       Test test = new Test()
             .setId("test-1")
@@ -55,7 +54,7 @@ class TestRunnerTest {
       assertThat(sessionStore.hasSession("session-1"), is(true));
       assertThat(eventProducer.getCommands(), hasSize(1));
 
-      StartStepRun command = eventProducer.getCommands().get(0);
+      StartStepRun command = eventProducer.getCommands().getFirst();
       assertThat(command.getStepRun().hasProperty("input"), is(true));
       assertThat(command.getTestId(), equalTo(testRun.getTest().getId()));
    }
@@ -63,7 +62,7 @@ class TestRunnerTest {
    @org.junit.jupiter.api.Test
    void listenAddsOutputsAndTriggersNextStep() {
       testRunner.run(new StartTestRun("session-ctx", testRun));
-      StartStepRun firstCommand = eventProducer.getCommands().get(0);
+      StartStepRun firstCommand = eventProducer.getCommands().getFirst();
 
       StepRunReport report = new StepRunReport()
             .setStepId("step-1")
@@ -104,10 +103,19 @@ class TestRunnerTest {
 
       assertThat(sessionStore.hasSession("session-last"), is(false));
       assertThat(eventProducer.getNotifications(), hasSize(1));
-      TestRunFinished notification = eventProducer.getNotifications().get(0);
+      TestRunFinished notification = eventProducer.getNotifications().getFirst();
       assertThat(notification.getTestRunReport().getStepRunReports(), hasSize(2));
    }
 
+    @org.junit.jupiter.api.Test
+    void invalidTestRunShouldAddUnexpectedError() {
+        TestRun invalid = new TestRun().setTest(new Test().setId("invalid"));
+        testRunner.run(new StartTestRun("session-last", invalid));
+
+        assertThat(eventProducer.getNotifications(), hasSize(1));
+        TestRunFinished notification = eventProducer.getNotifications().getFirst();
+        assertThat(notification.getTestRunReport().getUnexpectedErrors(), is(not(empty())));
+    }
 
    @org.junit.jupiter.api.Test
    void listenWithoutSessionDoesNothing() {

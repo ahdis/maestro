@@ -34,10 +34,6 @@ public final class StepCursor {
       this.index = -1;
    }
 
-   public static StepCursor empty() {
-      return new StepCursor(List.of());
-   }
-
    public static StepCursor from(List<Step> orderedSteps) {
       return new StepCursor(orderedSteps);
    }
@@ -53,15 +49,5 @@ public final class StepCursor {
       return steps.get(++index);
    }
 
-   public boolean hasCurrent() {
-      return index > -1;
-   }
-
-   public Step current() {
-      if (!hasCurrent()) {
-         throw new IllegalStateException("No step has been executed yet");
-      }
-      return steps.get(index);
-   }
 }
 

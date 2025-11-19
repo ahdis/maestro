@@ -1,19 +1,8 @@
 package net.ihe.gazelle.maestro.recording;
 
-import net.ihe.gazelle.maestro.api.business.property.BooleanProperty;
-import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
-import net.ihe.gazelle.maestro.api.business.property.IntegerProperty;
-import net.ihe.gazelle.maestro.api.business.property.Property;
-import net.ihe.gazelle.maestro.api.business.property.StringProperty;
-import net.ihe.gazelle.maestro.api.business.recording.ItemReference;
+import net.ihe.gazelle.maestro.api.business.property.*;
 import net.ihe.gazelle.maestro.api.business.testreport.*;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.AttachmentPlan;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.ItemPlan;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.PropertyMutation;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputContext;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputDissector;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputDissectorProvider;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputProjection;
+import net.ihe.gazelle.maestro.api.business.testreport.dissection.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -25,6 +14,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 class DatahouseTestReportRecordServiceTest {
 
@@ -49,13 +39,12 @@ class DatahouseTestReportRecordServiceTest {
                 .addInput(secondInput);
         TestReport report = newReport("R-1", run);
 
-        ItemReference reportRef = service.recordTestReportWithReferences(report);
+        String reportLocation = service.recordTestReport(report);
 
-        assertThat(reportRef.id()).isEqualTo("itm-1");
-        assertThat(reportRef.location()).isEqualTo("http://dh/items/itm-1");
+        assertThat(reportLocation).isEqualTo("http://dh/items/itm-1");
         assertThat(recordItemClientMock.recordedItems).hasSize(1);
         assertThat(recordItemClientMock.uploadedAttachmentsBatches).hasSize(1);
-        assertThat(recordItemClientMock.uploadedAttachmentsBatches.get(0)).hasSize(2);
+        assertThat(recordItemClientMock.uploadedAttachmentsBatches.getFirst()).hasSize(2);
 
         List<Property> inputs = firstRun(report).getInputs();
         assertThat(inputs).hasSize(2);
@@ -75,18 +64,18 @@ class DatahouseTestReportRecordServiceTest {
                 .addInput(numberInput);
         TestReport report = newReport("R-inline", run);
 
-        service.recordTestReportWithReferences(report);
+        service.recordTestReport(report);
 
         assertThat(recordItemClientMock.uploadedAttachmentsBatches).isEmpty();
 
         List<Property> inputs = firstRun(report).getInputs();
         assertThat(inputs).hasSize(3);
         assertThat(inputs.get(0)).isInstanceOf(StringProperty.class);
-        assertThat(((StringProperty) inputs.get(0)).getValue()).isEqualTo("hello");
+        assertEquals("hello", inputs.get(0).getValue());
         assertThat(inputs.get(1)).isInstanceOf(BooleanProperty.class);
-        assertThat(((BooleanProperty) inputs.get(1)).getValue()).isTrue();
+        assertTrue((Boolean) inputs.get(1).getValue());
         assertThat(inputs.get(2)).isInstanceOf(IntegerProperty.class);
-        assertThat(((IntegerProperty) inputs.get(2)).getValue()).isEqualTo(42);
+        assertEquals(42, (Integer) inputs.get(2).getValue());
     }
 
     @Test
@@ -123,13 +112,12 @@ class DatahouseTestReportRecordServiceTest {
         );
         dissectorProvider.register(step.getStepId(), projection);
 
-        ItemReference reportRef = service.recordTestReportWithReferences(report);
+        String reportLocation = service.recordTestReport(report);
 
         assertThat(recordItemClientMock.recordedItems).hasSize(2);
         assertThat(recordItemClientMock.uploadedAttachmentsBatches).hasSize(1);
-        assertThat(recordItemClientMock.uploadedAttachmentsBatches.get(0)).hasSize(1);
-        assertThat(reportRef.id()).isEqualTo("itm-2");
-        assertThat(reportRef.location()).isEqualTo("http://dh/items/itm-2");
+        assertThat(recordItemClientMock.uploadedAttachmentsBatches.getFirst()).hasSize(1);
+        assertThat(reportLocation).isEqualTo("http://dh/items/itm-2");
 
         List<Property> outputs = firstStep(report).getOutputs();
         assertThat(outputs).hasSize(2);
@@ -169,7 +157,7 @@ class DatahouseTestReportRecordServiceTest {
         assertThat(property).isInstanceOf(ByteArrayItemProperty.class);
         ByteArrayItemProperty attachment = (ByteArrayItemProperty) property;
         assertThat(attachment.getReference()).isEqualTo(expectedReference);
-        assertThat(attachment.getValue()).isNull();
+        assertNull(attachment.getValue());
     }
 
     private static final class TestStepOutputDissectorProvider implements StepOutputDissectorProvider {

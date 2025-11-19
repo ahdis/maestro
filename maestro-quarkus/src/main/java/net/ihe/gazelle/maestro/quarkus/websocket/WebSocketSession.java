@@ -48,21 +48,21 @@ public class WebSocketSession implements MaestroObserver {
     @Override
     public void onTestRunStarted(TestRunStarted testRunStarted) {
         String message = serDes.serializeAsString(new TestRunStartedDTO(testRunStarted.getTestId()));
-        LOG.info("Test Run Started: {}", message);
+        LOG.debug("Test Run Started: {}", message);
         this.session.getAsyncRemote().sendText(message);
     }
 
     @Override
     public void onStepRunStarted(StepRunStarted stepRunStarted) {
         String message = serDes.serializeAsString(new StepRunStartedDTO(stepRunStarted));
-        LOG.info("Step Run Started: {}", message);
+        LOG.debug("Step Run Started: {}", message);
         this.session.getAsyncRemote().sendText(message);
     }
 
     @Override
     public CompletableFuture<UserInteractionCompleted> interactWithUser(InteractWithUser interactWithUser) {
         String message = serDes.serializeAsString(new InteractWithUserDTO(interactWithUser));
-        LOG.info("Interact with user: {}", message);
+        LOG.debug("Interact with user: {}", message);
         this.session.getAsyncRemote().sendText(message);
         this.interactionFuture = new CompletableFuture<>();
         return interactionFuture;
@@ -71,21 +71,21 @@ public class WebSocketSession implements MaestroObserver {
     @Override
     public void onStepRunFinished(StepRunFinished stepRunFinished) {
         String message = serDes.serializeAsString(new StepRunFinishedDTO(stepRunFinished));
-        LOG.info("Step Run Finished: {}", message);
+        LOG.debug("Step Run Finished: {}", message);
         this.session.getAsyncRemote().sendText(message);
     }
 
     @Override
     public void onTestRunFinished(TestRunFinished testRunFinished) {
         String message = serDes.serializeAsString(new TestRunFinishedDTO(testRunFinished));
-        LOG.info("Test Run Finished: {}", message);
+        LOG.debug("Test Run Finished: {}", message);
         this.session.getAsyncRemote().sendText(message);
     }
 
     @Override
     public void onExecutionFinished(ExecutionFinished executionFinished) {
         String message = serDes.serializeAsString(new ExecutionFinishedDTO(executionFinished));
-        LOG.info("Execution Finished: {}", message);
+        LOG.debug("Execution Finished: {}", message);
         this.session.getAsyncRemote().sendText(message);
         closeSession();
     }

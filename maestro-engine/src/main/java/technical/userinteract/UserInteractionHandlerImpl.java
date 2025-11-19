@@ -38,6 +38,7 @@ public class UserInteractionHandlerImpl implements UserInteractionHandler {
         CompletableFuture<UserInteractionCompleted> future = observer.interactWithUser(new InteractWithUser(interactionTitle, message));
 
         try {
+            //TODO : handle timeout here
             future.get();
         } catch (ExecutionException e) {
             throw new ExecutionRuntimeException(e);
