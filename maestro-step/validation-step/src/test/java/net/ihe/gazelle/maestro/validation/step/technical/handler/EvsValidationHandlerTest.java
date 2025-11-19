@@ -19,6 +19,7 @@ package net.ihe.gazelle.maestro.validation.step.technical.handler;
 import net.ihe.gazelle.evsapi.client.business.ValidationClient;
 import net.ihe.gazelle.evsapi.client.business.ValidationService;
 import net.ihe.gazelle.evsapi.client.business.ValidationServiceProfile;
+import net.ihe.gazelle.evsapi.client.business.Validator;
 import net.ihe.gazelle.evsapi.client.business.request.HandledObject;
 import net.ihe.gazelle.evsapi.client.business.request.ValidationRequest;
 import net.ihe.gazelle.evsapi.client.business.response.report.ValidationOverview;
@@ -166,9 +167,9 @@ class EvsValidationHandlerTest {
         // Then
         assertNotNull(result);
         assertEquals(2, result.size());
-        assertEquals("profile1", result.get(0).getProfileID());
+        assertEquals("profile1", result.get(0).getValidator().getKeyword());
         assertEquals("Service 1", result.get(0).getServiceName());
-        assertEquals("profile2", result.get(1).getProfileID());
+        assertEquals("profile2", result.get(1).getValidator().getKeyword());
         assertEquals("Service 2", result.get(1).getServiceName());
     }
 
@@ -211,10 +212,14 @@ class EvsValidationHandlerTest {
     private List<ValidationServiceProfile> createValidationServiceProfile() {
         return List.of(
             new ValidationServiceProfile()
-                .setProfileID("profile1")
+                .setValidator(new Validator()
+                        .setName("profile1")
+                        .setKeyword("profile1"))
                 .setServiceName("Service 1"),
             new ValidationServiceProfile()
-                .setProfileID("profile2")
+                .setValidator(new Validator()
+                        .setName("profile2")
+                        .setKeyword("profile2"))
                 .setServiceName("Service 2")
         );
     }
