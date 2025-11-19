@@ -9,6 +9,6 @@ public interface MaestroAttachment {
 
    String getType();
 
-   String getFilename();
+   String filename();
 
 }

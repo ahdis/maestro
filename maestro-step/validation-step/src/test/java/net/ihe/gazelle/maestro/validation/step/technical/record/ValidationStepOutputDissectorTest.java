@@ -1,9 +1,9 @@
 package net.ihe.gazelle.maestro.validation.step.technical.record;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
-import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.dissection.*;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
@@ -24,7 +24,7 @@ class ValidationStepOutputDissectorTest {
     @Test
     void shouldReturnEmptyProjectionWhenNoValidationReportProperty() {
         StepRunReport step = new StepRunReport();
-        StepOutputProjection projection = dissect(step);
+        StepOutputProjection projection = dissector.dissect(new StepOutputContext(step, new AccessControlList()));
 
         assertNotNull(projection);
         assertTrue(projection.items().isEmpty());
@@ -38,11 +38,11 @@ class ValidationStepOutputDissectorTest {
         StepRunReport step = new StepRunReport()
                 .addOutput(new ByteArrayProperty(ValidationStepDefinition.REPORT, sample.serializedReport()));
 
-        StepOutputProjection projection = dissect(step);
+        StepOutputProjection projection = dissector.dissect(new StepOutputContext(step, new AccessControlList()));
 
         assertEquals(1, projection.items().size(), "One validation report item expected");
         ItemPlan reportPlan = projection.items().get(0);
-        assertEquals(ValidationStepDefinition.REPORT, reportPlan.item().getType());
+        assertEquals(ValidationStepDefinition.REPORT, reportPlan.item().type());
 
         assertEquals(1, projection.attachments().size(), "Only inputs with content should become attachments");
         AttachmentPlan attachmentPlan = projection.attachments().get(0);
@@ -54,6 +54,15 @@ class ValidationStepOutputDissectorTest {
         PropertyMutation mutation = projection.propertyMutations().get(0);
         assertEquals(0, mutation.outputIndex());
         assertEquals(0, mutation.sourceItemIndex(), "Single report item should be the mutation source");
+
+        JsonNode content = OBJECT_MAPPER.readTree(reportPlan.item().content());
+        assertFalse(content.has("inputs"), "Raw inputs collection should be replaced by references");
+        JsonNode inputRefs = content.get("inputReferences");
+        assertNotNull(inputRefs);
+        assertEquals(1, inputRefs.size(), "Only inputs stored as attachments should be referenced");
+        JsonNode firstRef = inputRefs.get(0);
+        assertEquals("payload-input", firstRef.get("referenceName").asText());
+        assertEquals(ValidationStepOutputDissector.VALIDATION_INPUT, firstRef.get("referenceType").asText());
     }
 
     @Test
@@ -62,17 +71,12 @@ class ValidationStepOutputDissectorTest {
         StepRunReport step = new StepRunReport()
                 .addOutput(new ByteArrayProperty(ValidationStepDefinition.REPORT, sample.serializedReport()));
 
-        StepOutputProjection projection = dissect(step);
-        String persistedContent = projection.items().get(0).item().getContent();
+        StepOutputProjection projection = dissector.dissect(new StepOutputContext(step, new AccessControlList()));
+        String persistedContent = projection.items().getFirst().item().content();
 
         assertNotNull(persistedContent);
         assertFalse(persistedContent.contains(sample.encodedPayload()),
                 "Detached attachment payload must not remain in the stored report JSON");
-    }
-
-    private StepOutputProjection dissect(StepRunReport stepRunReport) {
-        StepOutputContext context = new StepOutputContext(stepRunReport, new TestRunReport(), new AccessControlList());
-        return dissector.dissect(context);
     }
 
     private SampleReport sampleReport() throws Exception {

@@ -13,9 +13,9 @@ public interface MaestroItem {
 
    AccessControlList getAccessControlList();
 
-   String getType();
+   String type();
 
-   String getContent();
+   String content();
 
    List<? extends MaestroReference> getReferences();
 

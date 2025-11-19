@@ -40,7 +40,10 @@ public class GazelleValidationServiceHandlerFactory implements HandlerFactory {
     }
 
     @Override
-    public Handler createHandler(HandlerContext handlerContext, ProvidedInterface providedInterface, ConfigProvider configProvider) throws IllegalArgumentException {
+   public Handler createHandler(HandlerContext handlerContext, ProvidedInterface providedInterface, ConfigProvider configProvider) throws IllegalArgumentException {
+        if (providedInterface == null || providedInterface.getBindings() == null || providedInterface.getBindings().isEmpty()) {
+            throw new IllegalArgumentException("Service " + (providedInterface != null ? providedInterface.getInterfaceName() : "Validation Service") + " has no bindings");
+        }
         try {
             HttpRestBinding binding = (HttpRestBinding) providedInterface.getBindings().getFirst();
             String interfaceVersion = providedInterface.getInterfaceVersion();
@@ -74,4 +77,3 @@ public class GazelleValidationServiceHandlerFactory implements HandlerFactory {
                 .build());
     }
 }
-

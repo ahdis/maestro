@@ -8,15 +8,13 @@ import java.util.Objects;
  * Describes a reference that must be appended to the enclosing TestReport item
  * when a given item has been persisted.
  */
-public record ReportReferenceBinding(
+public record ReferenceBinding(
       String referenceName,
       String referenceType,
       MaestroRefType refType
 ) {
 
-   public ReportReferenceBinding {
-      referenceName = Objects.requireNonNull(referenceName, "referenceName");
-      referenceType = Objects.requireNonNull(referenceType, "referenceType");
+   public ReferenceBinding {
       refType = Objects.requireNonNullElse(refType, MaestroRefType.ITEM_ID);
    }
 }

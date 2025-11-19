@@ -22,10 +22,8 @@ import java.util.List;
  */
 class SimulationStepOutputDissector implements StepOutputDissector {
 
-   // Shared mapper for translating between DTOs, business objects, and stored JSON content.
     private static final TextSerDes serDes = new JacksonSerDes();
 
-   // Item type constants understood by the Datahouse persistence layer.
    private static final String ITEM_TYPE_SIMULATION_REPORT = "SIMULATION_REPORT";
 
    @Override
@@ -47,8 +45,15 @@ class SimulationStepOutputDissector implements StepOutputDissector {
       ByteArrayProperty reportProperty = (ByteArrayProperty) outputs.get(reportIndex);
       SimulationReport simulationReport = deserializeReport(reportProperty);
 
-      StepOutputProjectionBuilder builder = new StepOutputProjectionBuilder();
-      ItemHandle reportHandle = appendReportItem(context, simulationReport, builder);
+      StepOutputGraphBuilder graph = new StepOutputGraphBuilder();
+      MaestroItem reportItem = createReportItem(context, simulationReport);
+      ItemOutputBuilder reportBuilder = graph.addItem(reportItem);
+      //This reference will be added to the enclosing TestRunReport item later on
+      reportBuilder.addReferenceBinding(new ReferenceBinding(
+              SimulationStepDefinition.REPORT,
+              ITEM_TYPE_SIMULATION_REPORT,
+              MaestroRefType.ITEM_ID
+      ));
 
       // Replace the original byte[] output with a reference to the persisted report hierarchy.
       PropertyReferenceFactory factory = (itemId, itemUrl) -> {
@@ -56,24 +61,9 @@ class SimulationStepOutputDissector implements StepOutputDissector {
          replacement.setValue(null);
          return replacement.setReference(itemUrl);
       };
-      builder.addPropertyMutation(reportIndex, reportHandle, factory);
+      reportBuilder.addPropertyReplacement(reportIndex, factory);
 
-      // Produce the projection: the builder handles ordering, bindings, and property mutations.
-      return builder.build();
-   }
-
-   // Builds the top-level simulation report item and marks it as the property replacement target.
-   private ItemHandle appendReportItem(StepOutputContext context,
-         SimulationReport simulationReport,
-         StepOutputProjectionBuilder builder) {
-      MaestroItem reportItem = createReportItem(context, simulationReport);
-      ItemHandle handle = builder.addItem(reportItem);
-      builder.addReportBinding(handle, new ReportReferenceBinding(
-            SimulationStepDefinition.REPORT,
-              ITEM_TYPE_SIMULATION_REPORT,
-            MaestroRefType.ITEM_ID
-      ));
-      return handle;
+      return graph.build();
    }
 
    private MaestroItem createReportItem(StepOutputContext context, SimulationReport simulationReport) {

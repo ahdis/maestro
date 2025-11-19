@@ -14,8 +14,8 @@ public class DatahouseMaestroItem implements MaestroItem {
 
    public DatahouseMaestroItem(MaestroItem item) {
       this.item = new Item();
-      this.item.setContent(item.getContent());
-      this.item.setType(item.getType());
+      this.item.setContent(item.content());
+      this.item.setType(item.type());
       this.item.setAccessControlList(item.getAccessControlList());
       this.item.setReferences(
               item.getReferences()
@@ -82,12 +82,12 @@ public class DatahouseMaestroItem implements MaestroItem {
    }
 
    @Override
-   public String getType() {
+   public String type() {
       return this.item.getType();
    }
 
    @Override
-   public String getContent() {
+   public String content() {
       return this.item.getContent();
    }
 

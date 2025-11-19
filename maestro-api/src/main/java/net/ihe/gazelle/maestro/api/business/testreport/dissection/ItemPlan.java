@@ -9,23 +9,22 @@ import java.util.Objects;
  * Description of an item that must be persisted by the recording implementation.
  *
  * @param item             fully populated descriptor ready to be converted before persistence
- * @param parentBindings   relations to parent items within the same projection.
- *                         A binding is evaluated once the current item has been persisted.
- *                         Implementations must ensure the referenced parent item appears
- *                         later in {@link StepOutputProjection#items()} so that the parent
- *                         can still be mutated before it is recorded.
+ * @param relationBindings instructions telling the persistence layer which item must receive
+ *                         a reference once the current entry has been persisted. The target
+ *                         item index must come later in {@link StepOutputProjection#items()}
+ *                         so that its references can still be updated before it is recorded.
  * @param reportBindings   references that should be added to the enclosing TestReport
  *                         when the current item is persisted.
  */
 public record ItemPlan(
       MaestroItem item,
-      List<ItemReferenceBinding> parentBindings,
-      List<ReportReferenceBinding> reportBindings
+      List<ItemRelationBinding> relationBindings,
+      List<ReferenceBinding> reportBindings
 ) {
 
    public ItemPlan {
       Objects.requireNonNull(item, "item");
-      parentBindings = List.copyOf(Objects.requireNonNullElse(parentBindings, List.of()));
+      relationBindings = List.copyOf(Objects.requireNonNullElse(relationBindings, List.of()));
       reportBindings = List.copyOf(Objects.requireNonNullElse(reportBindings, List.of()));
    }
 

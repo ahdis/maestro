@@ -55,9 +55,12 @@ public class EvsValidationHandler implements ValidationHandler {
 
    @Override
    public List<ValidationProfile> getValidationProfiles() {
-      return mapper.toValidationProfiles(
-            validationClient.getValidationProfilesByServiceName(serviceName)
-      );
+      List<net.ihe.gazelle.evsapi.client.business.ValidationServiceProfile> serviceProfiles =
+            validationClient.getValidationProfilesByServiceName(serviceName);
+      if (serviceProfiles == null || serviceProfiles.isEmpty()) {
+         return List.of();
+      }
+      return mapper.toValidationProfiles(serviceProfiles);
    }
 
    private net.ihe.gazelle.evsapi.client.business.response.report.ValidationReport validate(

@@ -59,7 +59,7 @@ public class StepOutputRecordService {
     }
 
 
-    // Persists the ordered items, wiring parent/report references as we go, and returns the ids/urls for later mutations.
+    // Persists the ordered items, wiring relation/report references as we go, and returns the ids/urls for later mutations.
     private ItemPersistenceState persistItems(List<ItemPlan> itemPlans,
                                               List<Reference> reportReferences,
                                               AccessControlList acl) {
@@ -125,7 +125,7 @@ public class StepOutputRecordService {
     }
 
     private void appendReportBindings(List<Reference> reportReferences, ItemPlan itemPlan, String itemId) {
-        for (ReportReferenceBinding binding : itemPlan.reportBindings()) {
+        for (ReferenceBinding binding : itemPlan.reportBindings()) {
             reportReferences.add(new Reference()
                     .setName(binding.referenceName())
                     .setType(binding.referenceType())
@@ -135,13 +135,13 @@ public class StepOutputRecordService {
     }
 
     private void wireParentBindings(List<ItemPlan> itemPlans, List<Item> datahouseItems, int currentIndex, String childItemId, ItemPlan childPlan) {
-        for (ItemReferenceBinding binding : childPlan.parentBindings()) {
-            validateParentIndex(binding.parentItemIndex(), currentIndex, itemPlans.size());
-            Item parent = datahouseItems.get(binding.parentItemIndex());
-            if (parent.getReferences() == null) {
-                parent.setReferences(new ArrayList<>());
+        for (ItemRelationBinding binding : childPlan.relationBindings()) {
+            validateReferencingIndex(binding.referencingItemIndex(), currentIndex, itemPlans.size());
+            Item referencingItem = datahouseItems.get(binding.referencingItemIndex());
+            if (referencingItem.getReferences() == null) {
+                referencingItem.setReferences(new ArrayList<>());
             }
-            parent.addReference(new Reference()
+            referencingItem.addReference(new Reference()
                     .setName(binding.referenceName())
                     .setType(binding.referenceType())
                     .setRefType(DatahouseMaestroReference.toDatahouseRefType(binding.refType()))
@@ -149,9 +149,9 @@ public class StepOutputRecordService {
         }
     }
 
-    private void validateParentIndex(int parentIndex, int childIndex, int maxSize) {
-        if (parentIndex <= childIndex || parentIndex >= maxSize) {
-            throw new IllegalStateException("Parent item index must refer to an item persisted after the child");
+    private void validateReferencingIndex(int referencingIndex, int childIndex, int maxSize) {
+        if (referencingIndex <= childIndex || referencingIndex >= maxSize) {
+            throw new IllegalStateException("Referencing item index must point to an item persisted after the child");
         }
     }
 

@@ -1,5 +1,6 @@
 package net.ihe.gazelle.maestro.validation.step.technical.record;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
@@ -7,10 +8,19 @@ import net.ihe.gazelle.maestro.api.business.recording.MaestroAttachment;
 import net.ihe.gazelle.maestro.api.business.recording.MaestroItem;
 import net.ihe.gazelle.maestro.api.business.recording.MaestroRefType;
 import net.ihe.gazelle.maestro.api.business.testreport.ByteArrayItemProperty;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.*;
+import net.ihe.gazelle.maestro.api.business.testreport.dissection.AttachmentOutputBuilder;
+import net.ihe.gazelle.maestro.api.business.testreport.dissection.ItemOutputBuilder;
+import net.ihe.gazelle.maestro.api.business.testreport.dissection.PropertyReferenceFactory;
+import net.ihe.gazelle.maestro.api.business.testreport.dissection.ReferenceBinding;
+import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputContext;
+import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputDissector;
+import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputGraphBuilder;
+import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputProjection;
 import net.ihe.gazelle.maestro.recording.DatahouseMaestroAttachment;
 import net.ihe.gazelle.maestro.recording.DatahouseMaestroItem;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;
+import net.ihe.gazelle.maestro.validation.step.technical.record.dto.ValidationInputReferenceDTO;
+import net.ihe.gazelle.maestro.validation.step.technical.record.dto.ValidationReportItemDTO;
 import net.ihe.gazelle.validation.v2.api.business.Input;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
 
@@ -20,7 +30,8 @@ import java.util.List;
 
 public class ValidationStepOutputDissector implements StepOutputDissector {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     public static final String VALIDATION_INPUT = "VALIDATION_INPUT";
 
     @Override
@@ -42,13 +53,14 @@ public class ValidationStepOutputDissector implements StepOutputDissector {
         }
         byte[] validationReportBytes = validationReportProperty.getValue();
         ValidationReport validationReport = deserializeReport(validationReportBytes);
-        List<AttachmentPlan> inputAttachments = extractInputAttachments(validationReport);
-        StepOutputProjectionBuilder builder = new StepOutputProjectionBuilder();
-        MaestroItem reportItem = createItem(serializeReport(validationReport), context);
-        ItemHandle handle = builder.addItem(reportItem);
-        builder.addReportBinding(
-                handle,
-                new ReportReferenceBinding(
+        InputAttachmentExtraction extraction = extractInputAttachments(validationReport);
+        List<AttachmentOutputBuilder> inputAttachments = extraction.plans();
+        StepOutputGraphBuilder graph = new StepOutputGraphBuilder();
+        MaestroItem reportItem = createItem(serializeReport(validationReport, extraction.referencedInputs()), context);
+        ItemOutputBuilder reportBuilder = graph.addItem(reportItem);
+        //This reference will be added to the enclosing TestRunReport item later on
+        reportBuilder.addReferenceBinding(
+                new ReferenceBinding(
                         ValidationStepDefinition.REPORT,
                         ValidationStepDefinition.REPORT,
                         MaestroRefType.ITEM_ID
@@ -56,11 +68,11 @@ public class ValidationStepOutputDissector implements StepOutputDissector {
         );
 
         //process validation inputs as attachments
-        inputAttachments.forEach(builder::addAttachment);
+        reportBuilder.addAttachments(inputAttachments);
         PropertyReferenceFactory factory = createPropertyFactory(validationReportProperty);
-        builder.addPropertyMutation(validationReportIndex, handle, factory);
+        reportBuilder.addPropertyReplacement(validationReportIndex, factory);
 
-        return builder.build();
+        return graph.build();
     }
 
     private static PropertyReferenceFactory createPropertyFactory(ByteArrayProperty validationReportProperty) {
@@ -79,9 +91,10 @@ public class ValidationStepOutputDissector implements StepOutputDissector {
         }
     }
 
-    private String serializeReport(ValidationReport report) {
+    private String serializeReport(ValidationReport report, List<Input> referencedInputs) {
         try {
-            return OBJECT_MAPPER.writeValueAsString(report);
+            ValidationReportItemDTO dto = new ValidationReportItemDTO(report, VALIDATION_INPUT, referencedInputs);
+            return OBJECT_MAPPER.writeValueAsString(dto);
         } catch (IOException e) {
             throw new IllegalStateException("Failed to serialize ValidationReport to JSON", e);
         }
@@ -95,17 +108,19 @@ public class ValidationStepOutputDissector implements StepOutputDissector {
                 .setReferences(new ArrayList<>());
     }
 
-    private List<AttachmentPlan> extractInputAttachments(ValidationReport validationReport) {
-        List<AttachmentPlan> plans = new ArrayList<>();
+    private InputAttachmentExtraction extractInputAttachments(ValidationReport validationReport) {
+        List<AttachmentOutputBuilder> plans = new ArrayList<>();
+        List<Input> referencedInputs = new ArrayList<>();
         if (validationReport.getInputs() == null) {
-            return plans;
+            return new InputAttachmentExtraction(plans, referencedInputs);
         }
         for (Input input : validationReport.getInputs()) {
             if (input.getContent() != null) {
                 plans.add(createAttachmentPlan(input));
+                referencedInputs.add(input);
             }
         }
-        return plans;
+        return new InputAttachmentExtraction(plans, referencedInputs);
     }
 
     private MaestroAttachment createAttachmentFromInput(Input input) {
@@ -118,10 +133,19 @@ public class ValidationStepOutputDissector implements StepOutputDissector {
                 .setFilename(input.getId());
     }
 
-    private AttachmentPlan createAttachmentPlan(Input input) {
+    private AttachmentOutputBuilder createAttachmentPlan(Input input) {
         MaestroAttachment attachment = createAttachmentFromInput(input);
         input.setContent(null);
-        return AttachmentPlan.detached(attachment, input.getId(), VALIDATION_INPUT);
+        return new AttachmentOutputBuilder(attachment)
+                .withReference(referenceName(input), VALIDATION_INPUT);
+    }
+
+    private String referenceName(Input input) {
+        return ValidationInputReferenceDTO.resolveReferenceName(input.getId());
+    }
+
+    private record InputAttachmentExtraction(List<AttachmentOutputBuilder> plans,
+                                             List<Input> referencedInputs) {
     }
 
     private int findValidationReport(List<Property> outputs) {

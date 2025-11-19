@@ -4,7 +4,6 @@ import com.kereval.gazelle.datahouse.api.business.record.Attachment;
 import net.ihe.gazelle.maestro.api.business.recording.MaestroAttachment;
 
 import java.util.Arrays;
-import java.util.Objects;
 
 public class DatahouseMaestroAttachment implements MaestroAttachment {
 
@@ -45,7 +44,7 @@ public class DatahouseMaestroAttachment implements MaestroAttachment {
    }
 
    @Override
-   public String getFilename() {
+   public String filename() {
       return attachment.getFilename();
    }
 
