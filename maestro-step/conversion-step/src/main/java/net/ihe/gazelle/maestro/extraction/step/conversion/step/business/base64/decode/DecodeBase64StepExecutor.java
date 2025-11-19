@@ -19,8 +19,8 @@ import static net.ihe.gazelle.maestro.extraction.step.conversion.step.business.b
 
 public class DecodeBase64StepExecutor implements StepExecutor {
 
-
     public DecodeBase64StepExecutor() {
+        // Default constructor
     }
 
     @Override

@@ -71,10 +71,16 @@ public class XmlExtractionServiceImpl implements XmlExtractionService {
         }
     }
 
+    /**
+     * Handle namespace declarations for the XPath compiler.
+     * @param namespaces The map of namespace prefixes to URIs.
+     * @param xpathCompiler The XPath compiler to declare namespaces on.
+     * @param document The XML document node for auto-detection of namespaces if needed.
+     */
     private void handleNameSpaces(Map<String, String> namespaces, XPathCompiler xpathCompiler, XdmNode document) {
         if (namespaces == null || namespaces.isEmpty()) {
             // If no custom namespaces provided, auto-detect from document
-            declareNamespaces(xpathCompiler, document);
+            declareNamespacesFromDocument(xpathCompiler, document);
         } else {
             // Use provided custom namespaces
             for (Map.Entry<String, String> namespace : namespaces.entrySet()) {
@@ -97,7 +103,7 @@ public class XmlExtractionServiceImpl implements XmlExtractionService {
      * This method extracts namespace declarations from the document and makes them available to XPath.
      * It recursively collects all namespace declarations from all elements in the document.
      */
-    private void declareNamespaces(XPathCompiler compiler, XdmNode document) {
+    private void declareNamespacesFromDocument(XPathCompiler compiler, XdmNode document) {
         // Collect all namespace declarations from the entire document
         java.util.Map<String, String> namespaceMap = new java.util.HashMap<>();
         collectNamespaces(document, namespaceMap);

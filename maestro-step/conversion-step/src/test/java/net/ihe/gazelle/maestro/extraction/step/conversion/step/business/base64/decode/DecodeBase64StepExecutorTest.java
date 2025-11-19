@@ -1,11 +1,13 @@
 package net.ihe.gazelle.maestro.extraction.step.conversion.step.business.base64.decode;
 
+import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.spi.business.StepRun;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static net.ihe.gazelle.maestro.api.business.testreport.StepResult.DONE;
@@ -30,8 +32,7 @@ class DecodeBase64StepExecutorTest {
         assertEquals(DONE, stepRunReport.getResult());
         assertEquals(1, stepRunReport.getOutputs().size());
         assertTrue(stepRunReport.getOutputs().stream().anyMatch(output ->
-                output.getName().equals(DECODED_CONTENT) &&
-                output.getValue().equals("Hello World!")
+                isPropertyEqualsTo(output,"Hello World!")
         ));
     }
 
@@ -99,10 +100,9 @@ class DecodeBase64StepExecutorTest {
         // Then: The step should succeed with decoded content
         assertEquals(DONE, stepRunReport.getResult());
         assertEquals(1, stepRunReport.getOutputs().size());
-        assertTrue(stepRunReport.getOutputs().stream().anyMatch(output ->
-                output.getName().equals(DECODED_CONTENT) &&
-                output.getValue().equals("Test")
-        ));
+        assertTrue(stepRunReport.getOutputs().stream()
+                .anyMatch(output -> isPropertyEqualsTo(output, "Test"))
+        );
     }
 
     @Test
@@ -117,9 +117,7 @@ class DecodeBase64StepExecutorTest {
         // Then: The step should succeed with decoded content
         assertEquals(DONE, stepRunReport.getResult());
         assertEquals(1, stepRunReport.getOutputs().size());
-        assertTrue(stepRunReport.getOutputs().stream().anyMatch(output ->
-                output.getName().equals(DECODED_CONTENT) &&
-                output.getValue().equals("éèàçõ")
+        assertTrue(stepRunReport.getOutputs().stream().anyMatch(output ->isPropertyEqualsTo(output, "éèàçõ")
         ));
     }
 
@@ -131,6 +129,14 @@ class DecodeBase64StepExecutorTest {
                 .setProperties(List.of(
                         new StringProperty(CONTENT_TO_DECODE, contentToDecode)
                 ));
+    }
+
+    private static boolean isPropertyEqualsTo(Property output, String expectedValue) {
+        if (output.getName().equals(DECODED_CONTENT)) {
+            String result = new String(output.getValue(), StandardCharsets.UTF_8);
+            return result.equals(expectedValue);
+        }
+        return false;
     }
 }
 

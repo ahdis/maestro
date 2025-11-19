@@ -26,6 +26,7 @@ public class XmlExtractionStepDefinition implements StepDefinition {
     public static final String FAILURE_MESSAGE = "failureMessage";
 
     public XmlExtractionStepDefinition() {
+        // Default constructor
     }
 
     @Override

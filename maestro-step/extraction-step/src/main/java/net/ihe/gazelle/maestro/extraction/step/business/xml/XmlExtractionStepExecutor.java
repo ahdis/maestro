@@ -17,6 +17,9 @@ import static net.ihe.gazelle.maestro.api.business.testreport.StepResult.DONE;
 import static net.ihe.gazelle.maestro.api.business.testreport.StepResult.UNDEFINED;
 import static net.ihe.gazelle.maestro.extraction.step.business.xml.XmlExtractionStepDefinition.*;
 
+/**
+ * Executor for XML extraction step.
+ */
 public class XmlExtractionStepExecutor implements StepExecutor {
 
     private final XmlExtractionService xmlExtractionService;
