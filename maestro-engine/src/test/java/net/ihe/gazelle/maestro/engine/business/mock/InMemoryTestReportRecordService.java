@@ -37,4 +37,8 @@ public class InMemoryTestReportRecordService implements TestReportRecordService 
     public void failNextWith(TestReportRecordException exception) {
         nextFailure.set(exception);
     }
+
+    public void clear() {
+        recordedReports.clear();
+    }
 }

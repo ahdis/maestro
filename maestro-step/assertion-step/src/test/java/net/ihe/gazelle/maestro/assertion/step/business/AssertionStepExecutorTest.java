@@ -16,86 +16,104 @@
 
 package net.ihe.gazelle.maestro.assertion.step.business;
 
+import net.ihe.gazelle.maestro.api.business.property.Property;
+import net.ihe.gazelle.maestro.api.business.property.StringProperty;
+import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
-import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
-import net.ihe.gazelle.maestro.api.business.testrun.Property;
-import net.ihe.gazelle.maestro.assertion.step.technical.handler.AssertionHandlerImpl;
+import net.ihe.gazelle.maestro.api.business.testreport.validator.StepRunReportValidator;
+import net.ihe.gazelle.maestro.assertion.step.business.contains.AssertContainsStepDefinition;
+import net.ihe.gazelle.maestro.assertion.step.business.contains.AssertContainsStepExecutor;
+import net.ihe.gazelle.maestro.assertion.step.business.equals.AssertEqualsStepDefinition;
+import net.ihe.gazelle.maestro.assertion.step.business.equals.AssertEqualsStepExecutor;
 import net.ihe.gazelle.maestro.spi.business.StepRun;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class AssertionStepExecutorTest {
 
-    private static AssertionStep buildStep(String name) {
-        Property<byte[]> assertion = new Property<>(AssertionStep.ASSERTION, new byte[]{1});
-        Property<String> assertionService = new Property<>(AssertionStep.ASSERTION_SERVICE, "dummy");
-        return new AssertionStep(name, assertion, assertionService);
-    }
-
     @Test
-    void execute_returnsPassedReport_whenHandlerReturnsTrue() throws Exception {
-        AssertionHandler handler = new AssertionHandler() {
-            @Override
-            public boolean assertion(AssertionStep assertionStep) {
-                return true;
-            }
+    void execute_assert_equals_passed() throws Exception {
+        AssertEqualsStepExecutor runner = new AssertEqualsStepExecutor();
+        Step step = buildStep(AssertEqualsStepDefinition.TYPE);
+        Property expected = new StringProperty(AssertEqualsStepDefinition.EXPECTED, "Expected");
+        Property actual = new StringProperty(AssertEqualsStepDefinition.ACTUAL, "Expected");
+        step.setProperties(List.of(expected, actual));
+        StepRun stepRun = new StepRun(step, List.of());
 
-            @Override
-            public boolean isAvailable() {
-                return true;
-            }
-        };
-
-        AssertionStepExecutor runner = new AssertionStepExecutor(handler);
-        AssertionStep step = buildStep("assert-step-pass");
-        StepRun stepRun = new StepRun("ts", "tr", step);
-
-        CompletableFuture<StepRunReportBuilder> future = runner.execute(stepRun);
-        StepRunReportBuilder builder = future.get(1, TimeUnit.SECONDS);
-        StepRunReport report = builder.build();
+        CompletableFuture<StepRunReport> future = runner.execute(stepRun);
+        StepRunReport report = future.get(1, TimeUnit.SECONDS);
 
         assertEquals(step.getName(), report.getStepId());
-        assertEquals(AssertionStep.TYPE, report.getType());
+        assertEquals(AssertEqualsStepDefinition.TYPE, report.getType());
         assertEquals(StepResult.PASSED, report.getResult());
-        assertTrue(report.isValid());
+        assertDoesNotThrow(() -> new StepRunReportValidator().validate(report));
     }
 
     @Test
-    void execute_returnsFailedReport_whenHandlerReturnsFalse() throws Exception {
-        AssertionHandler handler = new AssertionHandler() {
-            @Override
-            public boolean assertion(AssertionStep assertionStep) {
-                return false;
-            }
+    void execute_assert_equals_failed() throws Exception {
+        AssertEqualsStepExecutor runner = new AssertEqualsStepExecutor();
+        Step step = buildStep(AssertEqualsStepDefinition.TYPE);
+        Property expected = new StringProperty(AssertEqualsStepDefinition.EXPECTED, "Expected");
+        Property actual = new StringProperty(AssertEqualsStepDefinition.ACTUAL, "Actual");
+        step.setProperties(List.of(expected, actual));
+        StepRun stepRun = new StepRun(step, List.of());
 
-            @Override
-            public boolean isAvailable() {
-                return true;
-            }
-        };
-
-        AssertionStepExecutor runner = new AssertionStepExecutor(handler);
-        AssertionStep step = buildStep("assert-step-fail");
-        StepRun stepRun = new StepRun("ts", "tr", step);
-
-        CompletableFuture<StepRunReportBuilder> future = runner.execute(stepRun);
-        StepRunReportBuilder builder = future.get(1, TimeUnit.SECONDS);
-        StepRunReport report = builder.build();
+        CompletableFuture<StepRunReport> future = runner.execute(stepRun);
+        StepRunReport report = future.get(1, TimeUnit.SECONDS);
 
         assertEquals(step.getName(), report.getStepId());
-        assertEquals(AssertionStep.TYPE, report.getType());
+        assertEquals(AssertEqualsStepDefinition.TYPE, report.getType());
         assertEquals(StepResult.FAILED, report.getResult());
-        assertTrue(report.isValid());
+        assertDoesNotThrow(() -> new StepRunReportValidator().validate(report));
     }
 
     @Test
-    void getSupportedStep_returnsAssertionType() {
-        AssertionStepExecutor runner = new AssertionStepExecutor(new AssertionHandlerImpl());
-        assertEquals(AssertionStep.TYPE, runner.getSupportedStep());
+    void execute_assert_contains_passed() throws Exception {
+        AssertContainsStepExecutor runner = new AssertContainsStepExecutor();
+        Step step = buildStep(AssertContainsStepDefinition.TYPE);
+        Property expected = new StringProperty(AssertEqualsStepDefinition.EXPECTED, "Expected");
+        Property actual = new StringProperty(AssertEqualsStepDefinition.ACTUAL, "Expected");
+        step.setProperties(List.of(expected, actual));
+        StepRun stepRun = new StepRun(step, List.of());
+
+        CompletableFuture<StepRunReport> future = runner.execute(stepRun);
+        StepRunReport report = future.get(1, TimeUnit.SECONDS);
+
+        assertEquals(step.getName(), report.getStepId());
+        assertEquals(AssertContainsStepDefinition.TYPE, report.getType());
+        assertEquals(StepResult.PASSED, report.getResult());
+        assertDoesNotThrow(() -> new StepRunReportValidator().validate(report));
+    }
+
+    @Test
+    void execute_assert_contains_failed() throws Exception {
+        AssertContainsStepExecutor runner = new AssertContainsStepExecutor();
+        Step step = buildStep(AssertContainsStepDefinition.TYPE);
+        Property expected = new StringProperty(AssertEqualsStepDefinition.EXPECTED, "Expected");
+        Property actual = new StringProperty(AssertEqualsStepDefinition.ACTUAL, "Actual");
+        step.setProperties(List.of(expected, actual));
+        StepRun stepRun = new StepRun(step, List.of());
+
+        CompletableFuture<StepRunReport> future = runner.execute(stepRun);
+        StepRunReport report = future.get(1, TimeUnit.SECONDS);
+
+        assertEquals(step.getName(), report.getStepId());
+        assertEquals(AssertContainsStepDefinition.TYPE, report.getType());
+        assertEquals(StepResult.FAILED, report.getResult());
+        assertDoesNotThrow(() -> new StepRunReportValidator().validate(report));
+    }
+
+    private static Step buildStep(String type) {
+        return new Step()
+                .setId("step")
+                .setName("step")
+                .setType(type);
     }
 }

@@ -1,6 +1,5 @@
 package net.ihe.gazelle.maestro.api.business.testreport;
 
-import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractBuilder;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;

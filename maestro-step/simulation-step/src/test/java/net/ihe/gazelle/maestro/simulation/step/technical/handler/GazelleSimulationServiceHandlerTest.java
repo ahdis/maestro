@@ -51,20 +51,20 @@ class GazelleSimulationServiceHandlerTest {
 
     @Test
     void isAvailable_returnsTrue_whenClientProvidesSequences() {
-        when(simulationClient.getSimulationSequences()).thenReturn(List.of(mock(SimulationSequence.class)));
+        when(simulationClient.getChecksum(List.of())).thenReturn("0x12345678");
         GazelleSimulationServiceHandler handler = new GazelleSimulationServiceHandler(simulationClient);
 
         assertTrue(handler.isAvailable());
-        verify(simulationClient, times(1)).getSimulationSequences();
+        verify(simulationClient, times(1)).getChecksum(List.of());
     }
 
     @Test
     void isAvailable_returnsFalse_whenClientThrows() {
-        when(simulationClient.getSimulationSequences()).thenThrow(new RuntimeException("boom"));
+        when(simulationClient.getChecksum(List.of())).thenThrow(new RuntimeException("boom"));
         GazelleSimulationServiceHandler handler = new GazelleSimulationServiceHandler(simulationClient);
 
         assertFalse(handler.isAvailable());
-        verify(simulationClient, times(1)).getSimulationSequences();
+        verify(simulationClient, times(1)).getChecksum(List.of());
     }
 
     @Test

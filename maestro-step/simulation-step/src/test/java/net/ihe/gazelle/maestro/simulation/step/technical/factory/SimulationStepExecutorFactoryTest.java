@@ -16,8 +16,11 @@
 
 package net.ihe.gazelle.maestro.simulation.step.technical.factory;
 
+import net.ihe.gazelle.maestro.api.business.property.BooleanProperty;
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
+import net.ihe.gazelle.maestro.api.business.property.IntegerProperty;
+import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.test.Step;
-import net.ihe.gazelle.maestro.api.business.testrun.Property;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepDefinition;
 import org.junit.jupiter.api.Test;
 
@@ -31,20 +34,26 @@ class SimulationStepExecutorFactoryTest {
 
     @Test
     void canonicalNameTest(){
-        assertEquals(SimulationStep.class.getCanonicalName(), factory.getSupportedStep());
+        assertEquals(SimulationStepDefinition.TYPE, factory.getSupportedStep());
     }
 
     @Test
     void getRequiredServicesOfSimulationStep(){
-        Step simulationStep = new SimulationStep("simulationStep",
-                new Property<>(SimulationStepDefinition.SIMULATION_SERVICE, "MCSD"),
-                new Property<>(SimulationStepDefinition.SEQUENCE_ID, "sequencId"),
-                new Property<>(SimulationStepDefinition.TIMEOUT_SECONDS, 60),
-                List.of(
-                        new Property<>("Patient Id", "1.1.1.1"),
-                        new Property<>("Boolean prop", true),
-                        new Property<>("File prop", "test".getBytes())
-                ));
+        Step simulationStep = new Step()
+                .setId("sim-step")
+                .setName("simulationStep")
+                .setType(SimulationStepDefinition.TYPE)
+                .setProperties(List.of(
+                        new StringProperty(SimulationStepDefinition.SIMULATION_SERVICE, "MCSD"),
+                        new StringProperty(SimulationStepDefinition.SEQUENCE_ID, "sequencId"),
+                        new IntegerProperty(SimulationStepDefinition.TIMEOUT_SECONDS, 60)
+                ))
+                .addProperties(List.of(
+                                new StringProperty("Patient Id", "1.1.1.1"),
+                                new BooleanProperty("Boolean prop", true),
+                                new ByteArrayProperty("File prop", "test".getBytes())
+                        )
+                );
         assertEquals(2, factory.getRequiredServices(simulationStep).size());
     }
 }

@@ -17,10 +17,11 @@
 package net.ihe.gazelle.maestro.quarkus.factory;
 
 import net.ihe.gazelle.maestro.api.business.Maestro;
-import net.ihe.gazelle.maestro.api.business.recording.ItemReference;
 import net.ihe.gazelle.maestro.engine.business.HardWiredEventBroker;
+import net.ihe.gazelle.maestro.engine.business.MetadataServiceMock;
 import net.ihe.gazelle.maestro.engine.business.StepExecutorProvider;
 import net.ihe.gazelle.maestro.engine.business.TestRunner;
+import net.ihe.gazelle.maestro.engine.business.mock.InMemoryTestReportRecordService;
 import net.ihe.gazelle.maestro.quarkus.handler.HandlerProviderMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,14 +36,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class FactoryTest {
 
-    private ExecutorService executorService;
     private MaestroFactory maestroFactory;
     private ServicesFactory servicesFactory;
 
     @BeforeEach
     void setUp() {
-        executorService = Executors.newCachedThreadPool();
-        TestRunMockEvent testRunMockEvent = new TestRunMockEvent();
+        ExecutorService executorService = Executors.newCachedThreadPool();
 
         servicesFactory = new ServicesFactory(
                 new HandlerProviderMock()
@@ -54,10 +53,12 @@ class FactoryTest {
                 new SessionStoreImpl<>(),
                 new SessionStoreImpl<>(),
                 new HardWiredEventBroker(executorService),
-                new SessionStoreImpl(),
-                testReport -> new ItemReference("test", null),
+                new HardWiredEventBroker(executorService),
+                new HardWiredEventBroker(executorService),
+                new HardWiredEventBroker(executorService),
+                new InMemoryTestReportRecordService(),
                 servicesFactory.getStepRunnerProvider(),
-
+                new MetadataServiceMock()
                 );
 
     }

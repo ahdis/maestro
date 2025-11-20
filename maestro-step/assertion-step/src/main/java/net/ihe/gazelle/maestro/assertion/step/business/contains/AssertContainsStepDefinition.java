@@ -6,10 +6,14 @@ import net.ihe.gazelle.maestro.api.business.test.SupportedInput;
 import net.ihe.gazelle.maestro.api.business.test.SupportedTextInput;
 import net.ihe.gazelle.maestro.spi.business.StepDefinition;
 
+import java.io.Serial;
 import java.util.List;
 import java.util.Map;
 
 public class AssertContainsStepDefinition implements StepDefinition {
+
+    @Serial
+    private static final long serialVersionUID = 2642778063856137804L;
 
    public static final String TYPE = "ASSERT_CONTAINS";
 
@@ -21,9 +25,9 @@ public class AssertContainsStepDefinition implements StepDefinition {
    public static final String FAILURE_MESSAGE = "failureMessage";
 
 
-   @Override
+    @Override
    public String getType() {
-      return "ASSERT_EQUALS";
+      return TYPE;
    }
 
    @Override

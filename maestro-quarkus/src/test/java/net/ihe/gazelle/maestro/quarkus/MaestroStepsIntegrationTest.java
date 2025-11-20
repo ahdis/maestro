@@ -17,306 +17,271 @@
 package net.ihe.gazelle.maestro.quarkus;
 
 import net.ihe.gazelle.maestro.api.business.SynchronousMaestro;
+import net.ihe.gazelle.maestro.api.business.property.*;
 import net.ihe.gazelle.maestro.api.business.test.Step;
+import net.ihe.gazelle.maestro.api.business.test.TestSuite;
 import net.ihe.gazelle.maestro.api.business.testreport.Result;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
-import net.ihe.gazelle.maestro.api.business.testrun.Property;
-import net.ihe.gazelle.maestro.api.business.testrun.PropertyRef;
-import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
-import net.ihe.gazelle.maestro.assertion.step.business.AssertionStep;
+import net.ihe.gazelle.maestro.assertion.step.business.equals.AssertEqualsStepDefinition;
+import net.ihe.gazelle.maestro.engine.business.HardWiredEventBroker;
 import net.ihe.gazelle.maestro.engine.business.MaestroImpl;
-import net.ihe.gazelle.maestro.engine.business.StepRunner;
-import net.ihe.gazelle.maestro.engine.business.TestRunner;
+import net.ihe.gazelle.maestro.engine.business.MaestroRecorderImpl;
+import net.ihe.gazelle.maestro.engine.business.MetadataServiceMock;
 import net.ihe.gazelle.maestro.engine.business.mock.InMemoryTestReportRecordService;
-import technical.dao.SessionStoreImpl;
 import net.ihe.gazelle.maestro.quarkus.broker.MaestroEventController;
 import net.ihe.gazelle.maestro.quarkus.factory.TestRunMockEvent;
-import net.ihe.gazelle.maestro.quarkus.handler.HandlerProviderMock;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepDefinition;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import technical.provider.StepExecutorSPIProvider;
+import technical.dao.SessionStoreImpl;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeoutException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 class MaestroStepsIntegrationTest {
 
-   private static SynchronousMaestro synchronousMaestro;
-   private static InMemoryTestReportRecordService testReportRecordService;
-   private static MaestroImpl maestroImpl;
+    private static SynchronousMaestro synchronousMaestro;
+    private static InMemoryTestReportRecordService testReportRecordService;
 
-   @BeforeAll
-   static void setUp() {
-      TestRunMockEvent testRunMockEvent = new TestRunMockEvent();
-      EventMaestroProducer eventProducer = new EventMaestroProducer(testRunMockEvent);
-      testReportRecordService = new InMemoryTestReportRecordService();
-      TestRunner maestro = new TestRunner(
-            eventProducer,
-            new SessionStoreImpl(),
-            testReportRecordService, "999.0.0"
-      );
-      maestroImpl = new MaestroImpl(eventProducer);
-      synchronousMaestro = new SynchronousMaestro(10, maestroImpl);
-      StepRunner stepRunner = new StepRunner(
-            new StepExecutorSPIProvider(new HandlerProviderMock()),
-            eventProducer
-      );
-      MaestroEventController eventListener = new MaestroEventController(maestro, maestroImpl, stepRunner);
-      testRunMockEvent.addListener(eventListener);
-   }
+    @BeforeAll
+    static void setUp() {
+        ExecutorService executorService = Executors.newCachedThreadPool();
+        TestRunMockEvent testRunMockEvent = new TestRunMockEvent();
+        testReportRecordService = new InMemoryTestReportRecordService();
+        MaestroImpl maestroImpl = new MaestroImpl(
+                new SessionStoreImpl<>(),
+                new SessionStoreImpl<>(),
+                new HardWiredEventBroker(executorService),
+                new MetadataServiceMock()
+        );
+        synchronousMaestro = new SynchronousMaestro(10, new MaestroRecorderImpl(maestroImpl, testReportRecordService));
+        MaestroEventController eventListener = new MaestroEventController(maestroImpl, testRunMockEvent);
+        testRunMockEvent.addListener(eventListener);
+    }
 
 
-   @Test
-   void testMaestroValidationStep() throws ExecutionException, InterruptedException, TimeoutException {
-      testReportRecordService.clear(); // Clear previous test data
+    @Test
+    void testMaestroValidationStep() throws InterruptedException, TimeoutException {
+        testReportRecordService.clear(); // Clear previous test data
 
-      TestSuiteRun testSuiteRun = getTestRunsWithOneValidationStep();
-      TestReportSummary reportSummary = synchronousMaestro.executeTestSuite(testSuiteRun);
+        TestSuiteRun testSuiteRun = getTestRunsWithOneValidationStep();
+        TestReport report = synchronousMaestro.executeTestSuite(testSuiteRun, false);
 
-      // Verify the summary contains basic information
-      assertNotNull(reportSummary);
-      assertEquals(Result.UNDEFINED, reportSummary.getResult());
-      assertNotNull(reportSummary.getId(), "Report summary should have an ID");
+        // Verify the summary contains basic information
+        assertNotNull(report);
+        assertEquals(Result.UNDEFINED, report.getResult());
+        assertNotNull(report.getUuid(), "Report summary should have an ID");
 
-      // Verify persistence behavior - the full report should be stored
-      assertTrue(testReportRecordService.getStoredReportsCount() > 0, "TestReport should be persisted");
+        // Verify persistence behavior - the full report should be stored
+        assertFalse(testReportRecordService.getRecordedReports().isEmpty(), "TestReport should be persisted");
 
-      // Retrieve the full report from storage using the ID
-      TestReport fullReport = testReportRecordService.getStoredReport(reportSummary.getId());
-      assertNotNull(fullReport, "Should be able to retrieve full report from storage");
+        // Retrieve the full report from storage using the ID
+        TestReport fullReport = testReportRecordService.getRecordedReports().getFirst();
+        assertNotNull(fullReport, "Should be able to retrieve full report from storage");
 
-      // Verify the full report details
-      List<TestRunReport> testRunReports = fullReport.getTestRunReports();
-      assertEquals(1, testRunReports.size());
-      assertEquals(1, testRunReports.getFirst().getStepRunReports().size());
-      assertEquals(1, fullReport.getTestCounters().getTotal());
-      assertEquals(1, fullReport.getTestCounters().getUndefined());
+        // Verify the full report details
+        List<TestRunReport> testRunReports = fullReport.getTestRunReports();
+        assertEquals(1, testRunReports.size());
+        assertEquals(1, testRunReports.getFirst().getStepRunReports().size());
+        assertEquals(1, fullReport.getTestCounters().getTotal());
+        assertEquals(1, fullReport.getTestCounters().getUndefined());
+    }
 
-      // Verify that inputs with content were stored as attachments
-      if (hasInputsWithContent(testSuiteRun.getTestRuns())) {
-         assertTrue(testReportRecordService.getStoredAttachmentsCount() > 0, "Input attachments should be stored");
-      }
-   }
+    @Test
+    void testMaestroSimulationStep() throws InterruptedException, TimeoutException {
+        testReportRecordService.clear(); // Clear previous test data
 
-   @Test
-   void testMaestroSimulationStep() throws ExecutionException, InterruptedException, TimeoutException {
-      testReportRecordService.clear(); // Clear previous test data
+        TestSuiteRun testSuiteRun = getTestRunsWithOneSimulationStep();
+        TestReport report = synchronousMaestro.executeTestSuite(testSuiteRun, false);
 
-      TestSuiteRun testSuiteRun = getTestRunsWithOneSimulationStep();
-      TestReportSummary reportSummary = synchronousMaestro.executeTestSuite(testSuiteRun);
+        // Verify the summary
+        assertNotNull(report);
+        assertEquals(Result.PASSED, report.getResult());
+        assertNotNull(report.getUuid(), "Report summary should have an ID");
 
-      // Verify the summary
-      assertNotNull(reportSummary);
-      assertEquals(Result.PASSED, reportSummary.getResult());
-      assertNotNull(reportSummary.getId(), "Report summary should have an ID");
+        // Verify persistence behavior
+        assertFalse(testReportRecordService.getRecordedReports().isEmpty(), "TestReport should be persisted");
 
-      // Verify persistence behavior
-      assertTrue(testReportRecordService.getStoredReportsCount() > 0, "TestReport should be persisted");
+        // Retrieve and verify the full report
+        TestReport fullReport = testReportRecordService.getRecordedReports().getFirst();
+        assertNotNull(fullReport, "Should be able to retrieve full report from storage");
 
-      // Retrieve and verify the full report
-      TestReport fullReport = testReportRecordService.getStoredReport(reportSummary.getId());
-      assertNotNull(fullReport, "Should be able to retrieve full report from storage");
+        List<TestRunReport> testRunReports = fullReport.getTestRunReports();
+        assertEquals(1, testRunReports.size());
+        assertEquals(1, testRunReports.getFirst().getStepRunReports().size());
+        assertEquals(1, fullReport.getTestCounters().getTotal());
+        assertEquals(1, fullReport.getTestCounters().getPassed());
+    }
 
-      List<TestRunReport> testRunReports = fullReport.getTestRunReports();
-      assertEquals(1, testRunReports.size());
-      assertEquals(1, testRunReports.getFirst().getStepRunReports().size());
-      assertEquals(1, fullReport.getTestCounters().getTotal());
-      assertEquals(1, fullReport.getTestCounters().getPassed());
+    @Test
+    void testMaestroValidationAndAssertionStep() throws ExecutionException, InterruptedException, TimeoutException {
+        testReportRecordService.clear(); // Clear previous test data
 
-      // Check if any outputs were generated and stored as items
-      boolean hasOutputs = testRunReports.stream()
-            .flatMap(tr -> tr.getStepRunReports().stream())
-            .anyMatch(sr -> sr.getOutputs() != null && !sr.getOutputs().isEmpty());
-      if (hasOutputs) {
-         assertTrue(testReportRecordService.getStoredItemsCount() > 0, "Step outputs should be stored as items");
-      }
-   }
+        TestSuiteRun testSuiteRun = getTestRunsWithValidationStepAndAssertionStepWithReference();
+        TestReport report = synchronousMaestro.executeTestSuite(testSuiteRun, false);
 
-   @Test
-   void testMaestroValidationAndAssertionStep() throws ExecutionException, InterruptedException, TimeoutException {
-      testReportRecordService.clear(); // Clear previous test data
+        // Verify the summary
+        assertNotNull(report);
+        assertEquals(Result.UNDEFINED, report.getResult());
+        assertNotNull(report.getUuid(), "Report summary should have an ID");
 
-      TestSuiteRun testSuiteRun = getTestRunsWithValidationStepAndAssertionStepWithReference();
-      TestReportSummary reportSummary = synchronousMaestro.executeTestSuite(testSuiteRun);
+        // Verify persistence behavior for multiple test runs
+        assertFalse(testReportRecordService.getRecordedReports().isEmpty(), "TestReports should be persisted");
 
-      // Verify the summary
-      assertNotNull(reportSummary);
-      assertEquals(Result.UNDEFINED, reportSummary.getResult());
-      assertNotNull(reportSummary.getId(), "Report summary should have an ID");
+        // Retrieve and verify the full report
+        TestReport fullReport = testReportRecordService.getRecordedReports().getFirst();
+        assertNotNull(fullReport, "Should be able to retrieve full report from storage");
 
-      // Verify persistence behavior for multiple test runs
-      assertTrue(testReportRecordService.getStoredReportsCount() > 0, "TestReports should be persisted");
+        List<TestRunReport> testRunReports = fullReport.getTestRunReports();
+        assertEquals(2, testRunReports.size());
+        assertEquals(1, testRunReports.getFirst().getStepRunReports().size());
+        assertEquals(1, testRunReports.getLast().getStepRunReports().size());
+        assertEquals(2, fullReport.getTestCounters().getTotal());
+        assertEquals(1, fullReport.getTestCounters().getPassed());
+        assertEquals(1, fullReport.getTestCounters().getUndefined());
+    }
 
-      // Retrieve and verify the full report
-      TestReport fullReport = testReportRecordService.getStoredReport(reportSummary.getId());
-      assertNotNull(fullReport, "Should be able to retrieve full report from storage");
+    @Test
+    void testMaestroWithSeveralStepOnSameTestRun() throws ExecutionException, InterruptedException, TimeoutException {
+        testReportRecordService.clear(); // Clear previous test data
 
-      List<TestRunReport> testRunReports = fullReport.getTestRunReports();
-      assertEquals(2, testRunReports.size());
-      assertEquals(1, testRunReports.getFirst().getStepRunReports().size());
-      assertEquals(1, testRunReports.getLast().getStepRunReports().size());
-      assertEquals(2, fullReport.getTestCounters().getTotal());
-      assertEquals(1, fullReport.getTestCounters().getPassed());
-      assertEquals(1, fullReport.getTestCounters().getUndefined());
-   }
+        TestSuiteRun testSuiteRun = getTestRunsWithOneValidationStep();
+        Property contentToValidate = new ByteArrayProperty("content", "liyvfgljv".getBytes());
+        Step validationStep = new Step()
+                .setId("test-validation-two")
+                .setProperties(List.of(
+                        new StringProperty(ValidationStepDefinition.VALIDATION_SERVICE, "matchbox"),
+                        new StringProperty(ValidationStepDefinition.VALIDATION_PROFILE, "Parameters"),
+                        contentToValidate
+                )
+        );
+        testSuiteRun.getTests().getFirst().addStep(validationStep);
+        testSuiteRun.getInputs().add(contentToValidate);
+        TestReport report = synchronousMaestro.executeTestSuite(testSuiteRun, false);
 
-   @Test
-   void testMaestroWithSeveralStepOnSameTestRun() throws ExecutionException, InterruptedException, TimeoutException {
-      testReportRecordService.clear(); // Clear previous test data
+        // Verify the summary
+        assertNotNull(report);
+        assertEquals(Result.UNDEFINED, report.getResult());
+        assertNotNull(report.getUuid(), "Report summary should have an ID");
 
-      TestSuiteRun testSuiteRun = getTestRunsWithOneValidationStep();
-      Property<byte[]> contentToValidate = new Property<>("content", "liyvfgljv".getBytes());
-      Step validationStep = new ValidationStepDefinition("test-validation-two",
-            new Property<>(ValidationStepDefinition.VALIDATION_SERVICE, "matchbox"),
-            new Property<>(ValidationStepDefinition.VALIDATION_PROFILE, "Parameters"),
-            new ArrayList<>(List.of(contentToValidate))
-      );
-      testSuiteRun.getTestRuns().getFirst().getTest().addStep(validationStep);
-      testSuiteRun.getTestRuns().getFirst().addInput(contentToValidate);
-      TestReportSummary reportSummary = synchronousMaestro.executeTestSuite(testSuiteRun);
+        // Verify persistence behavior with multiple steps
+        assertFalse(testReportRecordService.getRecordedReports().isEmpty(), "TestReport should be persisted");
 
-      // Verify the summary
-      assertNotNull(reportSummary);
-      assertEquals(Result.UNDEFINED, reportSummary.getResult());
-      assertNotNull(reportSummary.getId(), "Report summary should have an ID");
+        // Retrieve and verify the full report
+        TestReport fullReport = testReportRecordService.getRecordedReports().getFirst();
+        assertNotNull(fullReport, "Should be able to retrieve full report from storage");
 
-      // Verify persistence behavior with multiple steps
-      assertTrue(testReportRecordService.getStoredReportsCount() > 0, "TestReport should be persisted");
+        List<TestRunReport> testRunReports = fullReport.getTestRunReports();
+        assertEquals(1, testRunReports.size());
+        assertEquals(2, testRunReports.getFirst().getStepRunReports().size());
+        assertEquals(1, fullReport.getTestCounters().getTotal());
+        assertEquals(1, fullReport.getTestCounters().getUndefined());
+    }
 
-      // Retrieve and verify the full report
-      TestReport fullReport = testReportRecordService.getStoredReport(reportSummary.getId());
-      assertNotNull(fullReport, "Should be able to retrieve full report from storage");
+    @Test
+    void testMaestroWithInvalidTwoSameStepTestRun() {
+        testReportRecordService.clear(); // Clear previous test data
 
-      List<TestRunReport> testRunReports = fullReport.getTestRunReports();
-      assertEquals(1, testRunReports.size());
-      assertEquals(2, testRunReports.getFirst().getStepRunReports().size());
-      assertEquals(1, fullReport.getTestCounters().getTotal());
-      assertEquals(1, fullReport.getTestCounters().getUndefined());
+        TestSuiteRun testSuiteRun = getTestRunsWithOneValidationStep();
+        Step validationStep = new Step()
+                .setId("test-validation-two")
+                .setProperties(List.of(
+                        new StringProperty(ValidationStepDefinition.VALIDATION_SERVICE, "matchbox"),
+                        new StringProperty(ValidationStepDefinition.VALIDATION_PROFILE, "Parameters"),
+                        new ByteArrayProperty("content", "liyvfgljv".getBytes())
+                )
+        );
+        testSuiteRun.getTests().getFirst().addStep(validationStep);
+        Throwable throwable = assertThrows(IllegalArgumentException.class, () -> synchronousMaestro.executeTestSuite(
+                testSuiteRun, false));
+        assertThat(throwable.getMessage(), containsString("Steps must be unique => invalid"));
+    }
 
-      // With 2 validation steps containing content, we should have attachments
-      assertTrue(testReportRecordService.getStoredAttachmentsCount() >= 2,
-            "Both validation step inputs should be stored as attachments");
-   }
+    private static TestSuiteRun getTestRunsWithOneValidationStep() {
+        Property contentToValidate = new ByteArrayProperty("content", "liyvfgljv".getBytes());
+        Step validationStep = new Step()
+                .setId("test-validation-two")
+                .setProperties(List.of(
+                                new StringProperty(ValidationStepDefinition.VALIDATION_SERVICE, "matchbox"),
+                                new StringProperty(ValidationStepDefinition.VALIDATION_PROFILE, "Parameters"),
+                                contentToValidate
+                        )
+                );
+        net.ihe.gazelle.maestro.api.business.test.Test test =
+                new net.ihe.gazelle.maestro.api.business.test.Test().addStep(
+                        validationStep);
+        test.setName("validationTest");
+        test.setId(UUID.randomUUID().toString());
+        TestSuiteRun testSuiteRun = new TestSuiteRun();
+        return testSuiteRun
+                .setTestSuite(
+                        new TestSuite()
+                                .setName("Test Suite")
+                                .setId("Test Suite"))
+                .setTests(List.of(test))
+                .setAccessControlList(new AccessControlList().setOwners(Set.of("gazelle")));
+    }
 
-   @Test
-   void testMaestroWithInvalidTwoSameStepTestRun() {
-      testReportRecordService.clear(); // Clear previous test data
+    private static TestSuiteRun getTestRunsWithOneSimulationStep() {
+        List<Property> inputs = List.of(
+                new StringProperty("Patient Id", "1.1.1.1"),
+                new BooleanProperty("Boolean prop", true),
+                new ByteArrayProperty("File prop", "test".getBytes())
+        );
+        Step simulationStep = new Step()
+                .setId("simulationStep")
+                .setProperties(List.of(
+                        new StringProperty(SimulationStepDefinition.SIMULATION_SERVICE, "MCSD"),
+                        new StringProperty(SimulationStepDefinition.SEQUENCE_ID, "sequencId"),
+                        new IntegerProperty(SimulationStepDefinition.TIMEOUT_SECONDS, 60)
+                ))
+                .addProperties(inputs);
+        TestSuiteRun testSuiteRun = new TestSuiteRun();
+        net.ihe.gazelle.maestro.api.business.test.Test test =
+                new net.ihe.gazelle.maestro.api.business.test.Test().addStep(
+                        simulationStep);
+        test.setName("simulationTest");
+        test.setId(UUID.randomUUID().toString());
+        return testSuiteRun
+                .setTestSuite(
+                        new TestSuite()
+                                .setName("Test Suite")
+                                .setId("Test Suite"))
+                .setTests(List.of(test))
+                .setAccessControlList(new AccessControlList().setOwners(Set.of("gazelle")));
+    }
 
-      TestSuiteRun testSuiteRun = getTestRunsWithOneValidationStep();
-      Step validationStep = new ValidationStepDefinition("test-validation",
-            new Property<>(ValidationStepDefinition.VALIDATION_SERVICE, "matchbox"),
-            new Property<>(ValidationStepDefinition.VALIDATION_PROFILE, "Parameters"),
-            List.of(new Property<>("content", "liyvfgljv".getBytes()))
-      );
-      testSuiteRun.getTestRuns().getFirst().getTest().addStep(validationStep);
-      Throwable throwable = assertThrows(IllegalArgumentException.class, () -> synchronousMaestro.executeTestSuite(
-            testSuiteRun));
-      assertThat(throwable.getMessage(), containsString("Steps must be unique => invalid"));
-   }
-
-
-   // Helper method to check if test runs have inputs with content
-   private boolean hasInputsWithContent(List<TestRun> testRuns) {
-      return testRuns.stream()
-            .filter(tr -> tr != null && tr.getTest() != null && tr.getTest().getSteps() != null)
-            .flatMap(tr -> tr.getTest().getSteps().stream())
-            .anyMatch(ValidationStepDefinition.class::isInstance);
-   }
-
-   private static TestSuiteRun getTestRunsWithOneValidationStep() {
-      List<TestRun> testRuns = new ArrayList<>();
-      Property<byte[]> contentToValidate = new Property<>("content", "liyvfgljv".getBytes());
-      Step validationStep = new ValidationStepDefinition("test-validation",
-            new Property<>(ValidationStepDefinition.VALIDATION_SERVICE, "matchbox"),
-            new Property<>(ValidationStepDefinition.VALIDATION_PROFILE, "Parameters"),
-            new ArrayList<>(List.of(contentToValidate))
-      );
-      net.ihe.gazelle.maestro.api.business.test.Test test =
-            new net.ihe.gazelle.maestro.api.business.test.Test().addStep(
-            validationStep);
-      test.setName("validationTest");
-      test.setId(UUID.randomUUID().toString());
-      TestSuiteRun testSuiteRun = new TestSuiteRun();
-      TestRun testRun = new TestRun();
-      testRun.setTest(test);
-      testRun.addInput(contentToValidate);
-      testRun.setTestSuiteId(testSuiteRun.getInternalId());
-      testRuns.add(testRun);
-      return testSuiteRun
-            .setTestSuiteName("Test Suite")
-            .setTestSuiteClientId(UUID.randomUUID().toString())
-            .setTestRuns(testRuns)
-            .setAccessControlList(new AccessControlList().setOwners(Set.of("gazelle")))
-            ;
-   }
-
-   private static TestSuiteRun getTestRunsWithOneSimulationStep() {
-      List<TestRun> testRuns = new ArrayList<>();
-      List<Property<?>> inputs = List.of(
-            new Property<>("Patient Id", "1.1.1.1"),
-            new Property<>("Boolean prop", true),
-            new Property<>("File prop", "test".getBytes())
-      );
-      Step simulationStep = new SimulationStep("simulationStep",
-            new Property<>(SimulationStepDefinition.SIMULATION_SERVICE, "MCSD"),
-            new Property<>(SimulationStepDefinition.SEQUENCE_ID, "sequencId"),
-            new Property<>(SimulationStepDefinition.TIMEOUT_SECONDS, 60),
-            inputs);
-      TestSuiteRun testSuiteRun = new TestSuiteRun();
-      net.ihe.gazelle.maestro.api.business.test.Test test =
-            new net.ihe.gazelle.maestro.api.business.test.Test().addStep(
-            simulationStep);
-      test.setName("simulationTest");
-      test.setId(UUID.randomUUID().toString());
-      TestRun testRun = new TestRun()
-            .setTestSuiteId(testSuiteRun.getInternalId())
-            .setInputs(inputs);
-      testRun.setTest(test);
-      testRuns.add(testRun);
-      return testSuiteRun
-            .setTestSuiteName("Test Suite")
-            .setTestSuiteClientId(UUID.randomUUID().toString())
-            .setTestRuns(testRuns)
-            .setAccessControlList(new AccessControlList().setOwners(Set.of("gazelle")))
-            ;
-   }
-
-   private static TestSuiteRun getTestRunsWithValidationStepAndAssertionStepWithReference() {
-      Step assertionStep = new AssertionStep("test-assertion",
-            new PropertyRef<>(AssertionStep.ASSERTION, "assertion", byte[].class),
-            new Property<>(AssertionStep.ASSERTION_SERVICE, "toto")
-      );
-      TestSuiteRun testSuiteRun = getTestRunsWithOneValidationStep();
-      net.ihe.gazelle.maestro.api.business.test.Test test =
-            new net.ihe.gazelle.maestro.api.business.test.Test().addStep(
-            assertionStep);
-      test.setName("assertionTest");
-      test.setId(UUID.randomUUID().toString());
-      TestRun testRun = new TestRun()
-            .setTestSuiteId(testSuiteRun.getInternalId())
-            .setInputs(List.of(new Property<>("assertion", "liyvfgljv".getBytes())));
-      testRun.setTest(test);
-      testSuiteRun.getTestRuns().add(testRun);
-      return testSuiteRun;
-   }
+    private static TestSuiteRun getTestRunsWithValidationStepAndAssertionStepWithReference() {
+        Step assertionStep = new Step()
+                .setId("test-assertion")
+                .setProperties(List.of(
+                        new StringProperty(AssertEqualsStepDefinition.EXPECTED, "Expected"),
+                        new StringProperty(AssertEqualsStepDefinition.ACTUAL, "Expected")
+                )
+        );
+        TestSuiteRun testSuiteRun = getTestRunsWithOneValidationStep();
+        net.ihe.gazelle.maestro.api.business.test.Test test =
+                new net.ihe.gazelle.maestro.api.business.test.Test().addStep(
+                        assertionStep);
+        test.setName("assertionTest");
+        test.setId(UUID.randomUUID().toString());
+        testSuiteRun.getTests().add(test);
+        return testSuiteRun;
+    }
 
 
 }
