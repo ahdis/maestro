@@ -15,11 +15,13 @@ import java.util.Objects;
  *                         so that its references can still be updated before it is recorded.
  * @param reportBindings   references that should be added to the enclosing TestReport
  *                         when the current item is persisted.
+ * @param contentMutator   optional hook to adjust the content once related ids are known
  */
 public record ItemPlan(
       MaestroItem item,
       List<ItemRelationBinding> relationBindings,
-      List<ReferenceBinding> reportBindings
+      List<ReferenceBinding> reportBindings,
+      ContentMutator contentMutator
 ) {
 
    public ItemPlan {
@@ -29,6 +31,6 @@ public record ItemPlan(
    }
 
    public static ItemPlan of(MaestroItem item) {
-      return new ItemPlan(item, List.of(), List.of());
+      return new ItemPlan(item, List.of(), List.of(), null);
    }
 }

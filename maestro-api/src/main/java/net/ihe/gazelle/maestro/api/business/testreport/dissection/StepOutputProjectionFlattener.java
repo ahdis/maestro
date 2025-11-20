@@ -56,7 +56,7 @@ final class StepOutputProjectionFlattener {
       List<ReferenceBinding> reportBindings = node instanceof ItemOutputBuilder root
             ? root.reportBindings()
             : List.of();
-      return new ItemPlan(node.item(), relationBindings, reportBindings);
+      return new ItemPlan(node.item(), relationBindings, reportBindings, node.contentMutator());
    }
 
    private List<ItemRelationBinding> relationBindings(GraphNodeBuilder node,

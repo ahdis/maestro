@@ -1,6 +1,7 @@
 package net.ihe.gazelle.maestro.recording;
 
 import com.kereval.gazelle.datahouse.api.business.record.Item;
+import com.kereval.gazelle.datahouse.api.business.record.RefType;
 import com.kereval.gazelle.datahouse.api.business.record.Reference;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
@@ -34,11 +35,13 @@ class StepOutputRecordServiceTest {
       ItemPlan childPlan = new ItemPlan(
             new DatahouseMaestroItem().setType("CHILD").setContent("{\"level\":1}").setReferences(new ArrayList<>()),
             List.of(new ItemRelationBinding(1, "child-link", "CHILD", null)),
-            List.of());
+            List.of(),
+            null);
       ItemPlan rootPlan = new ItemPlan(
             new DatahouseMaestroItem().setType("ROOT").setContent("{\"level\":0}").setReferences(new ArrayList<>()),
             List.of(),
-            List.of(new ReferenceBinding("report-link", "ROOT", null)));
+            List.of(new ReferenceBinding("report-link", "ROOT", null)),
+            null);
 
       PropertyMutation mutation = new PropertyMutation(0, 1,
             (itemId, itemUrl) -> new StringProperty("report", itemUrl));
@@ -76,6 +79,46 @@ class StepOutputRecordServiceTest {
    }
 
    @Test
+   void shouldMutateContentUsingResolvedReferences() {
+      StepRunReport step = new StepRunReport()
+            .setStepId("content-step")
+            .addOutput(new StringProperty("noop", "noop"));
+
+      ItemPlan childPlan = new ItemPlan(
+            new DatahouseMaestroItem().setType("CHILD").setContent("attachment=log-ref").setReferences(new ArrayList<>()),
+            List.of(new ItemRelationBinding(1, "child-ref", "CHILD", null)),
+            List.of(),
+            (content, ctx) -> content.replace("log-ref", ctx.findAttachmentId("log-ref")));
+      ItemPlan parentPlan = new ItemPlan(
+            new DatahouseMaestroItem().setType("PARENT").setContent("child=child-ref").setReferences(new ArrayList<>()),
+            List.of(),
+            List.of(),
+            (content, ctx) -> content.replace("child-ref", ctx.findItemId("child-ref")));
+
+      StepOutputProjection projection = new StepOutputProjection(
+            List.of(childPlan, parentPlan),
+            List.of(),
+            List.of(),
+            List.of());
+
+      List<Property> updatedOutputs = new ArrayList<>(step.getOutputs());
+      List<Reference> reportReferences = new ArrayList<>();
+      reportReferences.add(new Reference()
+            .setName("log-ref")
+            .setType("LOG")
+            .setRefType(RefType.ATTACHMENT)
+            .setValue("att-7"));
+
+      service.dissectAndRecord(step, projection, new AccessControlList(), reportReferences, updatedOutputs);
+
+      assertThat(recordItemClient.recordedItems).hasSize(2);
+      Item recordedChild = (Item) recordItemClient.recordedItems.get(0);
+      assertEquals("attachment=att-7", recordedChild.getContent());
+      Item recordedParent = (Item) recordItemClient.recordedItems.get(1);
+      assertEquals("child=itm-1", recordedParent.getContent());
+   }
+
+   @Test
    void shouldFailWhenRelationTargetsEarlierItem() {
       StepRunReport step = new StepRunReport()
             .setStepId("invalid-rel")
@@ -84,7 +127,8 @@ class StepOutputRecordServiceTest {
       ItemPlan childPlan = new ItemPlan(
             new DatahouseMaestroItem().setType("CHILD").setContent("{}").setReferences(new ArrayList<>()),
             List.of(new ItemRelationBinding(0, "loop", "TYPE", null)),
-            List.of());
+            List.of(),
+            null);
 
       StepOutputProjection projection = new StepOutputProjection(
             List.of(childPlan),

@@ -4,7 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.*;
+import net.ihe.gazelle.maestro.api.business.testreport.dissection.AttachmentPlan;
+import net.ihe.gazelle.maestro.api.business.testreport.dissection.ContentMutationContext;
+import net.ihe.gazelle.maestro.api.business.testreport.dissection.ItemPlan;
+import net.ihe.gazelle.maestro.api.business.testreport.dissection.PropertyMutation;
+import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputContext;
+import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputProjection;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 import net.ihe.gazelle.validation.v2.api.business.Input;
@@ -45,24 +50,24 @@ class ValidationStepOutputDissectorTest {
         assertEquals(ValidationStepDefinition.REPORT, reportPlan.item().type());
 
         assertEquals(1, projection.attachments().size(), "Only inputs with content should become attachments");
-        AttachmentPlan attachmentPlan = projection.attachments().get(0);
+        AttachmentPlan attachmentPlan = projection.attachments().getFirst();
         assertEquals(-1, attachmentPlan.outputIndex());
         assertNull(attachmentPlan.propertyFactory(), "Detached attachments must not target a step output");
         assertArrayEquals(sample.inputPayload(), attachmentPlan.attachment().getContent());
 
         assertEquals(1, projection.propertyMutations().size());
-        PropertyMutation mutation = projection.propertyMutations().get(0);
+        PropertyMutation mutation = projection.propertyMutations().getFirst();
         assertEquals(0, mutation.outputIndex());
         assertEquals(0, mutation.sourceItemIndex(), "Single report item should be the mutation source");
 
         JsonNode content = OBJECT_MAPPER.readTree(reportPlan.item().content());
-        assertFalse(content.has("inputs"), "Raw inputs collection should be replaced by references");
-        JsonNode inputRefs = content.get("inputReferences");
-        assertNotNull(inputRefs);
-        assertEquals(1, inputRefs.size(), "Only inputs stored as attachments should be referenced");
-        JsonNode firstRef = inputRefs.get(0);
-        assertEquals("payload-input", firstRef.get("referenceName").asText());
-        assertEquals(ValidationStepOutputDissector.VALIDATION_INPUT, firstRef.get("referenceType").asText());
+        JsonNode inputs = content.get("inputs");
+        assertNotNull(inputs);
+        assertEquals(2, inputs.size());
+        JsonNode attachedInput = inputs.get(0);
+        assertEquals("payload-input", attachedInput.get("id").asText());
+        assertNull(attachedInput.get("content"), "Payload should be stripped");
+        assertNull(attachedInput.get("itemId"));
     }
 
     @Test
@@ -77,6 +82,31 @@ class ValidationStepOutputDissectorTest {
         assertNotNull(persistedContent);
         assertFalse(persistedContent.contains(sample.encodedPayload()),
                 "Detached attachment payload must not remain in the stored report JSON");
+    }
+
+    @Test
+    void shouldPopulateAttachmentIdsInReportContentDuringMutation() throws Exception {
+        SampleReport sample = sampleReport();
+        StepRunReport step = new StepRunReport()
+                .addOutput(new ByteArrayProperty(ValidationStepDefinition.REPORT, sample.serializedReport()));
+
+        StepOutputProjection projection = dissector.dissect(new StepOutputContext(step, new AccessControlList()));
+        ItemPlan reportPlan = projection.items().getFirst();
+
+        assertNotNull(reportPlan.contentMutator(), "Expected content mutator to be provided");
+
+        ContentMutationContext mutationContext = new ContentMutationContext(
+                null,
+                java.util.Map.of("payload-input", "att-42"));
+
+        String mutated = reportPlan.contentMutator().mutate(reportPlan.item().content(), mutationContext);
+        JsonNode root = OBJECT_MAPPER.readTree(mutated);
+        JsonNode inputs = root.get("inputs");
+        assertNotNull(inputs);
+        JsonNode first = inputs.get(0);
+        assertEquals("att-42", first.get("itemId").asText());
+        assertEquals("/attachments/att-42", first.get("location").asText());
+        assertNull(first.get("content"));
     }
 
     private SampleReport sampleReport() throws Exception {

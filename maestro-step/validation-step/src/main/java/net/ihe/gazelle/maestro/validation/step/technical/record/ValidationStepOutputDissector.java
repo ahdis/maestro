@@ -8,21 +8,13 @@ import net.ihe.gazelle.maestro.api.business.recording.MaestroAttachment;
 import net.ihe.gazelle.maestro.api.business.recording.MaestroItem;
 import net.ihe.gazelle.maestro.api.business.recording.MaestroRefType;
 import net.ihe.gazelle.maestro.api.business.testreport.ByteArrayItemProperty;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.AttachmentOutputBuilder;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.ItemOutputBuilder;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.PropertyReferenceFactory;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.ReferenceBinding;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputContext;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputDissector;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputGraphBuilder;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputProjection;
+import net.ihe.gazelle.maestro.api.business.testreport.dissection.*;
 import net.ihe.gazelle.maestro.recording.DatahouseMaestroAttachment;
 import net.ihe.gazelle.maestro.recording.DatahouseMaestroItem;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;
-import net.ihe.gazelle.maestro.validation.step.technical.record.dto.ValidationInputReferenceDTO;
-import net.ihe.gazelle.maestro.validation.step.technical.record.dto.ValidationReportItemDTO;
 import net.ihe.gazelle.validation.v2.api.business.Input;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
+import net.ihe.gazelle.validation.v2.api.technical.dto.report.ValidationReportDTO;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -56,7 +48,7 @@ public class ValidationStepOutputDissector implements StepOutputDissector {
         InputAttachmentExtraction extraction = extractInputAttachments(validationReport);
         List<AttachmentOutputBuilder> inputAttachments = extraction.plans();
         StepOutputGraphBuilder graph = new StepOutputGraphBuilder();
-        MaestroItem reportItem = createItem(serializeReport(validationReport, extraction.referencedInputs()), context);
+        MaestroItem reportItem = createItem(serializeReport(validationReport), context);
         ItemOutputBuilder reportBuilder = graph.addItem(reportItem);
         //This reference will be added to the enclosing TestRunReport item later on
         reportBuilder.addReferenceBinding(
@@ -66,6 +58,7 @@ public class ValidationStepOutputDissector implements StepOutputDissector {
                         MaestroRefType.ITEM_ID
                 )
         );
+        reportBuilder.mutateContent(this::mutateInputReferences);
 
         //process validation inputs as attachments
         reportBuilder.addAttachments(inputAttachments);
@@ -91,10 +84,9 @@ public class ValidationStepOutputDissector implements StepOutputDissector {
         }
     }
 
-    private String serializeReport(ValidationReport report, List<Input> referencedInputs) {
+    private String serializeReport(ValidationReport report) {
         try {
-            ValidationReportItemDTO dto = new ValidationReportItemDTO(report, VALIDATION_INPUT, referencedInputs);
-            return OBJECT_MAPPER.writeValueAsString(dto);
+            return OBJECT_MAPPER.writeValueAsString(new ValidationReportDTO(report));
         } catch (IOException e) {
             throw new IllegalStateException("Failed to serialize ValidationReport to JSON", e);
         }
@@ -141,7 +133,43 @@ public class ValidationStepOutputDissector implements StepOutputDissector {
     }
 
     private String referenceName(Input input) {
-        return ValidationInputReferenceDTO.resolveReferenceName(input.getId());
+        return resolveReferenceName(input.getId());
+    }
+
+    private String mutateInputReferences(String content, ContentMutationContext context) {
+        ValidationReport mutatedReport = deserializeReportContent(content);
+        if (mutatedReport.getInputs() != null) {
+            for (Input input : mutatedReport.getInputs()) {
+                String refName = resolveReferenceName(input.getId());
+                String attachmentId = context.findAttachmentId(refName);
+                if (attachmentId != null) {
+                    input.setItemId(attachmentId);
+                    input.setLocation("/attachments/" + attachmentId);
+                    input.setContent(null);
+                }
+            }
+        }
+        try {
+            return OBJECT_MAPPER.writeValueAsString(new ValidationReportDTO(mutatedReport));
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to mutate validation report content", e);
+        }
+    }
+
+    private ValidationReport deserializeReportContent(String content) {
+        try {
+            ValidationReportDTO dto = OBJECT_MAPPER.readValue(content, ValidationReportDTO.class);
+            return dto.getBusinessObject();
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to deserialize validation report content", e);
+        }
+    }
+
+    private String resolveReferenceName(String candidate) {
+        if (candidate == null || candidate.isBlank()) {
+            return "validation-input";
+        }
+        return candidate;
     }
 
     private record InputAttachmentExtraction(List<AttachmentOutputBuilder> plans,

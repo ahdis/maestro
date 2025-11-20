@@ -17,6 +17,7 @@ public final class ItemOutputBuilder implements GraphNodeBuilder {
    private final List<SubItemOutputBuilder> subItems = new ArrayList<>();
    private final List<PropertyReplacement> propertyReplacements = new ArrayList<>();
    private final List<ReferenceBinding> reportBindings = new ArrayList<>();
+   private ContentMutator contentMutator;
 
    ItemOutputBuilder(MaestroItem item) {
       this.item = Objects.requireNonNull(item, "item");
@@ -57,6 +58,14 @@ public final class ItemOutputBuilder implements GraphNodeBuilder {
     */
    public ItemOutputBuilder addReferenceBinding(ReferenceBinding binding) {
       reportBindings.add(Objects.requireNonNull(binding, "binding"));
+      return this;
+   }
+
+   /**
+    * Registers a content mutator that will be invoked once referenced identifiers are known.
+    */
+   public ItemOutputBuilder mutateContent(ContentMutator mutator) {
+      this.contentMutator = Objects.requireNonNull(mutator, "mutator");
       return this;
    }
 
@@ -103,5 +112,10 @@ public final class ItemOutputBuilder implements GraphNodeBuilder {
 
    List<ReferenceBinding> reportBindings() {
       return reportBindings;
+   }
+
+   @Override
+   public ContentMutator contentMutator() {
+      return contentMutator;
    }
 }

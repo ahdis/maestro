@@ -9,7 +9,9 @@ import net.ihe.gazelle.maestro.api.business.testreport.dissection.*;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class StepOutputRecordService {
 
@@ -67,6 +69,10 @@ public class StepOutputRecordService {
             return ItemPersistenceState.EMPTY;
         }
 
+        Map<String, String> itemIdsByReferenceName = new HashMap<>();
+        Map<String, String> attachmentIdsByReferenceName = new HashMap<>();
+        updateReferenceMapsFrom(reportReferences, itemIdsByReferenceName, attachmentIdsByReferenceName);
+
         List<Item> datahouseItems = new ArrayList<>(itemPlans.size());
         datahouseItems.addAll(itemPlans.stream()
                 .map(ItemPlan::item)
@@ -81,10 +87,14 @@ public class StepOutputRecordService {
         for (int i = 0; i < itemPlans.size(); i++) {
             ItemPlan itemPlan = itemPlans.get(i);
             Item item = prepareItemAclAndReferences(datahouseItems.get(i), acl);
+            updateReferenceMapsFrom(item.getReferences(), itemIdsByReferenceName, attachmentIdsByReferenceName);
+            applyContentMutation(itemPlan, item, itemIdsByReferenceName, attachmentIdsByReferenceName);
             String itemId = recordItemClient.recordItem(item);
             ids[i] = itemId;
             urls[i] = constructUrlToDatahouse(itemId);
             appendReportBindings(reportReferences, itemPlan, itemId);
+            updateReferenceMapsFrom(reportReferences, itemIdsByReferenceName, attachmentIdsByReferenceName);
+            registerRelationBindingReferenceNames(itemPlan, itemId, itemIdsByReferenceName, attachmentIdsByReferenceName);
             wireParentBindings(itemPlans, datahouseItems, i, itemId, itemPlan);
         }
 
@@ -132,6 +142,49 @@ public class StepOutputRecordService {
                     .setRefType(DatahouseMaestroReference.toDatahouseRefType(binding.refType()))
                     .setValue(itemId));
         }
+    }
+
+    private void updateReferenceMapsFrom(List<Reference> references,
+                                         Map<String, String> itemIdsByReferenceName,
+                                         Map<String, String> attachmentIdsByReferenceName) {
+        if (references == null) {
+            return;
+        }
+        for (Reference reference : references) {
+            switch (reference.getRefType()) {
+                case ITEM_ID -> itemIdsByReferenceName.put(reference.getName(), reference.getValue());
+                case ATTACHMENT -> attachmentIdsByReferenceName.put(reference.getName(), reference.getValue());
+                case URL -> {
+                }
+            }
+        }
+    }
+
+    private void registerRelationBindingReferenceNames(ItemPlan itemPlan,
+                                                       String itemId,
+                                                       Map<String, String> itemIdsByReferenceName,
+                                                       Map<String, String> attachmentIdsByReferenceName) {
+        for (ItemRelationBinding binding : itemPlan.relationBindings()) {
+            switch (binding.refType()) {
+                case ITEM_ID -> itemIdsByReferenceName.put(binding.referenceName(), itemId);
+                case ATTACHMENT -> attachmentIdsByReferenceName.put(binding.referenceName(), itemId);
+                case URL -> {
+                    // no-op
+                }
+            }
+        }
+    }
+
+    private void applyContentMutation(ItemPlan itemPlan,
+                                      Item item,
+                                      Map<String, String> itemIdsByReferenceName,
+                                      Map<String, String> attachmentIdsByReferenceName) {
+        if (itemPlan.contentMutator() == null || item.getContent() == null) {
+            return;
+        }
+        ContentMutationContext context = new ContentMutationContext(itemIdsByReferenceName, attachmentIdsByReferenceName);
+        String mutatedContent = itemPlan.contentMutator().mutate(item.getContent(), context);
+        item.setContent(mutatedContent);
     }
 
     private void wireParentBindings(List<ItemPlan> itemPlans, List<Item> datahouseItems, int currentIndex, String childItemId, ItemPlan childPlan) {

@@ -13,4 +13,6 @@ interface GraphNodeBuilder {
    List<SubItemOutputBuilder> subItems();
 
    List<PropertyReplacement> propertyReplacements();
+
+   ContentMutator contentMutator();
 }

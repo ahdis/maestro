@@ -20,6 +20,7 @@ public final class SubItemOutputBuilder implements GraphNodeBuilder {
    private final List<AttachmentOutputBuilder> attachments = new ArrayList<>();
    private final List<SubItemOutputBuilder> subItems = new ArrayList<>();
    private final List<PropertyReplacement> propertyReplacements = new ArrayList<>();
+   private ContentMutator contentMutator;
 
    SubItemOutputBuilder(MaestroItem item,
          GraphNodeBuilder referencingNode,
@@ -59,6 +60,14 @@ public final class SubItemOutputBuilder implements GraphNodeBuilder {
          throw new IllegalArgumentException("outputIndex must be >= 0");
       }
       propertyReplacements.add(new PropertyReplacement(outputIndex, Objects.requireNonNull(factory, "factory")));
+      return this;
+   }
+
+   /**
+    * Registers a content mutator that will be invoked once referenced identifiers are known.
+    */
+   public SubItemOutputBuilder mutateContent(ContentMutator mutator) {
+      this.contentMutator = Objects.requireNonNull(mutator, "mutator");
       return this;
    }
 
@@ -117,5 +126,10 @@ public final class SubItemOutputBuilder implements GraphNodeBuilder {
    @Override
    public List<PropertyReplacement> propertyReplacements() {
       return propertyReplacements;
+   }
+
+   @Override
+   public ContentMutator contentMutator() {
+      return contentMutator;
    }
 }
