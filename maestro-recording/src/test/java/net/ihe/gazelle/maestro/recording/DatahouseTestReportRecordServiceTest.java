@@ -81,7 +81,7 @@ class DatahouseTestReportRecordServiceTest {
         service = new DatahouseTestReportRecordService(recordItemClientMock, "http://dh", staticDissectorProvider());
 
         StepRunReport step = new StepRunReport()
-                .setStepId("step-outputs")
+                .setStepName("step-outputs")
                 .addOutput(new ByteArrayProperty(StaticStepOutputDissector.ROOT_OUTPUT_NAME, "{}".getBytes(StandardCharsets.UTF_8)))
                 .addOutput(new ByteArrayProperty(StaticStepOutputDissector.SIBLING_OUTPUT_NAME, "{}".getBytes(StandardCharsets.UTF_8)))
                 .addOutput(new ByteArrayProperty(StaticStepOutputDissector.ATTACHMENT_OUTPUT_NAME, "pdf".getBytes(StandardCharsets.UTF_8)));

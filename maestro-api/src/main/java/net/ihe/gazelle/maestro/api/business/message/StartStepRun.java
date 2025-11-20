@@ -31,15 +31,17 @@ public class StartStepRun implements Message {
 
    private String sessionId; // internal
    private String testId;
+   private int stepIndex;
    private StepRun stepRun;
 
    public StartStepRun() {
-      this(null, null,  null);
+      this(null, null, -1, null);
    }
 
-   public StartStepRun(String sessionId, String testId, StepRun stepRun) {
+   public StartStepRun(String sessionId, String testId, int stepIndex, StepRun stepRun) {
       this.sessionId = sessionId;
       this.testId = testId;
+      this.stepIndex = stepIndex;
       this.stepRun = stepRun;
    }
 
@@ -58,6 +60,15 @@ public class StartStepRun implements Message {
 
    public StartStepRun setTestId(String testId) {
       this.testId = testId;
+      return this;
+   }
+
+   public int getStepIndex() {
+      return stepIndex;
+   }
+
+   public StartStepRun setStepIndex(int stepIndex) {
+      this.stepIndex = stepIndex;
       return this;
    }
 

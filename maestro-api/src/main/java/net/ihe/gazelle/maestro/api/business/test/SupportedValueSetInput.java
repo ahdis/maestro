@@ -31,4 +31,9 @@ public class SupportedValueSetInput extends SupportedInput {
       this.defaultValue = defaultValue;
       return this;
    }
+
+   public boolean isValueSetIdDefined() {
+      return valueSetId != null && !valueSetId.isEmpty();
+   }
+
 }

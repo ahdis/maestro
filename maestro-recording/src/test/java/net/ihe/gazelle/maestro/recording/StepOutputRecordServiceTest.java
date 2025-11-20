@@ -29,7 +29,7 @@ class StepOutputRecordServiceTest {
    @Test
    void shouldPersistItemsWireRelationsAndMutateOutputs() {
       StepRunReport step = new StepRunReport()
-            .setStepId("rel-step")
+            .setStepName("rel-step")
             .addOutput(new StringProperty("report", "inline"));
 
       ItemPlan childPlan = new ItemPlan(
@@ -81,7 +81,7 @@ class StepOutputRecordServiceTest {
    @Test
    void shouldMutateContentUsingResolvedReferences() {
       StepRunReport step = new StepRunReport()
-            .setStepId("content-step")
+            .setStepName("content-step")
             .addOutput(new StringProperty("noop", "noop"));
 
       ItemPlan childPlan = new ItemPlan(
@@ -121,7 +121,7 @@ class StepOutputRecordServiceTest {
    @Test
    void shouldFailWhenRelationTargetsEarlierItem() {
       StepRunReport step = new StepRunReport()
-            .setStepId("invalid-rel")
+            .setStepName("invalid-rel")
             .addOutput(new StringProperty("report", "inline"));
 
       ItemPlan childPlan = new ItemPlan(

@@ -76,7 +76,6 @@ public class ValidationStepExecutor implements StepExecutor {
             .setMimeType("application/json");
 
       StepRunReportBuilder stepRunReportBuilder = new StepRunReportBuilder()
-            .setStepId(stepRun.getId())
             .setStepName(stepRun.getName())
             .setType(ValidationStepDefinition.TYPE)
             .setResult(mapResult(validationReport.getOverallResult()))

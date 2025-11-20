@@ -84,7 +84,6 @@ class TestReportDTOTest {
    @Test
    void shouldRoundTripStepRunOutputProperties() {
       StepRunReport stepRunReport = new StepRunReport()
-            .setStepId("step-1")
             .setType("validation")
             .setResult(StepResult.PASSED)
             .addOutput(new ByteArrayProperty("document", "content".getBytes(StandardCharsets.UTF_8)));
@@ -120,7 +119,6 @@ class TestReportDTOTest {
       Instant baseTime = Instant.now().minusSeconds(300);
 
       StepRunReport stepRunReport = new StepRunReport()
-            .setStepId("step-1")
             .setStepName("Validate input")
             .setType("validation")
             .setResult(StepResult.PASSED)

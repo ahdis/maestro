@@ -28,7 +28,6 @@ import java.util.List;
 
 public class StepRunReportBuilder extends AbstractBuilder<StepRunReport> {
 
-   private String stepId;
    private String stepName;
    private String type;
    private StepResult result;
@@ -45,11 +44,6 @@ public class StepRunReportBuilder extends AbstractBuilder<StepRunReport> {
       super(validatorBuilderFactory);
       outputs = new ArrayList<>();
       unexpectedErrors = new ArrayList<>();
-   }
-
-   public StepRunReportBuilder setStepId(String stepId) {
-      this.stepId = stepId;
-      return this;
    }
 
    public StepRunReportBuilder setStepName(String stepName) {
@@ -114,7 +108,6 @@ public class StepRunReportBuilder extends AbstractBuilder<StepRunReport> {
    @Override
    protected void make(StepRunReport stepRunReport) {
       stepRunReport
-            .setStepId(stepId)
             .setStepName(stepName)
             .setType(type)
             .setResult(result)

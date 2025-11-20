@@ -74,7 +74,7 @@ class WebSocketSessionTest {
     @Test
     void should_send_step_run_started_message() throws InterruptedException {
         WebSocketSession ws = new WebSocketSession(session);
-        ws.onStepRunStarted(new StepRunStarted("testId", "stepId"));
+        ws.onStepRunStarted(new StepRunStarted("testId", 3));
 
         String messageString = TestWebSocketServer.pollLastMessage();
         assertNotNull(messageString);
@@ -100,7 +100,7 @@ class WebSocketSessionTest {
         WebSocketSession ws = new WebSocketSession(session);
         ws.onStepRunFinished(new StepRunFinished(
                 session.getId(),
-                "testId",
+                "testId", 3,
                 ObjectFactory.createStepRun(),
                 ObjectFactory.createStepRunReport())
         );

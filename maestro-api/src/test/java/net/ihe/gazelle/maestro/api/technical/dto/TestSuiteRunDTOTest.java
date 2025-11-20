@@ -44,7 +44,6 @@ class TestSuiteRunDTOTest {
             .setSupportedInputs(List.of(new SupportedTextInput().setId("input-1").setLabel("Input").setRequired(true)));
 
       Step step = new Step()
-            .setId("step-1")
             .setName("Validate")
             .setType("validation")
             .setProperties(List.of(new StringProperty("threshold", "strict")));
@@ -117,7 +116,6 @@ class TestSuiteRunDTOTest {
             .setId("test-2")
             .setName("Simulation");
       test.addStep(new Step()
-            .setId("step-42")
             .setName("Simulate")
             .setType("simulation")
             .setProperties(List.of(new StringProperty("mode", "AUTO"))));
@@ -176,7 +174,6 @@ class TestSuiteRunDTOTest {
             .setSupportedInputs(List.of(supportedInput));
 
       Step step = new Step()
-            .setId("step-serialize")
             .setName("Execute")
             .setType("simulation")
             .setProperties(List.of(new StringProperty("mode", "STRICT")));

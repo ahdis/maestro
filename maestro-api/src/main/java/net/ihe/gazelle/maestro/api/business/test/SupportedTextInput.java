@@ -1,6 +1,7 @@
 package net.ihe.gazelle.maestro.api.business.test;
 
 import java.io.Serial;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SupportedTextInput extends SupportedInput {
@@ -8,11 +9,11 @@ public class SupportedTextInput extends SupportedInput {
    @Serial
    private static final long serialVersionUID = -4705877909585949476L;
 
-   private List<String> possibleValues;
+   private List<String> possibleValues = new ArrayList<>();
    private String defaultValue;
 
    public SupportedTextInput() {
-      //default constructor
+      // default constructor
    }
 
    public List<String> getPossibleValues() {
@@ -20,7 +21,7 @@ public class SupportedTextInput extends SupportedInput {
    }
 
    public SupportedTextInput setPossibleValues(List<String> possibleValues) {
-      this.possibleValues = possibleValues;
+      this.possibleValues = possibleValues != null ? possibleValues : new ArrayList<>();
       return this;
    }
 
@@ -49,5 +50,14 @@ public class SupportedTextInput extends SupportedInput {
    public SupportedTextInput setRequired(boolean required) {
       super.setRequired(required);
       return this;
+   }
+
+   public boolean areAllPossibleValuesDefined() {
+      for(String possibleValue : possibleValues) {
+         if (possibleValue == null || possibleValue.isEmpty()) {
+            return false;
+         }
+      }
+      return true;
    }
 }

@@ -44,7 +44,6 @@ public class UserInteractionStepExecutor implements StepExecutor {
 
     private StepRunReport buildStepRunReport(StepRun stepRun) {
         return new StepRunReportBuilder()
-                .setStepId(stepRun.getId())
                 .setStepName(stepRun.getName())
                 .setType(UserInteractionStepDefinition.TYPE)
                 .setResult(StepResult.DONE)

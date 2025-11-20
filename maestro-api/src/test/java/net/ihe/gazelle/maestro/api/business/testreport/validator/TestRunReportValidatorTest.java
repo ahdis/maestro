@@ -53,7 +53,6 @@ class TestRunReportValidatorTest {
 
     private TestRunReport buildValidTestRunReport() {
         StepRunReport stepRunReport = new StepRunReport()
-                .setStepId("step-1")
                 .setStepName("Validate input")
                 .setType("validation")
                 .setResult(StepResult.PASSED);

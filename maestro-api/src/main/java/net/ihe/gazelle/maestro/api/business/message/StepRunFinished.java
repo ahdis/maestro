@@ -32,15 +32,17 @@ public class StepRunFinished implements Message {
    private static final long serialVersionUID = 1L;
    private String sessionId;
    private String testId;
+   private int stepIndex;
    private StepRun stepRun;
    private StepRunReport stepRunReport;
 
    public StepRunFinished() {
    }
 
-   public StepRunFinished(String sessionId, String testId, StepRun stepRun, StepRunReport stepRunReport) {
+   public StepRunFinished(String sessionId, String testId, int stepIndex, StepRun stepRun, StepRunReport stepRunReport) {
       this.sessionId = sessionId;
       this.testId = testId;
+      this.stepIndex = stepIndex;
       this.stepRun = stepRun;
       this.stepRunReport = stepRunReport;
    }
@@ -63,6 +65,15 @@ public class StepRunFinished implements Message {
       return this;
    }
 
+   public int getStepIndex() {
+      return stepIndex;
+   }
+
+   public StepRunFinished setStepIndex(int stepIndex) {
+      this.stepIndex = stepIndex;
+      return this;
+   }
+
    public StepRun getStepRun() {
       return stepRun;
    }
@@ -76,7 +87,7 @@ public class StepRunFinished implements Message {
       return stepRunReport;
    }
 
-   public StepRunFinished setSteprunReport(StepRunReport stepRunReport) {
+   public StepRunFinished setStepRunReport(StepRunReport stepRunReport) {
       this.stepRunReport = stepRunReport;
       return this;
    }

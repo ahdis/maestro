@@ -77,7 +77,6 @@ class ValidationStepExecutorTest {
 
    private StepRun stepRunWithContent(byte[] content) {
       Step step = new Step()
-            .setId("step-1")
             .setName("Validation")
             .setType(ValidationStepDefinition.TYPE)
             .setProperties(List.of(

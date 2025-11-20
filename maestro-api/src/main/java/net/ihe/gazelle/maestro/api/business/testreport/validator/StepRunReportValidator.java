@@ -48,7 +48,6 @@ public class StepRunReportValidator extends AbstractValidator<StepRunReport> {
     @Override
     protected void addRulesAndMembers(ValidatorBuilder<? extends StepRunReport> validatorBuilder) {
         validatorBuilder
-                .addRule(StepRunReport::isStepIdValid, "Step Id must be set and not empty")
                 .addRule(StepRunReport::isStepNameValid, "Step Name must be set and not empty")
                 .addRule( StepRunReport::isTypeValid, "Type must be set and not empty")
                 .addRule(StepRunReport::isResultValid, "Result must be set")

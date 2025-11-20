@@ -61,10 +61,10 @@ public class StepRunner {
              timeout = (Integer) stepRun.getPropertyValue("timeout");
          }
          StepRunReport report = executor.execute(stepRun).get(timeout, TimeUnit.MILLISECONDS); // blocking call
-
          stepRunReportValidator.validate(report).orThrow(IllegalStateException::new);
          stepRunEventProducer.notify(
-               new StepRunFinished(startStepRun.getSessionId(), startStepRun.getTestId(), stepRun, report)
+               new StepRunFinished(startStepRun.getSessionId(), startStepRun.getTestId(), startStepRun.getStepIndex(),
+                     stepRun, report)
          );
       } catch (InterruptedException e) {
          Thread.currentThread().interrupt();
@@ -73,22 +73,21 @@ public class StepRunner {
          // User error, due to bad test definition
          logger.atDebug().setCause(e).log("Unable to run step");
          stepRunEventProducer.notify(
-               new StepRunFinished(startStepRun.getSessionId(), startStepRun.getTestId(), stepRun,
-                     buildErrorReport(stepRun, e))
+               new StepRunFinished(startStepRun.getSessionId(), startStepRun.getTestId(), startStepRun.getStepIndex(),
+                     stepRun, buildErrorReport(stepRun, e))
          );
       } catch (Exception e) {
          // Unexpected error
          logger.atError().setCause(e).log("Unexepcted error while running step");
          stepRunEventProducer.notify(
-               new StepRunFinished(startStepRun.getSessionId(), startStepRun.getTestId(), stepRun,
-                     buildErrorReport(stepRun, e))
+               new StepRunFinished(startStepRun.getSessionId(), startStepRun.getTestId(), startStepRun.getStepIndex(),
+                     stepRun, buildErrorReport(stepRun, e))
          );
       }
    }
 
    private static StepRunReport buildErrorReport(StepRun stepRun, Throwable e) {
       return new StepRunReportBuilder()
-            .setStepId(stepRun.getId())
             .setStepName(stepRun.getName())
             .setType(stepRun.getType())
             .setResult(StepResult.UNDEFINED)

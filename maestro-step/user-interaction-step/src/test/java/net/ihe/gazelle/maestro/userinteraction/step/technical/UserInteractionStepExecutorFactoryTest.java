@@ -61,7 +61,6 @@ class UserInteractionStepExecutorFactoryTest {
 
     private Step getUserInteractionStep() {
         return new Step()
-                .setId("sim-step")
                 .setName("simulationStep")
                 .setType(UserInteractionStepDefinition.TYPE)
                 .setProperties(List.of(

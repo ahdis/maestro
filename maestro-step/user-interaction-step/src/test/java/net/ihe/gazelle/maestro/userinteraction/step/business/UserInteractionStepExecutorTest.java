@@ -36,7 +36,6 @@ class UserInteractionStepExecutorTest {
         StepRun stepRun = stepRun();
 
         StepRunReport report = executor.execute(stepRun).join();
-        assertEquals(stepRun.getId(), report.getStepId());
         assertEquals(stepRun.getName(), report.getStepName());
         assertEquals(UserInteractionStepDefinition.TYPE, report.getType());
         assertEquals(StepResult.DONE, report.getResult());
@@ -44,7 +43,6 @@ class UserInteractionStepExecutorTest {
 
     private Step step() {
         return new Step()
-                .setId("sim-step")
                 .setName("Simulation")
                 .setType(UserInteractionStepDefinition.TYPE)
                 .setProperties(List.of(

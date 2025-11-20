@@ -35,7 +35,6 @@ public class StepRunReport implements Serializable {
    @Serial
    private static final long serialVersionUID = -5259327294299524545L;
 
-   private String stepId;
    private String stepName;
    private String type;
    private Instant dateTime;
@@ -50,20 +49,10 @@ public class StepRunReport implements Serializable {
        unexpectedErrors = new ArrayList<>();
    }
 
-   public StepRunReport(String stepId, String type, StepResult result) {
+   public StepRunReport(String type, StepResult result) {
       this();
-      this.stepId = stepId;
       this.type = type;
       this.result = result;
-   }
-
-   public String getStepId() {
-      return stepId;
-   }
-
-   public StepRunReport setStepId(String stepId) {
-      this.stepId = stepId;
-      return this;
    }
 
    public String getStepName() {
@@ -135,10 +124,6 @@ public class StepRunReport implements Serializable {
       return this;
    }
 
-   public boolean isStepIdValid() {
-      return stepId != null && !stepId.isBlank();
-   }
-
    public boolean isStepNameValid() {
       return stepName != null && !stepName.isBlank();
    }
@@ -163,14 +148,14 @@ public class StepRunReport implements Serializable {
       if (!(o instanceof StepRunReport report)) {
          return false;
       }
-      return Objects.equals(stepId, report.stepId) && Objects.equals(stepName,
-            report.stepName) && Objects.equals(type,
-            report.type) && result == report.result && Objects.equals(outputs,
+      return Objects.equals(stepName, report.stepName) && Objects.equals(type,
+            report.type) && Objects.equals(dateTime,
+            report.dateTime) && result == report.result && Objects.equals(outputs,
             report.outputs) && Objects.equals(unexpectedErrors, report.unexpectedErrors);
    }
 
    @Override
    public int hashCode() {
-      return Objects.hash(stepId, stepName, type, result, outputs, unexpectedErrors);
+      return Objects.hash(stepName, type, dateTime, result, outputs, unexpectedErrors);
    }
 }

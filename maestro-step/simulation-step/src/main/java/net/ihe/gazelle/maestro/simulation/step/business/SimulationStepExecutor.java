@@ -207,7 +207,6 @@ public class SimulationStepExecutor implements StepExecutor {
 
    private StepRunReportBuilder prepareStepReport(StepRun stepRun) {
       return new StepRunReportBuilder()
-            .setStepId(stepRun.getId())
             .setStepName(stepRun.getName())
             .setType(SimulationStepDefinition.TYPE);
    }

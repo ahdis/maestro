@@ -21,7 +21,9 @@ import net.ihe.gazelle.maestro.api.business.property.PropertyResolver;
 import net.ihe.gazelle.maestro.api.business.test.Step;
 
 import java.io.Serial;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * StepRun is the execution of a Step with the test context to be able to resolve reference-properties.
@@ -32,11 +34,27 @@ public class StepRun extends Step {
    private static final long serialVersionUID = 6529685098267757690L;
 
    public StepRun(Step step, List<Property> context) {
-      super(step);
-      // we copy the context properties to avoid shared references
-      super.addProperties(context.stream().map(Property::copy).toList());
-      // Now we can resolve all properties for this step run only.
-      PropertyResolver.resolveProperties(this.properties.values());
+      super(
+            step.getName(),
+            step.getType(),
+            resolveProperties(aggregateProperties(context, step.getProperties())),
+            step.getOutputMappings()
+      );
+   }
+
+   private static List<Property> aggregateProperties(List<Property> context, List<Property> stepProperties) {
+      // we create the map from the context first, so that it can be overridden by the step properties
+      Map<String, Property> aggregatedProperties = buildMap(context);
+      // Then Step properties are also copied to avoid modification of original properties via shared references
+      stepProperties.forEach(property ->
+            aggregatedProperties.put(property.getName(), property.copy())
+      );
+      return new ArrayList<>(aggregatedProperties.values());
+   }
+
+   private static List<Property> resolveProperties(final List<Property> properties) {
+      PropertyResolver.resolveProperties(properties);
+      return properties;
    }
 
 }

@@ -16,7 +16,7 @@
       },
       "stepRunReports": [
         {
-          "stepId": "stepId",
+          "name": "step name",
           "type": "VALIDATION",
           "result": "PASSED"
         }
@@ -44,7 +44,7 @@
           },
           "stepRunReports": [
             {
-              "stepId": "stepId",
+              "name": "step name",
               "type": "VALIDATION",
               "result": "PASSED"
             }

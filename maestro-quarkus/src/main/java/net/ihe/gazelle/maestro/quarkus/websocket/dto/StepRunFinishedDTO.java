@@ -30,7 +30,7 @@ import java.util.List;
 @JsonPropertyOrder({
         "type",
         "testId",
-        "stepId",
+        "stepIndex",
         "dateTime",
         "result",
         "unexpectedErrors"
@@ -53,9 +53,9 @@ public class StepRunFinishedDTO extends MessageDTO<StepRunFinished> {
         return message.getTestId();
     }
 
-    @JsonGetter("stepId")
-    public String getStepName() {
-        return message.getStepRun().getId();
+    @JsonGetter("stepIndex")
+    public int getStepIndex() {
+        return message.getStepIndex();
     }
 
     @JsonGetter("dateTime")

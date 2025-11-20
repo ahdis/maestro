@@ -23,7 +23,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -32,35 +32,28 @@ public class Step implements Serializable {
    @Serial
    private static final long serialVersionUID = 4126739543481925460L;
 
-   private String id;
    private String name;
    private String type;
    // The base Map interface is not serializable, so we declare properties as ConcurrentHashMap.
-   protected ConcurrentHashMap<String, Property> properties = new ConcurrentHashMap<>();
+   private ConcurrentHashMap<String, Property> properties = new ConcurrentHashMap<>();
+   private ConcurrentHashMap<String, String> outputMappings = new ConcurrentHashMap<>();
+
 
    public Step() {
       // Empty for serialization
    }
 
    public Step(Step other) {
-      this.id = other.id;
-      this.name = other.name;
-      this.type = other.type;
-      // not only we copied the map, but also each property to avoid shared references.
-      this.properties = other.properties.values().stream().collect(
-            ConcurrentHashMap::new,
-            (map, property) -> map.put(property.getName(), property.copy()),
-            ConcurrentHashMap::putAll
-      );
+      this(other.name, other.type, other.getProperties(), other.getOutputMappings());
    }
 
-   public String getId() {
-      return id;
-   }
-
-   public Step setId(String id) {
-      this.id = id;
-      return this;
+   protected Step(String name, String type, List<Property> properties, Map<String, String> outputMappings) {
+      this.name = name;
+      this.type = type;
+      properties.forEach(property -> this.properties.put(property.getName(), property.copy()));
+      this.outputMappings = outputMappings != null ?
+            new ConcurrentHashMap<>(outputMappings) :
+            new ConcurrentHashMap<>();
    }
 
    public String getName() {
@@ -122,13 +115,20 @@ public class Step implements Serializable {
       return this;
    }
 
-   public synchronized Step addProperties(List<Property> properties) {
-      properties.forEach(property -> this.properties.put(property.getName(), property));
+   public Map<String, String> getOutputMappings() {
+      return outputMappings;
+   }
+
+   public Step setOutputMappings(Map<String, String> outputMappings) {
+      this.outputMappings = outputMappings != null ?
+            new ConcurrentHashMap<>(outputMappings) :
+            new ConcurrentHashMap<>();
       return this;
    }
 
-   public boolean isIdDefined() {
-      return id != null && !id.isEmpty();
+   public Step addOutputMapping(String key, String value) {
+      this.outputMappings.put(key, value);
+      return this;
    }
 
    public boolean isNameDefined() {
@@ -139,12 +139,23 @@ public class Step implements Serializable {
       return type != null && !type.isEmpty();
    }
 
-   private ConcurrentHashMap<String, Property> buildMap(List<Property> properties) {
+   public boolean areOutputMappingsValid() {
+      return outputMappings.entrySet().stream()
+            .allMatch(Step::isMapEntryDefined);
+   }
+
+   protected static ConcurrentHashMap<String, Property> buildMap(List<Property> properties) {
       return properties.stream().collect(
             ConcurrentHashMap::new,
-            (map, property) -> map.put(property.getName(), property),
+            (map, property) -> map.put(property.getName(), property.copy()),
             ConcurrentHashMap::putAll
       );
    }
+
+   private static boolean isMapEntryDefined(Map.Entry<String, String> entry) {
+      return entry.getKey() != null && !entry.getKey().isBlank()
+                      && entry.getValue() != null && !entry.getValue().isBlank();
+   }
+
 }
 

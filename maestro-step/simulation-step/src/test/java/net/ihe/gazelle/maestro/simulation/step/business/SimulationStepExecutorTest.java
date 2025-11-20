@@ -52,7 +52,7 @@ class SimulationStepExecutorTest {
         StepRunReport report = runner.execute(stepRun()).join();
 
         assertNotNull(report.getResult());
-        assertEquals("sim-step", report.getStepId());
+        assertEquals("Simulation", report.getStepName());
         assertEquals(SimulationStepDefinition.TYPE, report.getType());
         assertFalse(report.getOutputs().isEmpty());
         assertEquals(SimulationStepDefinition.REPORT, report.getOutputs().getFirst().getName());
@@ -204,20 +204,16 @@ class SimulationStepExecutorTest {
 
     private Step step() {
         return new Step()
-                .setId("sim-step")
                 .setName("Simulation")
                 .setType(SimulationStepDefinition.TYPE)
                 .setProperties(List.of(
                         new StringProperty(SimulationStepDefinition.SIMULATION_SERVICE, "svc"),
                         new StringProperty(SimulationStepDefinition.SEQUENCE_ID, "SEQ-1"),
-                        new IntegerProperty(SimulationStepDefinition.TIMEOUT_SECONDS, 1)
-                ))
-                .addProperties(List.of(
-                                new StringProperty("p-text", "v"),
-                                new BooleanProperty("p-bool", true),
-                                new ByteArrayProperty("p-file", "data".getBytes(StandardCharsets.UTF_8))
-                        )
-                );
+                        new IntegerProperty(SimulationStepDefinition.TIMEOUT_SECONDS, 1),
+                      new StringProperty("p-text", "v"),
+                      new BooleanProperty("p-bool", true),
+                      new ByteArrayProperty("p-file", "data".getBytes(StandardCharsets.UTF_8))
+                ));
     }
 
     private StepRun stepRun() {

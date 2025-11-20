@@ -6,16 +6,17 @@ import java.io.Serial;
 
 @Event
 public class StepRunStarted implements Message {
+
     @Serial
     private static final long serialVersionUID = 1L;
     private String testId;
-    private String stepId;
+    private int stepIndex;
 
     public StepRunStarted() {}
 
-    public StepRunStarted(String testId, String stepId) {
+    public StepRunStarted(String testId, int stepIndex) {
         this.testId = testId;
-        this.stepId = stepId;
+        this.stepIndex = stepIndex;
     }
 
     public String getTestId() {
@@ -27,12 +28,12 @@ public class StepRunStarted implements Message {
         return this;
     }
 
-    public String getStepId() {
-        return stepId;
+    public int getStepIndex() {
+        return stepIndex;
     }
 
-    public StepRunStarted setStepId(String stepId) {
-        this.stepId = stepId;
+    public StepRunStarted setStepIndex(int stepIndex) {
+        this.stepIndex = stepIndex;
         return this;
     }
 }

@@ -20,7 +20,6 @@ public class AssertContainsStepExecutor implements StepExecutor {
    @Override
    public CompletableFuture<StepRunReport> execute(StepRun stepRun) {
       StepRunReportBuilder reportBuilder = new StepRunReportBuilder()
-            .setStepId(stepRun.getId())
             .setStepName(stepRun.getName())
             .setType(stepRun.getType());
 

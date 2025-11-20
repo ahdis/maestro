@@ -137,7 +137,7 @@ class TestSuiteRunnerTest {
    }
 
    private Test createTest(String id, String stepName) {
-      Step step = new Step().setId(id + "-" + stepName).setName(stepName).setType("SIM");
+      Step step = new Step().setName(stepName).setType("SIM");
       return new Test()
             .setId(id)
             .setName("Test " + id)

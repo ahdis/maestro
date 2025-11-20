@@ -28,6 +28,7 @@ import technical.dao.SessionStoreImpl;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -125,7 +126,7 @@ class MaestroEngineTest {
     @org.junit.jupiter.api.Test
    void executeTestSuiteWithFailingStepStillCompletes() {
       RecordingMaestroObserver observer = new RecordingMaestroObserver();
-      Step failingStep = step("step-fail", "Failing step");
+      Step failingStep = step("Failing step");
       Test test = createTest("test-2", "step-ok");
       test.addStep(failingStep);
       TestSuiteRun suiteRun = buildSuiteRun("suite-2", test);
@@ -139,7 +140,7 @@ class MaestroEngineTest {
       TestReport recorded = reportRecordService.getRecordedReports().getFirst();
       boolean failingStepRecorded = recorded.getTestRunReports().stream()
             .flatMap(run -> run.getStepRunReports().stream())
-            .anyMatch(stepReport -> stepReport.getStepId().equals("step-fail")
+            .anyMatch(stepReport -> stepReport.getStepName().equals("Failing step")
                                     && !stepReport.getUnexpectedErrors().isEmpty());
       assertThat(failingStepRecorded, is(true));
       assertThat(finished.getReport().getUnexpectedErrors(), empty());
@@ -183,9 +184,12 @@ class MaestroEngineTest {
    @org.junit.jupiter.api.Test
    void stepOutputsArePropagatedToNextStepContext() {
       RecordingMaestroObserver observer = new RecordingMaestroObserver();
-      Step producer = step("producer-step", "Producer");
-      Step consumer = step("consumer-step", "Consumer")
-            .setProperties(List.of(new StringProperty("echo", "${producer-step.payload}")));
+      Step producer = step("Producer")
+            .setOutputMappings(Map.of(
+                  "payload", "ProducerPayload"
+            ));
+      Step consumer = step("Consumer")
+            .setProperties(List.of(new StringProperty("echo", "${ProducerPayload}")));
 
       Test test = new Test()
             .setId("context-test")
@@ -197,15 +201,14 @@ class MaestroEngineTest {
       AtomicReference<String> observedValue = new AtomicReference<>();
 
       stepExecutorProvider
-            .returnsReport("producer-step", new StepRunReport()
-                  .setStepId("producer-step")
+            .returnsReport("Producer", new StepRunReport()
                   .setStepName("Producer")
                   .setType("SIMULATION")
                   .setResult(StepResult.PASSED)
                   .setOutputs(List.of(new StringProperty("payload", "HELLO-CONTEXT"))))
-            .withExecutor("consumer-step", stepRun -> {
+            .withExecutor("Consumer", stepRun -> {
                observedValue.set(stepRun.getPropertyValue("echo"));
-               return CompletableFuture.completedFuture(passedReport("consumer-step"));
+               return CompletableFuture.completedFuture(passedReport("Consumer"));
             });
 
       maestro.executeTestSuite(suiteRun, true, observer);
@@ -283,9 +286,12 @@ class MaestroEngineTest {
    @org.junit.jupiter.api.Test
    void stepExecutorTypeMismatchProducesUndefinedStepReport() {
       RecordingMaestroObserver observer = new RecordingMaestroObserver();
-      Step producer = step("producer", "Producer");
-      Step consumer = step("consumer", "Consumer")
-            .setProperties(List.of(new StringProperty("payloadRef", "${producer.payload}")));
+      Step producer = step("Producer")
+            .setOutputMappings(Map.of(
+                  "payload", "ProducerPayload"
+            ));
+      Step consumer = step("Consumer")
+            .setProperties(List.of(new StringProperty("payloadRef", "${ProducerPayload}")));
 
       Test test = new Test()
             .setId("mismatch-test")
@@ -295,16 +301,15 @@ class MaestroEngineTest {
       TestSuiteRun suiteRun = buildSuiteRun("suite-mismatch", test);
 
       stepExecutorProvider
-            .returnsReport("producer", new StepRunReport()
-                  .setStepId("producer")
+            .returnsReport("Producer", new StepRunReport()
                   .setStepName("Producer")
                   .setType("SIMULATION")
                   .setResult(StepResult.PASSED)
                   .setOutputs(List.of(new StringProperty("payload", "STRING-VALUE"))))
-            .withExecutor("consumer", stepRun -> {
+            .withExecutor("Consumer", stepRun -> {
                // Force a ClassCastException to mimic a type mismatch at execution time
                Integer ignored = (Integer) stepRun.getPropertyValue("payloadRef");
-               return CompletableFuture.completedFuture(passedReport("consumer"));
+               return CompletableFuture.completedFuture(passedReport("Consumer"));
             });
 
       runSuite(observer, suiteRun);
@@ -318,8 +323,8 @@ class MaestroEngineTest {
    @org.junit.jupiter.api.Test
    void duplicateStepNamesCauseValidationError() {
       RecordingMaestroObserver observer = new RecordingMaestroObserver();
-      Step stepA = step("dup-1", "duplicate");
-      Step stepB = step("dup-2", "duplicate");
+      Step stepA = step("duplicate");
+      Step stepB = step("duplicate");
       Test duplicated = new Test()
             .setId("dup-test")
             .setName("Duplicate Steps Test")
@@ -364,10 +369,9 @@ class MaestroEngineTest {
       return observer.awaitSuiteFinished(Duration.ofSeconds(5));
    }
 
-   private StepRunReport passedReport(String stepId) {
+   private StepRunReport passedReport(String stepName) {
       return new StepRunReport()
-            .setStepId(stepId)
-            .setStepName(stepId)
+            .setStepName(stepName)
             .setType("SIMULATION")
             .setResult(StepResult.PASSED);
    }
@@ -384,19 +388,18 @@ class MaestroEngineTest {
             .setAccessControlList(new AccessControlList().setPublic(true));
    }
 
-   private Test createTest(String testId, String... stepIds) {
+   private Test createTest(String testId, String... stepNames) {
       Test test = new Test()
             .setId(testId)
             .setName("Test " + testId);
-      for (String stepId : stepIds) {
-         test.addStep(step(stepId, "Step " + stepId));
+      for (String stepName : stepNames) {
+         test.addStep(step(stepName));
       }
       return test;
    }
 
-   private Step step(String id, String name) {
+   private Step step(String name) {
       return new Step()
-            .setId(id)
             .setName(name)
             .setType("SIMULATION");
    }

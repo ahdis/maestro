@@ -15,7 +15,6 @@ class TestRunReportBuilderTest {
         Instant timestamp = Instant.parse("2025-01-01T00:00:00Z");
 
         StepRunReportBuilder stepRunReportBuilder = new StepRunReportBuilder()
-                .setStepId("step-1")
                 .setStepName("Validation step")
                 .setType("VALIDATION")
                 .setResult(StepResult.PASSED)
@@ -44,7 +43,7 @@ class TestRunReportBuilderTest {
 
         assertEquals(1, report.getStepRunReports().size());
         StepRunReport stepRunReport = report.getStepRunReports().getFirst();
-        assertEquals("step-1", stepRunReport.getStepId());
+        assertEquals("Validation step", stepRunReport.getStepName());
         assertEquals(StepResult.PASSED, stepRunReport.getResult());
         assertEquals(1, stepRunReport.getOutputs().size());
         assertNotNull(report.getUrlToTestRun());

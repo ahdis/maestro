@@ -58,7 +58,6 @@ public class ItbStepExecutor implements StepExecutor {
    public CompletableFuture<StepRunReport> execute(StepRun stepRun) {
       TestRequest testRequest = mapToRequest(stepRun);
       StepRunReportBuilder reportBuilder = new StepRunReportBuilder()
-            .setStepId(stepRun.getId())
             .setStepName(stepRun.getName())
             .setType(ItbStepDefinition.TYPE);
       return itbService.runTests(testRequest).thenApply(

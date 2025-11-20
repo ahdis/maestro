@@ -50,7 +50,7 @@ class AssertionStepExecutorTest {
         CompletableFuture<StepRunReport> future = runner.execute(stepRun);
         StepRunReport report = future.get(1, TimeUnit.SECONDS);
 
-        assertEquals(step.getName(), report.getStepId());
+        assertEquals(step.getName(), report.getStepName());
         assertEquals(AssertEqualsStepDefinition.TYPE, report.getType());
         assertEquals(StepResult.PASSED, report.getResult());
         assertDoesNotThrow(() -> new StepRunReportValidator().validate(report));
@@ -68,7 +68,7 @@ class AssertionStepExecutorTest {
         CompletableFuture<StepRunReport> future = runner.execute(stepRun);
         StepRunReport report = future.get(1, TimeUnit.SECONDS);
 
-        assertEquals(step.getName(), report.getStepId());
+        assertEquals(step.getName(), report.getStepName());
         assertEquals(AssertEqualsStepDefinition.TYPE, report.getType());
         assertEquals(StepResult.FAILED, report.getResult());
         assertDoesNotThrow(() -> new StepRunReportValidator().validate(report));
@@ -86,7 +86,7 @@ class AssertionStepExecutorTest {
         CompletableFuture<StepRunReport> future = runner.execute(stepRun);
         StepRunReport report = future.get(1, TimeUnit.SECONDS);
 
-        assertEquals(step.getName(), report.getStepId());
+        assertEquals(step.getName(), report.getStepName());
         assertEquals(AssertContainsStepDefinition.TYPE, report.getType());
         assertEquals(StepResult.PASSED, report.getResult());
         assertDoesNotThrow(() -> new StepRunReportValidator().validate(report));
@@ -104,7 +104,7 @@ class AssertionStepExecutorTest {
         CompletableFuture<StepRunReport> future = runner.execute(stepRun);
         StepRunReport report = future.get(1, TimeUnit.SECONDS);
 
-        assertEquals(step.getName(), report.getStepId());
+        assertEquals(step.getName(), report.getStepName());
         assertEquals(AssertContainsStepDefinition.TYPE, report.getType());
         assertEquals(StepResult.FAILED, report.getResult());
         assertDoesNotThrow(() -> new StepRunReportValidator().validate(report));
@@ -112,7 +112,6 @@ class AssertionStepExecutorTest {
 
     private static Step buildStep(String type) {
         return new Step()
-                .setId("step")
                 .setName("step")
                 .setType(type);
     }

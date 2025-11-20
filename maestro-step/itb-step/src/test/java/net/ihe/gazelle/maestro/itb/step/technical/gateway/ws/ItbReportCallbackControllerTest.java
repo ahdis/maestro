@@ -53,7 +53,7 @@ class ItbReportCallbackControllerTest {
         CompletableFuture<StepRunReportBuilder> future = new CompletableFuture<>();
         ItbSessionStoreImpl.add(sessionId, future);
 
-        StepRunReportBuilder builder = new StepRunReportBuilder().setStepId("s").setType("ITB");
+        StepRunReportBuilder builder = new StepRunReportBuilder().setType("ITB");
         when(itbReportingService.buildItbReport(any())).thenReturn(builder);
 
         ItbReportCallbackController controller = new ItbReportCallbackController(itbReportingService);

@@ -51,7 +51,6 @@ class AssertionStepExecutorFactoryTest {
         Property expected = new StringProperty(AssertContainsStepDefinition.EXPECTED, "value");
         Property actual = new StringProperty(AssertContainsStepDefinition.ACTUAL, "value");
         Step assertionStep = new Step()
-                .setId(name)
                 .setName(name)
                 .setProperties(List.of(expected, actual));
         StepExecutor stepExecutor = assertContainsStepExecutorFactory.createStepExecutor(assertionStep, Map.of());
@@ -70,7 +69,6 @@ class AssertionStepExecutorFactoryTest {
         Property expected = new StringProperty(AssertEqualsStepDefinition.EXPECTED, "value");
         Property actual = new StringProperty(AssertEqualsStepDefinition.ACTUAL, "value");
         Step assertionStep = new Step()
-                .setId(name)
                 .setName(name)
                 .setProperties(List.of(expected, actual));
         StepExecutor stepExecutor = assertEqualsStepExecutorFactory.createStepExecutor(assertionStep, Map.of());

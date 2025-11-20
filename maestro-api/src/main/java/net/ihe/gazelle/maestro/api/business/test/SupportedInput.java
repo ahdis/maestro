@@ -42,4 +42,12 @@ public abstract class SupportedInput implements Serializable {
       this.required = required;
       return this;
    }
+
+   public boolean isIdDefined() {
+      return id != null && !id.isEmpty();
+   }
+
+   public boolean isLabelDefined() {
+      return label != null && !label.isEmpty();
+   }
 }

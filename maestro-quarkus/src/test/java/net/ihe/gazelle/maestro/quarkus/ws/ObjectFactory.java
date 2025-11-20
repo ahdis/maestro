@@ -27,7 +27,6 @@ public class ObjectFactory {
 
     public static Step createStep() {
         return new Step()
-                .setId("step")
                 .setName("step")
                 .setType("type");
     }
@@ -56,7 +55,6 @@ public class ObjectFactory {
 
     public static StepRunReport createStepRunReport() {
         StepRunReportBuilder stepRunReportBuilder = new StepRunReportBuilder()
-                .setStepId("step-1")
                 .setStepName("step")
                 .setType("TYPE")
                 .setResult(StepResult.PASSED);
@@ -65,7 +63,6 @@ public class ObjectFactory {
 
     public static TestRunReport createTestRunReport() {
         StepRunReportBuilder stepRunReportBuilder = new StepRunReportBuilder()
-                .setStepId("step-1")
                 .setStepName("step")
                 .setType("TYPE")
                 .setResult(StepResult.PASSED);
@@ -82,7 +79,6 @@ public class ObjectFactory {
 
     public static TestReport createTestReport() {
         StepRunReportBuilder stepRunReportBuilder = new StepRunReportBuilder()
-                .setStepId("step-1")
                 .setStepName("step")
                 .setType("TYPE")
                 .setResult(StepResult.PASSED);

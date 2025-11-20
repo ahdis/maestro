@@ -14,13 +14,11 @@ class TestReportBuilderTest {
         Instant timestamp = Instant.parse("2025-01-01T00:00:00Z");
 
         StepRunReportBuilder stepRunReportBuilder = new StepRunReportBuilder()
-                .setStepId("step-1")
                 .setStepName("Validation step")
                 .setType("VALIDATION")
                 .setResult(StepResult.PASSED);
 
         TestRunReportBuilder testRunReportBuilder = new TestRunReportBuilder()
-                .setRunId("run-42")
                 .setDateTime(timestamp)
                 .setTest(new TestBuilder()
                         .setId("test-1")

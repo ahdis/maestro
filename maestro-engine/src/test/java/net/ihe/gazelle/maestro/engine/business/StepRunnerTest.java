@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class StepRunnerTest {
 
@@ -32,31 +33,33 @@ class StepRunnerTest {
       executorProvider = new ScriptedStepExecutorProvider();
       eventProducer = new RecordingStepRunEventProducer();
       stepRunner = new StepRunner(executorProvider, eventProducer);
-      step = new Step().setId("step-1").setName("Step").setType("SIMULATION");
+      step = new Step().setName("Step 1").setType("SIMULATION");
    }
 
    @Test
    void runDelegatesToExecutorAndEmitsReport() {
       StepRunReport report = new StepRunReport()
-            .setStepId("step-1")
-            .setStepName("Step")
+            .setStepName("Step 1")
             .setType("SIMULATION")
             .setResult(StepResult.PASSED);
 
-      executorProvider.withExecutor("step-1", stepRun -> CompletableFuture.completedFuture(report));
+      executorProvider.withExecutor("Step 1", stepRun -> CompletableFuture.completedFuture(report));
 
-      stepRunner.run(new StartStepRun("session", "test", new StepRun(step, step.getProperties())));
+      stepRunner.run(new StartStepRun("123456", "abc123", 4, new StepRun(step, step.getProperties())));
 
       StepRunFinished finished = eventProducer.awaitFinishedEvent(Duration.ofSeconds(2));
+      assertEquals(4, finished.getStepIndex());
+      assertEquals("123456", finished.getSessionId());
+      assertEquals("abc123", finished.getTestId());
       assertThat(finished.getStepRunReport(), sameInstance(report));
    }
 
    @Test
    void runHonorsTimeoutProperty() {
       step.setProperties(List.of(new net.ihe.gazelle.maestro.api.business.property.IntegerProperty("timeout", 50)));
-      executorProvider.withExecutor("step-1", stepRun -> new CompletableFuture<>());
+      executorProvider.withExecutor("Step 1", stepRun -> new CompletableFuture<>());
 
-      stepRunner.run(new StartStepRun("session-timeout", "test", new StepRun(step, step.getProperties())));
+      stepRunner.run(new StartStepRun("session-timeout", "test", 0, new StepRun(step, step.getProperties())));
 
       StepRunFinished finished = eventProducer.awaitFinishedEvent(Duration.ofSeconds(2));
       assertThat(finished.getStepRunReport().getResult(), is(StepResult.UNDEFINED));
@@ -65,7 +68,7 @@ class StepRunnerTest {
 
    @Test
    void runHandlesUnknownStepException() {
-      stepRunner.run(new StartStepRun("session-unknown", "test", new StepRun(step, step.getProperties())));
+      stepRunner.run(new StartStepRun("session-unknown", "test", 0, new StepRun(step, step.getProperties())));
 
       StepRunFinished finished = eventProducer.awaitFinishedEvent(Duration.ofSeconds(2));
       assertThat(finished.getStepRunReport().getResult(), is(StepResult.UNDEFINED));
@@ -74,16 +77,17 @@ class StepRunnerTest {
 
    @Test
    void runPropagatesExecutorExceptionsAsUndefinedReports() {
-      executorProvider.withExecutor("step-1", stepRun -> {
+      executorProvider.withExecutor("Step 1", stepRun -> {
          CompletableFuture<StepRunReport> future = new CompletableFuture<>();
          future.completeExceptionally(new RuntimeException("boom"));
          return future;
       });
 
-      stepRunner.run(new StartStepRun("session-exception", "test", new StepRun(step, step.getProperties())));
+      stepRunner.run(new StartStepRun("session-exception", "test", 0, new StepRun(step, step.getProperties())));
 
       StepRunFinished finished = eventProducer.awaitFinishedEvent(Duration.ofSeconds(2));
       assertThat(finished.getStepRunReport().getResult(), is(StepResult.UNDEFINED));
+      assertEquals(0, finished.getStepIndex());
       assertThat(finished.getStepRunReport().getUnexpectedErrors(), is(not(empty())));
    }
 

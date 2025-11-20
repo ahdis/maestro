@@ -24,7 +24,7 @@ import java.util.NoSuchElementException;
 /**
  * Tracks iteration over the ordered list of {@link Step}.
  */
-public final class StepCursor {
+final class StepCursor {
 
    private final List<Step> steps;
    private int index;
@@ -34,20 +34,34 @@ public final class StepCursor {
       this.index = -1;
    }
 
-   public static StepCursor from(List<Step> orderedSteps) {
+   static StepCursor from(List<Step> orderedSteps) {
       return new StepCursor(orderedSteps);
    }
 
-   public boolean hasNext() {
+   boolean hasNext() {
       return index < steps.size() - 1;
    }
 
-   public Step next() {
+   Step next() {
       if (!hasNext()) {
          throw new NoSuchElementException("No more steps to execute");
       }
       return steps.get(++index);
    }
 
+   boolean hasCurrent() {
+      return index > -1;
+   }
+
+   Step current() {
+      if (!hasCurrent()) {
+         throw new IllegalStateException("No step has been executed yet");
+      }
+      return steps.get(index);
+   }
+
+   int currentIndex() {
+      return index;
+   }
 }
 

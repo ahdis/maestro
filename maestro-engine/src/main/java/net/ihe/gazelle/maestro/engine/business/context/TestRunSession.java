@@ -50,16 +50,20 @@ public class TestRunSession {
       return context;
    }
 
-   public StepCursor getStepCursor() {
-      return stepCursor;
-   }
-
    public boolean hasNextStep() {
       return stepCursor.hasNext();
    }
 
    public Step nextStep() {
       return stepCursor.next();
+   }
+
+   public Step currentStep() {
+      return stepCursor.current();
+   }
+
+   public int currentStepIndex() {
+      return stepCursor.currentIndex();
    }
 
    public List<StepRunReport> getStepReports() {

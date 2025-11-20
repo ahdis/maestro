@@ -70,7 +70,6 @@ class SimulationStepExecutorFactoryTest {
 
     private Step getSimulationStep() {
         return new Step()
-                .setId("sim-step")
                 .setName("simulationStep")
                 .setType(SimulationStepDefinition.TYPE)
                 .setProperties(List.of(

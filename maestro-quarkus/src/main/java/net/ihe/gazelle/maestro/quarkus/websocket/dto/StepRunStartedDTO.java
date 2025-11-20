@@ -31,7 +31,7 @@ import java.time.format.DateTimeFormatter;
 @JsonPropertyOrder({
         "type",
         "testId",
-        "stepId",
+        "stepIndex",
         "dateTime"
 })
 public class StepRunStartedDTO extends MessageDTO<StepRunStarted> {
@@ -52,9 +52,9 @@ public class StepRunStartedDTO extends MessageDTO<StepRunStarted> {
         return message.getTestId();
     }
 
-    @JsonGetter("stepId")
-    public String getStepName() {
-        return message.getStepId();
+    @JsonGetter("stepIndex")
+    public int getStepName() {
+        return message.getStepIndex();
     }
 
     @JsonGetter("dateTime")

@@ -80,7 +80,6 @@ class TestSuiteRunValidatorTest {
 
     private net.ihe.gazelle.maestro.api.business.test.Test buildValidTest() {
         Step step = new Step()
-                .setId("step-1")
                 .setName("Validate something")
                 .setType("validation");
 

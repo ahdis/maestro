@@ -12,29 +12,29 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ScriptedStepExecutorProvider implements StepExecutorProvider {
 
-   private final Map<String, StepExecutor> executorsByStepId = new ConcurrentHashMap<>();
+   private final Map<String, StepExecutor> executorsByStepName = new ConcurrentHashMap<>();
 
    @Override
    public StepExecutor getExecutor(String sessionId, Step step) {
-      StepExecutor executor = executorsByStepId.get(step.getId());
+      StepExecutor executor = executorsByStepName.get(step.getName());
       if (executor == null) {
-         throw new UnknownStepException("No executor registered for step " + step.getId());
+         throw new UnknownStepException("No executor registered for step " + step.getName());
       }
       return executor;
    }
 
-   public ScriptedStepExecutorProvider returnsReport(String stepId, StepRunReport stepRunReport) {
-      executorsByStepId.put(stepId, stepRun -> CompletableFuture.completedFuture(stepRunReport));
+   public ScriptedStepExecutorProvider returnsReport(String stepName, StepRunReport stepRunReport) {
+      executorsByStepName.put(stepName, stepRun -> CompletableFuture.completedFuture(stepRunReport));
       return this;
    }
 
-   public ScriptedStepExecutorProvider withExecutor(String stepId, StepExecutor executor) {
-      executorsByStepId.put(stepId, executor);
+   public ScriptedStepExecutorProvider withExecutor(String stepName, StepExecutor executor) {
+      executorsByStepName.put(stepName, executor);
       return this;
    }
 
-   public ScriptedStepExecutorProvider failsWith(String stepId, RuntimeException exception) {
-      executorsByStepId.put(stepId, stepRun -> {
+   public ScriptedStepExecutorProvider failsWith(String stepName, RuntimeException exception) {
+      executorsByStepName.put(stepName, stepRun -> {
          CompletableFuture<StepRunReport> failed = new CompletableFuture<>();
          failed.completeExceptionally(exception);
          return failed;

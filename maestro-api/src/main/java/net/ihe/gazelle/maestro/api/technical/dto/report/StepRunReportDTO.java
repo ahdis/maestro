@@ -62,16 +62,6 @@ public class StepRunReportDTO implements DTO<StepRunReport> {
       return stepRunReport;
    }
 
-   @JsonGetter(value = "stepId")
-   public String getStepId() {
-      return stepRunReport.getStepId();
-   }
-
-   @JsonSetter(value = "stepId")
-   public void setStepId(String stepId) {
-      stepRunReport.setStepId(stepId);
-   }
-
    @JsonGetter(value = "stepName")
    public String getStepName() {
       return stepRunReport.getStepName();

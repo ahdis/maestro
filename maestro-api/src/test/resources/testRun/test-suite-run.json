@@ -41,7 +41,6 @@
       ],
       "steps": [
         {
-          "id": "step-1",
           "name": "Execute",
           "type": "simulation",
           "properties": [
