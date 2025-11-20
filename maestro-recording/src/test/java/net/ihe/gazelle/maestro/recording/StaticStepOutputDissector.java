@@ -1,11 +1,13 @@
 package net.ihe.gazelle.maestro.recording;
 
 import net.ihe.gazelle.maestro.api.business.recording.MaestroRefType;
+import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.testreport.ByteArrayItemProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.dissection.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.List;
 
 final class StaticStepOutputDissector implements StepOutputDissector {
 
@@ -32,7 +34,7 @@ final class StaticStepOutputDissector implements StepOutputDissector {
     private final StepOutputProjection projection;
 
     StaticStepOutputDissector() {
-        this(buildProjection());
+        this(null);
     }
 
     StaticStepOutputDissector(StepOutputProjection projection) {
@@ -41,11 +43,17 @@ final class StaticStepOutputDissector implements StepOutputDissector {
 
     @Override
     public StepOutputProjection dissect(StepOutputContext context) {
-        return projection;
+        if (projection != null) {
+            return projection;
+        }
+        if (context == null || context.stepRunReport() == null) {
+            return StepOutputProjection.empty();
+        }
+        return buildProjection(context.stepRunReport().getOutputs());
     }
 
-    private static StepOutputProjection buildProjection() {
-        StepOutputGraphBuilder graph = new StepOutputGraphBuilder();
+    private static StepOutputProjection buildProjection(List<Property> outputs) {
+        StepOutputProjectionBuilder graph = new StepOutputProjectionBuilder();
 
         ItemOutputBuilder root = graph.addItem(item(ROOT_ITEM_TYPE, "{\"level\":0}"));
         root.addReferenceBinding(new ReferenceBinding(
@@ -53,7 +61,7 @@ final class StaticStepOutputDissector implements StepOutputDissector {
                 REPORT_REFERENCE_TYPE,
                 MaestroRefType.ITEM_ID
         ));
-        root.addPropertyReplacement(0, referenceProperty(ROOT_OUTPUT_NAME));
+        root.addPropertyReplacement(ROOT_OUTPUT_NAME, outputs, referenceProperty(ROOT_OUTPUT_NAME));
 
         SubItemOutputBuilder child = root.addSubItem(
                 item(CHILD_ITEM_TYPE, "{\"level\":1}"),

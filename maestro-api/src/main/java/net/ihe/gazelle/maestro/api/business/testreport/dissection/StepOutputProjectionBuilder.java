@@ -10,17 +10,17 @@ import java.util.Objects;
 /**
  * Aggregates the graph of {@link ItemOutputBuilder} nodes before flattening it into a {@link StepOutputProjection}.
  */
-public final class StepOutputGraphBuilder {
+public final class StepOutputProjectionBuilder {
 
    private final List<ItemOutputBuilder> rootItems = new ArrayList<>();
    private final List<MaestroReference> reportReferences = new ArrayList<>();
    private final StepOutputProjectionFlattener flattener;
 
-   public StepOutputGraphBuilder() {
+   public StepOutputProjectionBuilder() {
       this(new StepOutputProjectionFlattener());
    }
 
-   StepOutputGraphBuilder(StepOutputProjectionFlattener flattener) {
+   StepOutputProjectionBuilder(StepOutputProjectionFlattener flattener) {
       this.flattener = Objects.requireNonNull(flattener, "flattener");
    }
 
@@ -36,7 +36,7 @@ public final class StepOutputGraphBuilder {
    /**
     * Adds a raw reference that must be appended to the enclosing TestReport.
     */
-   public StepOutputGraphBuilder addReportReference(MaestroReference reference) {
+   public StepOutputProjectionBuilder addReportReference(MaestroReference reference) {
       reportReferences.add(Objects.requireNonNull(reference, "reference"));
       return this;
    }

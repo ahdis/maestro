@@ -1,5 +1,7 @@
 package net.ihe.gazelle.maestro.api.business.testreport.dissection;
 
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
+import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.recording.MaestroAttachment;
 import net.ihe.gazelle.maestro.api.business.recording.MaestroItem;
@@ -14,15 +16,17 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class StepOutputGraphBuilderTest {
+class StepOutputProjectionBuilderTest {
 
    @Test
    void buildsProjectionWithRelationsAttachmentsAndMutations() {
-      StepOutputGraphBuilder graph = new StepOutputGraphBuilder();
+      StepOutputProjectionBuilder graph = new StepOutputProjectionBuilder();
       ItemOutputBuilder root = graph.addItem(new SimpleItem("ROOT", "{\"value\":1}"));
+      List<net.ihe.gazelle.maestro.api.business.property.Property> outputs = List.of(
+            new ByteArrayProperty("report", new byte[]{1}));
 
       root.addReferenceBinding(new ReferenceBinding("REPORT", "TYPE", MaestroRefType.ITEM_ID));
-      root.addPropertyReplacement(0, (itemId, itemUrl) -> new StringProperty("report", itemUrl));
+      root.addPropertyReplacement("report", outputs, (itemId, itemUrl) -> new StringProperty("report", itemUrl));
       root.addAttachment(new AttachmentOutputBuilder(new SimpleAttachment("root.log"))
             .withReference("root-attachment", "LOG"));
 
@@ -58,7 +62,7 @@ class StepOutputGraphBuilderTest {
 
    @Test
    void addsReportReferencesToProjection() {
-      StepOutputGraphBuilder graph = new StepOutputGraphBuilder();
+      StepOutputProjectionBuilder graph = new StepOutputProjectionBuilder();
       graph.addReportReference(new SimpleReference("report-link", "REPORT", MaestroRefType.ITEM_ID, "itm-1"));
 
       StepOutputProjection projection = graph.build();
@@ -75,14 +79,16 @@ class StepOutputGraphBuilderTest {
 
    @Test
    void rejectsNegativePropertyReplacementIndex() {
-      StepOutputGraphBuilder graph = new StepOutputGraphBuilder();
+      StepOutputProjectionBuilder graph = new StepOutputProjectionBuilder();
       ItemOutputBuilder root = graph.addItem(new SimpleItem("ROOT", "{}"));
+      StringProperty stringProperty = new StringProperty("prop", "value");
+      List<Property> outputs = List.of();
       assertThrows(IllegalArgumentException.class,
-            () -> root.addPropertyReplacement(-1, (id, url) -> new StringProperty("prop", "value")));
+            () -> root.addPropertyReplacement("missing", outputs, (id, url) -> stringProperty));
 
       SubItemOutputBuilder child = root.addSubItem(new SimpleItem("CHILD", "{}"), "link", "TYPE");
       assertThrows(IllegalArgumentException.class,
-            () -> child.addPropertyReplacement(-2, (id, url) -> new StringProperty("prop", "value")));
+            () -> child.addPropertyReplacement(-2, (id, url) -> stringProperty));
    }
 
    private record SimpleItem(String type, String content) implements MaestroItem {

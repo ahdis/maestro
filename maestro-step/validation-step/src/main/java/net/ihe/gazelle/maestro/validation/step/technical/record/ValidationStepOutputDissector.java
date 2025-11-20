@@ -35,11 +35,10 @@ public class ValidationStepOutputDissector implements StepOutputDissector {
         if (outputs == null || outputs.isEmpty()) {
             return StepOutputProjection.empty();
         }
-        int validationReportIndex = findValidationReport(outputs);
-        if (validationReportIndex < 0) {
-            return StepOutputProjection.empty();
-        }
-        ByteArrayProperty validationReportProperty = (ByteArrayProperty) outputs.get(validationReportIndex);
+        ByteArrayProperty validationReportProperty = (ByteArrayProperty) outputs.stream()
+                .filter(output -> ValidationStepDefinition.REPORT.equals(output.getName()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Simulation report output property not found"));
         if (validationReportProperty == null) {
             return StepOutputProjection.empty();
         }
@@ -47,7 +46,7 @@ public class ValidationStepOutputDissector implements StepOutputDissector {
         ValidationReport validationReport = deserializeReport(validationReportBytes);
         InputAttachmentExtraction extraction = extractInputAttachments(validationReport);
         List<AttachmentOutputBuilder> inputAttachments = extraction.plans();
-        StepOutputGraphBuilder graph = new StepOutputGraphBuilder();
+        StepOutputProjectionBuilder graph = new StepOutputProjectionBuilder();
         MaestroItem reportItem = createItem(serializeReport(validationReport), context);
         ItemOutputBuilder reportBuilder = graph.addItem(reportItem);
         //This reference will be added to the enclosing TestRunReport item later on
@@ -63,7 +62,7 @@ public class ValidationStepOutputDissector implements StepOutputDissector {
         //process validation inputs as attachments
         reportBuilder.addAttachments(inputAttachments);
         PropertyReferenceFactory factory = createPropertyFactory(validationReportProperty);
-        reportBuilder.addPropertyReplacement(validationReportIndex, factory);
+        reportBuilder.addPropertyReplacement(ValidationStepDefinition.REPORT, outputs, factory);
 
         return graph.build();
     }
@@ -176,14 +175,5 @@ public class ValidationStepOutputDissector implements StepOutputDissector {
                                              List<Input> referencedInputs) {
     }
 
-    private int findValidationReport(List<Property> outputs) {
-        for (int i = 0; i < outputs.size(); i++) {
-            Property property = outputs.get(i);
-            if (property instanceof ByteArrayProperty
-                    && ValidationStepDefinition.REPORT.equals(property.getName())) {
-                return i;
-            }
-        }
-        return -1;
-    }
+
 }

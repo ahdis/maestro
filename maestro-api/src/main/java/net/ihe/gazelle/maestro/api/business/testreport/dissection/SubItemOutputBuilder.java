@@ -38,7 +38,7 @@ public final class SubItemOutputBuilder implements GraphNodeBuilder {
     * Adds an attachment scoped to this sub item.
     */
    public SubItemOutputBuilder addAttachment(AttachmentOutputBuilder attachmentBuilder) {
-      attachments.add(StepOutputGraphBuilder.requireAttachment(attachmentBuilder));
+      attachments.add(StepOutputProjectionBuilder.requireAttachment(attachmentBuilder));
       return this;
    }
 

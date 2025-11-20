@@ -155,6 +155,7 @@ public class StepOutputRecordService {
                 case ITEM_ID -> itemIdsByReferenceName.put(reference.getName(), reference.getValue());
                 case ATTACHMENT -> attachmentIdsByReferenceName.put(reference.getName(), reference.getValue());
                 case URL -> {
+                    // no-op
                 }
             }
         }
@@ -182,7 +183,7 @@ public class StepOutputRecordService {
         if (itemPlan.contentMutator() == null || item.getContent() == null) {
             return;
         }
-        ContentMutationContext context = new ContentMutationContext(itemIdsByReferenceName, attachmentIdsByReferenceName);
+        ContentMutationContext context = new ContentMutationContext(itemIdsByReferenceName, attachmentIdsByReferenceName, datahouseUrl);
         String mutatedContent = itemPlan.contentMutator().mutate(item.getContent(), context);
         item.setContent(mutatedContent);
     }

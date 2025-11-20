@@ -11,7 +11,8 @@ import java.util.Objects;
  */
 public record ContentMutationContext(
       Map<String, String> itemIdsByReferenceName,
-      Map<String, String> attachmentIdsByReferenceName
+      Map<String, String> attachmentIdsByReferenceName,
+      String datahouseUrl
 ) {
 
    public ContentMutationContext {

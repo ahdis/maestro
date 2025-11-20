@@ -1,5 +1,7 @@
 package net.ihe.gazelle.maestro.api.business.testreport.dissection;
 
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
+import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.recording.MaestroItem;
 import net.ihe.gazelle.maestro.api.business.recording.MaestroRefType;
 
@@ -27,7 +29,7 @@ public final class ItemOutputBuilder implements GraphNodeBuilder {
     * Adds an attachment scoped to this item.
     */
    public ItemOutputBuilder addAttachment(AttachmentOutputBuilder attachmentBuilder) {
-      attachments.add(StepOutputGraphBuilder.requireAttachment(attachmentBuilder));
+      attachments.add(StepOutputProjectionBuilder.requireAttachment(attachmentBuilder));
       return this;
    }
 
@@ -44,10 +46,11 @@ public final class ItemOutputBuilder implements GraphNodeBuilder {
    /**
     * Registers a property mutation targeting this item.
     */
-   public ItemOutputBuilder addPropertyReplacement(int outputIndex, PropertyReferenceFactory factory) {
-      if (outputIndex < 0) {
-         throw new IllegalArgumentException("outputIndex must be >= 0");
+   public ItemOutputBuilder addPropertyReplacement(String outputName, List<Property> outputs, PropertyReferenceFactory factory) {
+      if (outputs == null || outputs.isEmpty()) {
+         throw new IllegalArgumentException("outputs must be provided to add a property replacement");
       }
+      int outputIndex = findOutputByName(outputName, outputs);
       propertyReplacements.add(new PropertyReplacement(outputIndex, Objects.requireNonNull(factory, "factory")));
       return this;
    }
@@ -117,5 +120,15 @@ public final class ItemOutputBuilder implements GraphNodeBuilder {
    @Override
    public ContentMutator contentMutator() {
       return contentMutator;
+   }
+
+   private int findOutputByName(String outputName, List<Property> outputs) {
+      for (int i = 0; i < outputs.size(); i++) {
+         Property property = outputs.get(i);
+         if (outputName.equals(property.getName()) && property instanceof ByteArrayProperty) {
+            return i;
+         }
+      }
+      return -1;
    }
 }

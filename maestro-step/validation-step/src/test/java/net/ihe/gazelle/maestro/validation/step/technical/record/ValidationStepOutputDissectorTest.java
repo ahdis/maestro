@@ -97,7 +97,8 @@ class ValidationStepOutputDissectorTest {
 
         ContentMutationContext mutationContext = new ContentMutationContext(
                 null,
-                java.util.Map.of("payload-input", "att-42"));
+                java.util.Map.of("payload-input", "att-42"),
+                "http://dh");
 
         String mutated = reportPlan.contentMutator().mutate(reportPlan.item().content(), mutationContext);
         JsonNode root = OBJECT_MAPPER.readTree(mutated);

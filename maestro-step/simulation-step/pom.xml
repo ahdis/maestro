@@ -84,6 +84,14 @@
             <artifactId>lang</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>validation-v2-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>validation-v2-jaxrs-api</artifactId>
+        </dependency>
 
         <!-- Stack dependencies -->
         <dependency>
