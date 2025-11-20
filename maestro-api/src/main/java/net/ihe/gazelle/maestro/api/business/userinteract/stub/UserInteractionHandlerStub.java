@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.simulation.step.technical;
+package net.ihe.gazelle.maestro.api.business.userinteract.stub;
 
-import net.ihe.gazelle.maestro.spi.technical.ConfigProvider;
+import net.ihe.gazelle.maestro.api.business.userinteract.UserInteractionHandler;
 
-public class ConfigProviderMock implements ConfigProvider {
+public class UserInteractionHandlerStub implements UserInteractionHandler {
 
     @Override
-    public String getConfig(String key) {
-        return "http://localhost/maestro";
+    public void displayMessage(String interactionTitle, String message) {
+        // Stub method.
+    }
+
+    @Override
+    public boolean isAvailable() {
+        return true;
     }
 }

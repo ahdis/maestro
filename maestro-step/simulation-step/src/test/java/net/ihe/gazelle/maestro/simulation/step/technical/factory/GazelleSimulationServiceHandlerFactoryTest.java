@@ -17,7 +17,7 @@
 package net.ihe.gazelle.maestro.simulation.step.technical.factory;
 
 import io.quarkus.test.junit.QuarkusTest;
-import net.ihe.gazelle.maestro.simulation.step.technical.ConfigProviderMock;
+import net.ihe.gazelle.maestro.simulation.step.technical.mock.ConfigProviderMock;
 import net.ihe.gazelle.maestro.simulation.step.technical.handler.GazelleSimulationServiceHandler;
 import net.ihe.gazelle.maestro.spi.business.Handler;
 import net.ihe.gazelle.maestro.spi.technical.HandlerContext;

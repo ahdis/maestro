@@ -3,7 +3,7 @@
  */
 package net.ihe.gazelle.maestro.simulation.step.business;
 
-import net.ihe.gazelle.maestro.api.business.UserInteractionHandler;
+import net.ihe.gazelle.maestro.api.business.userinteract.UserInteractionHandler;
 import net.ihe.gazelle.maestro.api.business.property.*;
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
@@ -26,44 +26,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class SimulationStepExecutorTest {
-
-    private Step step() {
-        return new Step()
-                .setId("sim-step")
-                .setName("Simulation")
-                .setType(SimulationStepDefinition.TYPE)
-                .setProperties(List.of(
-                        new StringProperty(SimulationStepDefinition.SIMULATION_SERVICE, "svc"),
-                        new StringProperty(SimulationStepDefinition.SEQUENCE_ID, "SEQ-1"),
-                        new IntegerProperty(SimulationStepDefinition.TIMEOUT_SECONDS, 1)
-                ))
-                .addProperties(List.of(
-                        new StringProperty("p-text", "v"),
-                        new BooleanProperty("p-bool", true),
-                        new ByteArrayProperty("p-file", "data".getBytes(StandardCharsets.UTF_8))
-                )
-        );
-    }
-
-    private StepRun stepRun() {
-        List<Property> inputs = List.of(
-                new StringProperty("p-text", "v"),
-                new BooleanProperty("p-bool", true),
-                new ByteArrayProperty("p-file", "data".getBytes(StandardCharsets.UTF_8))
-        );
-        return new StepRun(step(), inputs);
-    }
-
-    private List<SimulationSequence> getSimulationSequences() {
-        return List.of(new SimulationSequence()
-                .setId("SEQ-1")
-                .setSupportedParameters(List.of(
-                        new SupportedParameter().setName("p-text").setType(ParameterType.TEXT),
-                        new SupportedParameter().setName("p-bool").setType(ParameterType.BOOLEAN),
-                        new SupportedParameter().setName("p-file").setType(ParameterType.FILE)
-                ))
-        );
-    }
 
     @Test
     void run_returnsPassed_and_output_and_showsInstructions() {
@@ -238,5 +200,43 @@ class SimulationStepExecutorTest {
               mock(ReportSerializer.class));
         StepRunReport report = runner.execute(sr).join();
         assertEquals("Error from simulator", report.getUnexpectedErrors().getFirst().getName());
+    }
+
+    private Step step() {
+        return new Step()
+                .setId("sim-step")
+                .setName("Simulation")
+                .setType(SimulationStepDefinition.TYPE)
+                .setProperties(List.of(
+                        new StringProperty(SimulationStepDefinition.SIMULATION_SERVICE, "svc"),
+                        new StringProperty(SimulationStepDefinition.SEQUENCE_ID, "SEQ-1"),
+                        new IntegerProperty(SimulationStepDefinition.TIMEOUT_SECONDS, 1)
+                ))
+                .addProperties(List.of(
+                                new StringProperty("p-text", "v"),
+                                new BooleanProperty("p-bool", true),
+                                new ByteArrayProperty("p-file", "data".getBytes(StandardCharsets.UTF_8))
+                        )
+                );
+    }
+
+    private StepRun stepRun() {
+        List<Property> inputs = List.of(
+                new StringProperty("p-text", "v"),
+                new BooleanProperty("p-bool", true),
+                new ByteArrayProperty("p-file", "data".getBytes(StandardCharsets.UTF_8))
+        );
+        return new StepRun(step(), inputs);
+    }
+
+    private List<SimulationSequence> getSimulationSequences() {
+        return List.of(new SimulationSequence()
+                .setId("SEQ-1")
+                .setSupportedParameters(List.of(
+                        new SupportedParameter().setName("p-text").setType(ParameterType.TEXT),
+                        new SupportedParameter().setName("p-bool").setType(ParameterType.BOOLEAN),
+                        new SupportedParameter().setName("p-file").setType(ParameterType.FILE)
+                ))
+        );
     }
 }

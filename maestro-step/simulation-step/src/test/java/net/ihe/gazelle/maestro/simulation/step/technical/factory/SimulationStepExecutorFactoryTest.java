@@ -16,44 +16,68 @@
 
 package net.ihe.gazelle.maestro.simulation.step.technical.factory;
 
-import net.ihe.gazelle.maestro.api.business.property.BooleanProperty;
-import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.IntegerProperty;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.test.Step;
+import net.ihe.gazelle.maestro.api.business.userinteract.UserInteractionHandler;
+import net.ihe.gazelle.maestro.api.business.userinteract.stub.UserInteractionHandlerStub;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepDefinition;
+import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepExecutor;
+import net.ihe.gazelle.maestro.simulation.step.technical.handler.GazelleSimulationServiceHandler;
+import net.ihe.gazelle.maestro.simulation.step.technical.mock.SimulationClientMock;
+import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class SimulationStepExecutorFactoryTest {
 
     private final SimulationStepExecutorFactory factory = new SimulationStepExecutorFactory();
 
     @Test
-    void canonicalNameTest(){
+    void stepTypeTest() {
         assertEquals(SimulationStepDefinition.TYPE, factory.getSupportedStep());
     }
 
     @Test
     void getRequiredServicesOfSimulationStep(){
-        Step simulationStep = new Step()
+        Step simulationStep = getSimulationStep();
+        assertEquals(2, factory.getRequiredServices(simulationStep).size());
+    }
+
+    @Test
+    void createStepExecutorTest() {
+        Step simulationStep = getSimulationStep();
+
+        assertThrows(IllegalArgumentException.class, () -> factory.createStepExecutor(simulationStep, Map.of(
+                UserInteractionHandler.SERVICE_NAME,
+                new UserInteractionHandlerStub())));
+        assertThrows(IllegalArgumentException.class, () -> factory.createStepExecutor(simulationStep, Map.of(
+                SimulationStepDefinition.SIMULATION_SERVICE,
+                new GazelleSimulationServiceHandler(new SimulationClientMock()))));
+
+        StepExecutor executor = factory.createStepExecutor(simulationStep, Map.of(
+                SimulationStepDefinition.SIMULATION_SERVICE,
+                new GazelleSimulationServiceHandler(new SimulationClientMock()),
+                UserInteractionHandler.SERVICE_NAME,
+                new UserInteractionHandlerStub()
+        ));
+        assertInstanceOf(SimulationStepExecutor.class, executor);
+    }
+
+    private Step getSimulationStep() {
+        return new Step()
                 .setId("sim-step")
                 .setName("simulationStep")
                 .setType(SimulationStepDefinition.TYPE)
                 .setProperties(List.of(
-                        new StringProperty(SimulationStepDefinition.SIMULATION_SERVICE, "MCSD"),
-                        new StringProperty(SimulationStepDefinition.SEQUENCE_ID, "sequencId"),
+                        new StringProperty(SimulationStepDefinition.SIMULATION_SERVICE, SimulationStepDefinition.SIMULATION_SERVICE),
+                        new StringProperty(SimulationStepDefinition.SEQUENCE_ID, "sequenceId"),
                         new IntegerProperty(SimulationStepDefinition.TIMEOUT_SECONDS, 60)
-                ))
-                .addProperties(List.of(
-                                new StringProperty("Patient Id", "1.1.1.1"),
-                                new BooleanProperty("Boolean prop", true),
-                                new ByteArrayProperty("File prop", "test".getBytes())
-                        )
-                );
-        assertEquals(2, factory.getRequiredServices(simulationStep).size());
+                ));
     }
+
 }

@@ -20,7 +20,7 @@ import net.ihe.gazelle.errorhandling.business.UnexpectedErrorBuilder;
 import net.ihe.gazelle.framework.modelvalidator.business.ObjectResult;
 import net.ihe.gazelle.lang.ExecutionRuntimeException;
 import net.ihe.gazelle.lang.TimeoutRuntimeException;
-import net.ihe.gazelle.maestro.api.business.UserInteractionHandler;
+import net.ihe.gazelle.maestro.api.business.userinteract.UserInteractionHandler;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;

@@ -18,7 +18,7 @@ package net.ihe.gazelle.maestro.quarkus.handler;
 
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationHandler;
 import net.ihe.gazelle.maestro.spi.business.Handler;
-import net.ihe.gazelle.maestro.api.business.UserInteractionHandler;
+import net.ihe.gazelle.maestro.api.business.userinteract.UserInteractionHandler;
 import net.ihe.gazelle.maestro.spi.technical.HandlerContext;
 import technical.userinteract.UserInteractionHandlerImpl;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationHandler;
@@ -33,7 +33,7 @@ public class HandlerProviderMock implements HandlerProvider {
         } else if (handlerType.isAssignableFrom(SimulationHandler.class)) {
             return new SimulationHandlerMock(null);
         } else if (handlerType.isAssignableFrom(UserInteractionHandler.class)) {
-            return new UserInteractionHandlerImpl();
+            return new UserInteractionHandlerImpl(null);
         }
         return null;
     }

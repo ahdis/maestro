@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.api.business;
+package net.ihe.gazelle.maestro.api.business.userinteract;
 
 import net.ihe.gazelle.maestro.spi.business.Handler;
 
