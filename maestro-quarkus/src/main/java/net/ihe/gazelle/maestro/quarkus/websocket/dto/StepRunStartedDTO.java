@@ -40,7 +40,7 @@ public class StepRunStartedDTO extends MessageDTO<StepRunStarted> {
     public static final String TYPE = "STEP_RUN_STARTED";
 
     public StepRunStartedDTO() {
-        super(new StepRunStarted());
+        this(new StepRunStarted());
     }
 
     public StepRunStartedDTO(StepRunStarted message) {
@@ -49,12 +49,12 @@ public class StepRunStartedDTO extends MessageDTO<StepRunStarted> {
 
     @JsonGetter("testId")
     public String getTestRunId() {
-        return getBusinessObject().getTestId();
+        return message.getTestId();
     }
 
     @JsonGetter("stepId")
     public String getStepName() {
-        return getBusinessObject().getStepId();
+        return message.getStepId();
     }
 
     @JsonGetter("dateTime")

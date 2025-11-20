@@ -17,12 +17,9 @@
 package net.ihe.gazelle.maestro.quarkus.factory;
 
 import net.ihe.gazelle.maestro.api.business.Maestro;
-import net.ihe.gazelle.maestro.engine.business.HardWiredEventBroker;
-import net.ihe.gazelle.maestro.engine.business.MetadataServiceMock;
-import net.ihe.gazelle.maestro.engine.business.StepExecutorProvider;
-import net.ihe.gazelle.maestro.engine.business.TestRunner;
+import net.ihe.gazelle.maestro.engine.business.*;
 import net.ihe.gazelle.maestro.engine.business.mock.InMemoryTestReportRecordService;
-import net.ihe.gazelle.maestro.quarkus.handler.HandlerProviderMock;
+import net.ihe.gazelle.maestro.quarkus.mock.HandlerProviderMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import technical.dao.SessionStoreImpl;
@@ -67,7 +64,7 @@ class FactoryTest {
     void getMaestroTest() {
         Maestro maestro = maestroFactory.getRedordMaestro();
         assertNotNull(maestro);
-        assertInstanceOf(TestRunner.class, maestro);
+        assertInstanceOf(MaestroRecorderImpl.class, maestro);
     }
 
     @Test

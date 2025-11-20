@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.quarkus.factory;
+package net.ihe.gazelle.maestro.quarkus.mock;
 
+import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.NotificationOptions;
 import jakarta.enterprise.util.TypeLiteral;
-import net.ihe.gazelle.maestro.api.business.message.Message;
-import net.ihe.gazelle.maestro.api.business.message.StartStepRun;
-import net.ihe.gazelle.maestro.api.business.message.StartTestRun;
-import net.ihe.gazelle.maestro.api.business.message.StartTestSuiteRun;
-import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
-import net.ihe.gazelle.maestro.api.business.message.TestRunFinished;
-import net.ihe.gazelle.maestro.api.business.message.TestSuiteRunFinished;
+import net.ihe.gazelle.maestro.api.business.message.*;
 import net.ihe.gazelle.maestro.quarkus.broker.MaestroEventController;
 
 import java.lang.annotation.Annotation;
@@ -34,7 +29,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
-public class TestRunMockEvent implements jakarta.enterprise.event.Event<Message> {
+public class TestRunMockEvent implements Event<Message> {
 
     ExecutorService executorService = new ScheduledThreadPoolExecutor(5);
     List<MaestroEventController> listeners = new ArrayList<>();
@@ -52,11 +47,6 @@ public class TestRunMockEvent implements jakarta.enterprise.event.Event<Message>
 
     @Override
     public void fire(Message message) {
-        if (message instanceof StartTestSuiteRun startTestSuiteRun) {
-            listeners.forEach(listener ->
-                    executorService.submit(() -> listener.onStartTestSuiteRun(startTestSuiteRun))
-            );
-        }
         if (message instanceof TestSuiteRunFinished testSuiteRunFinished) {
             listeners.forEach(listener ->
                     executorService.submit(() -> listener.onTestSuiteRunFinished(testSuiteRunFinished))
@@ -96,17 +86,17 @@ public class TestRunMockEvent implements jakarta.enterprise.event.Event<Message>
     }
 
     @Override
-    public jakarta.enterprise.event.Event<Message> select(Annotation... annotations) {
+    public Event<Message> select(Annotation... annotations) {
         return null;
     }
 
     @Override
-    public <U extends Message> jakarta.enterprise.event.Event<U> select(Class<U> aClass, Annotation... annotations) {
+    public <U extends Message> Event<U> select(Class<U> aClass, Annotation... annotations) {
         return null;
     }
 
     @Override
-    public <U extends Message> jakarta.enterprise.event.Event<U> select(TypeLiteral<U> typeLiteral, Annotation... annotations) {
+    public <U extends Message> Event<U> select(TypeLiteral<U> typeLiteral, Annotation... annotations) {
         return null;
     }
 }

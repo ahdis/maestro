@@ -18,6 +18,7 @@ package net.ihe.gazelle.maestro.quarkus.factory;
 
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.engine.business.StepExecutorProvider;
+import net.ihe.gazelle.maestro.engine.business.UnknownStepException;
 import net.ihe.gazelle.maestro.quarkus.configuration.ServiceRegistryDAOImpl;
 import net.ihe.gazelle.maestro.quarkus.configuration.ServiceRegistryImpl;
 import org.junit.jupiter.api.Test;
@@ -33,7 +34,7 @@ class StepExecutorSPIProviderTest {
     void getExecutorNotSupportedStep(){
         Step step = new Step();
         StepExecutorProvider provider = new StepExecutorSPIProvider(new HandlerProviderSPI(new ServiceRegistryImpl(new ServiceRegistryDAOImpl()), null, new SessionStoreImpl<>()));
-        assertThrows(IllegalArgumentException.class, () -> provider.getExecutor("sessionId", step));
+        assertThrows(UnknownStepException.class, () -> provider.getExecutor("sessionId", step));
     }
 
 }

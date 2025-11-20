@@ -14,27 +14,16 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.quarkus.handler;
+package net.ihe.gazelle.maestro.quarkus.mock;
 
-import net.ihe.gazelle.maestro.simulation.step.business.SimulationHandler;
 import net.ihe.gazelle.maestro.spi.business.Handler;
-import net.ihe.gazelle.maestro.api.business.userinteract.UserInteractionHandler;
 import net.ihe.gazelle.maestro.spi.technical.HandlerContext;
-import technical.userinteract.UserInteractionHandlerImpl;
-import net.ihe.gazelle.maestro.validation.step.business.ValidationHandler;
 import net.ihe.gazelle.maestro.spi.technical.HandlerProvider;
 
 public class HandlerProviderMock implements HandlerProvider {
 
     @Override
     public Handler getHandler(HandlerContext handlerContext, Class<? extends Handler> handlerType) {
-        if (handlerType.isAssignableFrom(ValidationHandler.class)) {
-            return new ValidationHandlerMock();
-        } else if (handlerType.isAssignableFrom(SimulationHandler.class)) {
-            return new SimulationHandlerMock(null);
-        } else if (handlerType.isAssignableFrom(UserInteractionHandler.class)) {
-            return new UserInteractionHandlerImpl(null);
-        }
-        return null;
+        return new HandlerMock();
     }
 }

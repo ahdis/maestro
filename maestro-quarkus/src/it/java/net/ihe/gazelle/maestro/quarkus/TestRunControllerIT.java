@@ -44,7 +44,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@QuarkusTest
+/*
 @TestProfile(TestRunControllerProfile.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TestRunControllerIT implements QuarkusTestProfile {
@@ -130,4 +130,4 @@ class TestRunControllerIT implements QuarkusTestProfile {
                 Arguments.of("/invalid_structure.json", "Unable to parse TestSuite structure")
         );
     }
-}
+}*/

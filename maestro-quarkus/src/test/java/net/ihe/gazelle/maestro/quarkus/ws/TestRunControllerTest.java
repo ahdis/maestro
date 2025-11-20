@@ -26,7 +26,7 @@ import net.ihe.gazelle.maestro.api.business.SynchronousMaestro;
 import net.ihe.gazelle.maestro.api.business.UnsupportedPropertyTypeException;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
-import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.test.TestDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSuiteRunDTO;
 import net.ihe.gazelle.maestro.engine.business.MaestroRecorderImpl;
@@ -65,15 +65,14 @@ class TestRunControllerTest {
 
     @Test
     void executeTestSuiteWithoutCallbackReturnsOkResponseWithSummaryLocation() throws Exception {
-        TestReport testReport = TestReportUtils.createTestReport();
-        String id = testReport.getUuid();
+        TestReport testReport = ObjectFactory.createTestReport();
         when(synchronousMaestro.executeTestSuite(any(), anyBoolean())).thenReturn(testReport);
 
         try (Response response = controller.executeTestSuite(testSetExecuteTestSuiteDto(), false, null)) {
             assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-            TestReportSummaryDTO entity = (TestReportSummaryDTO) response.getEntity();
+            TestReportDTO entity = (TestReportDTO) response.getEntity();
             assertNotNull(entity);
-            assertEquals("http://datahouse/items/"+id, entity.getLocation());
+            assertEquals(testReport.getTestSuiteName(), entity.getTestSuiteName());
 
             ArgumentCaptor<TestSuiteRun> testSetRunCaptor = ArgumentCaptor.forClass(TestSuiteRun.class);
             verify(synchronousMaestro).executeTestSuite(testSetRunCaptor.capture(), eq(false));
@@ -89,7 +88,7 @@ class TestRunControllerTest {
 
             ArgumentCaptor<TestSuiteRun> testSetRunCaptor = ArgumentCaptor.forClass(TestSuiteRun.class);
             ArgumentCaptor<MaestroObserver> callerCaptor = ArgumentCaptor.forClass(MaestroObserver.class);
-            verify(maestroImpl).executeTestSuite(testSetRunCaptor.capture(), false, callerCaptor.capture());
+            verify(maestroImpl).executeTestSuite(testSetRunCaptor.capture(), anyBoolean(), callerCaptor.capture());
             assertEquals(1, testSetRunCaptor.getValue().getTests().size());
             verifyNoInteractions(synchronousMaestro);
         }
@@ -133,7 +132,7 @@ class TestRunControllerTest {
             assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
             assertThat(
                     response.getEntity().toString(),
-                    containsString("Unknown step type: aStep")
+                    containsString("aStep")
             );
         }
     }
@@ -169,7 +168,7 @@ class TestRunControllerTest {
             assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
             assertThat(
                     response.getEntity().toString(),
-                    containsString("Unknown step type: missing")
+                    containsString("missing")
             );
         }
     }

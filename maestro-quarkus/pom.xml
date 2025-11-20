@@ -43,10 +43,6 @@
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
-            <artifactId>itb-step</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.ihe.gazelle</groupId>
             <artifactId>assertion-step</artifactId>
         </dependency>
 
@@ -224,36 +220,6 @@
             <plugin>
                 <groupId>io.quarkus.platform</groupId>
                 <artifactId>quarkus-maven-plugin</artifactId>
-            </plugin>
-
-            <!-- Configure compiler to exclude websocket tests by default -->
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <testExcludes>
-                        <testExclude>**/websocket/**</testExclude>
-                    </testExcludes>
-                </configuration>
-            </plugin>
-
-            <!-- Configure surefire to exclude websocket tests by default -->
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>**/websocket/**</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-
-            <!-- Configure failsafe to exclude websocket integration tests by default -->
-            <plugin>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>**/websocket/**</exclude>
-                    </excludes>
-                </configuration>
             </plugin>
         </plugins>
     </build>

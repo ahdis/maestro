@@ -47,7 +47,7 @@ public class WebSocketSession implements MaestroObserver {
 
     @Override
     public void onTestRunStarted(TestRunStarted testRunStarted) {
-        String message = serDes.serializeAsString(new TestRunStartedDTO(testRunStarted.getTestId()));
+        String message = serDes.serializeAsString(new TestRunStartedDTO(testRunStarted));
         LOG.debug("Test Run Started: {}", message);
         this.session.getAsyncRemote().sendText(message);
     }

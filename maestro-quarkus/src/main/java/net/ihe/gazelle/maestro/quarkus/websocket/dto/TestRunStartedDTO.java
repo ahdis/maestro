@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import net.ihe.gazelle.maestro.api.business.message.TestRunStarted;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -32,22 +33,22 @@ import java.time.format.DateTimeFormatter;
         "testId",
         "dateTime"
 })
-public class TestRunStartedDTO extends MessageDTO<String> {
+public class TestRunStartedDTO extends MessageDTO<TestRunStarted> {
 
     @JsonIgnore
     public static final String TYPE = "TEST_RUN_STARTED";
 
     public TestRunStartedDTO() {
-        this("");
+        this(new TestRunStarted());
     }
 
-    public TestRunStartedDTO(String testId) {
-        super(testId);
+    public TestRunStartedDTO(TestRunStarted message) {
+        super(message);
     }
 
     @JsonGetter("testId")
     public String getTestRunId() {
-        return super.message;
+        return message.getTestId();
     }
 
     @JsonGetter("dateTime")
@@ -58,7 +59,7 @@ public class TestRunStartedDTO extends MessageDTO<String> {
 
     @Override
     @JsonIgnore
-    public Class<String> getBusinessObjectClass() {
-        return String.class;
+    public Class<TestRunStarted> getBusinessObjectClass() {
+        return TestRunStarted.class;
     }
 }

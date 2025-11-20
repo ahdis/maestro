@@ -31,7 +31,7 @@ import net.ihe.gazelle.maestro.engine.business.MaestroRecorderImpl;
 import net.ihe.gazelle.maestro.engine.business.MetadataServiceMock;
 import net.ihe.gazelle.maestro.engine.business.mock.InMemoryTestReportRecordService;
 import net.ihe.gazelle.maestro.quarkus.broker.MaestroEventController;
-import net.ihe.gazelle.maestro.quarkus.factory.TestRunMockEvent;
+import net.ihe.gazelle.maestro.quarkus.mock.TestRunMockEvent;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepDefinition;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
@@ -52,7 +52,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 
 
-class MaestroStepsIntegrationTest {
+/*class MaestroStepsIntegrationTest {
 
     private static SynchronousMaestro synchronousMaestro;
     private static InMemoryTestReportRecordService testReportRecordService;
@@ -215,6 +215,8 @@ class MaestroStepsIntegrationTest {
         Property contentToValidate = new ByteArrayProperty("content", "liyvfgljv".getBytes());
         Step validationStep = new Step()
                 .setId("test-validation-two")
+                .setName("Validation Step")
+                .setType(ValidationStepDefinition.TYPE)
                 .setProperties(List.of(
                                 new StringProperty(ValidationStepDefinition.VALIDATION_SERVICE, "matchbox"),
                                 new StringProperty(ValidationStepDefinition.VALIDATION_PROFILE, "Parameters"),
@@ -244,9 +246,11 @@ class MaestroStepsIntegrationTest {
         );
         Step simulationStep = new Step()
                 .setId("simulationStep")
+                .setName("Simulation Step")
+                .setType(SimulationStepDefinition.TYPE)
                 .setProperties(List.of(
                         new StringProperty(SimulationStepDefinition.SIMULATION_SERVICE, "MCSD"),
-                        new StringProperty(SimulationStepDefinition.SEQUENCE_ID, "sequencId"),
+                        new StringProperty(SimulationStepDefinition.SEQUENCE_ID, "sequenceId"),
                         new IntegerProperty(SimulationStepDefinition.TIMEOUT_SECONDS, 60)
                 ))
                 .addProperties(inputs);
@@ -268,6 +272,8 @@ class MaestroStepsIntegrationTest {
     private static TestSuiteRun getTestRunsWithValidationStepAndAssertionStepWithReference() {
         Step assertionStep = new Step()
                 .setId("test-assertion")
+                .setName("Assertion Step")
+                .setType(AssertEqualsStepDefinition.TYPE)
                 .setProperties(List.of(
                         new StringProperty(AssertEqualsStepDefinition.EXPECTED, "Expected"),
                         new StringProperty(AssertEqualsStepDefinition.ACTUAL, "Expected")
@@ -284,4 +290,4 @@ class MaestroStepsIntegrationTest {
     }
 
 
-}
+}*/

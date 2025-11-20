@@ -41,7 +41,7 @@ public class StepRunFinishedDTO extends MessageDTO<StepRunFinished> {
     public static final String TYPE = "STEP_RUN_FINISHED";
 
     public StepRunFinishedDTO() {
-        super(new StepRunFinished());
+        this(new StepRunFinished());
     }
 
     public StepRunFinishedDTO(StepRunFinished message) {
@@ -50,29 +50,28 @@ public class StepRunFinishedDTO extends MessageDTO<StepRunFinished> {
 
     @JsonGetter("testId")
     public String getTestRunId() {
-        return getBusinessObject().getTestId();
+        return message.getTestId();
     }
 
     @JsonGetter("stepId")
     public String getStepName() {
-        return getBusinessObject().getStepRun().getId();
+        return message.getStepRun().getId();
     }
 
     @JsonGetter("dateTime")
     public String getDateTime() {
-        return ZonedDateTime.ofInstant(getBusinessObject().getStepRunReport().getDateTime(), ZoneId.systemDefault())
+        return ZonedDateTime.ofInstant(message.getStepRunReport().getDateTime(), ZoneId.systemDefault())
                 .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     }
 
     @JsonGetter("result")
     public String getResult() {
-        return getBusinessObject().getStepRunReport().getResult().name();
+        return message.getStepRunReport().getResult().name();
     }
 
     @JsonGetter("unexpectedErrors")
     public List<UnexpectedErrorDTO> getUnexpectedErrors() {
-        return getBusinessObject()
-                .getStepRunReport()
+        return message.getStepRunReport()
                 .getUnexpectedErrors()
                 .stream()
                 .map(UnexpectedErrorDTO::new)
