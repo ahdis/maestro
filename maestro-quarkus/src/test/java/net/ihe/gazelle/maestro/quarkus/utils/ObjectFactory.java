@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.quarkus.ws;
+package net.ihe.gazelle.maestro.quarkus.utils;
 
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.testreport.*;

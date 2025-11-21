@@ -74,12 +74,12 @@ public class TestRunDTO implements DTO<TestRun> {
             .toList();
    }
 
-   public void setInputs(List<PropertyDTO> inputs) {
+   public void setInputs(List<PropertyDTO<?>> inputs) {
       testRun.setInputs(
-            inputs != null ? inputs.stream()
-                  .map(DTO::getBusinessObject)
-                  .map(Property.class::cast).toList() :
-                  null
+              inputs.stream()
+                      .map(DTO::getBusinessObject)
+                      .map(Property.class::cast)
+                      .toList()
       );
    }
 
@@ -99,11 +99,9 @@ public class TestRunDTO implements DTO<TestRun> {
 
    public void setSystemsUnderTest(List<SystemUnderTestDTO> sutDTOs) {
       testRun.setSystemsUnderTest(
-            sutDTOs != null ?
-                  sutDTOs.stream()
-                        .map(SystemUnderTestDTO::getBusinessObject)
-                        .toList() :
-                  null
+              sutDTOs.stream()
+                      .map(SystemUnderTestDTO::getBusinessObject)
+                      .toList()
       );
    }
 }

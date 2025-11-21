@@ -31,6 +31,7 @@ import net.ihe.gazelle.maestro.api.technical.dto.test.TestDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSuiteRunDTO;
 import net.ihe.gazelle.maestro.engine.business.MaestroRecorderImpl;
 import net.ihe.gazelle.maestro.engine.business.UnknownStepException;
+import net.ihe.gazelle.maestro.quarkus.utils.ObjectFactory;
 import net.ihe.gazelle.security.technical.acl.AccessControlListDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

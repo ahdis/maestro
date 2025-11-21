@@ -116,12 +116,9 @@ public class StepRunReportDTO implements DTO<StepRunReport> {
    @JsonSetter(value = "outputs")
    public void setOutputs(List<PropertyDTO> outputs) {
       stepRunReport.setOutputs(
-            outputs != null ?
-                  outputs.stream()
-                        .map(PropertyDTO::getBusinessObject)
-                        .map(Property.class::cast)
-                        .toList() :
-                  null
+              outputs.stream()
+                      .map(PropertyDTO::getBusinessObject)
+                      .toList()
       );
    }
 
@@ -137,7 +134,9 @@ public class StepRunReportDTO implements DTO<StepRunReport> {
    @JsonSetter(value = "unexpectedErrors")
    public void setUnexpectedErrors(List<UnexpectedErrorDTO> unexpectedErrors) {
       stepRunReport.setUnexpectedErrors(
-            unexpectedErrors.stream().map(UnexpectedErrorDTO::getBusinessObject).toList()
+            unexpectedErrors.stream()
+                    .map(UnexpectedErrorDTO::getBusinessObject)
+                    .toList()
       );
    }
 }

@@ -58,6 +58,7 @@ public class ValidationStepDefinition implements StepDefinition {
    private static final long serialVersionUID = 7657361003088468932L;
 
    public ValidationStepDefinition() {
+       // Default constructor
    }
 
    @Override

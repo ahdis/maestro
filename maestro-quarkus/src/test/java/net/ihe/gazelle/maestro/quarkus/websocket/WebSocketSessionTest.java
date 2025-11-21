@@ -24,7 +24,7 @@ import jakarta.websocket.DeploymentException;
 import jakarta.websocket.Session;
 import net.ihe.gazelle.maestro.api.business.message.*;
 import net.ihe.gazelle.maestro.quarkus.websocket.dto.*;
-import net.ihe.gazelle.maestro.quarkus.ws.ObjectFactory;
+import net.ihe.gazelle.maestro.quarkus.utils.ObjectFactory;
 import org.junit.jupiter.api.*;
 
 import java.io.IOException;

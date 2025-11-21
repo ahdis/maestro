@@ -17,7 +17,7 @@ public interface MaestroItem {
 
    String content();
 
-   List<? extends MaestroReference> getReferences();
+   <T extends MaestroReference> List<T> getReferences();
 
    Map<String, String> getAdditionalParameters();
 }

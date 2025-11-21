@@ -59,8 +59,8 @@ class AssertionStepExecutorFactoryTest {
         assertEquals(name, assertionStep.getName());
         assertInstanceOf(AssertContainsStepExecutor.class, stepExecutor);
         List<Property> propertiesRes = assertionStep.getProperties();
-        assertTrue(propertiesRes.contains(expected));
-        assertTrue(propertiesRes.contains(actual));
+        assertEquals("value", propertiesRes.getFirst().getValue());
+        assertEquals("value", propertiesRes.get(1).getValue());
     }
 
     @Test
@@ -77,8 +77,8 @@ class AssertionStepExecutorFactoryTest {
         assertEquals(name, assertionStep.getName());
         assertInstanceOf(AssertEqualsStepExecutor.class, stepExecutor);
         List<Property> propertiesRes = assertionStep.getProperties();
-        assertTrue(propertiesRes.contains(expected));
-        assertTrue(propertiesRes.contains(actual));
+        assertEquals("value", propertiesRes.getFirst().getValue());
+        assertEquals("value", propertiesRes.get(1).getValue());
     }
 
     @Test

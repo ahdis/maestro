@@ -7,7 +7,7 @@ class DirectValue implements ValueHolder {
    @Serial
    private static final long serialVersionUID = 5435920465930342207L;
 
-   private final Object value;
+   private final transient Object value;
 
     public DirectValue(Object value) {
         this.value = value;
