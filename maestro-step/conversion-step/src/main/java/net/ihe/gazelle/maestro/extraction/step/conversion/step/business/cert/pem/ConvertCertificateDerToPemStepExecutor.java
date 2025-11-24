@@ -28,7 +28,6 @@ public class ConvertCertificateDerToPemStepExecutor implements StepExecutor {
     @Override
     public CompletableFuture<StepRunReport> execute(StepRun stepRun) {
         StepRunReportBuilder reportBuilder = new StepRunReportBuilder()
-                .setStepId(stepRun.getId())
                 .setStepName(stepRun.getName())
                 .setType(stepRun.getType());
         byte[] derCertificateBytes = stepRun.getPropertyValue(DER_CERTIFICATE);
