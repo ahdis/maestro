@@ -29,7 +29,7 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <evs-client-api.version>2.0.0-SNAPSHOT</evs-client-api.version>
+        <evs-client-api.version>2.0.0</evs-client-api.version>
 
     </properties>
 
