@@ -1,8 +1,8 @@
 package net.ihe.gazelle.maestro.extraction.step.conversion.step.business.base64.decode;
 
+import net.ihe.gazelle.errorhandling.business.UnexpectedErrorBuilder;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
-import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.spi.business.StepExecutor;
@@ -15,7 +15,6 @@ import static net.ihe.gazelle.maestro.api.business.testreport.StepResult.DONE;
 import static net.ihe.gazelle.maestro.api.business.testreport.StepResult.UNDEFINED;
 import static net.ihe.gazelle.maestro.extraction.step.conversion.step.business.base64.decode.DecodeBase64StepDefinition.CONTENT_TO_DECODE;
 import static net.ihe.gazelle.maestro.extraction.step.conversion.step.business.base64.decode.DecodeBase64StepDefinition.DECODED_CONTENT;
-import static net.ihe.gazelle.maestro.extraction.step.conversion.step.business.base64.encode.EncodeBase64StepDefinition.FAILURE_MESSAGE;
 
 public class DecodeBase64StepExecutor implements StepExecutor {
 
@@ -31,7 +30,7 @@ public class DecodeBase64StepExecutor implements StepExecutor {
 
         String contentToEncode = stepRun.getPropertyValue(CONTENT_TO_DECODE);
         if (contentToEncode == null || contentToEncode.isEmpty()) {
-            String failureMessage = "Content to decode is empty.";
+            String failureMessage = "Content to decode is null or empty";
             return buildStepRunReportFailed(failureMessage, reportBuilder);
         }
 
@@ -42,15 +41,15 @@ public class DecodeBase64StepExecutor implements StepExecutor {
                     .setOutputs(List.of(output))
                     .build());
         } catch (IllegalArgumentException e) {
-            String failureMessage = "Failed to decode Base64 content: " + e.getMessage();
+            String failureMessage = "Unable to decode base64 content : " + e.getMessage();
             return buildStepRunReportFailed(failureMessage, reportBuilder);
         }
     }
 
     private static CompletableFuture<StepRunReport> buildStepRunReportFailed(String failureMessage, StepRunReportBuilder reportBuilder) {
-        StringProperty failureOutput = new StringProperty(FAILURE_MESSAGE, failureMessage);
+        UnexpectedErrorBuilder unexpectedError =
+                new UnexpectedErrorBuilder().setName("Base64 decoding error").setMessage(failureMessage);
         return CompletableFuture.completedFuture(
-                reportBuilder.setOutputs(List.of(failureOutput)).setResult(UNDEFINED).build()
-        );
+                reportBuilder.setResult(UNDEFINED).setUnexpectedErrors(List.of(unexpectedError)).build());
     }
 }

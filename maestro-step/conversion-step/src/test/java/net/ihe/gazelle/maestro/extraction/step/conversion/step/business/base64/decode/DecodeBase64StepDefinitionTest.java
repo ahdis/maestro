@@ -32,12 +32,9 @@ class DecodeBase64StepDefinitionTest {
         DecodeBase64StepDefinition stepDefinition = new DecodeBase64StepDefinition();
 
         assertNotNull(stepDefinition.getOutputsDefinition());
-        assertEquals(2, stepDefinition.getOutputsDefinition().size());
+        assertEquals(1, stepDefinition.getOutputsDefinition().size());
 
         assertTrue(stepDefinition.getOutputsDefinition().containsKey(DecodeBase64StepDefinition.DECODED_CONTENT));
         assertEquals(ByteArrayProperty.class, stepDefinition.getOutputsDefinition().get(DecodeBase64StepDefinition.DECODED_CONTENT));
-
-        assertTrue(stepDefinition.getOutputsDefinition().containsKey(DecodeBase64StepDefinition.FAILURE_MESSAGE));
-        assertEquals(StringProperty.class, stepDefinition.getOutputsDefinition().get(DecodeBase64StepDefinition.FAILURE_MESSAGE));
     }
 }

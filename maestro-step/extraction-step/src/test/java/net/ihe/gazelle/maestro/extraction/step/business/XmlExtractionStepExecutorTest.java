@@ -6,7 +6,6 @@ import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.spi.business.StepRun;
 import net.ihe.gazelle.maestro.extraction.step.business.xml.XmlExtractionService;
-import net.ihe.gazelle.maestro.extraction.step.business.xml.XmlExtractionStepDefinition;
 import net.ihe.gazelle.maestro.extraction.step.business.xml.XmlExtractionStepExecutor;
 import net.ihe.gazelle.maestro.extraction.step.technical.xml.XmlExtractionServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -32,15 +31,15 @@ class XmlExtractionStepExecutorTest {
         StepRunReport stepRunReport = stepExecutor.execute(stepRun).join();
 
         assertEquals(UNDEFINED, stepRunReport.getResult());
-        assertEquals(1, stepRunReport.getOutputs().size());
-        assertTrue(stepRunReport.getOutputs().stream().anyMatch(output ->
-                output.getName().equals(XmlExtractionStepDefinition.FAILURE_MESSAGE)
+        assertEquals(0, stepRunReport.getOutputs().size());
+        assertEquals(1, stepRunReport.getUnexpectedErrors().size());
+        assertTrue(stepRunReport.getUnexpectedErrors().stream().anyMatch(unexpectedError ->
+                unexpectedError.getName().equals("XML_EXTRACTION_ERROR")
         ));
     }
 
     private Step buildStep(byte[] xmlFile, String xmlPath) {
         return new Step()
-                .setId("extractionXmlStep")
                 .setName("extractionXmlStep")
                 .setType("EXTRACT_XML")
                 .setProperties(List.of(

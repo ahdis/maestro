@@ -15,7 +15,6 @@ import java.util.List;
 
 import static net.ihe.gazelle.maestro.api.business.testreport.StepResult.DONE;
 import static net.ihe.gazelle.maestro.api.business.testreport.StepResult.UNDEFINED;
-import static net.ihe.gazelle.maestro.extraction.step.conversion.step.business.base64.encode.EncodeBase64StepDefinition.FAILURE_MESSAGE;
 import static net.ihe.gazelle.maestro.extraction.step.conversion.step.business.cert.pem.ConvertCertificateDerToPemStepDefinition.DER_CERTIFICATE;
 import static net.ihe.gazelle.maestro.extraction.step.conversion.step.business.cert.pem.ConvertCertificateDerToPemStepDefinition.PEM_CERTIFICATE;
 import static org.junit.jupiter.api.Assertions.*;
@@ -63,18 +62,11 @@ class ConvertCertificateDerToPemStepExecutorTest {
 
         // Assert
         assertEquals(UNDEFINED, stepRunReport.getResult());
-        assertEquals(1, stepRunReport.getOutputs().size());
-        assertTrue(stepRunReport.getOutputs().stream().anyMatch(output ->
-                output.getName().equals(FAILURE_MESSAGE)
+        assertEquals(0, stepRunReport.getOutputs().size());
+        assertEquals(1, stepRunReport.getUnexpectedErrors().size());
+        assertTrue(stepRunReport.getUnexpectedErrors().stream().anyMatch(unexpectedError ->
+                unexpectedError.getName().contains("Certificate DER to PEM conversion error")
         ));
-
-        String failureMessage = stepRunReport.getOutputs().stream()
-                .filter(output -> output.getName().equals(FAILURE_MESSAGE))
-                .findFirst()
-                .map(output -> (String) output.getValue())
-                .orElse(null);
-
-        assertNotNull(failureMessage);
     }
 
     @Test
@@ -87,18 +79,11 @@ class ConvertCertificateDerToPemStepExecutorTest {
 
         // Assert
         assertEquals(UNDEFINED, stepRunReport.getResult());
-        assertEquals(1, stepRunReport.getOutputs().size());
-        assertTrue(stepRunReport.getOutputs().stream().anyMatch(output ->
-                output.getName().equals(FAILURE_MESSAGE)
+        assertEquals(0, stepRunReport.getOutputs().size());
+        assertEquals(1, stepRunReport.getUnexpectedErrors().size());
+        assertTrue(stepRunReport.getUnexpectedErrors().stream().anyMatch(unexpectedError ->
+                unexpectedError.getName().contains("Certificate DER to PEM conversion error")
         ));
-
-        String failureMessage = stepRunReport.getOutputs().stream()
-                .filter(output -> output.getName().equals(FAILURE_MESSAGE))
-                .findFirst()
-                .map(output -> (String) output.getValue())
-                .orElse(null);
-
-        assertNotNull(failureMessage);
     }
 
     @Test
@@ -117,7 +102,6 @@ class ConvertCertificateDerToPemStepExecutorTest {
         // Assert
         assertEquals(DONE, stepRunReport.getResult());
         assertEquals(1, stepRunReport.getOutputs().size());
-
         byte[] pemCertificateBytes = stepRunReport.getOutputs().stream()
                 .filter(output -> output.getName().equals(PEM_CERTIFICATE))
                 .findFirst()
@@ -144,23 +128,15 @@ class ConvertCertificateDerToPemStepExecutorTest {
         StepRunReport stepRunReport = failingExecutor.execute(stepRun).join();
 
         assertEquals(UNDEFINED, stepRunReport.getResult());
-        assertEquals(1, stepRunReport.getOutputs().size());
-        assertTrue(stepRunReport.getOutputs().stream().anyMatch(output ->
-                output.getName().equals(FAILURE_MESSAGE)
+        assertEquals(0, stepRunReport.getOutputs().size());
+        assertEquals(1, stepRunReport.getUnexpectedErrors().size());
+        assertTrue(stepRunReport.getUnexpectedErrors().stream().anyMatch(unexpectedError ->
+                unexpectedError.getName().contains("Certificate DER to PEM conversion error")
         ));
-
-        String failureMessage = stepRunReport.getOutputs().stream()
-                .filter(output -> output.getName().equals(FAILURE_MESSAGE))
-                .findFirst()
-                .map(output -> (String) output.getValue())
-                .orElse(null);
-
-        assertNotNull(failureMessage);
     }
 
     private Step buildStep(byte[] derCertificate) {
         return new Step()
-                .setId("convertDerToPemStep")
                 .setName("convertDerToPemStep")
                 .setType(ConvertCertificateDerToPemStepDefinition.TYPE)
                 .setProperties(List.of(

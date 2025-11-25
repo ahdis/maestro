@@ -1,5 +1,6 @@
 package net.ihe.gazelle.maestro.extraction.step.conversion.step.business.base64.encode;
 
+import net.ihe.gazelle.errorhandling.business.UnexpectedErrorBuilder;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
@@ -13,7 +14,8 @@ import java.util.concurrent.CompletableFuture;
 import static java.util.Base64.getEncoder;
 import static net.ihe.gazelle.maestro.api.business.testreport.StepResult.DONE;
 import static net.ihe.gazelle.maestro.api.business.testreport.StepResult.UNDEFINED;
-import static net.ihe.gazelle.maestro.extraction.step.conversion.step.business.base64.encode.EncodeBase64StepDefinition.*;
+import static net.ihe.gazelle.maestro.extraction.step.conversion.step.business.base64.encode.EncodeBase64StepDefinition.CONTENT_TO_ENCODE;
+import static net.ihe.gazelle.maestro.extraction.step.conversion.step.business.base64.encode.EncodeBase64StepDefinition.ENCODED_CONTENT;
 
 public class EncodeBase64StepExecutor implements StepExecutor {
 
@@ -46,9 +48,9 @@ public class EncodeBase64StepExecutor implements StepExecutor {
     }
 
     private static CompletableFuture<StepRunReport> buildStepRunReportFailed(String failureMessage, StepRunReportBuilder reportBuilder) {
-        StringProperty failureOutput = new StringProperty(FAILURE_MESSAGE, failureMessage);
+        UnexpectedErrorBuilder unexpectedError =
+                new UnexpectedErrorBuilder().setName("Base64 encoding error").setMessage(failureMessage);
         return CompletableFuture.completedFuture(
-                reportBuilder.setOutputs(List.of(failureOutput)).setResult(UNDEFINED).build()
-        );
+                reportBuilder.setResult(UNDEFINED).setUnexpectedErrors(List.of(unexpectedError)).build());
     }
 }

@@ -33,7 +33,7 @@ class XmlExtractionStepDefinitionTest {
         assertNotNull(stepDefinition.getOutputsDefinition());
 
         assertEquals(4, stepDefinition.getSupportedInputs().size());
-        assertEquals(2, stepDefinition.getOutputsDefinition().size());
+        assertEquals(1, stepDefinition.getOutputsDefinition().size());
         assertEquals(2, stepDefinition.getSupportedInputs().stream().filter(SupportedInput::isRequired).count());
     }
 

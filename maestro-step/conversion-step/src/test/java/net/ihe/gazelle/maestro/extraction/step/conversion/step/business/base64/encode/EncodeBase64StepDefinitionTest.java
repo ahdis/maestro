@@ -31,12 +31,9 @@ class EncodeBase64StepDefinitionTest {
         EncodeBase64StepDefinition stepDefinition = new EncodeBase64StepDefinition();
 
         assertNotNull(stepDefinition.getOutputsDefinition());
-        assertEquals(2, stepDefinition.getOutputsDefinition().size());
+        assertEquals(1, stepDefinition.getOutputsDefinition().size());
 
         assertTrue(stepDefinition.getOutputsDefinition().containsKey(EncodeBase64StepDefinition.ENCODED_CONTENT));
         assertEquals(StringProperty.class, stepDefinition.getOutputsDefinition().get(EncodeBase64StepDefinition.ENCODED_CONTENT));
-
-        assertTrue(stepDefinition.getOutputsDefinition().containsKey(EncodeBase64StepDefinition.FAILURE_MESSAGE));
-        assertEquals(StringProperty.class, stepDefinition.getOutputsDefinition().get(EncodeBase64StepDefinition.FAILURE_MESSAGE));
     }
 }

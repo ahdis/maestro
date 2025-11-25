@@ -1,12 +1,13 @@
 package net.ihe.gazelle.maestro.extraction.step.business.xml;
 
+import net.ihe.gazelle.errorhandling.business.UnexpectedErrorBuilder;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
+import net.ihe.gazelle.maestro.extraction.step.technical.xml.XmlExtractionException;
 import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 import net.ihe.gazelle.maestro.spi.business.StepRun;
-import net.ihe.gazelle.maestro.extraction.step.technical.xml.XmlExtractionException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +38,7 @@ public class XmlExtractionStepExecutor implements StepExecutor {
         String xmlPath = stepRun.getPropertyValue(XML_PATH);
         byte[] xmlFile = stepRun.getPropertyValue(XML_FILE);
 
-        Map<String,String> namespaces = new HashMap<>();
+        Map<String, String> namespaces = new HashMap<>();
 
         if (stepRun.hasProperty(DEFAULT_NAMESPACE)) {
             String defaultNameSpace = stepRun.getPropertyValue(DEFAULT_NAMESPACE);
@@ -69,9 +70,9 @@ public class XmlExtractionStepExecutor implements StepExecutor {
     }
 
     private static CompletableFuture<StepRunReport> buildStepRunReportFailed(String failureMessage, StepRunReportBuilder reportBuilder) {
-        StringProperty failureOutput = new StringProperty(FAILURE_MESSAGE, failureMessage);
+        UnexpectedErrorBuilder unexpectedError =
+                new UnexpectedErrorBuilder().setName("XML_EXTRACTION_ERROR").setMessage(failureMessage);
         return CompletableFuture.completedFuture(
-                reportBuilder.setOutputs(List.of(failureOutput)).setResult(UNDEFINED).build()
-        );
+                reportBuilder.setResult(UNDEFINED).setUnexpectedErrors(List.of(unexpectedError)).build());
     }
 }

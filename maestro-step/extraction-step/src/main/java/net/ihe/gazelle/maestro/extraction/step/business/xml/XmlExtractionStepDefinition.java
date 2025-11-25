@@ -23,7 +23,6 @@ public class XmlExtractionStepDefinition implements StepDefinition {
 
     // outputs
     public static final String EXTRACTED_VALUE = "extractedValue";
-    public static final String FAILURE_MESSAGE = "failureMessage";
 
     public XmlExtractionStepDefinition() {
         // Default constructor
@@ -46,9 +45,6 @@ public class XmlExtractionStepDefinition implements StepDefinition {
 
     @Override
     public Map<String, Class<? extends Property>> getOutputsDefinition() {
-        return Map.of(
-                FAILURE_MESSAGE, StringProperty.class,
-                EXTRACTED_VALUE, StringProperty.class
-        );
+        return Map.of(EXTRACTED_VALUE, StringProperty.class);
     }
 }

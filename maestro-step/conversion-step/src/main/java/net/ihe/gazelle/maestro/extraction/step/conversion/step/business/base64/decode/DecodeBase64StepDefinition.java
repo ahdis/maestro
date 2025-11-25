@@ -2,7 +2,6 @@ package net.ihe.gazelle.maestro.extraction.step.conversion.step.business.base64.
 
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
-import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.test.SupportedInput;
 import net.ihe.gazelle.maestro.api.business.test.SupportedTextInput;
 import net.ihe.gazelle.maestro.spi.business.StepDefinition;
@@ -20,7 +19,6 @@ public class DecodeBase64StepDefinition implements StepDefinition {
 
     // outputs
     public static final String DECODED_CONTENT = "decodedContent";
-    public static final String FAILURE_MESSAGE = "failureMessage";
 
     public DecodeBase64StepDefinition() {
         // Default constructor
@@ -35,14 +33,11 @@ public class DecodeBase64StepDefinition implements StepDefinition {
     public List<SupportedInput> getSupportedInputs() {
         return List.of(
                 new SupportedTextInput().setId(CONTENT_TO_DECODE).setLabel("The content to decode from base64").setRequired(true)
-                );
+        );
     }
 
     @Override
     public Map<String, Class<? extends Property>> getOutputsDefinition() {
-        return Map.of(
-                FAILURE_MESSAGE, StringProperty.class,
-                DECODED_CONTENT, ByteArrayProperty.class
-        );
+        return Map.of(DECODED_CONTENT, ByteArrayProperty.class);
     }
 }

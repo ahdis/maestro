@@ -19,7 +19,6 @@ public class EncodeBase64StepDefinition implements StepDefinition {
 
     // outputs
     public static final String ENCODED_CONTENT = "encodedContent";
-    public static final String FAILURE_MESSAGE = "failureMessage";
 
     public EncodeBase64StepDefinition() {
         // Default constructor
@@ -34,14 +33,11 @@ public class EncodeBase64StepDefinition implements StepDefinition {
     public List<SupportedInput> getSupportedInputs() {
         return List.of(
                 new SupportedTextInput().setId(CONTENT_TO_ENCODE).setLabel("The content to encode into base64").setRequired(true)
-                );
+        );
     }
 
     @Override
     public Map<String, Class<? extends Property>> getOutputsDefinition() {
-        return Map.of(
-                FAILURE_MESSAGE, StringProperty.class,
-                ENCODED_CONTENT, StringProperty.class
-        );
+        return Map.of(ENCODED_CONTENT, StringProperty.class);
     }
 }

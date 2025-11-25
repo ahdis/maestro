@@ -25,8 +25,7 @@ class ConvertCertificateDerToPemStepDefinitionTest {
     @Test
     void testCorrectOutputsDefinition() {
         ConvertCertificateDerToPemStepDefinition stepDefinition = new ConvertCertificateDerToPemStepDefinition();
-        assertEquals(2, stepDefinition.getOutputsDefinition().size());
+        assertEquals(1, stepDefinition.getOutputsDefinition().size());
         assertEquals(ByteArrayProperty.class, stepDefinition.getOutputsDefinition().get("pemCertificate"));
-        assertEquals(StringProperty.class, stepDefinition.getOutputsDefinition().get("failureMessage"));
     }
 }

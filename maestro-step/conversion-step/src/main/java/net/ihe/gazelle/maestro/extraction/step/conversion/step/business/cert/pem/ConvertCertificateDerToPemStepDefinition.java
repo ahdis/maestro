@@ -20,7 +20,6 @@ public class ConvertCertificateDerToPemStepDefinition implements StepDefinition 
 
     // outputs
     public static final String PEM_CERTIFICATE = "pemCertificate";
-    public static final String FAILURE_MESSAGE = "failureMessage";
 
     public ConvertCertificateDerToPemStepDefinition() {
         // Default constructor
@@ -40,9 +39,6 @@ public class ConvertCertificateDerToPemStepDefinition implements StepDefinition 
 
     @Override
     public Map<String, Class<? extends Property>> getOutputsDefinition() {
-        return Map.of(
-                FAILURE_MESSAGE, StringProperty.class,
-                PEM_CERTIFICATE, ByteArrayProperty.class
-        );
+        return Map.of(PEM_CERTIFICATE, ByteArrayProperty.class);
     }
 }

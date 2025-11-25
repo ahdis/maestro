@@ -11,14 +11,15 @@ import java.util.List;
 import static net.ihe.gazelle.maestro.api.business.testreport.StepResult.DONE;
 import static net.ihe.gazelle.maestro.api.business.testreport.StepResult.UNDEFINED;
 import static net.ihe.gazelle.maestro.extraction.step.conversion.step.business.base64.encode.EncodeBase64StepDefinition.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EncodeBase64StepExecutorTest {
 
     private final EncodeBase64StepExecutor stepExecutor = new EncodeBase64StepExecutor();
 
     @Test
-    void executeStepWithValidContent() {
+    void testExecuteStepWithValidContent() {
         String content = "Hello World!";
         Step step = buildStep(content);
         StepRun stepRun = new StepRun(step, List.of());
@@ -31,12 +32,12 @@ class EncodeBase64StepExecutorTest {
         assertEquals(1, stepRunReport.getOutputs().size());
         assertTrue(stepRunReport.getOutputs().stream().anyMatch(output ->
                 output.getName().equals(ENCODED_CONTENT) &&
-                output.getValue().equals("SGVsbG8gV29ybGQh")
+                        output.getValue().equals("SGVsbG8gV29ybGQh")
         ));
     }
 
     @Test
-    void executeStepWithEmptyContent() {
+    void testExecuteStepWithEmptyContent() {
         Step step = buildStep("");
         StepRun stepRun = new StepRun(step, List.of());
 
@@ -45,15 +46,15 @@ class EncodeBase64StepExecutorTest {
 
         // Then: The step should fail with a failure message
         assertEquals(UNDEFINED, stepRunReport.getResult());
-        assertEquals(1, stepRunReport.getOutputs().size());
-        assertTrue(stepRunReport.getOutputs().stream().anyMatch(output ->
-                output.getName().equals(FAILURE_MESSAGE) &&
-                output.getValue().toString().contains("Content to encode is empty")
+        assertEquals(0, stepRunReport.getOutputs().size());
+        assertEquals(1, stepRunReport.getUnexpectedErrors().size());
+        assertTrue(stepRunReport.getUnexpectedErrors().stream().anyMatch(unexpectedError ->
+                unexpectedError.getMessage().contains("Content to encode is empty")
         ));
     }
 
     @Test
-    void executeStepWithNullContent() {
+    void testExecuteStepWithNullContent() {
         Step step = buildStep(null);
         StepRun stepRun = new StepRun(step, List.of());
 
@@ -62,15 +63,15 @@ class EncodeBase64StepExecutorTest {
 
         // Then: The step should fail with a failure message
         assertEquals(UNDEFINED, stepRunReport.getResult());
-        assertEquals(1, stepRunReport.getOutputs().size());
-        assertTrue(stepRunReport.getOutputs().stream().anyMatch(output ->
-                output.getName().equals(FAILURE_MESSAGE) &&
-                output.getValue().toString().contains("Content to encode is empty")
+        assertEquals(0, stepRunReport.getOutputs().size());
+        assertEquals(1, stepRunReport.getUnexpectedErrors().size());
+        assertTrue(stepRunReport.getUnexpectedErrors().stream().anyMatch(unexpectedError ->
+                unexpectedError.getMessage().contains("Content to encode is empty")
         ));
     }
 
     @Test
-    void executeStepWithSpecialCharacters() {
+    void testExecuteStepWithSpecialCharacters() {
         String content = "éèàçõ";
         Step step = buildStep(content);
         StepRun stepRun = new StepRun(step, List.of());
@@ -80,15 +81,16 @@ class EncodeBase64StepExecutorTest {
 
         // Then: The step should succeed with encoded content
         assertEquals(DONE, stepRunReport.getResult());
+        assertEquals(0, stepRunReport.getUnexpectedErrors().size());
         assertEquals(1, stepRunReport.getOutputs().size());
         assertTrue(stepRunReport.getOutputs().stream().anyMatch(output ->
                 output.getName().equals(ENCODED_CONTENT) &&
-                output.getValue().equals("w6nDqMOgw6fDtQ==")
+                        output.getValue().equals("w6nDqMOgw6fDtQ==")
         ));
     }
 
     @Test
-    void executeStepWithNumericContent() {
+    void testExecuteStepWithNumericContent() {
         String content = "1234567890";
         Step step = buildStep(content);
         StepRun stepRun = new StepRun(step, List.of());
@@ -98,15 +100,16 @@ class EncodeBase64StepExecutorTest {
 
         // Then: The step should succeed with encoded content
         assertEquals(DONE, stepRunReport.getResult());
+        assertEquals(0, stepRunReport.getUnexpectedErrors().size());
         assertEquals(1, stepRunReport.getOutputs().size());
         assertTrue(stepRunReport.getOutputs().stream().anyMatch(output ->
                 output.getName().equals(ENCODED_CONTENT) &&
-                output.getValue().equals("MTIzNDU2Nzg5MA==")
+                        output.getValue().equals("MTIzNDU2Nzg5MA==")
         ));
     }
 
     @Test
-    void executeStepWithMultilineContent() {
+    void testExecuteStepWithMultilineContent() {
         String content = "Line 1\nLine 2\nLine 3";
         Step step = buildStep(content);
         StepRun stepRun = new StepRun(step, List.of());
@@ -116,17 +119,17 @@ class EncodeBase64StepExecutorTest {
 
         // Then: The step should succeed with encoded content
         assertEquals(DONE, stepRunReport.getResult());
+        assertEquals(0, stepRunReport.getUnexpectedErrors().size());
         assertEquals(1, stepRunReport.getOutputs().size());
         assertTrue(stepRunReport.getOutputs().stream().anyMatch(output ->
                 output.getName().equals(ENCODED_CONTENT) &&
-                output.getValue() != null &&
-                !output.getValue().toString().isEmpty()
+                        output.getValue() != null &&
+                        !output.getValue().toString().isEmpty()
         ));
     }
 
     private Step buildStep(String contentToEncode) {
         return new Step()
-                .setId("encodeBase64Step")
                 .setName("encodeBase64Step")
                 .setType(TYPE)
                 .setProperties(List.of(
