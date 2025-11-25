@@ -20,7 +20,6 @@ import net.ihe.gazelle.errorhandling.business.UnexpectedErrorBuilder;
 import net.ihe.gazelle.maestro.api.business.Maestro;
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.api.business.message.*;
-import net.ihe.gazelle.maestro.api.business.recording.TestReportRecordException;
 import net.ihe.gazelle.maestro.api.business.recording.TestReportRecordService;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
@@ -91,7 +90,7 @@ public class MaestroRecorderImpl implements Maestro {
             try {
                 String location = testReportRecordService.recordTestReport(executionFinished.getReport());
                 executionFinished.setReportLocation(location);
-            } catch (TestReportRecordException e) {
+            } catch (Exception e) {
                 executionFinished.getReport().addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e).build());
             }
             delegate.onExecutionFinished(executionFinished);
