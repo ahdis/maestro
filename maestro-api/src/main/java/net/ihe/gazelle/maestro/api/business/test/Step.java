@@ -116,7 +116,7 @@ public class Step implements Serializable {
    }
 
    public Map<String, String> getOutputMappings() {
-      return outputMappings;
+      return new ConcurrentHashMap<>(outputMappings);
    }
 
    public Step setOutputMappings(Map<String, String> outputMappings) {

@@ -309,7 +309,7 @@ class MaestroEngineTest {
             .withExecutor("Consumer", stepRun -> {
                // Force a ClassCastException to mimic a type mismatch at execution time
                Integer ignored = (Integer) stepRun.getPropertyValue("payloadRef");
-               return CompletableFuture.completedFuture(passedReport("Consumer"));
+               return CompletableFuture.completedFuture(passedReport("Consumer" + ignored));
             });
 
       runSuite(observer, suiteRun);
