@@ -132,7 +132,6 @@ public class ValidationStepExecutor implements StepExecutor {
     * Compute the validation step result from the received validation report from external validation tool
     *
     * @param validationResult     The received validation report
-    * @param stepRunReportBuilder An object to build the Step run report
     */
    private StepResult mapResult(ValidationTestResult validationResult) {
       return switch (validationResult) {

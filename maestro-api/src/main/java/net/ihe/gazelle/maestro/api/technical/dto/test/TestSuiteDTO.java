@@ -1,6 +1,9 @@
 package net.ihe.gazelle.maestro.api.technical.dto.test;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import net.ihe.gazelle.maestro.api.business.test.SupportedInput;
 import net.ihe.gazelle.maestro.api.business.test.TestReference;
 import net.ihe.gazelle.maestro.api.business.test.TestSuite;
@@ -9,8 +12,16 @@ import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
 
 import java.util.List;
 
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonPropertyOrder({
+        "id",
+        "name",
+        "testReferences",
+        "supportedInputs",
+})
 public class TestSuiteDTO implements DTO<TestSuite> {
 
+    @JsonIgnore
    private final TestSuite testSuite;
 
    public TestSuiteDTO() {
@@ -77,6 +88,7 @@ public class TestSuiteDTO implements DTO<TestSuite> {
    }
 
    @Override
+   @JsonIgnore
    public TestSuite getBusinessObject() {
       return testSuite;
    }

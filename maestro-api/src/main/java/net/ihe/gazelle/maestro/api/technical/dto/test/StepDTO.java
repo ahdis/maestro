@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({"id", "name", "type", "properties", "outputMappings"})
+@JsonPropertyOrder({"name", "type", "properties", "outputMappings"})
 public class StepDTO implements DTO<Step> {
 
    public static final String MAPPING_DELIMITER = ":";

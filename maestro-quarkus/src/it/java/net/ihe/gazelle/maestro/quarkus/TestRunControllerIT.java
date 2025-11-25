@@ -22,9 +22,9 @@ import io.quarkus.test.junit.TestProfile;
 import io.restassured.response.Response;
 import jakarta.ws.rs.core.MediaType;
 import net.ihe.gazelle.maestro.api.business.testreport.Result;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
-import net.ihe.gazelle.maestro.api.business.testreport.validator.TestReportSummaryValidator;
-import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+import net.ihe.gazelle.maestro.api.business.testreport.validator.TestReportValidator;
+import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
 import org.apache.http.HttpHeaders;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.AfterAll;
@@ -41,10 +41,9 @@ import java.util.stream.Stream;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
-/*
+@QuarkusTest
 @TestProfile(TestRunControllerProfile.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TestRunControllerIT implements QuarkusTestProfile {
@@ -52,7 +51,7 @@ class TestRunControllerIT implements QuarkusTestProfile {
     @ConfigProperty(name = "gzl.it.port")
     int port;
 
-    TestReportSummaryValidator summaryValidator = new TestReportSummaryValidator();
+    TestReportValidator reportValidator = new TestReportValidator();
 
     @BeforeAll
     void setUp() throws IOException {
@@ -73,38 +72,111 @@ class TestRunControllerIT implements QuarkusTestProfile {
             MockDatahouseServer.stop();
         } catch (IOException e) {
             // log and ignore in teardown
-            e.printStackTrace();
         }
     }
 
     @Test
-    void synchronous_test_executeTestSuite_with_one_validation() throws IOException {
-        String testRun = WireMockSingleton.getResourceAsString("/Testrun.json");
+    void synchronous_test_executeTestSuite_with_one_step() throws IOException {
+        String testRun = WireMockSingleton.getResourceAsString("/rest/testSuiteRun_ok.json");
         Response response = given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                 .body(testRun)
-                .when().post("/testRuns/run")
+                .when().post("/v1/test-suite/run")
                 .then()
                 .extract().response();
         assertNotNull(response);
-        System.out.println(response.asString());
-        TestReportSummary testReport = response.as(TestReportSummaryDTO.class).getBusinessObject();
-        summaryValidator.assertValid(testReport);
-        assertEquals(Result.FAILED, testReport.getResult());
+        TestReport testReport = response.as(TestReportDTO.class).getBusinessObject();
+        reportValidator.assertValid(testReport);
+        assertEquals(Result.PASSED, testReport.getResult());
     }
 
     @Test
-    void asynchronous_test_executeTestSuite_with_one_validations() throws IOException {
-        String testRun = WireMockSingleton.getResourceAsString("/Testrun.json");
+    void asynchronous_test_executeTestSuite_with_one_step() throws IOException {
+        String testRun = WireMockSingleton.getResourceAsString("/rest/testSuiteRun_ok.json");
         String callback = "http://localhost:" + port + "/mock/gazelle/rest";
         given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                 .body(testRun)
-                .when().post("/testRuns/run?callback=" + callback)
+                .when().post("/v1/test-suite/run?callback=" + callback)
                 .then()
                 .statusCode(202);
 
-        TestReportSummary testReport = WireMockSingleton.awaitTestReport();
-        summaryValidator.assertValid(testReport);
-        assertEquals(Result.FAILED, testReport.getResult());
+        TestReport testReport = WireMockSingleton.awaitTestReport();
+        reportValidator.assertValid(testReport);
+        assertEquals(Result.PASSED, testReport.getResult());
+    }
+
+    @Test
+    void synchronous_test_executeTestRun_with_one_step() throws IOException {
+        String testRun = WireMockSingleton.getResourceAsString("/rest/testRun_ok.json");
+        Response response = given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .body(testRun)
+                .when().post("/v1/test/run")
+                .then()
+                .extract().response();
+        assertNotNull(response);
+        TestReport testReport = response.as(TestReportDTO.class).getBusinessObject();
+        reportValidator.assertValid(testReport);
+        assertEquals(Result.PASSED, testReport.getResult());
+    }
+
+    @Test
+    void asynchronous_test_executeTestRun_with_one_step() throws IOException {
+        String testRun = WireMockSingleton.getResourceAsString("/rest/testRun_ok.json");
+        String callback = "http://localhost:" + port + "/mock/gazelle/rest";
+        given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .body(testRun)
+                .when().post("/v1/test/run?callback=" + callback)
+                .then()
+                .statusCode(202);
+
+        TestReport testReport = WireMockSingleton.awaitTestReport();
+        reportValidator.assertValid(testReport);
+        assertEquals(Result.PASSED, testReport.getResult());
+    }
+
+    @Test
+    void shall_return_undefined_invalid_step_type() throws IOException {
+        String testRun = WireMockSingleton.getResourceAsString("/rest/invalid_step_type.json");
+        Response response = given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .body(testRun)
+                .when().post("/v1/test-suite/run")
+                .then()
+                .extract().response();
+        assertNotNull(response);
+        TestReport testReport = response.as(TestReportDTO.class).getBusinessObject();
+        reportValidator.assertValid(testReport);
+        assertEquals(Result.UNDEFINED, testReport.getResult());
+    }
+
+    @Test
+    void shall_return_undefined_invalid_property_name() throws IOException {
+        String testRun = WireMockSingleton.getResourceAsString("/rest/invalid_property_name.json");
+        Response response = given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .body(testRun)
+                .when().post("/v1/test-suite/run")
+                .then()
+                .extract().response();
+        assertNotNull(response);
+        TestReport testReport = response.as(TestReportDTO.class).getBusinessObject();
+        reportValidator.assertValid(testReport);
+        assertEquals(Result.UNDEFINED, testReport.getResult());
+    }
+
+    @Test
+    void synchronous_test_executeTestRun_with_user_interaction_unsupported() throws IOException {
+        String testRun = WireMockSingleton.getResourceAsString("/rest/user_interaction.json");
+        Response response = given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .body(testRun)
+                .when().post("/v1/test/run")
+                .then()
+                .extract().response();
+        assertNotNull(response);
+        TestReport testReport = response.as(TestReportDTO.class).getBusinessObject();
+        reportValidator.assertValid(testReport);
+        assertEquals(Result.UNDEFINED, testReport.getResult());
+        String error = testReport.getTestRunReports().getFirst()
+                .getStepRunReports().getFirst()
+                .getUnexpectedErrors().getFirst().getMessage();
+        assertTrue(error.contains("User interaction is not supported via REST API."));
     }
 
     @ParameterizedTest
@@ -113,7 +185,7 @@ class TestRunControllerIT implements QuarkusTestProfile {
         String testRun = WireMockSingleton.getResourceAsString(filePath);
         String response = given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                 .body(testRun)
-                .when().post("/testRuns/run")
+                .when().post("/v1/test-suite/run")
                 .then()
                 .statusCode(400)
                 .extract().response()
@@ -124,10 +196,8 @@ class TestRunControllerIT implements QuarkusTestProfile {
 
     private static Stream<Arguments> invalidTestExecuteTestSuiteProvider() {
         return Stream.of(
-                Arguments.of("/invalid_step_type.json", "Could not resolve type id"),
-                Arguments.of("/invalid_property_type.json", "Unsupported property type"),
-                Arguments.of("/invalid_property_name.json", "Property invalid is neither a validation step property nor a content to validate"),
-                Arguments.of("/invalid_structure.json", "Unable to parse TestSuite structure")
+                Arguments.of("/rest/invalid_property_type.json", "Could not resolve type id"),
+                Arguments.of("/rest/invalid_structure.json", "The request contains a testRun with bad format")
         );
     }
-}*/
+}

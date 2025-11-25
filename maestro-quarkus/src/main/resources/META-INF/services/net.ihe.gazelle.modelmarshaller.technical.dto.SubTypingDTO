@@ -22,4 +22,4 @@ net.ihe.gazelle.maestro.quarkus.websocket.dto.InteractWithUserDTO
 net.ihe.gazelle.maestro.quarkus.websocket.dto.UserInteractionCompletedDTO
 net.ihe.gazelle.maestro.quarkus.websocket.dto.StepRunFinishedDTO
 net.ihe.gazelle.maestro.quarkus.websocket.dto.TestRunFinishedDTO
-net.ihe.gazelle.maestro.quarkus.websocket.dto.TestSuiteRunFinishedDTO
+net.ihe.gazelle.maestro.quarkus.websocket.dto.ExecutionFinishedDTO

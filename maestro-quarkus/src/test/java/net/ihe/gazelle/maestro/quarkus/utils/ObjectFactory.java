@@ -16,26 +16,45 @@
 
 package net.ihe.gazelle.maestro.quarkus.utils;
 
+import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.test.Step;
+import net.ihe.gazelle.maestro.api.business.test.TestReference;
+import net.ihe.gazelle.maestro.api.business.test.TestSuite;
 import net.ihe.gazelle.maestro.api.business.testreport.*;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
+import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
+import net.ihe.gazelle.maestro.engine.business.stub.Instrumented4TestStepDefinition;
 import net.ihe.gazelle.maestro.spi.business.StepRun;
+import net.ihe.gazelle.security.business.acl.AccessControlList;
 
 import java.util.List;
+import java.util.Set;
 
 public class ObjectFactory {
+
+    private static final String TEST_ID = "test-1";
 
     public static Step createStep() {
         return new Step()
                 .setName("step")
-                .setType("type");
+                .setType(Instrumented4TestStepDefinition.TYPE)
+                .setProperties(List.of(
+                        new StringProperty("requiredInput", "test")
+                ));
     }
 
     public static net.ihe.gazelle.maestro.api.business.test.Test createTest4Run() {
         return new net.ihe.gazelle.maestro.api.business.test.Test()
-                .setId("test-1")
+                .setId(TEST_ID)
                 .setName("Sample test")
                 .addStep(createStep());
+    }
+
+    public static TestSuite createTestSuite() {
+        return new TestSuite()
+                .setName("Test Suite")
+                .setId("Test Suite")
+                .setTestReferences(List.of(new TestReference().setTestId(TEST_ID)));
     }
 
     public static StepRun createStepRun() {
@@ -43,20 +62,26 @@ public class ObjectFactory {
     }
 
     public static TestRun createTestRun() {
-        return new TestRun().setTest(createTest4Run());
+        return new TestRun()
+                .setTest(createTest4Run())
+                .setAccessControlList(new AccessControlList()
+                        .setPublic(true)
+                        .setOwners(Set.of("gazelle")));
     }
 
-    public static Test createTest4Report() {
-        return new TestBuilder()
-                .setId("test-1")
-                .setName("Sample test")
-                .build();
+    public static TestSuiteRun createTestSuiteRun() {
+        return new TestSuiteRun()
+                .setTestSuite(createTestSuite())
+                .setTests(List.of(createTest4Run()))
+                .setAccessControlList(new AccessControlList()
+                        .setPublic(true)
+                        .setOwners(Set.of("gazelle")));
     }
 
     public static StepRunReport createStepRunReport() {
         StepRunReportBuilder stepRunReportBuilder = new StepRunReportBuilder()
                 .setStepName("step")
-                .setType("TYPE")
+                .setType(Instrumented4TestStepDefinition.TYPE)
                 .setResult(StepResult.PASSED);
         return stepRunReportBuilder.build();
     }
@@ -64,7 +89,7 @@ public class ObjectFactory {
     public static TestRunReport createTestRunReport() {
         StepRunReportBuilder stepRunReportBuilder = new StepRunReportBuilder()
                 .setStepName("step")
-                .setType("TYPE")
+                .setType(Instrumented4TestStepDefinition.TYPE)
                 .setResult(StepResult.PASSED);
 
         TestRunReportBuilder testRunReportBuilder = new TestRunReportBuilder()
@@ -80,7 +105,7 @@ public class ObjectFactory {
     public static TestReport createTestReport() {
         StepRunReportBuilder stepRunReportBuilder = new StepRunReportBuilder()
                 .setStepName("step")
-                .setType("TYPE")
+                .setType(Instrumented4TestStepDefinition.TYPE)
                 .setResult(StepResult.PASSED);
 
         TestRunReportBuilder testRunReportBuilder = new TestRunReportBuilder()

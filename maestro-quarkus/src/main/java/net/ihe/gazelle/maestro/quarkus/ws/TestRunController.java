@@ -35,51 +35,11 @@ import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
+import static net.ihe.gazelle.maestro.quarkus.ws.Constants.TEST_RUN;
+import static net.ihe.gazelle.maestro.quarkus.ws.Constants.TEST_SUITE_RUN;
+
 @Path("/v1")
 public interface TestRunController {
-
-   // FIXME, example is outdated
-   String TEST_SUITE_RUN = """
-            [
-              {
-                "testSetId": "testSet1",
-                "test": {
-                  "id": "1",
-                  "name": "name1",
-                  "steps": [
-                    {
-                      "type": "VALIDATION",
-                      "name": "step1",
-                      "properties": [
-                        {
-                          "name": "validationService",
-                          "value": "matchbox",
-                          "type": "string"
-                        },
-                        {
-                          "name": "validationProfile",
-                          "value": "parameters",
-                          "type": "string"
-                        },
-                        {
-                          "name": "contentToValidate",
-                          "value": "${inputFile1}",
-                          "type": "byteArray"
-                        }
-                      ]
-                    }
-                  ]
-                },
-                "inputs": [
-                  {
-                    "name": "inputFile1",
-                    "value": "ihfeorhqifrghqpervgh",
-                    "type": "byteArray"
-                  }
-                ]
-              }
-            ]
-            """;
 
     /**
      * This endpoint can run synchronously or asynchronously depending on the presence of a callback URI.
@@ -212,7 +172,7 @@ public interface TestRunController {
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON,
                             schema = @Schema(implementation = TestRunDTO.class),
-                            example = TEST_SUITE_RUN
+                            example = TEST_RUN
                     )
             ) TestRunDTO testRun,
             @Parameter(

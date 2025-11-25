@@ -1,5 +1,6 @@
 package net.ihe.gazelle.maestro.api.technical.dto.test;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -18,6 +19,7 @@ import java.util.List;
 })
 public class TestReferenceDTO implements DTO<TestReference> {
 
+    @JsonIgnore
    private final TestReference testReference;
 
    public TestReferenceDTO() {
@@ -57,6 +59,7 @@ public class TestReferenceDTO implements DTO<TestReference> {
    }
 
    @Override
+   @JsonIgnore
    public TestReference getBusinessObject() {
       return testReference;
    }

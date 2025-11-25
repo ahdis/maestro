@@ -19,8 +19,8 @@ package net.ihe.gazelle.maestro.quarkus;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import net.ihe.gazelle.m2m.client.technical.KeycloakConfigurationProvider;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
-import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
 import net.ihe.gazelle.oidc.server.OIDCJWTGenerator;
@@ -41,13 +41,7 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.containing;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.ok;
-import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.awaitility.Awaitility.await;
 
 @Disabled
@@ -150,14 +144,14 @@ public class WireMockSingleton {
                 .willReturn(ok("{\"access_token\":\"" + OIDCJWTGenerator.getValidJwtWithGroups(List.of("admin")) + "\"}")));
     }
 
-    public static TestReportSummary awaitTestReport() {
+    public static TestReport awaitTestReport() {
         byte[] content = Objects.requireNonNull(await()
                 .atMost(3, TimeUnit.SECONDS)
                 .until(() -> {
                     List<LoggedRequest> matchingRequests = getMatchingRequests().apply(wireMockServer);
                     return !matchingRequests.isEmpty() ? matchingRequests : null;
                 }, Objects::nonNull)).getFirst().getBody();
-        return new JacksonSerDes().deserialize(content, TestReportSummaryDTO.class).getBusinessObject();
+        return new JacksonSerDes().deserialize(content, TestReportDTO.class).getBusinessObject();
     }
 
     private static Function<WireMockServer, List<LoggedRequest>> getMatchingRequests() {

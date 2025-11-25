@@ -21,10 +21,14 @@ import net.ihe.gazelle.maestro.api.business.test.SupportedInput;
 import net.ihe.gazelle.maestro.api.business.test.SupportedTextInput;
 import net.ihe.gazelle.maestro.spi.business.StepDefinition;
 
+import java.io.Serial;
 import java.util.List;
 import java.util.Map;
 
 public class UserInteractionStepDefinition implements StepDefinition {
+
+    @Serial
+    private static final long serialVersionUID = 5740485033132348151L;
 
     public static final String TYPE = "USER_INTERACTION";
 

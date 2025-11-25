@@ -18,10 +18,7 @@ package net.ihe.gazelle.maestro.quarkus.websocket;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.websocket.OnClose;
-import jakarta.websocket.OnMessage;
-import jakarta.websocket.OnOpen;
-import jakarta.websocket.Session;
+import jakarta.websocket.*;
 import jakarta.websocket.server.ServerEndpoint;
 import net.ihe.gazelle.maestro.api.business.Maestro;
 import net.ihe.gazelle.maestro.quarkus.websocket.dto.MessageDTO;
@@ -33,6 +30,7 @@ import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -65,14 +63,19 @@ public class TestStreamSocketController {
     }
 
     @OnMessage
-    public void onMessage(Session session, String messageString) {
+    public void onMessage(Session session, String messageString) throws IOException {
         MessageDTO<?> message = serDes.deserialize(messageString, MessageDTO.class);
         WebSocketSession maestroCaller = sessions.get(session.getId());
         switch (message) {
             case StartTestRunDTO testRun -> maestro.executeTest(testRun.getBusinessObject(), testRun.isPersist(), maestroCaller);
             case StartTestSuiteRunDTO testSuiteRun -> maestro.executeTestSuite(testSuiteRun.getBusinessObject(), testSuiteRun.isPersist(), maestroCaller);
             case UserInteractionCompletedDTO userInteractionCompleted -> maestroCaller.completeInteraction(userInteractionCompleted.getBusinessObject());
-            default -> throw new IllegalArgumentException("Unexpected message type: " + message.getClass().getName());
+            default -> {
+                sessions.remove(session.getId());
+                String error = "Unexpected message type: " + message.getClass().getName();
+                session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, error));
+                throw new IllegalArgumentException(error);
+            }
         }
     }
 }
