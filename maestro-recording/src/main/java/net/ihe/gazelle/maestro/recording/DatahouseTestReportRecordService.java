@@ -38,7 +38,7 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
     private final StepOutputRecordService stepOutputRecordService;
 
     @Inject
-    public DatahouseTestReportRecordService(@ConfigProperty(name = "gzl.datahouse.url") String datahouseUrl,
+    public DatahouseTestReportRecordService(@ConfigProperty(name = "datahouse.url") String datahouseUrl,
                                             StepOutputDissectorProvider dissectorProvider) {
         this.recordItemClient = new RecordItemClientProvider().createClient();
         this.stepOutputRecordService = new StepOutputRecordService(recordItemClient, datahouseUrl);
@@ -47,7 +47,7 @@ public class DatahouseTestReportRecordService implements TestReportRecordService
 
     // Convenience constructor for tests to bypass config-backed client creation
     DatahouseTestReportRecordService(RecordItemClient recordItemClient,
-                                     @ConfigProperty(name = "gzl.datahouse.url") String datahouseUrl,
+                                     @ConfigProperty(name = "datahouse.url") String datahouseUrl,
                                      StepOutputDissectorProvider dissectorProvider) {
         this.recordItemClient = recordItemClient;
         this.dissectorProvider = dissectorProvider;
