@@ -93,7 +93,6 @@ public class TestDTO implements DTO<Test> {
       );
    }
 
-   @SuppressWarnings("rawtypes")
    @JsonProperty("steps")
    public List<StepDTO> getSteps() {
       return test.getSteps().stream()
@@ -101,7 +100,6 @@ public class TestDTO implements DTO<Test> {
             .toList();
    }
 
-   @SuppressWarnings("rawtypes")
    public void setSteps(List<StepDTO> steps) {
       test.setSteps(
             steps != null ?

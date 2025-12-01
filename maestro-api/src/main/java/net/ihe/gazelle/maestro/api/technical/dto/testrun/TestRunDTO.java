@@ -66,6 +66,7 @@ public class TestRunDTO implements DTO<TestRun> {
       testRun.setTest(test.getBusinessObject());
    }
 
+    @SuppressWarnings("rawtypes")
    @JsonProperty("inputs")
    public List<PropertyDTO> getInputs() {
       return testRun.getInputs().stream()

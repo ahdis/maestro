@@ -68,6 +68,7 @@ public class TestSuiteDTO implements DTO<TestSuite> {
       );
    }
 
+    @SuppressWarnings("rawtypes")
    @JsonProperty("supportedInputs")
    public List<SupportedInputDTO> getSupportedInputs() {
       return testSuite.getSupportedInputs().stream()
@@ -76,6 +77,7 @@ public class TestSuiteDTO implements DTO<TestSuite> {
             .toList();
    }
 
+    @SuppressWarnings("rawtypes")
    public void setSupportedInputs(List<SupportedInputDTO> supportedInputDTOs) {
       testSuite.setSupportedInputs(
             supportedInputDTOs != null ?

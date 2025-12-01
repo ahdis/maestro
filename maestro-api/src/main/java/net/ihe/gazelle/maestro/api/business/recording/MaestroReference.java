@@ -1,7 +1,5 @@
 package net.ihe.gazelle.maestro.api.business.recording;
 
-import java.util.Objects;
-
 /**
  * Simple descriptor describing a reference that must be emitted once an item or attachment is persisted.
  */

@@ -83,6 +83,7 @@ public class TestSuiteRunDTO implements DTO<TestSuiteRun> {
       );
    }
 
+    @SuppressWarnings("rawtypes")
    @JsonProperty("inputs")
    public List<PropertyDTO> getInputs() {
       return testSuiteRun.getInputs().stream()
@@ -91,6 +92,7 @@ public class TestSuiteRunDTO implements DTO<TestSuiteRun> {
             .toList();
    }
 
+    @SuppressWarnings("rawtypes")
    public void setInputs(List<PropertyDTO> inputs) {
       testSuiteRun.setInputs(
             inputs != null ? inputs.stream()

@@ -39,6 +39,7 @@ public class TestReferenceDTO implements DTO<TestReference> {
       testReference.setTestId(testId);
    }
 
+    @SuppressWarnings("rawtypes")
    @JsonProperty("properties")
    public List<PropertyDTO> getProperties() {
       return testReference.getProperties().stream()
@@ -47,6 +48,7 @@ public class TestReferenceDTO implements DTO<TestReference> {
             .toList();
    }
 
+    @SuppressWarnings("rawtypes")
    public void setProperties(List<PropertyDTO> propertyDTOs) {
       testReference.setProperties(
             propertyDTOs != null ?

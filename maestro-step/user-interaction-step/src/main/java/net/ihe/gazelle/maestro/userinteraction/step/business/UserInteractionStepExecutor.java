@@ -16,10 +16,10 @@
 
 package net.ihe.gazelle.maestro.userinteraction.step.business;
 
-import net.ihe.gazelle.maestro.api.business.userinteract.UserInteractionHandler;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
+import net.ihe.gazelle.maestro.api.business.userinteract.UserInteractionHandler;
 import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 import net.ihe.gazelle.maestro.spi.business.StepRun;
 

@@ -18,10 +18,19 @@ package net.ihe.gazelle.maestro.quarkus.websocket.dto;
 
 import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.message.InteractWithUser;
+import net.ihe.gazelle.maestro.api.business.test.SupportedInput;
+import net.ihe.gazelle.maestro.api.technical.dto.test.SupportedInputDTO;
+import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
+import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
 
+import java.util.List;
+
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonTypeName(InteractWithUserDTO.TYPE)
 @JsonPropertyOrder({
-
+        "interactionTitle",
+        "message",
+        "supportedInputs"
 })
 public class InteractWithUserDTO extends MessageDTO<InteractWithUser> {
 
@@ -54,6 +63,27 @@ public class InteractWithUserDTO extends MessageDTO<InteractWithUser> {
     @JsonSetter("message")
     public void setMessage(String message) {
         getBusinessObject().setMessage(message);
+    }
+
+    @SuppressWarnings("rawtypes")
+    @JsonProperty("supportedInputs")
+    public List<SupportedInputDTO> getSupportedInputs() {
+        return message.getSupportedInputs().stream()
+                .map(SubTypingDTO::fromBusinessObject)
+                .map(SupportedInputDTO.class::cast)
+                .toList();
+    }
+
+    @SuppressWarnings("rawtypes")
+    public void setSupportedInputs(List<SupportedInputDTO> supportedInputs) {
+        message.addSupportedInputs(
+                supportedInputs != null ?
+                        supportedInputs.stream()
+                                .map(DTO::getBusinessObject)
+                                .map(SupportedInput.class::cast)
+                                .toList() :
+                        null
+        );
     }
 
     @Override

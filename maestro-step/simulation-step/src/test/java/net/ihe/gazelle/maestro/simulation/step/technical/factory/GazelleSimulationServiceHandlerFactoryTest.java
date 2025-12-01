@@ -17,8 +17,8 @@
 package net.ihe.gazelle.maestro.simulation.step.technical.factory;
 
 import io.quarkus.test.junit.QuarkusTest;
-import net.ihe.gazelle.maestro.simulation.step.technical.mock.ConfigProviderMock;
 import net.ihe.gazelle.maestro.simulation.step.technical.handler.GazelleSimulationServiceHandler;
+import net.ihe.gazelle.maestro.simulation.step.technical.mock.ConfigProviderMock;
 import net.ihe.gazelle.maestro.spi.business.Handler;
 import net.ihe.gazelle.maestro.spi.technical.HandlerContext;
 import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterface;
@@ -29,10 +29,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 class GazelleSimulationServiceHandlerFactoryTest {

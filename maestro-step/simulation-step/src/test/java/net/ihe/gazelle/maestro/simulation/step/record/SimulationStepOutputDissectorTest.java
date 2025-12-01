@@ -7,12 +7,7 @@ import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepDefinition
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
-import net.ihe.gazelle.simulation.business.callback.SimulationReport;
-import net.ihe.gazelle.simulation.business.callback.TransactionReport;
-import net.ihe.gazelle.simulation.business.callback.ValidationReport;
-import net.ihe.gazelle.simulation.business.callback.Result;
-import net.ihe.gazelle.simulation.business.callback.Role;
-import net.ihe.gazelle.simulation.business.callback.ValidationResult;
+import net.ihe.gazelle.simulation.business.callback.*;
 import net.ihe.gazelle.simulation.jaxrs.api.technical.dto.callback.SimulationReportDTO;
 import net.ihe.gazelle.validation.v2.api.business.Input;
 import org.junit.jupiter.api.Test;

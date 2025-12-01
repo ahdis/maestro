@@ -18,6 +18,7 @@ package net.ihe.gazelle.maestro.simulation.step.technical.factory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import net.ihe.gazelle.maestro.api.business.test.Step;
+import net.ihe.gazelle.maestro.api.business.userinteract.UserInteractionHandler;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationHandler;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepDefinition;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepExecutor;
@@ -25,7 +26,6 @@ import net.ihe.gazelle.maestro.simulation.step.technical.dto.ReportSerializerImp
 import net.ihe.gazelle.maestro.spi.business.Handler;
 import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 import net.ihe.gazelle.maestro.spi.technical.StepExecutorFactory;
-import net.ihe.gazelle.maestro.api.business.userinteract.UserInteractionHandler;
 
 import java.util.Map;
 import java.util.Optional;

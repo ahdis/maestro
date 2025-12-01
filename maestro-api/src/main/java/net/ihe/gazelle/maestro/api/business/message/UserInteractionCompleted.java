@@ -16,7 +16,11 @@
 
 package net.ihe.gazelle.maestro.api.business.message;
 
+import net.ihe.gazelle.maestro.api.business.property.Property;
+
 import java.io.Serial;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserInteractionCompleted implements Message {
 
@@ -24,6 +28,7 @@ public class UserInteractionCompleted implements Message {
     private static final long serialVersionUID = 8043799892319471672L;
 
     private String sessionId;
+    private final List<Property> inputs;
 
     public UserInteractionCompleted() {
         this(null);
@@ -31,6 +36,7 @@ public class UserInteractionCompleted implements Message {
 
     public UserInteractionCompleted(String sessionId) {
         this.sessionId = sessionId;
+        this.inputs = new ArrayList<>();
     }
 
     public String getSessionId() {
@@ -39,6 +45,20 @@ public class UserInteractionCompleted implements Message {
 
     public UserInteractionCompleted setSessionId(String sessionId) {
         this.sessionId = sessionId;
+        return this;
+    }
+
+    public List<Property> getInputs() {
+        return new ArrayList<>(inputs);
+    }
+
+    public UserInteractionCompleted addInput(Property input) {
+        this.inputs.add(input);
+        return this;
+    }
+
+    public UserInteractionCompleted addInputs(List<Property> inputs) {
+        this.inputs.addAll(inputs);
         return this;
     }
 }

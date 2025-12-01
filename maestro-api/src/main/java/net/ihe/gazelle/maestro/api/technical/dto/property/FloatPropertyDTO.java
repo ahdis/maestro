@@ -1,13 +1,13 @@
 package net.ihe.gazelle.maestro.api.technical.dto.property;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.property.FloatProperty;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonTypeName(FloatPropertyDTO.TYPE)
 public class FloatPropertyDTO extends PropertyDTO<FloatProperty> {
 
+    @JsonIgnore
    public static final String TYPE = "FLOAT";
 
    public FloatPropertyDTO() {
@@ -29,6 +29,7 @@ public class FloatPropertyDTO extends PropertyDTO<FloatProperty> {
    }
 
    @Override
+   @JsonIgnore
    public Class<FloatProperty> getBusinessObjectClass() {
       return FloatProperty.class;
    }

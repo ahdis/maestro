@@ -18,9 +18,9 @@ package technical.userinteract;
 
 import net.ihe.gazelle.lang.ExecutionRuntimeException;
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
-import net.ihe.gazelle.maestro.api.business.userinteract.UserInteractionHandler;
 import net.ihe.gazelle.maestro.api.business.message.InteractWithUser;
 import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
+import net.ihe.gazelle.maestro.api.business.userinteract.UserInteractionHandler;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;

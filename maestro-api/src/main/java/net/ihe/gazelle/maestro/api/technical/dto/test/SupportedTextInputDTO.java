@@ -1,16 +1,23 @@
 package net.ihe.gazelle.maestro.api.technical.dto.test;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.test.SupportedTextInput;
 
 import java.util.List;
 
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonTypeName(SupportedTextInputDTO.TYPE)
-@JsonPropertyOrder({"id", "type", "label", "required", "possibleValues", "defaultValue"})
+@JsonPropertyOrder({
+        "id",
+        "type",
+        "label",
+        "required",
+        "possibleValues",
+        "defaultValue"
+})
 public class SupportedTextInputDTO extends SupportedInputDTO<SupportedTextInput> {
 
+    @JsonIgnore
    public static final String TYPE = "TEXT";
 
    public SupportedTextInputDTO() {
@@ -40,6 +47,7 @@ public class SupportedTextInputDTO extends SupportedInputDTO<SupportedTextInput>
    }
 
    @Override
+   @JsonIgnore
    public Class<SupportedTextInput> getBusinessObjectClass() {
       return SupportedTextInput.class;
    }

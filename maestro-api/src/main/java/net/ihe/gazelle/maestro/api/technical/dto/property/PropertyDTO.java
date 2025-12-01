@@ -23,7 +23,11 @@ import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
 import java.util.function.Function;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({"name", "type", "value"})
+@JsonPropertyOrder({
+        "name",
+        "type",
+        "value"
+})
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 public abstract class PropertyDTO<T extends Property> implements SubTypingDTO<T> {
 

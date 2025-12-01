@@ -1,14 +1,21 @@
 package net.ihe.gazelle.maestro.api.technical.dto.test;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.test.SupportedValueSetInput;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonTypeName(SupportedValueSetInputDTO.TYPE)
-@JsonPropertyOrder({"id", "type", "label", "required", "valueSetId", "defaultValue"})
+@JsonPropertyOrder({
+        "id",
+        "type",
+        "label",
+        "required",
+        "valueSetId",
+        "defaultValue"
+})
 public class SupportedValueSetInputDTO extends SupportedInputDTO<SupportedValueSetInput> {
 
+    @JsonIgnore
    public static final String TYPE = "VALUE_SET";
 
    public SupportedValueSetInputDTO() {
@@ -38,6 +45,7 @@ public class SupportedValueSetInputDTO extends SupportedInputDTO<SupportedValueS
    }
 
    @Override
+   @JsonIgnore
    public Class<SupportedValueSetInput> getBusinessObjectClass() {
       return SupportedValueSetInput.class;
    }

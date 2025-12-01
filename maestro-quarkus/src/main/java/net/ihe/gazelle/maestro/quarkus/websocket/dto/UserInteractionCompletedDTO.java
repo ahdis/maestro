@@ -16,12 +16,19 @@
 
 package net.ihe.gazelle.maestro.quarkus.websocket.dto;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
+import net.ihe.gazelle.maestro.api.technical.dto.property.PropertyDTO;
+import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
 
+import java.util.List;
+
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonTypeName(UserInteractionCompletedDTO.TYPE)
+@JsonPropertyOrder({
+        "type",
+        "inputs"
+})
 public class UserInteractionCompletedDTO extends MessageDTO<UserInteractionCompleted> {
 
     @JsonIgnore
@@ -33,6 +40,24 @@ public class UserInteractionCompletedDTO extends MessageDTO<UserInteractionCompl
 
     public UserInteractionCompletedDTO(UserInteractionCompleted userInteractionCompleted) {
         super(userInteractionCompleted);
+    }
+
+    @SuppressWarnings("rawtypes")
+    @JsonProperty(value = "inputs")
+    public List<PropertyDTO> getInputs() {
+        return message.getInputs().stream()
+                .map(SubTypingDTO::fromBusinessObject)
+                .map(PropertyDTO.class::cast)
+                .toList();
+    }
+
+    @SuppressWarnings("rawtypes")
+    public void setInputs(List<PropertyDTO> inputs) {
+        message.addInputs(
+                inputs.stream()
+                        .map(PropertyDTO::getBusinessObject)
+                        .toList()
+        );
     }
 
     @Override

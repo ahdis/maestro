@@ -1,14 +1,21 @@
 package net.ihe.gazelle.maestro.api.technical.dto.property;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.testreport.ByteArrayItemProperty;
 
-@JsonPropertyOrder({"name", "type", "value", "fileName", "mimeType", "reference"})
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonPropertyOrder({
+        "name",
+        "type",
+        "value",
+        "fileName",
+        "mimeType",
+        "reference"
+})
 @JsonTypeName(ByteArrayItemPropertyDTO.TYPE)
 public class ByteArrayItemPropertyDTO extends PropertyDTO<ByteArrayItemProperty> {
 
+    @JsonIgnore
    public static final String TYPE = "BYTE_ARRAY_ITEM";
 
    public ByteArrayItemPropertyDTO() {
@@ -64,6 +71,7 @@ public class ByteArrayItemPropertyDTO extends PropertyDTO<ByteArrayItemProperty>
    }
 
    @Override
+   @JsonIgnore
    public Class<ByteArrayItemProperty> getBusinessObjectClass() {
       return ByteArrayItemProperty.class;
    }

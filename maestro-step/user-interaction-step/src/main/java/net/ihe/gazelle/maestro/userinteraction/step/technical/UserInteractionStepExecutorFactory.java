@@ -17,10 +17,10 @@
 package net.ihe.gazelle.maestro.userinteraction.step.technical;
 
 import net.ihe.gazelle.maestro.api.business.test.Step;
+import net.ihe.gazelle.maestro.api.business.userinteract.UserInteractionHandler;
 import net.ihe.gazelle.maestro.spi.business.Handler;
 import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 import net.ihe.gazelle.maestro.spi.technical.StepExecutorFactory;
-import net.ihe.gazelle.maestro.api.business.userinteract.UserInteractionHandler;
 import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionStepDefinition;
 import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionStepExecutor;
 

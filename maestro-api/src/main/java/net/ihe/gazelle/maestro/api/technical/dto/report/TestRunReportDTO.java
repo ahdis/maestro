@@ -105,6 +105,7 @@ public class TestRunReportDTO implements DTO<TestRunReport> {
       testRunReport.setTest(testDTO.getBusinessObject());
    }
 
+    @SuppressWarnings("rawtypes")
    @JsonGetter(value = "inputs")
    public List<PropertyDTO> getInputs() {
       return testRunReport.getInputs().stream()
@@ -113,6 +114,7 @@ public class TestRunReportDTO implements DTO<TestRunReport> {
             .toList();
    }
 
+    @SuppressWarnings("rawtypes")
    @JsonSetter(value = "inputs")
    public void setInputs(List<PropertyDTO> inputs) {
       testRunReport.setInputs(
@@ -125,6 +127,7 @@ public class TestRunReportDTO implements DTO<TestRunReport> {
       );
    }
 
+    @SuppressWarnings("rawtypes")
    @JsonGetter(value = "outputs")
    public List<PropertyDTO> getOutputs() {
       return testRunReport.getOutputs().stream()
@@ -133,6 +136,7 @@ public class TestRunReportDTO implements DTO<TestRunReport> {
             .toList();
    }
 
+    @SuppressWarnings("rawtypes")
    @JsonSetter(value = "outputs")
    public void setOutputs(List<PropertyDTO> outputs) {
       testRunReport.setOutputs(

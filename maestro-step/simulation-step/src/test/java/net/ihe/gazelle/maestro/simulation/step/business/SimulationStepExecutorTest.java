@@ -3,11 +3,11 @@
  */
 package net.ihe.gazelle.maestro.simulation.step.business;
 
-import net.ihe.gazelle.maestro.api.business.userinteract.UserInteractionHandler;
 import net.ihe.gazelle.maestro.api.business.property.*;
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
+import net.ihe.gazelle.maestro.api.business.userinteract.UserInteractionHandler;
 import net.ihe.gazelle.maestro.spi.business.StepRun;
 import net.ihe.gazelle.simulation.business.callback.Result;
 import net.ihe.gazelle.simulation.business.callback.SimulationReport;

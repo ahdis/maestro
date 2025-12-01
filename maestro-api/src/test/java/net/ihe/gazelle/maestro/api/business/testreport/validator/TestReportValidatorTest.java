@@ -17,14 +17,7 @@
 package net.ihe.gazelle.maestro.api.business.testreport.validator;
 
 import net.ihe.gazelle.framework.modelvalidator.business.ObjectResult;
-import net.ihe.gazelle.maestro.api.business.testreport.EntityIdentification;
-import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
-import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
-import net.ihe.gazelle.maestro.api.business.testreport.SystemUnderTest;
-import net.ihe.gazelle.maestro.api.business.testreport.TestCounters;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
-import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
-import net.ihe.gazelle.maestro.api.business.testreport.TestService;
+import net.ihe.gazelle.maestro.api.business.testreport.*;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;

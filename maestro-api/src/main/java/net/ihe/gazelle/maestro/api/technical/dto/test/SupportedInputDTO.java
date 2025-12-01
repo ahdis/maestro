@@ -1,15 +1,18 @@
 package net.ihe.gazelle.maestro.api.technical.dto.test;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.test.SupportedInput;
 import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({"id", "type", "label", "required"})
+@JsonPropertyOrder({
+        "id",
+        "type",
+        "label",
+        "groupName",
+        "description",
+        "required"
+})
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 public abstract class SupportedInputDTO<T extends SupportedInput> implements SubTypingDTO<T> {
 
@@ -21,11 +24,13 @@ public abstract class SupportedInputDTO<T extends SupportedInput> implements Sub
    }
 
    @Override
+   @JsonIgnore
    public T getBusinessObject() {
       return supportedInput;
    }
 
    @Override
+   @JsonIgnore
    public SubTypingDTO<T> initWithBusinessObject(T supportedInput) {
       this.supportedInput = supportedInput;
       return this;
@@ -47,6 +52,24 @@ public abstract class SupportedInputDTO<T extends SupportedInput> implements Sub
 
    public void setLabel(String label) {
       supportedInput.setLabel(label);
+   }
+
+   @JsonProperty("groupName")
+   public String getGroupName() {
+       return supportedInput.getGroupName();
+   }
+
+   public void setGroupName(String groupName) {
+       supportedInput.setGroupName(groupName);
+   }
+
+   @JsonProperty("description")
+   public String getDescription() {
+       return supportedInput.getDescription();
+   }
+
+   public void setDescription(String description) {
+       supportedInput.setDescription(description);
    }
 
    @JsonProperty("required")

@@ -101,6 +101,7 @@ public class StepRunReportDTO implements DTO<StepRunReport> {
       stepRunReport.setResult(StepResult.valueOf(result));
    }
 
+    @SuppressWarnings("rawtypes")
    @JsonGetter(value = "outputs")
    public List<PropertyDTO> outputs() {
       return stepRunReport.getOutputs().stream()
@@ -109,6 +110,7 @@ public class StepRunReportDTO implements DTO<StepRunReport> {
             .toList();
    }
 
+    @SuppressWarnings("rawtypes")
    @JsonSetter(value = "outputs")
    public void setOutputs(List<PropertyDTO> outputs) {
       stepRunReport.setOutputs(

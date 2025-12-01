@@ -6,11 +6,7 @@ import com.kereval.gazelle.datahouse.api.business.record.Reference;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.ItemPlan;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.ItemRelationBinding;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.PropertyMutation;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.ReferenceBinding;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputProjection;
+import net.ihe.gazelle.maestro.api.business.testreport.dissection.*;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 import org.junit.jupiter.api.Test;
 

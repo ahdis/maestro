@@ -1,11 +1,7 @@
 package net.ihe.gazelle.maestro.validation.step.technical.handler;
 
 import net.ihe.gazelle.evsapi.client.business.ValidationServiceProfile;
-import net.ihe.gazelle.evsapi.client.business.response.report.ConstraintPriority;
-import net.ihe.gazelle.evsapi.client.business.response.report.ConstraintValidation;
-import net.ihe.gazelle.evsapi.client.business.response.report.Metadata;
-import net.ihe.gazelle.evsapi.client.business.response.report.UnexpectedError;
-import net.ihe.gazelle.evsapi.client.business.response.report.ValidationOverview;
+import net.ihe.gazelle.evsapi.client.business.response.report.*;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;
 import net.ihe.gazelle.validation.v2.api.business.Input;
 import net.ihe.gazelle.validation.v2.api.business.profile.ValidationProfile;
@@ -17,9 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class EvsValidationMapperTest {
 

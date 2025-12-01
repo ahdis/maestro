@@ -20,11 +20,7 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.ObservesAsync;
 import jakarta.inject.Inject;
-import net.ihe.gazelle.maestro.api.business.message.Message;
-import net.ihe.gazelle.maestro.api.business.message.StartStepRun;
-import net.ihe.gazelle.maestro.api.business.message.StartTestRun;
-import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
-import net.ihe.gazelle.maestro.api.business.message.TestRunFinished;
+import net.ihe.gazelle.maestro.api.business.message.*;
 import net.ihe.gazelle.maestro.engine.business.TestRunEventProducer;
 import net.ihe.gazelle.maestro.engine.business.TestRunner;
 

@@ -11,9 +11,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static net.ihe.gazelle.maestro.api.business.testreport.StepResult.FAILED;
 import static net.ihe.gazelle.maestro.api.business.testreport.StepResult.PASSED;
-import static net.ihe.gazelle.maestro.assertion.step.business.equals.AssertEqualsStepDefinition.ACTUAL;
-import static net.ihe.gazelle.maestro.assertion.step.business.equals.AssertEqualsStepDefinition.EXPECTED;
-import static net.ihe.gazelle.maestro.assertion.step.business.equals.AssertEqualsStepDefinition.FAILURE_MESSAGE;
+import static net.ihe.gazelle.maestro.assertion.step.business.equals.AssertEqualsStepDefinition.*;
 
 public class AssertContainsStepExecutor implements StepExecutor {
 

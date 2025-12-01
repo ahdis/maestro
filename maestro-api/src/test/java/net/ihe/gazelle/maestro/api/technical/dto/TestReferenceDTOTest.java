@@ -9,7 +9,6 @@ import net.ihe.gazelle.maestro.api.technical.dto.property.StringPropertyDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.test.TestReferenceDTO;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
-import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Files;

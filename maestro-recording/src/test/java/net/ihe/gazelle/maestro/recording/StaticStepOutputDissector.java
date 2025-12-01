@@ -1,7 +1,7 @@
 package net.ihe.gazelle.maestro.recording;
 
-import net.ihe.gazelle.maestro.api.business.recording.MaestroRefType;
 import net.ihe.gazelle.maestro.api.business.property.Property;
+import net.ihe.gazelle.maestro.api.business.recording.MaestroRefType;
 import net.ihe.gazelle.maestro.api.business.testreport.ByteArrayItemProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.dissection.*;
 

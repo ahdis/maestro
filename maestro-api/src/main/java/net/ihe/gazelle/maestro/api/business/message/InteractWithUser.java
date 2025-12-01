@@ -16,7 +16,11 @@
 
 package net.ihe.gazelle.maestro.api.business.message;
 
+import net.ihe.gazelle.maestro.api.business.test.SupportedInput;
+
 import java.io.Serial;
+import java.util.ArrayList;
+import java.util.List;
 
 public class InteractWithUser implements Message {
 
@@ -25,6 +29,7 @@ public class InteractWithUser implements Message {
 
     private String interactionTitle;
     private String message;
+    private final List<SupportedInput> supportedInputs;
 
     public InteractWithUser() {
         this(null, null);
@@ -33,6 +38,7 @@ public class InteractWithUser implements Message {
     public InteractWithUser(String interactionTitle, String message) {
         this.interactionTitle = interactionTitle;
         this.message = message;
+        this.supportedInputs = new ArrayList<>();
     }
 
     public String getInteractionTitle() {
@@ -50,6 +56,20 @@ public class InteractWithUser implements Message {
 
     public InteractWithUser setMessage(String message) {
         this.message = message;
+        return this;
+    }
+
+    public List<SupportedInput> getSupportedInputs() {
+        return new ArrayList<>(supportedInputs);
+    }
+
+    public InteractWithUser addSupportedInput(SupportedInput supportedInput) {
+        this.supportedInputs.add(supportedInput);
+        return this;
+    }
+
+    public InteractWithUser addSupportedInputs(List<SupportedInput> supportedInputs) {
+        this.supportedInputs.addAll(supportedInputs);
         return this;
     }
 }

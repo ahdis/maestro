@@ -1,7 +1,6 @@
 package net.ihe.gazelle.maestro.api.business.property;
 
 import java.io.Serial;
-import java.time.Instant;
 
 public class DateProperty extends Property {
 

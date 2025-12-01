@@ -1,13 +1,13 @@
 package net.ihe.gazelle.maestro.api.technical.dto.property;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.property.IntegerProperty;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonTypeName(IntegerPropertyDTO.TYPE)
 public class IntegerPropertyDTO extends PropertyDTO<IntegerProperty> {
 
+    @JsonIgnore
    public static final String TYPE = "INTEGER";
 
    public IntegerPropertyDTO() {
@@ -29,6 +29,7 @@ public class IntegerPropertyDTO extends PropertyDTO<IntegerProperty> {
    }
 
    @Override
+   @JsonIgnore
    public Class<IntegerProperty> getBusinessObjectClass() {
       return IntegerProperty.class;
    }

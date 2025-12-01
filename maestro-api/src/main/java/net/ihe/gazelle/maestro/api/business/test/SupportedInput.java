@@ -10,6 +10,8 @@ public abstract class SupportedInput implements Serializable {
 
    private String id;
    private String label;
+   private String groupName;
+   private String description;
    private boolean required;
 
    protected SupportedInput() {
@@ -34,7 +36,25 @@ public abstract class SupportedInput implements Serializable {
       return this;
    }
 
-   public boolean isRequired() {
+    public String getGroupName() {
+        return groupName;
+    }
+
+    public SupportedInput setGroupName(String groupName) {
+        this.groupName = groupName;
+        return this;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public SupportedInput setDescription(String description) {
+        this.description = description;
+        return this;
+    }
+
+    public boolean isRequired() {
       return required;
    }
 

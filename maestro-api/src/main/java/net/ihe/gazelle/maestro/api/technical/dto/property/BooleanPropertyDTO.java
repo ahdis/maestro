@@ -1,10 +1,12 @@
 package net.ihe.gazelle.maestro.api.technical.dto.property;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import net.ihe.gazelle.maestro.api.business.property.BooleanProperty;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonTypeName(BooleanPropertyDTO.TYPE)
 public class BooleanPropertyDTO extends PropertyDTO<BooleanProperty> {
 

@@ -31,10 +31,18 @@ import java.util.List;
 import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({"name", "type", "properties", "outputMappings"})
+@JsonPropertyOrder({
+        "name",
+        "type",
+        "properties",
+        "outputMappings"
+})
 public class StepDTO implements DTO<Step> {
 
+    @JsonIgnore
    public static final String MAPPING_DELIMITER = ":";
+
+    @JsonIgnore
    private final Step step;
 
    public StepDTO() {

@@ -17,8 +17,8 @@
 package net.ihe.gazelle.maestro.simulation.step.technical.factory;
 
 import net.ihe.gazelle.maestro.simulation.step.technical.handler.GazelleSimulationServiceHandler;
-import net.ihe.gazelle.maestro.spi.technical.ConfigProvider;
 import net.ihe.gazelle.maestro.spi.business.Handler;
+import net.ihe.gazelle.maestro.spi.technical.ConfigProvider;
 import net.ihe.gazelle.maestro.spi.technical.HandlerContext;
 import net.ihe.gazelle.maestro.spi.technical.HandlerFactory;
 import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterface;

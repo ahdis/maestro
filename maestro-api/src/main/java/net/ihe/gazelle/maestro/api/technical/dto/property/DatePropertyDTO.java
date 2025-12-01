@@ -1,7 +1,8 @@
 package net.ihe.gazelle.maestro.api.technical.dto.property;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import net.ihe.gazelle.maestro.api.business.property.DateProperty;
 
@@ -10,9 +11,11 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonTypeName(DatePropertyDTO.TYPE)
 public class DatePropertyDTO extends PropertyDTO<DateProperty> {
 
+    @JsonIgnore
    public static final String TYPE = "DATE";
 
    public DatePropertyDTO() {
@@ -39,6 +42,7 @@ public class DatePropertyDTO extends PropertyDTO<DateProperty> {
    }
 
    @Override
+   @JsonIgnore
    public Class<DateProperty> getBusinessObjectClass() {
       return DateProperty.class;
    }
