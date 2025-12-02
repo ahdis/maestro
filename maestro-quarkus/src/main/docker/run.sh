@@ -24,6 +24,9 @@ if [ -n "${HTTPS_PROXY_HOST}" ]; then
     export JAVA_OPTS="$JAVA_OPTS -Dhttps.proxyHost=${HTTPS_PROXY_HOST} -Dhttps.proxyPort=${HTTPS_PROXY_PORT} -Dhttps.nonProxyHosts=${HTTPS_NON_PROXY_HOSTS}"
 fi
 
+if [ -n "${LOG_LEVEL}" ]; then
+    export JAVA_OPTS="$JAVA_OPTS -Dlogging.level.root=${LOG_LEVEL}"
+fi
 
 echo "                             ,                                                                             "
 echo "                                ******,                                                                    "
@@ -53,6 +56,5 @@ echo ",              %%%(      #%%%    /%%#      %%%%    %%%          %%%.      
 echo "               ,%%%%%%%%         *%%%%%%* %%%   %%%%%%%%%%%.    ,%%%%%%%#     %%%   #%%      %%%%%%%%.     "
 
 
-
 # Run the script
-/usr/local/s2i/run
+/opt/jboss/container/java/run/run-java.sh

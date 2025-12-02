@@ -47,9 +47,10 @@ import java.util.Map;
  */
 public class TestRunner {
 
-   private static final Logger LOG = LoggerFactory.getLogger(TestRunner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TestRunner.class);
+    public static final String CONTINUE_ON_STEP_FAILURE = "continueOnStepFailure";
 
-   private final SessionStore<TestRunSession> sessionStore;
+    private final SessionStore<TestRunSession> sessionStore;
    private final TestRunEventProducer testRunEventProducer;
    private final TestRunValidator testRunValidator = new TestRunValidator();
 
@@ -106,7 +107,7 @@ public class TestRunner {
       if (testRunSession != null) {
          try {
             updateSessionState(stepRunFinished, testRunSession);
-            if (isPreviousStepSuccessful(stepRunFinished) && testRunSession.hasNextStep()) {
+            if ((isPreviousStepSuccessful(stepRunFinished) || continueOnStepFailure(stepRunFinished) )&& testRunSession.hasNextStep() ) {
                runNextStep(testRunSession, sessionId, stepRunFinished.getTestId());
             } else {
                finishTest(sessionId, testRunSession);
@@ -126,6 +127,11 @@ public class TestRunner {
             );
          }
       }
+   }
+
+   private boolean continueOnStepFailure(StepRunFinished stepRunFinished) {
+       return stepRunFinished.getStepRun().hasProperty(CONTINUE_ON_STEP_FAILURE)
+               && (Boolean) stepRunFinished.getStepRun().getPropertyValue(CONTINUE_ON_STEP_FAILURE);
    }
 
    private void finishTest(String sessionId, TestRunSession testRunSession) {
