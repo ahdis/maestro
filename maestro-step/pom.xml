@@ -29,6 +29,7 @@
         <module>validation-step</module>
         <module>simulation-step</module>
         <module>user-interaction-step</module>
+        <module>itb-step</module>
         <module>assertion-step</module>
     </modules>
 

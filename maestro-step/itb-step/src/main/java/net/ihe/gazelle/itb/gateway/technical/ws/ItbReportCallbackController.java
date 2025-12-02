@@ -55,7 +55,7 @@ public class ItbReportCallbackController {
            return Response.ok().build();
         } catch (NoSuchElementException e) {
            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
-        }catch (CatchItbReportServiceException e) {
+        } catch (CatchItbReportServiceException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity("Bad format for test report. Error message : " + e.getMessage()).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error while manipulating test sessions. Error message : " + e.getMessage()).build();

@@ -38,7 +38,7 @@ public class ValidationStepOutputDissector implements StepOutputDissector {
         ByteArrayProperty validationReportProperty = (ByteArrayProperty) outputs.stream()
                 .filter(output -> ValidationStepDefinition.REPORT.equals(output.getName()))
                 .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Simulation report output property not found"));
+                .orElseThrow(() -> new IllegalStateException("Validation report output property not found"));
         if (validationReportProperty == null) {
             return StepOutputProjection.empty();
         }
