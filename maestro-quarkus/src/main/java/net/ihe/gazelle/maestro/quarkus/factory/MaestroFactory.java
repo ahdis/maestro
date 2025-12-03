@@ -23,7 +23,7 @@ import jakarta.ws.rs.Produces;
 import net.ihe.gazelle.maestro.api.business.Maestro;
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.api.business.SynchronousMaestro;
-import net.ihe.gazelle.maestro.api.business.recording.TestReportRecordService;
+import net.ihe.gazelle.maestro.engine.business.TestReportRecordingService;
 import net.ihe.gazelle.maestro.engine.business.*;
 import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
 import net.ihe.gazelle.maestro.engine.business.context.TestRunSession;
@@ -47,7 +47,7 @@ public class MaestroFactory {
    private final TestRunEventProducer testRunEventProducer;
    private final StepRunEventProducer stepRunEventProducer;
    private final StepExecutorProvider stepExecutorProvider;
-   private final TestReportRecordService testReportRecordService;
+   private final TestReportRecordingService testReportRecordingService;
    private final MetadataService metadataService;
 
    @Inject
@@ -59,7 +59,7 @@ public class MaestroFactory {
                          TestSuiteEventProducer testSuiteTestReportRecordService,
                          TestRunEventProducer testRunEventProducer,
                          StepRunEventProducer stepRunEventProducer,
-                         TestReportRecordService testReportRecordService,
+                         TestReportRecordingService testReportRecordingService,
                          StepExecutorProvider stepExecutorProvider,
                          MetadataService metadataService) {
       this.suiteSessionStore = suiteSessionStore;
@@ -70,7 +70,7 @@ public class MaestroFactory {
       this.testSuiteEventProducer = testSuiteTestReportRecordService;
       this.testRunEventProducer = testRunEventProducer;
       this.stepRunEventProducer = stepRunEventProducer;
-      this.testReportRecordService = testReportRecordService;
+      this.testReportRecordingService = testReportRecordingService;
       this.stepExecutorProvider = stepExecutorProvider;
       this.metadataService = metadataService;
    }
@@ -78,7 +78,7 @@ public class MaestroFactory {
    @Produces
    @Default
    public SynchronousMaestro getSynchronousMaestro() {
-      return new SynchronousMaestro(timeoutSeconds, getRedordMaestro());
+      return new SynchronousMaestro(timeoutSeconds, getRecordingMaestro());
    }
 
    @Produces
@@ -94,10 +94,10 @@ public class MaestroFactory {
 
    @Produces
    @Default
-   public Maestro getRedordMaestro() {
-       return new MaestroRecorderImpl(
+   public Maestro getRecordingMaestro() {
+       return new RecordingMaestroImpl(
                getMaestro(),
-              testReportRecordService);
+             testReportRecordingService);
    }
 
    @Produces

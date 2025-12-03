@@ -51,8 +51,8 @@
         <module>maestro-api</module>
         <module>maestro-engine</module>
         <module>maestro-step</module>
-        <module>maestro-quarkus</module>
         <module>maestro-recording</module>
+        <module>maestro-quarkus</module>
     </modules>
 
     <scm>

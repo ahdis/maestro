@@ -4,13 +4,19 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
-import net.ihe.gazelle.maestro.api.business.recording.MaestroAttachment;
-import net.ihe.gazelle.maestro.api.business.recording.MaestroItem;
-import net.ihe.gazelle.maestro.api.business.recording.MaestroRefType;
+import net.ihe.gazelle.maestro.spi.business.recording.MaestroAttachment;
+import net.ihe.gazelle.maestro.spi.business.recording.MaestroItem;
+import net.ihe.gazelle.maestro.spi.business.recording.MaestroRefType;
 import net.ihe.gazelle.maestro.api.business.testreport.ByteArrayItemProperty;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.*;
-import net.ihe.gazelle.maestro.recording.DatahouseMaestroAttachment;
-import net.ihe.gazelle.maestro.recording.DatahouseMaestroItem;
+import net.ihe.gazelle.maestro.spi.business.recording.AttachmentOutputBuilder;
+import net.ihe.gazelle.maestro.spi.business.recording.ContentMutationContext;
+import net.ihe.gazelle.maestro.spi.business.recording.ItemOutputBuilder;
+import net.ihe.gazelle.maestro.spi.business.recording.PropertyReferenceFactory;
+import net.ihe.gazelle.maestro.spi.business.recording.ReferenceBinding;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputContext;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputDissector;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputProjection;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputProjectionBuilder;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;
 import net.ihe.gazelle.validation.v2.api.business.Input;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
@@ -18,6 +24,7 @@ import net.ihe.gazelle.validation.v2.api.technical.dto.report.ValidationReportDT
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class ValidationStepOutputDissector implements StepOutputDissector {
@@ -92,11 +99,13 @@ public class ValidationStepOutputDissector implements StepOutputDissector {
     }
 
     private MaestroItem createItem(String content, StepOutputContext context) {
-        return new DatahouseMaestroItem()
-                .setType(ValidationStepDefinition.REPORT)
-                .setContent(content)
-                .setAccessControlList(context.accessControlList())
-                .setReferences(new ArrayList<>());
+        return new MaestroItem(
+              context.accessControlList(),
+              ValidationStepDefinition.REPORT,
+              content,
+              new ArrayList<>(),
+              new HashMap<>()
+        );
     }
 
     private InputAttachmentExtraction extractInputAttachments(ValidationReport validationReport) {
@@ -118,10 +127,11 @@ public class ValidationStepOutputDissector implements StepOutputDissector {
         if(input == null || input.getContent() == null) {
             throw new IllegalArgumentException("Input or input content cannot be null");
         }
-        return new DatahouseMaestroAttachment()
-                .setType(VALIDATION_INPUT)
-                .setContent(input.getContent())
-                .setFilename(input.getId());
+        return new MaestroAttachment(
+              input.getContent(),
+              VALIDATION_INPUT,
+              input.getId()
+        );
     }
 
     private AttachmentOutputBuilder createAttachmentPlan(Input input) {

@@ -18,14 +18,22 @@ package net.ihe.gazelle.maestro.simulation.step.technical.record;
 
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
-import net.ihe.gazelle.maestro.api.business.recording.MaestroItem;
-import net.ihe.gazelle.maestro.api.business.recording.MaestroRefType;
 import net.ihe.gazelle.maestro.api.business.testreport.ByteArrayItemProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.*;
-import net.ihe.gazelle.maestro.recording.DatahouseMaestroAttachment;
-import net.ihe.gazelle.maestro.recording.DatahouseMaestroItem;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepDefinition;
+import net.ihe.gazelle.maestro.spi.business.recording.AttachmentOutputBuilder;
+import net.ihe.gazelle.maestro.spi.business.recording.ContentMutationContext;
+import net.ihe.gazelle.maestro.spi.business.recording.ItemOutputBuilder;
+import net.ihe.gazelle.maestro.spi.business.recording.MaestroAttachment;
+import net.ihe.gazelle.maestro.spi.business.recording.MaestroItem;
+import net.ihe.gazelle.maestro.spi.business.recording.MaestroRefType;
+import net.ihe.gazelle.maestro.spi.business.recording.PropertyReferenceFactory;
+import net.ihe.gazelle.maestro.spi.business.recording.ReferenceBinding;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputContext;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputDissector;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputProjection;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputProjectionBuilder;
+import net.ihe.gazelle.maestro.spi.business.recording.SubItemOutputBuilder;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
 import net.ihe.gazelle.simulation.business.callback.SimulationReport;
@@ -35,6 +43,7 @@ import net.ihe.gazelle.simulation.jaxrs.api.technical.dto.callback.SimulationRep
 import net.ihe.gazelle.validation.v2.api.business.Input;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -110,11 +119,13 @@ class SimulationStepOutputDissector implements StepOutputDissector {
             List<AttachmentOutputBuilder> attachments = extractValidationInputAttachments(validationReportV2);
             String refName = "validation-report-" + ++refCounter;
 
-            MaestroItem validationItem = new DatahouseMaestroItem()
-                  .setAccessControlList(context.accessControlList())
-                  .setType(ITEM_TYPE_VALIDATION_REPORT)
-                  .setContent(serializeValidationReport(validationReportV2))
-                  .setReferences(new ArrayList<>()); // references are not yet known
+            MaestroItem validationItem = new MaestroItem(
+                  context.accessControlList(),
+                  ITEM_TYPE_VALIDATION_REPORT,
+                  serializeValidationReport(validationReportV2),
+                  new ArrayList<>(), // references are not yet known
+                  new HashMap<>()
+            );
 
             SubItemOutputBuilder validationBuilder = simulationReportBuilder.addSubItem(
                   validationItem,
@@ -143,10 +154,11 @@ class SimulationStepOutputDissector implements StepOutputDissector {
    }
 
    private AttachmentOutputBuilder createValidationInputAttachment(Input input) {
-      DatahouseMaestroAttachment attachment = new DatahouseMaestroAttachment()
-            .setFilename(input.getId())
-            .setType(VALIDATION_INPUT_TYPE)
-            .setContent(input.getContent());
+      MaestroAttachment attachment = new MaestroAttachment(
+            input.getContent(),
+            VALIDATION_INPUT_TYPE,
+            input.getId()
+      );
       return new AttachmentOutputBuilder(attachment)
             .withReference(resolveInputReferenceName(input.getId()), VALIDATION_INPUT_TYPE);
    }
@@ -222,13 +234,14 @@ class SimulationStepOutputDissector implements StepOutputDissector {
    }
 
    // Creates a bare Item with the correct ACL, type, serialized payload, and empty references list.
-   private DatahouseMaestroItem createItem(StepOutputContext context, Object payload) {
-      DatahouseMaestroItem item = new DatahouseMaestroItem()
-            .setAccessControlList(context.accessControlList())
-            .setType(ITEM_TYPE_SIMULATION_REPORT)
-            .setContent(serialize(payload));
-      item.setReferences(new ArrayList<>());
-      return item;
+   private MaestroItem createItem(StepOutputContext context, Object payload) {
+      return new MaestroItem(
+            context.accessControlList(),
+            ITEM_TYPE_SIMULATION_REPORT,
+            serialize(payload),
+            new ArrayList<>(),
+            new HashMap<>()
+      );
    }
 
    // Serializes DTOs to JSON for persistence in Datahouse.

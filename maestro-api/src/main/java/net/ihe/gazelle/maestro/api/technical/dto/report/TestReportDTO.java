@@ -30,12 +30,12 @@ import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
-        "modelVersion",
+        "reportVersion",
         "uuid",
+        "result",
         "dateTime",
         "testService",
         "systemsUnderTest",
-        "result",
         "testSuiteName",
         "testCounters",
         "note",
@@ -83,6 +83,16 @@ public class TestReportDTO implements DTO<TestReport> {
         getBusinessObject().setUuid(uuid);
     }
 
+   @JsonGetter(value = "result")
+   public String getResult() {
+      return getBusinessObject().getResult().name();
+   }
+
+   @JsonSetter(value = "result")
+   public void setResult(String result) {
+      getBusinessObject().setResult(Result.valueOf(result));
+   }
+
     @JsonGetter(value = "dateTime")
     public String getDateTime() {
         return ZonedDateTime.ofInstant(getBusinessObject().getDateTime(), ZoneId.systemDefault())
@@ -124,16 +134,6 @@ public class TestReportDTO implements DTO<TestReport> {
                 systemsUnderTest == null ? List.of() :
                         systemsUnderTest.stream().map(SystemUnderTestDTO::getBusinessObject).toList()
         );
-    }
-
-    @JsonGetter(value = "result")
-    public String getResult() {
-        return getBusinessObject().getResult().name();
-    }
-
-    @JsonSetter(value = "result")
-    public void setResult(String result) {
-        getBusinessObject().setResult(Result.valueOf(result));
     }
 
     @JsonGetter(value = "testSuiteName")

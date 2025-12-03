@@ -16,17 +16,15 @@
 
 package net.ihe.gazelle.maestro.itb.step.technical.record;
 
-import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputDissector;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputDissectorFactory;
 import net.ihe.gazelle.maestro.itb.step.business.ItbStepDefinition;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputDissector;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputDissectorFactory;
 
 public class ItbStepOutputDissectorFactory implements StepOutputDissectorFactory {
 
     @Override
-    public boolean supports(StepRunReport stepRunReport) {
-        return stepRunReport != null
-                && ItbStepDefinition.TYPE.equals(stepRunReport.getType());
+    public boolean supports(final String stepType) {
+        return ItbStepDefinition.TYPE.equals(stepType);
     }
 
     @Override

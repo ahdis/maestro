@@ -16,9 +16,8 @@
 
 package net.ihe.gazelle.maestro.simulation.step.technical.record;
 
-import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputDissector;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputDissectorFactory;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputDissector;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputDissectorFactory;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepDefinition;
 
 /**
@@ -26,10 +25,9 @@ import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepDefinition
  */
 public class SimulationStepOutputDissectorFactory implements StepOutputDissectorFactory {
 
-   @Override
-    public boolean supports(StepRunReport stepRunReport) {
-        return stepRunReport != null
-              && SimulationStepDefinition.TYPE.equals(stepRunReport.getType());
+    @Override
+    public boolean supports(final String stepType) {
+        return SimulationStepDefinition.TYPE.equals(stepType);
     }
 
     @Override

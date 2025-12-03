@@ -30,10 +30,6 @@
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>maestro-api</artifactId>
         </dependency>
-        <dependency>
-            <groupId>net.ihe.gazelle</groupId>
-            <artifactId>maestro-recording</artifactId>
-        </dependency>
 
         <!-- Gazelle dependencies -->
         <dependency>

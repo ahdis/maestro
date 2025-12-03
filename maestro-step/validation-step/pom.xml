@@ -36,10 +36,6 @@
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
-            <artifactId>maestro-recording</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.ihe.gazelle</groupId>
             <artifactId>user-interaction-step</artifactId>
         </dependency>
 

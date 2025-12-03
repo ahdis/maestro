@@ -29,7 +29,7 @@ import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.test.TestDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSuiteRunDTO;
-import net.ihe.gazelle.maestro.engine.business.MaestroRecorderImpl;
+import net.ihe.gazelle.maestro.engine.business.RecordingMaestroImpl;
 import net.ihe.gazelle.maestro.engine.business.UnknownStepException;
 import net.ihe.gazelle.maestro.quarkus.utils.ObjectFactory;
 import net.ihe.gazelle.security.technical.acl.AccessControlListDTO;
@@ -55,7 +55,7 @@ class TestRunControllerTest {
     SynchronousMaestro synchronousMaestro;
 
     @Mock
-    MaestroRecorderImpl maestroImpl;
+    RecordingMaestroImpl maestroImpl;
 
     TestRunControllerImpl controller;
 

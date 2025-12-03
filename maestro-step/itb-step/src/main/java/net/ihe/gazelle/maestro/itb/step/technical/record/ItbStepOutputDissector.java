@@ -19,12 +19,12 @@ package net.ihe.gazelle.maestro.itb.step.technical.record;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.AttachmentOutputBuilder;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputContext;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputDissector;
-import net.ihe.gazelle.maestro.api.business.testreport.dissection.StepOutputProjection;
 import net.ihe.gazelle.maestro.itb.step.business.ItbStepDefinition;
-import net.ihe.gazelle.maestro.recording.DatahouseMaestroAttachment;
+import net.ihe.gazelle.maestro.spi.business.recording.AttachmentOutputBuilder;
+import net.ihe.gazelle.maestro.spi.business.recording.MaestroAttachment;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputContext;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputDissector;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputProjection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,10 +76,11 @@ public class ItbStepOutputDissector implements StepOutputDissector {
 
 
     private AttachmentOutputBuilder createAttachment(String type, ByteArrayProperty property) {
-        DatahouseMaestroAttachment attachment = new DatahouseMaestroAttachment()
-                .setFilename(property.getFileName())
-                .setType(type)
-                .setContent(property.getValue());
+        MaestroAttachment attachment = new MaestroAttachment(
+              property.getValue(),
+              type,
+              property.getFileName()
+        );
         return new AttachmentOutputBuilder(attachment)
                 .withReference(type, type);
     }

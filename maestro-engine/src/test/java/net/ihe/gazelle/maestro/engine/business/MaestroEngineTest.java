@@ -5,7 +5,6 @@ import net.ihe.gazelle.maestro.api.business.message.ExecutionFinished;
 import net.ihe.gazelle.maestro.api.business.message.InteractWithUser;
 import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
-import net.ihe.gazelle.maestro.api.business.recording.TestReportRecordException;
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.test.Test;
 import net.ihe.gazelle.maestro.api.business.test.TestReference;
@@ -18,7 +17,7 @@ import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.engine.business.context.TestRunSession;
 import net.ihe.gazelle.maestro.engine.business.context.TestSuiteSession;
-import net.ihe.gazelle.maestro.engine.business.mock.InMemoryTestReportRecordService;
+import net.ihe.gazelle.maestro.engine.business.mock.InMemoryTestReportRecordingService;
 import net.ihe.gazelle.maestro.engine.business.mock.RecordingMaestroObserver;
 import net.ihe.gazelle.maestro.engine.business.mock.ScriptedStepExecutorProvider;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
@@ -39,16 +38,16 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class MaestroEngineTest {
 
    private ExecutorService executorService;
-    private MaestroRecorderImpl maestro;
+    private RecordingMaestroImpl maestro;
    private ScriptedStepExecutorProvider stepExecutorProvider;
-   private InMemoryTestReportRecordService reportRecordService;
+   private InMemoryTestReportRecordingService reportRecordService;
 
    @BeforeEach
    void setUp() {
       executorService = Executors.newCachedThreadPool();
        HardWiredEventBroker broker = new HardWiredEventBroker(executorService);
       stepExecutorProvider = new ScriptedStepExecutorProvider();
-      reportRecordService = new InMemoryTestReportRecordService();
+      reportRecordService = new InMemoryTestReportRecordingService();
 
       SessionStoreImpl<MaestroObserver> testRunObserverStore = new SessionStoreImpl<>();
        SessionStoreImpl<MaestroObserver> testSuiteRunObserverStore = new SessionStoreImpl<>();
@@ -60,7 +59,7 @@ class MaestroEngineTest {
       StepRunner stepRunner = new StepRunner(stepExecutorProvider, broker);
 
       MaestroImpl maestroImpl = new MaestroImpl(testRunObserverStore, testSuiteRunObserverStore, broker, new MetadataServiceMock());
-      maestro = new MaestroRecorderImpl(maestroImpl, reportRecordService);
+      maestro = new RecordingMaestroImpl(maestroImpl, reportRecordService);
       broker.setServices(maestroImpl, testSuiteRunner, testRunner, stepRunner);
    }
 
@@ -114,7 +113,7 @@ class MaestroEngineTest {
                 .returnsReport("step-1", passedReport("step-1"))
                 .returnsReport("step-2", passedReport("step-2"));
 
-        reportRecordService.failNextWith(new TestReportRecordException("down"));
+        reportRecordService.failNextWith(new TestReportRecordingException("down"));
         maestro.executeTestSuite(testSuiteRun, true, observer);
 
         ExecutionFinished finished = observer.awaitSuiteFinished(Duration.ofSeconds(5));
@@ -254,7 +253,7 @@ class MaestroEngineTest {
       RecordingMaestroObserver observer = new RecordingMaestroObserver();
       TestSuiteRun suiteRun = buildSuiteRun("suite-record", createTest("test-record", "record-step"));
       stepExecutorProvider.returnsReport("record-step", passedReport("record-step"));
-      reportRecordService.failNextWith(new TestReportRecordException("datahouse unreachable"));
+      reportRecordService.failNextWith(new TestReportRecordingException("datahouse unreachable"));
 
        ExecutionFinished finished = runSuite(observer, suiteRun);
 

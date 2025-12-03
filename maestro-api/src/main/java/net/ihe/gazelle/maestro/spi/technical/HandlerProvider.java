@@ -21,7 +21,7 @@ import net.ihe.gazelle.maestro.spi.business.Handler;
 public interface HandlerProvider {
 
     /**
-     * @param handlerContext
+     * @param handlerContext Handler informations
      * @param handlerType Class of Handler we are looking for
      * @return a Handler of type handlerType which connect with a service with name serviceName
      * @throws HandlerNotFoundException if it couldn't find a Handler of type handlerTyper

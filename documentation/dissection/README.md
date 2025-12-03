@@ -151,4 +151,4 @@ public class ValidationStepOutputDissector implements StepOutputDissector {
 * `maestro-api`: builder interfaces, projection records, and step SPI.
 * `maestro-recording`: persistence service that consumes `StepOutputProjection`.
 * `simulation-step/validation-step`: examples of dissector implementations (`ValidationStepOutputDissector`, `SimulationStepOutputDissector`), plus tests demonstrating the builder API.
-* `net.ihe.gazelle.maestro.recording.StaticStepOutputDissector` in tests: a reference for writing and asserting projections.
+* `net.ihe.gazelle.maestrorecording.adapter.StaticStepOutputDissector` in tests: a reference for writing and asserting projections.

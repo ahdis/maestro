@@ -23,6 +23,11 @@
             <artifactId>maestro-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>maestro-engine</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>com.kereval.gazelle</groupId>
             <artifactId>datahouse-api</artifactId>
         </dependency>
