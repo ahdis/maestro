@@ -16,7 +16,13 @@
 
 package net.ihe.gazelle.maestro.itb.step.business;
 
+import net.ihe.gazelle.itb.gateway.business.ItbSessionStore;
+import net.ihe.gazelle.itb.gateway.business.RunItbTestService;
+import net.ihe.gazelle.itb.gateway.business.reporting.ItbReporting;
 import net.ihe.gazelle.itb.gateway.business.reporting.ItbResult;
+import net.ihe.gazelle.itb.gateway.business.request.Parameter;
+import net.ihe.gazelle.itb.gateway.business.request.TestCase;
+import net.ihe.gazelle.itb.gateway.business.request.TestRequest;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
@@ -24,21 +30,17 @@ import net.ihe.gazelle.maestro.api.business.test.SupportedInput;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
-import net.ihe.gazelle.itb.gateway.business.ItbSessionStore;
-import net.ihe.gazelle.itb.gateway.business.RunItbTestService;
-import net.ihe.gazelle.itb.gateway.business.reporting.ItbReporting;
-import net.ihe.gazelle.itb.gateway.business.request.Parameter;
-import net.ihe.gazelle.itb.gateway.business.request.TestCase;
-import net.ihe.gazelle.itb.gateway.business.request.TestRequest;
 import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 import net.ihe.gazelle.maestro.spi.business.StepRun;
+import net.ihe.gazelle.lang.TimeoutRuntimeException;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 public class ItbStepExecutor implements StepExecutor {
@@ -55,14 +57,19 @@ public class ItbStepExecutor implements StepExecutor {
    }
 
    @Override
-   public CompletableFuture<StepRunReport> execute(StepRun stepRun) {
-      TestRequest testRequest = mapToRequest(stepRun);
-      StepRunReportBuilder reportBuilder = new StepRunReportBuilder()
-            .setStepName(stepRun.getName())
-            .setType(ItbStepDefinition.TYPE);
-      return itbService.runTests(testRequest).thenApply(
-            itbReporting -> mapToStepRunReport(reportBuilder, itbReporting)
-      );
+   public StepRunReport execute(StepRun stepRun) {
+       try {
+           TestRequest testRequest = mapToRequest(stepRun);
+           StepRunReportBuilder reportBuilder = new StepRunReportBuilder()
+                   .setStepName(stepRun.getName())
+                   .setType(ItbStepDefinition.TYPE);
+
+           return itbService.runTests(testRequest).thenApply(
+                   itbReporting -> mapToStepRunReport(reportBuilder, itbReporting)
+           ).get(stepRun.getTimeout(), TimeUnit.MILLISECONDS);
+       } catch (TimeoutException e) {
+           throw new TimeoutRuntimeException("Timeout while waiting for ITB response");
+       }
    }
 
    private TestRequest mapToRequest(StepRun stepRun) {

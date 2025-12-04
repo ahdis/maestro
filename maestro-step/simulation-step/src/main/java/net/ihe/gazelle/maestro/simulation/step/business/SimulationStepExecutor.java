@@ -64,7 +64,7 @@ public class SimulationStepExecutor implements StepExecutor {
    }
 
    @Override
-   public CompletableFuture<StepRunReport> execute(StepRun stepRun) {
+   public StepRunReport execute(StepRun stepRun) {
       try {
          String simulationService = stepRun.getPropertyValue(SimulationStepDefinition.SIMULATION_SERVICE);
          String sequenceId = stepRun.getPropertyValue(SimulationStepDefinition.SEQUENCE_ID);
@@ -80,7 +80,7 @@ public class SimulationStepExecutor implements StepExecutor {
          simulationHandler.simulate(simulationRequest, new InstructionConsumer(stepRun.getTimeout() - 2000), futureReport::complete);
          SimulationReport simulationReport = waitSimulationReport(simulationRequest, futureReport);
 
-         return CompletableFuture.completedFuture(buildStepRunReport(stepRun, simulationReport));
+         return buildStepRunReport(stepRun, simulationReport);
       } catch (MissingRequiredParameterException e) {
          return buildReportWithError(stepRun, e, "Missing Required Parameter");
       } catch (InvalidParameterValueException e) {
@@ -204,15 +204,15 @@ public class SimulationStepExecutor implements StepExecutor {
             .setType(SimulationStepDefinition.TYPE);
    }
 
-   private CompletableFuture<StepRunReport> buildReportWithError(StepRun stepRun, Exception e, String name) {
-      return CompletableFuture.completedFuture(prepareStepReport(stepRun)
+   private StepRunReport buildReportWithError(StepRun stepRun, Exception e, String name) {
+      return prepareStepReport(stepRun)
             .addUnexpectedError(
                   new UnexpectedErrorBuilder()
                         .setName(name)
                         .setMessage(name)
                         .setCause(new UnexpectedErrorBuilder().fromThrowable(e))
             )
-            .build());
+            .build();
    }
 
    private StepResult toStepResult(Result result) {

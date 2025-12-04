@@ -35,7 +35,7 @@ class UserInteractionStepExecutorTest {
         UserInteractionStepExecutor executor = new UserInteractionStepExecutor(new UserInteractionHandlerStub());
         StepRun stepRun = stepRun();
 
-        StepRunReport report = executor.execute(stepRun).join();
+        StepRunReport report = executor.execute(stepRun);
         assertEquals(stepRun.getName(), report.getStepName());
         assertEquals(UserInteractionStepDefinition.TYPE, report.getType());
         assertEquals(StepResult.DONE, report.getResult());

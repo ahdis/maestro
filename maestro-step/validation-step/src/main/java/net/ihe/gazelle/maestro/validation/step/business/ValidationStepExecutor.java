@@ -32,7 +32,6 @@ import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
 import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequestBuilder;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * A StepExecutor is an object used to run ValidationStep {@link ValidationStepDefinition}
@@ -56,7 +55,7 @@ public class ValidationStepExecutor implements StepExecutor {
    }
 
    @Override
-   public CompletableFuture<StepRunReport> execute(StepRun stepRun) {
+   public StepRunReport execute(StepRun stepRun) {
       String validationService = stepRun.getPropertyValue(ValidationStepDefinition.VALIDATION_SERVICE);
       String validationProfile = stepRun.getPropertyValue(ValidationStepDefinition.VALIDATION_PROFILE);
 
@@ -80,7 +79,7 @@ public class ValidationStepExecutor implements StepExecutor {
             .setType(ValidationStepDefinition.TYPE)
             .setResult(mapResult(validationReport.getOverallResult()))
             .setOutputs(List.of(reportOutput));
-      return CompletableFuture.completedFuture(stepRunReportBuilder.build());
+      return stepRunReportBuilder.build();
    }
 
    private ValidationRequest buildValidationRequest(StepRun stepRun, String validationProfile,

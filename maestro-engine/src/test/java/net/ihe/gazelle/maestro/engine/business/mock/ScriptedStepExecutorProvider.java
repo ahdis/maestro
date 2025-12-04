@@ -24,7 +24,7 @@ public class ScriptedStepExecutorProvider implements StepExecutorProvider {
    }
 
    public ScriptedStepExecutorProvider returnsReport(String stepName, StepRunReport stepRunReport) {
-      executorsByStepName.put(stepName, stepRun -> CompletableFuture.completedFuture(stepRunReport));
+      executorsByStepName.put(stepName, stepRun -> stepRunReport);
       return this;
    }
 

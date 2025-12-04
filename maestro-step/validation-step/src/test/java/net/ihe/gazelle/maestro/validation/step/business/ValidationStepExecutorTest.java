@@ -50,7 +50,7 @@ class ValidationStepExecutorTest {
       byte[] serialized = "{\"status\":\"ok\"}".getBytes(StandardCharsets.UTF_8);
       when(serializer.toByteArray(validationReport)).thenReturn(serialized);
 
-      StepRunReport report = executor.execute(stepRun).join();
+      StepRunReport report = executor.execute(stepRun);
 
       assertEquals(StepResult.PASSED, report.getResult());
       ByteArrayProperty output = (ByteArrayProperty) report.getOutputs().getFirst();

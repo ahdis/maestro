@@ -7,7 +7,6 @@ import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 import net.ihe.gazelle.maestro.spi.business.StepRun;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 import static net.ihe.gazelle.maestro.api.business.testreport.StepResult.FAILED;
 import static net.ihe.gazelle.maestro.api.business.testreport.StepResult.PASSED;
@@ -16,7 +15,7 @@ import static net.ihe.gazelle.maestro.assertion.step.business.equals.AssertEqual
 public class AssertContainsStepExecutor implements StepExecutor {
 
    @Override
-   public CompletableFuture<StepRunReport> execute(StepRun stepRun) {
+   public StepRunReport execute(StepRun stepRun) {
       StepRunReportBuilder reportBuilder = new StepRunReportBuilder()
             .setStepName(stepRun.getName())
             .setType(stepRun.getType());
@@ -25,15 +24,13 @@ public class AssertContainsStepExecutor implements StepExecutor {
       String actual = stepRun.getPropertyValue(ACTUAL);
 
       if(actual != null && actual.contains(expected)) {
-         return CompletableFuture.completedFuture(reportBuilder.setResult(PASSED).build());
+         return reportBuilder.setResult(PASSED).build();
       } else {
          StringProperty failureOutput = new StringProperty(
                FAILURE_MESSAGE,
                String.format("Expected value cannot be found. Expected: '%s', Actual: '%s'", expected, actual)
          );
-         return CompletableFuture.completedFuture(
-               reportBuilder.setOutputs(List.of(failureOutput)).setResult(FAILED).build()
-         );
+         return reportBuilder.setOutputs(List.of(failureOutput)).setResult(FAILED).build();
       }
    }
 }

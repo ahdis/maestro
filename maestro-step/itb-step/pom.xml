@@ -57,6 +57,11 @@
             <artifactId>service-metadata-jaxrs-api</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>lang</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- Technical dependencies -->
         <dependency>

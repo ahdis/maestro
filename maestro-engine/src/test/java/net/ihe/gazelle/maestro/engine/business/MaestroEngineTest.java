@@ -207,7 +207,7 @@ class MaestroEngineTest {
                   .setOutputs(List.of(new StringProperty("payload", "HELLO-CONTEXT"))))
             .withExecutor("Consumer", stepRun -> {
                observedValue.set(stepRun.getPropertyValue("echo"));
-               return CompletableFuture.completedFuture(passedReport("Consumer"));
+               return passedReport("Consumer");
             });
 
       maestro.executeTestSuite(suiteRun, true, observer);
@@ -267,7 +267,7 @@ class MaestroEngineTest {
       TestSuiteRun suiteRun = buildSuiteRun("suite-interact", createTest("interaction-test", "interaction-step"));
 
       stepExecutorProvider.withExecutor("interaction-step", stepRun -> observer.interactWithUser(
-                  new InteractWithUser("Confirm", "Proceed?"))
+                  new InteractWithUser("Confirm", "Proceed?", 3L))
             .thenApply(done -> passedReport("interaction-step")));
 
       maestro.executeTestSuite(suiteRun,true, observer);
@@ -308,7 +308,7 @@ class MaestroEngineTest {
             .withExecutor("Consumer", stepRun -> {
                // Force a ClassCastException to mimic a type mismatch at execution time
                Integer ignored = (Integer) stepRun.getPropertyValue("payloadRef");
-               return CompletableFuture.completedFuture(passedReport("Consumer" + ignored));
+               return passedReport("Consumer" + ignored);
             });
 
       runSuite(observer, suiteRun);

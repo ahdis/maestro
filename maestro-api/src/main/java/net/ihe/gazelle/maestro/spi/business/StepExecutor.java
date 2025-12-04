@@ -24,13 +24,13 @@ import java.util.concurrent.CompletableFuture;
 public interface StepExecutor {
 
    /**
-    * @param stepRun contain step to run
+    * @param stepRun contain a step to run
     *
-    * @return report builder with information to build report of step execution
+    * @return the report with information to build a step report
     *
     * @throws MissingPropertyException if a required property is missing to execute the step
     * @throws ClassCastException if a property has not the expected type
     */
-   CompletableFuture<StepRunReport> execute(StepRun stepRun);
+   StepRunReport execute(StepRun stepRun);
 
 }

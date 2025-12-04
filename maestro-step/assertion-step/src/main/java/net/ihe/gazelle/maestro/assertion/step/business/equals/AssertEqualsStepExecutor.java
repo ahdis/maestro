@@ -16,7 +16,7 @@ import static net.ihe.gazelle.maestro.assertion.step.business.equals.AssertEqual
 public class AssertEqualsStepExecutor implements StepExecutor {
 
    @Override
-   public CompletableFuture<StepRunReport> execute(StepRun stepRun) {
+   public StepRunReport execute(StepRun stepRun) {
       StepRunReportBuilder reportBuilder = new StepRunReportBuilder()
             .setStepName(stepRun.getName())
             .setType(stepRun.getType());
@@ -24,15 +24,13 @@ public class AssertEqualsStepExecutor implements StepExecutor {
       String expected = stepRun.getPropertyValue(EXPECTED);
       String actual = stepRun.getPropertyValue(ACTUAL);
       if(expected != null && expected.equals(actual)) {
-         return CompletableFuture.completedFuture(reportBuilder.setResult(PASSED).build());
+         return reportBuilder.setResult(PASSED).build();
       } else {
          StringProperty failureOutput = new StringProperty(
                FAILURE_MESSAGE,
                String.format("Values are not equal. Expected: '%s', Actual: '%s'", expected, actual)
          );
-         return CompletableFuture.completedFuture(
-               reportBuilder.setOutputs(List.of(failureOutput)).setResult(FAILED).build()
-         );
+         return reportBuilder.setOutputs(List.of(failureOutput)).setResult(FAILED).build();
       }
    }
 }
