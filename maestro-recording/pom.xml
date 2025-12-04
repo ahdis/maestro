@@ -30,14 +30,17 @@
         <dependency>
             <groupId>com.kereval.gazelle</groupId>
             <artifactId>datahouse-api</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.kereval.gazelle</groupId>
             <artifactId>datahouse-microprofile-rest-client</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>error-handling</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>jakarta.enterprise</groupId>

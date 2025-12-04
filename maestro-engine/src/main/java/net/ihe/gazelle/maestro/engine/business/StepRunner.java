@@ -55,12 +55,7 @@ public class StepRunner {
       StepRun stepRun = startStepRun.getStepRun();
       try {
          StepExecutor executor = stepExecutorProvider.getExecutor(startStepRun.getSessionId(), stepRun);
-         // TODO : move to maestroImpl timeout setting
-         Integer timeout = 60000;
-         if (stepRun.hasProperty("timeout")) {
-             timeout = (Integer) stepRun.getPropertyValue("timeout");
-         }
-         StepRunReport report = executor.execute(stepRun).get(timeout, TimeUnit.MILLISECONDS); // blocking call
+         StepRunReport report = executor.execute(stepRun).get(stepRun.getTimeout(), TimeUnit.MILLISECONDS); // blocking call
          stepRunReportValidator.validate(report).orThrow(IllegalStateException::new);
          stepRunEventProducer.notify(
                new StepRunFinished(startStepRun.getSessionId(), startStepRun.getTestId(), startStepRun.getStepIndex(),
@@ -78,7 +73,7 @@ public class StepRunner {
          );
       } catch (Exception e) {
          // Unexpected error
-         logger.atError().setCause(e).log("Unexepcted error while running step");
+         logger.atError().setCause(e).log("Unexpected error while running step");
          stepRunEventProducer.notify(
                new StepRunFinished(startStepRun.getSessionId(), startStepRun.getTestId(), startStepRun.getStepIndex(),
                      stepRun, buildErrorReport(stepRun, e))

@@ -61,7 +61,8 @@ public class TestRunner {
          testRunValidator.validate(testRun).orThrow(InvalidTestRunException::new);
 
          TestRunSession testRunSession = new TestRunSession(testRun);
-         sessionStore.addSession(sessionId, testRunSession);
+          long timeout = testRun.getTest().computeTestRunTimeout();
+         sessionStore.addSession(sessionId, testRunSession, timeout);
          runNextStep(testRunSession, sessionId, testRun.getTest().getId());
       } catch (Exception e) {
          Test test = testRun.getTest();

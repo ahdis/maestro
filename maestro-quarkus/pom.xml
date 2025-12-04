@@ -87,6 +87,24 @@
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>security</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.kereval.gazelle</groupId>
+            <artifactId>datahouse-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.kereval.gazelle</groupId>
+            <artifactId>datahouse-microprofile-rest-client</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>net.ihe.gazelle</groupId>
+                    <artifactId>m2m-client</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>m2m-client</artifactId>
+        </dependency>
 
         <!-- Quarkus -->
         <dependency>

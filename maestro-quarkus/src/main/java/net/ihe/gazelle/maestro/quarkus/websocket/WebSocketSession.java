@@ -42,7 +42,9 @@ public class WebSocketSession implements MaestroObserver {
     }
 
     public void completeInteraction(UserInteractionCompleted userInteractionCompleted) {
-        interactionFuture.complete(userInteractionCompleted);
+        if (interactionFuture != null && !interactionFuture.isDone()) {
+            interactionFuture.complete(userInteractionCompleted);
+        }
     }
 
     @Override
@@ -91,10 +93,12 @@ public class WebSocketSession implements MaestroObserver {
     }
 
     private void closeSession() {
-        try {
-            session.close();
-        } catch (IOException e) {
-            throw new IORuntimeException(e);
+        if (session.isOpen()) {
+            try {
+                session.close();
+            } catch (IOException e) {
+                throw new IORuntimeException(e);
+            }
         }
     }
 }

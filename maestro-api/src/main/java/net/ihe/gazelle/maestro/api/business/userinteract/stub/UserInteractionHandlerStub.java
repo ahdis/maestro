@@ -21,7 +21,7 @@ import net.ihe.gazelle.maestro.api.business.userinteract.UserInteractionHandler;
 public class UserInteractionHandlerStub implements UserInteractionHandler {
 
     @Override
-    public void displayMessage(String interactionTitle, String message) {
+    public void displayMessage(String interactionTitle, String message,  long timeout) {
         // Stub method.
     }
 

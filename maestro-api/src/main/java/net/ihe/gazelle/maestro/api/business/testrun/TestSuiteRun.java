@@ -36,7 +36,7 @@ import java.util.NoSuchElementException;
  * systemsUnderTest the list of systems under test that will be spread to each element of testRuns <br> testSetRunId
  * today maps the TestInstance ID in Gazelle Test Management
  */
-public class TestSuiteRun  implements Serializable {
+public class TestSuiteRun implements Serializable {
 
    @Serial
    private static final long serialVersionUID = -4027777114820632058L;
@@ -54,7 +54,21 @@ public class TestSuiteRun  implements Serializable {
       this.systemsUnderTest = new ArrayList<>();
    }
 
-   public TestSuite getTestSuite() {
+    public long computeTestSuiteTimeout() {
+        return testSuite.getTestReferences().stream()
+                .map(testReference -> getTestById(testReference.getTestId()))
+                .mapToLong(Test::computeTestRunTimeout)
+                .sum();
+    }
+
+    private Test getTestById(String testId) {
+        return tests.stream()
+                .filter(test -> testId.equals(test.getId()))
+                .findFirst()
+                .orElseThrow(() -> new NoSuchElementException("No test with id " + testId + " found."));
+    }
+
+    public TestSuite getTestSuite() {
       return testSuite;
    }
 

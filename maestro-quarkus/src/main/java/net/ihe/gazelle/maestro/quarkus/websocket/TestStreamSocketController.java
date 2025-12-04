@@ -51,19 +51,20 @@ public class TestStreamSocketController {
 
     @OnOpen
     public void onOpen(Session session) {
-        LOG.debug("Test Stream Socket Connected: {}", session.getId());
+        LOG.info("Test Stream Socket Connected: {}", session.getId());
         WebSocketSession maestroCaller = new WebSocketSession(session);
         sessions.put(session.getId(), maestroCaller);
     }
 
     @OnClose
     public void onClose(Session session) {
-        LOG.debug("Test Stream Socket Disconnected: {}", session.getId());
+        LOG.info("Test Stream Socket Disconnected: {}", session.getId());
         sessions.remove(session.getId());
     }
 
     @OnMessage
     public void onMessage(Session session, String messageString) throws IOException {
+        LOG.debug("Received message: {}", messageString);
         MessageDTO<?> message = serDes.deserialize(messageString, MessageDTO.class);
         WebSocketSession maestroCaller = sessions.get(session.getId());
         switch (message) {

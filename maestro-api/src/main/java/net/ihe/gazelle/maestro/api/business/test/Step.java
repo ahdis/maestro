@@ -32,24 +32,30 @@ public class Step implements Serializable {
    @Serial
    private static final long serialVersionUID = 4126739543481925460L;
 
+    /**
+     * Default timeout for step runs in milliseconds.
+     */
+    public static final long STEP_DEFAULT_TIMEOUT = 180*1000L;
+
    private String name;
    private String type;
+   private long timeout = STEP_DEFAULT_TIMEOUT;
    // The base Map interface is not serializable, so we declare properties as ConcurrentHashMap.
    private ConcurrentHashMap<String, Property> properties = new ConcurrentHashMap<>();
    private ConcurrentHashMap<String, String> outputMappings = new ConcurrentHashMap<>();
-
 
    public Step() {
       // Empty for serialization
    }
 
    public Step(Step other) {
-      this(other.name, other.type, other.getProperties(), other.getOutputMappings());
+      this(other.name, other.type, other.timeout, other.getProperties(), other.getOutputMappings());
    }
 
-   protected Step(String name, String type, List<Property> properties, Map<String, String> outputMappings) {
+   protected Step(String name, String type, Long timeout, List<Property> properties, Map<String, String> outputMappings) {
       this.name = name;
       this.type = type;
+      setTimeout(timeout);
       properties.forEach(property -> this.properties.put(property.getName(), property.copy()));
       this.outputMappings = outputMappings != null ?
             new ConcurrentHashMap<>(outputMappings) :
@@ -74,7 +80,18 @@ public class Step implements Serializable {
       return this;
    }
 
-   public List<Property> getProperties() {
+    public long getTimeout() {
+        return timeout;
+    }
+
+    public Step setTimeout(Long timeout) {
+        this.timeout = timeout != null
+                ? timeout
+                : STEP_DEFAULT_TIMEOUT;
+        return this;
+    }
+
+    public List<Property> getProperties() {
       return new ArrayList<>(properties.values());
    }
 

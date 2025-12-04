@@ -55,14 +55,16 @@ public class MaestroImpl {
     public void executeTestSuite(TestSuiteRun testSuiteRun, MaestroObserver testSuiteRunObserver) {
         testSuiteRunValidator.assertValid(testSuiteRun);
         String sessionId = UUID.randomUUID().toString();
-        testSuiteRunObserverStore.addSession(sessionId, testSuiteRunObserver);
+        long timeout = testSuiteRun.computeTestSuiteTimeout();
+        testSuiteRunObserverStore.addSession(sessionId, testSuiteRunObserver, timeout);
         maestroEventProducer.command(new StartTestSuiteRun(sessionId, testSuiteRun));
     }
 
     public void executeTest(TestRun testRun, MaestroObserver testRunObservers) {
         testRunValidator.assertValid(testRun);
         String sessionId = UUID.randomUUID().toString();
-        testRunObserverStore.addSession(sessionId, testRunObservers);
+        long timeout = testRun.getTest().computeTestRunTimeout();
+        testRunObserverStore.addSession(sessionId, testRunObservers, timeout);
         maestroEventProducer.command(new StartTestRun(sessionId, testRun));
     }
 

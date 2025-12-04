@@ -76,7 +76,6 @@ public class TestReport implements ProtectedResource, Serializable {
     private List<UnexpectedError> unexpectedErrors;
     private AccessControlList accessControlList;
 
-
     public TestReport() {
         reportVersion = REPORT_VERSION;
         dateTime = Instant.now();

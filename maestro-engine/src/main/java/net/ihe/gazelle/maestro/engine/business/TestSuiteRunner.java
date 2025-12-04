@@ -46,7 +46,8 @@ public class TestSuiteRunner {
          testSuiteRunValidator.validate(testSuiteRun).orThrow(InvalidTestSuiteException::new);
 
          TestRunCursor testRunCursor = TestRunCursor.from(consolidateTestRuns(testSuiteRun));
-         sessionStore.addSession(startTestSuiteRun.getSessionId(), new TestSuiteSession(testSuiteRun, testRunCursor));
+         long timeout = testSuiteRun.computeTestSuiteTimeout();
+         sessionStore.addSession(startTestSuiteRun.getSessionId(), new TestSuiteSession(testSuiteRun, testRunCursor), timeout);
          testSuiteEventProducer.command(new StartTestRun(startTestSuiteRun.getSessionId(), testRunCursor.next()));
       } catch (Exception e) {
          LOG.atError().setCause(e).log("Error when starting test suite for session {}", startTestSuiteRun.getSessionId());

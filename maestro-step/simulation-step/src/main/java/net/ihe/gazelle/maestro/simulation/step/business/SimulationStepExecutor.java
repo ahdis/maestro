@@ -43,6 +43,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
 
 public class SimulationStepExecutor implements StepExecutor {
 
@@ -76,7 +77,7 @@ public class SimulationStepExecutor implements StepExecutor {
          );
 
          CompletableFuture<SimulationReport> futureReport = new CompletableFuture<>();
-         simulationHandler.simulate(simulationRequest, this::showInstructions, futureReport::complete);
+         simulationHandler.simulate(simulationRequest, new InstructionConsumer(stepRun.getTimeout() - 2000), futureReport::complete);
          SimulationReport simulationReport = waitSimulationReport(simulationRequest, futureReport);
 
          return CompletableFuture.completedFuture(buildStepRunReport(stepRun, simulationReport));
@@ -100,9 +101,12 @@ public class SimulationStepExecutor implements StepExecutor {
    }
 
    private static int getTimeoutSeconds(StepRun stepRun) {
-      return stepRun.hasProperty(SimulationStepDefinition.TIMEOUT_SECONDS) ?
-            stepRun.getPropertyValue(SimulationStepDefinition.TIMEOUT_SECONDS) :
-            DEFAULT_TIMEOUT;
+       long timeoutMillis = stepRun.getTimeout();
+       if (timeoutMillis <= 0) {
+           throw new InvalidParameterValueException("The timeout cannot be negative.");
+       }
+       long seconds = TimeUnit.MILLISECONDS.toSeconds(timeoutMillis);
+       return seconds > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) seconds;
    }
 
    private List<SupportedParameter> getSupportedParameters(String simulationService, String sequenceId) {
@@ -156,18 +160,6 @@ public class SimulationStepExecutor implements StepExecutor {
       };
    }
 
-   private void showInstructions(AdditionalInstructions additionalInstructions) {
-      StringBuilder instructions = new StringBuilder()
-            .append(additionalInstructions.getInstruction())
-            .append("\n");
-      for (Parameter parameter : additionalInstructions.getParameters()) {
-         instructions
-               .append("name : ").append(parameter.getName()).append("\n")
-               .append("value : ").append(parameter.getValue()).append("\n");
-      }
-       userInteractionHandler.displayMessage("Additional instructions", instructions.toString());
-   }
-
    private SimulationReport waitSimulationReport(SimulationRequest simulationRequest,
                                                  CompletableFuture<SimulationReport> futureReport) {
       long timeout = simulationRequest.getTimeoutSeconds() + 3L;
@@ -179,7 +171,7 @@ public class SimulationStepExecutor implements StepExecutor {
       } catch (InterruptedException e) {
          Thread.currentThread().interrupt();
          // FIXME returning a null report will cause NPE later.
-         // After an interrupt, we should immediatly stop and leave the SimulationStepExecutor.
+         // After an interrupt, we should immediately stop and leave the SimulationStepExecutor.
          return null;
       } catch (ExecutionException e) {
          throw new ExecutionRuntimeException(e);
@@ -230,4 +222,26 @@ public class SimulationStepExecutor implements StepExecutor {
          default -> StepResult.UNDEFINED;
       };
    }
+
+    private class InstructionConsumer implements Consumer<AdditionalInstructions> {
+
+        private final long timeout;
+
+        public InstructionConsumer(long timeout) {
+            this.timeout = timeout;
+        }
+
+        @Override
+        public void accept(AdditionalInstructions additionalInstructions) {
+            StringBuilder instructions = new StringBuilder()
+                    .append(additionalInstructions.getInstruction())
+                    .append("\n");
+            for (Parameter parameter : additionalInstructions.getParameters()) {
+                instructions
+                        .append("name : ").append(parameter.getName()).append("\n")
+                        .append("value : ").append(parameter.getValue()).append("\n");
+            }
+            userInteractionHandler.displayMessage("Additional instructions", instructions.toString(), timeout);
+        }
+    }
 }

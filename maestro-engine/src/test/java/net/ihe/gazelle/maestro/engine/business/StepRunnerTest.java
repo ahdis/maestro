@@ -11,7 +11,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -56,7 +55,7 @@ class StepRunnerTest {
 
    @Test
    void runHonorsTimeoutProperty() {
-      step.setProperties(List.of(new net.ihe.gazelle.maestro.api.business.property.IntegerProperty("timeout", 50)));
+      step.setTimeout(50L);
       executorProvider.withExecutor("Step 1", stepRun -> new CompletableFuture<>());
 
       stepRunner.run(new StartStepRun("session-timeout", "test", 0, new StepRun(step, step.getProperties())));

@@ -38,17 +38,14 @@ public class SynchronousMaestro {
             "synchronous call, either something fatal happened and you may need " +
             "to contact an administrator";
 
-    private final int timeoutSeconds;
     private final Maestro maestro;
 
     /**
      * Constructor
      *
-     * @param timeoutSeconds the timeout in seconds for the synchronous call. Must not be null and greater than 0.
      * @param maestro        the Maestro Facade. Must not be null.
      */
-    public SynchronousMaestro(int timeoutSeconds, Maestro maestro) {
-        this.timeoutSeconds = timeoutSeconds;
+    public SynchronousMaestro(Maestro maestro) {
         this.maestro = maestro;
     }
 
@@ -72,7 +69,8 @@ public class SynchronousMaestro {
         );
 
         try {
-            return future.get(timeoutSeconds, TimeUnit.SECONDS);
+            long timeout = testSuiteRun.computeTestSuiteTimeout();
+            return future.get(timeout, TimeUnit.MILLISECONDS);
         } catch (ExecutionException e) {
             throw new ExecutionRuntimeException(e);
         }
@@ -87,7 +85,8 @@ public class SynchronousMaestro {
         );
 
         try {
-            return future.get(timeoutSeconds, TimeUnit.SECONDS);
+            long timeout = testRun.getTest().computeTestRunTimeout();
+            return future.get(timeout, TimeUnit.MILLISECONDS);
         } catch (ExecutionException e) {
             throw new ExecutionRuntimeException(e);
         }

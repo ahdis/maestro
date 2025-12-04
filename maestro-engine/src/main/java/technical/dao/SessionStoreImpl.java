@@ -16,10 +16,12 @@
 
 package technical.dao;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.Expiry;
 import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The purpose of this class is to being able to access any TestRunSession or TestSuiteSession from any Maestro
@@ -30,30 +32,57 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class SessionStoreImpl<T> implements SessionStore<T> {
 
-    private final Map<String, T> sessions = new ConcurrentHashMap<>();
+    private final Cache<String, CacheEntry<T>> sessions;
 
     public SessionStoreImpl() {
-        // For injection
+        sessions = Caffeine.newBuilder()
+                        .expireAfter(new SessionExpiry())
+                        .build();
     }
 
    @Override
-   public synchronized void addSession(String id, T session) {
-      sessions.put(id, session);
+   public synchronized void addSession(String id, T session, long timeoutMillis) {
+       sessions.put(id, new CacheEntry<>(session, timeoutMillis));
    }
 
    @Override
    public synchronized boolean hasSession(String id) {
-      return sessions.containsKey(id);
+       return sessions.getIfPresent(id) != null;
    }
 
    @Override
     public synchronized T getSession(String id) {
-        return (T) sessions.get(id);
+       CacheEntry<T> entry = sessions.getIfPresent(id);
+       return entry != null ? entry.value : null;
     }
 
     @Override
     public synchronized void removeSession(String id) {
-        sessions.remove(id);
+        sessions.invalidate(id);
     }
 
+    private final class SessionExpiry implements Expiry<String, CacheEntry<T>> {
+
+        @Override
+        public long expireAfterCreate(String key, CacheEntry<T> entry, long now) {
+            return entry.ttlNanos;
+        }
+
+        @Override
+        public long expireAfterUpdate(String key, CacheEntry<T> entry, long now, long currentDuration) {
+            return currentDuration;
+        }
+
+        @Override
+        public long expireAfterRead(String key, CacheEntry<T> entry, long now, long currentDuration) {
+            return currentDuration;
+        }
+    }
+
+    private record CacheEntry<T>(T value, long ttlNanos) {
+        private CacheEntry(T value, long ttlNanos) {
+            this.value = value;
+            this.ttlNanos = TimeUnit.MILLISECONDS.toNanos(ttlNanos);
+        }
+    }
 }

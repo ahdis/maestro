@@ -109,6 +109,11 @@ public class Test implements Serializable {
       return true;
    }
 
+    public long computeTestRunTimeout() {
+        return this.getSteps().stream()
+                .mapToLong(Step::getTimeout)
+                .sum();
+    }
 
    @Override
    public boolean equals(Object o) {

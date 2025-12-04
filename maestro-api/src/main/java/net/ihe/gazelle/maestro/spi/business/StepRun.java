@@ -37,6 +37,7 @@ public class StepRun extends Step {
       super(
             step.getName(),
             step.getType(),
+            step.getTimeout(),
             resolveProperties(aggregateProperties(context, step.getProperties())),
             step.getOutputMappings()
       );

@@ -30,6 +30,7 @@ import java.util.List;
 @JsonPropertyOrder({
         "interactionTitle",
         "message",
+        "timeout",
         "supportedInputs"
 })
 public class InteractWithUserDTO extends MessageDTO<InteractWithUser> {
@@ -63,6 +64,16 @@ public class InteractWithUserDTO extends MessageDTO<InteractWithUser> {
     @JsonSetter("message")
     public void setMessage(String message) {
         getBusinessObject().setMessage(message);
+    }
+
+    @JsonGetter("timeout")
+    public Long getTimeout() {
+        return getBusinessObject().getTimeout();
+    }
+
+    @JsonSetter("timeout")
+    public void setTimeout(Long timeout) {
+        getBusinessObject().setTimeout(timeout);
     }
 
     @SuppressWarnings("rawtypes")

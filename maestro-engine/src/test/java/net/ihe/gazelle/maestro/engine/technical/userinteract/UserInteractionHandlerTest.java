@@ -20,6 +20,7 @@ import net.ihe.gazelle.maestro.engine.business.mock.RecordingMaestroObserver;
 import org.junit.jupiter.api.Test;
 import technical.userinteract.UserInteractionHandlerImpl;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class UserInteractionHandlerTest {
@@ -28,6 +29,6 @@ class UserInteractionHandlerTest {
     void test_display_message() {
         UserInteractionHandlerImpl handler = new UserInteractionHandlerImpl(new RecordingMaestroObserver());
         assertTrue(handler.isAvailable());
-        handler.displayMessage("title", "message");
+        assertDoesNotThrow(() ->handler.displayMessage("title", "message", 10));
     }
 }

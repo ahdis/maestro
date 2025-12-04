@@ -17,6 +17,7 @@
 package net.ihe.gazelle.maestro.api.business.testrun;
 
 import net.ihe.gazelle.maestro.api.business.property.Property;
+import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.test.Test;
 import net.ihe.gazelle.maestro.api.business.testreport.SystemUnderTest;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
@@ -47,6 +48,8 @@ public class TestRun implements Serializable {
    public TestRun(TestRun other) {
       this.test = other.test;
       this.inputs = new ArrayList<>(other.inputs);
+      this.systemsUnderTest = new ArrayList<>(other.systemsUnderTest);
+      this.accessControlList = other.accessControlList;
    }
 
    public Test getTest() {

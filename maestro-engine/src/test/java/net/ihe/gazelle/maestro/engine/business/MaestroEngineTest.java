@@ -400,7 +400,8 @@ class MaestroEngineTest {
    private Step step(String name) {
       return new Step()
             .setName(name)
-            .setType("SIMULATION");
+            .setType("UNIT_TEST")
+            .setTimeout(3000L);
    }
 
    private static final class ManualInteractionObserver extends RecordingMaestroObserver {

@@ -34,6 +34,7 @@ import java.util.Map;
 @JsonPropertyOrder({
         "name",
         "type",
+        "timeout",
         "properties",
         "outputMappings"
 })
@@ -70,6 +71,15 @@ public class StepDTO implements DTO<Step> {
    public void setType(String type) {
       step.setType(type);
    }
+
+    @JsonProperty("timeout")
+    public Long getTimeout() {
+        return step.getTimeout();
+    }
+
+    public void setTimeout(Long timeout) {
+        step.setTimeout(timeout);
+    }
 
    @JsonProperty("properties")
    @SuppressWarnings({"java:S3740",  "rawtypes"})

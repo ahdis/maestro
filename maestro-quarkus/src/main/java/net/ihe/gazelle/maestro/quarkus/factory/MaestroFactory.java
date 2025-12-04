@@ -29,14 +29,9 @@ import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
 import net.ihe.gazelle.maestro.engine.business.context.TestRunSession;
 import net.ihe.gazelle.maestro.engine.business.context.TestSuiteSession;
 import net.ihe.gazelle.servicemetadata.api.business.MetadataService;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-
 
 @ApplicationScoped
 public class MaestroFactory {
-
-   @ConfigProperty(name = "gzl.maestro.timeout", defaultValue = "60")
-   int timeoutSeconds;
 
    private final SessionStore<TestSuiteSession> suiteSessionStore;
    private final SessionStore<TestRunSession> testSessionStore;
@@ -78,7 +73,7 @@ public class MaestroFactory {
    @Produces
    @Default
    public SynchronousMaestro getSynchronousMaestro() {
-      return new SynchronousMaestro(timeoutSeconds, getRecordingMaestro());
+      return new SynchronousMaestro(getRecordingMaestro());
    }
 
    @Produces

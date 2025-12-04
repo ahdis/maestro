@@ -29,15 +29,17 @@ public class InteractWithUser implements Message {
 
     private String interactionTitle;
     private String message;
+    private Long timeout;
     private final List<SupportedInput> supportedInputs;
 
     public InteractWithUser() {
-        this(null, null);
+        this(null, null, null);
     }
 
-    public InteractWithUser(String interactionTitle, String message) {
+    public InteractWithUser(String interactionTitle, String message, Long timeout) {
         this.interactionTitle = interactionTitle;
         this.message = message;
+        this.timeout = timeout;
         this.supportedInputs = new ArrayList<>();
     }
 
@@ -56,6 +58,15 @@ public class InteractWithUser implements Message {
 
     public InteractWithUser setMessage(String message) {
         this.message = message;
+        return this;
+    }
+
+    public Long getTimeout() {
+        return timeout;
+    }
+
+    public InteractWithUser setTimeout(Long timeout) {
+        this.timeout = timeout;
         return this;
     }
 

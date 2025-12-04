@@ -23,5 +23,5 @@ public interface UserInteractionHandler extends Handler {
     String SERVICE_NAME = "User Interaction Service";
     String INTERFACE_NAME = "User Interaction API";
 
-    void displayMessage(String interactionTitle, String message);
+    void displayMessage(String interactionTitle, String message, long timeout);
 }

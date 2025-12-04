@@ -18,7 +18,7 @@ package net.ihe.gazelle.maestro.engine.business.context;
 
 public interface SessionStore<T> extends ReadSessionStore<T> {
 
-   void addSession(String id, T session);
+   void addSession(String id, T session, long timeout);
 
    boolean hasSession(String id);
 

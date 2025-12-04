@@ -1,5 +1,8 @@
 package net.ihe.gazelle.maestro.api.business.test;
 
+import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
+import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
