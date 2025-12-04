@@ -36,8 +36,8 @@ public class SessionStoreImpl<T> implements SessionStore<T> {
 
     public SessionStoreImpl() {
         sessions = Caffeine.newBuilder()
-                        .expireAfter(new SessionExpiry())
-                        .build();
+                .expireAfter(new SessionExpiry())
+                .build();
     }
 
    @Override

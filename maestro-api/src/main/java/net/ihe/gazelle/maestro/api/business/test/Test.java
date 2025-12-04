@@ -34,6 +34,8 @@ public class Test implements Serializable {
    @Serial
    private static final long serialVersionUID = -7394123287397209441L;
 
+   private static final int TIMEOUT_MARGIN_OFFSET = 3000;
+
    private String id;
    private String name;
    private List<Step> steps = new ArrayList<>();
@@ -112,7 +114,7 @@ public class Test implements Serializable {
     public long computeTestRunTimeout() {
         return this.getSteps().stream()
                 .mapToLong(Step::getTimeout)
-                .sum();
+                .sum() + TIMEOUT_MARGIN_OFFSET;
     }
 
    @Override

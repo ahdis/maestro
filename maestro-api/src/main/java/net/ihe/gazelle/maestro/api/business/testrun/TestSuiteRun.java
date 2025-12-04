@@ -41,6 +41,8 @@ public class TestSuiteRun implements Serializable {
    @Serial
    private static final long serialVersionUID = -4027777114820632058L;
 
+    private static final int TIMEOUT_MARGIN_OFFSET = 3000;
+
    private TestSuite testSuite;
    private List<Test> tests;
    private List<Property> inputs;
@@ -58,7 +60,7 @@ public class TestSuiteRun implements Serializable {
         return testSuite.getTestReferences().stream()
                 .map(testReference -> getTestById(testReference.getTestId()))
                 .mapToLong(Test::computeTestRunTimeout)
-                .sum();
+                .sum() + TIMEOUT_MARGIN_OFFSET;
     }
 
     private Test getTestById(String testId) {

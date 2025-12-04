@@ -31,7 +31,6 @@ import net.ihe.gazelle.maestro.spi.business.StepRun;
 import net.ihe.gazelle.simulation.business.callback.Result;
 import net.ihe.gazelle.simulation.business.callback.SimulationReport;
 import net.ihe.gazelle.simulation.business.callback.SimulationReportValidator;
-import net.ihe.gazelle.simulation.business.sequence.ServiceUnavailableException;
 import net.ihe.gazelle.simulation.business.sequence.SupportedParameter;
 import net.ihe.gazelle.simulation.business.setup.*;
 import org.slf4j.Logger;
@@ -48,7 +47,6 @@ import java.util.function.Consumer;
 public class SimulationStepExecutor implements StepExecutor {
 
    private static final Logger LOG = LoggerFactory.getLogger(SimulationStepExecutor.class);
-   public static final int DEFAULT_TIMEOUT = 60;
 
    private final SimulationHandler simulationHandler;
    private final UserInteractionHandler userInteractionHandler;
@@ -77,26 +75,12 @@ public class SimulationStepExecutor implements StepExecutor {
          );
 
          CompletableFuture<SimulationReport> futureReport = new CompletableFuture<>();
-         simulationHandler.simulate(simulationRequest, new InstructionConsumer(stepRun.getTimeout() - 2000), futureReport::complete);
+         simulationHandler.simulate(simulationRequest, new InstructionConsumer(stepRun.getTimeout()), futureReport::complete);
          SimulationReport simulationReport = waitSimulationReport(simulationRequest, futureReport);
 
          return CompletableFuture.completedFuture(buildStepRunReport(stepRun, simulationReport));
-      } catch (MissingRequiredParameterException e) {
-         return buildReportWithError(stepRun, e, "Missing Required Parameter");
-      } catch (InvalidParameterValueException e) {
-         return buildReportWithError(stepRun, e, "Invalid Parameter Value");
-      } catch (UnknownSequenceException e) {
-         return buildReportWithError(stepRun, e, "Unknown Simulation Sequence");
-      } catch (UnknownSimulationException e) {
-         return buildReportWithError(stepRun, e, "Unknown Simulation session");
-      } catch (AlreadyRunningException e) {
-         return buildReportWithError(stepRun, e, "Simulation already running");
-      } catch (ServiceUnavailableException e) {
-         return buildReportWithError(stepRun, e, "Service Unavailable");
-      } catch (ClassCastException e) {
-         return buildReportWithError(stepRun, e, "Error on property type");
       } catch (RuntimeException e) {
-         return buildReportWithError(stepRun, e, "Error from simulator");
+         return buildReportWithError(stepRun, e);
       }
    }
 
@@ -204,14 +188,9 @@ public class SimulationStepExecutor implements StepExecutor {
             .setType(SimulationStepDefinition.TYPE);
    }
 
-   private CompletableFuture<StepRunReport> buildReportWithError(StepRun stepRun, Exception e, String name) {
+   private CompletableFuture<StepRunReport> buildReportWithError(StepRun stepRun, Exception e) {
       return CompletableFuture.completedFuture(prepareStepReport(stepRun)
-            .addUnexpectedError(
-                  new UnexpectedErrorBuilder()
-                        .setName(name)
-                        .setMessage(name)
-                        .setCause(new UnexpectedErrorBuilder().fromThrowable(e))
-            )
+            .addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e))
             .build());
    }
 

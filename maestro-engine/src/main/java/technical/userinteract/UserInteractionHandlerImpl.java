@@ -43,7 +43,7 @@ public class UserInteractionHandlerImpl implements UserInteractionHandler {
         try {
             future.get(timeout, TimeUnit.MILLISECONDS);
         } catch (TimeoutException e) {
-            throw new TimeoutRuntimeException(e);
+            throw new TimeoutRuntimeException("Timeout while waiting for user", e);
         } catch (ExecutionException e) {
             throw new ExecutionRuntimeException(e);
         } catch (InterruptedException e) {
