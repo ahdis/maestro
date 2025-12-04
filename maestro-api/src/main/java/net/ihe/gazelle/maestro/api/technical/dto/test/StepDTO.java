@@ -101,7 +101,7 @@ public class StepDTO implements DTO<Step> {
       if(mappings != null) {
          mappings.stream()
                .map(StepDTO::parseMapping)
-               .forEach(e -> step.getOutputMappings().put(e.getKey(), e.getValue()));
+               .forEach(e -> step.addOutputMapping(e.getKey(), e.getValue()));
       }
    }
 
