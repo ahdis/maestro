@@ -43,7 +43,7 @@ public class SystemUnderTestValidator extends AbstractValidator<SystemUnderTest>
     @Override
     protected void addRulesAndMembers(ValidatorBuilder<? extends SystemUnderTest> validatorBuilder) {
         validatorBuilder
-                .addRule("systemIdentificationValid", SystemUnderTest::isSystemIdentificationDefined, "systemIdentification must be set")
+                .addRule(SystemUnderTest::isSystemIdentificationDefined, "systemIdentification must be set")
                 .addMember("systemIdentification", SystemUnderTest::getSystemIdentification, entityIdentificationValidator::getAssembledValidatorBuilder);
     }
 }

@@ -39,7 +39,7 @@ public class EntityIdentificationValidator extends AbstractValidator<EntityIdent
     @Override
     protected void addRulesAndMembers(ValidatorBuilder<? extends EntityIdentification> validatorBuilder) {
         validatorBuilder
-                .addRule("versionValid", EntityIdentification::isVersionValid, "Version must be set if present")
-                .addRule("nameValid", EntityIdentification::isNameValid, "Name must be set and not empty");
+                .addRule(EntityIdentification::isVersionDefinedIfPresent, "Version must be set if present")
+                .addRule(EntityIdentification::isNameDefined, "Name must be set and not empty");
     }
 }

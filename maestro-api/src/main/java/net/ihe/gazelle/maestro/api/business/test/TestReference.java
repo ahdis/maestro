@@ -35,7 +35,11 @@ public class TestReference implements Serializable {
    }
 
    public TestReference setProperties(List<Property> properties) {
-      this.properties = properties != null ? properties : new ArrayList<>();
+      this.properties = properties != null ? new ArrayList<>(properties) : new ArrayList<>();
       return this;
+   }
+
+   public boolean isTestIdDefined() {
+      return testId != null && !testId.isEmpty();
    }
 }

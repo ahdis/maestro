@@ -61,11 +61,11 @@ public class EntityIdentification implements Serializable {
       return this;
    }
 
-   public boolean isVersionValid() {
+   public boolean isVersionDefinedIfPresent() {
       return version == null || !version.isBlank();
    }
 
-   public boolean isNameValid() {
+   public boolean isNameDefined() {
       return name != null && !name.isBlank();
    }
 
