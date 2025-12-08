@@ -5,8 +5,6 @@ import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory
 import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
 import net.ihe.gazelle.maestro.api.business.property.PropertyValidator;
 
-import java.util.List;
-
 public class TestReferenceValidator extends AbstractValidator<TestReference> {
 
    private final PropertyValidator propertyValidator;

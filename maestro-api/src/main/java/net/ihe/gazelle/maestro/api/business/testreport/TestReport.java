@@ -179,11 +179,13 @@ public class TestReport implements ProtectedResource, Serializable {
     }
 
     public TestCounters getTestCounters() {
-        return testCounters;
+        return new TestCounters(testCounters);
     }
 
     public TestReport setTestCounters(TestCounters testCounters) {
-        this.testCounters = testCounters;
+        this.testCounters = testCounters != null
+                ? new TestCounters(testCounters)
+                : new TestCounters();
         return this;
     }
 

@@ -47,7 +47,7 @@ public class TestRunSession {
    }
 
    public List<Property> getContext() {
-      return context;
+      return new ArrayList<>(context);
    }
 
    public boolean hasNextStep() {

@@ -38,20 +38,24 @@ public class TestSuite implements Serializable {
    }
 
    public List<TestReference> getTestReferences() {
-      return testReferences;
+      return new ArrayList<>(testReferences);
    }
 
    public TestSuite setTestReferences(List<TestReference> testReferences) {
-      this.testReferences = testReferences != null ? new ArrayList<>(testReferences) : new ArrayList<>();
+      this.testReferences = testReferences != null
+              ? new ArrayList<>(testReferences)
+              : new ArrayList<>();
       return this;
    }
 
    public List<SupportedInput> getSupportedInputs() {
-      return supportedInputs;
+      return new ArrayList<>(supportedInputs);
    }
 
    public TestSuite setSupportedInputs(List<SupportedInput> supportedInputs) {
-      this.supportedInputs = supportedInputs;
+      this.supportedInputs = supportedInputs != null
+              ? new ArrayList<>(supportedInputs)
+              : new ArrayList<>();
       return this;
    }
 

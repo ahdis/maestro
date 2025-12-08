@@ -80,16 +80,18 @@ public class TestSuiteRun implements Serializable {
    }
 
    public List<Test> getTests() {
-      return tests;
+      return new ArrayList<>(tests);
    }
 
    public TestSuiteRun setTests(List<Test> tests) {
-      this.tests = tests != null ? new ArrayList<>(tests) : new ArrayList<>();
+      this.tests = tests != null
+              ? new ArrayList<>(tests)
+              : new ArrayList<>();
       return this;
    }
 
    public List<Property> getInputs() {
-      return inputs;
+      return new ArrayList<>(inputs);
    }
 
    public TestSuiteRun setInputs(List<Property> inputs) {
@@ -98,11 +100,13 @@ public class TestSuiteRun implements Serializable {
    }
 
    public List<SystemUnderTest> getSystemsUnderTest() {
-      return systemsUnderTest;
+      return new ArrayList<>(systemsUnderTest);
    }
 
    public TestSuiteRun setSystemsUnderTest(List<SystemUnderTest> systemsUnderTest) {
-      this.systemsUnderTest = systemsUnderTest != null ? new ArrayList<>(systemsUnderTest) : new ArrayList<>();
+      this.systemsUnderTest = systemsUnderTest != null
+              ? new ArrayList<>(systemsUnderTest)
+              : new ArrayList<>();
       return this;
    }
 

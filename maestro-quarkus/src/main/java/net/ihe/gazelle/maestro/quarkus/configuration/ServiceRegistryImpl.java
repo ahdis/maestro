@@ -25,6 +25,7 @@ import net.ihe.gazelle.servicemetadata.api.business.Service;
 import net.ihe.gazelle.servicemetadata.api.business.ServiceBuilder;
 import technical.provider.ServiceRegistry;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -33,7 +34,7 @@ public class ServiceRegistryImpl implements ServiceRegistry {
 
     private final ServiceRegistryDAO serviceRegistryDAO;
 
-    private List<Service> services = null;
+    private List<Service> services;
 
     @Inject
     public ServiceRegistryImpl(ServiceRegistryDAO serviceRegistryDAO){
@@ -46,7 +47,7 @@ public class ServiceRegistryImpl implements ServiceRegistry {
             services = serviceRegistryDAO.getServices();
             addInternalServices();
         }
-        return services;
+        return new ArrayList<>(services);
     }
 
     @Override

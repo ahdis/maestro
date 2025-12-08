@@ -75,11 +75,13 @@ public class TestRun implements Serializable {
    }
 
    public List<SystemUnderTest> getSystemsUnderTest() {
-      return systemsUnderTest;
+      return new ArrayList<>(systemsUnderTest);
    }
 
    public TestRun setSystemsUnderTest(List<SystemUnderTest> systemsUnderTest) {
-      this.systemsUnderTest = systemsUnderTest != null ? new ArrayList<>(systemsUnderTest) : new ArrayList<>();
+      this.systemsUnderTest = systemsUnderTest != null
+              ? new ArrayList<>(systemsUnderTest)
+              : new ArrayList<>();
       return this;
    }
 

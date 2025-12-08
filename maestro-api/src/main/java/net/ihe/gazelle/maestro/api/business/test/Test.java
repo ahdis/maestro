@@ -74,11 +74,13 @@ public class Test implements Serializable {
    }
 
    public List<SupportedInput> getSupportedInputs() {
-      return supportedInputs;
+      return new ArrayList<>(supportedInputs);
    }
 
    public Test setSupportedInputs(List<SupportedInput> supportedInputs) {
-      this.supportedInputs = supportedInputs != null ? new ArrayList<>(supportedInputs) : new ArrayList<>();
+      this.supportedInputs = supportedInputs != null
+              ? new ArrayList<>(supportedInputs)
+              : new ArrayList<>();
       return this;
    }
 

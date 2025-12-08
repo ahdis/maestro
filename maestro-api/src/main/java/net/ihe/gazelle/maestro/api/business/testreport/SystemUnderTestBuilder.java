@@ -48,9 +48,9 @@ public class SystemUnderTestBuilder extends AbstractBuilder<SystemUnderTest> {
     public SystemUnderTestBuilder(SystemUnderTest systemUnderTest) {
         if (systemUnderTest != null) {
             this.systemIdentification = new EntityIdentificationBuilder(systemUnderTest.getSystemIdentification());
-            this.macAddresses = systemUnderTest.getMacAddresses() != null ? new ArrayList<>(systemUnderTest.getMacAddresses()) : new ArrayList<>();
-            this.ipAddresses = systemUnderTest.getIpAddresses() != null ? new ArrayList<>(systemUnderTest.getIpAddresses()) : new ArrayList<>();
-            this.hostNames = systemUnderTest.getHostNames() != null ? new ArrayList<>(systemUnderTest.getHostNames()) : new ArrayList<>();
+            this.macAddresses = new ArrayList<>(systemUnderTest.getMacAddresses());
+            this.ipAddresses = new ArrayList<>(systemUnderTest.getIpAddresses());
+            this.hostNames = new ArrayList<>(systemUnderTest.getHostNames());
         } else {
             macAddresses = new ArrayList<>();
             ipAddresses = new ArrayList<>();
@@ -64,7 +64,9 @@ public class SystemUnderTestBuilder extends AbstractBuilder<SystemUnderTest> {
     }
 
     public SystemUnderTestBuilder setMacAddresses(List<String> macAddresses) {
-        this.macAddresses = macAddresses;
+        this.macAddresses = macAddresses != null
+                ? new ArrayList<>(macAddresses)
+                : new ArrayList<>();
         return this;
     }
 
@@ -79,7 +81,9 @@ public class SystemUnderTestBuilder extends AbstractBuilder<SystemUnderTest> {
     }
 
     public SystemUnderTestBuilder setIpAddresses(List<String> ipAddresses) {
-        this.ipAddresses = ipAddresses;
+        this.ipAddresses = ipAddresses != null
+                ? new ArrayList<>(ipAddresses)
+                : new ArrayList<>();
         return this;
     }
 
@@ -94,7 +98,9 @@ public class SystemUnderTestBuilder extends AbstractBuilder<SystemUnderTest> {
     }
 
     public SystemUnderTestBuilder setHostNames(List<String> hostNames) {
-        this.hostNames = hostNames;
+        this.hostNames = hostNames != null
+                ? new ArrayList<>(hostNames)
+                : new ArrayList<>();
         return this;
     }
 

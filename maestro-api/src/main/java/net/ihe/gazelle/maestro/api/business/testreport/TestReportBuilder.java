@@ -137,7 +137,9 @@ public class TestReportBuilder extends AbstractBuilder<TestReport> {
     }
 
     public TestReportBuilder setUnexpectedErrors(List<UnexpectedErrorBuilder> unexpectedErrors) {
-        this.unexpectedErrors = unexpectedErrors;
+        this.unexpectedErrors = unexpectedErrors != null
+                ? new ArrayList<>(unexpectedErrors)
+                : new ArrayList<>();
         return this;
     }
 
