@@ -2,18 +2,7 @@ package net.ihe.gazelle.maestrorecording.adapter;
 
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.testreport.ByteArrayItemProperty;
-import net.ihe.gazelle.maestro.spi.business.recording.AttachmentOutputBuilder;
-import net.ihe.gazelle.maestro.spi.business.recording.ItemOutputBuilder;
-import net.ihe.gazelle.maestro.spi.business.recording.MaestroAttachment;
-import net.ihe.gazelle.maestro.spi.business.recording.MaestroItem;
-import net.ihe.gazelle.maestro.spi.business.recording.MaestroRefType;
-import net.ihe.gazelle.maestro.spi.business.recording.PropertyReferenceFactory;
-import net.ihe.gazelle.maestro.spi.business.recording.ReferenceBinding;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputContext;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputDissector;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputProjection;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputProjectionBuilder;
-import net.ihe.gazelle.maestro.spi.business.recording.SubItemOutputBuilder;
+import net.ihe.gazelle.maestro.spi.business.recording.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;

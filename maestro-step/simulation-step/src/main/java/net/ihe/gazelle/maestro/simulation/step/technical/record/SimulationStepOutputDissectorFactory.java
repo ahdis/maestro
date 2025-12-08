@@ -16,9 +16,9 @@
 
 package net.ihe.gazelle.maestro.simulation.step.technical.record;
 
+import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepDefinition;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputDissector;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputDissectorFactory;
-import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepDefinition;
 
 /**
  * Registers the simulation step output dissector.

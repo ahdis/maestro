@@ -23,9 +23,9 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import net.ihe.gazelle.itb.gateway.business.reporting.ItbReporting;
-import net.ihe.gazelle.itb.gateway.business.ItbReportingService;
 import net.ihe.gazelle.itb.gateway.business.CatchItbReportServiceException;
+import net.ihe.gazelle.itb.gateway.business.ItbReportingService;
+import net.ihe.gazelle.itb.gateway.business.reporting.ItbReporting;
 
 import java.util.NoSuchElementException;
 

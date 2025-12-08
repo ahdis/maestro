@@ -38,7 +38,9 @@ public class UserInteractionHandlerImpl implements UserInteractionHandler {
 
     @Override
     public void displayMessage(String interactionTitle, String message, long timeout) {
-        CompletableFuture<UserInteractionCompleted> future = observer.interactWithUser(new InteractWithUser(interactionTitle, message, timeout));
+        CompletableFuture<UserInteractionCompleted> future = observer.interactWithUser(
+                new InteractWithUser(interactionTitle, message, timeout)
+        );
 
         try {
             future.get(timeout, TimeUnit.MILLISECONDS);

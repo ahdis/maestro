@@ -154,9 +154,7 @@ public class SimulationStepExecutor implements StepExecutor {
          throw new TimeoutRuntimeException("Simulation timed out after " + timeout + " seconds");
       } catch (InterruptedException e) {
          Thread.currentThread().interrupt();
-         // FIXME returning a null report will cause NPE later.
-         // After an interrupt, we should immediately stop and leave the SimulationStepExecutor.
-         return null;
+          throw new ExecutionRuntimeException(e);
       } catch (ExecutionException e) {
          throw new ExecutionRuntimeException(e);
       }

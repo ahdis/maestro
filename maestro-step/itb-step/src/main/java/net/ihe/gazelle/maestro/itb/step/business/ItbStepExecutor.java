@@ -16,7 +16,13 @@
 
 package net.ihe.gazelle.maestro.itb.step.business;
 
+import net.ihe.gazelle.itb.gateway.business.ItbSessionStore;
+import net.ihe.gazelle.itb.gateway.business.RunItbTestService;
+import net.ihe.gazelle.itb.gateway.business.reporting.ItbReporting;
 import net.ihe.gazelle.itb.gateway.business.reporting.ItbResult;
+import net.ihe.gazelle.itb.gateway.business.request.Parameter;
+import net.ihe.gazelle.itb.gateway.business.request.TestCase;
+import net.ihe.gazelle.itb.gateway.business.request.TestRequest;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
@@ -24,12 +30,6 @@ import net.ihe.gazelle.maestro.api.business.test.SupportedInput;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
-import net.ihe.gazelle.itb.gateway.business.ItbSessionStore;
-import net.ihe.gazelle.itb.gateway.business.RunItbTestService;
-import net.ihe.gazelle.itb.gateway.business.reporting.ItbReporting;
-import net.ihe.gazelle.itb.gateway.business.request.Parameter;
-import net.ihe.gazelle.itb.gateway.business.request.TestCase;
-import net.ihe.gazelle.itb.gateway.business.request.TestRequest;
 import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 import net.ihe.gazelle.maestro.spi.business.StepRun;
 
