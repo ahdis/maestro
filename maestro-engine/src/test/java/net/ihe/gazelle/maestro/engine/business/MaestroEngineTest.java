@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class MaestroEngineTest {
 
    private ExecutorService executorService;
-    private RecordingMaestroImpl maestro;
+    private RecordingMaestro maestro;
    private ScriptedStepExecutorProvider stepExecutorProvider;
    private InMemoryTestReportRecordingService reportRecordService;
 
@@ -58,9 +58,9 @@ class MaestroEngineTest {
       TestRunner testRunner = new TestRunner(testRunSessionStore, broker);
       StepRunner stepRunner = new StepRunner(stepExecutorProvider, broker);
 
-      MaestroImpl maestroImpl = new MaestroImpl(testRunObserverStore, testSuiteRunObserverStore, broker, new MetadataServiceMock());
-      maestro = new RecordingMaestroImpl(maestroImpl, reportRecordService);
-      broker.setServices(maestroImpl, testSuiteRunner, testRunner, stepRunner);
+      MaestroFacade maestroFacade = new MaestroFacade(testRunObserverStore, testSuiteRunObserverStore, broker, new MetadataServiceMock());
+      maestro = new RecordingMaestro(maestroFacade, reportRecordService);
+      broker.setServices(maestroFacade, testSuiteRunner, testRunner, stepRunner);
    }
 
    @AfterEach

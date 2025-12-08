@@ -28,14 +28,15 @@ import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
 import net.ihe.gazelle.maestro.engine.business.context.TestRunSession;
 import net.ihe.gazelle.maestro.engine.business.context.TestSuiteSession;
 import net.ihe.gazelle.servicemetadata.api.business.MetadataService;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 @ApplicationScoped
 public class MaestroFactory {
 
    private final SessionStore<TestSuiteSession> suiteSessionStore;
    private final SessionStore<TestRunSession> testSessionStore;
-    private final SessionStore<MaestroObserver> testRunObserverStore;
-    private final SessionStore<MaestroObserver> testSuiteRunObserverStore;
+   private final SessionStore<MaestroObserver> testRunObserverStore;
+   private final SessionStore<MaestroObserver> testSuiteRunObserverStore;
    private final MaestroEventProducer maestroEventProducer;
    private final TestSuiteEventProducer testSuiteEventProducer;
    private final TestRunEventProducer testRunEventProducer;
@@ -43,6 +44,7 @@ public class MaestroFactory {
    private final StepExecutorProvider stepExecutorProvider;
    private final TestReportRecordingService testReportRecordingService;
    private final MetadataService metadataService;
+   private final Boolean reportRecordingEnabled;
 
    @Inject
    public MaestroFactory(@TestSuiteStore SessionStore<TestSuiteSession> suiteSessionStore,
@@ -55,7 +57,8 @@ public class MaestroFactory {
                          StepRunEventProducer stepRunEventProducer,
                          TestReportRecordingService testReportRecordingService,
                          StepExecutorProvider stepExecutorProvider,
-                         MetadataService metadataService) {
+                         MetadataService metadataService,
+                         @ConfigProperty(name = "gzl.report.recording.enabled") Boolean reportRecordingEnabled) {
       this.suiteSessionStore = suiteSessionStore;
       this.testSessionStore = testSessionStore;
       this.testRunObserverStore = testRunObserverStore;
@@ -67,6 +70,7 @@ public class MaestroFactory {
       this.testReportRecordingService = testReportRecordingService;
       this.stepExecutorProvider = stepExecutorProvider;
       this.metadataService = metadataService;
+      this.reportRecordingEnabled = reportRecordingEnabled;
    }
 
    @Produces
@@ -77,21 +81,22 @@ public class MaestroFactory {
 
    @Produces
    @Default
-   public MaestroImpl getMaestro() {
-       return new MaestroImpl(
-               testRunObserverStore,
-               testSuiteRunObserverStore,
-               maestroEventProducer,
-               metadataService
-       );
+   public Maestro getRecordingMaestro() {
+      if(Boolean.TRUE.equals(reportRecordingEnabled)) {
+         return new RecordingMaestro(getMaestro(), testReportRecordingService);
+      }
+      return new StandaloneMaestro(getMaestro());
    }
 
    @Produces
    @Default
-   public Maestro getRecordingMaestro() {
-       return new RecordingMaestroImpl(
-               getMaestro(),
-             testReportRecordingService);
+   public MaestroFacade getMaestro() {
+      return new MaestroFacade(
+            testRunObserverStore,
+            testSuiteRunObserverStore,
+            maestroEventProducer,
+            metadataService
+      );
    }
 
    @Produces
@@ -108,7 +113,7 @@ public class MaestroFactory {
 
    @Produces
    @Default
-   public StepRunner getStepRunnerJob() {
+   public StepRunner getStepRunner() {
       return new StepRunner(stepExecutorProvider, stepRunEventProducer);
    }
 

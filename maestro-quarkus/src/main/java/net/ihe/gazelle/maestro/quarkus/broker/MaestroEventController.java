@@ -22,7 +22,7 @@ import jakarta.enterprise.event.ObservesAsync;
 import jakarta.inject.Inject;
 import net.ihe.gazelle.maestro.api.business.message.*;
 import net.ihe.gazelle.maestro.engine.business.MaestroEventProducer;
-import net.ihe.gazelle.maestro.engine.business.MaestroImpl;
+import net.ihe.gazelle.maestro.engine.business.MaestroFacade;
 
 /**
  * This class is the event broker that listen to all kind of messages used in Maestro application It will trigger
@@ -31,12 +31,12 @@ import net.ihe.gazelle.maestro.engine.business.MaestroImpl;
 @RequestScoped
 public class MaestroEventController implements MaestroEventProducer {
 
-   private final MaestroImpl maestroImpl;
+   private final MaestroFacade maestroFacade;
    private final Event<Message> messageEvent;
 
    @Inject
-   public MaestroEventController(MaestroImpl maestroImpl, Event<Message> messageEvent) {
-      this.maestroImpl = maestroImpl;
+   public MaestroEventController(MaestroFacade maestroFacade, Event<Message> messageEvent) {
+      this.maestroFacade = maestroFacade;
       this.messageEvent = messageEvent;
    }
 
@@ -51,23 +51,23 @@ public class MaestroEventController implements MaestroEventProducer {
     }
 
    public void onStartTestRun(@ObservesAsync StartTestRun startTestRun) {
-      maestroImpl.listen(startTestRun);
+      maestroFacade.listen(startTestRun);
    }
 
    public void onStartStepRun(@ObservesAsync StartStepRun startStepRun) {
-      maestroImpl.listen(startStepRun);
+      maestroFacade.listen(startStepRun);
    }
 
    public void onStepRunFinished(@ObservesAsync StepRunFinished stepRunFinished) {
-      maestroImpl.listen(stepRunFinished);
+      maestroFacade.listen(stepRunFinished);
    }
 
    public void onTestRunFinished(@ObservesAsync TestRunFinished testRunFinished) {
-      maestroImpl.listen(testRunFinished);
+      maestroFacade.listen(testRunFinished);
    }
 
    public void onTestSuiteRunFinished(@ObservesAsync TestSuiteRunFinished testSuiteRunFinished) {
-      maestroImpl.listen(testSuiteRunFinished);
+      maestroFacade.listen(testSuiteRunFinished);
    }
 
 }

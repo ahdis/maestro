@@ -62,8 +62,8 @@ public class ServiceRegistryImpl implements ServiceRegistry {
     private void addInternalServices() {
         services.add(new ServiceBuilder()
                 .setVersion("1.0.0")
-                .setInstanceId("112233")
-                .setReplicaId("112")
+                .setInstanceId("00000")
+                .setReplicaId("001")
                 .setName(UserInteractionHandler.SERVICE_NAME)
                 .addProvidedInterfaceBuilder(new ProvidedInterfaceBuilder()
                         .setInterfaceVersion("1.0.0")

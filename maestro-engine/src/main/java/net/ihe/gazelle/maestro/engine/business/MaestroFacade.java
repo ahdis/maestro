@@ -33,7 +33,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
-public class MaestroImpl {
+public class MaestroFacade {
 
     private final TestSuiteRunValidator testSuiteRunValidator = new TestSuiteRunValidator();
     private final TestRunValidator testRunValidator = new TestRunValidator();
@@ -42,10 +42,10 @@ public class MaestroImpl {
     private final MaestroEventProducer maestroEventProducer;
     private final Service maestroService;
 
-    public MaestroImpl(SessionStore<MaestroObserver> testRunObserverStore,
-                       SessionStore<MaestroObserver> testSuiteRunObserverStore,
-                       MaestroEventProducer maestroEventProducer,
-                       MetadataService metadataService) {
+    public MaestroFacade(SessionStore<MaestroObserver> testRunObserverStore,
+                         SessionStore<MaestroObserver> testSuiteRunObserverStore,
+                         MaestroEventProducer maestroEventProducer,
+                         MetadataService metadataService) {
         this.testRunObserverStore = testRunObserverStore;
         this.testSuiteRunObserverStore = testSuiteRunObserverStore;
         this.maestroEventProducer = maestroEventProducer;
