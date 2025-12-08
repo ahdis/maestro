@@ -18,64 +18,71 @@ package net.ihe.gazelle.maestro.api.technical.dto.report;
 
 import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.testreport.Test;
+import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({"id", "name", "name", "description"})
-public class TestDTO {
+@JsonPropertyOrder({
+        "id",
+        "name",
+        "version",
+        "description"
+})
+public class TestDTO implements DTO<Test> {
 
     @JsonIgnore
-    private final Test domain;
+    private final Test test;
 
     public TestDTO() {
-        domain = new Test();
+        this(new Test());
     }
 
-    public TestDTO(Test domain) {
-        this.domain = domain;
+    public TestDTO(Test test) {
+        this.test = test;
+    }
+
+    @Override
+    @JsonIgnore
+    public Test getBusinessObject() {
+        return test;
     }
 
     @JsonGetter(value = "id")
     public String getId() {
-        return domain.getId();
+        return getBusinessObject().getId();
     }
 
     @JsonSetter(value = "id")
     public void setId(String id) {
-        domain.setId(id);
+        getBusinessObject().setId(id);
     }
 
     @JsonGetter(value = "name")
     public String getName() {
-        return domain.getName();
+        return getBusinessObject().getName();
     }
 
     @JsonSetter(value = "name")
     public void setName(String name) {
-        domain.setName(name);
+        getBusinessObject().setName(name);
     }
 
     @JsonGetter(value = "version")
     public String getVersion() {
-        return domain.getVersion();
+        return getBusinessObject().getVersion();
     }
 
     @JsonSetter(value = "version")
     public void setVersion(String version) {
-        domain.setVersion(version);
+        getBusinessObject().setVersion(version);
     }
 
     @JsonGetter(value = "description")
     public String getDescription() {
-        return domain.getDescription();
+        return getBusinessObject().getDescription();
     }
 
     @JsonSetter(value = "description")
     public void setDescription(String description) {
-        domain.setDescription(description);
-    }
-
-    @JsonIgnore
-    public Test getDomain() {
-        return domain;
+        getBusinessObject().setDescription(description);
     }
 }

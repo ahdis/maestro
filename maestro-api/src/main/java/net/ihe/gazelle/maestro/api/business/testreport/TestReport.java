@@ -16,11 +16,17 @@
 
 package net.ihe.gazelle.maestro.api.business.testreport;
 
-import net.ihe.gazelle.lang.UnexpectedError;
+import net.ihe.gazelle.errorhandling.business.UnexpectedError;
 import net.ihe.gazelle.security.business.ProtectedResource;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 
-import java.util.*;
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 import static net.ihe.gazelle.maestro.api.business.testreport.Result.UNDEFINED;
 
@@ -48,13 +54,16 @@ import static net.ihe.gazelle.maestro.api.business.testreport.Result.UNDEFINED;
  * Counters must be valid
  */
 
-public class TestReport implements ProtectedResource {
+public class TestReport implements ProtectedResource, Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 6609223753209152140L;
 
     public static final String REPORT_VERSION = "1.0";
 
     private String reportVersion;
     private String uuid;
-    private Date dateTime;
+    private Instant dateTime;
     private TestService testService;
     private List<SystemUnderTest> systemsUnderTest;
     private Result result;
@@ -67,10 +76,9 @@ public class TestReport implements ProtectedResource {
     private List<UnexpectedError> unexpectedErrors;
     private AccessControlList accessControlList;
 
-
     public TestReport() {
         reportVersion = REPORT_VERSION;
-        dateTime = new Date();
+        dateTime = Instant.now();
         result = Result.UNDEFINED;
         systemsUnderTest = new ArrayList<>();
         subReports = new ArrayList<>();
@@ -115,12 +123,12 @@ public class TestReport implements ProtectedResource {
         return this;
     }
 
-    public Date getDateTime() {
-        return new Date(dateTime.getTime());
+    public Instant getDateTime() {
+        return dateTime;
     }
 
-    public TestReport setDateTime(Date dateTime) {
-        this.dateTime = new Date(dateTime.getTime());
+    public TestReport setDateTime(Instant dateTime) {
+        this.dateTime = dateTime;
         return this;
     }
 
@@ -335,7 +343,7 @@ public class TestReport implements ProtectedResource {
     }
 
     public boolean isDateTimeValid() {
-        return dateTime != null && !dateTime.after(new Date());
+        return dateTime != null && !dateTime.isAfter(Instant.now());
     }
 
     public boolean isResultValid() {
@@ -364,16 +372,6 @@ public class TestReport implements ProtectedResource {
 
     public boolean hasAtLeastOneResult() {
         return !(subReports.isEmpty() && testRunReports.isEmpty() && unexpectedErrors.isEmpty());
-    }
-
-    public boolean isValid() {
-        return isUuidValid()
-                && isDateTimeValid()
-                && isResultValid()
-                && isTestSuiteNameValid()
-                && isNoteValid()
-                && isUrlToTestSuiteResultValid()
-                && hasAtLeastOneResult();
     }
 
     @Override

@@ -18,74 +18,82 @@ package net.ihe.gazelle.maestro.api.technical.dto.report;
 
 import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.testreport.TestCounters;
+import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({"total", "passed", "failed", "undefined", "unexpectedErrors"})
-public class TestCountersDTO {
+@JsonPropertyOrder({
+        "total",
+        "passed",
+        "failed",
+        "undefined",
+        "unexpectedErrors"
+})
+public class TestCountersDTO implements DTO<TestCounters> {
 
     @JsonIgnore
-    private final TestCounters domain;
+    private final TestCounters testCounters;
 
     public TestCountersDTO() {
-        this.domain = new TestCounters();
+        this(new TestCounters());
     }
 
-    public TestCountersDTO(TestCounters domain) {
-        this.domain = domain;
+    public TestCountersDTO(TestCounters testCounters) {
+        this.testCounters = testCounters;
+    }
+
+    @Override
+    @JsonIgnore
+    public TestCounters getBusinessObject() {
+        return testCounters;
     }
 
     @JsonGetter(value = "total")
     public int getTotal() {
-        return domain.getTotal();
+        return getBusinessObject().getTotal();
     }
 
     @JsonSetter(value = "total")
     public void setTotal(int total) {
-        domain.setTotal(total);
+        getBusinessObject().setTotal(total);
     }
 
     @JsonGetter(value = "passed")
     public int getPassed() {
-        return domain.getPassed();
+        return getBusinessObject().getPassed();
     }
 
     @JsonSetter(value = "passed")
     public void setPassed(int passed) {
-        domain.setPassed(passed);
+        getBusinessObject().setPassed(passed);
     }
 
     @JsonGetter(value = "failed")
     public int getFailed() {
-        return domain.getFailed();
+        return getBusinessObject().getFailed();
     }
 
     @JsonSetter(value = "failed")
     public void setFailed(int failed) {
-        domain.setFailed(failed);
+        getBusinessObject().setFailed(failed);
     }
 
     @JsonGetter(value = "undefined")
     public int getUndefined() {
-        return domain.getUndefined();
+        return getBusinessObject().getUndefined();
     }
 
     @JsonSetter(value = "undefined")
     public void setUndefined(int undefined) {
-        domain.setUndefined(undefined);
+        getBusinessObject().setUndefined(undefined);
     }
 
     @JsonGetter(value = "unexpectedErrors")
     public int getUnexpectedErrors() {
-        return domain.getUnexpectedErrors();
+        return getBusinessObject().getUnexpectedErrors();
     }
 
     @JsonSetter(value = "unexpectedErrors")
     public void setUnexpectedErrors(int unexpectedErrors) {
-        domain.setUnexpectedErrors(unexpectedErrors);
-    }
-
-    @JsonIgnore
-    public TestCounters getDomain() {
-        return domain;
+        getBusinessObject().setUnexpectedErrors(unexpectedErrors);
     }
 }

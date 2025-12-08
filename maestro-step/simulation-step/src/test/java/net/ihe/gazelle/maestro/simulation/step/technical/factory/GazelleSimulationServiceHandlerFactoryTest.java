@@ -17,9 +17,10 @@
 package net.ihe.gazelle.maestro.simulation.step.technical.factory;
 
 import io.quarkus.test.junit.QuarkusTest;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
-import net.ihe.gazelle.maestro.simulation.step.technical.ConfigProviderMock;
 import net.ihe.gazelle.maestro.simulation.step.technical.handler.GazelleSimulationServiceHandler;
+import net.ihe.gazelle.maestro.simulation.step.technical.mock.ConfigProviderMock;
+import net.ihe.gazelle.maestro.spi.business.Handler;
+import net.ihe.gazelle.maestro.spi.technical.HandlerContext;
 import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterface;
 import net.ihe.gazelle.servicemetadata.api.business.HttpRestBinding;
 import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterface;
@@ -57,7 +58,7 @@ class GazelleSimulationServiceHandlerFactoryTest {
         providedInterface.addBinding(binding);
         providedInterface.setInterfaceVersion("1.0.0");
         providedInterface.setInterfaceName("test");
-        Handler handler = factory.createHandler(providedInterface, new ConfigProviderMock());
+        Handler handler = factory.createHandler(new HandlerContext("simulator"), providedInterface, new ConfigProviderMock());
         assertNotNull(handler);
         assertInstanceOf(GazelleSimulationServiceHandler.class, handler);
     }
@@ -70,7 +71,7 @@ class GazelleSimulationServiceHandlerFactoryTest {
         ConfigProviderMock configProvider = new ConfigProviderMock();
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> factory.createHandler(providedInterface, configProvider)
+                () -> factory.createHandler(new HandlerContext("simulator"), providedInterface, configProvider)
         );
         assertEquals("Service test has no bindings", exception.getMessage());
     }

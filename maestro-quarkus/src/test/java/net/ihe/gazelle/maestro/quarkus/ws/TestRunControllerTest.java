@@ -20,29 +20,19 @@ import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
-import net.ihe.gazelle.maestro.api.business.testreport.Result;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
-import net.ihe.gazelle.maestro.api.business.testrun.InvalidTestRunException;
-import net.ihe.gazelle.maestro.api.business.testrun.Maestro;
-import net.ihe.gazelle.maestro.api.business.testrun.Property;
-import net.ihe.gazelle.maestro.api.business.testrun.PropertyRef;
-import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
-import net.ihe.gazelle.maestro.api.business.testrun.UnsupportedPropertyTypeException;
-import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
-import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestRunDTO;
-import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSetRunDTO;
-import net.ihe.gazelle.maestro.business.MaestroImpl;
-import net.ihe.gazelle.maestro.business.MissingArgumentException;
-import net.ihe.gazelle.maestro.quarkus.NotProvidedStep;
-import net.ihe.gazelle.maestro.quarkus.SessionStoreContextImpl;
-import net.ihe.gazelle.maestro.quarkus.factory.TestRunMockEvent;
-import net.ihe.gazelle.maestro.quarkus.jobs.EventMaestroProducer;
-import net.ihe.gazelle.maestro.quarkus.jobs.SynchronousMaestro;
-import net.ihe.gazelle.maestro.quarkus.mock.InMemoryTestReportRecordService;
-import net.ihe.gazelle.maestro.quarkus.mock.StepMockEvent;
-import net.ihe.gazelle.maestro.quarkus.ws.async.AsynchronousMaestro;
-import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
-import net.ihe.gazelle.security.business.acl.AccessControlList;
+import net.ihe.gazelle.maestro.api.business.InvalidTestRunException;
+import net.ihe.gazelle.maestro.api.business.MaestroObserver;
+import net.ihe.gazelle.maestro.api.business.SynchronousMaestro;
+import net.ihe.gazelle.maestro.api.business.UnsupportedPropertyTypeException;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
+import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.test.TestDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSuiteRunDTO;
+import net.ihe.gazelle.maestro.engine.business.RecordingMaestroImpl;
+import net.ihe.gazelle.maestro.engine.business.UnknownStepException;
+import net.ihe.gazelle.maestro.quarkus.utils.ObjectFactory;
+import net.ihe.gazelle.security.technical.acl.AccessControlListDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,12 +40,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -66,143 +55,145 @@ class TestRunControllerTest {
     SynchronousMaestro synchronousMaestro;
 
     @Mock
-    AsynchronousMaestro asynchronousMaestro;
+    RecordingMaestroImpl maestroImpl;
 
     TestRunControllerImpl controller;
 
     @BeforeEach
     void setUp() {
-        controller = new TestRunControllerImpl(synchronousMaestro, asynchronousMaestro);
-        controller.dataHouseUrl = "http://datahouse";
+        controller = new TestRunControllerImpl(synchronousMaestro, maestroImpl);
     }
 
     @Test
-    void runWithoutCallbackReturnsOkResponseWithSummaryLocation() throws Exception {
-        TestReportSummary summary = new TestReportSummary()
-                .setId("summary-id")
-                .setResult(Result.PASSED)
-                .setDateTime(new Date());
-        when(synchronousMaestro.executeTestSet(any())).thenReturn(summary);
+    void executeTestSuiteWithoutCallbackReturnsOkResponseWithSummaryLocation() throws Exception {
+        TestReport testReport = ObjectFactory.createTestReport();
+        when(synchronousMaestro.executeTestSuite(any(), anyBoolean())).thenReturn(testReport);
 
-        Response response = controller.run(null, testSetRunDto());
+        try (Response response = controller.executeTestSuite(testSetExecuteTestSuiteDto(), false, null)) {
+            assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+            TestReportDTO entity = (TestReportDTO) response.getEntity();
+            assertNotNull(entity);
+            assertEquals(testReport.getTestSuiteName(), entity.getTestSuiteName());
 
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-        TestReportSummaryDTO entity = (TestReportSummaryDTO) response.getEntity();
-        assertNotNull(entity);
-        assertEquals("http://datahouse/items/summary-id", entity.getLocation());
-
-        ArgumentCaptor<net.ihe.gazelle.maestro.api.business.testrun.TestSetRun> testSetRunCaptor = ArgumentCaptor.forClass(net.ihe.gazelle.maestro.api.business.testrun.TestSetRun.class);
-        verify(synchronousMaestro).executeTestSet(testSetRunCaptor.capture());
-        assertEquals(1, testSetRunCaptor.getValue().getTestRuns().size());
-        verifyNoInteractions(asynchronousMaestro);
+            ArgumentCaptor<TestSuiteRun> testSetRunCaptor = ArgumentCaptor.forClass(TestSuiteRun.class);
+            verify(synchronousMaestro).executeTestSuite(testSetRunCaptor.capture(), eq(false));
+            assertEquals(1, testSetRunCaptor.getValue().getTests().size());
+            verifyNoInteractions(maestroImpl);
+        }
     }
 
     @Test
-    void runWithCallbackTriggersAsyncExecutionAndReturnsAccepted() {
-        Response response = controller.run("http://callback", testSetRunDto());
+    void executeTestSuiteWithCallbackTriggersAsyncExecutionAndReturnsAccepted() {
+        try (Response response = controller.executeTestSuite(testSetExecuteTestSuiteDto(), false, "http://callback")) {
+            assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus());
 
-        assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus());
-
-        ArgumentCaptor<net.ihe.gazelle.maestro.api.business.testrun.TestSetRun> testSetRunCaptor = ArgumentCaptor.forClass(net.ihe.gazelle.maestro.api.business.testrun.TestSetRun.class);
-        verify(asynchronousMaestro).executeTestSet(eq("http://callback"), testSetRunCaptor.capture());
-        assertEquals(1, testSetRunCaptor.getValue().getTestRuns().size());
-        verifyNoInteractions(synchronousMaestro);
+            ArgumentCaptor<TestSuiteRun> testSetRunCaptor = ArgumentCaptor.forClass(TestSuiteRun.class);
+            ArgumentCaptor<MaestroObserver> callerCaptor = ArgumentCaptor.forClass(MaestroObserver.class);
+            verify(maestroImpl).executeTestSuite(testSetRunCaptor.capture(), anyBoolean(), callerCaptor.capture());
+            assertEquals(1, testSetRunCaptor.getValue().getTests().size());
+            verifyNoInteractions(synchronousMaestro);
+        }
     }
 
     @Test
-    void runWithoutCallbackInvalidTestRunReturnsBadRequest() throws Exception {
-        when(synchronousMaestro.executeTestSet(any())).thenThrow(new InvalidTestRunException("invalid"));
+    void runWithoutCallbackInvalidTestExecuteTestSuiteReturnsBadRequest() throws Exception {
+        when(synchronousMaestro.executeTestSuite(any(), anyBoolean())).thenThrow(new InvalidTestRunException("invalid"));
 
-        Response response = controller.run(null, testSetRunDto());
-
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
-        assertTrue(response.getEntity().toString().contains("bad format"));
+        try (Response response = controller.executeTestSuite(testSetExecuteTestSuiteDto(), false, null)) {
+            assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+            assertTrue(response.getEntity().toString().contains("bad format"));
+        }
     }
 
     @Test
-    void runWithoutCallbackTimeoutReturnsGatewayTimeout() throws Exception {
-        when(synchronousMaestro.executeTestSet(any())).thenThrow(new TimeoutException("too long"));
+    void executeTestSuiteWithoutCallbackTimeoutReturnsGatewayTimeout() throws Exception {
+        when(synchronousMaestro.executeTestSuite(any(), anyBoolean())).thenThrow(new TimeoutException("too long"));
 
-        Response response = controller.run(null, testSetRunDto());
-
-        assertEquals(Response.Status.GATEWAY_TIMEOUT.getStatusCode(), response.getStatus());
-        assertEquals(SynchronousMaestro.TIMEOUT_MESSAGE, response.getEntity());
+        try (Response response = controller.executeTestSuite(testSetExecuteTestSuiteDto(), false, null)) {
+            assertEquals(Response.Status.GATEWAY_TIMEOUT.getStatusCode(), response.getStatus());
+            assertEquals(SynchronousMaestro.TIMEOUT_MESSAGE, response.getEntity());
+        }
     }
 
     @Test
-    void runWithoutCallbackWebApplicationExceptionReturnsGatewayTimeout() throws Exception {
-        when(synchronousMaestro.executeTestSet(any())).thenThrow(new WebApplicationException("timeout"));
+    void executeTestSuiteWithoutCallbackWebApplicationExceptionReturnsGatewayTimeout() throws Exception {
+        when(synchronousMaestro.executeTestSuite(any(), anyBoolean())).thenThrow(new WebApplicationException("timeout"));
 
-        Response response = controller.run(null, testSetRunDto());
-
-        assertEquals(Response.Status.GATEWAY_TIMEOUT.getStatusCode(), response.getStatus());
-        assertEquals(SynchronousMaestro.TIMEOUT_MESSAGE, response.getEntity());
+        try (Response response = controller.executeTestSuite(testSetExecuteTestSuiteDto(), false, null)) {
+            assertEquals(Response.Status.GATEWAY_TIMEOUT.getStatusCode(), response.getStatus());
+            assertEquals(SynchronousMaestro.TIMEOUT_MESSAGE, response.getEntity());
+        }
     }
 
     @Test
-    void runWithoutCallbackNotProvidedStepReturnsBadRequest() throws Exception {
-        when(synchronousMaestro.executeTestSet(any())).thenThrow(new NotProvidedStep("missing step"));
+    void executeTestSuiteWithoutCallbackNotProvidedStepReturnsBadRequest() throws Exception {
+        when(synchronousMaestro.executeTestSuite(any(), anyBoolean())).thenThrow(new UnknownStepException("aStep"));
 
-        Response response = controller.run(null, testSetRunDto());
-
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
-        assertTrue(response.getEntity().toString().contains("non provided"));
+        try (Response response = controller.executeTestSuite(testSetExecuteTestSuiteDto(), false, null)) {
+            assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+            assertThat(
+                    response.getEntity().toString(),
+                    containsString("aStep")
+            );
+        }
     }
 
     @Test
-    void runWithoutCallbackUnexpectedExceptionInterruptsThreadAndReturnsInternalServerError() throws Exception {
-        when(synchronousMaestro.executeTestSet(any())).thenThrow(new RuntimeException("boom"));
+    void executeTestSuiteWithoutCallbackUnexpectedExceptionInterruptsThreadAndReturnsInternalServerError() throws Exception {
+        when(synchronousMaestro.executeTestSuite(any(), anyBoolean())).thenThrow(new RuntimeException("boom"));
 
-        Response response = controller.run(null, testSetRunDto());
-
-        assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
-        assertTrue(Thread.currentThread().isInterrupted());
-        assertTrue(response.getEntity().toString().contains("an error occurred"));
-        Thread.interrupted();
+        try (Response response = controller.executeTestSuite(testSetExecuteTestSuiteDto(), false, null)) {
+            assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+            assertTrue(Thread.currentThread().isInterrupted());
+            assertTrue(response.getEntity().toString().contains("an error occurred"));
+        }
     }
 
     @Test
-    void runWithCallbackInvalidTestRunReturnsBadRequest() {
+    void runWithCallbackInvalidTestExecuteTestSuiteReturnsBadRequest() {
         doThrow(new InvalidTestRunException("invalid"))
-                .when(asynchronousMaestro).executeTestSet(anyString(), any());
+                .when(maestroImpl).executeTestSuite(any(), anyBoolean(), any());
 
-        Response response = controller.run("http://callback", testSetRunDto());
-
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
-        assertTrue(response.getEntity().toString().contains("bad format"));
+        try (Response response = controller.executeTestSuite(testSetExecuteTestSuiteDto(), false, "http://callback")) {
+            assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+            assertTrue(response.getEntity().toString().contains("bad format"));
+        }
     }
 
     @Test
-    void runWithCallbackNotProvidedStepReturnsBadRequest() {
-        doThrow(new NotProvidedStep("missing"))
-                .when(asynchronousMaestro).executeTestSet(anyString(), any());
+    void executeTestSuiteWithCallbackNotProvidedStepReturnsBadRequest() {
+        doThrow(new UnknownStepException("missing"))
+                .when(maestroImpl).executeTestSuite(any(), anyBoolean(), any());
 
-        Response response = controller.run("http://callback", testSetRunDto());
-
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
-        assertTrue(response.getEntity().toString().contains("non provided"));
+        try (Response response = controller.executeTestSuite(testSetExecuteTestSuiteDto(), false, "http://callback")) {
+            assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+            assertThat(
+                    response.getEntity().toString(),
+                    containsString("missing")
+            );
+        }
     }
 
     @Test
-    void runWithCallbackWebApplicationExceptionReturnsGatewayTimeout() {
+    void executeTestSuiteWithCallbackWebApplicationExceptionReturnsGatewayTimeout() {
         doThrow(new WebApplicationException("timeout"))
-                .when(asynchronousMaestro).executeTestSet(anyString(), any());
+                .when(maestroImpl).executeTestSuite(any(), anyBoolean(), any());
 
-        Response response = controller.run("http://callback", testSetRunDto());
-
-        assertEquals(Response.Status.GATEWAY_TIMEOUT.getStatusCode(), response.getStatus());
-        assertEquals(SynchronousMaestro.TIMEOUT_MESSAGE, response.getEntity());
+        try (Response response = controller.executeTestSuite(testSetExecuteTestSuiteDto(), false, "http://callback")) {
+            assertEquals(Response.Status.GATEWAY_TIMEOUT.getStatusCode(), response.getStatus());
+            assertEquals(SynchronousMaestro.TIMEOUT_MESSAGE, response.getEntity());
+        }
     }
 
     @Test
-    void runWithCallbackUnexpectedExceptionReturnsInternalServerError() {
+    void executeTestSuiteWithCallbackUnexpectedExceptionReturnsInternalServerError() {
         doThrow(new RuntimeException("boom"))
-                .when(asynchronousMaestro).executeTestSet(anyString(), any());
+                .when(maestroImpl).executeTestSuite(any(), anyBoolean(), any());
 
-        Response response = controller.run("http://callback", testSetRunDto());
-
-        assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
-        assertTrue(response.getEntity().toString().contains("an error occurred"));
+        try (Response response = controller.executeTestSuite(testSetExecuteTestSuiteDto(), false, "http://callback")) {
+            assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+            assertTrue(response.getEntity().toString().contains("an error occurred"));
+        }
     }
 
     @Test
@@ -211,10 +202,10 @@ class TestRunControllerTest {
         Exception wrapper = new RuntimeException("wrapper", illegalArgumentException);
         Exception root = new Exception("root", wrapper);
 
-        Response response = controller.handleJsonProcessingException(root);
-
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
-        assertEquals("bad input", response.getEntity());
+        try (Response response = controller.handleJsonProcessingException(root)) {
+            assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+            assertEquals("bad input", response.getEntity());
+        }
     }
 
     @Test
@@ -223,66 +214,36 @@ class TestRunControllerTest {
         Exception wrapper = new RuntimeException("wrapper", unsupportedPropertyTypeException);
         Exception root = new Exception("root", wrapper);
 
-        Response response = controller.handleJsonProcessingException(root);
-
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
-        assertEquals("unsupported", response.getEntity());
+        try (Response response = controller.handleJsonProcessingException(root)) {
+            assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+            assertEquals("unsupported", response.getEntity());
+        }
     }
 
     @Test
     void handleJsonProcessingExceptionWithInvalidTypeIdReturnsOriginalMessage() {
         InvalidTypeIdException invalidTypeIdException = InvalidTypeIdException.from(null, "original message", TypeFactory.defaultInstance().constructType(Object.class), "type");
 
-        Response response = controller.handleJsonProcessingException(invalidTypeIdException);
-
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
-        assertEquals("original message", response.getEntity());
+        try (Response response = controller.handleJsonProcessingException(invalidTypeIdException)) {
+            assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+            assertEquals("original message", response.getEntity());
+        }
     }
 
     @Test
     void handleJsonProcessingExceptionWithUnknownExceptionReturnsGenericMessage() {
         Exception exception = new Exception("unknown");
 
-        Response response = controller.handleJsonProcessingException(exception);
-
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
-        assertEquals("Unable to parse TestRun structure.", response.getEntity());
+        try (Response response = controller.handleJsonProcessingException(exception)) {
+            assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+            assertEquals("Unable to parse TestSuite structure.", response.getEntity());
+        }
     }
 
-    @Test
-    void reportValidationStep() throws MissingArgumentException {
-        TestRun testRun = new TestRun();
-
-        net.ihe.gazelle.maestro.api.business.testrun.Test test = new net.ihe.gazelle.maestro.api.business.testrun.Test();
-                test.addStep(new ValidationStep(
-                        "iti78-request-validation",
-                        new Property<>(ValidationStep.VALIDATION_SERVICE, "matchbox"),
-                        new Property<>(ValidationStep.VALIDATION_PROFILE, "Parameters"),
-                        new ArrayList<>(List.of(new PropertyRef<>("content", "iti78-request", byte[].class))))
-                );
-
-        testRun.setTest(test);
-
-        testRun
-                .addInputs(new Property<>("iti78-request", "eaozieuaozieuaozieauo".getBytes(StandardCharsets.UTF_8)))
-                .addInputs(new Property<>("matchbox", "https://gazelle.ihe.net/matchboxv3/gazelle/validation"))
-        ;
-
-
-        Maestro engine = getEngine();
-        engine.run(testRun);
-
-    }
-
-    private Maestro getEngine() {
-        return new MaestroImpl(new EventMaestroProducer(new TestRunMockEvent(), new StepMockEvent()), new SessionStoreContextImpl(), new InMemoryTestReportRecordService(), "999.0.0");
-    }
-
-    private TestSetRunDTO testSetRunDto() {
-        TestSetRunDTO dto = new TestSetRunDTO();
-        TestRun testRun = new TestRun().setTestSetId("test-set");
-        dto.setTestRuns(List.of(new TestRunDTO(testRun)));
-        dto.setAccessControlList(new AccessControlList());
+    private TestSuiteRunDTO testSetExecuteTestSuiteDto() {
+        TestSuiteRunDTO dto = new TestSuiteRunDTO();
+        dto.setTests(List.of(new TestDTO(new net.ihe.gazelle.maestro.api.business.test.Test())));
+        dto.setAccessControlList(new AccessControlListDTO());
         return dto;
     }
 }

@@ -16,70 +16,93 @@
 
 package net.ihe.gazelle.maestro.api.technical.dto.testrun;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonSetter;
-import net.ihe.gazelle.maestro.api.business.testrun.Property;
+import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
+import net.ihe.gazelle.maestro.api.technical.dto.property.PropertyDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.report.SystemUnderTestDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.test.TestDTO;
+import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
+import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
+import net.ihe.gazelle.security.technical.acl.AccessControlListDTO;
 
-import java.util.ArrayList;
 import java.util.List;
 
-@JsonPropertyOrder({"testSetId", "test", "inputs"})
-public class TestRunDTO {
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonPropertyOrder({
+      "test",
+      "inputs",
+      "systemsUnderTest",
+      "accessControlList"
+})
+public class TestRunDTO implements DTO<TestRun> {
 
-    @JsonIgnore
-    private final TestRun domain;
+   @JsonIgnore
+   private final TestRun testRun;
 
-    public TestRunDTO() {
-        domain = new TestRun();
-    }
+   public TestRunDTO() {
+      this(new TestRun());
+   }
 
-    public TestRunDTO(TestRun domain) {
-        this.domain = domain;
-    }
+   public TestRunDTO(TestRun testRun) {
+      this.testRun = testRun;
+   }
 
-    @JsonGetter("testSetId")
-    public String getTestSetId() {
-        return domain.getTestSetId();
-    }
+   @Override
+   @JsonIgnore
+   public TestRun getBusinessObject() {
+      return testRun;
+   }
 
-    @JsonSetter("testSetId")
-    public void setTestSetId(String testSetId) {
-        domain.setTestSetId(testSetId);
-    }
+   @JsonProperty("test")
+   public TestDTO getTest() {
+      return new TestDTO(testRun.getTest());
+   }
 
-    @JsonGetter("test")
-    public TestDTO getTest() {
-        return new TestDTO(domain.getTest());
-    }
+   public void setTest(TestDTO test) {
+      testRun.setTest(test.getBusinessObject());
+   }
 
-    @JsonSetter("test")
-    public void setTest(TestDTO test) {
-        domain.setTest(test.getDomain());
-    }
+    @SuppressWarnings("rawtypes")
+   @JsonProperty("inputs")
+   public List<PropertyDTO> getInputs() {
+      return testRun.getInputs().stream()
+            .map(SubTypingDTO::fromBusinessObject)
+            .map(PropertyDTO.class::cast)
+            .toList();
+   }
 
-    @JsonGetter("inputs")
-    public List<PropertyDTO> getInputs() {
-        List<PropertyDTO> propertyDTOList = new ArrayList<>();
-        for (Property<?> property : domain.getInputs()) {
-            propertyDTOList.add(new PropertyDTO(property));
-        }
-        return propertyDTOList;
-    }
+   public void setInputs(List<PropertyDTO<?>> inputs) {
+      testRun.setInputs(
+              inputs.stream()
+                      .map(DTO::getBusinessObject)
+                      .map(Property.class::cast)
+                      .toList()
+      );
+   }
 
-    @JsonSetter("inputs")
-    public void setInputs(List<PropertyDTO> inputs) {
-        List<Property<?>> properties = new ArrayList<>();
-        for (PropertyDTO propertyDTO : inputs) {
-            properties.add(propertyDTO.getDomain());
-        }
-        domain.setInputs(properties);
-    }
+   @JsonProperty("accessControlList")
+   public AccessControlListDTO getAccessControlList() {
+      return new AccessControlListDTO(testRun.getAccessControlList());
+   }
 
-    @JsonIgnore
-    public TestRun getDomain() {
-        return domain;
-    }
+   public void setAccessControlList(AccessControlListDTO accessControlList) {
+      testRun.setAccessControlList(accessControlList.getBusinessObject());
+   }
+
+   @JsonProperty("systemsUnderTest")
+   public List<SystemUnderTestDTO> getSystemsUnderTest() {
+      return testRun.getSystemsUnderTest() != null ? testRun.getSystemsUnderTest().stream().map(SystemUnderTestDTO::new).toList() : null;
+   }
+
+   public void setSystemsUnderTest(List<SystemUnderTestDTO> sutDTOs) {
+      testRun.setSystemsUnderTest(
+              sutDTOs.stream()
+                      .map(SystemUnderTestDTO::getBusinessObject)
+                      .toList()
+      );
+   }
 }

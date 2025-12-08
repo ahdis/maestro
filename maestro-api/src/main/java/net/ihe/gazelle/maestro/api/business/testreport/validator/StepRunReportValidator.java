@@ -16,26 +16,28 @@
 
 package net.ihe.gazelle.maestro.api.business.testreport.validator;
 
+import net.ihe.gazelle.errorhandling.business.UnexpectedErrorValidator;
 import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilder;
 import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory;
 import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
+import net.ihe.gazelle.maestro.api.business.property.PropertyValidator;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 
 public class StepRunReportValidator extends AbstractValidator<StepRunReport> {
 
-    private final OutputValidator outputValidator;
+    private final PropertyValidator propertyValidator;
     private final UnexpectedErrorValidator unexpectedErrorValidator;
 
     public StepRunReportValidator() {
         super();
-        outputValidator = new OutputValidator();
+        propertyValidator = new PropertyValidator();
         unexpectedErrorValidator = new UnexpectedErrorValidator();
     }
 
     public StepRunReportValidator(ValidatorBuilderFactory validatorBuilderFactory) {
         super(validatorBuilderFactory);
-        outputValidator = new OutputValidator();
-        unexpectedErrorValidator = new UnexpectedErrorValidator();
+        propertyValidator = new PropertyValidator(validatorBuilderFactory);
+        unexpectedErrorValidator = new UnexpectedErrorValidator(validatorBuilderFactory);
     }
 
     @Override
@@ -46,10 +48,10 @@ public class StepRunReportValidator extends AbstractValidator<StepRunReport> {
     @Override
     protected void addRulesAndMembers(ValidatorBuilder<? extends StepRunReport> validatorBuilder) {
         validatorBuilder
-                .addRule("stepIdValid", StepRunReport::isStepIdValid, "StepId must be set and not empty")
-                .addRule("typeValid", StepRunReport::isTypeValid, "Type must be set and not empty")
-                .addRule("resultValid", StepRunReport::isResultValid, "Result must be set")
-                .addMember("outputs", StepRunReport::getOutputs, outputValidator::getAssembledValidatorBuilder)
+                .addRule(StepRunReport::isStepNameValid, "Step Name must be set and not empty")
+                .addRule( StepRunReport::isTypeValid, "Type must be set and not empty")
+                .addRule(StepRunReport::isResultValid, "Result must be set")
+                .addMember("outputs", StepRunReport::getOutputs, propertyValidator::getAssembledValidatorBuilder)
                 .addMember("unexpectedErrors", StepRunReport::getUnexpectedErrors, unexpectedErrorValidator::getAssembledValidatorBuilder);
     }
 }

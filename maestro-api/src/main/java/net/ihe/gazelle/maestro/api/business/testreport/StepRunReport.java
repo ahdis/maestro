@@ -16,8 +16,12 @@
 
 package net.ihe.gazelle.maestro.api.business.testreport;
 
-import net.ihe.gazelle.lang.UnexpectedError;
+import net.ihe.gazelle.errorhandling.business.UnexpectedError;
+import net.ihe.gazelle.maestro.api.business.property.Property;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -26,123 +30,132 @@ import java.util.Objects;
  * mandatory fields : stepId, type, result
  *
  */
-public class StepRunReport {
+public class StepRunReport implements Serializable {
 
-    private String stepId;
-    private String type;
-    private StepResult result;
-    private List<Output> outputs;
-    private List<UnexpectedError> unexpectedErrors;
+   @Serial
+   private static final long serialVersionUID = -5259327294299524545L;
 
-    public StepRunReport() {
-        result = StepResult.UNDEFINED;
-        outputs = new ArrayList<>();
-        unexpectedErrors = new ArrayList<>();
-    }
+   private String stepName;
+   private String type;
+   private Instant dateTime;
+   private StepResult result;
+   private List<Property> outputs;
+   private List<UnexpectedError> unexpectedErrors;
 
-    public StepRunReport(String stepId, String type, StepResult result) {
-        this();
-        this.stepId = stepId;
-        this.type = type;
-        this.result = result;
-    }
+   public StepRunReport() {
+       dateTime = Instant.now();
+       result = StepResult.UNDEFINED;
+       outputs = new ArrayList<>();
+       unexpectedErrors = new ArrayList<>();
+   }
 
-    public String getStepId() {
-        return stepId;
-    }
+   public StepRunReport(String type, StepResult result) {
+      this();
+      this.type = type;
+      this.result = result;
+   }
 
-    public StepRunReport setStepId(String stepId) {
-        this.stepId = stepId;
-        return this;
-    }
+   public String getStepName() {
+      return stepName;
+   }
 
-    public String getType() {
-        return type;
-    }
+   public StepRunReport setStepName(String stepName) {
+      this.stepName = stepName;
+      return this;
+   }
 
-    public StepRunReport setType(String type) {
-        this.type = type;
-        return this;
-    }
+   public String getType() {
+      return type;
+   }
 
-    public StepResult getResult() {
-        return result;
-    }
+   public StepRunReport setType(String type) {
+      this.type = type;
+      return this;
+   }
 
-    public StepRunReport setResult(StepResult result) {
-        this.result = result;
-        return this;
-    }
+   public Instant getDateTime() {
+      return dateTime;
+   }
 
-    public List<Output> getOutputs() {
-        return new ArrayList<>(outputs);
-    }
+   public StepRunReport setDateTime(Instant dateTime) {
+      this.dateTime = dateTime;
+      return this;
+   }
 
-    public StepRunReport setOutputs(List<Output> outputs) {
-        this.outputs = new ArrayList<>(outputs);
-        return this;
-    }
+   public StepResult getResult() {
+      return result;
+   }
 
-    public StepRunReport addOutput(Output output) {
-        outputs.add(output);
-        return this;
-    }
+   public StepRunReport setResult(StepResult result) {
+      this.result = result;
+      return this;
+   }
 
-    public StepRunReport addOutputs(List<Output> outputs) {
-        this.outputs.addAll(outputs);
-        return this;
-    }
+   public List<Property> getOutputs() {
+      return new ArrayList<>(outputs);
+   }
 
-    public List<UnexpectedError> getUnexpectedErrors() {
-        return unexpectedErrors;
-    }
+   public StepRunReport setOutputs(List<Property> outputs) {
+      this.outputs = new ArrayList<>(outputs);
+      return this;
+   }
 
-    public StepRunReport setUnexpectedErrors(List<UnexpectedError> unexpectedErrors) {
-        this.unexpectedErrors = unexpectedErrors;
-        return this;
-    }
+   public StepRunReport addOutput(Property output) {
+      outputs.add(output);
+      return this;
+   }
 
-    public StepRunReport addUnexpectedError(UnexpectedError unexpectedError) {
-        unexpectedErrors.add(unexpectedError);
-        return this;
-    }
+   public StepRunReport addOutputs(List<Property> outputs) {
+      this.outputs.addAll(outputs);
+      return this;
+   }
 
-    public boolean isStepIdValid() {
-        return stepId != null && !stepId.isBlank();
-    }
+   public List<UnexpectedError> getUnexpectedErrors() {
+      return unexpectedErrors;
+   }
 
-    public boolean isTypeValid() {
-        return type != null && !type.isBlank();
-    }
+   public StepRunReport setUnexpectedErrors(List<UnexpectedError> unexpectedErrors) {
+      this.unexpectedErrors = unexpectedErrors;
+      return this;
+   }
 
-    public boolean isResultValid() {
-        return result != null;
-    }
+   public StepRunReport addUnexpectedError(UnexpectedError unexpectedError) {
+      unexpectedErrors.add(unexpectedError);
+      return this;
+   }
 
-    public boolean isValid() {
-        return isStepIdValid() && isTypeValid() && isResultValid();
-    }
+   public boolean isStepNameValid() {
+      return stepName != null && !stepName.isBlank();
+   }
 
-    public StepResult computeResult() {
-        if (!unexpectedErrors.isEmpty()) {
-            result = StepResult.UNDEFINED;
-        }
-        return result;
-    }
+   public boolean isTypeValid() {
+      return type != null && !type.isBlank();
+   }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof StepRunReport stepRunReport)) return false;
-        return Objects.equals(stepId, stepRunReport.stepId)
-                && Objects.equals(type, stepRunReport.type)
-                && result == stepRunReport.result
-                && Objects.equals(outputs, stepRunReport.outputs)
-                && Objects.equals(unexpectedErrors, stepRunReport.unexpectedErrors);
-    }
+   public boolean isResultValid() {
+      return result != null;
+   }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(stepId, type, result, outputs, unexpectedErrors);
-    }
+   public StepResult computeResult() {
+      if (!unexpectedErrors.isEmpty()) {
+         result = StepResult.UNDEFINED;
+      }
+      return result;
+   }
+
+   @Override
+   public boolean equals(Object o) {
+      if (!(o instanceof StepRunReport report)) {
+         return false;
+      }
+      return Objects.equals(stepName, report.stepName) && Objects.equals(type,
+            report.type) && Objects.equals(dateTime,
+            report.dateTime) && result == report.result && Objects.equals(outputs,
+            report.outputs) && Objects.equals(unexpectedErrors, report.unexpectedErrors);
+   }
+
+   @Override
+   public int hashCode() {
+      return Objects.hash(stepName, type, dateTime, result, outputs, unexpectedErrors);
+   }
 }

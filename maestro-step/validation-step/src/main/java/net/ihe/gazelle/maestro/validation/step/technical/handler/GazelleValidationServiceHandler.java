@@ -16,54 +16,53 @@
 
 package net.ihe.gazelle.maestro.validation.step.technical.handler;
 
-import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
-import net.ihe.gazelle.maestro.validation.step.business.ServiceClientException;
+import net.ihe.gazelle.maestro.spi.business.Handler;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationHandler;
 import net.ihe.gazelle.validation.v2.api.business.ValidationService;
 import net.ihe.gazelle.validation.v2.api.business.profile.ValidationProfile;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
 import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 public class GazelleValidationServiceHandler implements ValidationHandler {
 
-    private ValidationService validationService;
+   private static final Logger LOG = LoggerFactory.getLogger(GazelleValidationServiceHandler.class);
 
-    protected GazelleValidationServiceHandler() {
-        /*Empty constructor used for mocking*/
-    }
+   private final ValidationService validationService;
 
-    public GazelleValidationServiceHandler(ValidationService validationService) {
-        this.validationService = validationService;
-    }
+   public GazelleValidationServiceHandler(ValidationService validationService) {
+      if (validationService == null) {
+         throw new IllegalArgumentException("validationService cannot be null");
+      }
+      this.validationService = validationService;
+   }
 
-    /**
-     * Override from {@link Handler} Interface
-     */
-    @Override
-    public boolean isAvailable() {
-        return validationService.getValidationProfiles() != null;
-    }
+   /**
+    * Override from {@link Handler} Interface
+    */
+   @Override
+   public boolean isAvailable() {
+      try {
+         return validationService.getValidationProfiles() != null;
+      } catch (Exception e) {
+         LOG.error("Error while trying to reach validation service", e);
+         return false;
+      }
+   }
 
-    @Override
-    public ValidationReport validate(ValidationRequest validationRequest) {
-        if (validationRequest == null) {
-            throw new IllegalArgumentException("Validation request cannot be null");
-        }
-        if (validationService != null) {
-            return validationService.validate(validationRequest);
-        } else {
-            throw new ServiceClientException("validationService not set");
-        }
-    }
+   @Override
+   public ValidationReport validate(ValidationRequest validationRequest) {
+      if (validationRequest == null) {
+         throw new IllegalArgumentException("validationRequest cannot be null");
+      }
+      return validationService.validate(validationRequest);
+   }
 
-    @Override
-    public List<ValidationProfile> getValidationProfiles() {
-        if (validationService != null) {
-            return validationService.getValidationProfiles();
-        } else {
-            throw new ServiceClientException("validationService not set");
-        }
-    }
+   @Override
+   public List<ValidationProfile> getValidationProfiles() {
+       return validationService.getValidationProfiles();
+   }
 }

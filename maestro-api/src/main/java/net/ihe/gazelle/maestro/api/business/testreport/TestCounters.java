@@ -16,6 +16,8 @@
 
 package net.ihe.gazelle.maestro.api.business.testreport;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
@@ -23,7 +25,10 @@ import java.util.Objects;
  * at least 0 for every int <br>
  * total = sum(passed, failed, undefined)
  */
-public class TestCounters {
+public class TestCounters implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 5953325041092171103L;
 
     private int total;
     private int passed;
@@ -137,14 +142,6 @@ public class TestCounters {
 
     public boolean isUnexpectedErrorsValid() {
         return unexpectedErrors >= 0;
-    }
-
-    public boolean isValid() {
-        return isTotalValid()
-                && isPassedValid()
-                && isFailedValid()
-                && isUndefinedValid()
-                && isUnexpectedErrorsValid();
     }
 
     @Override

@@ -16,6 +16,7 @@
 
 package net.ihe.gazelle.maestro.api.business.testreport.validator;
 
+import net.ihe.gazelle.errorhandling.business.UnexpectedErrorValidator;
 import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilder;
 import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory;
 import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
@@ -38,7 +39,7 @@ public class TestReportValidator extends AbstractValidator<TestReport> {
         unexpectedErrorValidator = new UnexpectedErrorValidator();
     }
 
-    public TestReportValidator(TestReportValidator testReportValidator) {
+    TestReportValidator(TestReportValidator testReportValidator) {
         super();
         testServiceValidator = new TestServiceValidator();
         systemUnderTestValidator = new SystemUnderTestValidator();
@@ -49,20 +50,20 @@ public class TestReportValidator extends AbstractValidator<TestReport> {
 
     public TestReportValidator(ValidatorBuilderFactory validatorBuilderFactory) {
         super(validatorBuilderFactory);
-        testServiceValidator = new TestServiceValidator();
-        systemUnderTestValidator = new SystemUnderTestValidator();
+        testServiceValidator = new TestServiceValidator(validatorBuilderFactory);
+        systemUnderTestValidator = new SystemUnderTestValidator(validatorBuilderFactory);
         subReportValidator = new TestReportValidator(validatorBuilderFactory, this);
-        testRunReportValidator = new TestRunReportValidator();
-        unexpectedErrorValidator = new UnexpectedErrorValidator();
+        testRunReportValidator = new TestRunReportValidator(validatorBuilderFactory);
+        unexpectedErrorValidator = new UnexpectedErrorValidator(validatorBuilderFactory);
     }
 
-    public TestReportValidator(ValidatorBuilderFactory builderFactory, TestReportValidator testReportValidator) {
+    TestReportValidator(ValidatorBuilderFactory builderFactory, TestReportValidator testReportValidator) {
         super(builderFactory);
-        testServiceValidator = new TestServiceValidator();
-        systemUnderTestValidator = new SystemUnderTestValidator();
+        testServiceValidator = new TestServiceValidator(builderFactory);
+        systemUnderTestValidator = new SystemUnderTestValidator(builderFactory);
         subReportValidator = testReportValidator;
-        testRunReportValidator = new TestRunReportValidator();
-        unexpectedErrorValidator = new UnexpectedErrorValidator();
+        testRunReportValidator = new TestRunReportValidator(builderFactory);
+        unexpectedErrorValidator = new UnexpectedErrorValidator(builderFactory);
     }
 
     @Override

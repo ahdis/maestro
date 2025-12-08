@@ -16,14 +16,15 @@
 
 package net.ihe.gazelle.maestro.api.business.testreport;
 
+import net.ihe.gazelle.errorhandling.business.UnexpectedErrorBuilder;
 import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory;
 import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractBuilder;
 import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
-import net.ihe.gazelle.maestro.api.business.acl.AccessControlListBuilder;
 import net.ihe.gazelle.maestro.api.business.testreport.validator.TestReportValidator;
+import net.ihe.gazelle.security.business.acl.AccessControlListBuilder;
 
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,34 +32,37 @@ public class TestReportBuilder extends AbstractBuilder<TestReport> {
 
     private String reportVersion;
     private final String uuid;
-    private Date dateTime;
+    private Instant dateTime;
     private TestServiceBuilder testService;
     private List<SystemUnderTestBuilder> systemsUnderTest;
     private String testSuiteName;
     private String note;
     private String urlToTestSuiteResult;
     private List<TestReportBuilder> subReports;
-    private List<TestRunReportBuilder> testRunReports;
+    private List<TestRunReport> testRunReports;
+    private List<TestRunReportBuilder> testRunReportBuilders;
     private List<UnexpectedErrorBuilder> unexpectedErrors;
     private AccessControlListBuilder accessControlListBuilder;
 
     public TestReportBuilder() {
         super();
         uuid = UUID.randomUUID().toString();
-        dateTime = new Date();
+        dateTime = Instant.now();
         systemsUnderTest = new ArrayList<>();
         subReports = new ArrayList<>();
         testRunReports = new ArrayList<>();
+        testRunReportBuilders = new ArrayList<>();
         unexpectedErrors = new ArrayList<>();
     }
 
     public TestReportBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
         super(validatorBuilderFactory);
         uuid = UUID.randomUUID().toString();
-        dateTime = new Date();
+        dateTime = Instant.now();
         systemsUnderTest = new ArrayList<>();
         subReports = new ArrayList<>();
         testRunReports = new ArrayList<>();
+        testRunReportBuilders = new ArrayList<>();
         unexpectedErrors = new ArrayList<>();
     }
 
@@ -67,8 +71,8 @@ public class TestReportBuilder extends AbstractBuilder<TestReport> {
         return this;
     }
 
-    public TestReportBuilder setDateTime(Date dateTime) {
-        this.dateTime = new Date(dateTime.getTime());
+    public TestReportBuilder setDateTime(Instant dateTime) {
+        this.dateTime = dateTime;
         return this;
     }
 
@@ -112,12 +116,22 @@ public class TestReportBuilder extends AbstractBuilder<TestReport> {
         return this;
     }
 
-    public TestReportBuilder setTestRunReports(List<TestRunReportBuilder> testRunReports) {
-        this.testRunReports = testRunReports;
+    public TestReportBuilder addTestRunReportBuilders(List<TestRunReportBuilder> testRunReports) {
+        this.testRunReportBuilders.addAll(testRunReports);
+        return this;
+    }
+
+    public TestReportBuilder addTestRunReports(List<TestRunReport> testRunReports) {
+        this.testRunReports.addAll(testRunReports);
         return this;
     }
 
     public TestReportBuilder addTestRunReport(TestRunReportBuilder testRunReport) {
+        this.testRunReportBuilders.add(testRunReport);
+        return this;
+    }
+
+    public TestReportBuilder addTestRunReport(TestRunReport testRunReport) {
         this.testRunReports.add(testRunReport);
         return this;
     }
@@ -173,9 +187,12 @@ public class TestReportBuilder extends AbstractBuilder<TestReport> {
                                 .toList() : new ArrayList<>()
                 )
                 .setTestRunReports(
-                        !testRunReports.isEmpty() ? testRunReports.stream()
+                        !testRunReportBuilders.isEmpty() ? testRunReportBuilders.stream()
                                 .map(AbstractBuilder::staticBuildWithoutValidation)
                                 .toList() : new ArrayList<>()
+                )
+                .addTestRunReports(
+                        !testRunReports.isEmpty() ? testRunReports : new ArrayList<>()
                 )
                 .setUnexpectedErrors(
                         !unexpectedErrors.isEmpty() ? unexpectedErrors.stream()

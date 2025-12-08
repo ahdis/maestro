@@ -14,23 +14,18 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>net.ihe.gazelle</groupId>
         <artifactId>maestro-step</artifactId>
-        <version>0.5.1-SNAPSHOT</version>
+        <version>0.6.0-NO-ITB-SNAPSHOT</version>
     </parent>
 
     <artifactId>validation-step</artifactId>
 
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <evs-client-api.version>2.0.0</evs-client-api.version>
-
     </properties>
 
     <dependencies>
@@ -45,22 +40,6 @@
         </dependency>
 
         <!-- Gazelle dependencies -->
-        <dependency>
-            <groupId>net.ihe.gazelle</groupId>
-            <artifactId>framework-model-validator</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.ihe.gazelle</groupId>
-            <artifactId>framework-model-marshaller</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.ihe.gazelle</groupId>
-            <artifactId>service-metadata-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.ihe.gazelle</groupId>
-            <artifactId>service-metadata-jaxrs-api</artifactId>
-        </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>validation-v1-api</artifactId>
@@ -79,18 +58,56 @@
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
-            <artifactId>lang</artifactId>
+            <artifactId>evs-client-api</artifactId>
+            <version>${evs-client-api.version}</version>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
-            <artifactId>evs-client-api</artifactId>
-            <version>${evs-client-api.version}</version>
+            <artifactId>error-handling</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>framework-model-validator</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>framework-model-marshaller</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>service-metadata-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>service-metadata-jaxrs-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>lang</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.kereval.gazelle</groupId>
+            <artifactId>datahouse-api</artifactId>
+            <version>${datahouse.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Libraries -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Test dependencies -->

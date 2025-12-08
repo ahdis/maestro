@@ -16,10 +16,10 @@
 
 package net.ihe.gazelle.maestro.validation.step.technical.factory;
 
-import net.ihe.gazelle.maestro.api.business.testrun.runner.ConfigProvider;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.HandlerFactory;
-import net.ihe.gazelle.maestro.validation.step.business.ServiceClientException;
+import net.ihe.gazelle.maestro.spi.business.Handler;
+import net.ihe.gazelle.maestro.spi.technical.ConfigProvider;
+import net.ihe.gazelle.maestro.spi.technical.HandlerContext;
+import net.ihe.gazelle.maestro.spi.technical.HandlerFactory;
 import net.ihe.gazelle.maestro.validation.step.technical.handler.GazelleValidationServiceHandler;
 import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterface;
 import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterfaceBuilder;
@@ -40,7 +40,10 @@ public class GazelleValidationServiceHandlerFactory implements HandlerFactory {
     }
 
     @Override
-    public Handler createHandler(ProvidedInterface providedInterface, ConfigProvider configProvider) throws IllegalArgumentException {
+   public Handler createHandler(HandlerContext handlerContext, ProvidedInterface providedInterface, ConfigProvider configProvider) throws IllegalArgumentException {
+        if (providedInterface == null || providedInterface.getBindings() == null || providedInterface.getBindings().isEmpty()) {
+            throw new IllegalArgumentException("Service " + (providedInterface != null ? providedInterface.getInterfaceName() : "Validation Service") + " has no bindings");
+        }
         try {
             HttpRestBinding binding = (HttpRestBinding) providedInterface.getBindings().getFirst();
             String interfaceVersion = providedInterface.getInterfaceVersion();
@@ -53,7 +56,7 @@ public class GazelleValidationServiceHandlerFactory implements HandlerFactory {
         } catch (NullPointerException e) {
             throw new IllegalArgumentException("Service " + providedInterface.getInterfaceName() + " has no bindings");
         } catch (URISyntaxException e) {
-            throw new ServiceClientException("Can't initiate validation handler due to exception while creating client from server url", e);
+            throw new IllegalArgumentException("Can't initiate validation handler due to exception while creating client from server url", e);
         }
     }
 
@@ -74,4 +77,3 @@ public class GazelleValidationServiceHandlerFactory implements HandlerFactory {
                 .build());
     }
 }
-

@@ -18,12 +18,12 @@ package net.ihe.gazelle.maestro.quarkus.configuration;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import net.ihe.gazelle.maestro.quarkus.ServiceRegistry;
-import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionHandler;
+import net.ihe.gazelle.maestro.api.business.userinteract.UserInteractionHandler;
 import net.ihe.gazelle.servicemetadata.api.business.HttpRestBindingBuilder;
 import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterfaceBuilder;
 import net.ihe.gazelle.servicemetadata.api.business.Service;
 import net.ihe.gazelle.servicemetadata.api.business.ServiceBuilder;
+import technical.provider.ServiceRegistry;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -64,7 +64,7 @@ public class ServiceRegistryImpl implements ServiceRegistry {
                 .setVersion("1.0.0")
                 .setInstanceId("112233")
                 .setReplicaId("112")
-                .setName(UserInteractionHandler.NAME)
+                .setName(UserInteractionHandler.SERVICE_NAME)
                 .addProvidedInterfaceBuilder(new ProvidedInterfaceBuilder()
                         .setInterfaceVersion("1.0.0")
                         .setInterfaceName(UserInteractionHandler.INTERFACE_NAME)

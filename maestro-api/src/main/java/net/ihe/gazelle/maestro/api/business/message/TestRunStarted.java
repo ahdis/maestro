@@ -1,0 +1,27 @@
+package net.ihe.gazelle.maestro.api.business.message;
+
+import net.ihe.gazelle.lang.Event;
+
+import java.io.Serial;
+
+@Event
+public class TestRunStarted implements Message {
+    @Serial
+    private static final long serialVersionUID = 1L;
+    private String testId;
+
+    public TestRunStarted() {}
+
+    public TestRunStarted(String testId) {
+        this.testId = testId;
+    }
+
+    public String getTestId() {
+        return testId;
+    }
+
+    public TestRunStarted setTestId(String testId) {
+        this.testId = testId;
+        return this;
+    }
+}

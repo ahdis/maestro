@@ -20,53 +20,96 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Produces;
-import net.ihe.gazelle.maestro.api.business.testrun.Maestro;
-import net.ihe.gazelle.maestro.api.business.testrun.MaestroEventProducer;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.ConfigProvider;
-import net.ihe.gazelle.maestro.business.MaestroImpl;
-import net.ihe.gazelle.maestro.business.TestReportRecordService;
-import net.ihe.gazelle.maestro.quarkus.ServiceRegistry;
-import net.ihe.gazelle.maestro.quarkus.SessionStoreContextImpl;
-import net.ihe.gazelle.maestro.quarkus.StepRunnerProviderSPI;
-import net.ihe.gazelle.maestro.quarkus.handler.HandlerProviderSPI;
-import net.ihe.gazelle.maestro.quarkus.jobs.StepRunnerProvider;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-
+import net.ihe.gazelle.maestro.api.business.Maestro;
+import net.ihe.gazelle.maestro.api.business.MaestroObserver;
+import net.ihe.gazelle.maestro.api.business.SynchronousMaestro;
+import net.ihe.gazelle.maestro.engine.business.*;
+import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
+import net.ihe.gazelle.maestro.engine.business.context.TestRunSession;
+import net.ihe.gazelle.maestro.engine.business.context.TestSuiteSession;
+import net.ihe.gazelle.servicemetadata.api.business.MetadataService;
 
 @ApplicationScoped
 public class MaestroFactory {
 
+   private final SessionStore<TestSuiteSession> suiteSessionStore;
+   private final SessionStore<TestRunSession> testSessionStore;
+    private final SessionStore<MaestroObserver> testRunObserverStore;
+    private final SessionStore<MaestroObserver> testSuiteRunObserverStore;
+   private final MaestroEventProducer maestroEventProducer;
+   private final TestSuiteEventProducer testSuiteEventProducer;
+   private final TestRunEventProducer testRunEventProducer;
+   private final StepRunEventProducer stepRunEventProducer;
+   private final StepExecutorProvider stepExecutorProvider;
+   private final TestReportRecordingService testReportRecordingService;
+   private final MetadataService metadataService;
 
-    @ConfigProperty(name = "quarkus.application.version")
-    String applicationVersion;
+   @Inject
+   public MaestroFactory(@TestSuiteStore SessionStore<TestSuiteSession> suiteSessionStore,
+                         @TestRunStore SessionStore<TestRunSession> testSessionStore,
+                         @TestRunObserverStore SessionStore<MaestroObserver> testRunObserverStore,
+                         @TestSuiteRunObserverStore SessionStore<MaestroObserver> testSuiteRunObserverStore,
+                         MaestroEventProducer maestroEventProducer,
+                         TestSuiteEventProducer testSuiteTestReportRecordService,
+                         TestRunEventProducer testRunEventProducer,
+                         StepRunEventProducer stepRunEventProducer,
+                         TestReportRecordingService testReportRecordingService,
+                         StepExecutorProvider stepExecutorProvider,
+                         MetadataService metadataService) {
+      this.suiteSessionStore = suiteSessionStore;
+      this.testSessionStore = testSessionStore;
+      this.testRunObserverStore = testRunObserverStore;
+      this.testSuiteRunObserverStore = testSuiteRunObserverStore;
+      this.maestroEventProducer = maestroEventProducer;
+      this.testSuiteEventProducer = testSuiteTestReportRecordService;
+      this.testRunEventProducer = testRunEventProducer;
+      this.stepRunEventProducer = stepRunEventProducer;
+      this.testReportRecordingService = testReportRecordingService;
+      this.stepExecutorProvider = stepExecutorProvider;
+      this.metadataService = metadataService;
+   }
 
-    private final ServiceRegistry serviceRegistry;
-    private final MaestroEventProducer maestroEventProducer;
-    private final SessionStoreContextImpl sessionStoreContext;
-    private final TestReportRecordService testReportRecordService;
-    private final ConfigProvider configProvider;
+   @Produces
+   @Default
+   public SynchronousMaestro getSynchronousMaestro() {
+      return new SynchronousMaestro(getRecordingMaestro());
+   }
 
-    @Inject
-    public MaestroFactory(ServiceRegistry serviceRegistry, MaestroEventProducer maestroEventProducer,
-                          SessionStoreContextImpl sessionStoreContext, ConfigProvider configProvider,
-                          TestReportRecordService testReportRecordService) {
-        this.testReportRecordService = testReportRecordService;
-        this.serviceRegistry = serviceRegistry;
-        this.maestroEventProducer = maestroEventProducer;
-        this.sessionStoreContext = sessionStoreContext;
-        this.configProvider = configProvider;
-    }
+   @Produces
+   @Default
+   public MaestroImpl getMaestro() {
+       return new MaestroImpl(
+               testRunObserverStore,
+               testSuiteRunObserverStore,
+               maestroEventProducer,
+               metadataService
+       );
+   }
 
-    @Produces
-    @Default
-    public StepRunnerProvider getStepRunnerProvider() {
-        return new StepRunnerProviderSPI(new HandlerProviderSPI(serviceRegistry, configProvider));
-    }
+   @Produces
+   @Default
+   public Maestro getRecordingMaestro() {
+       return new RecordingMaestroImpl(
+               getMaestro(),
+             testReportRecordingService);
+   }
 
-    @Produces
-    @Default
-    public Maestro getMaestro() {
-        return new MaestroImpl(maestroEventProducer, sessionStoreContext, testReportRecordService, applicationVersion);
-    }
+   @Produces
+   @Default
+   public TestSuiteRunner getTestSuiteRunner() {
+      return new TestSuiteRunner(suiteSessionStore, testSuiteEventProducer);
+   }
+
+   @Produces
+   @Default
+   public TestRunner getTestRunner() {
+      return new TestRunner(testSessionStore, testRunEventProducer);
+   }
+
+   @Produces
+   @Default
+   public StepRunner getStepRunnerJob() {
+      return new StepRunner(stepExecutorProvider, stepRunEventProducer);
+   }
 
 }

@@ -18,44 +18,49 @@ package net.ihe.gazelle.maestro.api.technical.dto.report;
 
 import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.testreport.EntityIdentification;
+import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({"version", "name"})
-public class EntityIdentificationDTO {
+@JsonPropertyOrder({
+        "version",
+        "name"
+})
+public class EntityIdentificationDTO implements DTO<EntityIdentification> {
 
     @JsonIgnore
-    private final EntityIdentification domain;
+    private final EntityIdentification entityIdentification;
 
     public EntityIdentificationDTO() {
-        domain = new EntityIdentification();
+        this(new EntityIdentification());
     }
 
-    public EntityIdentificationDTO(EntityIdentification domain) {
-        this.domain = domain;
+    public EntityIdentificationDTO(EntityIdentification entityIdentification) {
+        this.entityIdentification = entityIdentification;
+    }
+
+    @Override
+    @JsonIgnore
+    public EntityIdentification getBusinessObject() {
+        return entityIdentification;
     }
 
     @JsonGetter(value = "version")
     public String getVersion() {
-        return domain.getVersion();
+        return getBusinessObject().getVersion();
     }
 
     @JsonSetter(value = "version")
     public void setVersion(String version) {
-        domain.setVersion(version);
+        getBusinessObject().setVersion(version);
     }
 
     @JsonGetter(value = "name")
     public String getName() {
-        return domain.getName();
+        return getBusinessObject().getName();
     }
 
     @JsonSetter(value = "name")
     public void setName(String name) {
-        domain.setName(name);
-    }
-
-    @JsonIgnore
-    public EntityIdentification getDomain() {
-        return domain;
+        getBusinessObject().setName(name);
     }
 }

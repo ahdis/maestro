@@ -17,9 +17,10 @@
 package net.ihe.gazelle.maestro.validation.step.technical.factory;
 
 import net.ihe.gazelle.evsapi.client.technical.ValidationClientHttpImpl;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.ConfigProvider;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.HandlerFactory;
+import net.ihe.gazelle.maestro.spi.business.Handler;
+import net.ihe.gazelle.maestro.spi.technical.ConfigProvider;
+import net.ihe.gazelle.maestro.spi.technical.HandlerContext;
+import net.ihe.gazelle.maestro.spi.technical.HandlerFactory;
 import net.ihe.gazelle.maestro.validation.step.technical.handler.EvsValidationHandler;
 import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterface;
 import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterfaceBuilder;
@@ -40,7 +41,7 @@ public class EvsValidationServiceHandlerFactory implements HandlerFactory {
     }
 
     @Override
-    public Handler createHandler(ProvidedInterface providedInterface, ConfigProvider configProvider) {
+    public Handler createHandler(HandlerContext handlerContext, ProvidedInterface providedInterface, ConfigProvider configProvider) {
         if (providedInterface == null) {
             throw new IllegalArgumentException("ProvidedInterface cannot be null");
         }
@@ -57,7 +58,7 @@ public class EvsValidationServiceHandlerFactory implements HandlerFactory {
                 throw new IllegalArgumentException("Provided interface has no valid service URL");
             }
 
-            return new EvsValidationHandler(new ValidationClientHttpImpl(evsRestUrl.trim()));
+            return new EvsValidationHandler(handlerContext.serviceName(), new ValidationClientHttpImpl(evsRestUrl.trim()));
 
         } catch (ClassCastException e) {
             throw new IllegalArgumentException("First binding is not an HttpRestBinding", e);

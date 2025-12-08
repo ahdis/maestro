@@ -19,8 +19,8 @@ package net.ihe.gazelle.maestro.quarkus;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import net.ihe.gazelle.m2m.client.technical.KeycloakConfigurationProvider;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
-import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
 import net.ihe.gazelle.oidc.server.OIDCJWTGenerator;
@@ -30,7 +30,6 @@ import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterface;
 import net.ihe.gazelle.servicemetadata.api.business.Service;
 import net.ihe.gazelle.servicemetadata.technical.jaxrs.ServiceDTO;
 import net.ihe.gazelle.sso.api.business.configuration.SSOConfigurationProvider;
-import org.eclipse.microprofile.config.ConfigProvider;
 import org.junit.jupiter.api.Disabled;
 
 import java.io.IOException;
@@ -49,22 +48,21 @@ import static org.awaitility.Awaitility.await;
 public class WireMockSingleton {
 
     private static WireMockServer wireMockServer;
-    private static WireMockServer keycloakMockServer;
-    private static WireMockServer datahouseMockServer;
 
-    private static final String K_8_SID_VARIABLE_NAME = ConfigProvider.getConfig().getValue("gzl.k8s.id.env.variable.name", String.class);
-    private static final SSOConfigurationProvider ssoConfigurationProvider = new KeycloakConfigurationProvider(K_8_SID_VARIABLE_NAME);
-
+    private static final SSOConfigurationProvider ssoConfigurationProvider = new KeycloakConfigurationProvider("GZL_SERVICE_K8S_ID");
 
     private WireMockSingleton() {
         // Private constructor to enforce Singleton pattern
+    }
+
+    public static WireMockServer getWireMockServer() {
+        return wireMockServer;
     }
 
     public static synchronized WireMockServer startServer(int port) {
         if (wireMockServer == null) {
             wireMockServer = new WireMockServer(port);
             wireMockServer.start();
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> wireMockServer.stop()));
         }
         return wireMockServer;
     }
@@ -139,39 +137,21 @@ public class WireMockSingleton {
     }
 
     public static void mockKeycloak() {
-        keycloakMockServer = new WireMockServer(28080);
-
-        keycloakMockServer.start();
-
         String tokenUrl = "/realms/gazelle/protocol/openid-connect/token";
-        keycloakMockServer.stubFor(post(tokenUrl)
+        wireMockServer.stubFor(post(tokenUrl)
                 .withRequestBody(containing("client_id=" + ssoConfigurationProvider.getClientId()))
                 .withRequestBody(containing("client_secret=" + ssoConfigurationProvider.getClientSecret()))
                 .willReturn(ok("{\"access_token\":\"" + OIDCJWTGenerator.getValidJwtWithGroups(List.of("admin")) + "\"}")));
     }
 
-    public static void mockDatahouse(){
-        datahouseMockServer = new WireMockServer(8080);
-        datahouseMockServer.start();
-        datahouseMockServer.stubFor(post("/datahouse/rest/v1/items")
-                .willReturn(created().withHeader("Location", "http://localhost:8080/datahouse/rest/v1/items/1234567890"))
-        );
-        //stub /attachments endpoint to return a 200 Ok response with a list of strings as the body, representing attachment IDs
-        datahouseMockServer.stubFor(post(urlEqualTo("/datahouse/rest/v1/items/attachments"))
-                .willReturn(aResponse()
-                        .withTransformers("attachment-count-transformer") // the name from getName()
-                        .withHeader("Content-Type", "application/json"))
-        );
-    }
-
-    public static TestReportSummary awaitTestReport() {
-        byte[] content = await()
+    public static TestReport awaitTestReport() {
+        byte[] content = Objects.requireNonNull(await()
                 .atMost(3, TimeUnit.SECONDS)
                 .until(() -> {
                     List<LoggedRequest> matchingRequests = getMatchingRequests().apply(wireMockServer);
                     return !matchingRequests.isEmpty() ? matchingRequests : null;
-                }, Objects::nonNull).getFirst().getBody();
-        return new JacksonSerDes().deserialize(content, TestReportSummaryDTO.class).getDomain();
+                }, Objects::nonNull)).getFirst().getBody();
+        return new JacksonSerDes().deserialize(content, TestReportDTO.class).getBusinessObject();
     }
 
     private static Function<WireMockServer, List<LoggedRequest>> getMatchingRequests() {
@@ -189,7 +169,5 @@ public class WireMockSingleton {
     public static synchronized void stop() {
         wireMockServer.stop();
         wireMockServer = null;
-        keycloakMockServer.stop();
-        keycloakMockServer = null;
     }
 }

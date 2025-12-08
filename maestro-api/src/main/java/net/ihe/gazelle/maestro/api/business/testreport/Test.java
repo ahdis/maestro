@@ -16,13 +16,18 @@
 
 package net.ihe.gazelle.maestro.api.business.testreport;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
  * Business rules <br>
  * id is mandatory
  */
-public class Test {
+public class Test implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = -1682879799680526090L;
 
     private String id;
     private String name;
@@ -86,13 +91,6 @@ public class Test {
 
     public boolean isDescriptionValid() {
         return description == null || !description.isBlank();
-    }
-
-    public boolean isValid() {
-        return isIdValid()
-                && isNameValid()
-                && isVersionValid()
-                && isDescriptionValid();
     }
 
     @Override
