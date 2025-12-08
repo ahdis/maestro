@@ -69,9 +69,20 @@ public class EvsValidationHandler implements ValidationHandler {
       return validationClient.getValidationReportByOid(getOid(urlLocation));
    }
 
-   // FIXME this method is wrong if there is query parameters (like readAccessKey) in the URL
    private String getOid(String urlLocation) {
-      return urlLocation.substring(urlLocation.lastIndexOf("/") + 1);
+       if (urlLocation == null || urlLocation.isBlank()) {
+           return null;
+       }
+
+       int lastSlashIndex = urlLocation.lastIndexOf('/');
+       String lastSegment = lastSlashIndex >= 0
+               ? urlLocation.substring(lastSlashIndex + 1)
+               : urlLocation;
+
+       int queryIndex = lastSegment.indexOf('?');
+       return queryIndex >= 0
+               ? lastSegment.substring(0, queryIndex)
+               : lastSegment;
    }
 
 }
