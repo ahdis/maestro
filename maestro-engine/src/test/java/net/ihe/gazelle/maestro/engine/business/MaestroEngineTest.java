@@ -267,7 +267,7 @@ class MaestroEngineTest {
       TestSuiteRun suiteRun = buildSuiteRun("suite-interact", createTest("interaction-test", "interaction-step"));
 
       stepExecutorProvider.withExecutor("interaction-step", stepRun -> observer.interactWithUser(
-                  new InteractWithUser("Confirm", "Proceed?"))
+                  new InteractWithUser("Confirm", "Proceed?", 1L))
             .thenApply(done -> passedReport("interaction-step")));
 
       maestro.executeTestSuite(suiteRun,true, observer);

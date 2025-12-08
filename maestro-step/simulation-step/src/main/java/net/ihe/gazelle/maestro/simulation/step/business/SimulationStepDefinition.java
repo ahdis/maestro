@@ -32,8 +32,7 @@ public class SimulationStepDefinition implements StepDefinition {
    public List<SupportedInput> getSupportedInputs() {
       return List.of(
             new SupportedTextInput().setId(SIMULATION_SERVICE).setLabel("Simulation service").setRequired(true),
-            new SupportedTextInput().setId(SEQUENCE_ID).setLabel("Sequence ID").setRequired(true),
-            new SupportedTextInput().setId(TIMEOUT_SECONDS).setLabel("Timeout (seconds)").setRequired(false)
+            new SupportedTextInput().setId(SEQUENCE_ID).setLabel("Sequence ID").setRequired(true)
       );
    }
 

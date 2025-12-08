@@ -27,10 +27,9 @@ class SimulationStepDefinitionTest {
     void simulation_step_definition_test() {
         SimulationStepDefinition definition = new SimulationStepDefinition();
         assertEquals(SimulationStepDefinition.TYPE, definition.getType());
-        assertEquals(3, definition.getSupportedInputs().size());
+        assertEquals(2, definition.getSupportedInputs().size());
         assertEquals(SimulationStepDefinition.SIMULATION_SERVICE, definition.getSupportedInputs().getFirst().getId());
         assertEquals(SimulationStepDefinition.SEQUENCE_ID, definition.getSupportedInputs().get(1).getId());
-        assertEquals(SimulationStepDefinition.TIMEOUT_SECONDS, definition.getSupportedInputs().get(2).getId());
         assertEquals(1, definition.getOutputsDefinition().size());
         assertEquals(ByteArrayProperty.class, definition.getOutputsDefinition().get(SimulationStepDefinition.REPORT));
     }
