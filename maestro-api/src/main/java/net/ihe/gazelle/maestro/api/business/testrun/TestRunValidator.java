@@ -38,6 +38,7 @@ public class TestRunValidator extends AbstractValidator<TestRun> {
    }
 
    @Override
+   @SuppressWarnings("unchecked")
    protected void addRulesAndMembers(ValidatorBuilder<? extends TestRun> validatorBuilder) {
       validatorBuilder
             .addRule(TestRun::isTestDefined, "Test must be defined")

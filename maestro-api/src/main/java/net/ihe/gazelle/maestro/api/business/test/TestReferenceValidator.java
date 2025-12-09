@@ -5,8 +5,6 @@ import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory
 import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
 import net.ihe.gazelle.maestro.api.business.property.PropertyValidator;
 
-import java.util.List;
-
 public class TestReferenceValidator extends AbstractValidator<TestReference> {
 
    private final PropertyValidator propertyValidator;
@@ -28,6 +26,7 @@ public class TestReferenceValidator extends AbstractValidator<TestReference> {
    }
 
    @Override
+   @SuppressWarnings("unchecked")
    protected void addRulesAndMembers(ValidatorBuilder<? extends TestReference> validatorBuilder) {
       validatorBuilder
             .addRule(TestReference::isTestIdDefined, "Test ID must be set and not empty")

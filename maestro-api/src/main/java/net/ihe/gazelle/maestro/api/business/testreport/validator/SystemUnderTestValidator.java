@@ -41,6 +41,7 @@ public class SystemUnderTestValidator extends AbstractValidator<SystemUnderTest>
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected void addRulesAndMembers(ValidatorBuilder<? extends SystemUnderTest> validatorBuilder) {
         validatorBuilder
                 .addRule(SystemUnderTest::isSystemIdentificationDefined, "systemIdentification must be set")

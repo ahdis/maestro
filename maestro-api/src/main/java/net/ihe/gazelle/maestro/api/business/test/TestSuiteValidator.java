@@ -29,6 +29,7 @@ public class TestSuiteValidator extends AbstractValidator<TestSuite> {
    }
 
    @Override
+   @SuppressWarnings("unchecked")
    protected void addRulesAndMembers(ValidatorBuilder<? extends TestSuite> validatorBuilder) {
       validatorBuilder
             .addRule(TestSuite::isIdDefined, "Test Suite ID must be set and not empty")

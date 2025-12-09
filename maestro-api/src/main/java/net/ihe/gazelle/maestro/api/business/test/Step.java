@@ -91,9 +91,16 @@ public class Step implements Serializable {
         return this;
     }
 
-    public List<Property> getProperties() {
+    public synchronized List<Property> getProperties() {
       return new ArrayList<>(properties.values());
    }
+
+    public synchronized Step setProperties(List<Property> properties) {
+        this.properties = properties != null
+                ? buildMap(properties)
+                : new ConcurrentHashMap<>();
+        return this;
+    }
 
    public boolean hasProperty(String name) {
       return properties.containsKey(name);
@@ -125,11 +132,6 @@ public class Step implements Serializable {
     */
    public synchronized <T> T getPropertyValue(String name) {
       return getProperty(name).getValue();
-   }
-
-   public synchronized Step setProperties(List<Property> properties) {
-      this.properties = properties != null ? buildMap(properties) : new ConcurrentHashMap<>();
-      return this;
    }
 
    public Map<String, String> getOutputMappings() {

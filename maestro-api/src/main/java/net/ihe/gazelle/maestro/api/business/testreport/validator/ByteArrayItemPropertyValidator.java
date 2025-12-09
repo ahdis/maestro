@@ -23,6 +23,7 @@ public class ByteArrayItemPropertyValidator extends PropertyInReportValidator {
    }
 
    @Override
+   @SuppressWarnings("unchecked")
    protected void addRulesAndMembers(ValidatorBuilder<? extends Property> validatorBuilder) {
       super.addRulesAndMembers(validatorBuilder);
       ((ValidatorBuilder<ByteArrayItemProperty>) validatorBuilder)

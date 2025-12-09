@@ -72,6 +72,7 @@ public class TestReportValidator extends AbstractValidator<TestReport> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected void addRulesAndMembers(ValidatorBuilder<? extends TestReport> validatorBuilder) {
         validatorBuilder
                 .addRule("uuidValid", TestReport::isUuidValid, "Uuid must be set and not empty")

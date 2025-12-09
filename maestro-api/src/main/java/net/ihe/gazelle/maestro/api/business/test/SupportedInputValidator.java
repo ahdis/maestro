@@ -44,7 +44,7 @@ public abstract class SupportedInputValidator<T extends SupportedInput> extends 
       );
    }
 
-   @SuppressWarnings("java:S1452")
+   @SuppressWarnings({"java:S1452", "unchecked"})
    static Supplier<ValidatorBuilder<?>>[] getAssembledSuppliers(final List<SupportedInputValidator<?>> inputValidators) {
       return inputValidators.stream()
             .map(SupportedInputValidator::getAssemblerSupplier)

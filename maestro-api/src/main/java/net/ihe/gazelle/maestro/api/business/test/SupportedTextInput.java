@@ -17,11 +17,13 @@ public class SupportedTextInput extends SupportedInput {
    }
 
    public List<String> getPossibleValues() {
-      return possibleValues;
+      return new ArrayList<>(possibleValues);
    }
 
    public SupportedTextInput setPossibleValues(List<String> possibleValues) {
-      this.possibleValues = possibleValues != null ? possibleValues : new ArrayList<>();
+      this.possibleValues = possibleValues != null
+              ? possibleValues
+              : new ArrayList<>();
       return this;
    }
 

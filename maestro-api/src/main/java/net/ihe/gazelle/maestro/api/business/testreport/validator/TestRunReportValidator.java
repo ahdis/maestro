@@ -55,6 +55,7 @@ public class TestRunReportValidator extends AbstractValidator<TestRunReport> {
    }
 
    @Override
+   @SuppressWarnings("unchecked")
    protected void addRulesAndMembers(ValidatorBuilder<? extends TestRunReport> validatorBuilder) {
       validatorBuilder
             .addRule("dateTimeValid", TestRunReport::isDateTimeValid, "DateTime must be set and not in the future")

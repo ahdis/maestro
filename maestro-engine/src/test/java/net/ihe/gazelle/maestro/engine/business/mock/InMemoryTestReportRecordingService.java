@@ -28,7 +28,7 @@ public class InMemoryTestReportRecordingService implements TestReportRecordingSe
    }
 
    public List<TestReport> getRecordedReports() {
-      return recordedReports;
+      return new CopyOnWriteArrayList<>(recordedReports);
    }
 
    public void failNextWith(TestReportRecordingException exception) {

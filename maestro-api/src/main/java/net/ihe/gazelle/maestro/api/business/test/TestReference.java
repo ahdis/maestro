@@ -31,11 +31,13 @@ public class TestReference implements Serializable {
    }
 
    public List<Property> getProperties() {
-      return properties;
+      return new ArrayList<>(properties);
    }
 
    public TestReference setProperties(List<Property> properties) {
-      this.properties = properties != null ? new ArrayList<>(properties) : new ArrayList<>();
+      this.properties = properties != null
+              ? new ArrayList<>(properties)
+              : new ArrayList<>();
       return this;
    }
 

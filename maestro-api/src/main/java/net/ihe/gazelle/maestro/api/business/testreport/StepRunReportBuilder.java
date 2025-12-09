@@ -77,7 +77,7 @@ public class StepRunReportBuilder extends AbstractBuilder<StepRunReport> {
    }
 
    public List<Property> getOutputs() {
-      return outputs;
+      return new ArrayList<>(outputs);
    }
 
    public StepRunReportBuilder setUnexpectedErrors(List<UnexpectedErrorBuilder> unexpectedErrors) {

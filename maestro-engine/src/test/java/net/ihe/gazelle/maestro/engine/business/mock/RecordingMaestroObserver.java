@@ -56,18 +56,18 @@ public class RecordingMaestroObserver implements MaestroObserver {
    }
 
    public List<StepRunFinished> getStepRunFinishedEvents() {
-      return stepRunFinishedEvents;
+      return new CopyOnWriteArrayList<>(stepRunFinishedEvents);
    }
 
    public List<TestRunFinished> getTestRunFinishedEvents() {
-      return testRunFinishedEvents;
+      return new CopyOnWriteArrayList<>(testRunFinishedEvents);
    }
 
    public List<TestRunStarted> getTestRunStartedEvents() {
-      return testRunStartedEvents;
+      return new CopyOnWriteArrayList<>(testRunStartedEvents);
    }
 
    public List<StepRunStarted> getStepRunStartedEvents() {
-      return stepRunStartedEvents;
+      return new CopyOnWriteArrayList<>(stepRunStartedEvents);
    }
 }
