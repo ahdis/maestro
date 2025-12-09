@@ -21,8 +21,7 @@ import net.ihe.gazelle.maestro.engine.business.mock.InMemoryTestReportRecordingS
 import net.ihe.gazelle.maestro.engine.business.mock.RecordingMaestroObserver;
 import net.ihe.gazelle.maestro.engine.business.mock.ScriptedStepExecutorProvider;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.*;
 import technical.dao.SessionStoreImpl;
 
 import java.time.Duration;
@@ -37,14 +36,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class MaestroEngineTest {
 
-   private ExecutorService executorService;
+   private static ExecutorService executorService;
     private RecordingMaestro maestro;
    private ScriptedStepExecutorProvider stepExecutorProvider;
    private InMemoryTestReportRecordingService reportRecordService;
 
+   @BeforeAll
+   static void setUpClass() {
+       executorService = Executors.newFixedThreadPool(10);
+   }
+
    @BeforeEach
    void setUp() {
-      executorService = Executors.newCachedThreadPool();
        HardWiredEventBroker broker = new HardWiredEventBroker(executorService);
       stepExecutorProvider = new ScriptedStepExecutorProvider();
       reportRecordService = new InMemoryTestReportRecordingService();
@@ -63,8 +66,8 @@ class MaestroEngineTest {
       broker.setServices(maestroFacade, testSuiteRunner, testRunner, stepRunner);
    }
 
-   @AfterEach
-   void tearDown() {
+   @AfterAll
+   static void tearDown() {
       executorService.shutdownNow();
    }
 
@@ -348,9 +351,9 @@ class MaestroEngineTest {
             .returnsReport("step-B", passedReport("step-B"));
 
       CompletableFuture<ExecutionFinished> futureOne = CompletableFuture.supplyAsync(
-            () -> runSuite(observerOne, suiteOne));
+            () -> runSuite(observerOne, suiteOne), executorService);
       CompletableFuture<ExecutionFinished> futureTwo = CompletableFuture.supplyAsync(
-            () -> runSuite(observerTwo, suiteTwo));
+            () -> runSuite(observerTwo, suiteTwo), executorService);
 
       CompletableFuture.allOf(futureOne, futureTwo).join();
 

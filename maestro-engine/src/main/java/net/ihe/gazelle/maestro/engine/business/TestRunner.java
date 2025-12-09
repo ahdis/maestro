@@ -131,7 +131,7 @@ public class TestRunner {
    private static void updateSessionState(StepRunFinished stepRunFinished, TestRunSession testRunSession) {
       StepRunReport stepRunReport = stepRunFinished.getStepRunReport();
       testRunSession.addStepRunReport(stepRunReport);
-      testRunSession.getContext().addAll(
+      testRunSession.addPropertiesToContext(
             mapOutputs(testRunSession.currentStep(), stepRunReport)
       );
    }

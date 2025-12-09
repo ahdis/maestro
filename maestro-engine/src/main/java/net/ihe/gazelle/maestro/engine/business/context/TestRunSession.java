@@ -50,6 +50,11 @@ public class TestRunSession {
       return new ArrayList<>(context);
    }
 
+   public TestRunSession addPropertiesToContext(List<Property> properties) {
+      context.addAll(properties);
+      return this;
+   }
+
    public boolean hasNextStep() {
       return stepCursor.hasNext();
    }
