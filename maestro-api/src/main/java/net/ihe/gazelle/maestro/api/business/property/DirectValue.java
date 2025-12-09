@@ -1,20 +1,21 @@
 package net.ihe.gazelle.maestro.api.business.property;
 
 import java.io.Serial;
+import java.io.Serializable;
 
 class DirectValue implements ValueHolder {
 
    @Serial
    private static final long serialVersionUID = 5435920465930342207L;
 
-   private final Object value;
+   private final Serializable value;
 
-    public DirectValue(Object value) {
+    public DirectValue(Serializable value) {
         this.value = value;
     }
 
     @Override
-    public Object getValue() {
+    public Serializable getValue() {
         return value;
     }
 

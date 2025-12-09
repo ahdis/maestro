@@ -1,6 +1,7 @@
 package net.ihe.gazelle.maestro.api.business.property;
 
 import java.io.Serial;
+import java.io.Serializable;
 
 public class ByteArrayProperty extends Property {
 
@@ -14,7 +15,7 @@ public class ByteArrayProperty extends Property {
       super();
    }
 
-   public ByteArrayProperty(String name, Object value) {
+   public ByteArrayProperty(String name, Serializable value) {
       super(name, value);
    }
 

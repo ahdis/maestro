@@ -17,7 +17,7 @@ public abstract class Property implements Serializable {
    Property() {
    }
 
-   Property(String name, Object value) {
+   Property(String name, Serializable value) {
       this.name = name;
       setValue(value);
    }
@@ -31,7 +31,7 @@ public abstract class Property implements Serializable {
       return this;
    }
 
-   public Property setValue(Object value) {
+   public Property setValue(Serializable value) {
       if (value instanceof String strValue && strValue.matches(ReferenceValue.REFERENCE_REGEX)) {
          this.valueHolder = new ReferenceValue(strValue);
       } else {
@@ -40,7 +40,7 @@ public abstract class Property implements Serializable {
       return this;
    }
 
-   public <T> T getValue() {
+   public <T extends Serializable> T getValue() {
       return (T) valueHolder.getValue();
    }
 

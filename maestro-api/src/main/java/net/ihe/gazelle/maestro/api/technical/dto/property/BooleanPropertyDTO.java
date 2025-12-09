@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import net.ihe.gazelle.maestro.api.business.property.BooleanProperty;
 
+import java.io.Serializable;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonTypeName(BooleanPropertyDTO.TYPE)
 public class BooleanPropertyDTO extends PropertyDTO<BooleanProperty> {
@@ -26,7 +28,7 @@ public class BooleanPropertyDTO extends PropertyDTO<BooleanProperty> {
    }
 
    @JsonSetter(VALUE)
-   public void setValue(Object value) {
+   public void setValue(Serializable value) {
        super.setResolvedValue(Boolean.class, Boolean::valueOf, value);
    }
 

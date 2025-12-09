@@ -3,6 +3,7 @@ package net.ihe.gazelle.maestro.api.business.testreport;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 
 import java.io.Serial;
+import java.io.Serializable;
 
 public class ByteArrayItemProperty extends ByteArrayProperty {
 
@@ -13,7 +14,7 @@ public class ByteArrayItemProperty extends ByteArrayProperty {
       super();
    }
 
-   public ByteArrayItemProperty(String name, Object value) {
+   public ByteArrayItemProperty(String name, Serializable value) {
       super(name, value);
    }
 

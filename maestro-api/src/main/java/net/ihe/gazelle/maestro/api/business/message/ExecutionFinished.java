@@ -20,6 +20,7 @@ import net.ihe.gazelle.lang.Event;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 
 import java.io.Serial;
+import java.io.Serializable;
 
 @Event
 public class ExecutionFinished implements Message {
@@ -28,14 +29,14 @@ public class ExecutionFinished implements Message {
     private static final long serialVersionUID = 1L;
 
     private String sessionId;
-    private transient Object run;
+    private Serializable run;
     private String reportLocation;
     private TestReport report;
 
     public ExecutionFinished() {
     }
 
-    public ExecutionFinished(String sessionId, Object run, TestReport report) {
+    public ExecutionFinished(String sessionId, Serializable run, TestReport report) {
         this.sessionId = sessionId;
         this.run = run;
         this.report = report;
@@ -50,11 +51,11 @@ public class ExecutionFinished implements Message {
         return this;
     }
 
-    public Object getRun() {
+    public Serializable getRun() {
         return run;
     }
 
-    public ExecutionFinished setRun(Object run) {
+    public ExecutionFinished setRun(Serializable run) {
         this.run = run;
         return this;
     }

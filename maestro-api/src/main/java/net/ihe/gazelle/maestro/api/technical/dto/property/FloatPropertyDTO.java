@@ -3,6 +3,8 @@ package net.ihe.gazelle.maestro.api.technical.dto.property;
 import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.property.FloatProperty;
 
+import java.io.Serializable;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonTypeName(FloatPropertyDTO.TYPE)
 public class FloatPropertyDTO extends PropertyDTO<FloatProperty> {
@@ -24,7 +26,7 @@ public class FloatPropertyDTO extends PropertyDTO<FloatProperty> {
    }
 
    @JsonSetter(VALUE)
-   public void setValue(Object value) {
+   public void setValue(Serializable value) {
       super.setResolvedValue(Double.class, Double::valueOf, value);
    }
 

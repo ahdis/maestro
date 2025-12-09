@@ -1,6 +1,7 @@
 package net.ihe.gazelle.maestro.api.business.property;
 
 import java.io.Serial;
+import java.io.Serializable;
 
 public class StringProperty extends Property {
 
@@ -11,7 +12,7 @@ public class StringProperty extends Property {
       super();
    }
 
-   public StringProperty(String name, Object value) {
+   public StringProperty(String name, Serializable value) {
       super(name, value);
    }
 

@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
 
+import java.io.Serializable;
 import java.util.function.Function;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -65,7 +66,7 @@ public abstract class PropertyDTO<T extends Property> implements SubTypingDTO<T>
       return value != null && value.startsWith("${") && value.endsWith("}");
    }
 
-   <R> void setResolvedValue(Class<R> expectedType, Function<String, R> parser, Object value) {
+   <R extends Serializable> void setResolvedValue(Class<R> expectedType, Function<String, R> parser, Serializable value) {
       if (value == null) {
          property.setValue(null);
          return;

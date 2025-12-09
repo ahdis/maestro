@@ -1,6 +1,7 @@
 package net.ihe.gazelle.maestro.api.business.property;
 
 import java.io.Serial;
+import java.io.Serializable;
 
 public class FloatProperty extends Property {
 
@@ -11,7 +12,7 @@ public class FloatProperty extends Property {
       super();
    }
 
-   public FloatProperty(String name, Object value) {
+   public FloatProperty(String name, Serializable value) {
       super(name, value);
    }
 

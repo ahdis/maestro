@@ -1,6 +1,7 @@
 package net.ihe.gazelle.maestro.api.business.property;
 
 import java.io.Serial;
+import java.io.Serializable;
 
 public class BooleanProperty extends Property {
 
@@ -10,7 +11,7 @@ public class BooleanProperty extends Property {
    public BooleanProperty() {
    }
 
-   public BooleanProperty(String name, Object value) {
+   public BooleanProperty(String name, Serializable value) {
       super(name, value);
    }
 
