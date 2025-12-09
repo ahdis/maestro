@@ -42,6 +42,7 @@ public class TestSuiteRunValidator extends AbstractValidator<TestSuiteRun> {
    }
 
    @Override
+   @SuppressWarnings("unchecked")
    protected void addRulesAndMembers(ValidatorBuilder<? extends TestSuiteRun> validatorBuilder) {
       validatorBuilder
             .addRule(TestSuiteRun::isTestSuiteDefined, "Test Suite must be set")

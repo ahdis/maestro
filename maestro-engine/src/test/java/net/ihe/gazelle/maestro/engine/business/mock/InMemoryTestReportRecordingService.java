@@ -4,7 +4,6 @@ import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.engine.business.TestReportRecordingException;
 import net.ihe.gazelle.maestro.engine.business.TestReportRecordingService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
@@ -29,7 +28,7 @@ public class InMemoryTestReportRecordingService implements TestReportRecordingSe
    }
 
    public List<TestReport> getRecordedReports() {
-      return new ArrayList<>(recordedReports);
+      return new CopyOnWriteArrayList<>(recordedReports);
    }
 
    public void failNextWith(TestReportRecordingException exception) {

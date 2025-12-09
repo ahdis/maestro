@@ -96,7 +96,9 @@ public class Step implements Serializable {
    }
 
     public synchronized Step setProperties(List<Property> properties) {
-        this.properties = properties != null ? buildMap(properties) : new ConcurrentHashMap<>();
+        this.properties = properties != null
+                ? buildMap(properties)
+                : new ConcurrentHashMap<>();
         return this;
     }
 
@@ -128,7 +130,7 @@ public class Step implements Serializable {
     *
     * @throws MissingPropertyException if no property with the given name is found
     */
-   public <T> T getPropertyValue(String name) {
+   public synchronized <T> T getPropertyValue(String name) {
       return getProperty(name).getValue();
    }
 

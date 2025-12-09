@@ -46,6 +46,7 @@ public class StepRunReportValidator extends AbstractValidator<StepRunReport> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected void addRulesAndMembers(ValidatorBuilder<? extends StepRunReport> validatorBuilder) {
         validatorBuilder
                 .addRule(StepRunReport::isStepNameValid, "Step Name must be set and not empty")

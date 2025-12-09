@@ -28,7 +28,7 @@ public class ExecutionFinished implements Message {
     private static final long serialVersionUID = 1L;
 
     private String sessionId;
-    private Object run;
+    private transient Object run;
     private String reportLocation;
     private TestReport report;
 

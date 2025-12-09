@@ -45,11 +45,14 @@ public class TestCounters implements Serializable {
     }
 
     public TestCounters(TestCounters copy) {
-        this.total = copy.total;
-        this.passed = copy.passed;
-        this.failed = copy.failed;
-        this.undefined = copy.undefined;
-        this.unexpectedErrors = copy.unexpectedErrors;
+        this();
+        if (copy != null) {
+            this.total = copy.total;
+            this.passed = copy.passed;
+            this.failed = copy.failed;
+            this.undefined = copy.undefined;
+            this.unexpectedErrors = copy.unexpectedErrors;
+        }
     }
 
     public int getTotal() {

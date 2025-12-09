@@ -4,7 +4,6 @@ import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.api.business.message.*;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -57,18 +56,18 @@ public class RecordingMaestroObserver implements MaestroObserver {
    }
 
    public List<StepRunFinished> getStepRunFinishedEvents() {
-      return new ArrayList<>(stepRunFinishedEvents);
+      return new CopyOnWriteArrayList<>(stepRunFinishedEvents);
    }
 
    public List<TestRunFinished> getTestRunFinishedEvents() {
-      return new ArrayList<>(testRunFinishedEvents);
+      return new CopyOnWriteArrayList<>(testRunFinishedEvents);
    }
 
    public List<TestRunStarted> getTestRunStartedEvents() {
-      return new ArrayList<>(testRunStartedEvents);
+      return new CopyOnWriteArrayList<>(testRunStartedEvents);
    }
 
    public List<StepRunStarted> getStepRunStartedEvents() {
-      return new ArrayList<>(stepRunStartedEvents);
+      return new CopyOnWriteArrayList<>(stepRunStartedEvents);
    }
 }

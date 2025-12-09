@@ -26,6 +26,7 @@ public class StepValidator extends AbstractValidator<Step> {
    }
 
    @Override
+   @SuppressWarnings("unchecked")
    protected void addRulesAndMembers(ValidatorBuilder<? extends Step> validatorBuilder) {
       validatorBuilder
             .addRule(Step::isNameDefined, "Name must be set and not empty")

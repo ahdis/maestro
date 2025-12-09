@@ -22,7 +22,7 @@ public class SupportedTextInput extends SupportedInput {
 
    public SupportedTextInput setPossibleValues(List<String> possibleValues) {
       this.possibleValues = possibleValues != null
-              ? new ArrayList<>(possibleValues)
+              ? possibleValues
               : new ArrayList<>();
       return this;
    }

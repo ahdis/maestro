@@ -42,6 +42,7 @@ public class TestRun implements Serializable {
 
    public TestRun() {
       this.inputs = new ArrayList<>();
+      this.systemsUnderTest = new ArrayList<>();
    }
 
    public TestRun(TestRun other) {

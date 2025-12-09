@@ -53,10 +53,10 @@ public class TestSuite implements Serializable {
    }
 
    public TestSuite setSupportedInputs(List<SupportedInput> supportedInputs) {
-      this.supportedInputs = supportedInputs != null
-              ? new ArrayList<>(supportedInputs)
-              : new ArrayList<>();
-      return this;
+       this.supportedInputs = supportedInputs != null
+               ? new ArrayList<>(supportedInputs)
+               : new ArrayList<>();
+       return this;
    }
 
    public boolean isNameDefined() {

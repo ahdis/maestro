@@ -26,6 +26,7 @@ public class TestReferenceValidator extends AbstractValidator<TestReference> {
    }
 
    @Override
+   @SuppressWarnings("unchecked")
    protected void addRulesAndMembers(ValidatorBuilder<? extends TestReference> validatorBuilder) {
       validatorBuilder
             .addRule(TestReference::isTestIdDefined, "Test ID must be set and not empty")

@@ -28,6 +28,7 @@ public class PropertyValidator extends AbstractValidator<Property> {
 
 
    @Override
+   @SuppressWarnings("unchecked")
    protected void addRulesAndMembers(ValidatorBuilder<? extends Property> validatorBuilder) {
       validatorBuilder
             .addRule(Property::isNameDefined, "Name must be set and not empty")

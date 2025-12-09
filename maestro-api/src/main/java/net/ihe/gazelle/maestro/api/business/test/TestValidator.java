@@ -30,6 +30,7 @@ public class TestValidator extends AbstractValidator<Test> {
    }
 
    @Override
+   @SuppressWarnings("unchecked")
    protected void addRulesAndMembers(ValidatorBuilder<? extends Test> validatorBuilder) {
       validatorBuilder
             .addRule(Test::isIdDefined, "ID must be set")

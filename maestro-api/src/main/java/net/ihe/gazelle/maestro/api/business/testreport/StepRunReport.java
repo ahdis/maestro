@@ -115,9 +115,9 @@ public class StepRunReport implements Serializable {
    }
 
    public StepRunReport setUnexpectedErrors(List<UnexpectedError> unexpectedErrors) {
-      this.unexpectedErrors = unexpectedErrors != null
-              ? new ArrayList<>(unexpectedErrors)
-              : new ArrayList<>();
+       this.unexpectedErrors = unexpectedErrors != null
+               ? new ArrayList<>(unexpectedErrors)
+               : new ArrayList<>();
       return this;
    }
 

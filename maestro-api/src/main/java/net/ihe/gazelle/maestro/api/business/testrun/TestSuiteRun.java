@@ -95,7 +95,9 @@ public class TestSuiteRun implements Serializable {
    }
 
    public TestSuiteRun setInputs(List<Property> inputs) {
-      this.inputs = inputs != null ? new ArrayList<>(inputs) : new ArrayList<>();
+      this.inputs = inputs != null
+              ? new ArrayList<>(inputs)
+              : new ArrayList<>();
       return this;
    }
 

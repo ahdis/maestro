@@ -41,6 +41,7 @@ public class TestServiceValidator extends AbstractValidator<TestService> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected void addRulesAndMembers(ValidatorBuilder<? extends TestService> validatorBuilder) {
         validatorBuilder
                 .addRule("serviceIdentificationValid", TestService::isServiceIdentificationValid, "serviceIdentification must be set")
