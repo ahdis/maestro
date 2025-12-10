@@ -29,9 +29,14 @@ import net.ihe.gazelle.maestro.api.technical.dto.test.TestSuiteDTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
 import net.ihe.gazelle.security.technical.acl.AccessControlListDTO;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import java.util.List;
 
+@Schema(
+      name = "TestSuiteRun",
+      description = "A test suite run is a test suite execution."
+)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
       "testSuite",
@@ -59,6 +64,11 @@ public class TestSuiteRunDTO implements DTO<TestSuiteRun> {
       return testSuiteRun;
    }
 
+   @Schema(
+         name = "testSuite",
+         description = "The test suite definition that will be used for execution.",
+         required = true
+   )
    @JsonProperty("testSuite")
    public TestSuiteDTO getTestSuite() {
       return new TestSuiteDTO(testSuiteRun.getTestSuite());
@@ -68,6 +78,10 @@ public class TestSuiteRunDTO implements DTO<TestSuiteRun> {
       testSuiteRun.setTestSuite(testSuiteDTO.getBusinessObject());
    }
 
+   @Schema(
+         name = "tests",
+         description = "The list of test to execute."
+   )
    @JsonProperty("tests")
    public List<TestDTO> getTests() {
       return testSuiteRun.getTests().stream().map(TestDTO::new).toList();
@@ -83,7 +97,11 @@ public class TestSuiteRunDTO implements DTO<TestSuiteRun> {
       );
    }
 
-    @SuppressWarnings("rawtypes")
+   @Schema(
+         name = "inputs",
+         description = "A list of input provided for test suite execution that shall match supported inputs of test suite definition."
+   )
+   @SuppressWarnings("rawtypes")
    @JsonProperty("inputs")
    public List<PropertyDTO> getInputs() {
       return testSuiteRun.getInputs().stream()
@@ -92,7 +110,7 @@ public class TestSuiteRunDTO implements DTO<TestSuiteRun> {
             .toList();
    }
 
-    @SuppressWarnings("rawtypes")
+   @SuppressWarnings("rawtypes")
    public void setInputs(List<PropertyDTO> inputs) {
       testSuiteRun.setInputs(
             inputs != null ? inputs.stream()
@@ -102,6 +120,10 @@ public class TestSuiteRunDTO implements DTO<TestSuiteRun> {
       );
    }
 
+   @Schema(
+         name = "systemsUnderTest",
+         description = "The list of system under test involved in the test suite."
+   )
    @JsonProperty("systemsUnderTest")
    public List<SystemUnderTestDTO> getSystemsUnderTest() {
       return testSuiteRun.getSystemsUnderTest().stream().map(SystemUnderTestDTO::new).toList();
@@ -117,6 +139,10 @@ public class TestSuiteRunDTO implements DTO<TestSuiteRun> {
       );
    }
 
+   @Schema(
+         name = "accessControlList",
+         description = "An access control list for read, write authorization."
+   )
    @JsonProperty("accessControlList")
    public AccessControlListDTO getAccessControlList() {
       return new AccessControlListDTO(testSuiteRun.getAccessControlList());

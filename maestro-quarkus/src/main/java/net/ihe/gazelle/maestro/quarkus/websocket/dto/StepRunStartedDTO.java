@@ -16,56 +16,72 @@
 
 package net.ihe.gazelle.maestro.quarkus.websocket.dto;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.message.StepRunStarted;
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
+@Schema(
+      name = "StepRunStarted",
+      description = "Message sent when a step is started."
+)
 @JsonTypeName(StepRunStartedDTO.TYPE)
 @JsonPropertyOrder({
-        "type",
-        "testId",
-        "stepIndex",
-        "dateTime"
+      "type",
+      "testId",
+      "stepIndex",
+      "dateTime"
 })
 public class StepRunStartedDTO extends MessageDTO<StepRunStarted> {
 
-    @JsonIgnore
-    public static final String TYPE = "STEP_RUN_STARTED";
+   @JsonIgnore
+   public static final String TYPE = "STEP_RUN_STARTED";
 
-    public StepRunStartedDTO() {
-        this(new StepRunStarted());
-    }
+   public StepRunStartedDTO() {
+      this(new StepRunStarted());
+   }
 
-    public StepRunStartedDTO(StepRunStarted message) {
-        super(message);
-    }
+   public StepRunStartedDTO(StepRunStarted message) {
+      super(message);
+   }
 
-    @JsonGetter("testId")
-    public String getTestRunId() {
-        return message.getTestId();
-    }
+   @Schema(
+         name = "testId",
+         description = "The unique identifier of the test that own this step."
+   )
+   @JsonProperty("testId")
+   public String getTestRunId() {
+      return message.getTestId();
+   }
 
-    @JsonGetter("stepIndex")
-    public int getStepName() {
-        return message.getStepIndex();
-    }
+   @Schema(
+         name = "stepIndex",
+         description = "The index of the step.",
+         type = SchemaType.INTEGER
+   )
+   @JsonProperty("stepIndex")
+   public int getStepName() {
+      return message.getStepIndex();
+   }
 
-    @JsonGetter("dateTime")
-    public String getDateTime() {
-        return ZonedDateTime.ofInstant(Instant.now(), ZoneId.systemDefault())
-                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-    }
+   @Schema(
+         name = "dateTime",
+         description = "The zoned date time of the beginning of the execution of the step."
+   )
+   @JsonProperty("dateTime")
+   public String getDateTime() {
+      return ZonedDateTime.ofInstant(Instant.now(), ZoneId.systemDefault())
+            .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+   }
 
-    @Override
-    @JsonIgnore
-    public Class<StepRunStarted> getBusinessObjectClass() {
-        return StepRunStarted.class;
-    }
+   @Override
+   @JsonIgnore
+   public Class<StepRunStarted> getBusinessObjectClass() {
+      return StepRunStarted.class;
+   }
 }

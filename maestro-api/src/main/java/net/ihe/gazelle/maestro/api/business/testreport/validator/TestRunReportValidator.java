@@ -58,10 +58,10 @@ public class TestRunReportValidator extends AbstractValidator<TestRunReport> {
    @SuppressWarnings("unchecked")
    protected void addRulesAndMembers(ValidatorBuilder<? extends TestRunReport> validatorBuilder) {
       validatorBuilder
-            .addRule("dateTimeValid", TestRunReport::isDateTimeValid, "DateTime must be set and not in the future")
-            .addRule("resultValid", TestRunReport::isResultValid, "Result must be set adn reflect global steps result")
-            .addRule("testValid", TestRunReport::isTestValid, "Test must be set")
-            .addRule("urlToTestRun", TestRunReport::isUrlToTestRunValid, "URL must be set and not empty if present")
+            .addRule(TestRunReport::isDateTimeNotInTheFuture, "DateTime must be set and not in the future")
+            .addRule(TestRunReport::resultMatchesComputedResult, "Result must be set adn reflect global steps result")
+            .addRule(TestRunReport::isTestDefined, "Test must be set")
+            .addRule(TestRunReport::isUrlToTestRunDefinedIfPresent, "URL must be set and not empty if present")
             .addMember("test", TestRunReport::getTest, testValidator::getAssembledValidatorBuilder)
             .addMember("inputs", TestRunReport::getInputs,
                   propertyValidator::getAssembledValidatorBuilder,

@@ -19,53 +19,64 @@ package net.ihe.gazelle.maestro.quarkus.websocket.dto;
 import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSuiteRunDTO;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
+@Schema(
+      name = "StartTestSuiteRun",
+      description = "Message sent when a new test suite run is started."
+)
 @JsonTypeName(StartTestSuiteRunDTO.TYPE)
 @JsonPropertyOrder({
-        "type",
-        "testSuiteRun",
-        "persist"
+      "type",
+      "testSuiteRun",
+      "persist"
 })
 public class StartTestSuiteRunDTO extends MessageDTO<TestSuiteRun> {
 
-    @JsonIgnore
-    public static final String TYPE = "START_TEST_SUITE_RUN";
+   @JsonIgnore
+   public static final String TYPE = "START_TEST_SUITE_RUN";
 
-    private boolean persist;
+   private boolean persist;
 
-    public StartTestSuiteRunDTO() {
-        this(new TestSuiteRun());
-    }
+   public StartTestSuiteRunDTO() {
+      this(new TestSuiteRun());
+   }
 
-    public StartTestSuiteRunDTO(TestSuiteRun testSuiteRun) {
-        super(testSuiteRun);
-        this.persist = true;
-    }
+   public StartTestSuiteRunDTO(TestSuiteRun testSuiteRun) {
+      super(testSuiteRun);
+      this.persist = true;
+   }
 
-    @JsonGetter("testSuiteRun")
-    public TestSuiteRunDTO getTestSuiteRun() {
-        return new TestSuiteRunDTO(getBusinessObject());
-    }
+   @Schema(
+         name = "testSuiteRun",
+         description = "The test suite run that is starting."
+   )
+   @JsonProperty("testSuiteRun")
+   public TestSuiteRunDTO getTestSuiteRun() {
+      return new TestSuiteRunDTO(getBusinessObject());
+   }
 
-    @JsonSetter("testSuiteRun")
-    public void setTestSuiteRun(TestSuiteRunDTO testSuiteRun) {
-        this.message = testSuiteRun.getBusinessObject();
-    }
+   public void setTestSuiteRun(TestSuiteRunDTO testSuiteRun) {
+      this.message = testSuiteRun.getBusinessObject();
+   }
 
-    @JsonGetter("persist")
-    public boolean isPersist() {
-        return persist;
-    }
+   @Schema(
+         name = "persist",
+         description = "Whether the test suite report should be persisted."
+   )
+   @JsonProperty("persist")
+   public boolean isPersist() {
+      return persist;
+   }
 
-    @JsonSetter("persist")
-    public void setPersist(boolean persist) {
-        this.persist = persist;
-    }
+   public void setPersist(boolean persist) {
+      this.persist = persist;
+   }
 
-    @Override
-    @JsonIgnore
-    public Class<TestSuiteRun> getBusinessObjectClass() {
-        return TestSuiteRun.class;
-    }
+   @Override
+   @JsonIgnore
+   public Class<TestSuiteRun> getBusinessObjectClass() {
+      return TestSuiteRun.class;
+   }
 }
 

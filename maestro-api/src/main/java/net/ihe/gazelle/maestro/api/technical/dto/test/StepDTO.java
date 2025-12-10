@@ -25,25 +25,30 @@ import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.technical.dto.property.PropertyDTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 
+@Schema(
+
+)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
-        "name",
-        "type",
-        "timeout",
-        "properties",
-        "outputMappings"
+      "name",
+      "type",
+      "timeout",
+      "properties",
+      "outputMappings"
 })
 public class StepDTO implements DTO<Step> {
 
-    @JsonIgnore
+   @JsonIgnore
    public static final String MAPPING_DELIMITER = ":";
 
-    @JsonIgnore
+   @JsonIgnore
    private final Step step;
 
    public StepDTO() {
@@ -54,6 +59,11 @@ public class StepDTO implements DTO<Step> {
       this.step = step;
    }
 
+   @Schema(
+         name = "name",
+         description = "The name of the test step",
+         required = true
+   )
    @JsonProperty("name")
    public String getName() {
       return step.getName();
@@ -63,6 +73,12 @@ public class StepDTO implements DTO<Step> {
       step.setName(name);
    }
 
+   @Schema(
+         name = "type",
+         description = "The type of the test step.",
+         examples = {"SIMULATION", "VALIDATION"},
+         required = true
+   )
    @JsonProperty("type")
    public String getType() {
       return step.getType();
@@ -72,17 +88,27 @@ public class StepDTO implements DTO<Step> {
       step.setType(type);
    }
 
-    @JsonProperty("timeout")
-    public Long getTimeout() {
-        return step.getTimeout();
-    }
+   @Schema(
+         name = "timeout",
+         type = SchemaType.NUMBER,
+         description = "The maximum time in milliseconds to let the execution running.",
+         examples = "60000"
+   )
+   @JsonProperty("timeout")
+   public Long getTimeout() {
+      return step.getTimeout();
+   }
 
-    public void setTimeout(Long timeout) {
-        step.setTimeout(timeout);
-    }
+   public void setTimeout(Long timeout) {
+      step.setTimeout(timeout);
+   }
 
+   @Schema(
+         name = "properties",
+         description = "A list of properties used by the step during execution."
+   )
    @JsonProperty("properties")
-   @SuppressWarnings({"java:S3740",  "rawtypes"})
+   @SuppressWarnings({"java:S3740", "rawtypes"})
    public List<PropertyDTO> getProperties() {
       return step.getProperties().stream()
             .map(SubTypingDTO::fromBusinessObject)
@@ -100,6 +126,10 @@ public class StepDTO implements DTO<Step> {
       );
    }
 
+   @Schema(
+         name = "outputMappings",
+         description = "A list of mapping for the outputs of the test step."
+   )
    @JsonProperty("outputMappings")
    public List<String> getOutputMappings() {
       return step.getOutputMappings().entrySet().stream()
@@ -108,7 +138,7 @@ public class StepDTO implements DTO<Step> {
    }
 
    public void setOutputMappings(List<String> mappings) {
-      if(mappings != null) {
+      if (mappings != null) {
          mappings.stream()
                .map(StepDTO::parseMapping)
                .forEach(e -> step.addOutputMapping(e.getKey(), e.getValue()));

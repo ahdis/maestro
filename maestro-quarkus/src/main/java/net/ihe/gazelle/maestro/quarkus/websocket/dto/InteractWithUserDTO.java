@@ -22,84 +22,102 @@ import net.ihe.gazelle.maestro.api.business.test.SupportedInput;
 import net.ihe.gazelle.maestro.api.technical.dto.test.SupportedInputDTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import java.util.List;
 
+@Schema(
+      name = "InteractWithUser",
+      description = "Message sent when a step is asking for user interaction."
+)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonTypeName(InteractWithUserDTO.TYPE)
 @JsonPropertyOrder({
-        "interactionTitle",
-        "message",
-        "timeout",
-        "supportedInputs"
+      "interactionTitle",
+      "message",
+      "timeout",
+      "supportedInputs"
 })
 public class InteractWithUserDTO extends MessageDTO<InteractWithUser> {
 
-    @JsonIgnore
-    public static final String TYPE = "INTERACT_WITH_USER";
+   @JsonIgnore
+   public static final String TYPE = "INTERACT_WITH_USER";
 
-    public InteractWithUserDTO() {
-        super(new InteractWithUser());
-    }
+   public InteractWithUserDTO() {
+      super(new InteractWithUser());
+   }
 
-    public InteractWithUserDTO(InteractWithUser interactWithUser) {
-        super(interactWithUser);
-    }
+   public InteractWithUserDTO(InteractWithUser interactWithUser) {
+      super(interactWithUser);
+   }
 
-    @JsonGetter("interactionTitle")
-    public String getInteractionTitle() {
-        return getBusinessObject().getInteractionTitle();
-    }
+   @Schema(
+         name = "interactionTitle",
+         description = "The title of the user interaction."
+   )
+   @JsonProperty("interactionTitle")
+   public String getInteractionTitle() {
+      return message.getInteractionTitle();
+   }
 
-    @JsonSetter("interactionTitle")
-    public void setInteractionTitle(String interactionTitle) {
-        getBusinessObject().setInteractionTitle(interactionTitle);
-    }
+   public void setInteractionTitle(String interactionTitle) {
+      message.setInteractionTitle(interactionTitle);
+   }
 
-    @JsonGetter("message")
-    public String getMessage() {
-        return getBusinessObject().getMessage();
-    }
+   @Schema(
+         name = "message",
+         description = "The text giving the instructions to the user for performing the interaction."
+   )
+   @JsonProperty("message")
+   public String getMessage() {
+      return message.getMessage();
+   }
 
-    @JsonSetter("message")
-    public void setMessage(String message) {
-        getBusinessObject().setMessage(message);
-    }
+   public void setMessage(String message) {
+      super.message.setMessage(message);
+   }
 
-    @JsonGetter("timeout")
-    public Long getTimeout() {
-        return getBusinessObject().getTimeout();
-    }
+   @Schema(
+         name = "timeout",
+         description = "The maximum amount of time in milliseconds to perform the user interaction."
+   )
+   @JsonProperty("timeout")
+   public Long getTimeout() {
+      return message.getTimeout();
+   }
 
-    @JsonSetter("timeout")
-    public void setTimeout(Long timeout) {
-        getBusinessObject().setTimeout(timeout);
-    }
+   public void setTimeout(Long timeout) {
+      message.setTimeout(timeout);
+   }
 
-    @SuppressWarnings("rawtypes")
-    @JsonProperty("supportedInputs")
-    public List<SupportedInputDTO> getSupportedInputs() {
-        return message.getSupportedInputs().stream()
-                .map(SubTypingDTO::fromBusinessObject)
-                .map(SupportedInputDTO.class::cast)
-                .toList();
-    }
+   @Schema(
+         name = "supportedInputs",
+         description = "The list of input that will be asked to the user."
+   )
+   @SuppressWarnings("rawtypes")
+   @JsonProperty("supportedInputs")
+   public List<SupportedInputDTO> getSupportedInputs() {
+      return message.getSupportedInputs().stream()
+            .map(SubTypingDTO::fromBusinessObject)
+            .map(SupportedInputDTO.class::cast)
+            .toList();
+   }
 
-    @SuppressWarnings("rawtypes")
-    public void setSupportedInputs(List<SupportedInputDTO> supportedInputs) {
-        message.addSupportedInputs(
-                supportedInputs != null ?
-                        supportedInputs.stream()
-                                .map(DTO::getBusinessObject)
-                                .map(SupportedInput.class::cast)
-                                .toList() :
-                        null
-        );
-    }
+   @SuppressWarnings("rawtypes")
+   public void setSupportedInputs(List<SupportedInputDTO> supportedInputs) {
+      message.addSupportedInputs(
+            supportedInputs != null ?
+                  supportedInputs.stream()
+                        .map(DTO::getBusinessObject)
+                        .map(SupportedInput.class::cast)
+                        .toList() :
+                  null
+      );
+   }
 
-    @Override
-    @JsonIgnore
-    public Class<InteractWithUser> getBusinessObjectClass() {
-        return InteractWithUser.class;
-    }
+   @Override
+   @JsonIgnore
+   public Class<InteractWithUser> getBusinessObjectClass() {
+      return InteractWithUser.class;
+   }
 }

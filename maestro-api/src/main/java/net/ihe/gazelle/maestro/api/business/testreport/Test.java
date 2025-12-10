@@ -77,19 +77,19 @@ public class Test implements Serializable {
         return this;
     }
 
-    public boolean isIdValid() {
+    public boolean isIdDefined() {
         return id != null && !id.isBlank();
     }
 
-    public boolean isNameValid() {
+    public boolean isNameDefinedIfPresent() {
         return name == null || !name.isBlank();
     }
 
-    public boolean isVersionValid() {
+    public boolean isVersionDefinedIfPresent() {
         return version == null || !version.isBlank();
     }
 
-    public boolean isDescriptionValid() {
+    public boolean isDescriptionDefinedIfPresent() {
         return description == null || !description.isBlank();
     }
 

@@ -13,10 +13,11 @@ import java.util.Map;
 public class SimulationStepDefinition implements StepDefinition {
 
    public static final String TYPE = "SIMULATION";
+
    // inputs
    public static final String SIMULATION_SERVICE = "simulationService";
    public static final String SEQUENCE_ID = "sequenceId";
-   public static final String TIMEOUT_SECONDS = "timeoutSeconds";
+
    // outputs
    public static final String REPORT = "report";
 

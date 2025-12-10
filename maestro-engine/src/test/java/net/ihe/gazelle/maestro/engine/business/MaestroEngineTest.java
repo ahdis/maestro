@@ -20,6 +20,7 @@ import net.ihe.gazelle.maestro.engine.business.context.TestSuiteSession;
 import net.ihe.gazelle.maestro.engine.business.mock.InMemoryTestReportRecordingService;
 import net.ihe.gazelle.maestro.engine.business.mock.RecordingMaestroObserver;
 import net.ihe.gazelle.maestro.engine.business.mock.ScriptedStepExecutorProvider;
+import net.ihe.gazelle.maestro.engine.business.stub.Instrumented4TestStepDefinition;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 import org.junit.jupiter.api.*;
 import technical.dao.SessionStoreImpl;
@@ -205,7 +206,7 @@ class MaestroEngineTest {
       stepExecutorProvider
             .returnsReport("Producer", new StepRunReport()
                   .setStepName("Producer")
-                  .setType("SIMULATION")
+                  .setType(Instrumented4TestStepDefinition.TYPE)
                   .setResult(StepResult.PASSED)
                   .setOutputs(List.of(new StringProperty("payload", "HELLO-CONTEXT"))))
             .withExecutor("Consumer", stepRun -> {
@@ -305,7 +306,7 @@ class MaestroEngineTest {
       stepExecutorProvider
             .returnsReport("Producer", new StepRunReport()
                   .setStepName("Producer")
-                  .setType("SIMULATION")
+                  .setType(Instrumented4TestStepDefinition.TYPE)
                   .setResult(StepResult.PASSED)
                   .setOutputs(List.of(new StringProperty("payload", "STRING-VALUE"))))
             .withExecutor("Consumer", stepRun -> {
@@ -374,7 +375,7 @@ class MaestroEngineTest {
    private StepRunReport passedReport(String stepName) {
       return new StepRunReport()
             .setStepName(stepName)
-            .setType("SIMULATION")
+            .setType(Instrumented4TestStepDefinition.TYPE)
             .setResult(StepResult.PASSED);
    }
 

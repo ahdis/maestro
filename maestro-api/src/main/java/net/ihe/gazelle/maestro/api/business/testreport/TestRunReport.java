@@ -210,21 +210,21 @@ public class TestRunReport implements Serializable {
         return result;
     }
 
-    public boolean isDateTimeValid() {
+    public boolean isDateTimeNotInTheFuture() {
         return dateTime != null && !dateTime.isAfter(Instant.now());
     }
 
-    public boolean isResultValid() {
+    public boolean resultMatchesComputedResult() {
         TestRunReport tmp = new TestRunReport(this);
         tmp.computeResult();
         return tmp.getResult().equals(result);
     }
 
-    public boolean isTestValid() {
+    public boolean isTestDefined() {
         return test != null;
     }
 
-    public boolean isUrlToTestRunValid() {
+    public boolean isUrlToTestRunDefinedIfPresent() {
         return urlToTestRun == null || !urlToTestRun.isBlank();
     }
 

@@ -62,15 +62,15 @@ public class TestService implements Serializable {
         return this;
     }
 
-    public boolean isServiceIdentificationValid() {
+    public boolean isServiceIdentificationDefined() {
         return serviceIdentification != null;
     }
 
-    public boolean isServiceVersionValid() {
+    public boolean isServiceVersionDefined() {
         return serviceIdentification.getVersion() != null && !serviceIdentification.getVersion().isBlank();
     }
 
-    public boolean isDisclaimerValid() {
+    public boolean isDisclaimerDefined() {
         return disclaimer != null && !disclaimer.isBlank();
     }
 

@@ -2,20 +2,25 @@ package net.ihe.gazelle.maestro.api.technical.dto.property;
 
 import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.testreport.ByteArrayItemProperty;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
+@Schema(
+      name = "ByteArrayItemProperty",
+      description = "A property containing a byte array value that references an item."
+)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-        "name",
-        "type",
-        "value",
-        "fileName",
-        "mimeType",
-        "reference"
+      "name",
+      "type",
+      "value",
+      "fileName",
+      "mimeType",
+      "reference"
 })
 @JsonTypeName(ByteArrayItemPropertyDTO.TYPE)
 public class ByteArrayItemPropertyDTO extends PropertyDTO<ByteArrayItemProperty> {
 
-    @JsonIgnore
+   @JsonIgnore
    public static final String TYPE = "BYTE_ARRAY_ITEM";
 
    public ByteArrayItemPropertyDTO() {
@@ -26,6 +31,10 @@ public class ByteArrayItemPropertyDTO extends PropertyDTO<ByteArrayItemProperty>
       super(property);
    }
 
+   @Schema(
+         name = "value",
+         description = "The byte array typed value of the property."
+   )
    @JsonProperty(VALUE)
    public byte[] getValue() {
       return property.getValue();
@@ -43,6 +52,10 @@ public class ByteArrayItemPropertyDTO extends PropertyDTO<ByteArrayItemProperty>
       }
    }
 
+   @Schema(
+         name = "fileName",
+         description = "The name of the file of the referenced resource."
+   )
    @JsonProperty("fileName")
    public String getFileName() {
       return property.getFileName();
@@ -52,6 +65,10 @@ public class ByteArrayItemPropertyDTO extends PropertyDTO<ByteArrayItemProperty>
       property.setFileName(originalFileName);
    }
 
+   @Schema(
+         name = "mimeType",
+         description = "The mimetype of the referenced resource."
+   )
    @JsonProperty("mimeType")
    public String getMimeType() {
       return property.getMimeType();
@@ -61,6 +78,10 @@ public class ByteArrayItemPropertyDTO extends PropertyDTO<ByteArrayItemProperty>
       property.setMimeType(mimeType);
    }
 
+   @Schema(
+         name = "reference",
+         description = "A link referencing a remote binary resource."
+   )
    @JsonProperty("reference")
    public String getReference() {
       return property.getReference();

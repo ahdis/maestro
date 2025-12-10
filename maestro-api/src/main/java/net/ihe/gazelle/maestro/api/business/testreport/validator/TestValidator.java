@@ -39,9 +39,9 @@ public class TestValidator extends AbstractValidator<Test> {
     @Override
     protected void addRulesAndMembers(ValidatorBuilder<? extends Test> validatorBuilder) {
         validatorBuilder
-                .addRule("idValid", Test::isIdValid, "Id must be set and not empty")
-                .addRule("nameValid", Test::isNameValid, "Name must be set if present")
-                .addRule("versionValid", Test::isVersionValid, "Version must be set if present")
-                .addRule("descriptionValid", Test::isDescriptionValid, "Description must be set id present");
+                .addRule(Test::isIdDefined, "Id must be set and not empty")
+                .addRule(Test::isNameDefinedIfPresent, "Name must be set if present")
+                .addRule(Test::isVersionDefinedIfPresent, "Version must be set if present")
+                .addRule(Test::isDescriptionDefinedIfPresent, "Description must be set id present");
     }
 }

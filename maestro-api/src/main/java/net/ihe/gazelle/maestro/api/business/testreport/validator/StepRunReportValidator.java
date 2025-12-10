@@ -49,9 +49,9 @@ public class StepRunReportValidator extends AbstractValidator<StepRunReport> {
     @SuppressWarnings("unchecked")
     protected void addRulesAndMembers(ValidatorBuilder<? extends StepRunReport> validatorBuilder) {
         validatorBuilder
-                .addRule(StepRunReport::isStepNameValid, "Step Name must be set and not empty")
-                .addRule( StepRunReport::isTypeValid, "Type must be set and not empty")
-                .addRule(StepRunReport::isResultValid, "Result must be set")
+                .addRule(StepRunReport::isStepNameDefined, "Step Name must be set and not empty")
+                .addRule(StepRunReport::isTypeDefined, "Type must be set and not empty")
+                .addRule(StepRunReport::isResultDefined, "Result must be set")
                 .addMember("outputs", StepRunReport::getOutputs, propertyValidator::getAssembledValidatorBuilder)
                 .addMember("unexpectedErrors", StepRunReport::getUnexpectedErrors, unexpectedErrorValidator::getAssembledValidatorBuilder);
     }

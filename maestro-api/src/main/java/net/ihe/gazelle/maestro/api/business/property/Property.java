@@ -31,6 +31,10 @@ public abstract class Property implements Serializable {
       return this;
    }
 
+    public <T extends Serializable> T getValue() {
+        return (T) valueHolder.getValue();
+    }
+
    public Property setValue(Serializable value) {
       if (value instanceof String strValue && strValue.matches(ReferenceValue.REFERENCE_REGEX)) {
          this.valueHolder = new ReferenceValue(strValue);
@@ -38,10 +42,6 @@ public abstract class Property implements Serializable {
          this.valueHolder = new DirectValue(value);
       }
       return this;
-   }
-
-   public <T extends Serializable> T getValue() {
-      return (T) valueHolder.getValue();
    }
 
    public abstract Property copy();

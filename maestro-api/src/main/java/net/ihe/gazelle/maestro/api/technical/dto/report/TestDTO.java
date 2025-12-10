@@ -19,70 +19,88 @@ package net.ihe.gazelle.maestro.api.technical.dto.report;
 import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.testreport.Test;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
+@Schema(
+      name = "Test",
+      description = "The test that has been executed."
+)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-        "id",
-        "name",
-        "version",
-        "description"
+      "id",
+      "name",
+      "version",
+      "description"
 })
 public class TestDTO implements DTO<Test> {
 
-    @JsonIgnore
-    private final Test test;
+   @JsonIgnore
+   private final Test test;
 
-    public TestDTO() {
-        this(new Test());
-    }
+   public TestDTO() {
+      this(new Test());
+   }
 
-    public TestDTO(Test test) {
-        this.test = test;
-    }
+   public TestDTO(Test test) {
+      this.test = test;
+   }
 
-    @Override
-    @JsonIgnore
-    public Test getBusinessObject() {
-        return test;
-    }
+   @Override
+   @JsonIgnore
+   public Test getBusinessObject() {
+      return test;
+   }
 
-    @JsonGetter(value = "id")
-    public String getId() {
-        return getBusinessObject().getId();
-    }
+   @Schema(
+         name = "id",
+         description = "The unique identifier of the test.",
+         required = true
+   )
+   @JsonProperty(value = "id")
+   public String getId() {
+      return test.getId();
+   }
 
-    @JsonSetter(value = "id")
-    public void setId(String id) {
-        getBusinessObject().setId(id);
-    }
+   public void setId(String id) {
+      test.setId(id);
+   }
 
-    @JsonGetter(value = "name")
-    public String getName() {
-        return getBusinessObject().getName();
-    }
+   @Schema(
+         name = "name",
+         description = "The name of the test."
+   )
+   @JsonProperty(value = "name")
+   public String getName() {
+      return test.getName();
+   }
 
-    @JsonSetter(value = "name")
-    public void setName(String name) {
-        getBusinessObject().setName(name);
-    }
+   public void setName(String name) {
+      test.setName(name);
+   }
 
-    @JsonGetter(value = "version")
-    public String getVersion() {
-        return getBusinessObject().getVersion();
-    }
+   @Schema(
+         name = "version",
+         description = "The version of the test."
+   )
+   @JsonProperty(value = "version")
+   public String getVersion() {
+      return test.getVersion();
+   }
 
-    @JsonSetter(value = "version")
-    public void setVersion(String version) {
-        getBusinessObject().setVersion(version);
-    }
+   public void setVersion(String version) {
+      test.setVersion(version);
+   }
 
-    @JsonGetter(value = "description")
-    public String getDescription() {
-        return getBusinessObject().getDescription();
-    }
+   @Schema(
+         name = "description",
+         description = "The description of the test."
+   )
+   @JsonProperty(value = "description")
+   public String getDescription() {
+      return test.getDescription();
+   }
 
-    @JsonSetter(value = "description")
-    public void setDescription(String description) {
-        getBusinessObject().setDescription(description);
-    }
+   public void setDescription(String description) {
+      test.setDescription(description);
+   }
 }

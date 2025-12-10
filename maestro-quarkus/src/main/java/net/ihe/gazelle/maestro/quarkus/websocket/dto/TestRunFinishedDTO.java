@@ -20,64 +20,85 @@ import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.errorhandling.technical.UnexpectedErrorDTO;
 import net.ihe.gazelle.maestro.api.business.message.TestRunFinished;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+@Schema(
+      name = "TestRunFinished",
+      description = "Message sent when a test run is finished."
+)
 @JsonTypeName(TestRunFinishedDTO.TYPE)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
-        "type",
-        "testId",
-        "dateTime",
-        "result",
-        "unexpectedErrors"
+      "type",
+      "testId",
+      "dateTime",
+      "result",
+      "unexpectedErrors"
 })
 public class TestRunFinishedDTO extends MessageDTO<TestRunReport> {
 
-    @JsonIgnore
-    public static final String TYPE = "TEST_RUN_FINISHED";
+   @JsonIgnore
+   public static final String TYPE = "TEST_RUN_FINISHED";
 
-    public TestRunFinishedDTO() {
-        this(new TestRunFinished());
-    }
+   public TestRunFinishedDTO() {
+      this(new TestRunFinished());
+   }
 
-    public TestRunFinishedDTO(TestRunFinished message) {
-        super(message.getTestRunReport() != null
-                ? message.getTestRunReport()
-                : new TestRunReport());
-    }
+   public TestRunFinishedDTO(TestRunFinished message) {
+      super(message.getTestRunReport() != null
+            ? message.getTestRunReport()
+            : new TestRunReport());
+   }
 
-    @JsonGetter("testId")
-    public String getTestId() {
-        return getBusinessObject().getTest().getId();
-    }
+   @Schema(
+         name = "testId",
+         description = "The unique identifier of the test."
+   )
+   @JsonProperty("testId")
+   public String getTestId() {
+      return getBusinessObject().getTest().getId();
+   }
 
-    @JsonGetter("dateTime")
-    public String getDateTime() {
-        return ZonedDateTime.ofInstant(getBusinessObject().getDateTime(), ZoneId.systemDefault())
-                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-    }
+   @Schema(
+         name = "dateTime",
+         description = "The zoned date time of the end of the execution of the test."
+   )
+   @JsonProperty("dateTime")
+   public String getDateTime() {
+      return ZonedDateTime.ofInstant(getBusinessObject().getDateTime(), ZoneId.systemDefault())
+            .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+   }
 
-    @JsonGetter("result")
-    public String getResult() {
-        return getBusinessObject().getResult().name();
-    }
+   @Schema(
+         name = "result",
+         description = "The result of the test."
+   )
+   @JsonProperty("result")
+   public String getResult() {
+      return getBusinessObject().getResult().name();
+   }
 
-    @JsonGetter("unexpectedErrors")
-    public List<UnexpectedErrorDTO> getUnexpectedErrors() {
-        return getBusinessObject()
-                .getUnexpectedErrors()
-                .stream()
-                .map(UnexpectedErrorDTO::new)
-                .toList();
-    }
+   @Schema(
+         name = "unexpectedErrors",
+         description = "A list of unexpected errors that can occur during test execution."
+   )
+   @JsonProperty("unexpectedErrors")
+   public List<UnexpectedErrorDTO> getUnexpectedErrors() {
+      return getBusinessObject()
+            .getUnexpectedErrors()
+            .stream()
+            .map(UnexpectedErrorDTO::new)
+            .toList();
+   }
 
-    @Override
-    @JsonIgnore
-    public Class<TestRunReport> getBusinessObjectClass() {
-        return TestRunReport.class;
-    }
+   @Override
+   @JsonIgnore
+   public Class<TestRunReport> getBusinessObjectClass() {
+      return TestRunReport.class;
+   }
 }

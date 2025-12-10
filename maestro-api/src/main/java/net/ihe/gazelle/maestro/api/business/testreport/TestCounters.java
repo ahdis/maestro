@@ -135,23 +135,23 @@ public class TestCounters implements Serializable {
         unexpectedErrors += subCounters.getUnexpectedErrors();
     }
 
-    public boolean isTotalValid() {
+    public boolean isTotalEqualsToSumOfPassedFailedAndUndefined() {
         return total >= 0 && total == passed + failed + undefined;
     }
 
-    public boolean isPassedValid() {
+    public boolean isPassedPositive() {
         return total >= 0;
     }
 
-    public boolean isFailedValid() {
+    public boolean isFailedPositive() {
         return failed >= 0;
     }
 
-    public boolean isUndefinedValid() {
+    public boolean isUndefinedPositive() {
         return undefined >= 0;
     }
 
-    public boolean isUnexpectedErrorsValid() {
+    public boolean isUnexpectedPositive() {
         return unexpectedErrors >= 0;
     }
 

@@ -9,17 +9,22 @@ import net.ihe.gazelle.maestro.api.business.test.TestReference;
 import net.ihe.gazelle.maestro.api.technical.dto.property.PropertyDTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import java.util.List;
 
+@Schema(
+      name = "TestReference",
+      description = "The test reference is the test id linked to a list of properties in the test suite definition."
+)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
-        "testId",
-        "properties",
+      "testId",
+      "properties",
 })
 public class TestReferenceDTO implements DTO<TestReference> {
 
-    @JsonIgnore
+   @JsonIgnore
    private final TestReference testReference;
 
    public TestReferenceDTO() {
@@ -30,6 +35,11 @@ public class TestReferenceDTO implements DTO<TestReference> {
       this.testReference = testReference;
    }
 
+   @Schema(
+         name = "testId",
+         description = "The unique identifier of the test.",
+         required = true
+   )
    @JsonProperty("testId")
    public String getTestId() {
       return testReference.getTestId();
@@ -39,7 +49,11 @@ public class TestReferenceDTO implements DTO<TestReference> {
       testReference.setTestId(testId);
    }
 
-    @SuppressWarnings("rawtypes")
+   @Schema(
+         name = "properties",
+         description = "The list of properties of the test."
+   )
+   @SuppressWarnings("rawtypes")
    @JsonProperty("properties")
    public List<PropertyDTO> getProperties() {
       return testReference.getProperties().stream()
@@ -48,7 +62,7 @@ public class TestReferenceDTO implements DTO<TestReference> {
             .toList();
    }
 
-    @SuppressWarnings("rawtypes")
+   @SuppressWarnings("rawtypes")
    public void setProperties(List<PropertyDTO> propertyDTOs) {
       testReference.setProperties(
             propertyDTOs != null ?

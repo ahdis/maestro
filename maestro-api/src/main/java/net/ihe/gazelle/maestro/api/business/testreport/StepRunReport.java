@@ -126,15 +126,15 @@ public class StepRunReport implements Serializable {
       return this;
    }
 
-   public boolean isStepNameValid() {
+   public boolean isStepNameDefined() {
       return stepName != null && !stepName.isBlank();
    }
 
-   public boolean isTypeValid() {
+   public boolean isTypeDefined() {
       return type != null && !type.isBlank();
    }
 
-   public boolean isResultValid() {
+   public boolean isResultDefined() {
       return result != null;
    }
 

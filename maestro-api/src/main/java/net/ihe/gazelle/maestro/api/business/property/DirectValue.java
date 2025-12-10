@@ -23,8 +23,4 @@ class DirectValue implements ValueHolder {
         return value != null;
     }
 
-    public boolean isValueOptional() {
-       return true;
-    }
-
 }

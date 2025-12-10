@@ -25,9 +25,14 @@ import net.ihe.gazelle.maestro.api.business.test.SupportedInput;
 import net.ihe.gazelle.maestro.api.business.test.Test;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import java.util.List;
 
+@Schema(
+      name = "Test",
+      description = "The test to execute."
+)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
       "id",
@@ -54,6 +59,11 @@ public class TestDTO implements DTO<Test> {
       return test;
    }
 
+   @Schema(
+         name = "id",
+         description = "The unique identifier of the test.",
+         required = true
+   )
    @JsonProperty("id")
    public String getId() {
       return test.getId();
@@ -63,6 +73,11 @@ public class TestDTO implements DTO<Test> {
       test.setId(id);
    }
 
+   @Schema(
+         name = "name",
+         description = "The name of the test.",
+         required = true
+   )
    @JsonProperty("name")
    public String getName() {
       return test.getName();
@@ -72,6 +87,10 @@ public class TestDTO implements DTO<Test> {
       test.setName(name);
    }
 
+   @Schema(
+         name = "supportedInputs",
+         description = "The list of input that are supported by the test."
+   )
    @SuppressWarnings("rawtypes")
    @JsonProperty("supportedInputs")
    public List<SupportedInputDTO> getSupportedInputs() {
@@ -93,6 +112,11 @@ public class TestDTO implements DTO<Test> {
       );
    }
 
+   @Schema(
+         name = "steps",
+         description = "The list of step that will be executed by the test.",
+         minLength = 1
+   )
    @JsonProperty("steps")
    public List<StepDTO> getSteps() {
       return test.getSteps().stream()

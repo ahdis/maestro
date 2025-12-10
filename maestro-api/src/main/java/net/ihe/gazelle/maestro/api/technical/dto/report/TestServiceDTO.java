@@ -19,48 +19,59 @@ package net.ihe.gazelle.maestro.api.technical.dto.report;
 import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.testreport.TestService;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
+@Schema(
+      name = "TestService",
+      description = "The service used as the test engine to execute the test suite."
+)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-        "serviceIdentification",
-        "disclaimer"
+      "serviceIdentification",
+      "disclaimer"
 })
 public class TestServiceDTO implements DTO<TestService> {
 
-    @JsonIgnore
-    private final TestService testService;
+   @JsonIgnore
+   private final TestService testService;
 
-    public TestServiceDTO() {
-        this(new TestService());
-    }
+   public TestServiceDTO() {
+      this(new TestService());
+   }
 
-    public TestServiceDTO(TestService testService) {
-        this.testService = testService;
-    }
+   public TestServiceDTO(TestService testService) {
+      this.testService = testService;
+   }
 
-    @Override
-    @JsonIgnore
-    public TestService getBusinessObject() {
-        return testService;
-    }
+   @Override
+   @JsonIgnore
+   public TestService getBusinessObject() {
+      return testService;
+   }
 
-    @JsonGetter(value = "serviceIdentification")
-    public EntityIdentificationDTO getServiceIdentification() {
-        return new EntityIdentificationDTO(getBusinessObject().getServiceIdentification());
-    }
+   @Schema(
+         name = "serviceIdentification",
+         description = "The identification of the service with name and version."
+   )
+   @JsonProperty(value = "serviceIdentification")
+   public EntityIdentificationDTO getServiceIdentification() {
+      return new EntityIdentificationDTO(testService.getServiceIdentification());
+   }
 
-    @JsonSetter(value = "serviceIdentification")
-    public void setServiceIdentification(EntityIdentificationDTO entityIdentificationDTO) {
-        getBusinessObject().setServiceIdentification(entityIdentificationDTO.getBusinessObject());
-    }
+   public void setServiceIdentification(EntityIdentificationDTO entityIdentificationDTO) {
+      testService.setServiceIdentification(entityIdentificationDTO.getBusinessObject());
+   }
 
-    @JsonGetter(value = "disclaimer")
-    public String getDisclaimer() {
-        return getBusinessObject().getDisclaimer();
-    }
+   @Schema(
+         name = "disclaimer",
+         description = "A disclaimer about the test service."
+   )
+   @JsonProperty(value = "disclaimer")
+   public String getDisclaimer() {
+      return testService.getDisclaimer();
+   }
 
-    @JsonGetter(value = "disclaimer")
-    public void setDisclaimer(String disclaimer) {
-        getBusinessObject().setDisclaimer(disclaimer);
-    }
+   public void setDisclaimer(String disclaimer) {
+      testService.setDisclaimer(disclaimer);
+   }
 }

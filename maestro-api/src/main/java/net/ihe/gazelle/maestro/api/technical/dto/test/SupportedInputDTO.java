@@ -3,15 +3,16 @@ package net.ihe.gazelle.maestro.api.technical.dto.test;
 import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.test.SupportedInput;
 import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-        "id",
-        "type",
-        "label",
-        "groupName",
-        "description",
-        "required"
+      "id",
+      "type",
+      "label",
+      "groupName",
+      "description",
+      "required"
 })
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 public abstract class SupportedInputDTO<T extends SupportedInput> implements SubTypingDTO<T> {
@@ -36,6 +37,11 @@ public abstract class SupportedInputDTO<T extends SupportedInput> implements Sub
       return this;
    }
 
+   @Schema(
+         name = "id",
+         description = "The unique identifier of the input",
+         required = true
+   )
    @JsonProperty("id")
    public String getId() {
       return supportedInput.getId();
@@ -45,6 +51,11 @@ public abstract class SupportedInputDTO<T extends SupportedInput> implements Sub
       supportedInput.setId(id);
    }
 
+   @Schema(
+         name = "label",
+         description = "A human readable text to label the input.",
+         required = true
+   )
    @JsonProperty("label")
    public String getLabel() {
       return supportedInput.getLabel();
@@ -54,24 +65,36 @@ public abstract class SupportedInputDTO<T extends SupportedInput> implements Sub
       supportedInput.setLabel(label);
    }
 
+   @Schema(
+         name = "groupName",
+         description = "A name to gather inputs of the same kind together."
+   )
    @JsonProperty("groupName")
    public String getGroupName() {
-       return supportedInput.getGroupName();
+      return supportedInput.getGroupName();
    }
 
    public void setGroupName(String groupName) {
-       supportedInput.setGroupName(groupName);
+      supportedInput.setGroupName(groupName);
    }
 
+   @Schema(
+         name = "description",
+         description = "The description of what is supposed to be uploaded in the input."
+   )
    @JsonProperty("description")
    public String getDescription() {
-       return supportedInput.getDescription();
+      return supportedInput.getDescription();
    }
 
    public void setDescription(String description) {
-       supportedInput.setDescription(description);
+      supportedInput.setDescription(description);
    }
 
+   @Schema(
+         name = "required",
+         description = "A boolean value to specify if the input in mandatory or optional."
+   )
    @JsonProperty("required")
    public boolean isRequired() {
       return supportedInput.isRequired();
