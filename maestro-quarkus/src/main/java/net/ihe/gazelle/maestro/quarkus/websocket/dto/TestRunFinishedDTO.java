@@ -19,6 +19,7 @@ package net.ihe.gazelle.maestro.quarkus.websocket.dto;
 import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.errorhandling.technical.UnexpectedErrorDTO;
 import net.ihe.gazelle.maestro.api.business.message.TestRunFinished;
+import net.ihe.gazelle.maestro.api.business.testreport.Result;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
@@ -66,7 +67,8 @@ public class TestRunFinishedDTO extends MessageDTO<TestRunReport> {
 
    @Schema(
          name = "dateTime",
-         description = "The zoned date time of the end of the execution of the test."
+         description = "The zoned date time of the end of the execution of the test.",
+         examples = "2025-01-01T16:30:00.387+01:00"
    )
    @JsonProperty("dateTime")
    public String getDateTime() {
@@ -76,7 +78,8 @@ public class TestRunFinishedDTO extends MessageDTO<TestRunReport> {
 
    @Schema(
          name = "result",
-         description = "The result of the test."
+         description = "The result of the test execution.",
+         enumeration = {Result.RESULT_PASSED, Result.RESULT_FAILED, Result.RESULT_UNDEFINED}
    )
    @JsonProperty("result")
    public String getResult() {

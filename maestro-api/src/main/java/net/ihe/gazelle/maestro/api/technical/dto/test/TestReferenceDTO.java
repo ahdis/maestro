@@ -37,7 +37,7 @@ public class TestReferenceDTO implements DTO<TestReference> {
 
    @Schema(
          name = "testId",
-         description = "The unique identifier of the test.",
+         description = "The unique identifier of the referenced test.",
          required = true
    )
    @JsonProperty("testId")

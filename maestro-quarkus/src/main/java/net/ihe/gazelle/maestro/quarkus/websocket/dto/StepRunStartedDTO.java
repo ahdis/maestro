@@ -31,6 +31,7 @@ import java.time.format.DateTimeFormatter;
       description = "Message sent when a step is started."
 )
 @JsonTypeName(StepRunStartedDTO.TYPE)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
       "type",
       "testId",
@@ -71,7 +72,8 @@ public class StepRunStartedDTO extends MessageDTO<StepRunStarted> {
 
    @Schema(
          name = "dateTime",
-         description = "The zoned date time of the beginning of the execution of the step."
+         description = "The zoned date time of the beginning of the execution of the step.",
+         examples = "2025-01-01T16:30:00.387+01:00"
    )
    @JsonProperty("dateTime")
    public String getDateTime() {

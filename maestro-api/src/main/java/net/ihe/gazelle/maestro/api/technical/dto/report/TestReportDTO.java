@@ -31,7 +31,7 @@ import java.util.List;
 
 @Schema(
       name = "TestReport",
-      description = "The report containing the result of a test suite execution."
+      description = "The report containing the result of a test suite or test execution."
 )
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({

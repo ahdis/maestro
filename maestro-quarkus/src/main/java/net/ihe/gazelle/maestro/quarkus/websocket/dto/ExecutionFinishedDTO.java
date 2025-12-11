@@ -26,7 +26,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
       description = "Message sent when the execution of a test suite or a test is finished."
 )
 @JsonTypeName(ExecutionFinishedDTO.TYPE)
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
       "type",
       "testReport",
@@ -47,7 +47,7 @@ public class ExecutionFinishedDTO extends MessageDTO<ExecutionFinished> {
 
    @Schema(
          name = "testReport",
-         description = "The test report."
+         description = "The test report of the test suite or test execution."
    )
    @JsonProperty("testReport")
    public TestReportDTO getTestReport() {

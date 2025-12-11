@@ -33,7 +33,8 @@ import java.util.List;
 import java.util.Map;
 
 @Schema(
-
+      name = "Step",
+      description = "A test step to execute."
 )
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({

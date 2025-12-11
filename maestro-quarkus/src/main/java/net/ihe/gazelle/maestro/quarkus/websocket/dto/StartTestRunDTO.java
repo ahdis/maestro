@@ -26,6 +26,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
       description = "Message sent when a new test run is started."
 )
 @JsonTypeName(StartTestRunDTO.TYPE)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
       "type",
       "testRun",

@@ -19,6 +19,7 @@ package net.ihe.gazelle.maestro.quarkus.websocket.dto;
 import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.errorhandling.technical.UnexpectedErrorDTO;
 import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
+import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
@@ -75,7 +76,8 @@ public class StepRunFinishedDTO extends MessageDTO<StepRunFinished> {
 
    @Schema(
          name = "dateTime",
-         description = "The zoned date time of the end of the execution of the step."
+         description = "The zoned date time of the end of the execution of the step.",
+         examples = "2025-01-01T16:30:00.387+01:00"
    )
    @JsonProperty("dateTime")
    public String getDateTime() {
@@ -85,7 +87,8 @@ public class StepRunFinishedDTO extends MessageDTO<StepRunFinished> {
 
    @Schema(
          name = "result",
-         description = "The result of the step."
+         description = "The result of the step.",
+         enumeration = {StepResult.RESULT_DONE, StepResult.RESULT_PASSED, StepResult.RESULT_FAILED, StepResult.RESULT_UNDEFINED}
    )
    @JsonProperty("result")
    public String getResult() {

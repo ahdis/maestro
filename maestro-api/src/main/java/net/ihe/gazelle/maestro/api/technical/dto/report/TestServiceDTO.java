@@ -51,7 +51,8 @@ public class TestServiceDTO implements DTO<TestService> {
 
    @Schema(
          name = "serviceIdentification",
-         description = "The identification of the service with name and version."
+         description = "The identification of the service with name and version.",
+         required = true
    )
    @JsonProperty(value = "serviceIdentification")
    public EntityIdentificationDTO getServiceIdentification() {
@@ -64,7 +65,8 @@ public class TestServiceDTO implements DTO<TestService> {
 
    @Schema(
          name = "disclaimer",
-         description = "A disclaimer about the test service."
+         description = "A disclaimer about the test service.",
+         required = true
    )
    @JsonProperty(value = "disclaimer")
    public String getDisclaimer() {

@@ -115,6 +115,7 @@ public class TestDTO implements DTO<Test> {
    @Schema(
          name = "steps",
          description = "The list of step that will be executed by the test.",
+         required = true,
          minLength = 1
    )
    @JsonProperty("steps")

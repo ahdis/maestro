@@ -30,6 +30,7 @@ import java.time.format.DateTimeFormatter;
       description = "Message sent when a new test run is started."
 )
 @JsonTypeName(TestRunStartedDTO.TYPE)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
       "type",
       "testId",
@@ -59,7 +60,8 @@ public class TestRunStartedDTO extends MessageDTO<TestRunStarted> {
 
    @Schema(
          name = "dateTime",
-         description = "The zoned date time of the beginning of the execution of the test."
+         description = "The zoned date time of the beginning of the execution of the test.",
+         examples = "2025-01-01T16:30:00.387+01:00"
    )
    @JsonProperty("dateTime")
    public String getDateTime() {

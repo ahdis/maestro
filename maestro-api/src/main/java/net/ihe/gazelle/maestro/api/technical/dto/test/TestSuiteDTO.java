@@ -67,7 +67,7 @@ public class TestSuiteDTO implements DTO<TestSuite> {
 
    @Schema(
          name = "testReferences",
-         description = "The test suite is a test scenario where one or more test can be executed sequentially.",
+         description = "The list of test referenced by the test suite.",
          required = true,
          minLength = 1
    )
@@ -91,7 +91,7 @@ public class TestSuiteDTO implements DTO<TestSuite> {
 
    @Schema(
          name = "supportedInputs",
-         description = "The test suite is a test scenario where one or more test can be executed sequentially."
+         description = "A list of input that can be accessible across all test in the test suite."
    )
    @SuppressWarnings("rawtypes")
    @JsonProperty("supportedInputs")

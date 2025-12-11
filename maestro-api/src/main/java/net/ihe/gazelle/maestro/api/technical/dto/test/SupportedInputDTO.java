@@ -5,6 +5,10 @@ import net.ihe.gazelle.maestro.api.business.test.SupportedInput;
 import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
+@Schema(
+      name = "SupportedInput",
+      description = "An input that can be used by one or more step during execution."
+)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
       "id",
@@ -39,7 +43,7 @@ public abstract class SupportedInputDTO<T extends SupportedInput> implements Sub
 
    @Schema(
          name = "id",
-         description = "The unique identifier of the input",
+         description = "The unique identifier of the input.",
          required = true
    )
    @JsonProperty("id")
