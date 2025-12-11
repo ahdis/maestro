@@ -17,6 +17,7 @@
 package net.ihe.gazelle.maestro.quarkus.ws.openapi;
 
 import io.quarkus.smallrye.openapi.OpenApiFilter;
+import io.smallrye.openapi.internal.models.ExternalDocumentation;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.openapi.OASFilter;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
@@ -28,14 +29,18 @@ import org.eclipse.microprofile.openapi.models.OpenAPI;
 @OpenApiFilter(OpenApiFilter.RunStage.RUN)
 public class OpenAPIFilter implements OASFilter {
 
-    @Override
-    public void filterOpenAPI(OpenAPI openAPI) {
-        //In this method, we retrieve the term of service path to make sure we have the right url depending of the environment this
-        //deployed on.
-        if (openAPI.getInfo() != null) {
-            String termOfService = ConfigProvider.getConfig().getValue("gzl.terms.of.service.url", String.class);
-            openAPI.getInfo().setTermsOfService(termOfService);
-        }
-        OASFilter.super.filterOpenAPI(openAPI);
-    }
+   @Override
+   public void filterOpenAPI(OpenAPI openAPI) {
+      //In this method, we retrieve the term of service path to make sure we have the right url depending of the environment this
+      //deployed on.
+      if (openAPI.getInfo() != null) {
+         String termOfService = ConfigProvider.getConfig().getValue("gzl.terms.of.service.url", String.class);
+         String maestroUrl = ConfigProvider.getConfig().getValue("gzl.maestro.url", String.class);
+         openAPI.getInfo().setTermsOfService(termOfService);
+         openAPI.setExternalDocs(new ExternalDocumentation()
+               .url(maestroUrl + "/test-execution-api/index.html")
+               .description("Test Run Stream API"));
+      }
+      OASFilter.super.filterOpenAPI(openAPI);
+   }
 }

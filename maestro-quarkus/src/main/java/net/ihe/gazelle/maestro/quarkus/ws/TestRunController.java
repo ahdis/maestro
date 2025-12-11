@@ -69,7 +69,7 @@ public interface TestRunController {
     @Path("/test-suite/run")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    @Tag(name = "Maestro API")
+    @Tag(name = "Test Run API")
     @Operation(
             summary = "Run Gazelle test suite",
             description = """
@@ -129,7 +129,7 @@ public interface TestRunController {
     @Path("/test/run")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    @Tag(name = "Maestro API")
+    @Tag(name = "Test Run API")
     @Operation(
             summary = "Run Gazelle test",
             description = """
