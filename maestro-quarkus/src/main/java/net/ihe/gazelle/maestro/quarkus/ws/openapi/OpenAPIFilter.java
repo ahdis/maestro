@@ -38,7 +38,7 @@ public class OpenAPIFilter implements OASFilter {
          String maestroUrl = ConfigProvider.getConfig().getValue("gzl.maestro.url", String.class);
          openAPI.getInfo().setTermsOfService(termOfService);
          openAPI.setExternalDocs(new ExternalDocumentation()
-               .url(maestroUrl + "/test-execution-api/index.html")
+               .url(maestroUrl + "/test-run-stream-api/index.html")
                .description("Test Run Stream API"));
       }
       OASFilter.super.filterOpenAPI(openAPI);
