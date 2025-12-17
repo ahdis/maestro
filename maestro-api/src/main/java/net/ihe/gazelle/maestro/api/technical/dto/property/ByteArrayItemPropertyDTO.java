@@ -15,6 +15,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
       "value",
       "fileName",
       "mimeType",
+      "itemType",
       "reference"
 })
 @JsonTypeName(ByteArrayItemPropertyDTO.TYPE)
@@ -76,6 +77,19 @@ public class ByteArrayItemPropertyDTO extends PropertyDTO<ByteArrayItemProperty>
 
    public void setMimeType(String mimeType) {
       property.setMimeType(mimeType);
+   }
+
+   @Schema(
+         name = "itemType",
+         description = "The type of the referenced item."
+   )
+   @JsonProperty("itemType")
+   public String getItemType() {
+      return property.getItemType();
+   }
+
+   public void setItemType(String itemType) {
+      property.setItemType(itemType);
    }
 
    @Schema(

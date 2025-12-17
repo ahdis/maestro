@@ -77,7 +77,9 @@ class SimulationStepOutputDissector implements StepOutputDissector {
       PropertyReferenceFactory factory = (itemId, itemUrl) -> {
          ByteArrayItemProperty replacement = new ByteArrayItemProperty(reportProperty);
          replacement.setValue(null);
-         return replacement.setReference(itemUrl);
+         return replacement
+               .setItemType(ITEM_TYPE_SIMULATION_REPORT)
+               .setReference(itemUrl);
       };
       simulationReportBuilder.addPropertyReplacement(SimulationStepDefinition.REPORT, outputs, factory);
 
@@ -97,15 +99,21 @@ class SimulationStepOutputDissector implements StepOutputDissector {
       for (TransactionReport transaction : simulationReport.getTransactionReports()) {
          if (transaction.getValidationReports() == null) {
             continue;
-         }
-         for (ValidationReport validationReport : transaction.getValidationReports()) {
-            if (validationReport.getContent() == null || validationReport.getContent().length == 0) {
-               continue; // skip when only reference is present
-            }
-            net.ihe.gazelle.validation.v2.api.business.report.ValidationReport validationReportV2 =
-                  deserializeValidationReportV2(validationReport.getContent());
-            List<AttachmentOutputBuilder> attachments = extractValidationInputAttachments(validationReportV2);
-            String refName = "validation-report-" + ++refCounter;
+	         }
+	         for (ValidationReport validationReport : transaction.getValidationReports()) {
+	            byte[] validationContent = validationReport.getContent();
+	            if (validationContent == null || validationContent.length == 0) {
+	               String existingReference = validationReport.getReference();
+	               if (existingReference != null && !existingReference.isBlank()) {
+	                  continue; // skip when only reference is present
+	               }
+	               throw new IllegalStateException(
+	                     "Simulation validation report is missing content and does not provide a reference");
+	            }
+	            net.ihe.gazelle.validation.v2.api.business.report.ValidationReport validationReportV2 =
+	                  deserializeValidationReportV2(validationContent);
+	            List<AttachmentOutputBuilder> attachments = extractValidationInputAttachments(validationReportV2);
+	            String refName = "validation-report-" + ++refCounter;
 
             MaestroItem validationItem = new MaestroItem(
                   context.accessControlList(),

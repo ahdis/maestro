@@ -10,7 +10,9 @@ public class ByteArrayItemProperty extends ByteArrayProperty {
     @Serial
     private static final long serialVersionUID = 7729334463586120850L;
 
-    public ByteArrayItemProperty() {
+   private String itemType;
+
+   public ByteArrayItemProperty() {
       super();
    }
 
@@ -25,6 +27,15 @@ public class ByteArrayItemProperty extends ByteArrayProperty {
    }
 
    private String reference;
+
+   public String getItemType() {
+      return itemType;
+   }
+
+   public ByteArrayItemProperty setItemType(String itemType) {
+      this.itemType = itemType;
+      return this;
+   }
 
    public String getReference() {
       return reference;

@@ -67,7 +67,9 @@ public class ValidationStepOutputDissector implements StepOutputDissector {
         return (itemId, itemUrl) -> {
             ByteArrayItemProperty replacement = new ByteArrayItemProperty(validationReportProperty);
             replacement.setValue(null);
-            return replacement.setReference(itemUrl);
+            return replacement
+                  .setItemType(ValidationStepDefinition.REPORT)
+                  .setReference(itemUrl);
         };
     }
 
