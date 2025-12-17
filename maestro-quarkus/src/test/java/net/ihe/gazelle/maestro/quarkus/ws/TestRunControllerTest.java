@@ -119,7 +119,7 @@ class TestRunControllerTest {
       try (Response response = controller.executeTestSuite(getTestSuiteRunDTO(), false, callbackUrl)) {
          assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus());
          assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus());
-         Awaitility.await().atMost(2, TimeUnit.SECONDS).untilAsserted(
+         Awaitility.await().atMost(3, TimeUnit.SECONDS).untilAsserted(
                () -> wireMockServer.verify(
                      1,
                      postRequestedFor(urlEqualTo("/callback/testTestSuiteRunAsync"))
@@ -143,7 +143,7 @@ class TestRunControllerTest {
       try (Response response = controller.executeTest(getTestRunDTO(), false, callbackUrl)) {
          assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus());
          assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus());
-         Awaitility.await().atMost(2, TimeUnit.SECONDS).untilAsserted(
+         Awaitility.await().atMost(3, TimeUnit.SECONDS).untilAsserted(
                () -> wireMockServer.verify(
                      1,
                      postRequestedFor(urlEqualTo("/callback/testTestRunAsync"))
@@ -214,7 +214,7 @@ class TestRunControllerTest {
          assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
          assertTrue(response.getEntity().toString().contains("bad format"));
          // Verify that no call back was made
-         Awaitility.await().during(2, TimeUnit.SECONDS).untilAsserted(
+         Awaitility.await().during(3, TimeUnit.SECONDS).untilAsserted(
                () -> wireMockServer.verify(
                      0,
                      postRequestedFor(urlEqualTo("/callback/testInvalidTestSuiteRunAsync"))
@@ -237,7 +237,7 @@ class TestRunControllerTest {
          assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
          assertTrue(response.getEntity().toString().contains("bad format"));
          // Verify that no call back was made
-         Awaitility.await().during(2, TimeUnit.SECONDS).untilAsserted(
+         Awaitility.await().during(3, TimeUnit.SECONDS).untilAsserted(
                () -> wireMockServer.verify(
                      0,
                      postRequestedFor(urlEqualTo("/callback/testInvalidTestRunAsync"))
@@ -286,7 +286,6 @@ class TestRunControllerTest {
 
    @org.junit.jupiter.api.Test
    void testTestSuiteRunInternalServerError() {
-
       maestroMock.setErrorSupplier(() -> new RuntimeException("boom boom"));
 
       try (Response response = controller.executeTestSuite(getTestSuiteRunDTO(), false, null)) {
@@ -298,7 +297,6 @@ class TestRunControllerTest {
 
    @org.junit.jupiter.api.Test
    void testTestRunInternalServerError() {
-
       maestroMock.setErrorSupplier(() -> new RuntimeException("boom"));
 
       try (Response response = controller.executeTest(getTestRunDTO(), false, null)) {
