@@ -66,14 +66,17 @@ public class ApacheTestReportClient implements MaestroObserver {
 
     @Override
    public void onExecutionFinished(ExecutionFinished executionFinished) {
-      sendTestReport(executionFinished.getReport());
+      sendTestReport(executionFinished.getReport(), executionFinished.getReportLocation());
    }
 
-   private void sendTestReport(TestReport testReport) {
+   private void sendTestReport(TestReport testReport, String reportLocation) {
       try (CloseableHttpClient client = HttpClients.createDefault()) {
          HttpPost httpPost = new HttpPost(callBackUrl);
          if (callBackAuthorization != null) {
             httpPost.setHeader(HttpHeaders.AUTHORIZATION, callBackAuthorization);
+         }
+         if(reportLocation != null) {
+            httpPost.setHeader(HttpHeaders.LOCATION, reportLocation);
          }
 
          TextSerDes serDes = new JacksonSerDes();

@@ -22,7 +22,9 @@ import net.ihe.gazelle.maestro.api.business.message.InteractWithUser;
 import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
+import net.ihe.gazelle.maestro.api.business.testrun.TestRunValidator;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
+import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRunValidator;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -39,6 +41,8 @@ public class SynchronousMaestro {
             "to contact an administrator";
 
     private final Maestro maestro;
+    private final TestSuiteRunValidator testSuiteRunValidator = new TestSuiteRunValidator();
+    private final TestRunValidator testRunValidator = new TestRunValidator();
 
     /**
      * Constructor
@@ -69,6 +73,7 @@ public class SynchronousMaestro {
         );
 
         try {
+            testSuiteRunValidator.assertValid(testSuiteRun);
             long timeout = testSuiteRun.computeTestSuiteTimeout();
             return future.get(timeout, TimeUnit.MILLISECONDS);
         } catch (ExecutionException e) {
@@ -76,7 +81,7 @@ public class SynchronousMaestro {
         }
     }
 
-    public TestReport executeTest(TestRun testRun, boolean persist) throws TimeoutException, InterruptedException {
+   public TestReport executeTest(TestRun testRun, boolean persist) throws TimeoutException, InterruptedException {
         CompletableFuture<TestReport> future = new CompletableFuture<>();
         maestro.executeTest(
                 testRun,
@@ -85,6 +90,7 @@ public class SynchronousMaestro {
         );
 
         try {
+            testRunValidator.assertValid(testRun);
             long timeout = testRun.getTest().computeTestRunTimeout();
             return future.get(timeout, TimeUnit.MILLISECONDS);
         } catch (ExecutionException e) {

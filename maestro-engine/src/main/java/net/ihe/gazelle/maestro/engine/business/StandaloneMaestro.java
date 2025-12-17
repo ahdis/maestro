@@ -7,7 +7,6 @@ import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 
 public class StandaloneMaestro implements Maestro {
 
-
    private final MaestroFacade maestroFacade;
 
    public StandaloneMaestro(MaestroFacade maestroFacade) {

@@ -19,11 +19,9 @@ package net.ihe.gazelle.maestro.quarkus.ws;
 import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import net.ihe.gazelle.lang.TimeoutRuntimeException;
-import net.ihe.gazelle.maestro.api.business.InvalidTestRunException;
 import net.ihe.gazelle.maestro.api.business.Maestro;
 import net.ihe.gazelle.maestro.api.business.SynchronousMaestro;
 import net.ihe.gazelle.maestro.api.business.UnsupportedPropertyTypeException;
@@ -33,7 +31,6 @@ import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestRunDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSuiteRunDTO;
-import net.ihe.gazelle.maestro.engine.business.UnknownStepException;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,14 +75,11 @@ public class TestRunControllerImpl implements TestRunController {
     private Response handleErrors(Supplier<Response> serviceCall) {
         try {
             return serviceCall.get();
-        } catch (InvalidTestRunException | IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             LOG.debug("TestRun format Exception", e);
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
-                    .entity("The request contains a testRun with bad format" + e).build();
-        } catch (UnknownStepException e) {
-            return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
-                    .entity("Unknown step type: " + e.getMessage()).build();
-        } catch (TimeoutRuntimeException | WebApplicationException e) {
+                    .entity("The request contains a testRun with bad format." + e.getMessage()).build();
+        } catch (TimeoutRuntimeException e) {
             return Response.status(Response.Status.GATEWAY_TIMEOUT.getStatusCode())
                     .entity(SynchronousMaestro.TIMEOUT_MESSAGE).build();
         } catch (Exception e) {
