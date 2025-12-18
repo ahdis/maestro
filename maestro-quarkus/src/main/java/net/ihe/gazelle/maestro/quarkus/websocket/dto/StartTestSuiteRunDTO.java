@@ -27,6 +27,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 )
 @JsonTypeName(StartTestSuiteRunDTO.TYPE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(value = {"authorization"})
 @JsonPropertyOrder({
       "type",
       "testSuiteRun",

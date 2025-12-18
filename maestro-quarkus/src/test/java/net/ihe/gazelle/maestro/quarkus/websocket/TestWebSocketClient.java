@@ -28,59 +28,70 @@ import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.DeserializationException;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.Map;
+import java.util.concurrent.*;
 
 @ClientEndpoint
 @ApplicationScoped
 public class TestWebSocketClient {
 
-    private final TextSerDes serDes = new JacksonSerDes();
-    private final CompletableFuture<ExecutionFinished> future = new CompletableFuture<>();
-    private final CompletableFuture<String> errorFuture = new CompletableFuture<>();
+   private final TextSerDes serDes = new JacksonSerDes();
+   private static final Map<String, CompletableFuture<ExecutionFinished>> EXECUTIONS = new ConcurrentHashMap<>();
+   private static final Map<String, CompletableFuture<String>> ERRORS = new ConcurrentHashMap<>();
 
-    @OnMessage
-    public void onMessage(String msg) {
-        try {
-            MessageDTO<?> message = serDes.deserialize(msg, MessageDTO.class);
-            if (message instanceof ExecutionFinishedDTO executionFinishedDTO) {
-                future.complete(executionFinishedDTO.getBusinessObject());
-            }
-        } catch (DeserializationException e) {
-            // Do nothing
-        }
-    }
+   @OnOpen
+   public void onOpen(Session session) {
+      EXECUTIONS.put(session.getId(), new CompletableFuture<>());
+      ERRORS.put(session.getId(), new CompletableFuture<>());
+   }
 
-    @OnClose
-    public void onClose(Session session, CloseReason reason) {
-        errorFuture.complete(reason.getReasonPhrase());
-    }
+   @OnMessage
 
-    public TestReport getTestReport() {
-        try {
-            return future.get(2, TimeUnit.SECONDS).getReport();
-        } catch (TimeoutException e) {
-            throw new TimeoutRuntimeException(e);
-        } catch (ExecutionException e) {
-            throw new ExecutionRuntimeException(e);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return null;
-        }
-    }
+   public void onMessage(Session session, String msg) {
+      try {
+         MessageDTO<?> message = serDes.deserialize(msg, MessageDTO.class);
+         if (message instanceof ExecutionFinishedDTO executionFinishedDTO) {
+            EXECUTIONS.get(session.getId()).complete(executionFinishedDTO.getBusinessObject());
 
-    public String getError() {
-        try {
-            return errorFuture.get(1, TimeUnit.SECONDS);
-        } catch (TimeoutException e) {
-            throw new TimeoutRuntimeException(e);
-        } catch (ExecutionException e) {
-            throw new ExecutionRuntimeException(e);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return null;
-        }
-    }
+         }
+      } catch (DeserializationException e) {
+         // Do nothing
+      }
+   }
+
+   @OnClose
+   public void onClose(Session session, CloseReason reason) {
+      ERRORS.get(session.getId()).complete(reason.getReasonPhrase());
+   }
+
+   public TestReport getTestReport(String sessionId) {
+      try {
+         return EXECUTIONS.get(sessionId).get(200, TimeUnit.SECONDS).getReport();
+      } catch (TimeoutException e) {
+         throw new TimeoutRuntimeException(e);
+      } catch (ExecutionException e) {
+         throw new ExecutionRuntimeException(e);
+      } catch (InterruptedException e) {
+         Thread.currentThread().interrupt();
+         return null;
+      }
+   }
+
+   public String getError(String sessionId) {
+      try {
+         return ERRORS.get(sessionId).get(100, TimeUnit.SECONDS);
+      } catch (TimeoutException e) {
+         throw new TimeoutRuntimeException(e);
+      } catch (ExecutionException e) {
+         throw new ExecutionRuntimeException(e);
+      } catch (InterruptedException e) {
+         Thread.currentThread().interrupt();
+         return null;
+      }
+   }
+
+   public static void clear(String sessionId) {
+      EXECUTIONS.remove(sessionId);
+      ERRORS.remove(sessionId);
+   }
 }

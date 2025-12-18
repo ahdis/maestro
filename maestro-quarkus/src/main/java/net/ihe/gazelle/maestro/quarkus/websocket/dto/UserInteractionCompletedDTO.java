@@ -30,6 +30,7 @@ import java.util.List;
 )
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonTypeName(UserInteractionCompletedDTO.TYPE)
+@JsonIgnoreProperties(value = {"authorization"})
 @JsonPropertyOrder({
       "type",
       "inputs"

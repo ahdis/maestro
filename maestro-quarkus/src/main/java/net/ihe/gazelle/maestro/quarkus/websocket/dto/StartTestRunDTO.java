@@ -27,10 +27,11 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 )
 @JsonTypeName(StartTestRunDTO.TYPE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(value = {"authorization"})
 @JsonPropertyOrder({
       "type",
       "testRun",
-      "persist"
+      "persist",
 })
 public class StartTestRunDTO extends MessageDTO<TestRun> {
 

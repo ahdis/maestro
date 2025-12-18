@@ -119,7 +119,7 @@ public interface TestRunController {
                     in = ParameterIn.QUERY,
                     name = "persist",
                     description = "Choose whether to persist the test report or not"
-            ) @QueryParam("persist") boolean persist,
+            ) @QueryParam("persist") @DefaultValue("true") boolean persist,
             @Parameter(
                     in = ParameterIn.QUERY,
                     name = "callback",
@@ -181,7 +181,7 @@ public interface TestRunController {
                     in = ParameterIn.QUERY,
                     name = "persist",
                     description = "Choose whether to persist the test report or not"
-            ) @QueryParam("persist") boolean persist,
+            ) @QueryParam("persist") @DefaultValue("true") boolean persist,
             @Parameter(
                     in = ParameterIn.QUERY,
                     name = "callback",

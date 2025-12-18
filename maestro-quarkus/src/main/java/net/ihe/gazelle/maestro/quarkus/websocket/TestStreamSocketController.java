@@ -26,7 +26,9 @@ import net.ihe.gazelle.maestro.quarkus.websocket.dto.StartTestRunDTO;
 import net.ihe.gazelle.maestro.quarkus.websocket.dto.StartTestSuiteRunDTO;
 import net.ihe.gazelle.maestro.quarkus.websocket.dto.UserInteractionCompletedDTO;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
+import net.ihe.gazelle.modelmarshaller.technical.serialization.DeserializationException;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
+import net.ihe.gazelle.security.business.GazelleIdentity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,47 +40,63 @@ import java.util.concurrent.ConcurrentHashMap;
 @ServerEndpoint("/v1/test-stream/run")
 public class TestStreamSocketController {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TestStreamSocketController.class.getName());
+   private static final Logger LOG = LoggerFactory.getLogger(TestStreamSocketController.class.getName());
 
-    private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
-    private final TextSerDes serDes = new JacksonSerDes();
-    private final Maestro maestro;
+   private final GazelleIdentity identity;
+   private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
+   private final TextSerDes serDes = new JacksonSerDes();
+   private final Maestro maestro;
 
-    @Inject
-    public TestStreamSocketController(Maestro maestro) {
-        this.maestro = maestro;
-    }
+   @Inject
+   public TestStreamSocketController(GazelleIdentity identity, Maestro maestro) {
+      this.identity = identity;
+      this.maestro = maestro;
+   }
 
-    @OnOpen
-    public void onOpen(Session session) {
-        LOG.info("Test Stream Socket Connected: {}", session.getId());
-        WebSocketSession maestroCaller = new WebSocketSession(session);
-        sessions.put(session.getId(), maestroCaller);
-    }
+   @OnOpen
+   public void onOpen(Session session) {
+      LOG.info("Test Stream Socket Connected: {}", session.getId());
+      WebSocketSession maestroCaller = new WebSocketSession(session);
+      sessions.put(session.getId(), maestroCaller);
+   }
 
-    @OnClose
-    public void onClose(Session session) {
-        LOG.info("Test Stream Socket Disconnected: {}", session.getId());
-        sessions.remove(session.getId());
-    }
+   @OnClose
+   public void onClose(Session session) {
+      LOG.info("Test Stream Socket Disconnected: {}", session.getId());
+      sessions.remove(session.getId());
+   }
 
-    @OnMessage
-    public void onMessage(Session session, String messageString) throws IOException {
-        LOG.debug("Received message: {}", messageString);
-        MessageDTO<?> message = serDes.deserialize(messageString, MessageDTO.class);
-        WebSocketSession maestroCaller = sessions.get(session.getId());
-        switch (message) {
-            case StartTestRunDTO testRun -> maestro.executeTest(testRun.getBusinessObject(), testRun.isPersist(), maestroCaller);
-            case StartTestSuiteRunDTO testSuiteRun -> maestro.executeTestSuite(testSuiteRun.getBusinessObject(), testSuiteRun.isPersist(), maestroCaller);
-            case UserInteractionCompletedDTO userInteractionCompleted -> maestroCaller.completeInteraction(userInteractionCompleted.getBusinessObject());
+   @OnMessage
+   @ProtectedWebSocket
+   public void onMessage(Session session, String messageString) throws IOException {
+      try {
+         if (!identity.isAuthenticated()) {
+            session.close(new CloseReason(CloseReason.CloseCodes.VIOLATED_POLICY, "Unauthenticated"));
+            return;
+         }
+         LOG.debug("Received message: {}", messageString);
+         MessageDTO<?> message = serDes.deserialize(messageString, MessageDTO.class);
+         WebSocketSession maestroCaller = sessions.get(session.getId());
+         switch (message) {
+            case StartTestRunDTO testRun ->
+                  maestro.executeTest(testRun.getBusinessObject(), testRun.isPersist(), maestroCaller);
+            case StartTestSuiteRunDTO testSuiteRun ->
+                  maestro.executeTestSuite(testSuiteRun.getBusinessObject(), testSuiteRun.isPersist(), maestroCaller);
+            case UserInteractionCompletedDTO userInteractionCompleted ->
+                  maestroCaller.completeInteraction(userInteractionCompleted.getBusinessObject());
             default -> {
-                sessions.remove(session.getId());
-                String error = "Unexpected message type: " + message.getClass().getName();
-                session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, error));
-                throw new IllegalArgumentException(error);
+               sessions.remove(session.getId());
+               String error = "Unexpected message type: " + message.getClass().getName();
+               session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, error));
+               throw new IllegalArgumentException(error);
             }
-        }
-    }
+         }
+      } catch (DeserializationException e) {
+         session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, "Unable to execute simulation, please contact an administrator."));
+      } catch (Exception e) {
+         session.close(new CloseReason(CloseReason.CloseCodes.VIOLATED_POLICY, "Unauthenticated"));
+      }
+   }
 }
 
 
