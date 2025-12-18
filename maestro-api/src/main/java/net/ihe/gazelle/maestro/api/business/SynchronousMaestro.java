@@ -20,6 +20,7 @@ import net.ihe.gazelle.lang.ExecutionRuntimeException;
 import net.ihe.gazelle.maestro.api.business.message.ExecutionFinished;
 import net.ihe.gazelle.maestro.api.business.message.InteractWithUser;
 import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
+import net.ihe.gazelle.maestro.api.business.testreport.LocalizedTestReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRunValidator;
@@ -65,7 +66,7 @@ public class SynchronousMaestro {
      * @throws ExecutionRuntimeException if an unexpected error occurs during the execution.
      */
     public TestReport executeTestSuite(TestSuiteRun testSuiteRun, boolean persist) throws TimeoutException, InterruptedException {
-        CompletableFuture<TestReport> future = new CompletableFuture<>();
+        CompletableFuture<LocalizedTestReport> future = new CompletableFuture<>();
         maestro.executeTestSuite(
                 testSuiteRun,
                 persist,
@@ -82,7 +83,7 @@ public class SynchronousMaestro {
     }
 
    public TestReport executeTest(TestRun testRun, boolean persist) throws TimeoutException, InterruptedException {
-        CompletableFuture<TestReport> future = new CompletableFuture<>();
+        CompletableFuture<LocalizedTestReport> future = new CompletableFuture<>();
         maestro.executeTest(
                 testRun,
                 persist,
@@ -100,9 +101,9 @@ public class SynchronousMaestro {
 
     private class SynchronousObserver implements MaestroObserver {
 
-        private final CompletableFuture<TestReport> future;
+        private final CompletableFuture<LocalizedTestReport> future;
 
-        public SynchronousObserver(CompletableFuture<TestReport> future) {
+        public SynchronousObserver(CompletableFuture<LocalizedTestReport> future) {
             this.future = future;
         }
 
@@ -113,7 +114,8 @@ public class SynchronousMaestro {
 
         @Override
         public void onExecutionFinished(ExecutionFinished executionFinished) {
-            future.complete(executionFinished.getReport());
+            LocalizedTestReport localizedTestReport = new LocalizedTestReport(executionFinished.getReport(), executionFinished.getReportLocation());
+            future.complete(localizedTestReport);
         }
     }
 

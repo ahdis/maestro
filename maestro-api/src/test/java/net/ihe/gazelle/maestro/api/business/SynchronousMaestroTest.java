@@ -4,6 +4,7 @@ import net.ihe.gazelle.maestro.api.business.message.ExecutionFinished;
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.test.TestReference;
 import net.ihe.gazelle.maestro.api.business.test.TestSuite;
+import net.ihe.gazelle.maestro.api.business.testreport.LocalizedTestReport;
 import net.ihe.gazelle.maestro.api.business.testreport.Result;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
@@ -15,8 +16,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class SynchronousMaestroTest {
 
@@ -27,13 +27,14 @@ class SynchronousMaestroTest {
             .setUuid("summary-1")
             .setDateTime(Instant.parse("2025-01-01T00:00:00Z"))
             .setResult(Result.PASSED);
+      LocalizedTestReport expectedLocalizedReport = new LocalizedTestReport(expectedReport, null);
 
       CapturingMaestro maestro = new CapturingMaestro(expectedReport);
       SynchronousMaestro synchronousMaestro = new SynchronousMaestro(maestro);
 
-      TestReport report = synchronousMaestro.executeTestSuite(testSuiteRun, false);
+      LocalizedTestReport localizedTestReport = (LocalizedTestReport) synchronousMaestro.executeTestSuite(testSuiteRun, false);
 
-      assertSame(expectedReport, report);
+      assertEquals(expectedLocalizedReport, localizedTestReport);
       assertSame(testSuiteRun, maestro.lastTestSuiteRun);
    }
 

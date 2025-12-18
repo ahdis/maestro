@@ -27,6 +27,7 @@ import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.test.Test;
 import net.ihe.gazelle.maestro.api.business.test.TestReference;
 import net.ihe.gazelle.maestro.api.business.test.TestSuite;
+import net.ihe.gazelle.maestro.api.business.testreport.LocalizedTestReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
@@ -103,6 +104,21 @@ class TestRunControllerTest {
          TestReportDTO entity = (TestReportDTO) response.getEntity();
          assertNotNull(entity);
          assertEquals(testReport.getTestSuiteName(), entity.getTestSuiteName());
+      }
+   }
+
+   @org.junit.jupiter.api.Test
+   void testTestRunSyncPersist() {
+      TestReport testReport = ObjectFactory.createTestReport();
+      maestroMock.setTestReportSupplier(() -> testReport);
+
+      try (Response response = controller.executeTest(getTestRunDTO(), true, null)) {
+         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+         TestReportDTO entity = (TestReportDTO) response.getEntity();
+         assertNotNull(entity);
+         LocalizedTestReport localizedTestReport = (LocalizedTestReport) entity.getBusinessObject();
+         assertNotNull(localizedTestReport.getLocation());
+         assertTrue(localizedTestReport.getLocation().startsWith("http://localhost/datahouse/items/"));
       }
    }
 
