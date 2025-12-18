@@ -19,13 +19,14 @@ package net.ihe.gazelle.maestro.quarkus.ws;
 import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import net.ihe.gazelle.lang.TimeoutRuntimeException;
 import net.ihe.gazelle.maestro.api.business.Maestro;
 import net.ihe.gazelle.maestro.api.business.SynchronousMaestro;
 import net.ihe.gazelle.maestro.api.business.UnsupportedPropertyTypeException;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+import net.ihe.gazelle.maestro.api.business.testreport.LocalizedTestReport;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
@@ -92,8 +93,8 @@ public class TestRunControllerImpl implements TestRunController {
 
     private Response runTestSuiteSynchronously(TestSuiteRun testSuiteRun, boolean persist) {
         try {
-            TestReport report = synchronousMaestro.executeTestSuite(testSuiteRun, persist);
-            return Response.ok(new TestReportDTO(report)).build();
+            LocalizedTestReport report = (LocalizedTestReport) synchronousMaestro.executeTestSuite(testSuiteRun, persist);
+            return Response.ok(new TestReportDTO(report)).header(HttpHeaders.LOCATION, report.getLocation()).build();
         } catch (TimeoutException e) {
             throw new TimeoutRuntimeException(e);
         } catch (InterruptedException e) {
@@ -109,8 +110,8 @@ public class TestRunControllerImpl implements TestRunController {
 
     private Response runTestSynchronously(TestRun testRun, boolean persist) {
         try {
-            TestReport report = synchronousMaestro.executeTest(testRun, persist);
-            return Response.ok(new TestReportDTO(report)).build();
+            LocalizedTestReport report = (LocalizedTestReport) synchronousMaestro.executeTest(testRun, persist);
+            return Response.ok(new TestReportDTO(report)).header(HttpHeaders.LOCATION,report.getLocation()).build();
         } catch (TimeoutException e) {
             throw new TimeoutRuntimeException(e);
         } catch (InterruptedException e) {
