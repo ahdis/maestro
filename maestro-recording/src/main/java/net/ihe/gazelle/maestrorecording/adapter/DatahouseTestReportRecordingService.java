@@ -19,7 +19,9 @@ import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class DatahouseTestReportRecordingService implements TestReportRecordingService {
@@ -166,10 +168,10 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
                }
                List<Property> updatedOutputs = new ArrayList<>(stepRunReport.getOutputs());
                ensureOutputCapacity(updatedOutputs, projection);
-               List<Reference> references = new ArrayList<>(
-                     uploadAttachments(projection.attachments(), updatedOutputs));
+               UploadedAttachments uploadedAttachments = uploadAttachments(projection.attachments(), updatedOutputs);
+               List<Reference> references = new ArrayList<>(uploadedAttachments.references());
                List<Reference> stepReferences = stepOutputRecordService.dissectAndRecord(stepRunReport, projection, acl,
-                     references, updatedOutputs);
+                     references, uploadedAttachments.referencesByOwningItemIndex(), updatedOutputs);
                aggregatedReferences.addAll(stepReferences);
             }
          }
@@ -209,9 +211,9 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
    }
 
    // Streams attachment payloads to Datahouse, replaces the original properties, and returns the new references.
-   private List<Reference> uploadAttachments(List<AttachmentPlan> plans, List<Property> outputs) {
+   private UploadedAttachments uploadAttachments(List<AttachmentPlan> plans, List<Property> outputs) {
       if (plans.isEmpty()) {
-         return List.of();
+         return new UploadedAttachments(List.of(), Map.of());
       }
       List<Attachment> datahouseAttachments = plans.stream()
             .map(AttachmentPlan::attachment)
@@ -221,6 +223,7 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
       validateUploadedIdsCount(plans.size(), ids.size());
 
       List<Reference> references = new ArrayList<>();
+      Map<Integer, List<Reference>> referencesByOwningItemIndex = new HashMap<>();
       for (int i = 0; i < plans.size(); i++) {
          AttachmentPlan plan = plans.get(i);
          String attachmentId = ids.get(i);
@@ -229,13 +232,17 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
             Property replacement = plan.propertyFactory().create(attachmentId, url);
             setOutput(outputs, plan.outputIndex(), replacement);
          }
-         references.add(new Reference()
+         Reference reference = new Reference()
                .setName(plan.referenceName())
                .setType(plan.referenceType())
                .setValue(attachmentId)
-               .setRefType(RefType.ATTACHMENT));
+               .setRefType(RefType.ATTACHMENT);
+         references.add(reference);
+         referencesByOwningItemIndex
+               .computeIfAbsent(plan.owningItemIndex(), ignored -> new ArrayList<>())
+               .add(reference);
       }
-      return references;
+      return new UploadedAttachments(references, referencesByOwningItemIndex);
    }
 
    private Attachment toDatahouseAttachment(MaestroAttachment maestroAttachment) {
@@ -253,6 +260,10 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
          outputs.add(null);
       }
       outputs.set(index, replacement);
+   }
+
+   private record UploadedAttachments(List<Reference> references,
+                                      Map<Integer, List<Reference>> referencesByOwningItemIndex) {
    }
 
    private ItemReference recordTestReport(TestReport testReport, List<TestReportReferenceDTO> testReportReferenceDTOS,

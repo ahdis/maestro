@@ -54,6 +54,8 @@ class StepOutputProjectionBuilderTest {
 
       assertEquals(List.of("child-attachment", "root-attachment"),
             projection.attachments().stream().map(AttachmentPlan::referenceName).toList());
+      assertEquals(List.of(0, 1),
+            projection.attachments().stream().map(AttachmentPlan::owningItemIndex).toList());
    }
 
    @Test
@@ -70,7 +72,7 @@ class StepOutputProjectionBuilderTest {
    @Test
    void attachmentBuilderRequiresReferenceBeforeBuild() {
       AttachmentOutputBuilder builder = new AttachmentOutputBuilder(getSimpleAttachment("dangling.bin"));
-      assertThrows(IllegalStateException.class, builder::build);
+      assertThrows(IllegalStateException.class, () -> builder.build(0));
    }
 
    @Test

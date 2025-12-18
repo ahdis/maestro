@@ -104,8 +104,12 @@ class DatahouseTestReportRecordServiceTest {
 
         Item rootItem = recordedItemOfType(StaticStepOutputDissector.ROOT_ITEM_TYPE);
         assertThat(referenceNames(rootItem))
-                .containsExactlyInAnyOrder(StaticStepOutputDissector.CHILD_REFERENCE_NAME,
-                        StaticStepOutputDissector.SIBLING_REFERENCE_NAME);
+                .containsExactlyInAnyOrder(
+                        StaticStepOutputDissector.CHILD_REFERENCE_NAME,
+                        StaticStepOutputDissector.SIBLING_REFERENCE_NAME,
+                        StaticStepOutputDissector.ATTACHMENT_REFERENCE_NAME,
+                        StaticStepOutputDissector.DETACHED_REFERENCE_NAME
+                );
 
         Item childItem = recordedItemOfType(StaticStepOutputDissector.CHILD_ITEM_TYPE);
         assertThat(referenceNames(childItem))

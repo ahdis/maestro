@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -56,6 +57,7 @@ class StepOutputRecordServiceTest {
             projection,
             new AccessControlList(),
             reportReferences,
+            Map.of(),
             updatedOutputs);
 
       assertThat(returnedRefs).hasSize(1);
@@ -106,7 +108,7 @@ class StepOutputRecordServiceTest {
             .setRefType(RefType.ATTACHMENT)
             .setValue("att-7"));
 
-      service.dissectAndRecord(step, projection, new AccessControlList(), reportReferences, updatedOutputs);
+      service.dissectAndRecord(step, projection, new AccessControlList(), reportReferences, Map.of(), updatedOutputs);
 
       assertThat(recordItemClient.recordedItems).hasSize(2);
       Item recordedChild = (Item) recordItemClient.recordedItems.get(0);
@@ -142,6 +144,42 @@ class StepOutputRecordServiceTest {
             projection,
             acl,
             attachmentsReferences,
+            Map.of(),
             updatedOutputs));
+   }
+
+   @Test
+   void shouldAppendAttachmentReferencesToOwningItem() {
+      StepRunReport step = new StepRunReport()
+            .setStepName("attachment-refs")
+            .addOutput(new StringProperty("noop", "noop"));
+
+      ItemPlan rootPlan = new ItemPlan(
+            new MaestroItem(null, "ROOT", "{\"level\":0}", new ArrayList<>(), new HashMap<>()),
+            List.of(),
+            List.of(),
+            null);
+      StepOutputProjection projection = new StepOutputProjection(
+            List.of(rootPlan),
+            List.of(),
+            List.of(),
+            List.of());
+
+      List<Reference> attachmentReferences = new ArrayList<>();
+      Reference attachmentRef = new Reference()
+            .setName("input-1")
+            .setType("VALIDATION_INPUT")
+            .setRefType(RefType.ATTACHMENT)
+            .setValue("att-1");
+      attachmentReferences.add(attachmentRef);
+
+      service.dissectAndRecord(step, projection, new AccessControlList(), attachmentReferences,
+            Map.of(0, List.of(attachmentRef)), new ArrayList<>(step.getOutputs()));
+
+      assertThat(recordItemClient.recordedItems).hasSize(1);
+      Item recordedRoot = (Item) recordItemClient.recordedItems.getFirst();
+      assertThat(recordedRoot.getReferences())
+            .extracting(Reference::getName)
+            .contains("input-1");
    }
 }

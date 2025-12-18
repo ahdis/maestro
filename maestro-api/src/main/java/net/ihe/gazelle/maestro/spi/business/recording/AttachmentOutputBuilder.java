@@ -32,11 +32,14 @@ public final class AttachmentOutputBuilder {
       return this;
    }
 
-   AttachmentPlan build() {
+   AttachmentPlan build(int owningItemIndex) {
       if (referenceName == null || referenceType == null) {
          throw new IllegalStateException("referenceName and referenceType must be provided");
       }
       int planOutputIndex = propertyFactory == null ? -1 : outputIndex;
-      return new AttachmentPlan(attachment, planOutputIndex, propertyFactory, referenceName, referenceType);
+      if (owningItemIndex < 0) {
+         throw new IllegalArgumentException("owningItemIndex must be >= 0");
+      }
+      return new AttachmentPlan(attachment, owningItemIndex, planOutputIndex, propertyFactory, referenceName, referenceType);
    }
 }
