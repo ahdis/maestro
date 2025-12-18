@@ -66,7 +66,7 @@ public class TestWebSocketClient {
 
    public TestReport getTestReport(String sessionId) {
       try {
-         return EXECUTIONS.get(sessionId).get(200, TimeUnit.SECONDS).getReport();
+         return EXECUTIONS.get(sessionId).get(2, TimeUnit.SECONDS).getReport();
       } catch (TimeoutException e) {
          throw new TimeoutRuntimeException(e);
       } catch (ExecutionException e) {
@@ -79,7 +79,7 @@ public class TestWebSocketClient {
 
    public String getError(String sessionId) {
       try {
-         return ERRORS.get(sessionId).get(100, TimeUnit.SECONDS);
+         return ERRORS.get(sessionId).get(2, TimeUnit.SECONDS);
       } catch (TimeoutException e) {
          throw new TimeoutRuntimeException(e);
       } catch (ExecutionException e) {
