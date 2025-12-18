@@ -22,6 +22,7 @@ import jakarta.ws.rs.core.Response;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestRunDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSuiteRunDTO;
+import net.ihe.gazelle.sso.server.technical.filter.ProtectedResource;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
@@ -29,6 +30,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import static net.ihe.gazelle.maestro.quarkus.ws.Constants.TEST_RUN;
@@ -67,9 +69,11 @@ public interface TestRunController {
      */
     @POST
     @Path("/test-suite/run")
+    @ProtectedResource
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @Tag(name = "Test Run API")
+    @SecurityRequirement(name = "Keycloak")
     @Operation(
             summary = "Run Gazelle test suite",
             description = """
@@ -127,9 +131,11 @@ public interface TestRunController {
 
     @POST
     @Path("/test/run")
+    @ProtectedResource
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @Tag(name = "Test Run API")
+    @SecurityRequirement(name = "Keycloak")
     @Operation(
             summary = "Run Gazelle test",
             description = """

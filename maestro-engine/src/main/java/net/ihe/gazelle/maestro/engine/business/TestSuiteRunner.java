@@ -102,7 +102,8 @@ public class TestSuiteRunner {
          String testId = testRef.getTestId();
          testRuns.add(new TestRun()
                .setTest(testSuiteRun.getTest(testId))
-               .setInputs(consolidateInputs(testSuiteRun, testRef)));
+               .setInputs(consolidateInputs(testSuiteRun, testRef))
+               .setAccessControlList(testSuiteRun.getAccessControlList()));
       }
       return testRuns;
    }

@@ -12,6 +12,7 @@ import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.engine.business.context.TestRunSession;
 import net.ihe.gazelle.maestro.spi.business.StepRun;
+import net.ihe.gazelle.security.business.acl.AccessControlList;
 import org.junit.jupiter.api.BeforeEach;
 import technical.dao.SessionStoreImpl;
 
@@ -45,7 +46,8 @@ class TestRunnerTest {
 
       testRun = new TestRun()
             .setTest(test)
-            .setInputs(List.of(new StringProperty("input", "value")));
+            .setInputs(List.of(new StringProperty("input", "value")))
+            .setAccessControlList(new AccessControlList().setPublic(true));
    }
 
    @org.junit.jupiter.api.Test

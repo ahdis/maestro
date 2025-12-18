@@ -99,6 +99,10 @@ public class TestRun implements Serializable {
       return test != null;
    }
 
+   public boolean isAclDefined() {
+      return accessControlList != null;
+   }
+
    @Override
    public boolean equals(Object o) {
       if (!(o instanceof TestRun testRun)) {

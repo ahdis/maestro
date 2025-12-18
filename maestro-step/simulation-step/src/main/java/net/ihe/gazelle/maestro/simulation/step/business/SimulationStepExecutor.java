@@ -218,7 +218,7 @@ public class SimulationStepExecutor implements StepExecutor {
                         .append("name : ").append(parameter.getName()).append("\n")
                         .append("value : ").append(parameter.getValue()).append("\n");
             }
-            userInteractionHandler.displayMessage("Additional instructions", instructions.toString(), timeout);
+            userInteractionHandler.displayMessage("Execution paused", instructions.toString(), timeout);
         }
     }
 }

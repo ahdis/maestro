@@ -88,6 +88,10 @@
             <artifactId>security</artifactId>
         </dependency>
         <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>oidc-server</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.kereval.gazelle</groupId>
             <artifactId>datahouse-api</artifactId>
         </dependency>
@@ -144,6 +148,10 @@
             <artifactId>quarkus-websockets</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-smallrye-jwt</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.microprofile.openapi</groupId>
             <artifactId>microprofile-openapi-api</artifactId>
         </dependency>
@@ -182,11 +190,6 @@
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-smallrye-jwt</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

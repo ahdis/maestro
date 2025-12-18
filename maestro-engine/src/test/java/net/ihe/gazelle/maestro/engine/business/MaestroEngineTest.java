@@ -94,7 +94,9 @@ class MaestroEngineTest {
     void executeTestRunsEntireWorkflow() {
         RecordingMaestroObserver observer = new RecordingMaestroObserver();
         Test test = createTest("test-1", "step-1", "step-2");
-        TestRun testRun = new TestRun().setTest(test);
+        TestRun testRun = new TestRun()
+              .setTest(test)
+              .setAccessControlList(new AccessControlList().setPublic(true));
         stepExecutorProvider
                 .returnsReport("step-1", passedReport("step-1"))
                 .returnsReport("step-2", passedReport("step-2"));
@@ -179,7 +181,9 @@ class MaestroEngineTest {
     void executeTestWithoutPersisting() {
         RecordingMaestroObserver observer = new RecordingMaestroObserver();
         Test test = createTest("test-1", "step-1", "step-2");
-        TestRun testRun = new TestRun().setTest(test);
+        TestRun testRun = new TestRun()
+              .setTest(test)
+              .setAccessControlList(new AccessControlList().setPublic(true));
         maestro.executeTest(testRun, false, observer);
         assertThat(reportRecordService.getRecordedReports(), empty());
     }

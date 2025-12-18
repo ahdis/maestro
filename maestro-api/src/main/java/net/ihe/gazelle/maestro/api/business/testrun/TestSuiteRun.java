@@ -145,4 +145,8 @@ public class TestSuiteRun implements Serializable {
       return true;
    }
 
+   public boolean isAclDefined() {
+      return accessControlList != null;
+   }
+
 }

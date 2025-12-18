@@ -46,7 +46,8 @@ public class TestSuiteRunValidator extends AbstractValidator<TestSuiteRun> {
    protected void addRulesAndMembers(ValidatorBuilder<? extends TestSuiteRun> validatorBuilder) {
       validatorBuilder
             .addRule(TestSuiteRun::isTestSuiteDefined, "Test Suite must be set")
-            .addRule(TestSuiteRun::areAllReferencedTestsAttached, "All Tests referenced in the Test Suite must be attached to the Test Suite Run.")
+            .addRule(TestSuiteRun::areAllReferencedTestsAttached, "All Tests referenced in the Test Suite must be attached to the Test Suite Run")
+            .addRule(TestSuiteRun::isAclDefined, "Access control list must be defined")
             .addMember("testSuite", TestSuiteRun::getTestSuite, testSuiteValidator::getAssembledValidatorBuilder)
             .addMember("tests", TestSuiteRun::getTests, testValidator::getAssembledValidatorBuilder)
             .addMember("inputs", TestSuiteRun::getInputs,

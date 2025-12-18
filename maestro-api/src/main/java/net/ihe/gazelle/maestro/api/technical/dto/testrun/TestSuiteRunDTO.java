@@ -141,7 +141,8 @@ public class TestSuiteRunDTO implements DTO<TestSuiteRun> {
 
    @Schema(
          name = "accessControlList",
-         description = "An access control list for read, write authorization."
+         description = "An access control list for read, write authorization.",
+         required = true
    )
    @JsonProperty("accessControlList")
    public AccessControlListDTO getAccessControlList() {

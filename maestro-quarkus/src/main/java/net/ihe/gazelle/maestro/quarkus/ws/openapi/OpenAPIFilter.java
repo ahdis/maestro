@@ -21,6 +21,12 @@ import io.smallrye.openapi.internal.models.ExternalDocumentation;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.openapi.OASFilter;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
+import org.eclipse.microprofile.openapi.models.PathItem;
+import org.eclipse.microprofile.openapi.models.security.OAuthFlow;
+import org.eclipse.microprofile.openapi.models.security.SecurityScheme;
+
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * This class is used to modify the openapi file generated during the build on runtime.
@@ -28,6 +34,15 @@ import org.eclipse.microprofile.openapi.models.OpenAPI;
  */
 @OpenApiFilter(OpenApiFilter.RunStage.RUN)
 public class OpenAPIFilter implements OASFilter {
+
+   private static final String TAG_TO_REMOVE = "Simulation Callback API";
+   private static final String REALMS_GAZELLE_PROTOCOL_OPENID_CONNECT = "/realms/gazelle/protocol/openid-connect/";
+
+   private static final String ROOT_PATH = "/maestro";
+   @SuppressWarnings("java:S1075")
+   private static final String TEST_RUN_PATH = "/v1/test/run";
+   @SuppressWarnings("java:S1075")
+   private static final String TEST_SUITE_RUN_PATH = "/v1/test-suite/run";
 
    @Override
    public void filterOpenAPI(OpenAPI openAPI) {
@@ -40,7 +55,53 @@ public class OpenAPIFilter implements OASFilter {
          openAPI.setExternalDocs(new ExternalDocumentation()
                .url(maestroUrl + "/test-run-stream-api/index.html")
                .description("Test Run Stream API"));
+         removeEndpoints(openAPI, List.of("/simulation/v1/report", "/itb/report"));
+         replaceEndpoints(openAPI, List.of(TEST_RUN_PATH, TEST_SUITE_RUN_PATH));
       }
       OASFilter.super.filterOpenAPI(openAPI);
+   }
+
+   @Override
+   public SecurityScheme filterSecurityScheme(SecurityScheme securityScheme) {
+      //In this method, we retrieve the SSO url to make sure we have the right url depending of the environment this
+      //deployed on.
+      String ssoUrl = ConfigProvider.getConfig().getValue("gzl.sso.url", String.class);
+      if (securityScheme.getType().equals(SecurityScheme.Type.OAUTH2)) {
+         OAuthFlow implicitFlow = new io.smallrye.openapi.internal.models.security.OAuthFlow();
+         implicitFlow.setAuthorizationUrl(ssoUrl + REALMS_GAZELLE_PROTOCOL_OPENID_CONNECT + "auth");
+         implicitFlow.setScopes(new HashMap<>());
+         securityScheme.getFlows().setImplicit(implicitFlow);
+         String logoutLink = ssoUrl + REALMS_GAZELLE_PROTOCOL_OPENID_CONNECT + "logout";
+         String schemeDescription = "Authorize yourself by logging in Keycloak. To logout completely, use the button " +
+               "below and then please follow this link" +
+               " <a href=" + logoutLink + ">" + logoutLink + "</a>.";
+         securityScheme.setDescription(schemeDescription);
+      }
+      return OASFilter.super.filterSecurityScheme(securityScheme);
+   }
+
+   private void removeEndpoints(OpenAPI openAPI, List<String> endpoints) {
+      openAPI.getPaths().removePathItem("/simulation-mock/rest/services");
+
+      openAPI.setTags(
+            openAPI.getTags().stream()
+                  .filter(tag -> !TAG_TO_REMOVE.equals(tag.getName()))
+                  .toList()
+      );
+
+      for (String endpoint : endpoints) {
+         openAPI.getPaths().removePathItem(ROOT_PATH + endpoint);
+         openAPI.getPaths().removePathItem(ROOT_PATH + endpoint);
+      }
+   }
+
+   private void replaceEndpoints(OpenAPI openAPI, List<String> endpoints) {
+      for (String endpoint : endpoints) {
+         PathItem pathItem = openAPI.getPaths().getPathItem(ROOT_PATH + endpoint);
+         if (pathItem != null) {
+            openAPI.getPaths().addPathItem(endpoint, openAPI.getPaths().getPathItem(ROOT_PATH + endpoint));
+            openAPI.getPaths().removePathItem(ROOT_PATH + endpoint);
+         }
+      }
    }
 }

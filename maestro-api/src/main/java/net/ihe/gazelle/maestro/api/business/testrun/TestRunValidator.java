@@ -42,6 +42,7 @@ public class TestRunValidator extends AbstractValidator<TestRun> {
    protected void addRulesAndMembers(ValidatorBuilder<? extends TestRun> validatorBuilder) {
       validatorBuilder
             .addRule(TestRun::isTestDefined, "Test must be defined")
+            .addRule(TestRun::isAclDefined, "Access control list must be defined.")
             .addMember("test", TestRun::getTest, testValidator::getAssembledValidatorBuilder)
             .addMember("inputs", TestRun::getInputs, propertyValidator::getAssembledValidatorBuilder)
             .addMember("systemsUnderTest", TestRun::getSystemsUnderTest,

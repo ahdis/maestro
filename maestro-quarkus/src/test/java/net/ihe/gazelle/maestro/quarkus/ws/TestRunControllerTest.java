@@ -34,6 +34,7 @@ import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestRunDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSuiteRunDTO;
+import net.ihe.gazelle.maestro.quarkus.mock.IdentityMock;
 import net.ihe.gazelle.maestro.quarkus.utils.ObjectFactory;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 import org.awaitility.Awaitility;
@@ -42,6 +43,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -78,7 +80,7 @@ class TestRunControllerTest {
    @BeforeEach
    void setUp() {
       maestroMock = new MaestroMockForREST(SCHEDULED_EXECUTOR);
-      controller = new TestRunControllerImpl(new SynchronousMaestro(maestroMock), maestroMock);
+      controller = new TestRunControllerImpl(new IdentityMock(Set.of("role:gazelle_admin")), new SynchronousMaestro(maestroMock), maestroMock);
    }
 
    @org.junit.jupiter.api.Test

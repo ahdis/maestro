@@ -62,7 +62,7 @@ class TestSuiteRunValidatorTest {
 
       var result = validator.validate(testSuiteRun);
       assertFailure(result,
-            "All Tests referenced in the Test Suite must be attached to the Test Suite Run. => invalid");
+            "All Tests referenced in the Test Suite must be attached to the Test Suite Run => invalid");
    }
 
    @org.junit.jupiter.api.Test

@@ -48,5 +48,8 @@
       "value": "ihfeorhqifrghqpervgh",
       "type": "BYTE_ARRAY"
     }
-  ]
+  ],
+  "accessControlList": {
+    "isPublic": true
+  }
 }

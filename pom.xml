@@ -206,6 +206,11 @@
                 <artifactId>m2m-client</artifactId>
                 <version>${sso.client.version}</version>
             </dependency>
+            <dependency>
+                <groupId>net.ihe.gazelle</groupId>
+                <artifactId>oidc-server</artifactId>
+                <version>${sso.client.version}</version>
+            </dependency>
 
             <!-- Test dependencies -->
             <dependency>
