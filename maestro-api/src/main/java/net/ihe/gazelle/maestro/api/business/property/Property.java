@@ -15,6 +15,7 @@ public abstract class Property implements Serializable {
    private ValueHolder valueHolder;
 
    Property() {
+      valueHolder = new DirectValue(null);
    }
 
    Property(String name, Serializable value) {
@@ -31,6 +32,7 @@ public abstract class Property implements Serializable {
       return this;
    }
 
+   @SuppressWarnings("unchecked")
     public <T extends Serializable> T getValue() {
         return (T) valueHolder.getValue();
     }
