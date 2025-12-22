@@ -115,11 +115,7 @@ public class MaestroFacade {
                         .stream()
                         .map(SystemUnderTestBuilder::new)
                         .toList());
-        TestSuite testSuite = new TestSuite()
-                .setId(testRun.getTest().getId())
-                .setName(testRun.getTest().getName());
         testReportBuilder.setTestSuiteName(testRun.getTest().getName());
-        testReportBuilder.setNote(buildNote(testSuite));
         testReportBuilder.addTestRunReport(testRunFinished.getTestRunReport());
         TestReport testReport = testReportBuilder.build();
         return new ExecutionFinished(testRunFinished.getSessionId(), testRunFinished.getTestRun(), testReport);
@@ -147,25 +143,8 @@ public class MaestroFacade {
                 .setSystemsUnderTest(testSuiteRun.getSystemsUnderTest().stream().map(SystemUnderTestBuilder::new).toList());
         if (testSuiteRun.getTestSuite() != null) {
             testReportBuilder.setTestSuiteName(testSuiteRun.getTestSuite().getName());
-            testReportBuilder.setNote(buildNote(testSuiteRun.getTestSuite()));
         }
         return testReportBuilder;
-    }
-
-    private String buildNote(TestSuite testSuite) {
-        if (testSuite.getName() != null || testSuite.getId() != null) {
-            StringBuilder noteBuilder = new StringBuilder("Tests executed as part of the suite");
-            if (testSuite.getName() != null) {
-                noteBuilder.append(" ");
-                noteBuilder.append(testSuite.getName());
-            }
-            if (testSuite.getId() != null) {
-                noteBuilder.append(" #");
-                noteBuilder.append(testSuite.getId());
-            }
-            return noteBuilder.toString();
-        }
-        return null;
     }
 
     private TestServiceBuilder getTestServiceBuilder() {

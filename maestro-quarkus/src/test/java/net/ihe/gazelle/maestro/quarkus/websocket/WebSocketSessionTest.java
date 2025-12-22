@@ -25,11 +25,15 @@ import jakarta.websocket.Session;
 import net.ihe.gazelle.maestro.api.business.message.*;
 import net.ihe.gazelle.maestro.quarkus.utils.ObjectFactory;
 import net.ihe.gazelle.maestro.quarkus.websocket.dto.*;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.*;
 
 import java.io.IOException;
 import java.net.URI;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
@@ -68,7 +72,10 @@ class WebSocketSessionTest {
 
         String messageString = TestWebSocketServer.pollLastMessage();
         assertNotNull(messageString);
-        assertTrue(messageString.contains(TestRunStartedDTO.TYPE));
+        assertThat(
+             messageString,
+             containsString(TestRunStartedDTO.TYPE)
+        );
     }
 
     @Test
@@ -78,7 +85,10 @@ class WebSocketSessionTest {
 
         String messageString = TestWebSocketServer.pollLastMessage();
         assertNotNull(messageString);
-        assertTrue(messageString.contains(StepRunStartedDTO.TYPE));
+        assertThat(
+              messageString,
+              containsString(StepRunStartedDTO.TYPE)
+        );
     }
 
     @Test
@@ -92,7 +102,10 @@ class WebSocketSessionTest {
 
         String messageString = TestWebSocketServer.pollLastMessage();
         assertNotNull(messageString);
-        assertTrue(messageString.contains(InteractWithUserDTO.TYPE));
+        assertThat(
+              messageString,
+              containsString(InteractWithUserDTO.TYPE)
+        );
     }
 
     @Test
@@ -106,7 +119,10 @@ class WebSocketSessionTest {
         );
 
         String messageString = TestWebSocketServer.pollLastMessage();
-        assertTrue(messageString.contains(StepRunFinishedDTO.TYPE));
+        assertThat(
+              messageString,
+              containsString(StepRunFinishedDTO.TYPE)
+        );
     }
 
     @Test
@@ -118,7 +134,10 @@ class WebSocketSessionTest {
                 ObjectFactory.createTestRunReport()));
 
         String messageString = TestWebSocketServer.pollLastMessage();
-        assertTrue(messageString.contains(TestRunFinishedDTO.TYPE));
+        assertThat(
+              messageString,
+              containsString(TestRunFinishedDTO.TYPE)
+        );
     }
 
     @Test
@@ -134,7 +153,10 @@ class WebSocketSessionTest {
         ));
 
         String messageString = TestWebSocketServer.pollLastMessage();
-        assertTrue(messageString.contains(ExecutionFinishedDTO.TYPE));
+        assertThat(
+              messageString,
+              containsString(ExecutionFinishedDTO.TYPE)
+        );
         assertFalse(internal.isOpen());
     }
 }
