@@ -46,7 +46,7 @@ public class Constants {
                    "steps": [
                      {
                        "name": "step1",
-                       "type": "ASSERTION",
+                       "type": "ASSERT_EQUALS",
                        "properties": [
                          {
                            "name": "expected",
@@ -74,7 +74,7 @@ public class Constants {
                 "steps": [
                   {
                     "name": "step1",
-                    "type": "ASSERTION",
+                    "type": "ASSERT_EQUALS",
                     "properties": [
                       {
                         "name": "expected",
@@ -89,6 +89,9 @@ public class Constants {
                     ]
                   }
                 ]
+              },
+              "accessControlList": {
+                "isPublic": true
               }
             }
             """;

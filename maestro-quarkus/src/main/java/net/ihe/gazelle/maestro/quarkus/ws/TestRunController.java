@@ -99,6 +99,10 @@ public interface TestRunController {
             description = "The test run is malformed"
     )
     @APIResponse(
+          responseCode = "401",
+          description = "Unauthorized to execute a test suite run"
+    )
+    @APIResponse(
             responseCode = "500",
             description = "Unexpected Error"
     )
@@ -159,6 +163,10 @@ public interface TestRunController {
     @APIResponse(
             responseCode = "400",
             description = "The test run is malformed"
+    )
+    @APIResponse(
+          responseCode = "401",
+          description = "Unauthorized to execute a test run"
     )
     @APIResponse(
             responseCode = "500",

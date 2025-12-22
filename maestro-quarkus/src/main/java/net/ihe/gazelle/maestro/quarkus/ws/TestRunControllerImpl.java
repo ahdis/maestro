@@ -80,7 +80,7 @@ public class TestRunControllerImpl implements TestRunController {
     private Response handleErrors(Supplier<Response> serviceCall) {
         try {
            if (!identity.isAuthenticated()) {
-              return Response.status(Response.Status.FORBIDDEN).build();
+              return Response.status(Response.Status.UNAUTHORIZED).build();
            }
             return serviceCall.get();
         } catch (IllegalArgumentException e) {
