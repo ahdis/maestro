@@ -16,12 +16,16 @@
 
 package net.ihe.gazelle.maestro.api.business.testreport;
 
+import java.io.Serial;
 import java.util.Objects;
 
 
 public class LocalizedTestReport extends TestReport {
 
-    private String location;
+   @Serial
+   private static final long serialVersionUID = 9186291567338000846L;
+
+   private String location;
 
     public LocalizedTestReport(TestReport testReport, String location) {
         super(testReport);

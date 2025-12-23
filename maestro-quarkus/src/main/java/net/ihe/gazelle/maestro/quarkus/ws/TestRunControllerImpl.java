@@ -77,30 +77,30 @@ public class TestRunControllerImpl implements TestRunController {
       }
    }
 
-    private Response handleErrors(Supplier<Response> serviceCall) {
-        try {
-           if (!identity.isAuthenticated()) {
-              return Response.status(Response.Status.UNAUTHORIZED).build();
-           }
-            return serviceCall.get();
-        } catch (IllegalArgumentException e) {
-            LOG.debug("TestRun format Exception", e);
-            return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
-                    .entity("The request contains a testRun with bad format" + e).build();
-        } catch (TimeoutRuntimeException e) {
-            return Response.status(Response.Status.GATEWAY_TIMEOUT.getStatusCode())
-                    .entity(SynchronousMaestro.TIMEOUT_MESSAGE).build();
-        } catch (Exception e) {
-            LOG.error("Unknown error", e);
-            Thread.currentThread().interrupt();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
-                    .entity("an error occurred during execution: " + e).build();
-        }
-    }
+   private Response handleErrors(Supplier<Response> serviceCall) {
+      try {
+         if (!identity.isAuthenticated()) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+         }
+         return serviceCall.get();
+      } catch (IllegalArgumentException e) {
+         LOG.debug("TestRun format Exception", e);
+         return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
+               .entity("The request contains a testRun with bad format" + e).build();
+      } catch (TimeoutRuntimeException e) {
+         return Response.status(Response.Status.GATEWAY_TIMEOUT.getStatusCode())
+               .entity(SynchronousMaestro.TIMEOUT_MESSAGE).build();
+      } catch (Exception e) {
+         LOG.error("Unknown error", e);
+         Thread.currentThread().interrupt();
+         return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
+               .entity("an error occurred during execution: " + e).build();
+      }
+   }
 
    private Response runTestSuiteSynchronously(TestSuiteRun testSuiteRun, boolean persist) {
       try {
-         LocalizedTestReport report = (LocalizedTestReport)synchronousMaestro.executeTestSuite(testSuiteRun, persist);
+         LocalizedTestReport report = (LocalizedTestReport) synchronousMaestro.executeTestSuite(testSuiteRun, persist);
          return Response
                .ok(new TestReportDTO(report))
                .header(HttpHeaders.LOCATION, report.getLocation()).build();
@@ -119,10 +119,10 @@ public class TestRunControllerImpl implements TestRunController {
 
    private Response runTestSynchronously(TestRun testRun, boolean persist) {
       try {
-         LocalizedTestReport report = (LocalizedTestReport)synchronousMaestro.executeTest(testRun, persist);
+         LocalizedTestReport report = (LocalizedTestReport) synchronousMaestro.executeTest(testRun, persist);
          return Response
                .ok(new TestReportDTO(report))
-               .header(HttpHeaders.LOCATION,report.getLocation()).build();
+               .header(HttpHeaders.LOCATION, report.getLocation()).build();
       } catch (TimeoutException e) {
          throw new TimeoutRuntimeException(e);
       } catch (InterruptedException e) {

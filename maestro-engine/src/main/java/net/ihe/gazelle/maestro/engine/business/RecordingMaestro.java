@@ -90,7 +90,6 @@ public class RecordingMaestro implements Maestro {
             String location = testReportRecordingService.recordTestReport(executionFinished.getReport());
             executionFinished.setReportLocation(location);
          } catch (Exception e) {
-            e.printStackTrace();
             executionFinished.getReport().addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e).build());
          }
          delegate.onExecutionFinished(executionFinished);
