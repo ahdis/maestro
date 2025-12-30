@@ -5,15 +5,27 @@ import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory
 import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
 import net.ihe.gazelle.maestro.api.business.property.PropertyValidator;
 
+/**
+ * Validator implementation for {@link TestReference}, responsible for defining
+ */
 public class TestReferenceValidator extends AbstractValidator<TestReference> {
 
    private final PropertyValidator propertyValidator;
 
+   /**
+    * Default constructor.
+    */
    public TestReferenceValidator() {
       super();
       this.propertyValidator = new PropertyValidator();
    }
 
+   /**
+    * Constructs a new instance of {@code TestReferenceValidator} with the specified {@link ValidatorBuilderFactory}.
+    *
+    * @param validatorBuilderFactory the factory used to create validator builders for
+    *                                {@code TestReference} and its related validation components
+    */
    public TestReferenceValidator(ValidatorBuilderFactory validatorBuilderFactory) {
       super(validatorBuilderFactory);
       this.propertyValidator = new PropertyValidator(validatorBuilderFactory);

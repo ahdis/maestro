@@ -16,8 +16,25 @@
 
 package net.ihe.gazelle.maestro.spi.technical;
 
+import java.io.Serial;
+
+import net.ihe.gazelle.maestro.spi.business.Handler;
+
+/**
+ * Exception thrown when a {@link Handler} cannot be found.
+ */
 public class HandlerNotFoundException extends RuntimeException {
-    public HandlerNotFoundException(String message) {
-        super(message);
-    }
+
+   @Serial
+   private static final long serialVersionUID = -3894544965571276430L;
+
+   /**
+    * Creates a new {@code HandlerNotFoundException} with the specified message.
+    *
+    * @param message the detail message
+    */
+   public HandlerNotFoundException(String message) {
+      super(message);
+   }
 }
+

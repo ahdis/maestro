@@ -21,12 +21,17 @@ import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Interface to perform the execution of a step
+ */
 public interface StepExecutor {
 
    /**
-    * @param stepRun contain step to run
+    * The method that trigger step execution
     *
-    * @return report builder with information to build report of step execution
+    * @param stepRun contain a step to run
+    *
+    * @return report builder with information to build the report of step execution
     *
     * @throws MissingPropertyException if a required property is missing to execute the step
     * @throws ClassCastException if a property has not the expected type

@@ -7,7 +7,7 @@ import com.kereval.gazelle.datahouse.api.business.record.Reference;
 import com.kereval.gazelle.datahouse.technical.rest.client.RecordItemClient;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
-import net.ihe.gazelle.maestro.api.business.testreport.ByteArrayItemProperty;
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;

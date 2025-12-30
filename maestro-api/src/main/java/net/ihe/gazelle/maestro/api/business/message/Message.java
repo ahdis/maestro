@@ -18,6 +18,9 @@ package net.ihe.gazelle.maestro.api.business.message;
 
 import java.io.Serializable;
 
+/**
+ * Marker interface for all messages used by Maestro.
+ */
 public interface Message extends Serializable {
 
 }

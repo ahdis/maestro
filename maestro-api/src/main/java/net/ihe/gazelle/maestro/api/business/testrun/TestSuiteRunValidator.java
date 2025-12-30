@@ -9,6 +9,9 @@ import net.ihe.gazelle.maestro.api.business.test.TestValidator;
 import net.ihe.gazelle.maestro.api.business.testreport.validator.SystemUnderTestValidator;
 import net.ihe.gazelle.security.business.acl.AccessControlListValidator;
 
+/**
+ * Validator responsible for validating {@link TestSuiteRun} instances.
+ */
 public class TestSuiteRunValidator extends AbstractValidator<TestSuiteRun> {
 
    private final TestValidator testValidator;
@@ -17,6 +20,9 @@ public class TestSuiteRunValidator extends AbstractValidator<TestSuiteRun> {
    private final AccessControlListValidator accessControlListValidator;
    private final SystemUnderTestValidator systemUnderTestValidator;
 
+   /**
+    * Default constructor
+    */
    public TestSuiteRunValidator() {
       super();
       this.testValidator = new TestValidator();
@@ -26,6 +32,11 @@ public class TestSuiteRunValidator extends AbstractValidator<TestSuiteRun> {
       this.systemUnderTestValidator = new SystemUnderTestValidator();
    }
 
+   /**
+    * Creates a {@code TestSuiteRunValidator} using the provided {@link ValidatorBuilderFactory}.
+    *
+    * @param validatorBuilderFactory the factory used to build validation rules
+    */
    public TestSuiteRunValidator(ValidatorBuilderFactory validatorBuilderFactory) {
       super(validatorBuilderFactory);
       this.testValidator = new TestValidator(validatorBuilderFactory);

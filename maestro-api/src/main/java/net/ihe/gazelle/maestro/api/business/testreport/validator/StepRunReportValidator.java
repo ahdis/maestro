@@ -23,36 +23,47 @@ import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator
 import net.ihe.gazelle.maestro.api.business.property.PropertyValidator;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 
+/**
+ * Validator implementation for {@link StepRunReport}, responsible for defining
+ */
 public class StepRunReportValidator extends AbstractValidator<StepRunReport> {
 
-    private final PropertyValidator propertyValidator;
-    private final UnexpectedErrorValidator unexpectedErrorValidator;
+   private final PropertyValidator propertyValidator;
+   private final UnexpectedErrorValidator unexpectedErrorValidator;
 
-    public StepRunReportValidator() {
-        super();
-        propertyValidator = new PropertyValidator();
-        unexpectedErrorValidator = new UnexpectedErrorValidator();
-    }
+   /**
+    * Default constructor
+    */
+   public StepRunReportValidator() {
+      super();
+      propertyValidator = new PropertyValidator();
+      unexpectedErrorValidator = new UnexpectedErrorValidator();
+   }
 
-    public StepRunReportValidator(ValidatorBuilderFactory validatorBuilderFactory) {
-        super(validatorBuilderFactory);
-        propertyValidator = new PropertyValidator(validatorBuilderFactory);
-        unexpectedErrorValidator = new UnexpectedErrorValidator(validatorBuilderFactory);
-    }
+   /**
+    * Constructs a new {@code StepRunReportValidator} with the specified {@link ValidatorBuilderFactory}.
+    *
+    * @param validatorBuilderFactory the factory used to create a validator builder
+    */
+   public StepRunReportValidator(ValidatorBuilderFactory validatorBuilderFactory) {
+      super(validatorBuilderFactory);
+      propertyValidator = new PropertyValidator(validatorBuilderFactory);
+      unexpectedErrorValidator = new UnexpectedErrorValidator(validatorBuilderFactory);
+   }
 
-    @Override
-    protected ValidatorBuilder<? extends StepRunReport> instantiateValidatorBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
-        return validatorBuilderFactory.getBuilder(StepRunReport.class);
-    }
+   @Override
+   protected ValidatorBuilder<? extends StepRunReport> instantiateValidatorBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
+      return validatorBuilderFactory.getBuilder(StepRunReport.class);
+   }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    protected void addRulesAndMembers(ValidatorBuilder<? extends StepRunReport> validatorBuilder) {
-        validatorBuilder
-                .addRule(StepRunReport::isStepNameDefined, "Step Name must be set and not empty")
-                .addRule(StepRunReport::isTypeDefined, "Type must be set and not empty")
-                .addRule(StepRunReport::isResultDefined, "Result must be set")
-                .addMember("outputs", StepRunReport::getOutputs, propertyValidator::getAssembledValidatorBuilder)
-                .addMember("unexpectedErrors", StepRunReport::getUnexpectedErrors, unexpectedErrorValidator::getAssembledValidatorBuilder);
-    }
+   @Override
+   @SuppressWarnings("unchecked")
+   protected void addRulesAndMembers(ValidatorBuilder<? extends StepRunReport> validatorBuilder) {
+      validatorBuilder
+            .addRule(StepRunReport::isStepNameDefined, "Step Name must be set and not empty")
+            .addRule(StepRunReport::isTypeDefined, "Type must be set and not empty")
+            .addRule(StepRunReport::isResultDefined, "Result must be set")
+            .addMember("outputs", StepRunReport::getOutputs, propertyValidator::getAssembledValidatorBuilder)
+            .addMember("unexpectedErrors", StepRunReport::getUnexpectedErrors, unexpectedErrorValidator::getAssembledValidatorBuilder);
+   }
 }

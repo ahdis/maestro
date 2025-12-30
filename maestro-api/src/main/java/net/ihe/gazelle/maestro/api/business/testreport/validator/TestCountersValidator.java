@@ -21,12 +21,23 @@ import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory
 import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
 import net.ihe.gazelle.maestro.api.business.testreport.TestCounters;
 
+/**
+ * Validator implementation for {@link TestCounters}, responsible for defining
+ */
 public class TestCountersValidator extends AbstractValidator<TestCounters> {
 
+   /**
+    * Default constructor
+    */
    public TestCountersValidator() {
       super();
    }
 
+   /**
+    * Constructs a new TestCountersValidator with the specified ValidatorBuilderFactory.
+    *
+    * @param validatorBuilderFactory the factory to create the validator builder
+    */
    public TestCountersValidator(ValidatorBuilderFactory validatorBuilderFactory) {
       super(validatorBuilderFactory);
    }

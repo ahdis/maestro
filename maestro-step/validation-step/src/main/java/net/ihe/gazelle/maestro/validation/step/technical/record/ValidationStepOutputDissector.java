@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
-import net.ihe.gazelle.maestro.api.business.testreport.ByteArrayItemProperty;
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
 import net.ihe.gazelle.maestro.spi.business.recording.*;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;
 import net.ihe.gazelle.validation.v2.api.business.Input;

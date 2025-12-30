@@ -30,31 +30,69 @@ public class StartTestSuiteRun implements Message {
    @Serial
    private static final long serialVersionUID = 1L;
 
+   /**
+    * The session id of the execution
+    */
    private String sessionId;
+
+   /**
+    * The test suite run to be executed
+    */
    private TestSuiteRun testSuiteRun;
 
+   /**
+    * Default constructor
+    */
    public StartTestSuiteRun() {
       this(null, null);
    }
 
+   /**
+    * Initializes a new instance of the StartTestSuiteRun class with the specified session ID and test suite run details.
+    *
+    * @param sessionId the unique identifier for the session during which the test suite run will be executed
+    * @param testSuiteRun the details of the test suite run to be executed
+    */
    public StartTestSuiteRun(String sessionId, TestSuiteRun testSuiteRun) {
       this.sessionId = sessionId;
       this.testSuiteRun = testSuiteRun;
    }
 
+   /**
+    * Retrieves the session ID associated with the test suite execution.
+    *
+    * @return the session ID as a string, or null if no session ID is set.
+    */
    public String getSessionId() {
       return sessionId;
    }
 
+   /**
+    * Sets the session ID associated with the test suite execution.
+    *
+    * @param sessionId the unique identifier for the session during which the test suite run will be executed
+    * @return the current instance of {@code StartTestSuiteRun} for method chaining
+    */
    public StartTestSuiteRun setSessionId(String sessionId) {
       this.sessionId = sessionId;
       return this;
    }
 
+   /**
+    * Retrieves the details of the test suite run to be executed.
+    *
+    * @return the {@code TestSuiteRun} object representing the details of the test suite run.
+    */
    public TestSuiteRun getTestSuiteRun() {
       return testSuiteRun;
    }
 
+   /**
+    * Sets the test suite run details to be executed.
+    *
+    * @param testSuiteRun the {@code TestSuiteRun} object representing the details of the test suite run
+    * @return the current instance of {@code StartTestSuiteRun} for method chaining
+    */
    public StartTestSuiteRun setTestSuiteRun(TestSuiteRun testSuiteRun) {
       this.testSuiteRun = testSuiteRun;
       return this;

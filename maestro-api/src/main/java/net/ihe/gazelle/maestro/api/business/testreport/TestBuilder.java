@@ -21,56 +21,91 @@ import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractBuilder;
 import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
 import net.ihe.gazelle.maestro.api.business.testreport.validator.TestValidator;
 
+/**
+ * Builder for {@link Test}.
+ */
 public class TestBuilder extends AbstractBuilder<Test> {
 
-    private String id;
-    private String name;
-    private String version;
-    private String description;
+   private String id;
+   private String name;
+   private String version;
+   private String description;
 
-    public TestBuilder() {
-        super();
-    }
+   /**
+    * Default constructor.
+    */
+   public TestBuilder() {
+      super();
+   }
 
-    public TestBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
-        super(validatorBuilderFactory);
-    }
+   /**
+    * Constructs a new TestBuilder instance using the provided ValidatorBuilderFactory.
+    *
+    * @param validatorBuilderFactory the factory used to create a validator builder; must not be null
+    */
+   public TestBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
+      super(validatorBuilderFactory);
+   }
 
-    public TestBuilder setId(String id) {
-        this.id = id;
-        return this;
-    }
+   /**
+    * Sets the unique identifier for the test.
+    *
+    * @param id the unique identifier for the test; must not be null or blank
+    * @return the current instance of {@code TestBuilder} to allow method chaining
+    */
+   public TestBuilder setId(String id) {
+      this.id = id;
+      return this;
+   }
 
-    public TestBuilder setName(String name) {
-        this.name = name;
-        return this;
-    }
+   /**
+    * Sets the name for the test.
+    *
+    * @param name the name of the test
+    * @return the current instance of {@code TestBuilder} to allow method chaining
+    */
+   public TestBuilder setName(String name) {
+      this.name = name;
+      return this;
+   }
 
-    public TestBuilder setVersion(String version) {
-        this.version = version;
-        return this;
-    }
+   /**
+    * Sets the version for the test.
+    *
+    * @param version the version of the test as a String
+    * @return the current instance of {@code TestBuilder} to allow method chaining
+    */
+   public TestBuilder setVersion(String version) {
+      this.version = version;
+      return this;
+   }
 
-    public TestBuilder setDescription(String description) {
-        this.description = description;
-        return this;
-    }
+   /**
+    * Sets the description for the test.
+    *
+    * @param description the description of the test
+    * @return the current instance of {@code TestBuilder} to allow method chaining
+    */
+   public TestBuilder setDescription(String description) {
+      this.description = description;
+      return this;
+   }
 
-    @Override
-    protected AbstractValidator<Test> instantiateValidator(ValidatorBuilderFactory validatorBuilderFactory) {
-        return new TestValidator(validatorBuilderFactory);
-    }
+   @Override
+   protected AbstractValidator<Test> instantiateValidator(ValidatorBuilderFactory validatorBuilderFactory) {
+      return new TestValidator(validatorBuilderFactory);
+   }
 
-    @Override
-    protected Test instantiate() {
-        return new Test();
-    }
+   @Override
+   protected Test instantiate() {
+      return new Test();
+   }
 
-    @Override
-    protected void make(Test test) {
-        test.setId(id)
-                .setName(name)
-                .setVersion(version)
-                .setDescription(description);
-    }
+   @Override
+   protected void make(Test test) {
+      test.setId(id)
+            .setName(name)
+            .setVersion(version)
+            .setDescription(description);
+   }
 }

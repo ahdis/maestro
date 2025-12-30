@@ -22,6 +22,9 @@ import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory
 import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
 
+/**
+ * Validator implementation for {@link TestRunReport}, responsible for defining
+ */
 public class TestRunReportValidator extends AbstractValidator<TestRunReport> {
 
    private final TestValidator testValidator;
@@ -30,6 +33,9 @@ public class TestRunReportValidator extends AbstractValidator<TestRunReport> {
    private final StepRunReportValidator stepRunReportValidator;
    private final UnexpectedErrorValidator unexpectedErrorValidator;
 
+   /**
+    * Default constructor
+    */
    public TestRunReportValidator() {
       super();
       testValidator = new TestValidator();
@@ -39,6 +45,12 @@ public class TestRunReportValidator extends AbstractValidator<TestRunReport> {
       unexpectedErrorValidator = new UnexpectedErrorValidator();
    }
 
+   /**
+    * Constructs a new {@code TestRunReportValidator} utilizing the provided {@link ValidatorBuilderFactory}
+    *
+    * @param validatorBuilderFactory the factory responsible for supplying
+    *                                {@link ValidatorBuilder} instances for specific types
+    */
    public TestRunReportValidator(ValidatorBuilderFactory validatorBuilderFactory) {
       super(validatorBuilderFactory);
       testValidator = new TestValidator(validatorBuilderFactory);

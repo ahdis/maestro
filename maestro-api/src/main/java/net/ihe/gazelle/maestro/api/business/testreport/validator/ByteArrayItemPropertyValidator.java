@@ -3,14 +3,25 @@ package net.ihe.gazelle.maestro.api.business.testreport.validator;
 import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilder;
 import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory;
 import net.ihe.gazelle.maestro.api.business.property.Property;
-import net.ihe.gazelle.maestro.api.business.testreport.ByteArrayItemProperty;
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
 
+/**
+ * Validator implementation for {@link ByteArrayItemProperty}, responsible for defining
+ */
 public class ByteArrayItemPropertyValidator extends PropertyInReportValidator {
 
+   /**
+    * Default constructor
+    */
    public ByteArrayItemPropertyValidator() {
       super();
    }
 
+   /**
+    * Constructs a new ByteArrayItemPropertyValidator with the specified ValidatorBuilderFactory.
+    *
+    * @param validatorBuilderFactory the factory used to create ValidatorBuilder instances for validation logic
+    */
    public ByteArrayItemPropertyValidator(
          ValidatorBuilderFactory validatorBuilderFactory) {
       super(validatorBuilderFactory);

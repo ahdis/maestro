@@ -1,7 +1,7 @@
 package net.ihe.gazelle.maestro.api.technical.dto.property;
 
 import com.fasterxml.jackson.annotation.*;
-import net.ihe.gazelle.maestro.api.business.testreport.ByteArrayItemProperty;
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 @Schema(

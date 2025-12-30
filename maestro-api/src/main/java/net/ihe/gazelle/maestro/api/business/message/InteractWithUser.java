@@ -22,65 +22,149 @@ import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents a message for user interaction.
+ */
 public class InteractWithUser implements Message {
 
-    @Serial
-    private static final long serialVersionUID = 5192092115743420623L;
+   @Serial
+   private static final long serialVersionUID = 5192092115743420623L;
 
-    private String interactionTitle;
-    private String message;
-    private Long timeout;
-    private final List<SupportedInput> supportedInputs;
+   /**
+    * Title of the interaction.
+    */
+   private String interactionTitle;
 
-    public InteractWithUser() {
-        this(null, null, null);
-    }
+   /**
+    * Message to display to the user.
+    */
+   private String message;
 
-    public InteractWithUser(String interactionTitle, String message, Long timeout) {
-        this.interactionTitle = interactionTitle;
-        this.message = message;
-        this.timeout = timeout;
-        this.supportedInputs = new ArrayList<>();
-    }
+   /**
+    * Timeout in milliseconds.
+    */
+   private Long timeout;
 
-    public String getInteractionTitle() {
-        return interactionTitle;
-    }
+   /**
+    * List of supported inputs.
+    */
+   private final List<SupportedInput> supportedInputs;
 
-    public InteractWithUser setInteractionTitle(String interactionTitle) {
-        this.interactionTitle = interactionTitle;
-        return this;
-    }
+   /**
+    * Constructs a default instance of the InteractWithUser class.
+    * Initializes the interaction with no title, no message, no timeout,
+    * and an empty list of supported inputs.
+    */
+   public InteractWithUser() {
+      this(null, null, null);
+   }
 
-    public String getMessage() {
-        return message;
-    }
+   /**
+    * Constructs an instance of the InteractWithUser class with the specified title, message,
+    * and timeout, and initializes an empty list of supported inputs.
+    *
+    * @param interactionTitle the title of the user interaction
+    * @param message the message to be displayed to the user
+    * @param timeout the timeout duration in milliseconds
+    */
+   public InteractWithUser(String interactionTitle, String message, Long timeout) {
+      this.interactionTitle = interactionTitle;
+      this.message = message;
+      this.timeout = timeout;
+      this.supportedInputs = new ArrayList<>();
+   }
 
-    public InteractWithUser setMessage(String message) {
-        this.message = message;
-        return this;
-    }
+   /**
+    * Retrieves the title of the interaction.
+    *
+    * @return the interaction title as a String
+    */
+   public String getInteractionTitle() {
+      return interactionTitle;
+   }
 
-    public Long getTimeout() {
-        return timeout;
-    }
+   /**
+    * Sets the title of the user interaction.
+    *
+    * @param interactionTitle the title to be set for the user interaction
+    * @return the current instance of InteractWithUser to allow method chaining
+    */
+   public InteractWithUser setInteractionTitle(String interactionTitle) {
+      this.interactionTitle = interactionTitle;
+      return this;
+   }
 
-    public InteractWithUser setTimeout(Long timeout) {
-        this.timeout = timeout;
-        return this;
-    }
+   /**
+    * Retrieves the message to be displayed to the user.
+    *
+    * @return the message as a String
+    */
+   public String getMessage() {
+      return message;
+   }
 
-    public List<SupportedInput> getSupportedInputs() {
-        return new ArrayList<>(supportedInputs);
-    }
+   /**
+    * Sets the message to be displayed to the user.
+    *
+    * @param message the message to be set
+    * @return the current instance of InteractWithUser to allow method chaining
+    */
+   public InteractWithUser setMessage(String message) {
+      this.message = message;
+      return this;
+   }
 
-    public InteractWithUser addSupportedInput(SupportedInput supportedInput) {
-        this.supportedInputs.add(supportedInput);
-        return this;
-    }
+   /**
+    * Retrieves the timeout value for the user interaction.
+    *
+    * @return the timeout duration in milliseconds as a Long, or null if no timeout is set
+    */
+   public Long getTimeout() {
+      return timeout;
+   }
 
-    public InteractWithUser addSupportedInputs(List<SupportedInput> supportedInputs) {
-        this.supportedInputs.addAll(supportedInputs);
-        return this;
-    }
+   /**
+    * Sets the timeout value for the user interaction.
+    *
+    * @param timeout the timeout duration in milliseconds, or null if no timeout is to be set
+    * @return the current instance of InteractWithUser to allow method chaining
+    */
+   public InteractWithUser setTimeout(Long timeout) {
+      this.timeout = timeout;
+      return this;
+   }
+
+   /**
+    * Retrieves the list of supported inputs for the user interaction.
+    *
+    * @return a list of SupportedInput objects representing the supported input options
+    */
+   public List<SupportedInput> getSupportedInputs() {
+      return new ArrayList<>(supportedInputs);
+   }
+
+   /**
+    * Adds a supported input to the list of inputs associated with the interaction.
+    * This method allows chaining by returning the current instance of {@code InteractWithUser}.
+    *
+    * @param supportedInput the {@code SupportedInput} object to be added to the list of supported inputs
+    * @return the current instance of {@code InteractWithUser} to allow method chaining
+    */
+   public InteractWithUser addSupportedInput(SupportedInput supportedInput) {
+      this.supportedInputs.add(supportedInput);
+      return this;
+   }
+
+   /**
+    * Adds a list of supported inputs to the current instance of {@code InteractWithUser}.
+    * This method appends all items in the provided list to the existing list of supported inputs
+    * and returns the current instance to allow method chaining.
+    *
+    * @param supportedInputs a list of {@code SupportedInput} objects to be added to the supported inputs
+    * @return the current instance of {@code InteractWithUser} to allow method chaining
+    */
+   public InteractWithUser addSupportedInputs(List<SupportedInput> supportedInputs) {
+      this.supportedInputs.addAll(supportedInputs);
+      return this;
+   }
 }

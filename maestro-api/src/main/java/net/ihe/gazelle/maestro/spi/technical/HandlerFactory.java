@@ -22,24 +22,32 @@ import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterface;
 
 import java.util.List;
 
+/**
+ * Factory interface responsible for creating {@link Handler} instances.
+ */
 public interface HandlerFactory {
 
     /**
-     * @return Handler Implementation class
+     * Returns the {@link Handler} implementation class associated with this factory.
+     *
+     * @return the handler implementation class
      */
     Class<? extends Handler> getHandlerType();
 
     /**
+     * Creates a new {@link Handler} instance using the provided context, interface, and configuration.
      *
-     * @param handlerContext
-     * @param providedInterface The provided interface used by the handler
-     * @return A Handler that can provide interaction with service
-     * @throws IllegalArgumentException if service has no binding set
+     * @param handlerContext the context for the handler
+     * @param providedInterface the interface provided to the handler
+     * @param configProvider the configuration provider
+     * @return a new {@code Handler} instance
+     * @throws IllegalArgumentException if any argument is invalid
      */
     Handler createHandler(HandlerContext handlerContext, ProvidedInterface providedInterface, ConfigProvider configProvider) throws IllegalArgumentException;
 
     /**
-     * Get the list of consumed interfaces by this handler factory.
+     * Returns the list of {@link ConsumedInterface} instances consumed by this handler factory.
+     *
      * @return a list of consumed interfaces
      */
     List<ConsumedInterface> getConsumedInterfaces();

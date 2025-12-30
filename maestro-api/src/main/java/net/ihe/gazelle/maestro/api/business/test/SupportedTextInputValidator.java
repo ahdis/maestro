@@ -3,12 +3,24 @@ package net.ihe.gazelle.maestro.api.business.test;
 import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilder;
 import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory;
 
+/**
+ * Validator implementation for {@link SupportedTextInput}, responsible for defining
+ */
 public class SupportedTextInputValidator extends SupportedInputValidator<SupportedTextInput> {
 
+   /**
+    * Default constructor.
+    */
    public SupportedTextInputValidator() {
       super();
    }
 
+   /**
+    * Constructs a new instance of SupportedTextInputValidator using the provided ValidatorBuilderFactory.
+    *
+    * @param validatorBuilderFactory The factory used to construct a ValidatorBuilder
+    *                                for the validation process.
+    */
    public SupportedTextInputValidator(ValidatorBuilderFactory validatorBuilderFactory) {
       super(validatorBuilderFactory);
    }

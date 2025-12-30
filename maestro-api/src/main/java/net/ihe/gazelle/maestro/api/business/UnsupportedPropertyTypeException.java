@@ -16,8 +16,23 @@
 
 package net.ihe.gazelle.maestro.api.business;
 
+import java.io.Serial;
+
+/**
+ * Exception thrown when a property type is unsupported.
+ */
 public class UnsupportedPropertyTypeException extends RuntimeException {
+
+    @Serial
+    private static final long serialVersionUID = 5063364369521245428L;
+
+    /**
+     * Creates a new {@code UnsupportedPropertyTypeException} with the specified message.
+     *
+     * @param message the detail message
+     */
     public UnsupportedPropertyTypeException(String message) {
         super(message);
     }
+
 }

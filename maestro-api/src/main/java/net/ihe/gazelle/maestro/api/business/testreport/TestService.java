@@ -21,69 +21,125 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
+ * A structure for the service providing the test report.
  * Business rules <br>
  * all mandatory <br>
  * serviceIdentification.version mandatory (version "unknown" is accepted)
  */
 public class TestService implements Serializable {
 
-    @Serial
-    private static final long serialVersionUID = 4438062754526037863L;
+   @Serial
+   private static final long serialVersionUID = 4438062754526037863L;
 
-    private EntityIdentification serviceIdentification;
-    private String disclaimer;
+   /**
+    * The identification of the service providing the test report.
+    */
+   private EntityIdentification serviceIdentification;
 
-    public TestService() {
-    }
+   /**
+    * A disclaimer to be added to the test report.
+    */
+   private String disclaimer;
 
-    public TestService(EntityIdentification serviceIdentification, String disclaimer) {
-        setServiceIdentification(serviceIdentification);
-        this.disclaimer = disclaimer;
-    }
+   /**
+    * Default constructor
+    */
+   public TestService() {
+   }
 
-    public EntityIdentification getServiceIdentification() {
-        return serviceIdentification;
-    }
+   /**
+    * Constructs an instance of {@code TestService} with the specified service identification
+    * and disclaimer.
+    *
+    * @param serviceIdentification the identification of the service providing the test report; must not be null
+    * @param disclaimer the disclaimer to be added to the test report; can be null or blank
+    */
+   public TestService(EntityIdentification serviceIdentification, String disclaimer) {
+      setServiceIdentification(serviceIdentification);
+      this.disclaimer = disclaimer;
+   }
 
-    public TestService setServiceIdentification(EntityIdentification serviceIdentification) {
-        if (serviceIdentification.getVersion() == null) {
-            serviceIdentification.setVersion("unknown");
-        }
-        this.serviceIdentification = serviceIdentification;
-        return this;
-    }
+   /**
+    * Retrieves the identification of the service providing the test report.
+    *
+    * @return the service identification, or null if not defined
+    */
+   public EntityIdentification getServiceIdentification() {
+      return serviceIdentification;
+   }
 
-    public String getDisclaimer() {
-        return disclaimer;
-    }
+   /**
+    * Sets the service identification for the test service. If the version of the provided
+    * service identification is null, it defaults the version to "unknown".
+    *
+    * @param serviceIdentification the identification of the service providing the test report; must not be null
+    * @return the current instance of {@code TestService} for method chaining
+    */
+   public TestService setServiceIdentification(EntityIdentification serviceIdentification) {
+      if (serviceIdentification.getVersion() == null) {
+         serviceIdentification.setVersion("unknown");
+      }
+      this.serviceIdentification = serviceIdentification;
+      return this;
+   }
 
-    public TestService setDisclaimer(String disclaimer) {
-        this.disclaimer = disclaimer;
-        return this;
-    }
+   /**
+    * Retrieves the disclaimer associated with the current instance.
+    *
+    * @return the disclaimer as a String, or null if no disclaimer is set
+    */
+   public String getDisclaimer() {
+      return disclaimer;
+   }
 
-    public boolean isServiceIdentificationDefined() {
-        return serviceIdentification != null;
-    }
+   /**
+    * Sets the disclaimer associated with the test report.
+    *
+    * @param disclaimer the disclaimer to be added to the test report; can be null or blank
+    * @return the current instance of {@code TestService} for method chaining
+    */
+   public TestService setDisclaimer(String disclaimer) {
+      this.disclaimer = disclaimer;
+      return this;
+   }
 
-    public boolean isServiceVersionDefined() {
-        return serviceIdentification.getVersion() != null && !serviceIdentification.getVersion().isBlank();
-    }
+   /**
+    * Checks if the service identification is defined for the current instance.
+    *
+    * @return true if the service identification is not null; false otherwise
+    */
+   public boolean isServiceIdentificationDefined() {
+      return serviceIdentification != null;
+   }
 
-    public boolean isDisclaimerDefined() {
-        return disclaimer != null && !disclaimer.isBlank();
-    }
+   /**
+    * Checks whether the service version is defined.
+    *
+    * @return true if the service version is not null and not blank; false otherwise
+    */
+   public boolean isServiceVersionDefined() {
+      return serviceIdentification.getVersion() != null && !serviceIdentification.getVersion().isBlank();
+   }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof TestService that)) return false;
-        return Objects.equals(serviceIdentification, that.serviceIdentification)
-                && Objects.equals(disclaimer, that.disclaimer);
-    }
+   /**
+    * Checks whether the disclaimer is defined for the current instance.
+    *
+    * @return true if the disclaimer is not null and not blank; false otherwise
+    */
+   public boolean isDisclaimerDefined() {
+      return disclaimer != null && !disclaimer.isBlank();
+   }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(serviceIdentification, disclaimer);
-    }
+   @Override
+   public boolean equals(Object o) {
+      if (this == o) return true;
+      if (!(o instanceof TestService that)) return false;
+      return Objects.equals(serviceIdentification, that.serviceIdentification)
+            && Objects.equals(disclaimer, that.disclaimer);
+   }
+
+   @Override
+   public int hashCode() {
+      return Objects.hash(serviceIdentification, disclaimer);
+   }
 }

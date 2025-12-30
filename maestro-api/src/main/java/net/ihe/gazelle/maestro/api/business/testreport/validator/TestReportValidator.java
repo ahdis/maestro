@@ -22,6 +22,9 @@ import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory
 import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 
+/**
+ * Validator implementation for {@link TestReport}, responsible for defining
+ */
 public class TestReportValidator extends AbstractValidator<TestReport> {
 
    private final TestServiceValidator testServiceValidator;
@@ -31,6 +34,9 @@ public class TestReportValidator extends AbstractValidator<TestReport> {
    private final TestRunReportValidator testRunReportValidator;
    private final UnexpectedErrorValidator unexpectedErrorValidator;
 
+   /**
+    * Default constructor
+    */
    public TestReportValidator() {
       super();
       testServiceValidator = new TestServiceValidator();
@@ -41,6 +47,11 @@ public class TestReportValidator extends AbstractValidator<TestReport> {
       unexpectedErrorValidator = new UnexpectedErrorValidator();
    }
 
+   /**
+    * Constructs a new TestReportValidator using the provided TestReportValidator instance as the sub-validator.
+    *
+    * @param testReportValidator the instance of TestReportValidator to be used as a sub-validator
+    */
    public TestReportValidator(TestReportValidator testReportValidator) {
       super();
       testServiceValidator = new TestServiceValidator();
@@ -51,6 +62,11 @@ public class TestReportValidator extends AbstractValidator<TestReport> {
       unexpectedErrorValidator = new UnexpectedErrorValidator();
    }
 
+   /**
+    * Constructs a new TestReportValidator and initializes the dependent validators.
+    *
+    * @param validatorBuilderFactory the factory used to create validator builders.
+    */
    public TestReportValidator(ValidatorBuilderFactory validatorBuilderFactory) {
       super(validatorBuilderFactory);
       testServiceValidator = new TestServiceValidator(validatorBuilderFactory);
@@ -61,6 +77,12 @@ public class TestReportValidator extends AbstractValidator<TestReport> {
       unexpectedErrorValidator = new UnexpectedErrorValidator(validatorBuilderFactory);
    }
 
+   /**
+    * Constructs a new TestReportValidator and initializes its dependent validators along with a sub-validator.
+    *
+    * @param builderFactory The factory used to create validator builders.
+    * @param testReportValidator The instance of TestReportValidator to be used as a sub-validator.
+    */
    public TestReportValidator(ValidatorBuilderFactory builderFactory, TestReportValidator testReportValidator) {
       super(builderFactory);
       testServiceValidator = new TestServiceValidator(builderFactory);

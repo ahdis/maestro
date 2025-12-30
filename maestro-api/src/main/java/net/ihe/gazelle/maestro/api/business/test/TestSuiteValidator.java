@@ -6,17 +6,29 @@ import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator
 
 import java.util.List;
 
+/**
+ * Validator for the {@link TestSuite} class that ensures specific validation rules are applied.
+ */
 public class TestSuiteValidator extends AbstractValidator<TestSuite> {
 
    private final TestReferenceValidator testReferenceValidator;
    private final List<SupportedInputValidator<?>> supportedInputValidators;
 
+   /**
+    * Default constructor.
+    */
    public TestSuiteValidator() {
       super();
       this.testReferenceValidator = new TestReferenceValidator();
       this.supportedInputValidators = SupportedInputValidator.getAllSupportedInputValidators();
    }
 
+   /**
+    * Constructs a new {@code TestSuiteValidator} with the given {@code validatorBuilderFactory}.
+    *
+    * @param validatorBuilderFactory the factory used to create validator builders for the
+    *                                {@link TestSuite} and its related validation components
+    */
    public TestSuiteValidator(ValidatorBuilderFactory validatorBuilderFactory) {
       super(validatorBuilderFactory);
       this.testReferenceValidator = new TestReferenceValidator(validatorBuilderFactory);

@@ -6,17 +6,29 @@ import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator
 
 import java.util.List;
 
+/**
+ * Validator for the {@link Test} class that ensures specific validation rules are applied.
+ */
 public class TestValidator extends AbstractValidator<Test> {
 
    private final StepValidator stepValidator;
    private final List<SupportedInputValidator<?>> supportedInputValidators;
 
+   /**
+    * Default constructor.
+    */
    public TestValidator() {
       super();
       this.stepValidator = new StepValidator();
       this.supportedInputValidators = SupportedInputValidator.getAllSupportedInputValidators();
    }
 
+   /**
+    * Constructs a {@code TestValidator} using the specified {@link ValidatorBuilderFactory}.
+    *
+    * @param validatorBuilderFactory The factory used to create {@link ValidatorBuilder} instances
+    *                                for the {@code TestValidator} and its associated components.
+    */
    public TestValidator(ValidatorBuilderFactory validatorBuilderFactory) {
       super(validatorBuilderFactory);
       this.stepValidator = new StepValidator(validatorBuilderFactory);

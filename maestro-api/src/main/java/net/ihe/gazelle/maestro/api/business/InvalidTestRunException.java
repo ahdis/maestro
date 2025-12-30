@@ -16,8 +16,21 @@
 
 package net.ihe.gazelle.maestro.api.business;
 
-public class InvalidTestRunException extends RuntimeException{
+import java.io.Serial;
 
+/**
+ * Exception thrown when a test run is invalid.
+ */
+public class InvalidTestRunException extends RuntimeException {
+
+    @Serial
+    private static final long serialVersionUID = 5596660592261308405L;
+
+    /**
+     * Creates a new {@code InvalidTestRunException} with the specified message.
+     *
+     * @param message the detail message
+     */
     public InvalidTestRunException(String message) {
         super(message);
     }

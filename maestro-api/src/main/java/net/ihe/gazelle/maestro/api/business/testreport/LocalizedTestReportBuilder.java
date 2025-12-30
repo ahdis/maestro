@@ -18,15 +18,26 @@ package net.ihe.gazelle.maestro.api.business.testreport;
 
 import java.util.Objects;
 
-
+/**
+ * Builder for {@link LocalizedTestReport}.
+ */
 public class LocalizedTestReportBuilder extends TestReportBuilder {
 
     private String location;
 
-    public LocalizedTestReportBuilder() {
+   /**
+    * Default constructor.
+    */
+   public LocalizedTestReportBuilder() {
         super();
     }
 
+   /**
+    * Sets the location for the localized test report and returns the builder instance.
+    *
+    * @param location the location to be set for the test report
+    * @return the current instance of {@code LocalizedTestReportBuilder}
+    */
     public LocalizedTestReportBuilder setLocation(String location) {
         this.location = location;
         return this;

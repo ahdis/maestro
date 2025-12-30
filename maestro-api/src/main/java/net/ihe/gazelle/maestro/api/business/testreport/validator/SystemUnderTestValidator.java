@@ -21,30 +21,41 @@ import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory
 import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
 import net.ihe.gazelle.maestro.api.business.testreport.SystemUnderTest;
 
+/**
+ * Validator implementation for {@link SystemUnderTest}, responsible for defining
+ */
 public class SystemUnderTestValidator extends AbstractValidator<SystemUnderTest> {
 
-    private final EntityIdentificationValidator entityIdentificationValidator;
+   private final EntityIdentificationValidator entityIdentificationValidator;
 
-    public SystemUnderTestValidator() {
-        super();
-        entityIdentificationValidator = new EntityIdentificationValidator();
-    }
+   /**
+    * Default constructor
+    */
+   public SystemUnderTestValidator() {
+      super();
+      entityIdentificationValidator = new EntityIdentificationValidator();
+   }
 
-    public SystemUnderTestValidator(ValidatorBuilderFactory validatorBuilderFactory) {
-        super(validatorBuilderFactory);
-        entityIdentificationValidator = new EntityIdentificationValidator(validatorBuilderFactory);
-    }
+   /**
+    * Constructs a SystemUnderTestValidator using the provided ValidatorBuilderFactory.
+    *
+    * @param validatorBuilderFactory The factory to create ValidatorBuilder instances for validating SystemUnderTest objects.
+    */
+   public SystemUnderTestValidator(ValidatorBuilderFactory validatorBuilderFactory) {
+      super(validatorBuilderFactory);
+      entityIdentificationValidator = new EntityIdentificationValidator(validatorBuilderFactory);
+   }
 
-    @Override
-    protected ValidatorBuilder<? extends SystemUnderTest> instantiateValidatorBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
-        return validatorBuilderFactory.getBuilder(SystemUnderTest.class);
-    }
+   @Override
+   protected ValidatorBuilder<? extends SystemUnderTest> instantiateValidatorBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
+      return validatorBuilderFactory.getBuilder(SystemUnderTest.class);
+   }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    protected void addRulesAndMembers(ValidatorBuilder<? extends SystemUnderTest> validatorBuilder) {
-        validatorBuilder
-                .addRule(SystemUnderTest::isSystemIdentificationDefined, "systemIdentification must be set")
-                .addMember("systemIdentification", SystemUnderTest::getSystemIdentification, entityIdentificationValidator::getAssembledValidatorBuilder);
-    }
+   @Override
+   @SuppressWarnings("unchecked")
+   protected void addRulesAndMembers(ValidatorBuilder<? extends SystemUnderTest> validatorBuilder) {
+      validatorBuilder
+            .addRule(SystemUnderTest::isSystemIdentificationDefined, "systemIdentification must be set")
+            .addMember("systemIdentification", SystemUnderTest::getSystemIdentification, entityIdentificationValidator::getAssembledValidatorBuilder);
+   }
 }

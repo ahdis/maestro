@@ -18,13 +18,18 @@ package net.ihe.gazelle.maestro.spi.technical;
 
 import net.ihe.gazelle.maestro.spi.business.Handler;
 
+
+/**
+ * Provides {@link Handler} instances based on the context and handler type.
+ */
 public interface HandlerProvider {
 
     /**
-     * @param handlerContext Handler informations
-     * @param handlerType Class of Handler we are looking for
-     * @return a Handler of type handlerType which connect with a service with name serviceName
-     * @throws HandlerNotFoundException if it couldn't find a Handler of type handlerTyper
+     * Retrieves a handler of the specified type using the provided context.
+     *
+     * @param handlerContext the context for the handler
+     * @param handlerType the class of the handler to retrieve
+     * @return the handler instance
      */
     Handler getHandler(HandlerContext handlerContext, Class<? extends Handler> handlerType);
 
