@@ -36,6 +36,17 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * WebSocket controller for handling test execution streams.
+ * <p>
+ * This endpoint allows clients to start test runs or test suite runs and to receive updates
+ * asynchronously over a WebSocket connection. It also supports user interactions during
+ * test execution.
+ * </p>
+ * <p>
+ * The endpoint is located at <code>/v1/test-stream/run</code>.
+ * </p>
+ */
 @ApplicationScoped
 @ServerEndpoint("/v1/test-stream/run")
 public class TestStreamSocketController {
@@ -47,12 +58,23 @@ public class TestStreamSocketController {
    private final TextSerDes serDes = new JacksonSerDes();
    private final Maestro maestro;
 
+   /**
+    * Creates a new TestStreamSocketController instance.
+    *
+    * @param identity the current Gazelle identity used to authenticate incoming WebSocket messages
+    * @param maestro  the Maestro engine used to execute tests and test suites
+    */
    @Inject
    public TestStreamSocketController(GazelleIdentity identity, Maestro maestro) {
       this.identity = identity;
       this.maestro = maestro;
    }
 
+   /**
+    * Called when a new WebSocket connection is opened.
+    *
+    * @param session the newly opened WebSocket session
+    */
    @OnOpen
    public void onOpen(Session session) {
       LOG.info("Test Stream Socket Connected: {}", session.getId());
@@ -60,12 +82,29 @@ public class TestStreamSocketController {
       sessions.put(session.getId(), maestroCaller);
    }
 
+   /**
+    * Called when a WebSocket connection is closed.
+    *
+    * @param session the WebSocket session being closed
+    */
    @OnClose
    public void onClose(Session session) {
       LOG.info("Test Stream Socket Disconnected: {}", session.getId());
       sessions.remove(session.getId());
    }
 
+   /**
+    * Called when a message is received from a WebSocket client.
+    * <p>
+    * Depending on the type of the message, it may start a test run, start a test suite run,
+    * or complete a user interaction.
+    * </p>
+    *
+    * @param session       the WebSocket session from which the message was received
+    * @param messageString the raw message payload as a JSON string
+    * @throws IOException if an error occurs when closing the session due to invalid input or authentication failure
+    * @throws DeserializationException if unable to deserialize the received message
+    */
    @OnMessage
    @ProtectedWebSocket
    public void onMessage(Session session, String messageString) throws IOException {

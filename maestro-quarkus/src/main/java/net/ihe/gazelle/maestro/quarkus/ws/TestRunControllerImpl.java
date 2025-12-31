@@ -41,6 +41,9 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 
+/**
+ * Implementation of {@link TestRunController} that handles test run requests.
+ */
 @RequestScoped
 public class TestRunControllerImpl implements TestRunController {
 
@@ -50,6 +53,13 @@ public class TestRunControllerImpl implements TestRunController {
    private final SynchronousMaestro synchronousMaestro;
    private final Maestro maestro;
 
+   /**
+    * Creates a new instance of {@code TestRunControllerImpl}.
+    *
+    * @param identity           the authenticated user identity
+    * @param synchronousMaestro the synchronous Maestro engine for executing tests
+    * @param maestro            the generic Maestro engine for asynchronous test execution
+    */
    @Inject
    public TestRunControllerImpl(GazelleIdentity identity, SynchronousMaestro synchronousMaestro, Maestro maestro) {
       this.identity = identity;

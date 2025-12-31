@@ -5,10 +5,19 @@ import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 
+/**
+ * Standalone implementation of {@link Maestro} that executes tests without persisting results.
+ * Persisting test runs or test suite runs is not supported in this implementation.
+ */
 public class StandaloneMaestro implements Maestro {
 
    private final MaestroFacade maestroFacade;
 
+   /**
+    * Creates a new {@code StandaloneMaestro} using the provided {@link MaestroFacade}.
+    *
+    * @param maestroFacade the facade used to execute tests and test suites
+    */
    public StandaloneMaestro(MaestroFacade maestroFacade) {
       this.maestroFacade = maestroFacade;
    }

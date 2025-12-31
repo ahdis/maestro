@@ -25,11 +25,21 @@ import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Maestro implementation that records test execution reports when {@code persist} is enabled.
+ * Delegates execution to a {@link MaestroFacade} and wraps observers for recording.
+ */
 public class RecordingMaestro implements Maestro {
 
    private final MaestroFacade maestro;
    private final TestReportRecordingService testReportRecordingService;
 
+   /**
+    * Creates a new {@code RecordingMaestro} instance with the specified facade and recording service.
+    *
+    * @param maestro                    the {@link MaestroFacade} used for executing tests
+    * @param testReportRecordingService the service used to record test reports
+    */
    public RecordingMaestro(MaestroFacade maestro, TestReportRecordingService testReportRecordingService) {
       this.maestro = maestro;
       this.testReportRecordingService = testReportRecordingService;

@@ -18,6 +18,9 @@ public class SPIStepOutputDissectorProvider implements StepOutputDissectorProvid
 
    private final List<StepOutputDissectorFactory> factories;
 
+   /**
+    * Default constructor
+    */
    public SPIStepOutputDissectorProvider() {
       this(loadFactories());
    }

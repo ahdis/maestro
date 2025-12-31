@@ -31,12 +31,25 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.ServiceLoader;
 
+/**
+ * Service Provider Interface (SPI) implementation of {@link HandlerProvider}.
+ * Responsible for providing {@link Handler} instances for a given {@link HandlerContext} and handler type.
+ * It can create handlers via service discovery or return a {@link UserInteractionHandler} when requested.
+ */
 public class HandlerProviderSPI implements HandlerProvider {
 
     private final ServiceRegistry serviceRegistry;
     private final ConfigProvider configProvider;
     private final ReadSessionStore<MaestroObserver> observerStore;
 
+    /**
+     * Creates a new {@code HandlerProviderSPI} with the specified service registry, configuration provider,
+     * and observer store.
+     *
+     * @param serviceRegistry the registry used to look up services and their interfaces
+     * @param configProvider the configuration provider used to configure handlers
+     * @param observerStore the store containing {@link MaestroObserver} instances, used for user interaction handlers
+     */
     public HandlerProviderSPI(ServiceRegistry serviceRegistry, ConfigProvider configProvider, ReadSessionStore<MaestroObserver> observerStore) {
         this.serviceRegistry = serviceRegistry;
         this.configProvider = configProvider;

@@ -27,9 +27,14 @@ import net.ihe.gazelle.maestro.engine.business.*;
 import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
 import net.ihe.gazelle.maestro.engine.business.context.TestRunSession;
 import net.ihe.gazelle.maestro.engine.business.context.TestSuiteSession;
+import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 import net.ihe.gazelle.servicemetadata.api.business.MetadataService;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
+
+/**
+ * Factory class responsible for creating and providing configured Maestro engine components.
+ */
 @ApplicationScoped
 public class MaestroFactory {
 
@@ -46,6 +51,23 @@ public class MaestroFactory {
    private final MetadataService metadataService;
    private final Boolean reportRecordingEnabled;
 
+
+   /**
+    * Creates a new {@code MaestroFactory} with all required dependencies injected by CDI.
+    *
+    * @param suiteSessionStore the session store for {@link TestSuiteSession} instances
+    * @param testSessionStore the session store for {@link TestRunSession} instances
+    * @param testRunObserverStore the session store for {@link MaestroObserver} of test runs
+    * @param testSuiteRunObserverStore the session store for {@link MaestroObserver} of test suite runs
+    * @param maestroEventProducer the event producer for Maestro commands
+    * @param testSuiteTestReportRecordService the event producer for test suite events
+    * @param testRunEventProducer the event producer for test run events
+    * @param stepRunEventProducer the event producer for step run events
+    * @param testReportRecordingService the service responsible for recording test reports
+    * @param stepExecutorProvider the provider for {@link StepExecutor} instances
+    * @param metadataService the service providing metadata information
+    * @param reportRecordingEnabled flag indicating if test report recording is enabled
+    */
    @Inject
    public MaestroFactory(@TestSuiteStore SessionStore<TestSuiteSession> suiteSessionStore,
                          @TestRunStore SessionStore<TestRunSession> testSessionStore,
@@ -73,12 +95,23 @@ public class MaestroFactory {
       this.reportRecordingEnabled = reportRecordingEnabled;
    }
 
+   /**
+    * Produces a {@link SynchronousMaestro} instance configured with the appropriate underlying Maestro.
+    *
+    * @return a new {@link SynchronousMaestro} instance
+    */
    @Produces
    @Default
    public SynchronousMaestro getSynchronousMaestro() {
       return new SynchronousMaestro(getRecordingMaestro());
    }
 
+   /**
+    * Produces a {@link Maestro} instance that may be recording or standalone
+    * depending on the {@code reportRecordingEnabled} flag.
+    *
+    * @return a configured {@link Maestro} instance
+    */
    @Produces
    @Default
    public Maestro getRecordingMaestro() {
@@ -88,6 +121,11 @@ public class MaestroFactory {
       return new StandaloneMaestro(getMaestro());
    }
 
+   /**
+    * Produces a {@link MaestroFacade} instance which handles the orchestration of test and suite executions.
+    *
+    * @return a new {@link MaestroFacade} instance
+    */
    @Produces
    @Default
    public MaestroFacade getMaestro() {
@@ -99,18 +137,36 @@ public class MaestroFactory {
       );
    }
 
+   /**
+    * Produces a {@link TestSuiteRunner} instance configured with the test suite session store
+    * and the test suite event producer.
+    *
+    * @return a new {@link TestSuiteRunner} instance
+    */
    @Produces
    @Default
    public TestSuiteRunner getTestSuiteRunner() {
       return new TestSuiteRunner(suiteSessionStore, testSuiteEventProducer);
    }
 
+   /**
+    * Produces a {@link TestRunner} instance configured with the test run session store
+    * and the test run event producer.
+    *
+    * @return a new {@link TestRunner} instance
+    */
    @Produces
    @Default
    public TestRunner getTestRunner() {
       return new TestRunner(testSessionStore, testRunEventProducer);
    }
 
+   /**
+    * Produces a {@link StepRunner} instance configured with the {@link StepExecutorProvider}
+    * and the step run event producer.
+    *
+    * @return a new {@link StepRunner} instance
+    */
    @Produces
    @Default
    public StepRunner getStepRunner() {

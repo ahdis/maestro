@@ -21,11 +21,27 @@ import io.quarkus.jackson.ObjectMapperCustomizer;
 import jakarta.inject.Singleton;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.ObjectMapperBuilder;
 
+/**
+ * Registers a custom module to apply Gazelle-specific settings to the Jackson {@link ObjectMapper}.
+ * This ensures consistent serialization and deserialization behavior across the application.
+ */
 @Singleton
 public class RegisterCustomModuleCustomizer implements ObjectMapperCustomizer {
 
-    public void customize(ObjectMapper mapper) {
-          ObjectMapperBuilder.applyGazelleSettings(mapper);
-    }
+   /**
+    * Default constructor
+    */
+   public RegisterCustomModuleCustomizer() {
+      // Empty
+   }
 
+   /**
+    * Customizes the given {@link ObjectMapper} by applying Gazelle-specific settings.
+    *
+    * @param mapper the {@link ObjectMapper} to customize
+    */
+   @Override
+   public void customize(ObjectMapper mapper) {
+      ObjectMapperBuilder.applyGazelleSettings(mapper);
+   }
 }

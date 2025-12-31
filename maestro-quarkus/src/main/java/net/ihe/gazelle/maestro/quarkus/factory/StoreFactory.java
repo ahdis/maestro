@@ -24,8 +24,24 @@ import net.ihe.gazelle.maestro.engine.business.context.TestRunSession;
 import net.ihe.gazelle.maestro.engine.business.context.TestSuiteSession;
 import technical.dao.SessionStoreImpl;
 
+/**
+ * Factory class responsible for producing various {@link SessionStore} instances.
+ */
+@ApplicationScoped
 public class StoreFactory {
 
+    /**
+     * Default constructor
+     */
+    public StoreFactory() {
+        // Empty
+    }
+
+    /**
+     * Produces a {@link SessionStore} for {@link TestSuiteSession} instances.
+     *
+     * @return a new {@link SessionStoreImpl} instance for test suite sessions
+     */
     @ApplicationScoped
     @Produces
     @TestSuiteStore
@@ -33,6 +49,11 @@ public class StoreFactory {
         return new SessionStoreImpl<>();
     }
 
+    /**
+     * Produces a {@link SessionStore} for {@link TestRunSession} instances.
+     *
+     * @return a new {@link SessionStoreImpl} instance for test run sessions
+     */
     @ApplicationScoped
     @Produces
     @TestRunStore
@@ -40,6 +61,12 @@ public class StoreFactory {
         return new SessionStoreImpl<>();
     }
 
+    /**
+     * Produces a {@link SessionStore} for {@link MaestroObserver} instances
+     * associated with individual test runs.
+     *
+     * @return a new {@link SessionStoreImpl} instance for test run observers
+     */
     @ApplicationScoped
     @Produces
     @TestRunObserverStore
@@ -47,6 +74,12 @@ public class StoreFactory {
         return new SessionStoreImpl<>();
     }
 
+    /**
+     * Produces a {@link SessionStore} for {@link MaestroObserver} instances
+     * associated with test suite runs.
+     *
+     * @return a new {@link SessionStoreImpl} instance for test suite run observers
+     */
     @ApplicationScoped
     @Produces
     @TestSuiteRunObserverStore

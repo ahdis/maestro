@@ -250,6 +250,15 @@
                 <groupId>io.quarkus.platform</groupId>
                 <artifactId>quarkus-maven-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <excludePackageNames>
+                        net.ihe.gazelle.maestro.quarkus.websocket.dto
+                    </excludePackageNames>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 

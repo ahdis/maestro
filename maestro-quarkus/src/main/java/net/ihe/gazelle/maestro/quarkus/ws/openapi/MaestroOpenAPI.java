@@ -21,6 +21,9 @@ import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
 import org.eclipse.microprofile.openapi.annotations.info.Info;
 import org.eclipse.microprofile.openapi.annotations.info.License;
 
+/**
+ * Configuration class for OpenAPI documentation of the Maestro API.
+ */
 @OpenAPIDefinition(
       info = @Info(
             title = "Maestro API", description = "This API allows to trigger test execution.", license = @License(
@@ -28,4 +31,11 @@ import org.eclipse.microprofile.openapi.annotations.info.License;
             url = "https://www.apache.org/licenses/LICENSE-2.0.html"), version = "")
 )
 public class MaestroOpenAPI extends Application {
+
+   /**
+    * Default constructor
+    */
+   public MaestroOpenAPI() {
+      // Empty
+   }
 }

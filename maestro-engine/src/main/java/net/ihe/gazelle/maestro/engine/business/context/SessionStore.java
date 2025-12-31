@@ -16,12 +16,35 @@
 
 package net.ihe.gazelle.maestro.engine.business.context;
 
+/**
+ * Stores session objects and provides access to them by their identifier.
+ *
+ * @param <T> the type of session object stored and retrieved
+ */
 public interface SessionStore<T> extends ReadSessionStore<T> {
 
+   /**
+    * Adds a session object with the specified identifier and timeout.
+    *
+    * @param id the identifier for the session
+    * @param session the session object to store
+    * @param timeout the time in milliseconds after which the session expires
+    */
    void addSession(String id, T session, long timeout);
 
+   /**
+    * Checks whether a session exists for the given identifier.
+    *
+    * @param id the identifier of the session
+    * @return {@code true} if a session exists, {@code false} otherwise
+    */
    boolean hasSession(String id);
 
-    void removeSession(String id);
+   /**
+    * Removes the session associated with the given identifier.
+    *
+    * @param id the identifier of the session to remove
+    */
+   void removeSession(String id);
 
 }

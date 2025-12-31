@@ -23,8 +23,15 @@ import net.ihe.gazelle.security.business.BaseGazelleIdentity;
 import net.ihe.gazelle.security.business.GazelleIdentity;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
+/**
+ * Authenticator implementation for WebSocket connections.
+ * This class can be used to provide authentication logic for WebSocket sessions.
+ */
 public class WebSocketAuthenticator implements Authenticator {
 
+   /**
+    * Default constructor.
+    */
    public WebSocketAuthenticator() {
       // Used for SPI
    }

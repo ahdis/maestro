@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A stepRunnerJob receive message from producer to execute Step, launch execution and send result to Maestro Listener
+ * A stepRunnerJob receive a message from producer to execute Step, launch execution and send a result to Maestro Listener
  */
 public class StepRunner {
 
@@ -41,6 +41,12 @@ public class StepRunner {
    private final StepRunEventProducer stepRunEventProducer;
    private final StepRunReportValidator stepRunReportValidator = new StepRunReportValidator();
 
+   /**
+    * Creates a new {@code StepRunner} with the specified executor provider and event producer.
+    *
+    * @param stepExecutorProvider the provider used to obtain {@link StepExecutor} instances for executing steps
+    * @param stepRunEventProducer the producer used to notify step run events
+    */
    public StepRunner(StepExecutorProvider stepExecutorProvider, StepRunEventProducer stepRunEventProducer) {
       this.stepExecutorProvider = stepExecutorProvider;
       this.stepRunEventProducer = stepRunEventProducer;

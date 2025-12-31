@@ -23,7 +23,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
+/**
+ * Implementation of {@link TestReportRecordingService} that records test reports to the Datahouse system.
+ */
 public class DatahouseTestReportRecordingService implements TestReportRecordingService {
 
    static final String TEST_REPORT_TYPE = "TEST_REPORT";
@@ -34,6 +36,14 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
    private final StepOutputRecordService stepOutputRecordService;
    private final TextSerDes serDes = new JacksonSerDes();
 
+
+   /**
+    * Constructs a new {@code DatahouseTestReportRecordingService}.
+    *
+    * @param recordItemClient  client used to send records to Datahouse
+    * @param datahouseUrl      base URL of the Datahouse service
+    * @param dissectorProvider provider used to dissect step outputs for recording
+    */
    public DatahouseTestReportRecordingService(RecordItemClient recordItemClient,
                                               String datahouseUrl,
                                               StepOutputDissectorProvider dissectorProvider) {

@@ -33,28 +33,53 @@ public class TestSuiteSession {
    private final TestRunCursor testRunCursor;
    private final List<TestRunReport> testRunReports;
 
+   /**
+    * Creates a new {@code TestSuiteSession} for the specified {@link TestSuiteRun} and {@link TestRunCursor}.
+    *
+    * @param testSuiteRun the test suite run associated with this session
+    * @param testRunCursor the cursor for iterating over the test runs in this suite
+    */
    public TestSuiteSession(TestSuiteRun testSuiteRun, TestRunCursor testRunCursor) {
       this.testSuiteRun = testSuiteRun;
       this.testRunCursor = testRunCursor;
-       this.testRunReports = new ArrayList<>();
+      this.testRunReports = new ArrayList<>();
    }
 
+   /**
+    * Retrieves the {@link TestSuiteRun} associated with this session.
+    *
+    * @return the test suite run
+    */
    public TestSuiteRun getTestSuiteRun() {
       return testSuiteRun;
    }
 
+   /**
+    * Returns a copy of the list of executed test run reports.
+    *
+    * @return a list of {@link TestRunReport} instances
+    */
    public List<TestRunReport> getTestRunReports() {
       return new ArrayList<>(testRunReports);
    }
 
+   /**
+    * Adds a {@link TestRunReport} to the list of executed test run reports.
+    *
+    * @param report the test run report to add
+    */
    public void addTestRunReport(TestRunReport report) {
-       testRunReports.add(report);
+      testRunReports.add(report);
    }
 
+   /**
+    * Returns the {@link TestRunCursor} for iterating over the test runs in this suite.
+    *
+    * @return the test run cursor
+    */
    public TestRunCursor getTestRunCursor() {
       return testRunCursor;
    }
-
 
    @Override
    public boolean equals(Object o) {
@@ -62,8 +87,8 @@ public class TestSuiteSession {
          return false;
       }
       return Objects.equals(testSuiteRun, store.testSuiteRun)
-             && Objects.equals(testRunReports, store.testRunReports)
-             && Objects.equals(testRunCursor, store.testRunCursor);
+            && Objects.equals(testRunReports, store.testRunReports)
+            && Objects.equals(testRunCursor, store.testRunCursor);
    }
 
    @Override
@@ -71,3 +96,4 @@ public class TestSuiteSession {
       return Objects.hash(testSuiteRun, testRunReports, testRunCursor);
    }
 }
+

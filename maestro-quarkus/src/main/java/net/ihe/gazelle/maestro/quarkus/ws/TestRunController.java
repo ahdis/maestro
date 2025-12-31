@@ -36,36 +36,24 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import static net.ihe.gazelle.maestro.quarkus.ws.Constants.TEST_RUN;
 import static net.ihe.gazelle.maestro.quarkus.ws.Constants.TEST_SUITE_RUN;
 
+/**
+ * REST API interface for executing Gazelle tests and test suites.
+ * <p>
+ * This API allows clients to trigger synchronous or asynchronous test execution using the Maestro engine.
+ * If a {@code callback} query parameter is provided, the test run will be executed asynchronously, and the
+ * results will be sent to the specified callback URI. Otherwise, the test run will be executed synchronously,
+ * and the results will be returned directly in the response.
+ */
 @Path("/v1")
 public interface TestRunController {
 
     /**
-     * This endpoint can run synchronously or asynchronously depending on the presence of a callback URI.
-     * <p>
-     * If the callback query parameter is not set, this will run synchronously and directly send the {@code TestReport}
-     * as a response.
-     * </p>
-     * <p>
-     * If the callback query parameter is set, this will run asynchronously and will send the {@code TestReport} to the
-     * specified callback URI later on.
-     * </p>
-     * <p>
-     * Different responses can be sent depending on what happens during execution:
-     * </p>
-     * <ul>
-     *     <li><b>Execution went well</b> : 200 + TestReport in body if callback is not present and run is synchronous</li>
-     *     <li><b>Execution went well</b> : 202 If callback is present and run is asynchronous </li>
-     *     <li><b>Request couldn't be Parsed</b> : 400 + ParsingErrorException or MissingArgumentException</li>
-     *     <li><b>TestRun isn't valid</b> : 400 + InvalidTestRunException</li>
-     *     <li><b>Request try to execute an unsupported Step</b> : 400 + UnknownStepType</li>
-     *     <li><b>Unknown Error occurred</b> : 500 + Exception</li>
-     *     <li><b>Timeout exception</b> : 504 + message explaining why timeout occurred</li>
-     * </ul>
+     * Execute a Gazelle test suite.
      *
-     * @param testSuiteRun A list of TestRun
-     * @param callback   The callback URI to send back the Test report for asynchronous run
-     *
-     * @return A response with a status code and a body containing TestReport or an exception
+     * @param testSuiteRun the test suite to execute
+     * @param persist      whether to persist the test report
+     * @param callback     optional callback URL for asynchronous execution
+     * @return a {@link Response} containing the {@link TestReportDTO} or HTTP status depending on execution mode
      */
     @POST
     @Path("/test-suite/run")
@@ -132,7 +120,14 @@ public interface TestRunController {
             ) @QueryParam("callback") String callback
     );
 
-
+    /**
+     * Execute a test.
+     *
+     * @param testRun  the test to execute
+     * @param persist  whether to persist the test report
+     * @param callback optional callback URL for asynchronous execution
+     * @return a {@link Response} containing the {@link TestReportDTO} or HTTP status depending on execution mode
+     */
     @POST
     @Path("/test/run")
     @ProtectedResource

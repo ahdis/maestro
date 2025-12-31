@@ -8,6 +8,9 @@ import net.ihe.gazelle.maestrorecording.adapter.DatahouseTestReportRecordingServ
 import net.ihe.gazelle.maestrorecording.adapter.SPIStepOutputDissectorProvider;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
+/**
+ * CDI factory for producing {@link DatahouseTestReportRecordingService} instances.
+ */
 @ApplicationScoped
 public class RecordingServiceCDIFactory {
 
@@ -16,6 +19,19 @@ public class RecordingServiceCDIFactory {
 
    private final SPIStepOutputDissectorProvider dissectorProvider = new SPIStepOutputDissectorProvider();
 
+   /**
+    * Default constructor
+    */
+   public RecordingServiceCDIFactory() {
+      // Empty
+   }
+
+   /**
+    * Produces a new {@link DatahouseTestReportRecordingService} for each request.
+    *
+    * @return a {@code DatahouseTestReportRecordingService} instance configured with the
+    *         datahouse URL and {@link SPIStepOutputDissectorProvider}.
+    */
    @Produces
    @RequestScoped
    public DatahouseTestReportRecordingService getRecordingService() {

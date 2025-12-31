@@ -26,18 +26,34 @@ import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
 import net.ihe.gazelle.maestro.engine.business.StepRunEventProducer;
 import net.ihe.gazelle.maestro.engine.business.StepRunner;
 
+/**
+ * StepRunnerEventController is responsible for producing and handling step-related events.
+ * It delegates the execution of steps to {@link StepRunner} and fires {@link StepRunFinished}
+ * events asynchronously.
+ */
 @RequestScoped
 public class StepRunnerEventController implements StepRunEventProducer {
 
    private final StepRunner stepRunner;
    private final Event<Message> messageEvent;
 
+   /**
+    * Creates a new {@code StepRunnerEventController} with the specified {@link StepRunner} and event dispatcher.
+    *
+    * @param stepRunner   the {@link StepRunner} used to execute steps
+    * @param messageEvent the CDI event used to fire step events asynchronously
+    */
    @Inject
    public StepRunnerEventController(StepRunner stepRunner, Event<Message> messageEvent) {
       this.stepRunner = stepRunner;
       this.messageEvent = messageEvent;
    }
 
+   /**
+    * Handles asynchronously a {@link StartStepRun} event by delegating execution to {@link StepRunner}.
+    *
+    * @param startStepRun the start step run event
+    */
    public void onStartStepRun(@ObservesAsync StartStepRun startStepRun) {
       stepRunner.run(startStepRun);
    }

@@ -19,15 +19,35 @@ package net.ihe.gazelle.maestro.quarkus.websocket;
 import jakarta.enterprise.context.RequestScoped;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
+/**
+ * Holds the {@link JsonWebToken} for the current request scope.
+ */
 @RequestScoped
 public class JwtContext {
 
    private JsonWebToken jwt;
 
+   /**
+    * Default constructor
+    */
+   public JwtContext() {
+      // Empty
+   }
+
+   /**
+    * Retrieves the {@link JsonWebToken} for the current request.
+    *
+    * @return the current {@link JsonWebToken}, or {@code null} if none has been set
+    */
    public JsonWebToken get() {
       return jwt;
    }
 
+   /**
+    * Sets the {@link JsonWebToken} for the current request.
+    *
+    * @param jwt the {@link JsonWebToken} to associate with the current request
+    */
    public void set(JsonWebToken jwt) {
       this.jwt = jwt;
    }

@@ -20,17 +20,24 @@ import net.ihe.gazelle.servicemetadata.api.business.Service;
 
 import java.util.List;
 
+/**
+ * ServiceRegistry provides access to all available {@link Service} instances.
+ */
 public interface ServiceRegistry {
 
     /**
-     * @return List of services from Database
+     * Retrieves the list of all services available in the database.
+     *
+     * @return a list of {@link Service} instances
      */
     List<Service> getServices();
 
     /**
-     * @param serviceName Name of the service 
-     * @return Service with name corresponding to serviceName
-     * @throws IllegalArgumentException if there is no Service with corresponding name in DB
+     * Retrieves a {@link Service} by its name.
+     *
+     * @param serviceName the name of the service to retrieve
+     * @return the {@link Service} instance with the specified name
+     * @throws IllegalArgumentException if no service with the specified name exists in the database
      */
     Service getService(String serviceName);
 }

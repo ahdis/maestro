@@ -21,16 +21,29 @@ import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
+/**
+ * Factory class responsible for producing a {@link JsonWebToken} for the current request scope.
+ */
 @RequestScoped
 public class JsonWebTokenFactory {
 
    private final JwtContext jwtContext;
 
+   /**
+    * Constructs a new {@code JsonWebTokenFactory} with the given {@link JwtContext}.
+    *
+    * @param jwtContext the context used to retrieve the {@link JsonWebToken} for the current request
+    */
    @Inject
    public JsonWebTokenFactory(JwtContext jwtContext) {
       this.jwtContext = jwtContext;
    }
 
+   /**
+    * Produces the {@link JsonWebToken} associated with the current request.
+    *
+    * @return the {@link JsonWebToken} from the {@link JwtContext}
+    */
    @Produces
    @RequestScoped
    public JsonWebToken produceJwt() {

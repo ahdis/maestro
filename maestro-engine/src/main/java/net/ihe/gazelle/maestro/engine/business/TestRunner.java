@@ -41,6 +41,10 @@ import java.io.Serial;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * TestRunner is responsible for executing {@link TestRun} instances step by step,
+ * managing session state, and notifying observers of execution progress and results.
+ */
 public class TestRunner {
 
    private static final Logger LOG = LoggerFactory.getLogger(TestRunner.class);
@@ -49,11 +53,23 @@ public class TestRunner {
    private final TestRunEventProducer testRunEventProducer;
    private final TestRunValidator testRunValidator = new TestRunValidator();
 
+   /**
+    * Creates a new {@code TestRunner} with the specified session store and event producer.
+    *
+    * @param sessionStore the store used to manage {@link TestRunSession} instances
+    * @param testRunEventProducer the producer used to send test run events
+    */
    public TestRunner(SessionStore<TestRunSession> sessionStore, TestRunEventProducer testRunEventProducer) {
       this.sessionStore = sessionStore;
       this.testRunEventProducer = testRunEventProducer;
    }
 
+   /**
+    * Executes a {@link TestRun} as specified by a {@link StartTestRun} event.
+    * Manages session state and handles exceptions during execution.
+    *
+    * @param startTestRun the event containing the test run to execute and session information
+    */
    public void run(StartTestRun startTestRun) {
       String sessionId = startTestRun.getSessionId();
       TestRun testRun = startTestRun.getTestRun();
@@ -78,6 +94,12 @@ public class TestRunner {
       }
    }
 
+   /**
+    * Handles a {@link StepRunFinished} event by updating the session state,
+    * executing the next step if available, or finishing the test run.
+    *
+    * @param stepRunFinished the finished step run event to process
+    */
    public void listen(StepRunFinished stepRunFinished) {
       String sessionId = stepRunFinished.getSessionId();
       TestRunSession testRunSession = sessionStore.getSession(sessionId);
@@ -162,10 +184,19 @@ public class TestRunner {
                   .setName(test.getName()));
    }
 
+   /**
+    * Exception thrown when an output mapping of a {@link Step} or {@link StepRun} is invalid.
+    */
    public static class InvalidOutputMappingException extends RuntimeException {
+
       @Serial
       private static final long serialVersionUID = 1727233135259169863L;
 
+      /**
+       * Creates a new {@code InvalidOutputMappingException} with the specified message.
+       *
+       * @param message the detail message describing the invalid output mapping
+       */
       public InvalidOutputMappingException(String message) {
          super(message);
       }

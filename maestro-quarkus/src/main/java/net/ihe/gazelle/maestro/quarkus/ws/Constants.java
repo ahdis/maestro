@@ -16,59 +16,37 @@
 
 package net.ihe.gazelle.maestro.quarkus.ws;
 
+/**
+ * Defines constants used for open API examples
+ */
 public class Constants {
 
-    private Constants() {
-    }
+   private Constants() {
+   }
 
-    static final String TEST_SUITE_RUN = """
-             {
-               "testSuite": {
-                 "id": "testSuite1",
-                 "name": "test suite name",
-                 "testReferences":[
-                   {
-                     "testId": "test1"
-                   }
-                 ]
-               },
-               "accessControlList": {
-                 "owners": [
-                   "gazelle",
-                   "tm-integration"
-                 ],
-                 "isPublic": true
-               },
-               "tests": [
-                 {
-                   "id": "test1",
-                   "name": "test name",
-                   "steps": [
-                     {
-                       "name": "step1",
-                       "type": "ASSERT_EQUALS",
-                       "properties": [
-                         {
-                           "name": "expected",
-                           "value": "test",
-                           "type": "STRING"
-                         },
-                         {
-                           "name": "actual",
-                           "value": "test",
-                           "type": "STRING"
-                         }
-                       ]
-                     }
-                   ]
-                 }
-               ]
-             }
-            """;
-
-    static final String TEST_RUN = """
-            {
-              "test": {
+   /**
+    * Test suite run example
+    */
+   static final String TEST_SUITE_RUN = """
+          {
+            "testSuite": {
+              "id": "testSuite1",
+              "name": "test suite name",
+              "testReferences":[
+                {
+                  "testId": "test1"
+                }
+              ]
+            },
+            "accessControlList": {
+              "owners": [
+                "gazelle",
+                "tm-integration"
+              ],
+              "isPublic": true
+            },
+            "tests": [
+              {
                 "id": "test1",
                 "name": "test name",
                 "steps": [
@@ -89,10 +67,41 @@ public class Constants {
                     ]
                   }
                 ]
-              },
-              "accessControlList": {
-                "isPublic": true
               }
-            }
-            """;
+            ]
+          }
+         """;
+
+   /**
+    * Test run example
+    */
+   static final String TEST_RUN = """
+         {
+           "test": {
+             "id": "test1",
+             "name": "test name",
+             "steps": [
+               {
+                 "name": "step1",
+                 "type": "ASSERT_EQUALS",
+                 "properties": [
+                   {
+                     "name": "expected",
+                     "value": "test",
+                     "type": "STRING"
+                   },
+                   {
+                     "name": "actual",
+                     "value": "test",
+                     "type": "STRING"
+                   }
+                 ]
+               }
+             ]
+           },
+           "accessControlList": {
+             "isPublic": true
+           }
+         }
+         """;
 }

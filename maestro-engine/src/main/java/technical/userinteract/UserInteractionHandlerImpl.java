@@ -28,10 +28,19 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * Implementation of {@link UserInteractionHandler} that delegates user interaction
+ * events to a {@link MaestroObserver}.
+ */
 public class UserInteractionHandlerImpl implements UserInteractionHandler {
 
     private final MaestroObserver observer;
 
+    /**
+     * Creates a new {@code UserInteractionHandlerImpl} using the specified observer.
+     *
+     * @param observer the {@link MaestroObserver} that will receive user interaction events
+     */
     public UserInteractionHandlerImpl(MaestroObserver observer) {
         this.observer = observer;
     }

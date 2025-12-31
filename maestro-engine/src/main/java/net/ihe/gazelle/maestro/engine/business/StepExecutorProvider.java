@@ -19,11 +19,15 @@ package net.ihe.gazelle.maestro.engine.business;
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 
+/**
+ * SPI for Step executor interface
+ */
 public interface StepExecutorProvider {
 
    /**
     * Get the StepExecutor able to execute the given step
     *
+    * @param sessionId The internal session id
     * @param step The step we want StepExecutor to execute
     *
     * @return A StepExecutor able to run step

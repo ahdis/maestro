@@ -22,6 +22,7 @@ import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.openapi.OASFilter;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.PathItem;
+import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.security.OAuthFlow;
 import org.eclipse.microprofile.openapi.models.security.SecurityScheme;
 
@@ -43,6 +44,13 @@ public class OpenAPIFilter implements OASFilter {
    private static final String TEST_RUN_PATH = "/v1/test/run";
    @SuppressWarnings("java:S1075")
    private static final String TEST_SUITE_RUN_PATH = "/v1/test-suite/run";
+
+   /**
+    * Default constructor
+    */
+   public OpenAPIFilter() {
+      // Empty
+   }
 
    @Override
    public void filterOpenAPI(OpenAPI openAPI) {

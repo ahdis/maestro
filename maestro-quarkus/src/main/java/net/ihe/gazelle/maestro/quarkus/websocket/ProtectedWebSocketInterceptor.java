@@ -31,6 +31,15 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import java.lang.reflect.Method;
 
+/**
+ * Interceptor to secure WebSocket endpoints annotated with {@link ProtectedWebSocket}.
+ * <p>
+ * This interceptor parses the JWT provided in incoming WebSocket messages, validates the token,
+ * and stores it in {@link JwtContext} for further access during the request lifecycle.
+ * If the token is invalid, expired, or has a bad audience, an {@link UnauthorizedException} is thrown.
+ * If no JWT is provided, the request is treated as unauthenticated but is not aborted.
+ * </p>
+ */
 @ProtectedWebSocket
 @Interceptor
 @Priority(Interceptor.Priority.APPLICATION)
@@ -40,6 +49,12 @@ public class ProtectedWebSocketInterceptor {
    private final JWTParser parser;
    private final JwtContext jwtContext;
 
+   /**
+    * Constructs the interceptor with the required JWT parser and context.
+    *
+    * @param parser     the JWT parser to extract and validate tokens
+    * @param jwtContext the context to store the JWT during the request
+    */
    @Inject
    public ProtectedWebSocketInterceptor(JWTParser parser, JwtContext jwtContext) {
       this.parser = parser;
@@ -48,6 +63,14 @@ public class ProtectedWebSocketInterceptor {
 
    private final String rootTestBedUrl = ConfigProvider.getConfig().getValue("gzl.root.test.bed.url", String.class);
 
+   /**
+    * Intercepts the method call for WebSocket endpoints, validates JWT tokens, and
+    * sets the JWT in the {@link JwtContext} if valid.
+    *
+    * @param ctx the {@link InvocationContext} representing the intercepted method
+    * @return the result of the method invocation
+    * @throws Exception if the method invocation fails or the JWT is invalid
+    */
    @AroundInvoke
    Object around(InvocationContext ctx) throws Exception {
       Method method = ctx.getMethod();
