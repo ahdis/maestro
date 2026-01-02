@@ -66,14 +66,14 @@
         <!--git-->
         <git.project.url>https://${git.user.name}:${git.user.token}@gitlab.inria.fr/gazelle/private/kereval/maestro.git</git.project.url>
 
-        <framework.version>2.2.1-SNAPSHOT</framework.version>
+        <framework.version>2.2.1</framework.version>
         <search-api.version>1.1.0</search-api.version>
         <validation-api.version>2.0.1</validation-api.version>
         <simulation-api.version>0.2.0-SNAPSHOT</simulation-api.version>
         <service-registry.version>1.0.0</service-registry.version>
         <lang.version>3.0.0</lang.version>
         <datahouse.version>4.0.0</datahouse.version>
-        <sso.client.version>3.3.1-SNAPSHOT</sso.client.version>
+        <sso.client.version>3.3.1</sso.client.version>
 
         <equalsverifier.version>3.16.1</equalsverifier.version>
 
