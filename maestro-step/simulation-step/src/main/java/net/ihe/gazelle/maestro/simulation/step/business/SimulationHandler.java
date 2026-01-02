@@ -19,5 +19,9 @@ package net.ihe.gazelle.maestro.simulation.step.business;
 import net.ihe.gazelle.maestro.spi.business.Handler;
 import net.ihe.gazelle.simulation.client.business.SimulationClient;
 
+/**
+ * Handler interface for simulation services.
+ * Combines Handler and SimulationClient interfaces for simulation operations.
+ */
 public interface SimulationHandler extends Handler, SimulationClient {
 }

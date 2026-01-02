@@ -16,11 +16,24 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Dissects validation step outputs for recording purposes.
+ * This class processes validation reports and extracts attachments and references.
+ */
 public class ValidationStepOutputDissector implements StepOutputDissector {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+    /**
+     * Constant identifier for validation input attachments.
+     */
     public static final String VALIDATION_INPUT = "VALIDATION_INPUT";
+
+    /**
+     * Default constructor.
+     */
+    public ValidationStepOutputDissector() { /* Default constructor */ }
 
     @Override
     public StepOutputProjection dissect(StepOutputContext context) {

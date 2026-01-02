@@ -10,19 +10,39 @@ import java.io.Serial;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Step definition for assertion that checks if the actual value equals the expected value.
+ * This step verifies that two strings are equal.
+ */
 public class AssertEqualsStepDefinition implements StepDefinition {
 
     @Serial
     private static final long serialVersionUID = 9207233191257118044L;
 
+   /**
+    * The type identifier for the assert equals step.
+    */
    public static final String TYPE = "ASSERT_EQUALS";
 
-   // inputs
+   /**
+    * Input property key for the expected value.
+    */
    public static final String EXPECTED = "expected";
+
+   /**
+    * Input property key for the actual value.
+    */
    public static final String ACTUAL = "actual";
 
-   // outputs
+   /**
+    * Output property key for the failure message when the assertion fails.
+    */
    public static final String FAILURE_MESSAGE = "failureMessage";
+
+   /**
+    * Default constructor.
+    */
+   public AssertEqualsStepDefinition() { /* Default constructor */ }
 
     @Override
    public String getType() {

@@ -29,6 +29,11 @@ public class ReportSerializerImpl implements ReportSerializer {
 
    private final SerDes serDes = new JacksonSerDes();
 
+   /**
+    * Default constructor.
+    */
+   public ReportSerializerImpl() { /* Default constructor */ }
+
    @Override
     public byte[] toByteArray(ValidationReport report) {
        return serDes.serialize(new ValidationReportDTO(report));

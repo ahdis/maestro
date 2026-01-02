@@ -18,6 +18,10 @@ package net.ihe.gazelle.maestro.validation.step.business;
 
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
 
+/**
+ * Interface for serializing validation reports.
+ * Provides methods to convert validation report objects to byte arrays.
+ */
 public interface ReportSerializer {
 
     /**

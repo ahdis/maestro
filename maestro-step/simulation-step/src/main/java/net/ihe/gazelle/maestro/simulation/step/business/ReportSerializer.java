@@ -19,6 +19,10 @@ package net.ihe.gazelle.maestro.simulation.step.business;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.SerializationException;
 import net.ihe.gazelle.simulation.business.callback.SimulationReport;
 
+/**
+ * Interface for serializing simulation reports.
+ * Provides methods to convert simulation report objects to byte arrays.
+ */
 public interface ReportSerializer {
 
     /**

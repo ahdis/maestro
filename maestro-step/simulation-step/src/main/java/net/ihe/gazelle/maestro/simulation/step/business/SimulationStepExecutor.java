@@ -44,6 +44,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
+/**
+ * Executor for simulation steps.
+ * This class executes simulation sequences and processes simulation reports.
+ */
 public class SimulationStepExecutor implements StepExecutor {
 
    private static final Logger LOG = LoggerFactory.getLogger(SimulationStepExecutor.class);
@@ -53,6 +57,12 @@ public class SimulationStepExecutor implements StepExecutor {
    private final ReportSerializer serializer;
    private final SimulationReportValidator reportValidator = new SimulationReportValidator();
 
+   /**
+    * Constructor for SimulationStepExecutor.
+    * @param simulationHandler the simulation handler to execute simulations
+    * @param userInteractionHandler the handler for user interactions during simulation
+    * @param serializer the serializer for converting simulation reports to byte arrays
+    */
    public SimulationStepExecutor(SimulationHandler simulationHandler,
                                  UserInteractionHandler userInteractionHandler,
                                  ReportSerializer serializer) {
@@ -102,6 +112,14 @@ public class SimulationStepExecutor implements StepExecutor {
             .getSupportedParameters();
    }
 
+   /**
+    * Creates a simulation request from step run parameters.
+    * @param sequenceId the simulation sequence identifier
+    * @param timeoutSeconds the timeout in seconds for the simulation
+    * @param stepRun the step run containing the parameters
+    * @param supportedParameters the list of supported parameters for this sequence
+    * @return the configured simulation request
+    */
    public static SimulationRequest createSimulationRequest(String sequenceId, int timeoutSeconds, StepRun stepRun,
                                                            List<SupportedParameter> supportedParameters) {
       SimulationRequestBuilder simulationRequest = new SimulationRequestBuilder()

@@ -130,11 +130,14 @@ public class TestRunner {
 
    private void finishTest(String sessionId, TestRunSession testRunSession) {
       sessionStore.removeSession(sessionId);
+
+      List<Property> inputs = testRunSession.getTestRun().getInputs();
+
       testRunEventProducer.notify(
             new TestRunFinished(sessionId, testRunSession.getTestRun(),
                   newTestRunReportBuilder(testRunSession.getTestRun().getTest())
                         .addStepRunReports(testRunSession.getStepReports())
-                        .setInputs(testRunSession.getTestRun().getInputs())
+                        .setInputs(inputs)
                         .build()
             )
       );

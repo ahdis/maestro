@@ -35,6 +35,11 @@ public class EvsValidationHandler implements ValidationHandler {
    private final ValidationClient validationClient;
    private final EvsValidationMapper mapper = new EvsValidationMapper();
 
+   /**
+    * Constructor for EvsValidationHandler.
+    * @param serviceName the name of the validation service
+    * @param validationClient the client to communicate with the EVS validation service
+    */
    public EvsValidationHandler(String serviceName, ValidationClient validationClient) {
       this.validationClient = validationClient;
       this.serviceName = serviceName;

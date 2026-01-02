@@ -25,15 +25,34 @@ import java.io.Serial;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Step definition for user interaction operations.
+ * This step displays a message to the user and waits for acknowledgment.
+ */
 public class UserInteractionStepDefinition implements StepDefinition {
 
     @Serial
     private static final long serialVersionUID = 5740485033132348151L;
 
+    /**
+     * The type identifier for the user interaction step.
+     */
     public static final String TYPE = "USER_INTERACTION";
 
+    /**
+     * Input property key for the interaction title.
+     */
     public static final String INTERACTION_TITLE = "interactionTitle";
+
+    /**
+     * Input property key for the message to display to the user.
+     */
     public static final String MESSAGE = "message";
+
+    /**
+     * Default constructor.
+     */
+    public UserInteractionStepDefinition() { /* Default constructor */ }
 
     @Override
     public String getType() {

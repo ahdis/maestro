@@ -25,6 +25,11 @@ import net.ihe.gazelle.maestro.spi.business.recording.StepOutputDissectorFactory
  */
 public class SimulationStepOutputDissectorFactory implements StepOutputDissectorFactory {
 
+    /**
+     * Default constructor.
+     */
+    public SimulationStepOutputDissectorFactory() { /* Default constructor */ }
+
     @Override
     public boolean supports(final String stepType) {
         return SimulationStepDefinition.TYPE.equals(stepType);

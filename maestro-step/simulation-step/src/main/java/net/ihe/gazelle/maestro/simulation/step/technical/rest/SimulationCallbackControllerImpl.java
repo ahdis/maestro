@@ -22,9 +22,17 @@ import net.ihe.gazelle.simulation.business.callback.SimulationCallbackService;
 import net.ihe.gazelle.simulation.callback.jaxrs.server.technical.SimulationCallbackController;
 
 
+/**
+ * Implementation of SimulationCallbackController for handling simulation callbacks.
+ * This controller receives and processes simulation callbacks from the simulation service.
+ */
 @Path("/")
 public class SimulationCallbackControllerImpl extends SimulationCallbackController {
 
+    /**
+     * Constructor for SimulationCallbackControllerImpl.
+     * @param simulationCallback the simulation callback service to handle callbacks
+     */
     @Inject
     public SimulationCallbackControllerImpl(SimulationCallbackService simulationCallback) {
         super(simulationCallback);

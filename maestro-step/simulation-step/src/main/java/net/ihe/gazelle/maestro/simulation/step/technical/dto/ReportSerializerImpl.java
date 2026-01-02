@@ -22,9 +22,18 @@ import net.ihe.gazelle.modelmarshaller.technical.serialization.SerDes;
 import net.ihe.gazelle.simulation.business.callback.SimulationReport;
 import net.ihe.gazelle.simulation.jaxrs.api.technical.dto.callback.SimulationReportDTO;
 
+/**
+ * Implementation of ReportSerializer for serializing simulation reports.
+ * Uses Jackson serialization to convert reports to JSON byte arrays.
+ */
 public class ReportSerializerImpl implements ReportSerializer {
 
    private final SerDes serDes = new JacksonSerDes();
+
+   /**
+    * Default constructor.
+    */
+   public ReportSerializerImpl() { /* Default constructor */ }
 
    @Override
    public byte[] toByteArray(SimulationReport report) {

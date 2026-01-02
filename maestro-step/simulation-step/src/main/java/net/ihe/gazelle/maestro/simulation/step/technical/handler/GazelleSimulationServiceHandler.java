@@ -29,12 +29,20 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * Handler for Gazelle simulation service.
+ * This handler interfaces with the Gazelle simulation service to execute simulation sequences.
+ */
 public class GazelleSimulationServiceHandler implements SimulationHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GazelleSimulationServiceHandler.class);
 
     private final SimulationClient simulationClient;
 
+    /**
+     * Constructor for GazelleSimulationServiceHandler.
+     * @param simulationClient the simulation client to use for simulation operations
+     */
     public GazelleSimulationServiceHandler(SimulationClient simulationClient) {
         this.simulationClient = simulationClient;
     }
