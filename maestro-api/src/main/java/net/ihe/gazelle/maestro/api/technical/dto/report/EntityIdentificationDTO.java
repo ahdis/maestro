@@ -18,44 +18,63 @@ package net.ihe.gazelle.maestro.api.technical.dto.report;
 
 import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.testreport.EntityIdentification;
+import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
+@Schema(
+        name = "EntityIdentification",
+        description = "The name and version used to identify an entity."
+)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({"version", "name"})
-public class EntityIdentificationDTO {
+@JsonPropertyOrder({
+        "version",
+        "name"
+})
+public class EntityIdentificationDTO implements DTO<EntityIdentification> {
 
     @JsonIgnore
-    private final EntityIdentification domain;
+    private final EntityIdentification entityIdentification;
 
     public EntityIdentificationDTO() {
-        domain = new EntityIdentification();
+        this(new EntityIdentification());
     }
 
-    public EntityIdentificationDTO(EntityIdentification domain) {
-        this.domain = domain;
+    public EntityIdentificationDTO(EntityIdentification entityIdentification) {
+        this.entityIdentification = entityIdentification;
     }
 
-    @JsonGetter(value = "version")
-    public String getVersion() {
-        return domain.getVersion();
-    }
-
-    @JsonSetter(value = "version")
-    public void setVersion(String version) {
-        domain.setVersion(version);
-    }
-
-    @JsonGetter(value = "name")
-    public String getName() {
-        return domain.getName();
-    }
-
-    @JsonSetter(value = "name")
-    public void setName(String name) {
-        domain.setName(name);
-    }
-
+    @Override
     @JsonIgnore
-    public EntityIdentification getDomain() {
-        return domain;
+    public EntityIdentification getBusinessObject() {
+        return entityIdentification;
+    }
+
+    @Schema(
+            name = "version",
+            description = "The version of the entity.",
+            examples = "1.0"
+    )
+    @JsonProperty(value = "version")
+    public String getVersion() {
+        return entityIdentification.getVersion();
+    }
+
+    public void setVersion(String version) {
+       entityIdentification.setVersion(version);
+    }
+
+    @Schema(
+            name = "name",
+            description = "The name of the entity.",
+            examples = "My service",
+            required = true
+    )
+    @JsonProperty(value = "name")
+    public String getName() {
+        return entityIdentification.getName();
+    }
+
+    public void setName(String name) {
+       entityIdentification.setName(name);
     }
 }

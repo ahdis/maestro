@@ -18,271 +18,391 @@ package net.ihe.gazelle.maestro.quarkus.ws;
 
 import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import jakarta.ws.rs.WebApplicationException;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
 import jakarta.ws.rs.core.Response;
-import net.ihe.gazelle.maestro.api.business.testreport.Result;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReportSummary;
-import net.ihe.gazelle.maestro.api.business.testrun.InvalidTestRunException;
-import net.ihe.gazelle.maestro.api.business.testrun.Maestro;
-import net.ihe.gazelle.maestro.api.business.testrun.Property;
-import net.ihe.gazelle.maestro.api.business.testrun.PropertyRef;
+import net.ihe.gazelle.maestro.api.business.SynchronousMaestro;
+import net.ihe.gazelle.maestro.api.business.UnsupportedPropertyTypeException;
+import net.ihe.gazelle.maestro.api.business.test.Step;
+import net.ihe.gazelle.maestro.api.business.test.Test;
+import net.ihe.gazelle.maestro.api.business.test.TestReference;
+import net.ihe.gazelle.maestro.api.business.test.TestSuite;
+import net.ihe.gazelle.maestro.api.business.testreport.LocalizedTestReport;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
-import net.ihe.gazelle.maestro.api.business.testrun.UnsupportedPropertyTypeException;
-import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportSummaryDTO;
+import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
+import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestRunDTO;
-import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSetRunDTO;
-import net.ihe.gazelle.maestro.business.MaestroImpl;
-import net.ihe.gazelle.maestro.business.MissingArgumentException;
-import net.ihe.gazelle.maestro.quarkus.NotProvidedStep;
-import net.ihe.gazelle.maestro.quarkus.SessionStoreContextImpl;
-import net.ihe.gazelle.maestro.quarkus.factory.TestRunMockEvent;
-import net.ihe.gazelle.maestro.quarkus.jobs.EventMaestroProducer;
-import net.ihe.gazelle.maestro.quarkus.jobs.SynchronousMaestro;
-import net.ihe.gazelle.maestro.quarkus.mock.InMemoryTestReportRecordService;
-import net.ihe.gazelle.maestro.quarkus.mock.StepMockEvent;
-import net.ihe.gazelle.maestro.quarkus.ws.async.AsynchronousMaestro;
-import net.ihe.gazelle.maestro.validation.step.business.ValidationStep;
+import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSuiteRunDTO;
+import net.ihe.gazelle.maestro.quarkus.mock.IdentityMock;
+import net.ihe.gazelle.maestro.quarkus.utils.ObjectFactory;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
+import org.awaitility.Awaitility;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeoutException;
+import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.containing;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ExtendWith(MockitoExtension.class)
 class TestRunControllerTest {
 
-    @Mock
-    SynchronousMaestro synchronousMaestro;
+   private static WireMockServer wireMockServer;
+   private static int mockPort;
+   private static final ScheduledExecutorService SCHEDULED_EXECUTOR = new ScheduledThreadPoolExecutor(5);
 
-    @Mock
-    AsynchronousMaestro asynchronousMaestro;
+   private MaestroMockForREST maestroMock;
+   private TestRunControllerImpl controller;
 
-    TestRunControllerImpl controller;
+   @BeforeAll
+   static void setup() {
+      wireMockServer = new WireMockServer(0); // use random port
+      wireMockServer.start();
+      mockPort = wireMockServer.port();
+   }
 
-    @BeforeEach
-    void setUp() {
-        controller = new TestRunControllerImpl(synchronousMaestro, asynchronousMaestro);
-        controller.dataHouseUrl = "http://datahouse";
-    }
+   @AfterAll
+   static void tearDown() {
+      wireMockServer.stop();
+   }
 
-    @Test
-    void runWithoutCallbackReturnsOkResponseWithSummaryLocation() throws Exception {
-        TestReportSummary summary = new TestReportSummary()
-                .setId("summary-id")
-                .setResult(Result.PASSED)
-                .setDateTime(new Date());
-        when(synchronousMaestro.executeTestSet(any())).thenReturn(summary);
+   @BeforeEach
+   void setUp() {
+      maestroMock = new MaestroMockForREST(SCHEDULED_EXECUTOR);
+      controller = new TestRunControllerImpl(new IdentityMock(Set.of("role:gazelle_admin")), new SynchronousMaestro(maestroMock), maestroMock);
+   }
 
-        Response response = controller.run(null, testSetRunDto());
+   @org.junit.jupiter.api.Test
+   void testTestSuiteRunSync() {
+      TestReport testReport = ObjectFactory.createTestReport();
+      maestroMock.setTestReportSupplier(() -> testReport);
 
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-        TestReportSummaryDTO entity = (TestReportSummaryDTO) response.getEntity();
-        assertNotNull(entity);
-        assertEquals("http://datahouse/items/summary-id", entity.getLocation());
+      try (Response response = controller.executeTestSuite(getTestSuiteRunDTO(), false, null)) {
+         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+         TestReportDTO entity = (TestReportDTO) response.getEntity();
+         assertNotNull(entity);
+         assertEquals(testReport.getTestSuiteName(), entity.getTestSuiteName());
+      }
+   }
 
-        ArgumentCaptor<net.ihe.gazelle.maestro.api.business.testrun.TestSetRun> testSetRunCaptor = ArgumentCaptor.forClass(net.ihe.gazelle.maestro.api.business.testrun.TestSetRun.class);
-        verify(synchronousMaestro).executeTestSet(testSetRunCaptor.capture());
-        assertEquals(1, testSetRunCaptor.getValue().getTestRuns().size());
-        verifyNoInteractions(asynchronousMaestro);
-    }
+   @org.junit.jupiter.api.Test
+   void testTestRunSync() {
+      TestReport testReport = ObjectFactory.createTestReport();
+      maestroMock.setTestReportSupplier(() -> testReport);
 
-    @Test
-    void runWithCallbackTriggersAsyncExecutionAndReturnsAccepted() {
-        Response response = controller.run("http://callback", testSetRunDto());
+      try (Response response = controller.executeTest(getTestRunDTO(), false, null)) {
+         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+         TestReportDTO entity = (TestReportDTO) response.getEntity();
+         assertNotNull(entity);
+         assertEquals(testReport.getTestSuiteName(), entity.getTestSuiteName());
+      }
+   }
 
-        assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus());
+   @org.junit.jupiter.api.Test
+   void testTestRunSyncPersist() {
+      TestReport testReport = ObjectFactory.createTestReport();
+      maestroMock.setTestReportSupplier(() -> testReport);
 
-        ArgumentCaptor<net.ihe.gazelle.maestro.api.business.testrun.TestSetRun> testSetRunCaptor = ArgumentCaptor.forClass(net.ihe.gazelle.maestro.api.business.testrun.TestSetRun.class);
-        verify(asynchronousMaestro).executeTestSet(eq("http://callback"), testSetRunCaptor.capture());
-        assertEquals(1, testSetRunCaptor.getValue().getTestRuns().size());
-        verifyNoInteractions(synchronousMaestro);
-    }
+      try (Response response = controller.executeTest(getTestRunDTO(), true, null)) {
+         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+         TestReportDTO entity = (TestReportDTO) response.getEntity();
+         assertNotNull(entity);
+         LocalizedTestReport localizedTestReport = (LocalizedTestReport) entity.getBusinessObject();
+         assertNotNull(localizedTestReport.getLocation());
+         assertTrue(localizedTestReport.getLocation().startsWith("http://localhost/datahouse/items/"));
+      }
+   }
 
-    @Test
-    void runWithoutCallbackInvalidTestRunReturnsBadRequest() throws Exception {
-        when(synchronousMaestro.executeTestSet(any())).thenThrow(new InvalidTestRunException("invalid"));
+   @org.junit.jupiter.api.Test
+   void testTestSuiteRunAsync() {
+      maestroMock.setTestReportSupplier(ObjectFactory::createTestReport);
 
-        Response response = controller.run(null, testSetRunDto());
+      String callbackUrl = "http://localhost:" + mockPort + "/callback/testTestSuiteRunAsync";
+      wireMockServer.stubFor(
+            post(urlEqualTo("/callback/testTestSuiteRunAsync"))
+                  .willReturn(WireMock.ok())
+      );
 
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
-        assertTrue(response.getEntity().toString().contains("bad format"));
-    }
+      try (Response response = controller.executeTestSuite(getTestSuiteRunDTO(), false, callbackUrl)) {
+         assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus());
+         assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus());
+         Awaitility.await().atMost(3, TimeUnit.SECONDS).untilAsserted(
+               () -> wireMockServer.verify(
+                     1,
+                     postRequestedFor(urlEqualTo("/callback/testTestSuiteRunAsync"))
+                           .withoutHeader("Location")
+                           .withRequestBody(containing("\"result\":\"PASSED\""))
+               )
+         );
+      }
+   }
 
-    @Test
-    void runWithoutCallbackTimeoutReturnsGatewayTimeout() throws Exception {
-        when(synchronousMaestro.executeTestSet(any())).thenThrow(new TimeoutException("too long"));
+   @org.junit.jupiter.api.Test
+   void testTestRunAsync() {
+      maestroMock.setTestReportSupplier(ObjectFactory::createTestReport);
 
-        Response response = controller.run(null, testSetRunDto());
+      String callbackUrl = "http://localhost:" + mockPort + "/callback/testTestRunAsync";
+      wireMockServer.stubFor(
+            post(urlEqualTo("/callback/testTestRunAsync"))
+                  .willReturn(WireMock.ok())
+      );
 
-        assertEquals(Response.Status.GATEWAY_TIMEOUT.getStatusCode(), response.getStatus());
-        assertEquals(SynchronousMaestro.TIMEOUT_MESSAGE, response.getEntity());
-    }
+      try (Response response = controller.executeTest(getTestRunDTO(), false, callbackUrl)) {
+         assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus());
+         assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus());
+         Awaitility.await().atMost(3, TimeUnit.SECONDS).untilAsserted(
+               () -> wireMockServer.verify(
+                     1,
+                     postRequestedFor(urlEqualTo("/callback/testTestRunAsync"))
+                           .withoutHeader("Location")
+                           .withRequestBody(containing("\"result\":\"PASSED\""))
+               )
+         );
+      }
+   }
 
-    @Test
-    void runWithoutCallbackWebApplicationExceptionReturnsGatewayTimeout() throws Exception {
-        when(synchronousMaestro.executeTestSet(any())).thenThrow(new WebApplicationException("timeout"));
+   @org.junit.jupiter.api.Test
+   void testTestSuiteRunAsyncPersist() {
+      maestroMock.setTestReportSupplier(ObjectFactory::createTestReport);
 
-        Response response = controller.run(null, testSetRunDto());
+      String callbackUrl = "http://localhost:" + mockPort + "/callback/testTestSuiteRunAsyncPersist";
+      wireMockServer.stubFor(
+            post(urlEqualTo("/callback/testTestSuiteRunAsyncPersist"))
+                  .willReturn(WireMock.ok())
+      );
 
-        assertEquals(Response.Status.GATEWAY_TIMEOUT.getStatusCode(), response.getStatus());
-        assertEquals(SynchronousMaestro.TIMEOUT_MESSAGE, response.getEntity());
-    }
+      try (Response response = controller.executeTestSuite(getTestSuiteRunDTO(), true, callbackUrl)) {
+         assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus());
+         Awaitility.await().atMost(3, TimeUnit.SECONDS).untilAsserted(
+               () -> wireMockServer.verify(
+                     1,
+                     postRequestedFor(urlEqualTo("/callback/testTestSuiteRunAsyncPersist"))
+                           .withHeader("Location", containing("http://localhost/datahouse/items/"))
+                           .withRequestBody(containing("\"result\":\"PASSED\""))
+               )
+         );
+      }
+   }
 
-    @Test
-    void runWithoutCallbackNotProvidedStepReturnsBadRequest() throws Exception {
-        when(synchronousMaestro.executeTestSet(any())).thenThrow(new NotProvidedStep("missing step"));
+   @org.junit.jupiter.api.Test
+   void testTestRunAsyncPersist() {
+      maestroMock.setTestReportSupplier(ObjectFactory::createTestReport);
 
-        Response response = controller.run(null, testSetRunDto());
+      String callbackUrl = "http://localhost:" + mockPort + "/callback/testTestRunAsyncPersist";
+      wireMockServer.stubFor(
+            post(urlEqualTo("/callback/testTestRunAsyncPersist"))
+                  .willReturn(WireMock.ok())
+      );
 
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
-        assertTrue(response.getEntity().toString().contains("non provided"));
-    }
+      try (Response response = controller.executeTest(getTestRunDTO(), true, callbackUrl)) {
+         assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus());
+         Awaitility.await().atMost(3, TimeUnit.SECONDS).untilAsserted(
+               () -> wireMockServer.verify(
+                     1,
+                     postRequestedFor(urlEqualTo("/callback/testTestRunAsyncPersist"))
+                           .withHeader("Location", containing("http://localhost/datahouse/items/"))
+                           .withRequestBody(containing("\"result\":\"PASSED\""))
+               )
+         );
+      }
+   }
 
-    @Test
-    void runWithoutCallbackUnexpectedExceptionInterruptsThreadAndReturnsInternalServerError() throws Exception {
-        when(synchronousMaestro.executeTestSet(any())).thenThrow(new RuntimeException("boom"));
+   @org.junit.jupiter.api.Test
+   void testInvalidTestSuiteRunAsync() {
+      maestroMock.setErrorSupplier(() -> new IllegalArgumentException("invalid"));
 
-        Response response = controller.run(null, testSetRunDto());
+      String callbackUrl = "http://localhost:" + mockPort + "/callback/testInvalidTestSuiteRunAsync";
+      wireMockServer.stubFor(
+            post(urlEqualTo("/callback/testTestSuiteRunAsyncPersist"))
+                  .willReturn(WireMock.ok())
+      );
 
-        assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
-        assertTrue(Thread.currentThread().isInterrupted());
-        assertTrue(response.getEntity().toString().contains("an error occurred"));
-        Thread.interrupted();
-    }
+      try (Response response = controller.executeTestSuite(getTestSuiteRunDTO(), false, callbackUrl)) {
+         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+         assertTrue(response.getEntity().toString().contains("bad format"));
+         // Verify that no call back was made
+         Awaitility.await().during(3, TimeUnit.SECONDS).untilAsserted(
+               () -> wireMockServer.verify(
+                     0,
+                     postRequestedFor(urlEqualTo("/callback/testInvalidTestSuiteRunAsync"))
+               )
+         );
+      }
+   }
 
-    @Test
-    void runWithCallbackInvalidTestRunReturnsBadRequest() {
-        doThrow(new InvalidTestRunException("invalid"))
-                .when(asynchronousMaestro).executeTestSet(anyString(), any());
+   @org.junit.jupiter.api.Test
+   void testInvalidTestRunAsync() {
+      maestroMock.setErrorSupplier(() -> new IllegalArgumentException("invalid"));
 
-        Response response = controller.run("http://callback", testSetRunDto());
+      String callbackUrl = "http://localhost:" + mockPort + "/callback/testInvalidTestRunAsync";
+      wireMockServer.stubFor(
+            post(urlEqualTo("/callback/testInvalidTestRunAsync"))
+                  .willReturn(WireMock.ok())
+      );
 
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
-        assertTrue(response.getEntity().toString().contains("bad format"));
-    }
+      try (Response response = controller.executeTest(getTestRunDTO(), false, callbackUrl)) {
+         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+         assertTrue(response.getEntity().toString().contains("bad format"));
+         // Verify that no call back was made
+         Awaitility.await().during(3, TimeUnit.SECONDS).untilAsserted(
+               () -> wireMockServer.verify(
+                     0,
+                     postRequestedFor(urlEqualTo("/callback/testInvalidTestRunAsync"))
+               )
+         );
+      }
+   }
 
-    @Test
-    void runWithCallbackNotProvidedStepReturnsBadRequest() {
-        doThrow(new NotProvidedStep("missing"))
-                .when(asynchronousMaestro).executeTestSet(anyString(), any());
+   @org.junit.jupiter.api.Test
+   void testTestSuiteRunTimeout() {
+      maestroMock.setTestReportSupplier(() -> {
+         // Simulate a long-running test to trigger a timeout in synchronousMaestro
+         try {
+            Thread.sleep(10*1000);
+            return null;
+         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return null;
+         }
+      });
 
-        Response response = controller.run("http://callback", testSetRunDto());
+      try (Response response = controller.executeTestSuite(getTestSuiteRunDTO(), false, null)) {
+         assertEquals(Response.Status.GATEWAY_TIMEOUT.getStatusCode(), response.getStatus());
+         assertEquals(SynchronousMaestro.TIMEOUT_MESSAGE, response.getEntity());
+      }
+   }
 
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
-        assertTrue(response.getEntity().toString().contains("non provided"));
-    }
+   @org.junit.jupiter.api.Test
+   void testTestRunTimeout() {
+      maestroMock.setTestReportSupplier(() -> {
+         // Simulate a long-running test to trigger a timeout in synchronousMaestro
+         try {
+            Thread.sleep(4*1000);
+            return null;
+         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return null;
+         }
+      });
 
-    @Test
-    void runWithCallbackWebApplicationExceptionReturnsGatewayTimeout() {
-        doThrow(new WebApplicationException("timeout"))
-                .when(asynchronousMaestro).executeTestSet(anyString(), any());
+      try (Response response = controller.executeTest(getTestRunDTO(), false, null)) {
+         assertEquals(Response.Status.GATEWAY_TIMEOUT.getStatusCode(), response.getStatus());
+         assertEquals(SynchronousMaestro.TIMEOUT_MESSAGE, response.getEntity());
+      }
+   }
 
-        Response response = controller.run("http://callback", testSetRunDto());
+   @org.junit.jupiter.api.Test
+   void testTestSuiteRunInternalServerError() {
+      maestroMock.setErrorSupplier(() -> new RuntimeException("boom boom"));
 
-        assertEquals(Response.Status.GATEWAY_TIMEOUT.getStatusCode(), response.getStatus());
-        assertEquals(SynchronousMaestro.TIMEOUT_MESSAGE, response.getEntity());
-    }
+      try (Response response = controller.executeTestSuite(getTestSuiteRunDTO(), false, null)) {
+         assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+         assertTrue(Thread.currentThread().isInterrupted());
+         assertTrue(response.getEntity().toString().contains("an error occurred"));
+      }
+   }
 
-    @Test
-    void runWithCallbackUnexpectedExceptionReturnsInternalServerError() {
-        doThrow(new RuntimeException("boom"))
-                .when(asynchronousMaestro).executeTestSet(anyString(), any());
+   @org.junit.jupiter.api.Test
+   void testTestRunInternalServerError() {
+      maestroMock.setErrorSupplier(() -> new RuntimeException("boom"));
 
-        Response response = controller.run("http://callback", testSetRunDto());
+      try (Response response = controller.executeTest(getTestRunDTO(), false, null)) {
+         assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+         assertTrue(Thread.currentThread().isInterrupted());
+         assertTrue(response.getEntity().toString().contains("an error occurred"));
+      }
+   }
 
-        assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
-        assertTrue(response.getEntity().toString().contains("an error occurred"));
-    }
+   @org.junit.jupiter.api.Test
+   void handleJsonProcessingExceptionWithIllegalArgumentCauseReturnsMessage() {
+      IllegalArgumentException illegalArgumentException = new IllegalArgumentException("bad input");
+      Exception wrapper = new RuntimeException("wrapper", illegalArgumentException);
+      Exception root = new Exception("root", wrapper);
 
-    @Test
-    void handleJsonProcessingExceptionWithIllegalArgumentCauseReturnsMessage() {
-        IllegalArgumentException illegalArgumentException = new IllegalArgumentException("bad input");
-        Exception wrapper = new RuntimeException("wrapper", illegalArgumentException);
-        Exception root = new Exception("root", wrapper);
+      try (Response response = controller.handleJsonProcessingException(root)) {
+         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+         assertEquals("bad input", response.getEntity());
+      }
+   }
 
-        Response response = controller.handleJsonProcessingException(root);
+   @org.junit.jupiter.api.Test
+   void handleJsonProcessingExceptionWithUnsupportedPropertyTypeReturnsMessage() {
+      UnsupportedPropertyTypeException unsupportedPropertyTypeException = new UnsupportedPropertyTypeException(
+            "unsupported");
+      Exception wrapper = new RuntimeException("wrapper", unsupportedPropertyTypeException);
+      Exception root = new Exception("root", wrapper);
 
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
-        assertEquals("bad input", response.getEntity());
-    }
+      try (Response response = controller.handleJsonProcessingException(root)) {
+         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+         assertEquals("unsupported", response.getEntity());
+      }
+   }
 
-    @Test
-    void handleJsonProcessingExceptionWithUnsupportedPropertyTypeReturnsMessage() {
-        UnsupportedPropertyTypeException unsupportedPropertyTypeException = new UnsupportedPropertyTypeException("unsupported");
-        Exception wrapper = new RuntimeException("wrapper", unsupportedPropertyTypeException);
-        Exception root = new Exception("root", wrapper);
+   @org.junit.jupiter.api.Test
+   void handleJsonProcessingExceptionWithInvalidTypeIdReturnsOriginalMessage() {
+      InvalidTypeIdException invalidTypeIdException = InvalidTypeIdException.from(null, "original message",
+            TypeFactory.defaultInstance().constructType(Object.class), "type");
 
-        Response response = controller.handleJsonProcessingException(root);
+      try (Response response = controller.handleJsonProcessingException(invalidTypeIdException)) {
+         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+         assertEquals("original message", response.getEntity());
+      }
+   }
 
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
-        assertEquals("unsupported", response.getEntity());
-    }
+   @org.junit.jupiter.api.Test
+   void handleJsonProcessingExceptionWithUnknownExceptionReturnsGenericMessage() {
+      Exception exception = new Exception("unknown");
 
-    @Test
-    void handleJsonProcessingExceptionWithInvalidTypeIdReturnsOriginalMessage() {
-        InvalidTypeIdException invalidTypeIdException = InvalidTypeIdException.from(null, "original message", TypeFactory.defaultInstance().constructType(Object.class), "type");
-
-        Response response = controller.handleJsonProcessingException(invalidTypeIdException);
-
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
-        assertEquals("original message", response.getEntity());
-    }
-
-    @Test
-    void handleJsonProcessingExceptionWithUnknownExceptionReturnsGenericMessage() {
-        Exception exception = new Exception("unknown");
-
-        Response response = controller.handleJsonProcessingException(exception);
-
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
-        assertEquals("Unable to parse TestRun structure.", response.getEntity());
-    }
-
-    @Test
-    void reportValidationStep() throws MissingArgumentException {
-        TestRun testRun = new TestRun();
-
-        net.ihe.gazelle.maestro.api.business.testrun.Test test = new net.ihe.gazelle.maestro.api.business.testrun.Test();
-                test.addStep(new ValidationStep(
-                        "iti78-request-validation",
-                        new Property<>(ValidationStep.VALIDATION_SERVICE, "matchbox"),
-                        new Property<>(ValidationStep.VALIDATION_PROFILE, "Parameters"),
-                        new ArrayList<>(List.of(new PropertyRef<>("content", "iti78-request", byte[].class))))
-                );
-
-        testRun.setTest(test);
-
-        testRun
-                .addInputs(new Property<>("iti78-request", "eaozieuaozieuaozieauo".getBytes(StandardCharsets.UTF_8)))
-                .addInputs(new Property<>("matchbox", "https://gazelle.ihe.net/matchboxv3/gazelle/validation"))
-        ;
+      try (Response response = controller.handleJsonProcessingException(exception)) {
+         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+         assertEquals("Unable to parse TestSuite structure.", response.getEntity());
+      }
+   }
 
 
-        Maestro engine = getEngine();
-        engine.run(testRun);
 
-    }
+   private TestRunDTO getTestRunDTO() {
+      TestRun testRun = new TestRun()
+            .setTest(
+                  new Test().setId("T1").setName("Test 1").addStep(
+                        new Step().setName("A step").setType("SOME_STEP_TYPE").setTimeout(10L)
+                  )
+            )
+            .setAccessControlList(new AccessControlList().setPublic(true));
+      return new TestRunDTO(testRun);
+   }
 
-    private Maestro getEngine() {
-        return new MaestroImpl(new EventMaestroProducer(new TestRunMockEvent(), new StepMockEvent()), new SessionStoreContextImpl(), new InMemoryTestReportRecordService(), "999.0.0");
-    }
-
-    private TestSetRunDTO testSetRunDto() {
-        TestSetRunDTO dto = new TestSetRunDTO();
-        TestRun testRun = new TestRun().setTestSetId("test-set");
-        dto.setTestRuns(List.of(new TestRunDTO(testRun)));
-        dto.setAccessControlList(new AccessControlList());
-        return dto;
-    }
+   private TestSuiteRunDTO getTestSuiteRunDTO() {
+      TestSuiteRun testSuiteRun = new TestSuiteRun()
+            .setTestSuite(
+                  new TestSuite()
+                        .setId("TS1")
+                        .setName("Test Suite 1")
+                        .setTestReferences(List.of(
+                              new TestReference().setTestId("T1"),
+                              new TestReference().setTestId("T2")
+                        ))
+            )
+            .setTests(List.of(
+                  new Test().setId("T1").setName("Test 1").addStep(
+                        new Step().setName("A step").setType("SOME_STEP_TYPE").setTimeout(10L)
+                  ),
+                  new Test().setId("T2").setName("Test 2").addStep(
+                        new Step().setName("A step").setType("SOME_STEP_TYPE").setTimeout(10L)
+                  )
+            ))
+            .setAccessControlList(new AccessControlList().setPublic(true));
+      return new TestSuiteRunDTO(testSuiteRun);
+   }
 }

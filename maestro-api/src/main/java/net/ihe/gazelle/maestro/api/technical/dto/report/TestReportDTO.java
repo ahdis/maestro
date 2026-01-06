@@ -17,186 +17,264 @@
 package net.ihe.gazelle.maestro.api.technical.dto.report;
 
 import com.fasterxml.jackson.annotation.*;
+import net.ihe.gazelle.errorhandling.technical.UnexpectedErrorDTO;
 import net.ihe.gazelle.maestro.api.business.testreport.Result;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
-import java.util.Date;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+@Schema(
+      name = "TestReport",
+      description = "The report containing the result of a test suite or test execution."
+)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
-        "modelVersion", "uuid", "date", "testService", "systemsUnderTest", "status", "testSuiteName",
-        "testCounters", "note", "urlToTestSuiteResult", "testRunReports", "subReports", "unexpectedErrors"
+      "reportVersion",
+      "uuid",
+      "result",
+      "dateTime",
+      "testService",
+      "systemsUnderTest",
+      "testSuiteName",
+      "testCounters",
+      "note",
+      "urlToTestSuiteResult",
+      "testRunReports",
+      "subReports",
+      "unexpectedErrors"
 })
-public class TestReportDTO {
+public class TestReportDTO implements DTO<TestReport> {
 
-    public static final String ISO_8601_DATETIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
+   @JsonIgnore
+   private final TestReport testReport;
 
-    @JsonIgnore
-    private final TestReport domain;
+   public TestReportDTO() {
+      this(new TestReport());
+   }
 
-    public TestReportDTO() {
-        domain = new TestReport();
-    }
+   public TestReportDTO(TestReport testReport) {
+      this.testReport = testReport;
+   }
 
-    public TestReportDTO(TestReport domain) {
-         this.domain = domain;
-    }
+   @Override
+   @JsonIgnore
+   public TestReport getBusinessObject() {
+      return testReport;
+   }
 
-    @JsonGetter(value = "reportVersion")
-    public String getReportVersion() {
-        return domain.getReportVersion();
-    }
+   @Schema(
+         name = "reportVersion",
+         description = "The version of the test report model."
+   )
+   @JsonProperty(value = "reportVersion")
+   public String getReportVersion() {
+      return testReport.getReportVersion();
+   }
 
-    @JsonSetter(value = "reportVersion")
-    public void setReportVersion(String reportVersion) {
-        // do nothing
-    }
+   public void setReportVersion(String reportVersion) {
+      // for deserialization
+   }
 
-    @JsonGetter(value = "uuid")
-    public String getUuid() {
-        return domain.getUuid();
-    }
+   @Schema(
+         name = "uuid",
+         description = "The unique identifier of the test report.",
+         required = true
+   )
+   @JsonProperty(value = "uuid")
+   public String getUuid() {
+      return testReport.getUuid();
+   }
 
-    @JsonSetter(value = "uuid")
-    public void setUuid(String uuid) {
-        domain.setUuid(uuid);
-    }
+   public void setUuid(String uuid) {
+      testReport.setUuid(uuid);
+   }
 
-    @JsonGetter(value = "date")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = ISO_8601_DATETIME_PATTERN) // ISO 8601
-    public Date getDateTime() {
-        return domain.getDateTime();
-    }
+   @Schema(
+         name = "result",
+         description = "The global result of the test suite.",
+         enumeration = {Result.RESULT_PASSED, Result.RESULT_FAILED, Result.RESULT_UNDEFINED},
+         required = true
+   )
+   @JsonProperty(value = "result")
+   public String getResult() {
+      return testReport.getResult().name();
+   }
 
-    @JsonSetter(value = "date")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = ISO_8601_DATETIME_PATTERN) // ISO 8601
-    public void setDateTime(Date dateTime) {
-        domain.setDateTime(dateTime);
-    }
+   public void setResult(String result) {
+      testReport.setResult(Result.valueOf(result));
+   }
 
-    @JsonGetter(value = "testService")
-    public TestServiceDTO getTestService() {
-        TestServiceDTO testServiceDTO = null;
-        if (domain.getTestService() != null) {
-            testServiceDTO = new TestServiceDTO(domain.getTestService());
-        }
-        return testServiceDTO;
-    }
+   @Schema(
+         name = "dateTime",
+         description = "The zoned date time of the test suite execution.",
+         examples = "2025-01-01T16:30:00.387+01:00",
+         required = true
+   )
+   @JsonProperty(value = "dateTime")
+   public String getDateTime() {
+      return ZonedDateTime.ofInstant(testReport.getDateTime(), ZoneId.systemDefault())
+            .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+   }
 
-    @JsonSetter(value = "testService")
-    public void setTestService(TestServiceDTO testServiceDTO) {
-        domain.setTestService(testServiceDTO.getDomain());
-    }
+   public void setDateTime(String dateTime) {
+      testReport.setDateTime(
+            Instant.from(ZonedDateTime.parse(dateTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+      );
+   }
 
-    @JsonGetter(value = "systemsUnderTest")
-    public List<SystemUnderTestDTO> getSystemsUnderTest() {
-        return domain.getSystemsUnderTest().stream()
-                .map(SystemUnderTestDTO::new)
-                .toList();
-    }
+   @Schema(
+         name = "testService",
+         description = "The service used as the test engine to execute the test suite."
+   )
+   @JsonProperty(value = "testService")
+   public TestServiceDTO getTestService() {
+      if (testReport.getTestService() != null) {
+         return new TestServiceDTO(testReport.getTestService());
+      }
+      return null;
+   }
 
-    @JsonSetter(value = "systemsUnderTest")
-    public void setSystemsUnderTest(List<SystemUnderTestDTO> systemsUnderTest) {
-        domain.setSystemsUnderTest(systemsUnderTest.stream()
-                .map(SystemUnderTestDTO::getDomain)
-                .toList());
-    }
+   public void setTestService(TestServiceDTO testServiceDTO) {
+      testReport.setTestService(testServiceDTO != null ? testServiceDTO.getBusinessObject() : null);
+   }
 
-    @JsonGetter(value = "status")
-    public String getResult() {
-        return domain.getResult().name();
-    }
+   @Schema(
+         name = "systemsUnderTest",
+         description = "The list of system under test involved in the test suite."
+   )
+   @JsonProperty(value = "systemsUnderTest")
+   public List<SystemUnderTestDTO> getSystemsUnderTest() {
+      return testReport
+            .getSystemsUnderTest()
+            .stream()
+            .map(SystemUnderTestDTO::new)
+            .toList();
+   }
 
-    @JsonSetter(value = "status")
-    public void setResult(String result) {
-        domain.setResult(Result.valueOf(result));
-    }
+   public void setSystemsUnderTest(List<SystemUnderTestDTO> systemsUnderTest) {
+      testReport.setSystemsUnderTest(
+            systemsUnderTest == null ? List.of() :
+                  systemsUnderTest.stream().map(SystemUnderTestDTO::getBusinessObject).toList()
+      );
+   }
 
-    @JsonGetter(value = "testSuiteName")
-    public String getTestSuiteName() {
-        return domain.getTestSuiteName();
-    }
+   @Schema(
+         name = "testSuiteName",
+         description = "The name of the test suite that has been executed."
+   )
+   @JsonProperty(value = "testSuiteName")
+   public String getTestSuiteName() {
+      return testReport.getTestSuiteName();
+   }
 
-    @JsonSetter(value = "testSuiteName")
-    public void setTestSuiteName(String testSuiteName) {
-        domain.setTestSuiteName(testSuiteName);
-    }
+   public void setTestSuiteName(String testSuiteName) {
+      testReport.setTestSuiteName(testSuiteName);
+   }
 
-    @JsonGetter(value = "testCounters")
-    public TestCountersDTO getTestCounters() {
-        return domain.getTestCounters() != null ? new TestCountersDTO(domain.getTestCounters()) : new TestCountersDTO();
-    }
+   @Schema(
+         name = "testCounters",
+         description = "The counters that summarize the results of test runs in the suite."
+   )
+   @JsonProperty(value = "testCounters")
+   public TestCountersDTO getTestCounters() {
+      return testReport.getTestCounters() != null
+            ? new TestCountersDTO(testReport.getTestCounters())
+            : new TestCountersDTO();
+   }
 
-    @JsonSetter(value = "testCounters")
-    public void setTestCounters(TestCountersDTO testCounters) {
-        domain.setTestCounters(testCounters.getDomain());
-    }
+   public void setTestCounters(TestCountersDTO testCounters) {
+      testReport.setTestCounters(testCounters != null ? testCounters.getBusinessObject() : null);
+   }
 
-    @JsonGetter(value = "note")
-    public String getNote() {
-        return domain.getNote();
-    }
+   @Schema(
+         name = "note",
+         description = "A note to attach to the test report."
+   )
+   @JsonProperty(value = "note")
+   public String getNote() {
+      return testReport.getNote();
+   }
 
-    @JsonSetter(value = "note")
-    public void setNote(String note) {
-        domain.setNote(note);
-    }
+   public void setNote(String note) {
+      testReport.setNote(note);
+   }
 
-    @JsonGetter(value = "urlToTestSuiteResult")
-    public String getUrlToTestSuiteResult() {
-        return domain.getUrlToTestSuiteResult();
-    }
+   @Schema(
+         name = "urlToTestSuiteResult",
+         description = "A link to retrieve the test report."
+   )
+   @JsonProperty(value = "urlToTestSuiteResult")
+   public String getUrlToTestSuiteResult() {
+      return testReport.getUrlToTestSuiteResult();
+   }
 
-    @JsonSetter(value = "urlToTestSuiteResult")
-    public void setUrlToTestSuiteResult(String urlToTestSuiteResult) {
-        domain.setUrlToTestSuiteResult(urlToTestSuiteResult);
-    }
+   public void setUrlToTestSuiteResult(String urlToTestSuiteResult) {
+      testReport.setUrlToTestSuiteResult(urlToTestSuiteResult);
+   }
 
-    @JsonGetter(value = "testRunReports")
-    public List<TestRunReportDTO> getTestRunReports() {
-        return domain.getTestRunReports().stream()
-                .map(TestRunReportDTO::new)
-                .toList();
-    }
+   @Schema(
+         name = "testRunReports",
+         description = "The list of test run report that was part of the test suite."
+   )
+   @JsonProperty(value = "testRunReports")
+   public List<TestRunReportDTO> getTestRunReports() {
+      return testReport
+            .getTestRunReports()
+            .stream()
+            .map(TestRunReportDTO::new)
+            .toList();
+   }
 
-    @JsonSetter(value = "testRunReports")
-    public void setTestRunReports(List<TestRunReportDTO> testRunReports) {
-        domain.setTestRunReports(testRunReports.stream()
-                .map(TestRunReportDTO::getDomain)
-                .toList());
-    }
+   public void setTestRunReports(List<TestRunReportDTO> testRunReports) {
+      testReport.setTestRunReports(
+            testRunReports == null ? List.of() :
+                  testRunReports.stream().map(TestRunReportDTO::getBusinessObject).toList()
+      );
+   }
 
-    @JsonGetter(value = "subReports")
-    public List<TestReportDTO> getSubReports() {
-        return domain.getSubReports().stream()
-                .map(TestReportDTO::new)
-                .toList();
-    }
+   @Schema(
+         name = "subReports",
+         description = "A list of included test reports."
+   )
+   @JsonProperty(value = "subReports")
+   public List<TestReportDTO> getSubReports() {
+      return testReport
+            .getSubReports()
+            .stream()
+            .map(TestReportDTO::new)
+            .toList();
+   }
 
-    @JsonSetter(value = "subReports")
-    public void setSubReports(List<TestReportDTO> subReports) {
-        domain.setSubReports(subReports.stream()
-                .map(TestReportDTO::getDomain)
-                .toList());
-    }
+   public void setSubReports(List<TestReportDTO> subReports) {
+      testReport.setSubReports(
+            subReports == null ? List.of() :
+                  subReports.stream().map(TestReportDTO::getBusinessObject).toList()
+      );
+   }
 
-    @JsonGetter(value = "unexpectedErrors")
-    public List<UnexpectedErrorDTO> getUnexpectedErrors() {
-        return domain.getUnexpectedErrors().stream()
-                .map(UnexpectedErrorDTO::new)
-                .toList();
-    }
+   @Schema(
+         name = "unexpectedErrors",
+         description = "The list of unexpected errors that can occur during test suite execution."
+   )
+   @JsonProperty(value = "unexpectedErrors")
+   public List<UnexpectedErrorDTO> getUnexpectedErrors() {
+      return testReport
+            .getUnexpectedErrors()
+            .stream()
+            .map(UnexpectedErrorDTO::new)
+            .toList();
+   }
 
-    @JsonSetter(value = "unexpectedErrors")
-    public void setUnexpectedErrors(List<UnexpectedErrorDTO> unexpectedErrors) {
-        domain.setUnexpectedErrors(unexpectedErrors.stream()
-                .map(UnexpectedErrorDTO::getDomain)
-                .toList());
-    }
-
-    @JsonIgnore
-    public TestReport getDomain() {
-        return domain;
-    }
+   public void setUnexpectedErrors(List<UnexpectedErrorDTO> unexpectedErrors) {
+      testReport.setUnexpectedErrors(
+            unexpectedErrors == null ? List.of() :
+                  unexpectedErrors.stream().map(UnexpectedErrorDTO::getBusinessObject).toList()
+      );
+   }
 }

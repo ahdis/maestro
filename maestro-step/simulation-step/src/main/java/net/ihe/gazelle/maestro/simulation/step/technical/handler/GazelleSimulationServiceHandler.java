@@ -18,6 +18,7 @@ package net.ihe.gazelle.maestro.simulation.step.technical.handler;
 
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationHandler;
 import net.ihe.gazelle.simulation.business.callback.SimulationReport;
+import net.ihe.gazelle.simulation.business.sequence.SimulationChecksumService;
 import net.ihe.gazelle.simulation.business.sequence.SimulationSequence;
 import net.ihe.gazelle.simulation.business.setup.AdditionalInstructions;
 import net.ihe.gazelle.simulation.business.setup.SimulationRequest;
@@ -28,12 +29,20 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * Handler for Gazelle simulation service.
+ * This handler interfaces with the Gazelle simulation service to execute simulation sequences.
+ */
 public class GazelleSimulationServiceHandler implements SimulationHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GazelleSimulationServiceHandler.class);
 
     private final SimulationClient simulationClient;
 
+    /**
+     * Constructor for GazelleSimulationServiceHandler.
+     * @param simulationClient the simulation client to use for simulation operations
+     */
     public GazelleSimulationServiceHandler(SimulationClient simulationClient) {
         this.simulationClient = simulationClient;
     }
@@ -41,7 +50,8 @@ public class GazelleSimulationServiceHandler implements SimulationHandler {
     @Override
     public boolean isAvailable() {
         try {
-            return getSimulationSequences() != null;
+            String checksum = simulationClient.getChecksum(List.of());
+            return !SimulationChecksumService.DEFAULT_CHECKSUM.equals(checksum);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             return false;

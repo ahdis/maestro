@@ -4,46 +4,28 @@
     <parent>
         <groupId>net.ihe.gazelle</groupId>
         <artifactId>maestro</artifactId>
-        <version>0.5.1-SNAPSHOT</version>
+        <version>0.6.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>maestro-quarkus</artifactId>
 
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <quarkus.container-image.name>app/maestro</quarkus.container-image.name>
+        <quarkus.container-image.tag>${project.version}</quarkus.container-image.tag>
 
         <!-- Test properties -->
-        <sso.client.version>3.1.0</sso.client.version>
         <mongodb-driver-sync.version>5.0.0</mongodb-driver-sync.version>
-
     </properties>
 
     <dependencies>
-
         <!-- Sub modules dependencies -->
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>maestro-engine</artifactId>
         </dependency>
-
-        <!-- Gazelle dependencies -->
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
-            <artifactId>service-metadata-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.ihe.gazelle</groupId>
-            <artifactId>search-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.ihe.gazelle</groupId>
-            <artifactId>service-registry-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.kereval.gazelle</groupId>
-            <artifactId>datahouse-microprofile-rest-client</artifactId>
+            <artifactId>maestro-recording</artifactId>
         </dependency>
 
         <!-- Steps -->
@@ -66,6 +48,66 @@
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>assertion-step</artifactId>
+        </dependency>
+
+        <!-- Gazelle dependencies -->
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>lang</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>error-handling</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>framework-model-marshaller</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>framework-model-validator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>service-metadata-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>search-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>search-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>service-registry-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>oidc-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.kereval.gazelle</groupId>
+            <artifactId>datahouse-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.kereval.gazelle</groupId>
+            <artifactId>datahouse-microprofile-rest-client</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>net.ihe.gazelle</groupId>
+                    <artifactId>m2m-client</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>m2m-client</artifactId>
         </dependency>
 
         <!-- Quarkus -->
@@ -106,6 +148,10 @@
             <artifactId>quarkus-websockets</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-smallrye-jwt</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.microprofile.openapi</groupId>
             <artifactId>microprofile-openapi-api</artifactId>
         </dependency>
@@ -133,11 +179,6 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-junit5</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -180,150 +221,45 @@
             <version>4.11.0</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>maestro-engine</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>simulation-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>simulation-client</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>validation-v2-api</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>${quarkus.platform.group-id}</groupId>
+                <groupId>io.quarkus.platform</groupId>
                 <artifactId>quarkus-maven-plugin</artifactId>
-                <version>${quarkus.platform.version}</version>
-                <extensions>true</extensions>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>build</goal>
-                            <goal>generate-code</goal>
-                            <goal>generate-code-tests</goal>
-                            <goal>native-image-agent</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
-            <!-- Add integration test sources -->
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>add-test-source</id>
-                        <phase>generate-test-sources</phase>
-                        <goals>
-                            <goal>add-test-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>src/it/java</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>add-integration-test-resources</id>
-                        <phase>generate-test-resources</phase>
-                        <goals>
-                            <goal>add-test-resource</goal>
-                        </goals>
-                        <configuration>
-                            <resources>
-                                <resource>
-                                    <directory>src/it/resources</directory>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- Configure compiler to exclude websocket tests by default -->
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
-                    <testExcludes>
-                        <testExclude>**/websocket/**</testExclude>
-                    </testExcludes>
-                </configuration>
-            </plugin>
-
-            <!-- Configure surefire to exclude websocket tests by default -->
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>**/websocket/**</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-
-            <!-- Configure failsafe to exclude websocket integration tests by default -->
-            <plugin>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>**/websocket/**</exclude>
-                    </excludes>
+                    <excludePackageNames>
+                        net.ihe.gazelle.maestro.quarkus.websocket.dto
+                    </excludePackageNames>
                 </configuration>
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>native</id>
-            <activation>
-                <property>
-                    <name>native</name>
-                </property>
-            </activation>
-            <properties>
-                <skipITs>false</skipITs>
-                <quarkus.native.enabled>true</quarkus.native.enabled>
-            </properties>
-        </profile>
-        <profile>
-            <id>with-websocket</id>
-            <activation>
-                <property>
-                    <name>websocket</name>
-                </property>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>net.ihe.gazelle</groupId>
-                    <artifactId>maestro-websocket</artifactId>
-                </dependency>
-            </dependencies>
-            <build>
-                <plugins>
-                    <!-- Override compiler to include websocket tests -->
-                    <plugin>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <configuration>
-                            <!-- Remove test excludes to compile all tests -->
-                            <testExcludes combine.self="override" />
-                        </configuration>
-                    </plugin>
-
-                    <!-- Override surefire to include websocket tests -->
-                    <plugin>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                            <!-- Remove excludes to run all tests -->
-                            <excludes combine.self="override" />
-                        </configuration>
-                    </plugin>
-
-                    <!-- Override failsafe to include websocket integration tests -->
-                    <plugin>
-                        <artifactId>maven-failsafe-plugin</artifactId>
-                        <configuration>
-                            <!-- Remove excludes to run all integration tests -->
-                            <excludes combine.self="override" />
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
 </project>

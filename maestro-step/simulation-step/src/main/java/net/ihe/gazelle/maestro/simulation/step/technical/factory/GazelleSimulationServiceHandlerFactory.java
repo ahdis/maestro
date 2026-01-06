@@ -16,16 +16,17 @@
 
 package net.ihe.gazelle.maestro.simulation.step.technical.factory;
 
-import net.ihe.gazelle.maestro.api.business.testrun.runner.ConfigProvider;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.HandlerFactory;
 import net.ihe.gazelle.maestro.simulation.step.technical.handler.GazelleSimulationServiceHandler;
+import net.ihe.gazelle.maestro.spi.business.Handler;
+import net.ihe.gazelle.maestro.spi.technical.ConfigProvider;
+import net.ihe.gazelle.maestro.spi.technical.HandlerContext;
+import net.ihe.gazelle.maestro.spi.technical.HandlerFactory;
 import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterface;
 import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterfaceBuilder;
 import net.ihe.gazelle.servicemetadata.api.business.HttpRestBinding;
 import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterface;
+import net.ihe.gazelle.simulation.callback.jaxrs.server.technical.SimulationCallbackFactory;
 import net.ihe.gazelle.simulation.client.business.SimulationClientImpl;
-import net.ihe.gazelle.simulation.client.technical.SimulationCallbackFactory;
 import net.ihe.gazelle.simulation.client.technical.SimulationServiceClientImpl;
 import net.ihe.gazelle.simulation.jaxrs.api.technical.ws.SimulationAPI;
 
@@ -33,7 +34,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+/**
+ * Factory for creating GazelleSimulationServiceHandler instances.
+ * This factory creates handlers that interface with Gazelle simulation services.
+ */
 public class GazelleSimulationServiceHandlerFactory implements HandlerFactory {
+
+    /**
+     * Default constructor.
+     */
+    public GazelleSimulationServiceHandlerFactory() { /* Default constructor */ }
 
     @Override
     public Class<? extends Handler> getHandlerType() {
@@ -41,7 +51,7 @@ public class GazelleSimulationServiceHandlerFactory implements HandlerFactory {
     }
 
     @Override
-    public Handler createHandler(ProvidedInterface providedInterface, ConfigProvider configProvider) throws IllegalArgumentException {
+    public Handler createHandler(HandlerContext handlerContext, ProvidedInterface providedInterface, ConfigProvider configProvider) throws IllegalArgumentException {
         try {
             HttpRestBinding binding = (HttpRestBinding) providedInterface.getBindings().getFirst();
             return new GazelleSimulationServiceHandler(
@@ -61,8 +71,8 @@ public class GazelleSimulationServiceHandlerFactory implements HandlerFactory {
         consumedInterfaces.add(new ConsumedInterfaceBuilder()
                 .setInterfaceName(SimulationAPI.INTERFACE_NAME)
                 .setRequired(true)
-                .setSupportedBindings(List.of(HttpRestBinding.TYPE))
-                .setSupportedVersions(List.of("1.0.0"))
+                .addSupportedBinding(HttpRestBinding.TYPE)
+                .addSupportedVersion("1.0.0")
                 .build());
         return consumedInterfaces;
     }

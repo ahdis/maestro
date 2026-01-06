@@ -18,50 +18,76 @@ package net.ihe.gazelle.maestro.validation.step.technical.handler;
 
 
 import net.ihe.gazelle.evsapi.client.business.ValidationClient;
-import net.ihe.gazelle.evsapi.client.business.ValidationServiceProfile;
-import net.ihe.gazelle.evsapi.client.business.request.ValidationRequest;
-import net.ihe.gazelle.evsapi.client.business.response.report.ValidationReport;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
+import net.ihe.gazelle.maestro.validation.step.business.ValidationHandler;
+import net.ihe.gazelle.validation.v2.api.business.profile.ValidationProfile;
+import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
+import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
 
 import java.util.List;
 
 /**
- * ValidationHandler implementation for EVS (External Validation Service)
- * Handles validation through EVS API for various validation types
+ * ValidationHandler implementation for EVS (External Validation Service) Handles validation through EVS API for various
+ * validation types
  */
-public class EvsValidationHandler implements Handler {
+public class EvsValidationHandler implements ValidationHandler {
 
-    private final ValidationClient validationClient;
+   private final String serviceName;
+   private final ValidationClient validationClient;
+   private final EvsValidationMapper mapper = new EvsValidationMapper();
 
-    public EvsValidationHandler(ValidationClient validationClient) {
-        this.validationClient = validationClient;
-    }
+   /**
+    * Constructor for EvsValidationHandler.
+    * @param serviceName the name of the validation service
+    * @param validationClient the client to communicate with the EVS validation service
+    */
+   public EvsValidationHandler(String serviceName, ValidationClient validationClient) {
+      this.validationClient = validationClient;
+      this.serviceName = serviceName;
+   }
 
-    @Override
-    public boolean isAvailable() {
-        return getValidationProfiles() != null && !getValidationProfiles().isEmpty();
-    }
+   @Override
+   public boolean isAvailable() {
+      List<ValidationProfile> profiles = getValidationProfiles();
+      return profiles != null && !profiles.isEmpty();
+   }
 
-    public ValidationReport validate(ValidationRequest evsRequest) {
-        if (validationClient == null) {
-            throw new IllegalStateException("Validation client is not set");
-        }
-        if (evsRequest == null) {
-            throw new IllegalArgumentException("Validation request cannot be null");
-        }
-        String urlLocation = validationClient.validate(evsRequest);
-        return validationClient.getValidationReportByOid(getOid(urlLocation));
-    }
+   @Override
+   public ValidationReport validate(ValidationRequest validationRequest) {
+      net.ihe.gazelle.evsapi.client.business.response.report.ValidationReport evsReport =
+            validate(mapper.toEvsRequest(serviceName, validationRequest));
+      return mapper.toValidationReport(evsReport, validationRequest);
+   }
 
-    public List<ValidationServiceProfile> getValidationProfiles() {
-        if (validationClient == null) {
-            throw new IllegalStateException("Validation client is not set");
-        }
-        return validationClient.getValidationProfiles();
+   @Override
+   public List<ValidationProfile> getValidationProfiles() {
+      List<net.ihe.gazelle.evsapi.client.business.ValidationServiceProfile> serviceProfiles =
+            validationClient.getValidationProfilesByServiceName(serviceName);
+      if (serviceProfiles == null || serviceProfiles.isEmpty()) {
+         return List.of();
+      }
+      return mapper.toValidationProfiles(serviceProfiles);
+   }
 
-    }
+   private net.ihe.gazelle.evsapi.client.business.response.report.ValidationReport validate(
+         net.ihe.gazelle.evsapi.client.business.request.ValidationRequest evsRequest) {
+      String urlLocation = validationClient.validate(evsRequest);
+      return validationClient.getValidationReportByOid(getOid(urlLocation));
+   }
 
+   private String getOid(String urlLocation) {
+       if (urlLocation == null || urlLocation.isBlank()) {
+           return null;
+       }
 
-    private String getOid(String urlLocation) {
-        return urlLocation.substring(urlLocation.lastIndexOf("/") + 1);
-    }}
+       int lastSlashIndex = urlLocation.lastIndexOf('/');
+       String lastSegment = lastSlashIndex >= 0
+               ? urlLocation.substring(lastSlashIndex + 1)
+               : urlLocation;
+
+       int queryIndex = lastSegment.indexOf('?');
+       return queryIndex >= 0
+               ? lastSegment.substring(0, queryIndex)
+               : lastSegment;
+   }
+
+}

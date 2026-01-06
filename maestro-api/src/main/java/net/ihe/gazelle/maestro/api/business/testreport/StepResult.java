@@ -16,6 +16,49 @@
 
 package net.ihe.gazelle.maestro.api.business.testreport;
 
+/**
+ * Represents the possible outcomes of a simulation, validation,
+ * or processing step.
+ * <p>
+ * Each enum constant also has a corresponding string constant
+ * for use in contexts where only string values are supported.
+ * </p>
+ */
 public enum StepResult {
-    DONE,PASSED,FAILED,UNDEFINED
+
+   /**
+    * Indicates that the process or operation has completed successfully,
+    * without further qualification of success or failure.
+    */
+   DONE,
+
+   /**
+    * Indicates that the process or operation has passed validation
+    * or met the required criteria.
+    */
+   PASSED,
+
+   /**
+    * Indicates that the process or operation has failed validation
+    * or did not meet the required criteria.
+    */
+   FAILED,
+
+   /**
+    * Indicates that the outcome of the process or operation
+    * could not be determined.
+    */
+   UNDEFINED;
+
+   /** String constant for {@link #DONE}. */
+   public static final String RESULT_DONE = "DONE";
+
+   /** String constant for {@link #PASSED}. */
+   public static final String RESULT_PASSED = "PASSED";
+
+   /** String constant for {@link #FAILED}. */
+   public static final String RESULT_FAILED = "FAILED";
+
+   /** String constant for {@link #UNDEFINED}. */
+   public static final String RESULT_UNDEFINED = "UNDEFINED";
 }

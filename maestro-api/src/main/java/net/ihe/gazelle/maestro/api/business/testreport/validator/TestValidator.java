@@ -21,27 +21,38 @@ import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory
 import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
 import net.ihe.gazelle.maestro.api.business.testreport.Test;
 
+/**
+ * Validator implementation for {@link Test}, responsible for defining
+ */
 public class TestValidator extends AbstractValidator<Test> {
 
-    public TestValidator() {
-        super();
-    }
+   /**
+    * Default constructor
+    */
+   public TestValidator() {
+      super();
+   }
 
-    public TestValidator(ValidatorBuilderFactory validatorBuilderFactory) {
-        super(validatorBuilderFactory);
-    }
+   /**
+    * Constructs a new TestValidator instance with the specified ValidatorBuilderFactory.
+    *
+    * @param validatorBuilderFactory the factory used to create validator builders
+    */
+   public TestValidator(ValidatorBuilderFactory validatorBuilderFactory) {
+      super(validatorBuilderFactory);
+   }
 
-    @Override
-    protected ValidatorBuilder<? extends Test> instantiateValidatorBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
-        return validatorBuilderFactory.getBuilder(Test.class);
-    }
+   @Override
+   protected ValidatorBuilder<? extends Test> instantiateValidatorBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
+      return validatorBuilderFactory.getBuilder(Test.class);
+   }
 
-    @Override
-    protected void addRulesAndMembers(ValidatorBuilder<? extends Test> validatorBuilder) {
-        validatorBuilder
-                .addRule("idValid", Test::isIdValid, "Id must be set and not empty")
-                .addRule("nameValid", Test::isNameValid, "Name must be set if present")
-                .addRule("versionValid", Test::isVersionValid, "Version must be set if present")
-                .addRule("descriptionValid", Test::isDescriptionValid, "Description must be set id present");
-    }
+   @Override
+   protected void addRulesAndMembers(ValidatorBuilder<? extends Test> validatorBuilder) {
+      validatorBuilder
+            .addRule(Test::isIdDefined, "Id must be set and not empty")
+            .addRule(Test::isNameDefinedIfPresent, "Name must be set if present")
+            .addRule(Test::isVersionDefinedIfPresent, "Version must be set if present")
+            .addRule(Test::isDescriptionDefinedIfPresent, "Description must be set id present");
+   }
 }

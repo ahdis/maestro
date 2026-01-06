@@ -31,28 +31,37 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Implementation of {@link ServiceRegistryDAO} that provides access to
+ * {@link Service} instances from the database.
+ */
 @ApplicationScoped
 public class ServiceRegistryDAOImpl implements ServiceRegistryDAO {
 
-    @ConfigProperty(name = "gzl.service.registry.url")
-    String serviceRegistryUrl;
+   @ConfigProperty(name = "gzl.service.registry.url")
+   String serviceRegistryUrl;
 
-    @Override
-    public List<Service> getServices() {
-        try {
-            ServiceLookupClient client = new ServiceLookupClientImpl(serviceRegistryUrl);
-            SearchResult<DeployedService> searchResult = client.search(new SearchQuery<>(
-                    new ServiceSearchCriteria(),
-                    new Range(0, Integer.MAX_VALUE),
-                    null
-            ));
-            return new ArrayList<>(searchResult.objects().stream().map(
-                    Service.class::cast
-            ).toList());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new InterruptedRuntimeException(e);
-        }
-    }
+   /**
+    * Default constructor
+    */
+   public ServiceRegistryDAOImpl() {
+      // Empty
+   }
+
+   @Override
+   public List<Service> getServices() {
+      try {
+         ServiceLookupClient client = new ServiceLookupClientImpl(serviceRegistryUrl);
+         SearchResult<DeployedService> searchResult = client.search(new SearchQuery<>(
+               new ServiceSearchCriteria(),
+               new Range(0, Integer.MAX_VALUE),
+               null
+         ));
+         return new ArrayList<>(searchResult.objects());
+      } catch (InterruptedException e) {
+         Thread.currentThread().interrupt();
+         throw new InterruptedRuntimeException(e);
+      }
+   }
 
 }

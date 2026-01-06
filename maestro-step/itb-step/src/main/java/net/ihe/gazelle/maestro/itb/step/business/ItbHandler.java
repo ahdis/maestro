@@ -16,9 +16,11 @@
 
 package net.ihe.gazelle.maestro.itb.step.business;
 
-import net.ihe.gazelle.maestro.api.business.testrun.runner.Handler;
+import net.ihe.gazelle.itb.gateway.business.ItbClient;
+import net.ihe.gazelle.maestro.spi.business.Handler;
 
-public interface ItbHandler extends Handler {
+public interface ItbHandler extends ItbClient, Handler {
 
-    String handle(ItbStep step);
+   String ITB_SERVICE_NAME = "ITB";
+
 }

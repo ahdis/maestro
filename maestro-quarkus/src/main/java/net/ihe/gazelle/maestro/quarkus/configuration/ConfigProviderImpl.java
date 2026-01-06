@@ -19,22 +19,31 @@ package net.ihe.gazelle.maestro.quarkus.configuration;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
-import net.ihe.gazelle.maestro.api.business.testrun.runner.ConfigProvider;
+import net.ihe.gazelle.maestro.spi.technical.ConfigProvider;
 import org.eclipse.microprofile.config.Config;
 
+/**
+ * Default {@link ConfigProvider} implementation that retrieves configuration values
+ * from a {@link Config} instance.
+ */
 @Default
 @ApplicationScoped
 public class ConfigProviderImpl implements ConfigProvider {
 
-    private final Config config;
+   private final Config config;
 
-    @Inject
-    public ConfigProviderImpl(Config config) {
-        this.config = config;
-    }
+   /**
+    * Creates a new {@code ConfigProviderImpl} using the specified {@link Config} instance.
+    *
+    * @param config the configuration source used to retrieve configuration values
+    */
+   @Inject
+   public ConfigProviderImpl(Config config) {
+      this.config = config;
+   }
 
-    @Override
-    public String getConfig(String key) {
-        return config.getValue(key, String.class);
-    }
+   @Override
+   public String getConfig(String key) {
+      return config.getValue(key, String.class);
+   }
 }

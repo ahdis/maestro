@@ -1,0 +1,58 @@
+package net.ihe.gazelle.maestro.api.technical.dto.property;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import net.ihe.gazelle.maestro.api.business.property.DateProperty;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+
+@Schema(
+        name = "DateProperty",
+        description = "A property that supports date value."
+)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonTypeName(DatePropertyDTO.TYPE)
+public class DatePropertyDTO extends PropertyDTO<DateProperty> {
+
+    @JsonIgnore
+   public static final String TYPE = "DATE";
+
+   public DatePropertyDTO() {
+      super(new DateProperty());
+   }
+
+   public DatePropertyDTO(DateProperty property) {
+      super(property);
+   }
+
+    @Schema(
+            name = "value",
+            description = "The date typed value of the property.",
+            examples = "2025-01-01T16:30:00.387+01:00"
+    )
+   @JsonProperty(VALUE)
+   public String getValue() {
+      return ZonedDateTime.ofInstant(property.getValue(), ZoneId.systemDefault())
+            .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+   }
+
+   public void setValue(String value) {
+      if (isReference(value)) {
+         property.setValue(value);
+      } else {
+         property.setValue(Instant.from(ZonedDateTime.parse(value, DateTimeFormatter.ISO_OFFSET_DATE_TIME)));
+      }
+   }
+
+   @Override
+   @JsonIgnore
+   public Class<DateProperty> getBusinessObjectClass() {
+      return DateProperty.class;
+   }
+}

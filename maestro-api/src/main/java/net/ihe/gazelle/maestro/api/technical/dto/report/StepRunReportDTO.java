@@ -17,86 +17,155 @@
 package net.ihe.gazelle.maestro.api.technical.dto.report;
 
 import com.fasterxml.jackson.annotation.*;
+import net.ihe.gazelle.errorhandling.technical.UnexpectedErrorDTO;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
+import net.ihe.gazelle.maestro.api.technical.dto.property.PropertyDTO;
+import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
+import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+@Schema(
+      name = "StepRunReport",
+      description = "A report containing the result of a test step execution."
+)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({"stepId", "type", "result", "outputs"})
-public class StepRunReportDTO {
+@JsonPropertyOrder({
+      "stepName",
+      "type",
+      "dateTime",
+      "result",
+      "outputs",
+      "unexpectedErrors"
+})
+public class StepRunReportDTO implements DTO<StepRunReport> {
 
-    @JsonIgnore
-    private final StepRunReport domain;
+   @JsonIgnore
+   private final StepRunReport stepRunReport;
 
-    public StepRunReportDTO() {
-        this.domain = new StepRunReport();
-    }
+   public StepRunReportDTO() {
+      this(new StepRunReport());
+   }
 
-    public StepRunReportDTO(StepRunReport domain) {
-        this.domain = domain;
-    }
+   public StepRunReportDTO(StepRunReport stepRunReport) {
+      this.stepRunReport = stepRunReport;
+   }
 
-    @JsonGetter(value = "stepId")
-    public String getStepId() {
-        return domain.getStepId();
-    }
+   @Override
+   @JsonIgnore
+   public StepRunReport getBusinessObject() {
+      return stepRunReport;
+   }
 
-    @JsonSetter(value = "stepId")
-    public void setStepId(String stepId) {
-        domain.setStepId(stepId);
-    }
+   @Schema(
+         name = "stepName",
+         description = "The name of the step that was executed.",
+         examples = "ITI-90 Simulation step",
+         required = true
+   )
+   @JsonProperty(value = "stepName")
+   public String getStepName() {
+      return stepRunReport.getStepName();
+   }
 
-    @JsonGetter(value = "type")
-    public String getType() {
-        return domain.getType();
-    }
+   public void setStepName(String stepName) {
+      stepRunReport.setStepName(stepName);
+   }
 
-    @JsonSetter(value = "type")
-    public void setType(String type) {
-        domain.setType(type);
-    }
+   @Schema(
+         name = "type",
+         description = "The type of the step that was executed.",
+         examples = {"SIMULATION", "VALIDATION"},
+         required = true
+   )
+   @JsonProperty(value = "type")
+   public String getType() {
+      return stepRunReport.getType();
+   }
 
-    @JsonGetter(value = "result")
-    public String getResult() {
-        return domain.getResult().name();
-    }
+   public void setType(String type) {
+      stepRunReport.setType(type);
+   }
 
-    @JsonSetter(value = "result")
-    public void setResult(String result) {
-        domain.setResult(StepResult.valueOf(result));
-    }
+   @Schema(
+         name = "dateTime",
+         description = "The zoned date time of the step execution.",
+         examples = "2025-01-01T16:30:00.387+01:00",
+         required = true
+   )
+   @JsonProperty(value = "dateTime")
+   public String getDateTime() {
+      return ZonedDateTime.ofInstant(getBusinessObject().getDateTime(), ZoneId.systemDefault())
+            .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+   }
 
-    @JsonGetter(value = "outputs")
-    public List<OutputDTO> outputs() {
-        return domain.getOutputs().stream()
-                .map(OutputDTO::new)
-                .toList();
-    }
+   public void setDateTime(String dateTime) {
+      getBusinessObject().setDateTime(
+            Instant.from(ZonedDateTime.parse(dateTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+      );
+   }
 
-    @JsonSetter(value = "outputs")
-    public void setOutputs(List<OutputDTO> outputs) {
-        domain.setOutputs(outputs.stream().map(
-                OutputDTO::getDomain
-        ).toList());
-    }
+   @Schema(
+         name = "result",
+         description = "The result of the test step.",
+         enumeration = {StepResult.RESULT_DONE, StepResult.RESULT_PASSED, StepResult.RESULT_FAILED, StepResult.RESULT_UNDEFINED},
+         required = true
+   )
+   @JsonProperty(value = "result")
+   public String getResult() {
+      return stepRunReport.getResult().name();
+   }
 
-    @JsonGetter(value = "unexpectedErrors")
-    public List<UnexpectedErrorDTO> getUnexpectedErrors() {
-        return domain.getUnexpectedErrors().stream()
-                .map(UnexpectedErrorDTO::new)
-                .toList();
-    }
+   public void setResult(String result) {
+      stepRunReport.setResult(StepResult.valueOf(result));
+   }
 
-    @JsonSetter(value = "unexpectedErrors")
-    public void setUnexpectedErrors(List<UnexpectedErrorDTO> unexpectedErrors) {
-        domain.setUnexpectedErrors(unexpectedErrors.stream().map(
-                UnexpectedErrorDTO::getDomain
-        ).toList());
-    }
+   @Schema(
+         name = "outputs",
+         description = "The outputs of the step execution."
+   )
+   @SuppressWarnings("rawtypes")
+   @JsonProperty(value = "outputs")
+   public List<PropertyDTO> getOutputs() {
+      return stepRunReport.getOutputs().stream()
+            .map(SubTypingDTO::fromBusinessObject)
+            .map(PropertyDTO.class::cast)
+            .toList();
+   }
 
-    @JsonIgnore
-    public StepRunReport getDomain() {
-        return domain;
-    }
+   @SuppressWarnings("rawtypes")
+   public void setOutputs(List<PropertyDTO> outputs) {
+      stepRunReport.setOutputs(
+            outputs.stream()
+                  .map(PropertyDTO::getBusinessObject)
+                  .toList()
+      );
+   }
+
+   @Schema(
+         name = "unexpectedErrors",
+         description = "The errors that can happen during step execution."
+   )
+   @JsonProperty(value = "unexpectedErrors")
+   public List<UnexpectedErrorDTO> getUnexpectedErrors() {
+      return stepRunReport
+            .getUnexpectedErrors()
+            .stream()
+            .map(UnexpectedErrorDTO::new)
+            .toList();
+   }
+
+   public void setUnexpectedErrors(List<UnexpectedErrorDTO> unexpectedErrors) {
+      stepRunReport.setUnexpectedErrors(
+            unexpectedErrors.stream()
+                  .map(UnexpectedErrorDTO::getBusinessObject)
+                  .toList()
+      );
+   }
 }
