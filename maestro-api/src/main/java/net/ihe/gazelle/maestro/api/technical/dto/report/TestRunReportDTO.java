@@ -17,159 +17,214 @@
 package net.ihe.gazelle.maestro.api.technical.dto.report;
 
 import com.fasterxml.jackson.annotation.*;
+import net.ihe.gazelle.errorhandling.technical.UnexpectedErrorDTO;
+import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.testreport.Result;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
+import net.ihe.gazelle.maestro.api.technical.dto.property.PropertyDTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
+import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
-import java.util.Date;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+@Schema(
+      name = "TestRunReport",
+      description = "The report containing the result of a test run."
+)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
-        "runId",
-        "dateTime",
-        "result",
-        "test",
-        "inputs",
-        "outputs",
-        "stepRunReports",
-        "urlToTestRun",
-        "unexpectedErrors"
+      "runId",
+      "dateTime",
+      "result",
+      "test",
+      "inputs",
+      "outputs",
+      "stepRunReports",
+      "urlToTestRun",
+      "unexpectedErrors"
 })
 public class TestRunReportDTO implements DTO<TestRunReport> {
 
-    public static final String ISO_8601_DATETIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
+   @JsonIgnore
+   private final TestRunReport testRunReport;
 
-    @JsonIgnore
-    private final TestRunReport testRunReport;
+   public TestRunReportDTO() {
+      this(new TestRunReport());
+   }
 
-    public TestRunReportDTO() {
-        this(new TestRunReport());
-    }
+   public TestRunReportDTO(TestRunReport testRunReport) {
+      this.testRunReport = testRunReport;
+   }
 
-    public TestRunReportDTO(TestRunReport testRunReport) {
-        this.testRunReport = testRunReport;
-    }
+   @Override
+   @JsonIgnore
+   public TestRunReport getBusinessObject() {
+      return testRunReport;
+   }
 
-    @Override
-    @JsonIgnore
-    public TestRunReport getBusinessObject() {
-        return testRunReport;
-    }
+   @Schema(
+         name = "runId",
+         description = "The unique identifier of the test run."
+   )
+   @JsonProperty(value = "runId")
+   public String getRunId() {
+      return testRunReport.getRunId();
+   }
 
-    @JsonGetter(value = "runId")
-    public String getRunId() {
-        return getBusinessObject().getRunId();
-    }
+   public void setRunId(String runId) {
+      testRunReport.setRunId(runId);
+   }
 
-    @JsonSetter(value = "runId")
-    public void setRunId(String runId) {
-        getBusinessObject().setRunId(runId);
-    }
+   @Schema(
+         name = "dateTime",
+         description = "The zoned date time of the test execution.",
+         examples = "2025-01-01T16:30:00.387+01:00",
+         required = true
+   )
+   @JsonProperty(value = "dateTime")
+   public String getDateTime() {
+      return ZonedDateTime.ofInstant(getBusinessObject().getDateTime(), ZoneId.systemDefault())
+            .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+   }
 
-    @JsonGetter(value = "dateTime")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = ISO_8601_DATETIME_PATTERN)
-    public Date getDateTime() {
-        return getBusinessObject().getDateTime();
-    }
+   public void setDateTime(String dateTime) {
+      getBusinessObject().setDateTime(
+            Instant.from(ZonedDateTime.parse(dateTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+      );
+   }
 
-    @JsonSetter(value = "dateTime")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = ISO_8601_DATETIME_PATTERN)
-    public void setDateTime(Date dateTime) {
-        getBusinessObject().setDateTime(dateTime);
-    }
+   @Schema(
+         name = "result",
+         description = "The result of the test execution.",
+         enumeration = {Result.RESULT_PASSED, Result.RESULT_FAILED, Result.RESULT_UNDEFINED},
+         required = true
+   )
+   @JsonProperty(value = "result")
+   public String result() {
+      return testRunReport.getResult().name();
+   }
 
-    @JsonGetter(value = "result")
-    public String result() {
-        return getBusinessObject().getResult().name();
-    }
+   public void setResult(String result) {
+      testRunReport.setResult(Result.valueOf(result));
+   }
 
-    @JsonSetter(value = "result")
-    public void setResult(String result) {
-        getBusinessObject().setResult(Result.valueOf(result));
-    }
+   @Schema(
+         name = "test",
+         description = "The test that has been executed.",
+         required = true
+   )
+   @JsonProperty(value = "test")
+   public TestDTO test() {
+      return new TestDTO(testRunReport.getTest());
+   }
 
-    @JsonGetter(value = "test")
-    public TestDTO test() {
-        return new TestDTO(getBusinessObject().getTest());
-    }
+   public void setTest(TestDTO testDTO) {
+      testRunReport.setTest(testDTO.getBusinessObject());
+   }
 
-    @JsonSetter(value = "test")
-    public void setTest(TestDTO testDTO) {
-        getBusinessObject().setTest(testDTO.getBusinessObject());
-    }
+   @Schema(
+         name = "inputs",
+         description = "The list of inputs used to execute the test."
+   )
+   @SuppressWarnings("rawtypes")
+   @JsonProperty(value = "inputs")
+   public List<PropertyDTO> getInputs() {
+      return testRunReport.getInputs().stream()
+            .map(SubTypingDTO::fromBusinessObject)
+            .map(PropertyDTO.class::cast)
+            .toList();
+   }
 
-    @JsonGetter(value = "inputs")
-    public List<InputDTO> getInputs() {
-        return getBusinessObject()
-                .getInputs()
-                .stream()
-                .map(InputDTO::new)
-                .toList();
-    }
+   @SuppressWarnings("rawtypes")
+   public void setInputs(List<PropertyDTO> inputs) {
+      testRunReport.setInputs(
+            inputs != null ?
+                  inputs.stream()
+                        .map(PropertyDTO::getBusinessObject)
+                        .map(Property.class::cast)
+                        .toList() :
+                  null
+      );
+   }
 
-    @JsonSetter(value = "inputs")
-    public void setInputs(List<InputDTO> inputs) {
-        getBusinessObject().setInputs(
-                inputs.stream().map(InputDTO::getBusinessObject).toList()
-        );
-    }
+   @Schema(
+         name = "outputs",
+         description = "The list of outputs produced by the test execution."
+   )
+   @SuppressWarnings("rawtypes")
+   @JsonProperty(value = "outputs")
+   public List<PropertyDTO> getOutputs() {
+      return testRunReport.getOutputs().stream()
+            .map(SubTypingDTO::fromBusinessObject)
+            .map(PropertyDTO.class::cast)
+            .toList();
+   }
 
-    @JsonGetter(value = "outputs")
-    public List<OutputDTO> getOutputs() {
-        return getBusinessObject()
-                .getOutputs()
-                .stream()
-                .map(OutputDTO::new)
-                .toList();
-    }
+   @SuppressWarnings("rawtypes")
+   public void setOutputs(List<PropertyDTO> outputs) {
+      testRunReport.setOutputs(
+            outputs != null ?
+                  outputs.stream()
+                        .map(PropertyDTO::getBusinessObject)
+                        .map(Property.class::cast)
+                        .toList() :
+                  null
+      );
+   }
 
-    @JsonSetter(value = "outputs")
-    public void setOutputs(List<OutputDTO> outputs) {
-        getBusinessObject().setOutputs(
-                outputs.stream().map(OutputDTO::getBusinessObject).toList()
-        );
-    }
+   @Schema(
+         name = "stepRunReports",
+         description = "The list reports for each step executed in the test."
+   )
+   @JsonProperty(value = "stepRunReports")
+   public List<StepRunReportDTO> getStepRunReports() {
+      return testRunReport
+            .getStepRunReports()
+            .stream()
+            .map(StepRunReportDTO::new)
+            .toList();
+   }
 
-    @JsonGetter(value = "stepRunReports")
-    public List<StepRunReportDTO> getStepRunReports() {
-        return getBusinessObject()
-                .getStepRunReports()
-                .stream()
-                .map(StepRunReportDTO::new)
-                .toList();
-    }
+   public void setStepRunReports(List<StepRunReportDTO> stepRunReports) {
+      testRunReport.setStepRunReports(
+            stepRunReports.stream().map(StepRunReportDTO::getBusinessObject).toList()
+      );
+   }
 
-    @JsonSetter(value = "stepRunReports")
-    public void setStepRunReports(List<StepRunReportDTO> stepRunReports) {
-        getBusinessObject().setStepRunReports(
-                stepRunReports.stream().map(StepRunReportDTO::getBusinessObject).toList()
-        );
-    }
+   @Schema(
+         name = "urlToTestRun",
+         description = "The link to retrieve the test execution report."
+   )
+   @JsonProperty(value = "urlToTestRun")
+   public String getUrlToTestRun() {
+      return testRunReport.getUrlToTestRun();
+   }
 
-    @JsonGetter(value = "urlToTestRun")
-    public String getUrlToTestRun() {
-        return getBusinessObject().getUrlToTestRun();
-    }
+   public void setUrlToTestRun(String urlToTestRun) {
+      testRunReport.setUrlToTestRun(urlToTestRun);
+   }
 
-    @JsonSetter(value = "urlToTestRun")
-    public void setUrlToTestRun(String urlToTestRun) {
-        getBusinessObject().setUrlToTestRun(urlToTestRun);
-    }
+   @Schema(
+         name = "unexpectedErrors",
+         description = "The list of unexpected errors that can occur during test execution."
+   )
+   @JsonProperty(value = "unexpectedErrors")
+   public List<UnexpectedErrorDTO> getUnexpectedErrors() {
+      return testRunReport
+            .getUnexpectedErrors()
+            .stream()
+            .map(UnexpectedErrorDTO::new)
+            .toList();
+   }
 
-    @JsonGetter(value = "unexpectedErrors")
-    public List<UnexpectedErrorDTO> getUnexpectedErrors() {
-        return getBusinessObject()
-                .getUnexpectedErrors()
-                .stream()
-                .map(UnexpectedErrorDTO::new)
-                .toList();
-    }
-
-    @JsonSetter(value = "unexpectedErrors")
-    public void setUnexpectedErrors(List<UnexpectedErrorDTO> unexpectedErrors) {
-        getBusinessObject().setUnexpectedErrors(
-                unexpectedErrors.stream().map(UnexpectedErrorDTO::getBusinessObject).toList()
-        );
-    }
+   public void setUnexpectedErrors(List<UnexpectedErrorDTO> unexpectedErrors) {
+      testRunReport.setUnexpectedErrors(
+            unexpectedErrors.stream().map(UnexpectedErrorDTO::getBusinessObject).toList()
+      );
+   }
 }

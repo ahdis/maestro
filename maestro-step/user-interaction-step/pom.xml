@@ -19,7 +19,7 @@
     <parent>
         <groupId>net.ihe.gazelle</groupId>
         <artifactId>maestro-step</artifactId>
-        <version>0.4.1-SNAPSHOT</version>
+        <version>0.6.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>user-interaction-step</artifactId>
@@ -35,6 +35,11 @@
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>service-metadata-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>error-handling</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>

@@ -20,7 +20,9 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
-import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSetRunDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestRunDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSuiteRunDTO;
+import net.ihe.gazelle.sso.server.technical.filter.ProtectedResource;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
@@ -28,44 +30,40 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
-@Path("/testRuns")
+import static net.ihe.gazelle.maestro.quarkus.ws.Constants.TEST_RUN;
+import static net.ihe.gazelle.maestro.quarkus.ws.Constants.TEST_SUITE_RUN;
+
+/**
+ * REST API interface for executing Gazelle tests and test suites.
+ * <p>
+ * This API allows clients to trigger synchronous or asynchronous test execution using the Maestro engine.
+ * If a {@code callback} query parameter is provided, the test run will be executed asynchronously, and the
+ * results will be sent to the specified callback URI. Otherwise, the test run will be executed synchronously,
+ * and the results will be returned directly in the response.
+ */
+@Path("/v1")
 public interface TestRunController {
 
     /**
-     * This endpoint can run synchronously or asynchronously depending on the presence of a callback URI.
-     * <p>
-     * If the callback query parameter is not set, this will run synchronously and directly send the
-     * {@code TestReport} as a response.
-     * </p>
-     * <p>
-     * If the callback query parameter is set, this will run asynchronously and will send the
-     * {@code TestReport} to the specified callback URI later on.
-     * </p>
-     * <p>
-     * Different responses can be sent depending on what happens during execution:
-     * </p>
-     * <ul>
-     *     <li><b>Execution went well</b> : 200 + TestReport in body if callback is not present and run is synchronous</li>
-     *     <li><b>Execution went well</b> : 202 If callback is present and run is asynchronous </li>
-     *     <li><b>Request couldn't be Parsed</b> : 400 + ParsingErrorException or MissingArgumentException</li>
-     *     <li><b>TestRun isn't valid</b> : 400 + InvalidTestRunException</li>
-     *     <li><b>Request try to execute an unsupported Step</b> : 400 + NotProvidedStep</li>
-     *     <li><b>Unknown Error occurred</b> : 500 + Exception</li>
-     *     <li><b>Timeout exception</b> : 504 + message explaining why timeout occurred</li>
-     * </ul>
-     * @param callback The callback URI to send back the Test report for asynchronous run
-     * @param testSetRun A list of TestRun
-     * @return A response with a status code and a body containing TestReport or an exception
+     * Execute a Gazelle test suite.
+     *
+     * @param testSuiteRun the test suite to execute
+     * @param persist      whether to persist the test report
+     * @param callback     optional callback URL for asynchronous execution
+     * @return a {@link Response} containing the {@link TestReportDTO} or HTTP status depending on execution mode
      */
     @POST
-    @Path("/run")
+    @Path("/test-suite/run")
+    @ProtectedResource
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    @Tag(name = "Maestro API")
+    @Tag(name = "Test Run API")
+    @SecurityRequirement(name = "Keycloak")
     @Operation(
-            summary = "Run Gazelle tests",
+            summary = "Run Gazelle test suite",
             description = """
                        This API is used to execute a Gazelle test suite with the maestro engine.
                        If the callback query parameter is not set, this will run synchronously and directly send the Test report as a response.
@@ -89,6 +87,10 @@ public interface TestRunController {
             description = "The test run is malformed"
     )
     @APIResponse(
+          responseCode = "401",
+          description = "Unauthorized to execute a test suite run"
+    )
+    @APIResponse(
             responseCode = "500",
             description = "Unexpected Error"
     )
@@ -96,63 +98,99 @@ public interface TestRunController {
             responseCode = "504",
             description = "Synchronous run has timed out"
     )
-    Response run(
+    Response executeTestSuite(
+            @RequestBody(
+                    description = "The test suite to run.",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(implementation = TestSuiteRunDTO.class),
+                            example = TEST_SUITE_RUN
+                    )
+            ) TestSuiteRunDTO testSuiteRun,
+            @Parameter(
+                    in = ParameterIn.QUERY,
+                    name = "persist",
+                    description = "Choose whether to persist the test report or not"
+            ) @QueryParam("persist") @DefaultValue("true") boolean persist,
             @Parameter(
                     in = ParameterIn.QUERY,
                     name = "callback",
                     description = "Callback URL for asynchronous test run. For such callback to be secured, the client should generate a unique and strong sessionId included into the callback URL.",
-                    example = "http://localhost/gazelle/?session=10"
-            ) @QueryParam("callback") String callback,
-            @RequestBody(
-                    description = "The tests to run.",
-                    required = true,
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON,
-                            schema = @Schema(implementation = TestSetRunDTO.class),
-                            example = TEST_RUN
-                    )
-            ) TestSetRunDTO testSetRun
+                    example = "http://localhost/gazelle/report?session=10"
+            ) @QueryParam("callback") String callback
     );
 
-    String TEST_RUN = """
-            [
-              {
-                "testSetId": "testSet1",
-                "test": {
-                  "id": "1",
-                  "name": "name1",
-                  "steps": [
-                    {
-                      "type": "VALIDATION",
-                      "name": "step1",
-                      "properties": [
-                        {
-                          "name": "validationService",
-                          "value": "matchbox",
-                          "type": "string"
-                        },
-                        {
-                          "name": "validationProfile",
-                          "value": "parameters",
-                          "type": "string"
-                        },
-                        {
-                          "name": "contentToValidate",
-                          "value": "${inputFile1}",
-                          "type": "byteArray"
-                        }
-                      ]
-                    }
-                  ]
-                },
-                "inputs": [
-                  {
-                    "name": "inputFile1",
-                    "value": "ihfeorhqifrghqpervgh",
-                    "type": "byteArray"
-                  }
-                ]
-              }
-            ]
-            """;
+    /**
+     * Execute a test.
+     *
+     * @param testRun  the test to execute
+     * @param persist  whether to persist the test report
+     * @param callback optional callback URL for asynchronous execution
+     * @return a {@link Response} containing the {@link TestReportDTO} or HTTP status depending on execution mode
+     */
+    @POST
+    @Path("/test/run")
+    @ProtectedResource
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Tag(name = "Test Run API")
+    @SecurityRequirement(name = "Keycloak")
+    @Operation(
+            summary = "Run Gazelle test",
+            description = """
+                       This API is used to execute a Gazelle test suite with the maestro engine.
+                       If the callback query parameter is not set, this will run synchronously and directly send the Test report as a response.
+                       If the callback query parameter is set, this will run asynchronously and will send the Test report to the specified callback URI later on.
+                    """
+    )
+    @APIResponse(
+            responseCode = "200",
+            description = "Test has been executed, Contains the Test report with all detailed steps and results.",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = TestReportDTO.class)
+            )
+    )
+    @APIResponse(
+            responseCode = "202",
+            description = "Test run accepted"
+    )
+    @APIResponse(
+            responseCode = "400",
+            description = "The test run is malformed"
+    )
+    @APIResponse(
+          responseCode = "401",
+          description = "Unauthorized to execute a test run"
+    )
+    @APIResponse(
+            responseCode = "500",
+            description = "Unexpected Error"
+    )
+    @APIResponse(
+            responseCode = "504",
+            description = "Synchronous run has timed out"
+    )
+    Response executeTest(
+            @RequestBody(
+                    description = "The test to run.",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(implementation = TestRunDTO.class),
+                            example = TEST_RUN
+                    )
+            ) TestRunDTO testRun,
+            @Parameter(
+                    in = ParameterIn.QUERY,
+                    name = "persist",
+                    description = "Choose whether to persist the test report or not"
+            ) @QueryParam("persist") @DefaultValue("true") boolean persist,
+            @Parameter(
+                    in = ParameterIn.QUERY,
+                    name = "callback",
+                    description = "Callback URL for asynchronous test run. For such callback to be secured, the client should generate a unique and strong sessionId included into the callback URL.",
+                    example = "http://localhost/gazelle/report?session=10"
+            ) @QueryParam("callback") String callback
+    );
+
 }

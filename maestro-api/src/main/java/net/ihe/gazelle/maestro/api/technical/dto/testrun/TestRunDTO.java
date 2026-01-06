@@ -16,59 +16,116 @@
 
 package net.ihe.gazelle.maestro.api.technical.dto.testrun;
 
-import com.fasterxml.jackson.annotation.*;
-import net.ihe.gazelle.maestro.api.business.testrun.Property;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
+import net.ihe.gazelle.maestro.api.technical.dto.property.PropertyDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.report.SystemUnderTestDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.test.TestDTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
+import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
+import net.ihe.gazelle.security.technical.acl.AccessControlListDTO;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
-import java.util.ArrayList;
 import java.util.List;
 
+@Schema(
+      name = "TestRun",
+      description = "A test run to be executed by the test engine."
+)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
-        "test",
-        "inputs"
+      "test",
+      "inputs",
+      "systemsUnderTest",
+      "accessControlList"
 })
 public class TestRunDTO implements DTO<TestRun> {
 
-    @JsonIgnore
-    private final TestRun testRun;
+   @JsonIgnore
+   private final TestRun testRun;
 
-    public TestRunDTO() {
-        this(new TestRun());
-    }
+   public TestRunDTO() {
+      this(new TestRun());
+   }
 
-    public TestRunDTO(TestRun testRun) {
-        this.testRun = testRun;
-    }
+   public TestRunDTO(TestRun testRun) {
+      this.testRun = testRun;
+   }
 
-    @Override
-    @JsonIgnore
-    public TestRun getBusinessObject() {
-        return testRun;
-    }
+   @Override
+   @JsonIgnore
+   public TestRun getBusinessObject() {
+      return testRun;
+   }
 
-    @JsonGetter("test")
-    public TestDTO getTest() {
-        return new TestDTO(getBusinessObject().getTest());
-    }
+   @Schema(
+         name = "test",
+         description = "The test definition that will be used for execution.",
+         required = true
+   )
+   @JsonProperty("test")
+   public TestDTO getTest() {
+      return new TestDTO(testRun.getTest());
+   }
 
-    @JsonSetter("test")
-    public void setTest(TestDTO test) {
-        getBusinessObject().setTest(test.getBusinessObject());
-    }
+   public void setTest(TestDTO test) {
+      testRun.setTest(test.getBusinessObject());
+   }
 
-    @JsonGetter("inputs")
-    public List<PropertyDTO> getInputs() {
-        return getBusinessObject().getInputs().stream().map(PropertyDTO::new).toList();
-    }
+   @Schema(
+         name = "inputs",
+         description = "A list of input provided for test execution that shall match supported inputs of test definition."
+   )
+    @SuppressWarnings("rawtypes")
+   @JsonProperty("inputs")
+   public List<PropertyDTO> getInputs() {
+      return testRun.getInputs().stream()
+            .map(SubTypingDTO::fromBusinessObject)
+            .map(PropertyDTO.class::cast)
+            .toList();
+   }
 
-    @JsonSetter("inputs")
-    public void setInputs(List<PropertyDTO> inputs) {
-        List<Property<?>> properties = new ArrayList<>();
-        for (PropertyDTO propertyDTO : inputs) {
-            properties.add(propertyDTO.getBusinessObject());
-        }
-        getBusinessObject().setInputs(properties);
-    }
+   public void setInputs(List<PropertyDTO<?>> inputs) {
+      testRun.setInputs(
+              inputs.stream()
+                      .map(DTO::getBusinessObject)
+                      .map(Property.class::cast)
+                      .toList()
+      );
+   }
+
+   @Schema(
+         name = "accessControlList",
+         description = "An access control list for read, write authorization.",
+         required = true
+   )
+   @JsonProperty("accessControlList")
+   public AccessControlListDTO getAccessControlList() {
+      return new AccessControlListDTO(testRun.getAccessControlList());
+   }
+
+   public void setAccessControlList(AccessControlListDTO accessControlList) {
+      testRun.setAccessControlList(accessControlList.getBusinessObject());
+   }
+
+   @Schema(
+         name = "systemsUnderTest",
+         description = "The list of system under test involved in the test."
+   )
+   @JsonProperty("systemsUnderTest")
+   public List<SystemUnderTestDTO> getSystemsUnderTest() {
+      return testRun.getSystemsUnderTest() != null ? testRun.getSystemsUnderTest().stream().map(SystemUnderTestDTO::new).toList() : null;
+   }
+
+   public void setSystemsUnderTest(List<SystemUnderTestDTO> sutDTOs) {
+      testRun.setSystemsUnderTest(
+              sutDTOs.stream()
+                      .map(SystemUnderTestDTO::getBusinessObject)
+                      .toList()
+      );
+   }
 }

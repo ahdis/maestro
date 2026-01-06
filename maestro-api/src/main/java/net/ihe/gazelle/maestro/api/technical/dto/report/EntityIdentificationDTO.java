@@ -19,7 +19,12 @@ package net.ihe.gazelle.maestro.api.technical.dto.report;
 import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.testreport.EntityIdentification;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
+@Schema(
+        name = "EntityIdentification",
+        description = "The name and version used to identify an entity."
+)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
         "version",
@@ -44,23 +49,32 @@ public class EntityIdentificationDTO implements DTO<EntityIdentification> {
         return entityIdentification;
     }
 
-    @JsonGetter(value = "version")
+    @Schema(
+            name = "version",
+            description = "The version of the entity.",
+            examples = "1.0"
+    )
+    @JsonProperty(value = "version")
     public String getVersion() {
-        return getBusinessObject().getVersion();
+        return entityIdentification.getVersion();
     }
 
-    @JsonSetter(value = "version")
     public void setVersion(String version) {
-        getBusinessObject().setVersion(version);
+       entityIdentification.setVersion(version);
     }
 
-    @JsonGetter(value = "name")
+    @Schema(
+            name = "name",
+            description = "The name of the entity.",
+            examples = "My service",
+            required = true
+    )
+    @JsonProperty(value = "name")
     public String getName() {
-        return getBusinessObject().getName();
+        return entityIdentification.getName();
     }
 
-    @JsonSetter(value = "name")
     public void setName(String name) {
-        getBusinessObject().setName(name);
+       entityIdentification.setName(name);
     }
 }

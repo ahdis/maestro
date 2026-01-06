@@ -16,118 +16,231 @@
 
 package net.ihe.gazelle.maestro.api.business.testreport;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 /**
- * Business rules <br>
- * systemIdentification mandatory
+ * A structure for the system under test.
+ * Business rules <br> systemIdentification mandatory
  */
-public class SystemUnderTest {
+public class SystemUnderTest implements Serializable {
 
-    private EntityIdentification systemIdentification;
-    private List<String> macAddresses;
-    private List<String> ipAddresses;
-    private List<String> hostNames;
+   @Serial
+   private static final long serialVersionUID = -3823347636444508122L;
 
-    public SystemUnderTest() {
-        this.macAddresses = new ArrayList<>();
-        this.ipAddresses = new ArrayList<>();
-        this.hostNames = new ArrayList<>();
-    }
+   /**
+    * The identification of the system under test.
+    */
+   private EntityIdentification systemIdentification;
 
-    public SystemUnderTest(EntityIdentification systemIdentification) {
-        this();
-        this.systemIdentification = systemIdentification;
-    }
+   /**
+    * A list of MAC address strings associated with the system.
+    */
+   private List<String> macAddresses;
 
-    public EntityIdentification getSystemIdentification() {
-        return systemIdentification;
-    }
+   /**
+    * A list of IP address strings associated with the system.
+    */
+   private List<String> ipAddresses;
 
-    public SystemUnderTest setSystemIdentification(EntityIdentification systemIdentification) {
-        this.systemIdentification = systemIdentification;
-        return this;
-    }
+   /**
+    * A list of host name strings associated with the system.
+    */
+   private List<String> hostNames;
 
-    public List<String> getMacAddresses() {
-        return new ArrayList<>(macAddresses);
-    }
+   /**
+    * Default constructor.
+    */
+   public SystemUnderTest() {
+      this.macAddresses = new ArrayList<>();
+      this.ipAddresses = new ArrayList<>();
+      this.hostNames = new ArrayList<>();
+   }
 
-    public SystemUnderTest setMacAddresses(List<String> macAddresses) {
-        this.macAddresses = new ArrayList<>(macAddresses);
-        return this;
-    }
+   /**
+    * Constructs a SystemUnderTest instance with the specified system identification.
+    *
+    * @param systemIdentification the identification of the system, must not be null
+    */
+   public SystemUnderTest(EntityIdentification systemIdentification) {
+      this();
+      this.systemIdentification = systemIdentification;
+   }
 
-    public SystemUnderTest addMacAddress(String macAddress) {
-        macAddresses.add(macAddress);
-        return this;
-    }
+   /**
+    * Retrieves the system identification associated with this instance.
+    *
+    * @return the system identification, or null if it is not defined
+    */
+   public EntityIdentification getSystemIdentification() {
+      return systemIdentification;
+   }
 
-    public SystemUnderTest addMacAddresses(List<String> macAddresses) {
-        this.macAddresses.addAll(macAddresses);
-        return this;
-    }
+   /**
+    * Sets the system identification for this instance.
+    *
+    * @param systemIdentification the identification of the system to set; must not be null
+    * @return the current instance of {@code SystemUnderTest} for method chaining
+    */
+   public SystemUnderTest setSystemIdentification(EntityIdentification systemIdentification) {
+      this.systemIdentification = systemIdentification;
+      return this;
+   }
 
-    public List<String> getIpAddresses() {
-        return new ArrayList<>(ipAddresses);
-    }
+   /**
+    * Retrieves the list of MAC addresses associated with the system.
+    *
+    * @return a list of MAC addresses; the list is a copy of the internal data, ensuring encapsulation
+    */
+   public List<String> getMacAddresses() {
+      return new ArrayList<>(macAddresses);
+   }
 
-    public SystemUnderTest setIpAddresses(List<String> ipAddresses) {
-        this.ipAddresses = new ArrayList<>(ipAddresses);
-        return this;
-    }
+   /**
+    * Sets the list of MAC addresses for the system.
+    *
+    * @param macAddresses the list of MAC addresses to set; must not be null
+    * @return the current instance of {@code SystemUnderTest} for method chaining
+    */
+   public SystemUnderTest setMacAddresses(List<String> macAddresses) {
+      this.macAddresses = new ArrayList<>(macAddresses);
+      return this;
+   }
 
-    public SystemUnderTest addIpAddress(String ipAddress) {
-        ipAddresses.add(ipAddress);
-        return this;
-    }
+   /**
+    * Adds a new MAC address to the system.
+    *
+    * @param macAddress the MAC address to be added; must not be null or empty
+    * @return the current instance of {@code SystemUnderTest} for method chaining
+    */
+   public SystemUnderTest addMacAddress(String macAddress) {
+      macAddresses.add(macAddress);
+      return this;
+   }
 
-    public SystemUnderTest addIpAddresses(List<String> ipAddresses) {
-        this.ipAddresses.addAll(ipAddresses);
-        return this;
-    }
+   /**
+    * Adds a list of MAC addresses to the current instance.
+    *
+    * @param macAddresses the list of MAC addresses to add; must not be null
+    * @return the current instance of {@code SystemUnderTest} for method chaining
+    */
+   public SystemUnderTest addMacAddresses(List<String> macAddresses) {
+      this.macAddresses.addAll(macAddresses);
+      return this;
+   }
 
-    public List<String> getHostNames() {
-        return new ArrayList<>(hostNames);
-    }
+   /**
+    * Retrieves the list of IP addresses associated with the system.
+    *
+    * @return a list of IP addresses
+    */
+   public List<String> getIpAddresses() {
+      return new ArrayList<>(ipAddresses);
+   }
 
-    public SystemUnderTest setHostNames(List<String> hostNames) {
-        this.hostNames = new ArrayList<>(hostNames);
-        return this;
-    }
+   /**
+    * Sets the list of IP addresses for the system.
+    *
+    * @param ipAddresses the list of IP addresses to set; must not be null
+    * @return the current instance of {@code SystemUnderTest} for method chaining
+    */
+   public SystemUnderTest setIpAddresses(List<String> ipAddresses) {
+      this.ipAddresses = new ArrayList<>(ipAddresses);
+      return this;
+   }
 
-    public SystemUnderTest addHostName(String hostName) {
-        hostNames.add(hostName);
-        return this;
-    }
+   /**
+    * Adds an IP address to the list of IP addresses associated with this instance.
+    *
+    * @param ipAddress the IP address to add; must not be null or empty
+    * @return the current instance of {@code SystemUnderTest} for method chaining
+    */
+   public SystemUnderTest addIpAddress(String ipAddress) {
+      ipAddresses.add(ipAddress);
+      return this;
+   }
 
-    public SystemUnderTest addHostNames(List<String> hostNames) {
-        this.hostNames.addAll(hostNames);
-        return this;
-    }
+   /**
+    * Adds a list of IP addresses to the current instance.
+    *
+    * @param ipAddresses the list of IP addresses to add; must not be null
+    * @return the current instance of {@code SystemUnderTest} for method chaining
+    */
+   public SystemUnderTest addIpAddresses(List<String> ipAddresses) {
+      this.ipAddresses.addAll(ipAddresses);
+      return this;
+   }
 
-    public boolean isSystemIdentificationValid() {
-        return systemIdentification != null;
-    }
+   /**
+    * Retrieves the list of host names associated with the system.
+    *
+    * @return a list of host names
+    */
+   public List<String> getHostNames() {
+      return new ArrayList<>(hostNames);
+   }
 
-    public boolean isValid() {
-        return isSystemIdentificationValid();
-    }
+   /**
+    * Sets the list of host names for the system.
+    *
+    * @param hostNames the list of host names to set; must not be null
+    * @return the current instance of {@code SystemUnderTest} for method chaining
+    */
+   public SystemUnderTest setHostNames(List<String> hostNames) {
+      this.hostNames = new ArrayList<>(hostNames);
+      return this;
+   }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof SystemUnderTest that)) return false;
-        return Objects.equals(systemIdentification, that.systemIdentification)
-                && Objects.equals(macAddresses, that.macAddresses)
-                && Objects.equals(ipAddresses, that.ipAddresses)
-                && Objects.equals(hostNames, that.hostNames);
-    }
+   /**
+    * Adds a host name to the list of host names associated with the system.
+    *
+    * @param hostName the host name to be added; must not be null or empty
+    * @return the current instance of {@code SystemUnderTest} for method chaining
+    */
+   public SystemUnderTest addHostName(String hostName) {
+      hostNames.add(hostName);
+      return this;
+   }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(systemIdentification, macAddresses, ipAddresses, hostNames);
-    }
+   /**
+    * Adds a list of host names to the current instance.
+    *
+    * @param hostNames the list of host names to add; must not be null
+    * @return the current instance of {@code SystemUnderTest} for method chaining
+    */
+   public SystemUnderTest addHostNames(List<String> hostNames) {
+      this.hostNames.addAll(hostNames);
+      return this;
+   }
+
+   /**
+    * Checks whether the system identification is defined for this instance.
+    *
+    * @return true if the system identification is defined (not null); false otherwise
+    */
+   public boolean isSystemIdentificationDefined() {
+      return systemIdentification != null;
+   }
+
+   @Override
+   public boolean equals(Object o) {
+      if (this == o) {
+         return true;
+      }
+      if (!(o instanceof SystemUnderTest that)) {
+         return false;
+      }
+      return Objects.equals(systemIdentification, that.systemIdentification)
+            && Objects.equals(macAddresses, that.macAddresses)
+            && Objects.equals(ipAddresses, that.ipAddresses)
+            && Objects.equals(hostNames, that.hostNames);
+   }
+
+   @Override
+   public int hashCode() {
+      return Objects.hash(systemIdentification, macAddresses, ipAddresses, hostNames);
+   }
 }

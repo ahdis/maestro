@@ -16,69 +16,127 @@
 
 package net.ihe.gazelle.maestro.api.business.testreport;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * Business rules: <br>
- * name is mandatory
+ * Identification of an entity.
+ * Business rules: <br> name is mandatory
  */
-public class EntityIdentification {
+public class EntityIdentification implements Serializable {
 
-    private String version;
-    private String name;
+   @Serial
+   private static final long serialVersionUID = 8403054616731250869L;
 
-    public EntityIdentification() {
-    }
+   /**
+    * The version of the entity.
+    */
+   private String version;
 
-    public EntityIdentification(String name) {
-        this.name = name;
-    }
+   /**
+    * The name of the entity.
+    */
+   private String name;
 
-    public EntityIdentification(String version, String name) {
-        this(name);
-        this.version = version;
-    }
+   /**
+    * Default constructor
+    */
+   public EntityIdentification() {
+   }
 
-    public String getVersion() {
-        return version;
-    }
+   /**
+    * Constructs an EntityIdentification with the specified name.
+    *
+    * @param name the name of the entity; must not be null or blank
+    */
+   public EntityIdentification(String name) {
+      this.name = name;
+   }
 
-    public EntityIdentification setVersion(String version) {
-        this.version = version;
-        return this;
-    }
+   /**
+    * Constructs an EntityIdentification with the specified version and name.
+    *
+    * @param version the version of the entity; can be null or blank
+    * @param name the name of the entity; must not be null or blank
+    */
+   public EntityIdentification(String version, String name) {
+      this(name);
+      this.version = version;
+   }
 
-    public String getName() {
-        return name;
-    }
+   /**
+    * Retrieves the version of the entity.
+    *
+    * @return the version of the entity, or null if not defined
+    */
+   public String getVersion() {
+      return version;
+   }
 
-    public EntityIdentification setName(String name) {
-        this.name = name;
-        return this;
-    }
+   /**
+    * Sets the version of the entity.
+    *
+    * @param version the version of the entity, which can be null or blank
+    * @return the current instance of {@code EntityIdentification} for method chaining
+    */
+   public EntityIdentification setVersion(String version) {
+      this.version = version;
+      return this;
+   }
 
-    public boolean isVersionValid() {
-        return version == null || !version.isBlank();
-    }
+   /**
+    * Retrieves the name of the entity.
+    *
+    * @return the name of the entity, or null if not defined
+    */
+   public String getName() {
+      return name;
+   }
 
-    public boolean isNameValid() {
-        return name != null && !name.isBlank();
-    }
+   /**
+    * Sets the name of the entity.
+    *
+    * @param name the name to set; must not be null or blank
+    * @return the current instance of {@code EntityIdentification} for method chaining
+    */
+   public EntityIdentification setName(String name) {
+      this.name = name;
+      return this;
+   }
 
-    public boolean isValid() {
-        return isVersionValid() && isNameValid();
-    }
+   /**
+    * Determines whether the version is null or not blank.
+    *
+    * @return {@code true} if the version is null or not blank, {@code false} otherwise
+    */
+   public boolean isVersionDefinedIfPresent() {
+      return version == null || !version.isBlank();
+   }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof EntityIdentification that)) return false;
-        return Objects.equals(version, that.version)
-                && Objects.equals(name, that.name);
-    }
+   /**
+    * Determines whether the name of the entity is defined and not blank.
+    *
+    * @return {@code true} if the name is not null and not blank, {@code false} otherwise
+    */
+   public boolean isNameDefined() {
+      return name != null && !name.isBlank();
+   }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(version, name);
-    }
+   @Override
+   public boolean equals(Object o) {
+      if (this == o) {
+         return true;
+      }
+      if (!(o instanceof EntityIdentification that)) {
+         return false;
+      }
+      return Objects.equals(version, that.version)
+             && Objects.equals(name, that.name);
+   }
+
+   @Override
+   public int hashCode() {
+      return Objects.hash(version, name);
+   }
 }

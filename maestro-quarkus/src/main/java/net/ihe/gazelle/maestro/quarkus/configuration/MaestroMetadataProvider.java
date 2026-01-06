@@ -20,21 +20,29 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import net.ihe.gazelle.servicemetadata.api.technical.AbstractMetadataService;
 
+/**
+ * Default {@link AbstractMetadataService} implementation providing metadata
+ * information for the Maestro test automation engine.
+ */
 @Default
 @ApplicationScoped
 public class MaestroMetadataProvider extends AbstractMetadataService {
 
-    protected MaestroMetadataProvider() {
-        super(MaestroMetadataProvider.class);
-    }
+   /**
+    * Protected constructor for CDI.
+    * Initializes the metadata service with this class type.
+    */
+   protected MaestroMetadataProvider() {
+      super(MaestroMetadataProvider.class);
+   }
 
-    @Override
-    public String getServiceName() {
-        return "Maestro";
-    }
+   @Override
+   public String getServiceName() {
+      return "Maestro";
+   }
 
-    @Override
-    public String getServiceDescription() {
-        return "The Gazelle test automation engine";
-    }
+   @Override
+   public String getServiceDescription() {
+      return "The Gazelle test automation engine";
+   }
 }

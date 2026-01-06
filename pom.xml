@@ -24,7 +24,7 @@
     </parent>
 
     <artifactId>maestro</artifactId>
-    <version>0.4.1-SNAPSHOT</version>
+    <version>0.6.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <organization>
@@ -51,6 +51,7 @@
         <module>maestro-api</module>
         <module>maestro-engine</module>
         <module>maestro-step</module>
+        <module>maestro-recording</module>
         <module>maestro-quarkus</module>
     </modules>
 
@@ -65,14 +66,15 @@
         <!--git-->
         <git.project.url>https://${git.user.name}:${git.user.token}@gitlab.inria.fr/gazelle/private/kereval/maestro.git</git.project.url>
 
-        <framework.version>2.1.2</framework.version>
+        <framework.version>2.2.1</framework.version>
         <search-api.version>1.1.0</search-api.version>
         <validation-api.version>2.0.1</validation-api.version>
-        <simulation-api.version>0.2.0-SNAPSHOT</simulation-api.version>
+        <simulation-api.version>0.2.0</simulation-api.version>
         <service-registry.version>1.0.0</service-registry.version>
-        <lang.version>2.0.1</lang.version>
-        <datahouse.version>3.1.0</datahouse.version>
-        <security.version>3.2.0</security.version>
+        <lang.version>3.0.0</lang.version>
+        <datahouse.version>4.0.0</datahouse.version>
+        <sso.client.version>3.3.1</sso.client.version>
+
         <equalsverifier.version>3.16.1</equalsverifier.version>
 
         <skipTests>false</skipTests>
@@ -88,7 +90,8 @@
             **/gazelle/context/*
             **/gazelle/maestro/technical/ws/async/tmintegration/**
             **/gazelle/maestro/websocket/**
-            **/gazelle/maestro/mlang/**</sonar.coverage.exclusions>
+            **/gazelle/maestro/mlang/**
+        </sonar.coverage.exclusions>
     </properties>
 
     <dependencyManagement>
@@ -97,43 +100,42 @@
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-api</artifactId>
-                <version>0.4.1-SNAPSHOT</version>
+                <version>0.6.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-engine</artifactId>
-                <version>0.4.1-SNAPSHOT</version>
+                <version>0.6.1-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>net.ihe.gazelle</groupId>
+                <artifactId>maestro-recording</artifactId>
+                <version>0.6.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>validation-step</artifactId>
-                <version>0.4.1-SNAPSHOT</version>
+                <version>0.6.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>simulation-step</artifactId>
-                <version>0.4.1-SNAPSHOT</version>
+                <version>0.6.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>user-interaction-step</artifactId>
-                <version>0.4.1-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>net.ihe.gazelle</groupId>
-                <artifactId>assertion-step</artifactId>
-                <version>0.4.1-SNAPSHOT</version>
+                <version>0.6.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>itb-step</artifactId>
-                <version>0.4.1-SNAPSHOT</version>
+                <version>0.6.1-SNAPSHOT</version>
             </dependency>
-            <!-- to be removed when maestro-websocket has it own tests -->
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
-                <artifactId>maestro-websocket</artifactId>
-                <version>0.4.1-SNAPSHOT</version>
+                <artifactId>assertion-step</artifactId>
+                <version>0.6.1-SNAPSHOT</version>
             </dependency>
 
             <!-- Stack BOM -->
@@ -186,16 +188,38 @@
             </dependency>
             <dependency>
                 <groupId>com.kereval.gazelle</groupId>
+                <artifactId>datahouse-api</artifactId>
+                <version>${datahouse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.kereval.gazelle</groupId>
                 <artifactId>datahouse-microprofile-rest-client</artifactId>
                 <version>${datahouse.version}</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>security</artifactId>
-                <version>${security.version}</version>
+                <version>${sso.client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.ihe.gazelle</groupId>
+                <artifactId>m2m-client</artifactId>
+                <version>${sso.client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.ihe.gazelle</groupId>
+                <artifactId>oidc-server</artifactId>
+                <version>${sso.client.version}</version>
             </dependency>
 
             <!-- Test dependencies -->
+            <dependency>
+                <groupId>net.ihe.gazelle</groupId>
+                <artifactId>maestro-engine</artifactId>
+                <version>0.6.1-SNAPSHOT</version>
+                <type>test-jar</type>
+                <scope>test</scope>
+            </dependency>
             <dependency>
                 <groupId>nl.jqno.equalsverifier</groupId>
                 <artifactId>equalsverifier</artifactId>
@@ -241,7 +265,7 @@
                     <dependency>
                         <groupId>net.ihe.gazelle</groupId>
                         <artifactId>mlang-converter</artifactId>
-                        <version>0.4.1-SNAPSHOT</version>
+                        <version>0.6.0-SNAPSHOT</version>
                     </dependency>
                 </dependencies>
             </dependencyManagement>

@@ -21,25 +21,36 @@ import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory
 import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
 import net.ihe.gazelle.maestro.api.business.testreport.EntityIdentification;
 
+/**
+ * Validator implementation for {@link EntityIdentification}, responsible for defining
+ */
 public class EntityIdentificationValidator extends AbstractValidator<EntityIdentification> {
 
-    public EntityIdentificationValidator() {
-        super();
-    }
+   /**
+    * Default constructor
+    */
+   public EntityIdentificationValidator() {
+      super();
+   }
 
-    public EntityIdentificationValidator(ValidatorBuilderFactory builderFactory) {
-        super(builderFactory);
-    }
+   /**
+    * Constructs an EntityIdentificationValidator using the provided ValidatorBuilderFactory.
+    *
+    * @param builderFactory The factory to create ValidatorBuilder instances for validating EntityIdentification objects.
+    */
+   public EntityIdentificationValidator(ValidatorBuilderFactory builderFactory) {
+      super(builderFactory);
+   }
 
-    @Override
-    protected ValidatorBuilder<? extends EntityIdentification> instantiateValidatorBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
-        return validatorBuilderFactory.getBuilder(EntityIdentification.class);
-    }
+   @Override
+   protected ValidatorBuilder<? extends EntityIdentification> instantiateValidatorBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
+      return validatorBuilderFactory.getBuilder(EntityIdentification.class);
+   }
 
-    @Override
-    protected void addRulesAndMembers(ValidatorBuilder<? extends EntityIdentification> validatorBuilder) {
-        validatorBuilder
-                .addRule("versionValid", EntityIdentification::isVersionValid, "Version must be set if present")
-                .addRule("nameValid", EntityIdentification::isNameValid, "Name must be set and not empty");
-    }
+   @Override
+   protected void addRulesAndMembers(ValidatorBuilder<? extends EntityIdentification> validatorBuilder) {
+      validatorBuilder
+            .addRule(EntityIdentification::isVersionDefinedIfPresent, "Version must be set if present")
+            .addRule(EntityIdentification::isNameDefined, "Name must be set and not empty");
+   }
 }

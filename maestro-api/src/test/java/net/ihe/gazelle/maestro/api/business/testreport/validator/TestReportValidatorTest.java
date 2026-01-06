@@ -17,13 +17,10 @@
 package net.ihe.gazelle.maestro.api.business.testreport.validator;
 
 import net.ihe.gazelle.framework.modelvalidator.business.ObjectResult;
-import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
-import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
-import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
+import net.ihe.gazelle.maestro.api.business.testreport.*;
 import org.junit.jupiter.api.Test;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -31,46 +28,53 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TestReportValidatorTest {
 
-    private final TestReportValidator testReportValidator = new TestReportValidator();
+    private final TestReportValidator validator = new TestReportValidator();
 
     @Test
-    void test_report_validator_valid() {
-        ObjectResult result = testReportValidator.validate(getTestReport());
-        assertTrue(result.isValid());
-        testReportValidator.assertValid(getTestReport());
+    void shouldValidateCompleteTestReport() {
+        TestReport testReport = buildValidTestReport();
+
+        ObjectResult result = validator.validate(testReport);
+
+        assertTrue(result.isValid(), () -> "Unexpected failures: " + result);
+        validator.assertValid(testReport);
     }
 
     @Test
-    void test_report_validator_invalid() {
-        TestReport testReport = getTestReport();
-        testReport.addTestRunReport(new TestRunReport()
-                .setDateTime(new Date())
-                .setTest(new net.ihe.gazelle.maestro.api.business.testreport.Test("id"))
-                .addStepRunReport(new StepRunReport()
-                        .setStepId("id")
-                        .setType("type")
-                        .setResult(StepResult.PASSED)
-                )
-        );
-        ObjectResult result = testReportValidator.validate(testReport);
+    void shouldRejectTestReportWhenCountersMismatch() {
+        TestReport testReport = buildValidTestReport();
+        testReport.setTestCounters(new TestCounters().setTotal(99));
+
+        ObjectResult result = validator.validate(testReport);
+
         assertFalse(result.isValid());
     }
 
-    private TestReport getTestReport() {
+    private TestReport buildValidTestReport() {
+        StepRunReport stepRunReport = new StepRunReport()
+                .setStepName("Validate input")
+                .setType("validation")
+                .setResult(StepResult.PASSED);
+
         TestRunReport testRunReport = new TestRunReport()
-                .setDateTime(new Date())
-                .setTest(new net.ihe.gazelle.maestro.api.business.testreport.Test("id"))
-                .addStepRunReport(new StepRunReport()
-                        .setStepId("id")
-                        .setType("type")
-                        .setResult(StepResult.PASSED)
-                );
+                .setRunId("run-1")
+                .setDateTime(Instant.now().minusSeconds(1))
+                .setTest(new net.ihe.gazelle.maestro.api.business.testreport.Test().setId("test-id"))
+                .addStepRunReport(stepRunReport)
+                .setUrlToTestRun("http://example.com");
         testRunReport.computeResult();
 
         TestReport testReport = new TestReport()
-                .setReportVersion("version")
                 .setUuid(UUID.randomUUID().toString())
-                .setDateTime(new Date())
+                .setDateTime(Instant.now().minusSeconds(1))
+                .setTestSuiteName("suite")
+                .setNote("note")
+                .setUrlToTestSuiteResult("http://example.com/report")
+                .setTestService(new TestService()
+                        .setServiceIdentification(new EntityIdentification("service").setVersion("1.0"))
+                        .setDisclaimer("disclaimer"))
+                .addSystemUnderTest(new SystemUnderTest()
+                        .setSystemIdentification(new EntityIdentification("sut")))
                 .addTestRunReport(testRunReport);
         testReport.computeResult();
         testReport.computeCounters();

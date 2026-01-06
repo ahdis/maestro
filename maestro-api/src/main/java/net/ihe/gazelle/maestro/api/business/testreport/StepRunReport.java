@@ -16,133 +16,295 @@
 
 package net.ihe.gazelle.maestro.api.business.testreport;
 
-import net.ihe.gazelle.lang.UnexpectedError;
+import net.ihe.gazelle.errorhandling.business.UnexpectedError;
+import net.ihe.gazelle.maestro.api.business.property.Property;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 /**
+ * A structure for reporting the result of a step execution
  * mandatory fields : stepId, type, result
- *
  */
-public class StepRunReport {
+public class StepRunReport implements Serializable {
 
-    private String stepId;
-    private String type;
-    private StepResult result;
-    private List<Output> outputs;
-    private List<UnexpectedError> unexpectedErrors;
+   @Serial
+   private static final long serialVersionUID = -5259327294299524545L;
 
-    public StepRunReport() {
-        result = StepResult.UNDEFINED;
-        outputs = new ArrayList<>();
-        unexpectedErrors = new ArrayList<>();
-    }
+   /**
+    * The name of the step.
+    */
+   private String stepName;
 
-    public StepRunReport(String stepId, String type, StepResult result) {
-        this();
-        this.stepId = stepId;
-        this.type = type;
-        this.result = result;
-    }
+   /**
+    * The type of the step.
+    */
+   private String type;
 
-    public String getStepId() {
-        return stepId;
-    }
+   /**
+    * The date and time at which the step was executed.
+    */
+   private Instant dateTime;
 
-    public StepRunReport setStepId(String stepId) {
-        this.stepId = stepId;
-        return this;
-    }
+   /**
+    * The result of the step execution.
+    */
+   private StepResult result;
 
-    public String getType() {
-        return type;
-    }
+   /**
+    * The outputs of the step execution.
+    */
+   private List<Property> outputs;
 
-    public StepRunReport setType(String type) {
-        this.type = type;
-        return this;
-    }
+   /**
+    * The unexpected errors that occurred during the step execution.
+    */
+   private List<UnexpectedError> unexpectedErrors;
 
-    public StepResult getResult() {
-        return result;
-    }
+   /**
+    * Default constructor.
+    */
+   public StepRunReport() {
+      dateTime = Instant.now();
+      result = StepResult.UNDEFINED;
+      outputs = new ArrayList<>();
+      unexpectedErrors = new ArrayList<>();
+   }
 
-    public StepRunReport setResult(StepResult result) {
-        this.result = result;
-        return this;
-    }
+   /**
+    * Constructs a new instance of the StepRunReport class with the specified type and result.
+    *
+    * @param type   the type of the step or process being reported
+    * @param result the result of the step or process execution
+    */
+   public StepRunReport(String type, StepResult result) {
+      this();
+      this.type = type;
+      this.result = result;
+   }
 
-    public List<Output> getOutputs() {
-        return new ArrayList<>(outputs);
-    }
+   /**
+    * Retrieves the name of the step associated with this report.
+    *
+    * @return the name of the step, or null if the step name has not been defined
+    */
+   public String getStepName() {
+      return stepName;
+   }
 
-    public StepRunReport setOutputs(List<Output> outputs) {
-        this.outputs = new ArrayList<>(outputs);
-        return this;
-    }
+   /**
+    * Sets the name of the step associated with this report.
+    *
+    * @param stepName the name of the step to set
+    * @return the current instance of StepRunReport
+    */
+   public StepRunReport setStepName(String stepName) {
+      this.stepName = stepName;
+      return this;
+   }
 
-    public StepRunReport addOutput(Output output) {
-        outputs.add(output);
-        return this;
-    }
+   /**
+    * Retrieves the type associated with the current instance.
+    *
+    * @return the type of the step or process being reported
+    */
+   public String getType() {
+      return type;
+   }
 
-    public StepRunReport addOutputs(List<Output> outputs) {
-        this.outputs.addAll(outputs);
-        return this;
-    }
+   /**
+    * Sets the type associated with this instance.
+    *
+    * @param type the type of the step or process being reported
+    * @return the current instance of StepRunReport
+    */
+   public StepRunReport setType(String type) {
+      this.type = type;
+      return this;
+   }
 
-    public List<UnexpectedError> getUnexpectedErrors() {
-        return unexpectedErrors;
-    }
+   /**
+    * Retrieves the timestamp associated with this step run report.
+    *
+    * @return the timestamp of the step or process execution as an {@link Instant},
+    *         or null if the date and time have not been defined.
+    */
+   public Instant getDateTime() {
+      return dateTime;
+   }
 
-    public StepRunReport setUnexpectedErrors(List<UnexpectedError> unexpectedErrors) {
-        this.unexpectedErrors = unexpectedErrors;
-        return this;
-    }
+   /**
+    * Sets the timestamp associated with this step run report.
+    *
+    * @param dateTime the timestamp of the step or process execution as an {@link Instant}
+    * @return the current instance of StepRunReport
+    */
+   public StepRunReport setDateTime(Instant dateTime) {
+      this.dateTime = dateTime;
+      return this;
+   }
 
-    public StepRunReport addUnexpectedError(UnexpectedError unexpectedError) {
-        unexpectedErrors.add(unexpectedError);
-        return this;
-    }
+   /**
+    * Retrieves the result of the step or process execution associated with this instance.
+    *
+    * @return the result of the step or process execution as a {@link StepResult},
+    *         or null if the result has not been defined.
+    */
+   public StepResult getResult() {
+      return result;
+   }
 
-    public boolean isStepIdValid() {
-        return stepId != null && !stepId.isBlank();
-    }
+   /**
+    * Sets the result of the step or process execution associated with this report.
+    *
+    * @param result the result of the step or process execution to set, represented as a {@link StepResult}
+    * @return the current instance of {@code StepRunReport}
+    */
+   public StepRunReport setResult(StepResult result) {
+      this.result = result;
+      return this;
+   }
 
-    public boolean isTypeValid() {
-        return type != null && !type.isBlank();
-    }
+   /**
+    * Retrieves the list of output properties associated with this step run report.
+    *
+    * @return a list of {@code Property} instances representing the output properties,
+    *         or an empty list if no outputs are defined
+    */
+   public List<Property> getOutputs() {
+      return new ArrayList<>(outputs);
+   }
 
-    public boolean isResultValid() {
-        return result != null;
-    }
+   /**
+    * Sets the list of output properties associated with this step run report.
+    *
+    * @param outputs the list of {@code Property} instances representing the output properties to set;
+    *                cannot be null but may be empty
+    * @return the current instance of {@code StepRunReport} with the updated output properties
+    */
+   public StepRunReport setOutputs(List<Property> outputs) {
+      this.outputs = new ArrayList<>(outputs);
+      return this;
+   }
 
-    public boolean isValid() {
-        return isStepIdValid() && isTypeValid() && isResultValid();
-    }
+   /**
+    * Adds an output property to the list of outputs for this step run report.
+    *
+    * @param output the {@code Property} instance to be added to the list of outputs; must not be null
+    * @return the current instance of {@code StepRunReport} with the updated outputs
+    */
+   public StepRunReport addOutput(Property output) {
+      outputs.add(output);
+      return this;
+   }
 
-    public StepResult computeResult() {
-        if (!unexpectedErrors.isEmpty()) {
-            result = StepResult.UNDEFINED;
-        }
-        return result;
-    }
+   /**
+    * Adds a list of output properties to the current list of outputs associated with this step run report.
+    *
+    * @param outputs the list of {@code Property} instances to be added to the existing outputs;
+    *                must not be null but can be an empty list
+    * @return the current instance of {@code StepRunReport} with the updated list of outputs
+    */
+   public StepRunReport addOutputs(List<Property> outputs) {
+      this.outputs.addAll(outputs);
+      return this;
+   }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof StepRunReport stepRunReport)) return false;
-        return Objects.equals(stepId, stepRunReport.stepId)
-                && Objects.equals(type, stepRunReport.type)
-                && result == stepRunReport.result
-                && Objects.equals(outputs, stepRunReport.outputs)
-                && Objects.equals(unexpectedErrors, stepRunReport.unexpectedErrors);
-    }
+   /**
+    * Retrieves the list of unexpected errors associated with the current instance.
+    *
+    * @return a list of {@code UnexpectedError} instances representing the unexpected errors,
+    *         or an empty list if no unexpected errors are defined.
+    */
+   public List<UnexpectedError> getUnexpectedErrors() {
+      return new ArrayList<>(unexpectedErrors);
+   }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(stepId, type, result, outputs, unexpectedErrors);
-    }
+   /**
+    * Sets the list of unexpected errors associated with this step run report.
+    *
+    * @param unexpectedErrors the list of {@code UnexpectedError} instances representing
+    *                         the unexpected errors to set; can be null
+    * @return the current instance of {@code StepRunReport} with the updated list of unexpected errors
+    */
+   public StepRunReport setUnexpectedErrors(List<UnexpectedError> unexpectedErrors) {
+      this.unexpectedErrors = unexpectedErrors != null
+            ? new ArrayList<>(unexpectedErrors)
+            : new ArrayList<>();
+      return this;
+   }
+
+   /**
+    * Adds an unexpected error to the list of unexpected errors associated with this instance.
+    *
+    * @param unexpectedError the {@code UnexpectedError} instance to be added; must not be null
+    * @return the current instance of {@code StepRunReport} with the updated list of unexpected errors
+    */
+   public StepRunReport addUnexpectedError(UnexpectedError unexpectedError) {
+      unexpectedErrors.add(unexpectedError);
+      return this;
+   }
+
+   /**
+    * Determines whether the step name associated with this report has been defined
+    * and is not blank.
+    *
+    * @return {@code true} if the step name is defined and not blank; {@code false} otherwise
+    */
+   public boolean isStepNameDefined() {
+      return stepName != null && !stepName.isBlank();
+   }
+
+   /**
+    * Determines whether the type associated with this report has been defined
+    * and is not blank.
+    *
+    * @return true if the type is defined and not blank; false otherwise
+    */
+   public boolean isTypeDefined() {
+      return type != null && !type.isBlank();
+   }
+
+   /**
+    * Determines whether the result of the step or process execution has been defined.
+    *
+    * @return true if the result is not null; false otherwise
+    */
+   public boolean isResultDefined() {
+      return result != null;
+   }
+
+   /**
+    * Computes and returns the result of a step or process execution.
+    * If there are any unexpected errors, the result is set to {@link StepResult#UNDEFINED}.
+    *
+    * @return the computed {@link StepResult}, which may reflect the current value
+    *         of the result or {@link StepResult#UNDEFINED} if unexpected errors exist.
+    */
+   public StepResult computeResult() {
+      if (!unexpectedErrors.isEmpty()) {
+         result = StepResult.UNDEFINED;
+      }
+      return result;
+   }
+
+   @Override
+   public boolean equals(Object o) {
+      if (!(o instanceof StepRunReport report)) {
+         return false;
+      }
+      return Objects.equals(stepName, report.stepName) && Objects.equals(type,
+            report.type) && Objects.equals(dateTime,
+            report.dateTime) && result == report.result && Objects.equals(outputs,
+            report.outputs) && Objects.equals(unexpectedErrors, report.unexpectedErrors);
+   }
+
+   @Override
+   public int hashCode() {
+      return Objects.hash(stepName, type, dateTime, result, outputs, unexpectedErrors);
+   }
 }

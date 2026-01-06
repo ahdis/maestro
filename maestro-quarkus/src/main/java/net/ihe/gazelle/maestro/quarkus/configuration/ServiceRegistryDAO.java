@@ -20,12 +20,16 @@ import net.ihe.gazelle.servicemetadata.api.business.Service;
 
 import java.util.List;
 
+/**
+ * Data Access Object (DAO) interface for retrieving {@link Service} instances
+ * from the underlying database.
+ */
 public interface ServiceRegistryDAO {
 
-    /**
-     * @return a list of service load from DataBase
-     * @throws ReadingFileException if it can't read Database content
-     */
-    List<Service> getServices();
-
+   /**
+    * Retrieves all services stored in the database.
+    *
+    * @return a list of {@link Service} instances loaded from the database
+    */
+   List<Service> getServices();
 }

@@ -19,72 +19,93 @@ package net.ihe.gazelle.maestro.api.technical.dto.report;
 import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.testreport.SystemUnderTest;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import java.util.List;
 
+@Schema(
+      name = "SystemUnderTest",
+      description = "The system that has been tested by the test execution."
+)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
-        "systemIdentification",
-        "macAddresses",
-        "ipAddresses",
-        "hostNames"
+      "systemIdentification",
+      "macAddresses",
+      "ipAddresses",
+      "hostNames"
 })
 public class SystemUnderTestDTO implements DTO<SystemUnderTest> {
 
-    @JsonIgnore
-    private final SystemUnderTest systemUnderTest;
+   @JsonIgnore
+   private final SystemUnderTest systemUnderTest;
 
-    public SystemUnderTestDTO() {
-        this(new SystemUnderTest());
-    }
+   public SystemUnderTestDTO() {
+      this(new SystemUnderTest());
+   }
 
-    public SystemUnderTestDTO(SystemUnderTest systemUnderTest) {
-        this.systemUnderTest = systemUnderTest;
-    }
+   public SystemUnderTestDTO(SystemUnderTest systemUnderTest) {
+      this.systemUnderTest = systemUnderTest;
+   }
 
-    @Override
-    @JsonIgnore
-    public SystemUnderTest getBusinessObject() {
-        return systemUnderTest;
-    }
+   @Override
+   @JsonIgnore
+   public SystemUnderTest getBusinessObject() {
+      return systemUnderTest;
+   }
 
-    @JsonGetter(value = "systemIdentification")
-    public EntityIdentificationDTO getSystemIdentification() {
-        return new EntityIdentificationDTO(getBusinessObject().getSystemIdentification());
-    }
+   @Schema(
+         name = "systemIdentification",
+         description = "The identification of the system under test.",
+         required = true
+   )
+   @JsonProperty(value = "systemIdentification")
+   public EntityIdentificationDTO getSystemIdentification() {
+      return new EntityIdentificationDTO(getBusinessObject().getSystemIdentification());
+   }
 
-    @JsonSetter(value = "systemIdentification")
-    public void setSystemIdentification(EntityIdentificationDTO entityIdentificationDTO) {
-        getBusinessObject().setSystemIdentification(entityIdentificationDTO.getBusinessObject());
-    }
+   public void setSystemIdentification(EntityIdentificationDTO entityIdentificationDTO) {
+      systemUnderTest.setSystemIdentification(entityIdentificationDTO.getBusinessObject());
+   }
 
-    @JsonGetter(value = "macAddresses")
-    public List<String> getMacAddresses() {
-        return getBusinessObject().getMacAddresses();
-    }
+   @Schema(
+         name = "macAddresses",
+         description = "The list of mac addressed of the system under test.",
+         examples = {"FF:FF:FF:FF:FF:FF"}
+   )
+   @JsonProperty(value = "macAddresses")
+   public List<String> getMacAddresses() {
+      return systemUnderTest.getMacAddresses();
+   }
 
-    @JsonSetter(value = "macAddresses")
-    public void setMacAddresses(List<String> macAddresses) {
-        getBusinessObject().setMacAddresses(macAddresses);
-    }
+   public void setMacAddresses(List<String> macAddresses) {
+      systemUnderTest.setMacAddresses(macAddresses);
+   }
 
-    @JsonGetter(value = "ipAddresses")
-    public List<String> getIpAddresses() {
-        return getBusinessObject().getIpAddresses();
-    }
+   @Schema(
+         name = "ipAddresses",
+         description = "The list of ip addressed of the system under test.",
+         examples = {"10.190.10.10"}
+   )
+   @JsonProperty(value = "ipAddresses")
+   public List<String> getIpAddresses() {
+      return systemUnderTest.getIpAddresses();
+   }
 
-    @JsonSetter(value = "ipAddresses")
-    public void setIpAddresses(List<String> ipAddresses) {
-        getBusinessObject().setIpAddresses(ipAddresses);
-    }
+   public void setIpAddresses(List<String> ipAddresses) {
+      systemUnderTest.setIpAddresses(ipAddresses);
+   }
 
-    @JsonGetter(value = "hostNames")
-    public List<String> getHostNames() {
-        return getBusinessObject().getHostNames();
-    }
+   @Schema(
+         name = "hostNames",
+         description = "The list of host names of the system under test.",
+         examples = {"example.com"}
+   )
+   @JsonProperty(value = "hostNames")
+   public List<String> getHostNames() {
+      return systemUnderTest.getHostNames();
+   }
 
-    @JsonSetter(value = "hostNames")
-    public void setHostNames(List<String> hostNames) {
-        getBusinessObject().setHostNames(hostNames);
-    }
+   public void setHostNames(List<String> hostNames) {
+      systemUnderTest.setHostNames(hostNames);
+   }
 }

@@ -19,7 +19,7 @@
     <parent>
         <groupId>net.ihe.gazelle</groupId>
         <artifactId>maestro-step</artifactId>
-        <version>0.4.1-SNAPSHOT</version>
+        <version>0.6.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>simulation-step</artifactId>
@@ -29,10 +29,6 @@
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>maestro-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.ihe.gazelle</groupId>
-            <artifactId>user-interaction-step</artifactId>
         </dependency>
 
         <!-- Gazelle dependencies -->
@@ -49,24 +45,48 @@
             <artifactId>simulation-jaxrs-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.kereval.gazelle</groupId>
+            <artifactId>datahouse-api</artifactId>
+            <version>${datahouse.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>error-handling</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>framework-model-validator</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>framework-model-marshaller</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>service-metadata-api</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>service-metadata-jaxrs-api</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>lang</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>validation-v2-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>validation-v2-jaxrs-api</artifactId>
         </dependency>
 
         <!-- Stack dependencies -->
