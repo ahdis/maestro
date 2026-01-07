@@ -19,7 +19,7 @@
     <parent>
         <groupId>net.ihe.gazelle</groupId>
         <artifactId>maestro-step</artifactId>
-        <version>0.6.1-SNAPSHOT</version>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>itb-step</artifactId>
@@ -112,8 +112,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>net.ihe.gazelle</groupId>
-            <artifactId>lang</artifactId>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

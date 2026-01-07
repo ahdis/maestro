@@ -7,7 +7,6 @@ import net.ihe.gazelle.maestro.engine.business.UnknownStepException;
 import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ScriptedStepExecutorProvider implements StepExecutorProvider {
@@ -35,9 +34,7 @@ public class ScriptedStepExecutorProvider implements StepExecutorProvider {
 
    public ScriptedStepExecutorProvider failsWith(String stepName, RuntimeException exception) {
       executorsByStepName.put(stepName, stepRun -> {
-         CompletableFuture<StepRunReport> failed = new CompletableFuture<>();
-         failed.completeExceptionally(exception);
-         return failed;
+         throw exception;
       });
       return this;
    }

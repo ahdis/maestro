@@ -21,8 +21,9 @@ import org.junit.jupiter.api.Test;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ItbStepExecutorTest {
@@ -30,20 +31,26 @@ class ItbStepExecutorTest {
     private static final String SESSION_ID = "SESSION-123";
 
     @Test
-    void execute_registersFutureInDB_withSessionId_fromHandler() throws ExecutionException, InterruptedException {
+    void execute_registersFutureInDB_withSessionId_fromHandler() {
         ItbHandler handler = new ItbHandlerMock(SESSION_ID);
         ItbSessionStoreImpl store = new ItbSessionStoreImpl();
         ItbStepExecutor runner = new ItbStepExecutor(handler, store);
-
         StepRun stepRun = new StepRun(step(), List.of());
+        ItbReportingService service =
+              new ItbReportingService(new ItbClient("baseUrl", "itbApiKey"), store);
 
-        CompletableFuture<StepRunReport> future = runner.execute(stepRun);
-        ItbReportingService service = new ItbReportingService(new ItbClient("baseUrl", "itbApiKey"), store);
+        CompletableFuture<StepRunReport> reportFuture =
+              CompletableFuture.supplyAsync(() -> runner.execute(stepRun));
+
+        await()
+              .atMost(2, TimeUnit.SECONDS)
+              .until(() -> store.get(SESSION_ID) != null);
+
         service.receiveReporting(getItbReporting());
-
-        StepRunReport report = future.get();
+        StepRunReport report = reportFuture.join();
         assertEquals(StepResult.PASSED, report.getResult());
     }
+
 
     private ItbReporting getItbReporting() {
         return new ItbReporting(

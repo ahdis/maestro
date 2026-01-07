@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class MaestroEngineTest {
 
    private static ExecutorService executorService;
-    private RecordingMaestro maestro;
+   private RecordingMaestro maestro;
    private ScriptedStepExecutorProvider stepExecutorProvider;
    private InMemoryTestReportRecordingService reportRecordService;
 
@@ -49,12 +49,12 @@ class MaestroEngineTest {
 
    @BeforeEach
    void setUp() {
-       HardWiredEventBroker broker = new HardWiredEventBroker(executorService);
+      HardWiredEventBroker broker = new HardWiredEventBroker(executorService);
       stepExecutorProvider = new ScriptedStepExecutorProvider();
       reportRecordService = new InMemoryTestReportRecordingService();
 
       SessionStoreImpl<MaestroObserver> testRunObserverStore = new SessionStoreImpl<>();
-       SessionStoreImpl<MaestroObserver> testSuiteRunObserverStore = new SessionStoreImpl<>();
+      SessionStoreImpl<MaestroObserver> testSuiteRunObserverStore = new SessionStoreImpl<>();
       SessionStoreImpl<TestSuiteSession> suiteSessionStore = new SessionStoreImpl<>();
       SessionStoreImpl<TestRunSession> testRunSessionStore = new SessionStoreImpl<>();
 
@@ -274,9 +274,11 @@ class MaestroEngineTest {
       ManualInteractionObserver observer = new ManualInteractionObserver();
       TestSuiteRun suiteRun = buildSuiteRun("suite-interact", createTest("interaction-test", "interaction-step"));
 
-      stepExecutorProvider.withExecutor("interaction-step", stepRun -> observer.interactWithUser(
-                  new InteractWithUser("Confirm", "Proceed?", 1L))
-            .thenApply(done -> passedReport("interaction-step")));
+      stepExecutorProvider.withExecutor("interaction-step", stepRun ->
+            observer.interactWithUser(
+                  new InteractWithUser("Confirm", "Proceed?", 1L)
+            ).thenApply(done -> passedReport("interaction-step")).join()
+      );
 
       maestro.executeTestSuite(suiteRun,true, observer);
 

@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -42,7 +41,7 @@ class StepRunnerTest {
             .setType("SIMULATION")
             .setResult(StepResult.PASSED);
 
-      executorProvider.withExecutor("Step 1", stepRun -> CompletableFuture.completedFuture(report));
+      executorProvider.withExecutor("Step 1", stepRun -> report);
 
       stepRunner.run(new StartStepRun("123456", "abc123", 4, new StepRun(step, step.getProperties())));
 
@@ -56,7 +55,7 @@ class StepRunnerTest {
    @Test
    void runHonorsTimeoutProperty() {
       step.setTimeout(50L);
-      executorProvider.withExecutor("Step 1", stepRun -> new CompletableFuture<>());
+      executorProvider.withExecutor("Step 1", stepRun -> new StepRunReport());
 
       stepRunner.run(new StartStepRun("session-timeout", "test", 0, new StepRun(step, step.getProperties())));
 
@@ -77,9 +76,7 @@ class StepRunnerTest {
    @Test
    void runPropagatesExecutorExceptionsAsUndefinedReports() {
       executorProvider.withExecutor("Step 1", stepRun -> {
-         CompletableFuture<StepRunReport> future = new CompletableFuture<>();
-         future.completeExceptionally(new RuntimeException("boom"));
-         return future;
+         throw new RuntimeException("boom");
       });
 
       stepRunner.run(new StartStepRun("session-exception", "test", 0, new StepRun(step, step.getProperties())));
