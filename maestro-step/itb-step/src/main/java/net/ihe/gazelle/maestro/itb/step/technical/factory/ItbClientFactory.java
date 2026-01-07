@@ -34,11 +34,23 @@ public class ItbClientFactory {
 
    private final HandlerProvider handlerProvider;
 
+   /**
+    * Constructs an instance of ItbClientFactory with the specified HandlerProvider.
+    *
+    * @param handlerProvider the provider responsible for retrieving handlers for ITB services
+    */
    @Inject
    public ItbClientFactory(HandlerProvider handlerProvider) {
       this.handlerProvider = handlerProvider;
    }
 
+   /**
+    * Produces and provides a request-scoped instance of {@link ItbClient}.
+    * This method utilizes the {@link HandlerProvider} to retrieve a handler for the ITB service
+    * based on the specified {@link HandlerContext}.
+    *
+    * @return an instance of {@link ItbClient} generated through the {@link HandlerProvider}
+    */
    @Produces
    @RequestScoped
    public ItbClient createItbClient() {

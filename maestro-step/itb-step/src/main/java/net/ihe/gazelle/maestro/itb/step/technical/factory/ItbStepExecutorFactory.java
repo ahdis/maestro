@@ -28,7 +28,17 @@ import net.ihe.gazelle.maestro.spi.technical.StepExecutorFactory;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Factory class for creating step executors that handle ITB (Integration Test Bed) steps.
+ */
 public class ItbStepExecutorFactory implements StepExecutorFactory {
+
+   /**
+    * Default constructor.
+    */
+   public ItbStepExecutorFactory() {
+      // Empty
+   }
 
    @Override
    public String getSupportedStep() {

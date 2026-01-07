@@ -19,8 +19,19 @@ package net.ihe.gazelle.maestro.itb.step.business;
 import net.ihe.gazelle.itb.gateway.business.ItbClient;
 import net.ihe.gazelle.maestro.spi.business.Handler;
 
+/**
+ * Represents a handler interface for ITB (Integration Test Bed) services.
+ * It combines the functionality of {@link ItbClient} and {@link Handler},
+ * allowing implementations to manage ITB test sessions and check service availability.
+ * <br>
+ * The constant {@code ITB_SERVICE_NAME} provides the name of the ITB service.
+ */
 public interface ItbHandler extends ItbClient, Handler {
 
+   /**
+    * The name of the Integration Test Bed (ITB) service.
+    * This constant is used to identify and reference the ITB service within the system.
+    */
    String ITB_SERVICE_NAME = "ITB";
 
 }

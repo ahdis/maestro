@@ -19,8 +19,17 @@ package net.ihe.gazelle.maestro.itb.step.technical.handler;
 import net.ihe.gazelle.itb.gateway.technical.client.ItbClient;
 import net.ihe.gazelle.maestro.itb.step.business.ItbHandler;
 
+/**
+ * Implementation of {@link ItbHandler}.
+ */
 public class ItbHandlerImpl extends ItbClient implements ItbHandler {
 
+   /**
+    * Constructs an instance of {@code ItbHandlerImpl} by initializing its base URL and API key.
+    *
+    * @param baseItbUrl the base URL of the ITB service
+    * @param itbApiKey the API key used for authenticating with the ITB service
+    */
    public ItbHandlerImpl(String baseItbUrl, String itbApiKey) {
       super(baseItbUrl, itbApiKey);
    }

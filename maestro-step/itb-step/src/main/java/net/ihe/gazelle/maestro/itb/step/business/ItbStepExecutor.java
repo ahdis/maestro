@@ -49,6 +49,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
+/**
+ * Implementation of the StepExecutor interface for handling ITB step executions.
+ */
 public class ItbStepExecutor implements StepExecutor {
 
    private static final Logger LOG = LoggerFactory.getLogger(ItbStepExecutor.class);
@@ -60,6 +63,13 @@ public class ItbStepExecutor implements StepExecutor {
 
    private final RunItbTestService itbService;
 
+   /**
+    * Constructs an instance of the {@code ItbStepExecutor} class, which is responsible for executing
+    * ITB test steps by using the provided ITB handler and session store.
+    *
+    * @param itbHandler the handler interface for managing ITB services and test sessions.
+    * @param sessionStore the session store that handles the storage and retrieval of ITB reporting sessions.
+    */
    public ItbStepExecutor(ItbHandler itbHandler, ItbSessionStore sessionStore) {
       itbService = new RunItbTestService(itbHandler, sessionStore);
    }

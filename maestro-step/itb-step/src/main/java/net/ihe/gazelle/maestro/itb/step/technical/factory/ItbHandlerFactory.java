@@ -29,7 +29,17 @@ import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterface;
 
 import java.util.List;
 
+/**
+ * Factory class for creating and configuring handlers for the ITB (Integration Test Bed) service.
+ */
 public class ItbHandlerFactory implements HandlerFactory {
+
+   /**
+    * Default constructor.
+    */
+   public ItbHandlerFactory() {
+      // Empty
+   }
 
     @Override
     public Class<? extends Handler> getHandlerType() {
