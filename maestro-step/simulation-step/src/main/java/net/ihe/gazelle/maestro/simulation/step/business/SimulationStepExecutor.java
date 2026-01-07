@@ -88,7 +88,7 @@ public class SimulationStepExecutor implements StepExecutor {
          simulationHandler.simulate(simulationRequest, new InstructionConsumer(stepRun.getTimeout()), futureReport::complete);
          SimulationReport simulationReport = waitSimulationReport(simulationRequest, futureReport);
 
-         return CompletableFuture.completedFuture(buildStepRunReport(stepRun, simulationReport));
+         return buildStepRunReport(stepRun, simulationReport);
       } catch (RuntimeException e) {
          return buildReportWithError(stepRun, e);
       }
