@@ -9,19 +9,24 @@ import net.ihe.gazelle.maestro.api.business.test.TestReference;
 import net.ihe.gazelle.maestro.api.business.test.TestSuite;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import java.util.List;
 
+@Schema(
+      name = "TestSuite",
+      description = "The test suite is a test scenario where one or more test can be executed sequentially."
+)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
-        "id",
-        "name",
-        "testReferences",
-        "supportedInputs",
+      "id",
+      "name",
+      "testReferences",
+      "supportedInputs",
 })
 public class TestSuiteDTO implements DTO<TestSuite> {
 
-    @JsonIgnore
+   @JsonIgnore
    private final TestSuite testSuite;
 
    public TestSuiteDTO() {
@@ -32,6 +37,11 @@ public class TestSuiteDTO implements DTO<TestSuite> {
       this.testSuite = testSuite;
    }
 
+   @Schema(
+         name = "id",
+         description = "The unique identifier of the test suite.",
+         required = true
+   )
    @JsonProperty("id")
    public String getId() {
       return testSuite.getId();
@@ -41,6 +51,11 @@ public class TestSuiteDTO implements DTO<TestSuite> {
       testSuite.setId(id);
    }
 
+   @Schema(
+         name = "name",
+         description = "The name of the test suite.",
+         required = true
+   )
    @JsonProperty("name")
    public String getName() {
       return testSuite.getName();
@@ -50,6 +65,12 @@ public class TestSuiteDTO implements DTO<TestSuite> {
       testSuite.setName(name);
    }
 
+   @Schema(
+         name = "testReferences",
+         description = "The list of test referenced by the test suite.",
+         required = true,
+         minLength = 1
+   )
    @JsonProperty("testReferences")
    public List<TestReferenceDTO> getTestReferences() {
       return testSuite.getTestReferences().stream()
@@ -68,7 +89,11 @@ public class TestSuiteDTO implements DTO<TestSuite> {
       );
    }
 
-    @SuppressWarnings("rawtypes")
+   @Schema(
+         name = "supportedInputs",
+         description = "A list of input that can be accessible across all test in the test suite."
+   )
+   @SuppressWarnings("rawtypes")
    @JsonProperty("supportedInputs")
    public List<SupportedInputDTO> getSupportedInputs() {
       return testSuite.getSupportedInputs().stream()
@@ -77,7 +102,7 @@ public class TestSuiteDTO implements DTO<TestSuite> {
             .toList();
    }
 
-    @SuppressWarnings("rawtypes")
+   @SuppressWarnings("rawtypes")
    public void setSupportedInputs(List<SupportedInputDTO> supportedInputDTOs) {
       testSuite.setSupportedInputs(
             supportedInputDTOs != null ?

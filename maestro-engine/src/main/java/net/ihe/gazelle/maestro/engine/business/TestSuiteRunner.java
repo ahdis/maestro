@@ -20,6 +20,9 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * TestSuiteRunner is responsible for executing {@link TestSuiteRun} instances.
+ */
 public class TestSuiteRunner {
 
    private static final Logger LOG = LoggerFactory.getLogger(TestSuiteRunner.class);
@@ -28,6 +31,12 @@ public class TestSuiteRunner {
    private final TestSuiteEventProducer testSuiteEventProducer;
    private final TestSuiteRunValidator testSuiteRunValidator = new TestSuiteRunValidator();
 
+   /**
+    * Creates a new {@code TestSuiteRunner} with the specified session store and event producer.
+    *
+    * @param sessionStore the store used to manage {@link TestSuiteSession} instances
+    * @param testSuiteEventProducer the producer used to send test suite events
+    */
    public TestSuiteRunner(SessionStore<TestSuiteSession> sessionStore, TestSuiteEventProducer testSuiteEventProducer) {
       this.sessionStore = sessionStore;
       this.testSuiteEventProducer = testSuiteEventProducer;
@@ -60,6 +69,12 @@ public class TestSuiteRunner {
       }
    }
 
+   /**
+    * Handles a {@link TestRunFinished} event by updating the session state,
+    * sending the next test run command, or finishing the test suite.
+    *
+    * @param testRunFinished the finished test run event to process
+    */
    public void listen(TestRunFinished testRunFinished) {
       String sessionId = testRunFinished.getSessionId();
       if (sessionId != null && sessionStore.hasSession(sessionId)) {
@@ -102,7 +117,8 @@ public class TestSuiteRunner {
          String testId = testRef.getTestId();
          testRuns.add(new TestRun()
                .setTest(testSuiteRun.getTest(testId))
-               .setInputs(consolidateInputs(testSuiteRun, testRef)));
+               .setInputs(consolidateInputs(testSuiteRun, testRef))
+               .setAccessControlList(testSuiteRun.getAccessControlList()));
       }
       return testRuns;
    }

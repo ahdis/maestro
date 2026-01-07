@@ -19,50 +19,61 @@ package net.ihe.gazelle.maestro.quarkus.websocket.dto;
 import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.message.ExecutionFinished;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
+@Schema(
+      name = "ExecutionFinished",
+      description = "Message sent when the execution of a test suite or a test is finished."
+)
 @JsonTypeName(ExecutionFinishedDTO.TYPE)
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-        "type",
-        "testReport",
-        "location",
+      "type",
+      "testReport",
+      "location",
 })
 public class ExecutionFinishedDTO extends MessageDTO<ExecutionFinished> {
 
-    @JsonIgnore
-    public static final String TYPE = "EXECUTION_FINISHED";
+   @JsonIgnore
+   public static final String TYPE = "EXECUTION_FINISHED";
 
-    public ExecutionFinishedDTO() {
-        this(new ExecutionFinished());
-    }
+   public ExecutionFinishedDTO() {
+      this(new ExecutionFinished());
+   }
 
-    public ExecutionFinishedDTO(ExecutionFinished testReport) {
-        super(testReport);
-    }
+   public ExecutionFinishedDTO(ExecutionFinished testReport) {
+      super(testReport);
+   }
 
-    @JsonGetter("testReport")
-    public TestReportDTO getTestReport() {
-        return new TestReportDTO(message.getReport());
-    }
+   @Schema(
+         name = "testReport",
+         description = "The test report of the test suite or test execution."
+   )
+   @JsonProperty("testReport")
+   public TestReportDTO getTestReport() {
+      return new TestReportDTO(message.getReport());
+   }
 
-    @JsonSetter("testReport")
-    public void setDateTime(TestReportDTO testReport) {
-        message.setReport(testReport.getBusinessObject());
-    }
+   public void setTestReport(TestReportDTO testReport) {
+      message.setReport(testReport.getBusinessObject());
+   }
 
-    @JsonGetter("location")
-    public String getLocation() {
-        return message.getReportLocation();
-    }
+   @Schema(
+         name = "location",
+         description = "A link to retrieve the test report."
+   )
+   @JsonProperty("location")
+   public String getLocation() {
+      return message.getReportLocation();
+   }
 
-    @JsonSetter("location")
-    public void setLocation(String location) {
-        message.setReportLocation(location);
-    }
+   public void setLocation(String location) {
+      message.setReportLocation(location);
+   }
 
-    @Override
-    @JsonIgnore
-    public Class<ExecutionFinished> getBusinessObjectClass() {
-        return ExecutionFinished.class;
-    }
+   @Override
+   @JsonIgnore
+   public Class<ExecutionFinished> getBusinessObjectClass() {
+      return ExecutionFinished.class;
+   }
 }

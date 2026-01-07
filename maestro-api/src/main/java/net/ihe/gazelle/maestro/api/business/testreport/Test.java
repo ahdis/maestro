@@ -21,90 +21,178 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
+ * A structure for a test.
  * Business rules <br>
  * id is mandatory
  */
 public class Test implements Serializable {
 
-    @Serial
-    private static final long serialVersionUID = -1682879799680526090L;
+   @Serial
+   private static final long serialVersionUID = -1682879799680526090L;
 
-    private String id;
-    private String name;
-    private String version;
-    private String description;
+   /**
+    * The id of the test.
+    */
+   private String id;
 
-    public Test() {
-    }
+   /**
+    * The name of the test.
+    */
+   private String name;
 
-    public Test(String id) {
-        this.id = id;
-    }
+   /**
+    * The version of the test.
+    */
+   private String version;
 
-    public String getId() {
-        return id;
-    }
+   /**
+    * The description of the test.
+    */
+   private String description;
 
-    public Test setId(String id) {
-        this.id = id;
-        return this;
-    }
+   /**
+    * Default constructor.
+    */
+   public Test() {
+   }
 
-    public String getName() {
-        return name;
-    }
+   /**
+    * Constructs a new Test instance with the specified id.
+    *
+    * @param id the unique identifier for the test; must not be null or blank
+    */
+   public Test(String id) {
+      this.id = id;
+   }
 
-    public Test setName(String name) {
-        this.name = name;
-        return this;
-    }
+   /**
+    * Retrieves the ID of the test.
+    *
+    * @return the ID of the test as a String
+    */
+   public String getId() {
+      return id;
+   }
 
-    public String getVersion() {
-        return version;
-    }
+   /**
+    * Sets the ID of the test.
+    *
+    * @param id the unique identifier for the test; must not be null or blank
+    * @return the current instance of {@code Test} to allow method chaining
+    */
+   public Test setId(String id) {
+      this.id = id;
+      return this;
+   }
 
-    public Test setVersion(String version) {
-        this.version = version;
-        return this;
-    }
+   /**
+    * Retrieves the name of the test.
+    *
+    * @return the name of the test as a String
+    */
+   public String getName() {
+      return name;
+   }
 
-    public String getDescription() {
-        return description;
-    }
+   /**
+    * Sets the name of the test.
+    *
+    * @param name the name of the test
+    * @return the current instance of {@code Test} to allow method chaining
+    */
+   public Test setName(String name) {
+      this.name = name;
+      return this;
+   }
 
-    public Test setDescription(String description) {
-        this.description = description;
-        return this;
-    }
+   /**
+    * Retrieves the version of the test.
+    *
+    * @return the version of the test as a String
+    */
+   public String getVersion() {
+      return version;
+   }
 
-    public boolean isIdValid() {
-        return id != null && !id.isBlank();
-    }
+   /**
+    * Sets the version of the test.
+    *
+    * @param version the version of the test as a String
+    * @return the current instance of {@code Test} to allow method chaining
+    */
+   public Test setVersion(String version) {
+      this.version = version;
+      return this;
+   }
 
-    public boolean isNameValid() {
-        return name == null || !name.isBlank();
-    }
+   /**
+    * Retrieves the description of the current instance.
+    *
+    * @return the description as a String
+    */
+   public String getDescription() {
+      return description;
+   }
 
-    public boolean isVersionValid() {
-        return version == null || !version.isBlank();
-    }
+   /**
+    * Sets the description of the test.
+    *
+    * @param description the description of the test
+    * @return the current instance of {@code Test} to allow method chaining
+    */
+   public Test setDescription(String description) {
+      this.description = description;
+      return this;
+   }
 
-    public boolean isDescriptionValid() {
-        return description == null || !description.isBlank();
-    }
+   /**
+    * Checks if the ID is defined for this instance.
+    *
+    * @return true if the ID is defined, false otherwise
+    */
+   public boolean isIdDefined() {
+      return id != null && !id.isBlank();
+   }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Test test)) return false;
-        return Objects.equals(id, test.id)
-                && Objects.equals(name, test.name)
-                && Objects.equals(version, test.version)
-                && Objects.equals(description, test.description);
-    }
+   /**
+    * Checks whether the name is defined if it is present.
+    *
+    * @return true if the name is either null or non-blank; false if the name is blank
+    */
+   public boolean isNameDefinedIfPresent() {
+      return name == null || !name.isBlank();
+   }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name, version, description);
-    }
+   /**
+    * Checks whether the version is defined if it is present.
+    *
+    * @return true if the version is either null or non-blank; false otherwise
+    */
+   public boolean isVersionDefinedIfPresent() {
+      return version == null || !version.isBlank();
+   }
+
+   /**
+    * Checks whether the description is considered defined if it is present.
+    *
+    * @return true if the description is null or non-blank; false if the description is blank
+    */
+   public boolean isDescriptionDefinedIfPresent() {
+      return description == null || !description.isBlank();
+   }
+
+   @Override
+   public boolean equals(Object o) {
+      if (this == o) return true;
+      if (!(o instanceof Test test)) return false;
+      return Objects.equals(id, test.id)
+            && Objects.equals(name, test.name)
+            && Objects.equals(version, test.version)
+            && Objects.equals(description, test.description);
+   }
+
+   @Override
+   public int hashCode() {
+      return Objects.hash(id, name, version, description);
+   }
 }

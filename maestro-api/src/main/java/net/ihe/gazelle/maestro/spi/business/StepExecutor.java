@@ -19,11 +19,13 @@ package net.ihe.gazelle.maestro.spi.business;
 import net.ihe.gazelle.maestro.api.business.property.MissingPropertyException;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 
-import java.util.concurrent.CompletableFuture;
-
+/**
+ * Interface to perform the execution of a step
+ */
 public interface StepExecutor {
 
    /**
+    * The method that trigger step execution
     * @param stepRun contain a step to run
     *
     * @return the report with information to build a step report

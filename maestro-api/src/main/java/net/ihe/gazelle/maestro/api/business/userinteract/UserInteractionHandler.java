@@ -18,10 +18,27 @@ package net.ihe.gazelle.maestro.api.business.userinteract;
 
 import net.ihe.gazelle.maestro.spi.business.Handler;
 
+/**
+ * The user interaction handler is used to ask additional actions to the user during test execution
+ */
 public interface UserInteractionHandler extends Handler {
 
-    String SERVICE_NAME = "User Interaction Service";
-    String INTERFACE_NAME = "User Interaction API";
+   /**
+    * The name of the service associated with user interaction
+    */
+   String SERVICE_NAME = "User Interaction Service";
 
-    void displayMessage(String interactionTitle, String message, long timeout);
+   /**
+    * The name of the interface of the user interaction
+    */
+   String INTERFACE_NAME = "User Interaction API";
+
+   /**
+    * Displays a message to the user during test execution.
+    *
+    * @param interactionTitle the title of the interaction
+    * @param message the message to display
+    * @param timeout the maximum time to wait for user interaction, in milliseconds
+    */
+   void displayMessage(String interactionTitle, String message, long timeout);
 }

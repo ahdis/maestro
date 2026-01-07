@@ -1,6 +1,5 @@
 package net.ihe.gazelle.maestrorecording.adapter;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputDissector;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputDissectorFactory;
@@ -19,6 +18,9 @@ public class SPIStepOutputDissectorProvider implements StepOutputDissectorProvid
 
    private final List<StepOutputDissectorFactory> factories;
 
+   /**
+    * Default constructor
+    */
    public SPIStepOutputDissectorProvider() {
       this(loadFactories());
    }

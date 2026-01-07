@@ -21,31 +21,43 @@ import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory
 import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
 import net.ihe.gazelle.maestro.api.business.testreport.TestService;
 
+/**
+ * Validator implementation for {@link TestService}, responsible for defining
+ */
 public class TestServiceValidator extends AbstractValidator<TestService> {
 
-    private final EntityIdentificationValidator entityIdentificationValidator;
+   private final EntityIdentificationValidator entityIdentificationValidator;
 
-    public TestServiceValidator() {
-        super();
-        entityIdentificationValidator = new EntityIdentificationValidator();
-    }
+   /**
+    * Default constructor
+    */
+   public TestServiceValidator() {
+      super();
+      entityIdentificationValidator = new EntityIdentificationValidator();
+   }
 
-    public TestServiceValidator(ValidatorBuilderFactory validatorBuilderFactory) {
-        super(validatorBuilderFactory);
-        entityIdentificationValidator = new EntityIdentificationValidator(validatorBuilderFactory);
-    }
+   /**
+    * Constructs a TestServiceValidator using the provided ValidatorBuilderFactory.
+    *
+    * @param validatorBuilderFactory The factory to create ValidatorBuilder instances for validating TestService objects.
+    */
+   public TestServiceValidator(ValidatorBuilderFactory validatorBuilderFactory) {
+      super(validatorBuilderFactory);
+      entityIdentificationValidator = new EntityIdentificationValidator(validatorBuilderFactory);
+   }
 
-    @Override
-    protected ValidatorBuilder<? extends TestService> instantiateValidatorBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
-        return validatorBuilderFactory.getBuilder(TestService.class);
-    }
+   @Override
+   protected ValidatorBuilder<? extends TestService> instantiateValidatorBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
+      return validatorBuilderFactory.getBuilder(TestService.class);
+   }
 
-    @Override
-    protected void addRulesAndMembers(ValidatorBuilder<? extends TestService> validatorBuilder) {
-        validatorBuilder
-                .addRule("serviceIdentificationValid", TestService::isServiceIdentificationValid, "serviceIdentification must be set")
-                .addRule("serviceVersion", TestService::isServiceVersionValid, "version in serviceIdentification must be set and not empty")
-                .addRule("disclaimerValid", TestService::isDisclaimerValid, "disclaimer must be set and not empty")
-                .addMember("serviceIdentification", TestService::getServiceIdentification, entityIdentificationValidator::getAssembledValidatorBuilder);
-    }
+   @Override
+   @SuppressWarnings("unchecked")
+   protected void addRulesAndMembers(ValidatorBuilder<? extends TestService> validatorBuilder) {
+      validatorBuilder
+            .addRule(TestService::isServiceIdentificationDefined, "serviceIdentification must be set")
+            .addRule(TestService::isServiceVersionDefined, "version in serviceIdentification must be set and not empty")
+            .addRule(TestService::isDisclaimerDefined, "disclaimer must be set and not empty")
+            .addMember("serviceIdentification", TestService::getServiceIdentification, entityIdentificationValidator::getAssembledValidatorBuilder);
+   }
 }

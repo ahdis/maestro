@@ -1,7 +1,5 @@
 package net.ihe.gazelle.maestro.spi.business.recording;
 
-import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
-
 /**
  * Service provider loaded through {@link java.util.ServiceLoader} allowing each step
  * module to contribute its own {@link StepOutputDissector}.

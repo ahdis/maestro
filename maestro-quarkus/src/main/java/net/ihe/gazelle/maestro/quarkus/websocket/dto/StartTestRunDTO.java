@@ -19,52 +19,65 @@ package net.ihe.gazelle.maestro.quarkus.websocket.dto;
 import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestRunDTO;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
+@Schema(
+      name = "StartTestRun",
+      description = "Message sent when a new test run is started."
+)
 @JsonTypeName(StartTestRunDTO.TYPE)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(value = {"authorization"})
 @JsonPropertyOrder({
-        "type",
-        "testRun",
-        "persist"
+      "type",
+      "testRun",
+      "persist",
 })
 public class StartTestRunDTO extends MessageDTO<TestRun> {
 
-    @JsonIgnore
-    public static final String TYPE = "START_TEST_RUN";
+   @JsonIgnore
+   public static final String TYPE = "START_TEST_RUN";
 
-    private boolean persist;
+   private boolean persist;
 
-    public StartTestRunDTO() {
-        this(new TestRun());
-    }
+   public StartTestRunDTO() {
+      this(new TestRun());
+   }
 
-    public StartTestRunDTO(TestRun testRun) {
-        super(testRun);
-        this.persist = true;
-    }
+   public StartTestRunDTO(TestRun testRun) {
+      super(testRun);
+      this.persist = true;
+   }
 
-    @JsonGetter("testRun")
-    public TestRunDTO getTestSuiteRun() {
-        return new TestRunDTO(getBusinessObject());
-    }
+   @Schema(
+         name = "testRun",
+         description = "The test run that is staring."
+   )
+   @JsonProperty("testRun")
+   public TestRunDTO getTestSuiteRun() {
+      return new TestRunDTO(message);
+   }
 
-    @JsonSetter("testRun")
-    public void setTestSuiteRun(TestRunDTO testRun) {
-        this.message = testRun.getBusinessObject();
-    }
+   public void setTestSuiteRun(TestRunDTO testRun) {
+      this.message = testRun.getBusinessObject();
+   }
 
-    @JsonGetter("persist")
-    public boolean isPersist() {
-        return persist;
-    }
+   @Schema(
+         name = "persist",
+         description = "Whether the test report should be persisted."
+   )
+   @JsonProperty("persist")
+   public boolean isPersist() {
+      return persist;
+   }
 
-    @JsonSetter("persist")
-    public void setPersist(boolean persist) {
-        this.persist = persist;
-    }
+   public void setPersist(boolean persist) {
+      this.persist = persist;
+   }
 
-    @Override
-    @JsonIgnore
-    public Class<TestRun> getBusinessObjectClass() {
-        return TestRun.class;
-    }
+   @Override
+   @JsonIgnore
+   public Class<TestRun> getBusinessObjectClass() {
+      return TestRun.class;
+   }
 }

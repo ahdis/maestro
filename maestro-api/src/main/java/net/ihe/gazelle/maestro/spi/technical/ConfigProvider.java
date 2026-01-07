@@ -16,8 +16,17 @@
 
 package net.ihe.gazelle.maestro.spi.technical;
 
+/**
+ * Provides configuration values based on a key.
+ */
 public interface ConfigProvider {
 
+    /**
+     * Retrieves the configuration value associated with the given key.
+     *
+     * @param key the configuration key
+     * @return the configuration value
+     */
     String getConfig(String key);
 
 }

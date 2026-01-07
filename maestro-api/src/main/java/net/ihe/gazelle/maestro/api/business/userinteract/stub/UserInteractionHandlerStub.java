@@ -18,15 +18,25 @@ package net.ihe.gazelle.maestro.api.business.userinteract.stub;
 
 import net.ihe.gazelle.maestro.api.business.userinteract.UserInteractionHandler;
 
+/**
+ * Stub used for tests
+ */
 public class UserInteractionHandlerStub implements UserInteractionHandler {
 
-    @Override
-    public void displayMessage(String interactionTitle, String message,  long timeout) {
-        // Stub method.
-    }
+   /**
+    * Default constructor
+    */
+   public UserInteractionHandlerStub() {
+      // Empty
+   }
 
-    @Override
-    public boolean isAvailable() {
-        return true;
-    }
+   @Override
+   public void displayMessage(String interactionTitle, String message, long timeout) {
+      // Stub method.
+   }
+
+   @Override
+   public boolean isAvailable() {
+      return true;
+   }
 }

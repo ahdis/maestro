@@ -13,7 +13,15 @@ import static net.ihe.gazelle.maestro.api.business.testreport.StepResult.FAILED;
 import static net.ihe.gazelle.maestro.api.business.testreport.StepResult.PASSED;
 import static net.ihe.gazelle.maestro.assertion.step.business.equals.AssertEqualsStepDefinition.*;
 
+/**
+ * Executor for the assert equals step. Verifies that the actual value equals the expected value.
+ */
 public class AssertEqualsStepExecutor implements StepExecutor {
+
+   /**
+    * Default constructor.
+    */
+   public AssertEqualsStepExecutor() { /* Default constructor */ }
 
    @Override
    public StepRunReport execute(StepRun stepRun) {

@@ -18,8 +18,8 @@ package net.ihe.gazelle.maestro.itb.step.technical.factory;
 
 import net.ihe.gazelle.maestro.itb.step.business.ItbHandler;
 import net.ihe.gazelle.maestro.itb.step.technical.handler.ItbHandlerImpl;
-import net.ihe.gazelle.maestro.spi.technical.ConfigProvider;
 import net.ihe.gazelle.maestro.spi.business.Handler;
+import net.ihe.gazelle.maestro.spi.technical.ConfigProvider;
 import net.ihe.gazelle.maestro.spi.technical.HandlerContext;
 import net.ihe.gazelle.maestro.spi.technical.HandlerFactory;
 import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterface;

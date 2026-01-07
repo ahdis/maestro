@@ -16,7 +16,21 @@
 
 package net.ihe.gazelle.maestro.api.business;
 
+import java.io.Serial;
+
+/**
+ * Exception thrown when a test suite is invalid.
+ */
 public class InvalidTestSuiteException extends RuntimeException {
+
+    @Serial
+    private static final long serialVersionUID = -5853728697242788342L;
+
+    /**
+     * Creates a new {@code InvalidTestSuiteException} with the specified message.
+     *
+     * @param message the detail message
+     */
     public InvalidTestSuiteException(String message) {
         super(message);
     }

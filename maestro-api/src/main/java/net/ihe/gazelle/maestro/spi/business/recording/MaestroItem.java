@@ -1,6 +1,5 @@
 package net.ihe.gazelle.maestro.spi.business.recording;
 
-import net.ihe.gazelle.security.business.ProtectedResource;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 
 import java.util.List;

@@ -20,51 +20,61 @@ import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
 import net.ihe.gazelle.maestro.api.technical.dto.property.PropertyDTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import java.util.List;
 
+@Schema(
+      name = "UserInteractionCompleted",
+      description = "Message sent when a user interaction is completed."
+)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonTypeName(UserInteractionCompletedDTO.TYPE)
+@JsonIgnoreProperties(value = {"authorization"})
 @JsonPropertyOrder({
-        "type",
-        "inputs"
+      "type",
+      "inputs"
 })
 public class UserInteractionCompletedDTO extends MessageDTO<UserInteractionCompleted> {
 
-    @JsonIgnore
-    public static final String TYPE = "USER_INTERACTION_COMPLETED";
+   @JsonIgnore
+   public static final String TYPE = "USER_INTERACTION_COMPLETED";
 
-    public UserInteractionCompletedDTO() {
-        this(new UserInteractionCompleted());
-    }
+   public UserInteractionCompletedDTO() {
+      this(new UserInteractionCompleted());
+   }
 
-    public UserInteractionCompletedDTO(UserInteractionCompleted userInteractionCompleted) {
-        super(userInteractionCompleted);
-    }
+   public UserInteractionCompletedDTO(UserInteractionCompleted userInteractionCompleted) {
+      super(userInteractionCompleted);
+   }
 
-    @SuppressWarnings("rawtypes")
-    @JsonProperty(value = "inputs")
-    public List<PropertyDTO> getInputs() {
-        return message.getInputs().stream()
-                .map(SubTypingDTO::fromBusinessObject)
-                .map(PropertyDTO.class::cast)
-                .toList();
-    }
+   @Schema(
+         name = "inputs",
+         description = "The inputs provided by the user."
+   )
+   @SuppressWarnings("rawtypes")
+   @JsonProperty(value = "inputs")
+   public List<PropertyDTO> getInputs() {
+      return message.getInputs().stream()
+            .map(SubTypingDTO::fromBusinessObject)
+            .map(PropertyDTO.class::cast)
+            .toList();
+   }
 
-    @SuppressWarnings("rawtypes")
-    public void setInputs(List<PropertyDTO> inputs) {
-        message.addInputs(
-                inputs.stream()
-                        .map(PropertyDTO::getBusinessObject)
-                        .toList()
-        );
-    }
+   @SuppressWarnings("rawtypes")
+   public void setInputs(List<PropertyDTO> inputs) {
+      message.addInputs(
+            inputs.stream()
+                  .map(PropertyDTO::getBusinessObject)
+                  .toList()
+      );
+   }
 
-    @Override
-    @JsonGetter
-    public Class<UserInteractionCompleted> getBusinessObjectClass() {
-        return UserInteractionCompleted.class;
-    }
+   @Override
+   @JsonGetter
+   public Class<UserInteractionCompleted> getBusinessObjectClass() {
+      return UserInteractionCompleted.class;
+   }
 }
 
 

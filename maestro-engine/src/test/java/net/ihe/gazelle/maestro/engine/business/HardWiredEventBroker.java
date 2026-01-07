@@ -8,7 +8,7 @@ public class HardWiredEventBroker implements MaestroEventProducer, TestSuiteEven
 
    private final ExecutorService executorService;
 
-   private MaestroImpl maestro;
+   private MaestroFacade maestro;
    private TestSuiteRunner testSuiteRunner;
    private TestRunner testRunner;
    private StepRunner stepRunner;
@@ -17,7 +17,7 @@ public class HardWiredEventBroker implements MaestroEventProducer, TestSuiteEven
       this.executorService = executorService;
    }
 
-   public void setServices(MaestroImpl maestro, TestSuiteRunner testSuiteRunner, TestRunner testRunner, StepRunner stepRunner) {
+   public void setServices(MaestroFacade maestro, TestSuiteRunner testSuiteRunner, TestRunner testRunner, StepRunner stepRunner) {
       this.maestro = maestro;
       this.testSuiteRunner = testSuiteRunner;
       this.testRunner = testRunner;

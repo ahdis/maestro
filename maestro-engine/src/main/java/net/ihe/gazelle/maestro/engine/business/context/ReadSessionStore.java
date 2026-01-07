@@ -16,7 +16,19 @@
 
 package net.ihe.gazelle.maestro.engine.business.context;
 
+/**
+ * Provides access to session objects by their identifier.
+ *
+ * @param <T> the type of session object stored and retrieved
+ */
 public interface ReadSessionStore<T> {
 
-    T getSession(String id);
+   /**
+    * Retrieves a session object by its identifier.
+    *
+    * @param id the identifier of the session
+    * @return the session object associated with the given id, or null if not found
+    */
+   T getSession(String id);
+
 }

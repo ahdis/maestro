@@ -5,7 +5,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
+@Schema(
+        name = "StringProperty",
+        description = "A property that supports string value."
+)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonTypeName(StringPropertyDTO.TYPE)
 public class StringPropertyDTO extends PropertyDTO<StringProperty> {
@@ -21,6 +26,11 @@ public class StringPropertyDTO extends PropertyDTO<StringProperty> {
       super(property);
    }
 
+    @Schema(
+            name = "value",
+            description = "The string typed value of the property.",
+            examples = "any text"
+    )
    @JsonProperty(VALUE)
    public String getValue() {
       return property.getValue();

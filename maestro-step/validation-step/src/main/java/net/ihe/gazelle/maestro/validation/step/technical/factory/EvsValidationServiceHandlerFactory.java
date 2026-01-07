@@ -30,10 +30,15 @@ import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterface;
 import java.util.List;
 
 /**
- * Factory for creating EVS ValidationHandler instances
- * Follows the same pattern as GazelleValidationServiceHandlerFactory
+ * Factory for creating EVS ValidationHandler instances.
+ * Follows the same pattern as GazelleValidationServiceHandlerFactory.
  */
 public class EvsValidationServiceHandlerFactory implements HandlerFactory {
+
+    /**
+     * Default constructor.
+     */
+    public EvsValidationServiceHandlerFactory() { /* Default constructor */ }
 
     @Override
     public Class<? extends Handler> getHandlerType() {

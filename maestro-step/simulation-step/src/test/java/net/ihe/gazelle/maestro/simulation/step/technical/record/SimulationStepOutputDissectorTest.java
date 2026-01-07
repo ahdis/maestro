@@ -17,13 +17,10 @@
 package net.ihe.gazelle.maestro.simulation.step.technical.record;
 
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepDefinition;
-import net.ihe.gazelle.maestro.spi.business.recording.AttachmentPlan;
-import net.ihe.gazelle.maestro.spi.business.recording.ContentMutationContext;
-import net.ihe.gazelle.maestro.spi.business.recording.ItemPlan;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputContext;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputProjection;
+import net.ihe.gazelle.maestro.spi.business.recording.*;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
@@ -80,6 +77,12 @@ class SimulationStepOutputDissectorTest {
       ItemPlan simulationItem = projection.items().getLast();
       assertEquals("VALIDATION_REPORT", validationItem.item().type());
       assertEquals("SIMULATION_REPORT", simulationItem.item().type());
+
+      assertEquals(1, projection.propertyMutations().size());
+      PropertyMutation outputMutation = projection.propertyMutations().getFirst();
+      assertEquals(0, outputMutation.outputIndex());
+      assertEquals(simulationItemIndex(projection), outputMutation.sourceItemIndex());
+      assertReplacementItemType(outputMutation, "SIMULATION_REPORT");
 
       // Attachments: validation input content
       assertEquals(1, projection.attachments().size());
@@ -139,5 +142,47 @@ class SimulationStepOutputDissectorTest {
       assertEquals(1, projection.items().size(), "Only simulation report item should be present");
       assertTrue(projection.attachments().isEmpty());
       assertEquals(1, projection.propertyMutations().size());
+   }
+
+   @Test
+   void shouldRaiseUnexpectedErrorWhenValidationReportHasNoContentAndNoReference() {
+      ValidationReport simValidation = new ValidationReport()
+            .setValidationResult(ValidationResult.PASSED);
+
+      TransactionReport tx = new TransactionReport()
+            .setResult(Result.DONE)
+            .setInitiator(new Role().setName("init"))
+            .setResponder(new Role().setName("resp"))
+            .setValidationReports(List.of(simValidation));
+      SimulationReport simulationReport = new SimulationReport()
+            .setDateTime(Instant.now())
+            .setResult(Result.DONE)
+            .setTransactionReports(List.of(tx));
+
+      byte[] simulationBytes = SER_DES.serializeAsString(new SimulationReportDTO(simulationReport)).getBytes();
+      StepRunReport step = new StepRunReport()
+            .addOutput(new ByteArrayProperty(SimulationStepDefinition.REPORT, simulationBytes));
+
+      assertThrows(IllegalStateException.class,
+            () -> dissector.dissect(new StepOutputContext(step, new AccessControlList())));
+   }
+
+   private void assertReplacementItemType(PropertyMutation mutation, String expectedItemType) {
+      assertNotNull(mutation.factory());
+      var property = mutation.factory().create("item-1", "http://dh/items/item-1");
+      assertInstanceOf(ByteArrayItemProperty.class, property);
+      ByteArrayItemProperty itemProperty = (ByteArrayItemProperty) property;
+      assertEquals(expectedItemType, itemProperty.getItemType());
+      assertEquals("http://dh/items/item-1", itemProperty.getReference());
+      assertNull(itemProperty.getValue());
+   }
+
+   private int simulationItemIndex(StepOutputProjection projection) {
+      for (int i = 0; i < projection.items().size(); i++) {
+         if ("SIMULATION_REPORT".equals(projection.items().get(i).item().type())) {
+            return i;
+         }
+      }
+      throw new AssertionError("Simulation report item not found");
    }
 }

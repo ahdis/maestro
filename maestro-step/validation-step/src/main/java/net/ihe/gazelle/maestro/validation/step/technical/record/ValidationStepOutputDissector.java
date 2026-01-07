@@ -4,19 +4,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
-import net.ihe.gazelle.maestro.spi.business.recording.MaestroAttachment;
-import net.ihe.gazelle.maestro.spi.business.recording.MaestroItem;
-import net.ihe.gazelle.maestro.spi.business.recording.MaestroRefType;
-import net.ihe.gazelle.maestro.api.business.testreport.ByteArrayItemProperty;
-import net.ihe.gazelle.maestro.spi.business.recording.AttachmentOutputBuilder;
-import net.ihe.gazelle.maestro.spi.business.recording.ContentMutationContext;
-import net.ihe.gazelle.maestro.spi.business.recording.ItemOutputBuilder;
-import net.ihe.gazelle.maestro.spi.business.recording.PropertyReferenceFactory;
-import net.ihe.gazelle.maestro.spi.business.recording.ReferenceBinding;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputContext;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputDissector;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputProjection;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputProjectionBuilder;
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
+import net.ihe.gazelle.maestro.spi.business.recording.*;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;
 import net.ihe.gazelle.validation.v2.api.business.Input;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
@@ -27,11 +16,24 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Dissects validation step outputs for recording purposes.
+ * This class processes validation reports and extracts attachments and references.
+ */
 public class ValidationStepOutputDissector implements StepOutputDissector {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+    /**
+     * Constant identifier for validation input attachments.
+     */
     public static final String VALIDATION_INPUT = "VALIDATION_INPUT";
+
+    /**
+     * Default constructor.
+     */
+    public ValidationStepOutputDissector() { /* Default constructor */ }
 
     @Override
     public StepOutputProjection dissect(StepOutputContext context) {
@@ -78,7 +80,9 @@ public class ValidationStepOutputDissector implements StepOutputDissector {
         return (itemId, itemUrl) -> {
             ByteArrayItemProperty replacement = new ByteArrayItemProperty(validationReportProperty);
             replacement.setValue(null);
-            return replacement.setReference(itemUrl);
+            return replacement
+                  .setItemType(ValidationStepDefinition.REPORT)
+                  .setReference(itemUrl);
         };
     }
 

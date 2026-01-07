@@ -19,12 +19,26 @@ package net.ihe.gazelle.maestro.quarkus.configuration;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.Produces;
 
+/**
+ * Factory class to produce {@link ServiceRegistryDAO} instances for CDI injection.
+ */
 @ApplicationScoped
 public class ServiceRegistryDAOFactory {
 
-    @Produces
-    ServiceRegistryDAO getServiceRegistry(){
-        return new ServiceRegistryDAOImpl();
-    }
+   /**
+    * Default constructor
+    */
+   public ServiceRegistryDAOFactory() {
+      // Empty
+   }
 
+   /**
+    * Produces a new {@link ServiceRegistryDAO} instance.
+    *
+    * @return a new {@link ServiceRegistryDAOImpl} instance
+    */
+   @Produces
+   ServiceRegistryDAO getServiceRegistry() {
+      return new ServiceRegistryDAOImpl();
+   }
 }

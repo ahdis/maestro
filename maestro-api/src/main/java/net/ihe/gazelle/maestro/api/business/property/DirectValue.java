@@ -1,29 +1,42 @@
 package net.ihe.gazelle.maestro.api.business.property;
 
 import java.io.Serial;
+import java.io.Serializable;
 
+/**
+ * Implementation of ValueHolder for concrete value
+ */
 class DirectValue implements ValueHolder {
 
    @Serial
    private static final long serialVersionUID = 5435920465930342207L;
 
-   private final Object value;
+   /**
+    * The value.
+    */
+   private final Serializable value;
 
-    public DirectValue(Object value) {
-        this.value = value;
-    }
+   /**
+    * Constructs a new DirectValue with the specified value.
+    *
+    * @param value the Serializable value to be held; can be null
+    */
+   public DirectValue(Serializable value) {
+      this.value = value;
+   }
 
-    @Override
-    public Object getValue() {
-        return value;
-    }
+   @Override
+   public Serializable getValue() {
+      return value;
+   }
 
-    public boolean isValueDefined() {
-        return value != null;
-    }
-
-    public boolean isValueOptional() {
-       return true;
-    }
+   /**
+    * Checks whether the value is defined.
+    *
+    * @return true if the value is not null, otherwise false
+    */
+   public boolean isValueDefined() {
+      return value != null;
+   }
 
 }

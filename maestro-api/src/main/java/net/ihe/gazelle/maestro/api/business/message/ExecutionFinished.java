@@ -20,60 +20,135 @@ import net.ihe.gazelle.lang.Event;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 
 import java.io.Serial;
+import java.io.Serializable;
 
+/**
+ * A message used to notify that a test or a test suite execution ended
+ */
 @Event
 public class ExecutionFinished implements Message {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
-    private String sessionId;
-    private Object run;
-    private String reportLocation;
-    private TestReport report;
+   @Serial
+   private static final long serialVersionUID = 1L;
 
-    public ExecutionFinished() {
-    }
+   /**
+    * The session id of the execution
+    */
+   private String sessionId;
 
-    public ExecutionFinished(String sessionId, Object run, TestReport report) {
-        this.sessionId = sessionId;
-        this.run = run;
-        this.report = report;
-    }
+   /**
+    * The Test suite run or the test run
+    */
+   private Serializable run;
 
-    public String getSessionId() {
-        return sessionId;
-    }
+   /**
+    * The location of the report
+    */
+   private String reportLocation;
 
-    public ExecutionFinished setSessionId(String sessionId) {
-        this.sessionId = sessionId;
-        return this;
-    }
+   /**
+    * The report
+    */
+   private TestReport report;
 
-    public Object getRun() {
-        return run;
-    }
+   /**
+    * Default constructor
+    */
+   public ExecutionFinished() {
+      // Empty
+   }
 
-    public ExecutionFinished setRun(Object run) {
-        this.run = run;
-        return this;
-    }
+   /**
+    * Constructs an ExecutionFinished message.
+    *
+    * @param sessionId the session id of the execution
+    * @param run the test suite run or individual test run
+    * @param report the test report associated with the execution
+    */
+   public ExecutionFinished(String sessionId, Serializable run, TestReport report) {
+      this.sessionId = sessionId;
+      this.run = run;
+      this.report = report;
+   }
 
-    public String getReportLocation() {
-        return reportLocation;
-    }
+   /**
+    * Retrieves the session ID associated with the execution.
+    *
+    * @return the session ID as a {@code String}
+    */
+   public String getSessionId() {
+      return sessionId;
+   }
 
-    public ExecutionFinished setReportLocation(String reportLocation) {
-        this.reportLocation = reportLocation;
-        return this;
-    }
+   /**
+    * Sets the session ID for the execution and returns the updated object.
+    *
+    * @param sessionId the session ID to associate with the execution
+    * @return the updated {@code ExecutionFinished} instance
+    */
+   public ExecutionFinished setSessionId(String sessionId) {
+      this.sessionId = sessionId;
+      return this;
+   }
 
-    public TestReport getReport() {
-        return report;
-    }
+   /**
+    * Retrieves the test suite run or individual test run associated with the execution.
+    *
+    * @return the associated test suite run or test run as a {@code Serializable} object
+    */
+   public Serializable getRun() {
+      return run;
+   }
 
-    public ExecutionFinished setReport(TestReport report) {
-        this.report = report;
-        return this;
-    }
+   /**
+    * Sets the test suite run or individual test run associated with the execution.
+    *
+    * @param run the test suite run or individual test run to associate with the execution
+    * @return the updated {@code ExecutionFinished} instance
+    */
+   public ExecutionFinished setRun(Serializable run) {
+      this.run = run;
+      return this;
+   }
+
+   /**
+    * Retrieves the location of the report associated with the test or test suite execution.
+    *
+    * @return the report location as a {@code String}
+    */
+   public String getReportLocation() {
+      return reportLocation;
+   }
+
+   /**
+    * Sets the location of the report associated with the test or test suite execution.
+    *
+    * @param reportLocation the location of the report as a String
+    * @return the updated {@code ExecutionFinished} instance
+    */
+   public ExecutionFinished setReportLocation(String reportLocation) {
+      this.reportLocation = reportLocation;
+      return this;
+   }
+
+   /**
+    * Retrieves the test report associated with the execution.
+    *
+    * @return the test report as a {@code TestReport} object
+    */
+   public TestReport getReport() {
+      return report;
+   }
+
+   /**
+    * Sets the test report associated with the execution and returns the updated object.
+    *
+    * @param report the test report to associate with the execution
+    * @return the updated {@code ExecutionFinished} instance
+    */
+   public ExecutionFinished setReport(TestReport report) {
+      this.report = report;
+      return this;
+   }
 
 }

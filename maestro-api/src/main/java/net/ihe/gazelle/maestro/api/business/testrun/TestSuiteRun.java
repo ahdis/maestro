@@ -41,12 +41,36 @@ public class TestSuiteRun implements Serializable {
    @Serial
    private static final long serialVersionUID = -4027777114820632058L;
 
+   private static final int TIMEOUT_MARGIN_OFFSET = 3000;
+
+   /**
+    * Timeout margin added to the computed test suite timeout.
+    */
    private TestSuite testSuite;
+
+   /**
+    * The list of tests associated with this test suite run.
+    */
    private List<Test> tests;
+
+   /**
+    * The input properties shared by all test runs.
+    */
    private List<Property> inputs;
+
+   /**
+    * The systems under test shared by all test runs.
+    */
    private List<SystemUnderTest> systemsUnderTest;
+
+   /**
+    * The access control list applied to all test runs.
+    */
    private AccessControlList accessControlList;
 
+   /**
+    * Default constructor
+    */
    public TestSuiteRun() {
       this.tests = new ArrayList<>();
       this.inputs = new ArrayList<>();
@@ -54,65 +78,138 @@ public class TestSuiteRun implements Serializable {
       this.systemsUnderTest = new ArrayList<>();
    }
 
-    public long computeTestSuiteTimeout() {
-        return testSuite.getTestReferences().stream()
-                .map(testReference -> getTestById(testReference.getTestId()))
-                .mapToLong(Test::computeTestRunTimeout)
-                .sum();
-    }
+   /**
+    * Computes the total timeout for this test suite run.
+    *
+    * @return the computed timeout including a safety margin
+    */
+   public long computeTestSuiteTimeout() {
+      return testSuite.getTestReferences().stream()
+            .map(testReference -> getTestById(testReference.getTestId()))
+            .mapToLong(Test::computeTestRunTimeout)
+            .sum() + TIMEOUT_MARGIN_OFFSET;
+   }
 
-    private Test getTestById(String testId) {
-        return tests.stream()
-                .filter(test -> testId.equals(test.getId()))
-                .findFirst()
-                .orElseThrow(() -> new NoSuchElementException("No test with id " + testId + " found."));
-    }
+   private Test getTestById(String testId) {
+      return tests.stream()
+            .filter(test -> testId.equals(test.getId()))
+            .findFirst()
+            .orElseThrow(() -> new NoSuchElementException("No test with id " + testId + " found."));
+   }
 
-    public TestSuite getTestSuite() {
+   /**
+    * Retrieves the test suite definition.
+    *
+    * @return the test suite
+    */
+   public TestSuite getTestSuite() {
       return testSuite;
    }
 
+   /**
+    * Sets the test suite definition.
+    *
+    * @param testSuite the test suite to set
+    * @return the current {@code TestSuiteRun} instance
+    */
    public TestSuiteRun setTestSuite(TestSuite testSuite) {
       this.testSuite = testSuite;
       return this;
    }
 
+   /**
+    * Retrieves the list of tests.
+    *
+    * @return a copy of the list of tests
+    */
    public List<Test> getTests() {
-      return tests;
+      return new ArrayList<>(tests);
    }
 
+   /**
+    * Sets the list of tests.
+    *
+    * @param tests the tests to associate
+    * @return the current {@code TestSuiteRun} instance
+    */
    public TestSuiteRun setTests(List<Test> tests) {
-      this.tests = tests != null ? new ArrayList<>(tests) : new ArrayList<>();
+      this.tests = tests != null
+            ? new ArrayList<>(tests)
+            : new ArrayList<>();
       return this;
    }
 
+   /**
+    * Retrieves the input properties.
+    *
+    * @return a copy of the input properties
+    */
    public List<Property> getInputs() {
-      return inputs;
+      return new ArrayList<>(inputs);
    }
 
+   /**
+    * Sets the input properties.
+    *
+    * @param inputs the input properties to set
+    * @return the current {@code TestSuiteRun} instance
+    */
    public TestSuiteRun setInputs(List<Property> inputs) {
-      this.inputs = inputs != null ? new ArrayList<>(inputs) : new ArrayList<>();
+      this.inputs = inputs != null
+            ? new ArrayList<>(inputs)
+            : new ArrayList<>();
       return this;
    }
 
+   /**
+    * Retrieves the systems under test.
+    *
+    * @return a copy of the systems under test
+    */
    public List<SystemUnderTest> getSystemsUnderTest() {
-      return systemsUnderTest;
+      return new ArrayList<>(systemsUnderTest);
    }
 
+   /**
+    * Sets the systems under test.
+    *
+    * @param systemsUnderTest the systems under test to set
+    * @return the current {@code TestSuiteRun} instance
+    */
    public TestSuiteRun setSystemsUnderTest(List<SystemUnderTest> systemsUnderTest) {
-      this.systemsUnderTest = systemsUnderTest != null ? new ArrayList<>(systemsUnderTest) : new ArrayList<>();
+      this.systemsUnderTest = systemsUnderTest != null
+            ? new ArrayList<>(systemsUnderTest)
+            : new ArrayList<>();
       return this;
    }
 
+   /**
+    * Retrieves the access control list.
+    *
+    * @return the access control list
+    */
    public AccessControlList getAccessControlList() {
       return accessControlList;
    }
 
+   /**
+    * Sets the access control list.
+    *
+    * @param accessControlList the access control list to set
+    * @return the current {@code TestSuiteRun} instance
+    */
    public TestSuiteRun setAccessControlList(AccessControlList accessControlList) {
       this.accessControlList = accessControlList != null ? accessControlList : new AccessControlList();
       return this;
    }
 
+   /**
+    * Retrieves a test by its identifier.
+    *
+    * @param id the test identifier
+    * @return the matching test
+    * @throws NoSuchElementException if no test matches the given identifier
+    */
    public Test getTest(String id) {
       return tests.stream()
             .filter(test -> test.getId().equals(id))
@@ -120,10 +217,20 @@ public class TestSuiteRun implements Serializable {
             .orElseThrow(() -> new NoSuchElementException("No test with id " + id + " found in this TestSuiteRun"));
    }
 
+   /**
+    * Indicates whether a test suite is defined.
+    *
+    * @return {@code true} if a test suite is defined, {@code false} otherwise
+    */
    public boolean isTestSuiteDefined() {
       return testSuite != null;
    }
 
+   /**
+    * Checks whether all tests referenced by the test suite are attached.
+    *
+    * @return {@code true} if all referenced tests are attached, {@code false} otherwise
+    */
    public boolean areAllReferencedTestsAttached() {
       if (testSuite == null || tests == null) {
          return false;
@@ -135,6 +242,15 @@ public class TestSuiteRun implements Serializable {
          }
       }
       return true;
+   }
+
+   /**
+    * Indicates whether an access control list is defined.
+    *
+    * @return {@code true} if an access control list is present, {@code false} otherwise
+    */
+   public boolean isAclDefined() {
+      return accessControlList != null;
    }
 
 }

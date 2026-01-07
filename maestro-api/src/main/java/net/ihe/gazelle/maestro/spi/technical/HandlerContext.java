@@ -16,8 +16,19 @@
 
 package net.ihe.gazelle.maestro.spi.technical;
 
+/**
+ * Context information provided to a handler, including the service name and session ID.
+ *
+ * @param serviceName The name of the service that handle step execution
+ * @param sessionId   The id of the internal session
+ */
 public record HandlerContext(String serviceName, String sessionId) {
 
+    /**
+     * Creates a new {@code HandlerContext} with the specified service name and no session ID.
+     *
+     * @param serviceName the name of the service
+     */
     public HandlerContext(String serviceName) {
         this(serviceName, null);
     }

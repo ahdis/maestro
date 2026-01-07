@@ -31,7 +31,6 @@ import net.ihe.gazelle.maestro.spi.business.StepRun;
 import net.ihe.gazelle.simulation.business.callback.Result;
 import net.ihe.gazelle.simulation.business.callback.SimulationReport;
 import net.ihe.gazelle.simulation.business.callback.SimulationReportValidator;
-import net.ihe.gazelle.simulation.business.sequence.ServiceUnavailableException;
 import net.ihe.gazelle.simulation.business.sequence.SupportedParameter;
 import net.ihe.gazelle.simulation.business.setup.*;
 import org.slf4j.Logger;
@@ -45,16 +44,25 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
+/**
+ * Executor for simulation steps.
+ * This class executes simulation sequences and processes simulation reports.
+ */
 public class SimulationStepExecutor implements StepExecutor {
 
    private static final Logger LOG = LoggerFactory.getLogger(SimulationStepExecutor.class);
-   public static final int DEFAULT_TIMEOUT = 60;
 
    private final SimulationHandler simulationHandler;
    private final UserInteractionHandler userInteractionHandler;
    private final ReportSerializer serializer;
    private final SimulationReportValidator reportValidator = new SimulationReportValidator();
 
+   /**
+    * Constructor for SimulationStepExecutor.
+    * @param simulationHandler the simulation handler to execute simulations
+    * @param userInteractionHandler the handler for user interactions during simulation
+    * @param serializer the serializer for converting simulation reports to byte arrays
+    */
    public SimulationStepExecutor(SimulationHandler simulationHandler,
                                  UserInteractionHandler userInteractionHandler,
                                  ReportSerializer serializer) {
@@ -77,26 +85,12 @@ public class SimulationStepExecutor implements StepExecutor {
          );
 
          CompletableFuture<SimulationReport> futureReport = new CompletableFuture<>();
-         simulationHandler.simulate(simulationRequest, new InstructionConsumer(stepRun.getTimeout() - 2000), futureReport::complete);
+         simulationHandler.simulate(simulationRequest, new InstructionConsumer(stepRun.getTimeout()), futureReport::complete);
          SimulationReport simulationReport = waitSimulationReport(simulationRequest, futureReport);
 
-         return buildStepRunReport(stepRun, simulationReport);
-      } catch (MissingRequiredParameterException e) {
-         return buildReportWithError(stepRun, e, "Missing Required Parameter");
-      } catch (InvalidParameterValueException e) {
-         return buildReportWithError(stepRun, e, "Invalid Parameter Value");
-      } catch (UnknownSequenceException e) {
-         return buildReportWithError(stepRun, e, "Unknown Simulation Sequence");
-      } catch (UnknownSimulationException e) {
-         return buildReportWithError(stepRun, e, "Unknown Simulation session");
-      } catch (AlreadyRunningException e) {
-         return buildReportWithError(stepRun, e, "Simulation already running");
-      } catch (ServiceUnavailableException e) {
-         return buildReportWithError(stepRun, e, "Service Unavailable");
-      } catch (ClassCastException e) {
-         return buildReportWithError(stepRun, e, "Error on property type");
+         return CompletableFuture.completedFuture(buildStepRunReport(stepRun, simulationReport));
       } catch (RuntimeException e) {
-         return buildReportWithError(stepRun, e, "Error from simulator");
+         return buildReportWithError(stepRun, e);
       }
    }
 
@@ -118,6 +112,14 @@ public class SimulationStepExecutor implements StepExecutor {
             .getSupportedParameters();
    }
 
+   /**
+    * Creates a simulation request from step run parameters.
+    * @param sequenceId the simulation sequence identifier
+    * @param timeoutSeconds the timeout in seconds for the simulation
+    * @param stepRun the step run containing the parameters
+    * @param supportedParameters the list of supported parameters for this sequence
+    * @return the configured simulation request
+    */
    public static SimulationRequest createSimulationRequest(String sequenceId, int timeoutSeconds, StepRun stepRun,
                                                            List<SupportedParameter> supportedParameters) {
       SimulationRequestBuilder simulationRequest = new SimulationRequestBuilder()
@@ -170,9 +172,7 @@ public class SimulationStepExecutor implements StepExecutor {
          throw new TimeoutRuntimeException("Simulation timed out after " + timeout + " seconds");
       } catch (InterruptedException e) {
          Thread.currentThread().interrupt();
-         // FIXME returning a null report will cause NPE later.
-         // After an interrupt, we should immediately stop and leave the SimulationStepExecutor.
-         return null;
+          throw new ExecutionRuntimeException(e);
       } catch (ExecutionException e) {
          throw new ExecutionRuntimeException(e);
       }
@@ -204,14 +204,9 @@ public class SimulationStepExecutor implements StepExecutor {
             .setType(SimulationStepDefinition.TYPE);
    }
 
-   private StepRunReport buildReportWithError(StepRun stepRun, Exception e, String name) {
+   private StepRunReport buildReportWithError(StepRun stepRun, Exception e) {
       return prepareStepReport(stepRun)
-            .addUnexpectedError(
-                  new UnexpectedErrorBuilder()
-                        .setName(name)
-                        .setMessage(name)
-                        .setCause(new UnexpectedErrorBuilder().fromThrowable(e))
-            )
+            .addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e))
             .build();
    }
 
@@ -241,7 +236,7 @@ public class SimulationStepExecutor implements StepExecutor {
                         .append("name : ").append(parameter.getName()).append("\n")
                         .append("value : ").append(parameter.getValue()).append("\n");
             }
-            userInteractionHandler.displayMessage("Additional instructions", instructions.toString(), timeout);
+            userInteractionHandler.displayMessage("Execution paused", instructions.toString(), timeout);
         }
     }
 }

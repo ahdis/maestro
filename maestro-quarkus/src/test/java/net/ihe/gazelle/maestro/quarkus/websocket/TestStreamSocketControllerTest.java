@@ -44,74 +44,78 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActivateRequestContext
 class TestStreamSocketControllerTest {
 
-    @TestHTTPResource("/v1/test-stream/run")
-    URI uri;
+   @TestHTTPResource("/v1/test-stream/run")
+   URI uri;
 
-    @Inject
-    TestWebSocketClient client;
+   @Inject
+   TestWebSocketClient client;
 
-    private Session session;
-    private final TextSerDes serDes = new JacksonSerDes();
+   private final TextSerDes serDes = new JacksonSerDes();
 
-    @BeforeAll
-    void openConnection() throws Exception {
-        session = ContainerProvider
-                .getWebSocketContainer()
-                .connectToServer(client, uri);
-    }
+   @BeforeEach
+   void init() {
+      TestWebSocketServer.clear();
+   }
 
-    @BeforeEach
-    void resetReceiver() {
-        TestWebSocketServer.clear();
-    }
+   @Test
+   void should_send_test_run_started_message() throws DeploymentException, IOException {
+      try (Session session = ContainerProvider
+            .getWebSocketContainer()
+            .connectToServer(client, uri)) {
+         StartTestRunDTO message = new StartTestRunDTO(ObjectFactory.createTestRun());
+         message.setPersist(false);
+         String messageString = serDes.serializeAsString(message);
+         session.getAsyncRemote().sendText(messageString);
 
-    @AfterAll
-    void closeConnection() throws IOException {
-        if (session != null && session.isOpen()) {
-            session.close();
-        }
-    }
+         TestReport report = client.getTestReport(session.getId());
+         assertEquals(Result.PASSED, report.getResult());
+         TestWebSocketClient.clear(session.getId());
+      }
+   }
 
-    @Test
-    void should_send_test_run_started_message() {
-        StartTestRunDTO message = new StartTestRunDTO(ObjectFactory.createTestRun());
-        message.setPersist(false);
-        String messageString = serDes.serializeAsString(message);
-        session.getAsyncRemote().sendText(messageString);
+   @Test
+   void should_send_test_suite_run_started_message() throws DeploymentException, IOException {
+      TestWebSocketServer.clear();
+      try (Session session = ContainerProvider
+            .getWebSocketContainer()
+            .connectToServer(client, uri)) {
+         StartTestSuiteRunDTO message = new StartTestSuiteRunDTO(ObjectFactory.createTestSuiteRun());
+         message.setPersist(false);
+         String messageString = serDes.serializeAsString(message);
+         session.getAsyncRemote().sendText(messageString);
 
-        TestReport report = client.getTestReport();
-        assertEquals(Result.PASSED, report.getResult());
-    }
+         TestReport report = client.getTestReport(session.getId());
+         assertEquals(Result.PASSED, report.getResult());
+         TestWebSocketClient.clear(session.getId());
+      }
+   }
 
-    @Test
-    void should_send_test_suite_run_started_message() {
-        StartTestSuiteRunDTO message = new StartTestSuiteRunDTO(ObjectFactory.createTestSuiteRun());
-        message.setPersist(false);
-        String messageString = serDes.serializeAsString(message);
-        session.getAsyncRemote().sendText(messageString);
+   @Test
+   void should_complete_user_interaction() throws DeploymentException, IOException {
+      TestWebSocketServer.clear();
+      try (Session session = ContainerProvider
+            .getWebSocketContainer()
+            .connectToServer(client, uri)) {
+         UserInteractionCompletedDTO message = new UserInteractionCompletedDTO();
+         String messageString = serDes.serializeAsString(message);
+         assertDoesNotThrow(() -> session.getAsyncRemote().sendText(messageString));
+         TestWebSocketClient.clear(session.getId());
+      }
+   }
 
-        TestReport report = client.getTestReport();
-        assertEquals(Result.PASSED, report.getResult());
-    }
+   @Test
+   void should_throw_unexpected_message_type() throws DeploymentException, IOException {
+      TestWebSocketServer.clear();
+      try (Session session = ContainerProvider
+            .getWebSocketContainer()
+            .connectToServer(client, uri)) {
+         String messageString = "{\"type\":\"" + StepRunFinishedDTO.TYPE + "\"}";
+         session.getAsyncRemote().sendText(messageString);
 
-    @Test
-    void should_complete_user_interaction() {
-        UserInteractionCompletedDTO message = new UserInteractionCompletedDTO();
-        String messageString = serDes.serializeAsString(message);
-        assertDoesNotThrow(() -> session.getAsyncRemote().sendText(messageString));
-    }
-
-    @Test
-    void should_throw_unexpected_message_type() throws DeploymentException, IOException {
-        try (Session errorSession = ContainerProvider
-                .getWebSocketContainer()
-                .connectToServer(client, uri)) {
-            String messageString = "{\"type\":\"" + StepRunFinishedDTO.TYPE + "\"}";
-            errorSession.getAsyncRemote().sendText(messageString);
-
-            String error = client.getError();
-            assertNotNull(error);
-            assertTrue(error.contains("Unexpected message type: " + StepRunFinishedDTO.class.getName()));
-        }
-    }
+         String error = client.getError(session.getId());
+         assertNotNull(error);
+         assertTrue(error.contains("Unexpected message type: " + StepRunFinishedDTO.class.getName()));
+         TestWebSocketClient.clear(session.getId());
+      }
+   }
 }

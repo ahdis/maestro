@@ -22,6 +22,9 @@ import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory
 import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
 
+/**
+ * Validator implementation for {@link TestRunReport}, responsible for defining
+ */
 public class TestRunReportValidator extends AbstractValidator<TestRunReport> {
 
    private final TestValidator testValidator;
@@ -30,6 +33,9 @@ public class TestRunReportValidator extends AbstractValidator<TestRunReport> {
    private final StepRunReportValidator stepRunReportValidator;
    private final UnexpectedErrorValidator unexpectedErrorValidator;
 
+   /**
+    * Default constructor
+    */
    public TestRunReportValidator() {
       super();
       testValidator = new TestValidator();
@@ -39,6 +45,12 @@ public class TestRunReportValidator extends AbstractValidator<TestRunReport> {
       unexpectedErrorValidator = new UnexpectedErrorValidator();
    }
 
+   /**
+    * Constructs a new {@code TestRunReportValidator} utilizing the provided {@link ValidatorBuilderFactory}
+    *
+    * @param validatorBuilderFactory the factory responsible for supplying
+    *                                {@link ValidatorBuilder} instances for specific types
+    */
    public TestRunReportValidator(ValidatorBuilderFactory validatorBuilderFactory) {
       super(validatorBuilderFactory);
       testValidator = new TestValidator(validatorBuilderFactory);
@@ -55,12 +67,13 @@ public class TestRunReportValidator extends AbstractValidator<TestRunReport> {
    }
 
    @Override
+   @SuppressWarnings("unchecked")
    protected void addRulesAndMembers(ValidatorBuilder<? extends TestRunReport> validatorBuilder) {
       validatorBuilder
-            .addRule("dateTimeValid", TestRunReport::isDateTimeValid, "DateTime must be set and not in the future")
-            .addRule("resultValid", TestRunReport::isResultValid, "Result must be set adn reflect global steps result")
-            .addRule("testValid", TestRunReport::isTestValid, "Test must be set")
-            .addRule("urlToTestRun", TestRunReport::isUrlToTestRunValid, "URL must be set and not empty if present")
+            .addRule(TestRunReport::isDateTimeNotInTheFuture, "DateTime must be set and not in the future")
+            .addRule(TestRunReport::resultMatchesComputedResult, "Result must be set adn reflect global steps result")
+            .addRule(TestRunReport::isTestDefined, "Test must be set")
+            .addRule(TestRunReport::isUrlToTestRunDefinedIfPresent, "URL must be set and not empty if present")
             .addMember("test", TestRunReport::getTest, testValidator::getAssembledValidatorBuilder)
             .addMember("inputs", TestRunReport::getInputs,
                   propertyValidator::getAssembledValidatorBuilder,

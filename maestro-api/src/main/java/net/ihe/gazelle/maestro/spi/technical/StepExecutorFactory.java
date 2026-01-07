@@ -22,28 +22,32 @@ import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 
 import java.util.Map;
 
+/**
+ * Factory interface responsible for creating {@link StepExecutor} instances to execute {@link Step} objects.
+ */
 public interface StepExecutorFactory {
 
    /**
-    * @return Type name of the supported Step
+    * Returns the type name of the step supported by this factory.
+    *
+    * @return the supported step type name
     */
    String getSupportedStep();
 
    /**
-    * Get the list of required services to run the step
+    * Returns the list of required services to run the given step.
     *
-    * @param step
-    *
-    * @return a map containing the service names as keys and the required Handler class as values
+    * @param step the step for which required services are requested
+    * @return a map containing service names as keys and the required {@link Handler} classes as values
     */
    Map<String, Class<? extends Handler>> getRequiredServices(Step step);
 
    /**
-    * @param step     step to run
-    * @param handlers a map of services (name as key and, and handlers as value) that can be used to run the step
+    * Creates a {@link StepExecutor} instance capable of executing the given step using the provided handlers.
     *
-    * @return a StepExecutor instance that can run step using a Handler from handlers
-    *
+    * @param step the step to execute
+    * @param handlers a map of service names to handler instances that can be used to run the step
+    * @return a {@code StepExecutor} instance for executing the step
     * @throws IllegalArgumentException if the provided handlers are not suitable to run the step
     */
    StepExecutor createStepExecutor(Step step, Map<String, Handler> handlers);

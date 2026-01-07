@@ -4,6 +4,12 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * A utility class for resolving property dependencies in a collection of {@code Property} objects.
+ * Properties can hold direct values or reference other properties. The {@code resolveProperties} method
+ * ensures all references are correctly resolved to their corresponding values while maintaining type safety
+ * and detecting circular dependencies.
+ */
 public class PropertyResolver {
 
    private PropertyResolver() {

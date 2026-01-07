@@ -25,55 +25,65 @@ import net.ihe.gazelle.servicemetadata.api.business.Service;
 import net.ihe.gazelle.servicemetadata.api.business.ServiceBuilder;
 import technical.provider.ServiceRegistry;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+/**
+ * Implementation of {@link ServiceRegistry} that uses a {@link ServiceRegistryDAO}
+ * to retrieve services from the database and cache them locally.
+ */
 @ApplicationScoped
 public class ServiceRegistryImpl implements ServiceRegistry {
 
-    private final ServiceRegistryDAO serviceRegistryDAO;
+   private final ServiceRegistryDAO serviceRegistryDAO;
 
-    private List<Service> services = null;
+   private List<Service> services;
 
-    @Inject
-    public ServiceRegistryImpl(ServiceRegistryDAO serviceRegistryDAO){
-        this.serviceRegistryDAO = serviceRegistryDAO;
-    }
+   /**
+    * Creates a new {@code ServiceRegistryImpl} using the specified {@link ServiceRegistryDAO}.
+    *
+    * @param serviceRegistryDAO the DAO used to load services from the database
+    */
+   @Inject
+   public ServiceRegistryImpl(ServiceRegistryDAO serviceRegistryDAO) {
+      this.serviceRegistryDAO = serviceRegistryDAO;
+   }
 
-    @Override
-    public List<Service> getServices() {
-        if (services == null) {
-            services = serviceRegistryDAO.getServices();
-            addInternalServices();
-        }
-        return services;
-    }
+   @Override
+   public List<Service> getServices() {
+      if (services == null) {
+         services = serviceRegistryDAO.getServices();
+         addInternalServices();
+      }
+      return new ArrayList<>(services);
+   }
 
-    @Override
-    public Service getService(String serviceName) {
-        if (serviceName == null) {
-            throw new IllegalArgumentException("service name is required");
-        }
-        return getServices().stream().filter(service -> serviceName.equals(service.getName()))
-                .findFirst()
-                .orElseThrow(() -> new NoSuchElementException("No service with name " + serviceName));
-    }
+   @Override
+   public Service getService(String serviceName) {
+      if (serviceName == null) {
+         throw new IllegalArgumentException("service name is required");
+      }
+      return getServices().stream().filter(service -> serviceName.equals(service.getName()))
+            .findFirst()
+            .orElseThrow(() -> new NoSuchElementException("No service with name " + serviceName));
+   }
 
-    private void addInternalServices() {
-        services.add(new ServiceBuilder()
-                .setVersion("1.0.0")
-                .setInstanceId("112233")
-                .setReplicaId("112")
-                .setName(UserInteractionHandler.SERVICE_NAME)
-                .addProvidedInterfaceBuilder(new ProvidedInterfaceBuilder()
-                        .setInterfaceVersion("1.0.0")
-                        .setInterfaceName(UserInteractionHandler.INTERFACE_NAME)
-                        .addBinding(
-                                new HttpRestBindingBuilder()
-                                        .setServiceUrl("http://localhost:8080/maestro")
-                        )
-                )
-                .build()
-        );
-    }
+   private void addInternalServices() {
+      services.add(new ServiceBuilder()
+            .setVersion("1.0.0")
+            .setInstanceId("00000")
+            .setReplicaId("001")
+            .setName(UserInteractionHandler.SERVICE_NAME)
+            .addProvidedInterfaceBuilder(new ProvidedInterfaceBuilder()
+                  .setInterfaceVersion("1.0.0")
+                  .setInterfaceName(UserInteractionHandler.INTERFACE_NAME)
+                  .addBinding(
+                        new HttpRestBindingBuilder()
+                              .setServiceUrl("http://localhost:8080/maestro")
+                  )
+            )
+            .build()
+      );
+   }
 }

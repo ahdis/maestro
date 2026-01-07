@@ -34,16 +34,32 @@ public class TestRunnerEventController implements TestRunEventProducer {
    private final TestRunner testRunner;
    private final Event<Message> messageEvent;
 
+   /**
+    * Creates a new {@code TestRunnerEventController} with the specified {@link TestRunner} and event dispatcher.
+    *
+    * @param testRunner the {@link TestRunner} used to execute test runs
+    * @param messageEvent the CDI event used to fire test events asynchronously
+    */
    @Inject
    public TestRunnerEventController(TestRunner testRunner, Event<Message> messageEvent) {
       this.testRunner = testRunner;
       this.messageEvent = messageEvent;
    }
 
+   /**
+    * Handles asynchronously a {@link StartTestRun} event by delegating execution to {@link TestRunner}.
+    *
+    * @param startTestRun the start test run event
+    */
    public void onStartTestRun(@ObservesAsync StartTestRun startTestRun) {
       testRunner.run(startTestRun);
    }
 
+   /**
+    * Handles asynchronously a {@link StepRunFinished} event by delegating to {@link TestRunner} for processing.
+    *
+    * @param stepRunFinished the step run finished event
+    */
    public void onStepRunFinished(@ObservesAsync StepRunFinished stepRunFinished) {
       testRunner.listen(stepRunFinished);
    }

@@ -20,9 +20,12 @@ import net.ihe.gazelle.lang.ExecutionRuntimeException;
 import net.ihe.gazelle.maestro.api.business.message.ExecutionFinished;
 import net.ihe.gazelle.maestro.api.business.message.InteractWithUser;
 import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
+import net.ihe.gazelle.maestro.api.business.testreport.LocalizedTestReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
+import net.ihe.gazelle.maestro.api.business.testrun.TestRunValidator;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
+import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRunValidator;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -34,81 +37,102 @@ import java.util.concurrent.TimeoutException;
  */
 public class SynchronousMaestro {
 
-    public static final String TIMEOUT_MESSAGE = "The test execution timed out. Either the test was too long for a " +
-            "synchronous call, either something fatal happened and you may need " +
-            "to contact an administrator";
+   /**
+    * The message to return in case of execution timeout
+    */
+   public static final String TIMEOUT_MESSAGE = "The test execution timed out. Either the test was too long for a " +
+         "synchronous call, either something fatal happened and you may need " +
+         "to contact an administrator";
 
-    private final Maestro maestro;
+   private final Maestro maestro;
+   private final TestSuiteRunValidator testSuiteRunValidator = new TestSuiteRunValidator();
+   private final TestRunValidator testRunValidator = new TestRunValidator();
 
-    /**
-     * Constructor
-     *
-     * @param maestro        the Maestro Facade. Must not be null.
-     */
-    public SynchronousMaestro(Maestro maestro) {
-        this.maestro = maestro;
-    }
+   /**
+    * Constructor
+    *
+    * @param maestro the Maestro Facade. Must not be null.
+    */
+   public SynchronousMaestro(Maestro maestro) {
+      this.maestro = maestro;
+   }
 
-    /**
-     * Execute a Test Suite. This method will block the current thread until the test execution is finished or timeout
-     * occurs.
-     *
-     * @param testSuiteRun the test suite to execute
-     * @return A test report summary.
-     * @throws IllegalArgumentException  if testSuiteRun is invalid
-     * @throws TimeoutException          if the timeout expires before the test execution is finished.
-     * @throws InterruptedException      if the current thread is interrupted while waiting.
-     * @throws ExecutionRuntimeException if an unexpected error occurs during the execution.
-     */
-    public TestReport executeTestSuite(TestSuiteRun testSuiteRun, boolean persist) throws TimeoutException, InterruptedException {
-        CompletableFuture<TestReport> future = new CompletableFuture<>();
-        maestro.executeTestSuite(
-                testSuiteRun,
-                persist,
-                new SynchronousObserver(future)
-        );
+   /**
+    * Execute a Test Suite. This method will block the current thread until the test execution is finished or timeout
+    * occurs.
+    *
+    * @param testSuiteRun the test suite to execute
+    * @param persist whether to persist the test report after execution
+    * @return A test report summary.
+    * @throws IllegalArgumentException  if testSuiteRun is invalid
+    * @throws TimeoutException          if the timeout expires before the test execution is finished.
+    * @throws InterruptedException      if the current thread is interrupted while waiting.
+    * @throws ExecutionRuntimeException if an unexpected error occurs during the execution.
+    */
+   public TestReport executeTestSuite(TestSuiteRun testSuiteRun, boolean persist) throws TimeoutException, InterruptedException {
+      CompletableFuture<LocalizedTestReport> future = new CompletableFuture<>();
+      maestro.executeTestSuite(
+            testSuiteRun,
+            persist,
+            new SynchronousObserver(future)
+      );
 
-        try {
-            long timeout = testSuiteRun.computeTestSuiteTimeout();
-            return future.get(timeout, TimeUnit.MILLISECONDS);
-        } catch (ExecutionException e) {
-            throw new ExecutionRuntimeException(e);
-        }
-    }
+      try {
+         testSuiteRunValidator.assertValid(testSuiteRun);
+         long timeout = testSuiteRun.computeTestSuiteTimeout();
+         return future.get(timeout, TimeUnit.MILLISECONDS);
+      } catch (ExecutionException e) {
+         throw new ExecutionRuntimeException(e);
+      }
+   }
 
-    public TestReport executeTest(TestRun testRun, boolean persist) throws TimeoutException, InterruptedException {
-        CompletableFuture<TestReport> future = new CompletableFuture<>();
-        maestro.executeTest(
-                testRun,
-                persist,
-                new SynchronousObserver(future)
-        );
+   /**
+    * Execute a single Test. This method will block the current thread until the test execution is finished or timeout
+    * occurs.
+    *
+    * @param testRun the test to execute
+    * @param persist whether to persist the test report after execution
+    * @return A test report summary.
+    * @throws IllegalArgumentException  if testRun is invalid
+    * @throws TimeoutException          if the timeout expires before the test execution is finished.
+    * @throws InterruptedException      if the current thread is interrupted while waiting.
+    * @throws ExecutionRuntimeException if an unexpected error occurs during the execution.
+    */
+   public TestReport executeTest(TestRun testRun, boolean persist) throws TimeoutException, InterruptedException {
+      CompletableFuture<LocalizedTestReport> future = new CompletableFuture<>();
+      maestro.executeTest(
+            testRun,
+            persist,
+            new SynchronousObserver(future)
+      );
 
-        try {
-            long timeout = testRun.getTest().computeTestRunTimeout();
-            return future.get(timeout, TimeUnit.MILLISECONDS);
-        } catch (ExecutionException e) {
-            throw new ExecutionRuntimeException(e);
-        }
-    }
+      try {
+         testRunValidator.assertValid(testRun);
+         long timeout = testRun.getTest().computeTestRunTimeout();
+         return future.get(timeout, TimeUnit.MILLISECONDS);
+      } catch (ExecutionException e) {
+         throw new ExecutionRuntimeException(e);
+      }
+   }
 
-    private class SynchronousObserver implements MaestroObserver {
+   private class SynchronousObserver implements MaestroObserver {
 
-        private final CompletableFuture<TestReport> future;
+      private final CompletableFuture<LocalizedTestReport> future;
 
-        public SynchronousObserver(CompletableFuture<TestReport> future) {
-            this.future = future;
-        }
+      public SynchronousObserver(CompletableFuture<LocalizedTestReport> future) {
+         this.future = future;
+      }
 
-        @Override
-        public CompletableFuture<UserInteractionCompleted> interactWithUser(InteractWithUser interactWithUser) {
-            throw new UnsupportedOperationException("User interaction is not supported via REST API.");
-        }
+      @Override
+      public CompletableFuture<UserInteractionCompleted> interactWithUser(InteractWithUser interactWithUser) {
+         throw new UnsupportedOperationException("User interaction is not supported via REST API.");
+      }
 
-        @Override
-        public void onExecutionFinished(ExecutionFinished executionFinished) {
-            future.complete(executionFinished.getReport());
-        }
-    }
+      @Override
+      public void onExecutionFinished(ExecutionFinished executionFinished) {
+         LocalizedTestReport localizedTestReport = new LocalizedTestReport(executionFinished.getReport(), executionFinished.getReportLocation());
+         future.complete(localizedTestReport);
+      }
+   }
 
 }

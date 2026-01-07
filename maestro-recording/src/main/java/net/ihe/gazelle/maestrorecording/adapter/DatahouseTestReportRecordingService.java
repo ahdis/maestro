@@ -7,26 +7,25 @@ import com.kereval.gazelle.datahouse.api.business.record.Reference;
 import com.kereval.gazelle.datahouse.technical.rest.client.RecordItemClient;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
-import net.ihe.gazelle.maestro.api.business.testreport.ByteArrayItemProperty;
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
 import net.ihe.gazelle.maestro.engine.business.TestReportRecordingException;
 import net.ihe.gazelle.maestro.engine.business.TestReportRecordingService;
-import net.ihe.gazelle.maestro.spi.business.recording.AttachmentPlan;
-import net.ihe.gazelle.maestro.spi.business.recording.MaestroAttachment;
-import net.ihe.gazelle.maestro.spi.business.recording.PropertyMutation;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputContext;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputDissector;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputProjection;
+import net.ihe.gazelle.maestro.spi.business.recording.*;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-
+/**
+ * Implementation of {@link TestReportRecordingService} that records test reports to the Datahouse system.
+ */
 public class DatahouseTestReportRecordingService implements TestReportRecordingService {
 
    static final String TEST_REPORT_TYPE = "TEST_REPORT";
@@ -37,6 +36,14 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
    private final StepOutputRecordService stepOutputRecordService;
    private final TextSerDes serDes = new JacksonSerDes();
 
+
+   /**
+    * Constructs a new {@code DatahouseTestReportRecordingService}.
+    *
+    * @param recordItemClient  client used to send records to Datahouse
+    * @param datahouseUrl      base URL of the Datahouse service
+    * @param dissectorProvider provider used to dissect step outputs for recording
+    */
    public DatahouseTestReportRecordingService(RecordItemClient recordItemClient,
                                               String datahouseUrl,
                                               StepOutputDissectorProvider dissectorProvider) {
@@ -171,10 +178,10 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
                }
                List<Property> updatedOutputs = new ArrayList<>(stepRunReport.getOutputs());
                ensureOutputCapacity(updatedOutputs, projection);
-               List<Reference> references = new ArrayList<>(
-                     uploadAttachments(projection.attachments(), updatedOutputs));
+               UploadedAttachments uploadedAttachments = uploadAttachments(projection.attachments(), updatedOutputs);
+               List<Reference> references = new ArrayList<>(uploadedAttachments.references());
                List<Reference> stepReferences = stepOutputRecordService.dissectAndRecord(stepRunReport, projection, acl,
-                     references, updatedOutputs);
+                     references, uploadedAttachments.referencesByOwningItemIndex(), updatedOutputs);
                aggregatedReferences.addAll(stepReferences);
             }
          }
@@ -214,9 +221,9 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
    }
 
    // Streams attachment payloads to Datahouse, replaces the original properties, and returns the new references.
-   private List<Reference> uploadAttachments(List<AttachmentPlan> plans, List<Property> outputs) {
+   private UploadedAttachments uploadAttachments(List<AttachmentPlan> plans, List<Property> outputs) {
       if (plans.isEmpty()) {
-         return List.of();
+         return new UploadedAttachments(List.of(), Map.of());
       }
       List<Attachment> datahouseAttachments = plans.stream()
             .map(AttachmentPlan::attachment)
@@ -226,6 +233,7 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
       validateUploadedIdsCount(plans.size(), ids.size());
 
       List<Reference> references = new ArrayList<>();
+      Map<Integer, List<Reference>> referencesByOwningItemIndex = new HashMap<>();
       for (int i = 0; i < plans.size(); i++) {
          AttachmentPlan plan = plans.get(i);
          String attachmentId = ids.get(i);
@@ -234,13 +242,17 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
             Property replacement = plan.propertyFactory().create(attachmentId, url);
             setOutput(outputs, plan.outputIndex(), replacement);
          }
-         references.add(new Reference()
+         Reference reference = new Reference()
                .setName(plan.referenceName())
                .setType(plan.referenceType())
                .setValue(attachmentId)
-               .setRefType(RefType.ATTACHMENT));
+               .setRefType(RefType.ATTACHMENT);
+         references.add(reference);
+         referencesByOwningItemIndex
+               .computeIfAbsent(plan.owningItemIndex(), ignored -> new ArrayList<>())
+               .add(reference);
       }
-      return references;
+      return new UploadedAttachments(references, referencesByOwningItemIndex);
    }
 
    private Attachment toDatahouseAttachment(MaestroAttachment maestroAttachment) {
@@ -258,6 +270,10 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
          outputs.add(null);
       }
       outputs.set(index, replacement);
+   }
+
+   private record UploadedAttachments(List<Reference> references,
+                                      Map<Integer, List<Reference>> referencesByOwningItemIndex) {
    }
 
    private ItemReference recordTestReport(TestReport testReport, List<TestReportReferenceDTO> testReportReferenceDTOS,

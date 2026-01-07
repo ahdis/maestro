@@ -20,11 +20,7 @@ import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.itb.step.business.ItbStepDefinition;
-import net.ihe.gazelle.maestro.spi.business.recording.AttachmentOutputBuilder;
-import net.ihe.gazelle.maestro.spi.business.recording.MaestroAttachment;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputContext;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputDissector;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputProjection;
+import net.ihe.gazelle.maestro.spi.business.recording.*;
 
 import java.util.ArrayList;
 import java.util.List;

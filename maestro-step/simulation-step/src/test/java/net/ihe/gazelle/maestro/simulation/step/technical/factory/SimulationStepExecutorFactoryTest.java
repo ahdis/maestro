@@ -16,7 +16,6 @@
 
 package net.ihe.gazelle.maestro.simulation.step.technical.factory;
 
-import net.ihe.gazelle.maestro.api.business.property.IntegerProperty;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.userinteract.UserInteractionHandler;
@@ -74,8 +73,7 @@ class SimulationStepExecutorFactoryTest {
                 .setType(SimulationStepDefinition.TYPE)
                 .setProperties(List.of(
                         new StringProperty(SimulationStepDefinition.SIMULATION_SERVICE, SimulationStepDefinition.SIMULATION_SERVICE),
-                        new StringProperty(SimulationStepDefinition.SEQUENCE_ID, "sequenceId"),
-                        new IntegerProperty(SimulationStepDefinition.TIMEOUT_SECONDS, 60)
+                        new StringProperty(SimulationStepDefinition.SEQUENCE_ID, "sequenceId")
                 ));
     }
 

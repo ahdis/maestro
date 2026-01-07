@@ -49,6 +49,11 @@ public class ValidationStepExecutor implements StepExecutor {
    private final ReportSerializer serializer;
    private final ValidationHandler handler;
 
+   /**
+    * Constructor for ValidationStepExecutor.
+    * @param validationHandler the validation handler to use for validation operations
+    * @param serializer the report serializer to use for converting reports to byte arrays
+    */
    public ValidationStepExecutor(ValidationHandler validationHandler, ReportSerializer serializer) {
       this.handler = validationHandler;
       this.serializer = serializer;

@@ -3,6 +3,7 @@ package net.ihe.gazelle.maestro.validation.step.technical.handler;
 
 import net.ihe.gazelle.evsapi.client.business.ValidationService;
 import net.ihe.gazelle.evsapi.client.business.ValidationServiceProfile;
+import net.ihe.gazelle.evsapi.client.business.Validator;
 import net.ihe.gazelle.evsapi.client.business.request.HandledObject;
 import net.ihe.gazelle.evsapi.client.business.response.report.ConstraintPriority;
 import net.ihe.gazelle.evsapi.client.business.response.report.ConstraintValidation;
@@ -56,7 +57,11 @@ class EvsValidationMapper {
    }
 
    ValidationProfile toValidationProfile(ValidationServiceProfile validationServiceProfile) {
-      return new ValidationProfile().setProfileID(validationServiceProfile.getProfileID());
+      Validator validator = validationServiceProfile.getValidator();
+      return new ValidationProfile()
+            .setProfileID(validator.getKeyword())
+            .setProfileName(validator.getName())
+            .setDomain(validator.getDomain());
    }
 
    /**

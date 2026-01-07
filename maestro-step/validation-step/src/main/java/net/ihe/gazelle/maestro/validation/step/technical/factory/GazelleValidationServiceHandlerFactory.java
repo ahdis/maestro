@@ -32,7 +32,16 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
+/**
+ * Factory for creating GazelleValidationServiceHandler instances.
+ * This factory creates handlers that interface with Gazelle validation services, supporting both v1 and v2 API versions.
+ */
 public class GazelleValidationServiceHandlerFactory implements HandlerFactory {
+
+    /**
+     * Default constructor.
+     */
+    public GazelleValidationServiceHandlerFactory() { /* Default constructor */ }
 
     @Override
     public Class<? extends Handler> getHandlerType() {

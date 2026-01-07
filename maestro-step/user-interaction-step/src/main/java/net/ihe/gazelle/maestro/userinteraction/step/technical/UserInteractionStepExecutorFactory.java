@@ -27,7 +27,16 @@ import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionStep
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Factory for creating UserInteractionStepExecutor instances.
+ * This factory creates executors for the user interaction step type.
+ */
 public class UserInteractionStepExecutorFactory implements StepExecutorFactory {
+
+    /**
+     * Default constructor.
+     */
+    public UserInteractionStepExecutorFactory() { /* Default constructor */ }
 
     @Override
     public String getSupportedStep() {

@@ -20,9 +20,9 @@ import net.ihe.gazelle.maestro.engine.business.context.TestSuiteSession;
 import net.ihe.gazelle.maestro.engine.business.mock.InMemoryTestReportRecordingService;
 import net.ihe.gazelle.maestro.engine.business.mock.RecordingMaestroObserver;
 import net.ihe.gazelle.maestro.engine.business.mock.ScriptedStepExecutorProvider;
+import net.ihe.gazelle.maestro.engine.business.stub.Instrumented4TestStepDefinition;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.*;
 import technical.dao.SessionStoreImpl;
 
 import java.time.Duration;
@@ -37,14 +37,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class MaestroEngineTest {
 
-   private ExecutorService executorService;
-    private RecordingMaestroImpl maestro;
+   private static ExecutorService executorService;
+    private RecordingMaestro maestro;
    private ScriptedStepExecutorProvider stepExecutorProvider;
    private InMemoryTestReportRecordingService reportRecordService;
 
+   @BeforeAll
+   static void setUpClass() {
+       executorService = Executors.newFixedThreadPool(10);
+   }
+
    @BeforeEach
    void setUp() {
-      executorService = Executors.newCachedThreadPool();
        HardWiredEventBroker broker = new HardWiredEventBroker(executorService);
       stepExecutorProvider = new ScriptedStepExecutorProvider();
       reportRecordService = new InMemoryTestReportRecordingService();
@@ -58,13 +62,13 @@ class MaestroEngineTest {
       TestRunner testRunner = new TestRunner(testRunSessionStore, broker);
       StepRunner stepRunner = new StepRunner(stepExecutorProvider, broker);
 
-      MaestroImpl maestroImpl = new MaestroImpl(testRunObserverStore, testSuiteRunObserverStore, broker, new MetadataServiceMock());
-      maestro = new RecordingMaestroImpl(maestroImpl, reportRecordService);
-      broker.setServices(maestroImpl, testSuiteRunner, testRunner, stepRunner);
+      MaestroFacade maestroFacade = new MaestroFacade(testRunObserverStore, testSuiteRunObserverStore, broker, new MetadataServiceMock());
+      maestro = new RecordingMaestro(maestroFacade, reportRecordService);
+      broker.setServices(maestroFacade, testSuiteRunner, testRunner, stepRunner);
    }
 
-   @AfterEach
-   void tearDown() {
+   @AfterAll
+   static void tearDown() {
       executorService.shutdownNow();
    }
 
@@ -90,7 +94,9 @@ class MaestroEngineTest {
     void executeTestRunsEntireWorkflow() {
         RecordingMaestroObserver observer = new RecordingMaestroObserver();
         Test test = createTest("test-1", "step-1", "step-2");
-        TestRun testRun = new TestRun().setTest(test);
+        TestRun testRun = new TestRun()
+              .setTest(test)
+              .setAccessControlList(new AccessControlList().setPublic(true));
         stepExecutorProvider
                 .returnsReport("step-1", passedReport("step-1"))
                 .returnsReport("step-2", passedReport("step-2"));
@@ -175,7 +181,9 @@ class MaestroEngineTest {
     void executeTestWithoutPersisting() {
         RecordingMaestroObserver observer = new RecordingMaestroObserver();
         Test test = createTest("test-1", "step-1", "step-2");
-        TestRun testRun = new TestRun().setTest(test);
+        TestRun testRun = new TestRun()
+              .setTest(test)
+              .setAccessControlList(new AccessControlList().setPublic(true));
         maestro.executeTest(testRun, false, observer);
         assertThat(reportRecordService.getRecordedReports(), empty());
     }
@@ -202,7 +210,7 @@ class MaestroEngineTest {
       stepExecutorProvider
             .returnsReport("Producer", new StepRunReport()
                   .setStepName("Producer")
-                  .setType("SIMULATION")
+                  .setType(Instrumented4TestStepDefinition.TYPE)
                   .setResult(StepResult.PASSED)
                   .setOutputs(List.of(new StringProperty("payload", "HELLO-CONTEXT"))))
             .withExecutor("Consumer", stepRun -> {
@@ -267,7 +275,7 @@ class MaestroEngineTest {
       TestSuiteRun suiteRun = buildSuiteRun("suite-interact", createTest("interaction-test", "interaction-step"));
 
       stepExecutorProvider.withExecutor("interaction-step", stepRun -> observer.interactWithUser(
-                  new InteractWithUser("Confirm", "Proceed?", 3L))
+                  new InteractWithUser("Confirm", "Proceed?", 1L))
             .thenApply(done -> passedReport("interaction-step")));
 
       maestro.executeTestSuite(suiteRun,true, observer);
@@ -302,7 +310,7 @@ class MaestroEngineTest {
       stepExecutorProvider
             .returnsReport("Producer", new StepRunReport()
                   .setStepName("Producer")
-                  .setType("SIMULATION")
+                  .setType(Instrumented4TestStepDefinition.TYPE)
                   .setResult(StepResult.PASSED)
                   .setOutputs(List.of(new StringProperty("payload", "STRING-VALUE"))))
             .withExecutor("Consumer", stepRun -> {
@@ -348,9 +356,9 @@ class MaestroEngineTest {
             .returnsReport("step-B", passedReport("step-B"));
 
       CompletableFuture<ExecutionFinished> futureOne = CompletableFuture.supplyAsync(
-            () -> runSuite(observerOne, suiteOne));
+            () -> runSuite(observerOne, suiteOne), executorService);
       CompletableFuture<ExecutionFinished> futureTwo = CompletableFuture.supplyAsync(
-            () -> runSuite(observerTwo, suiteTwo));
+            () -> runSuite(observerTwo, suiteTwo), executorService);
 
       CompletableFuture.allOf(futureOne, futureTwo).join();
 
@@ -371,7 +379,7 @@ class MaestroEngineTest {
    private StepRunReport passedReport(String stepName) {
       return new StepRunReport()
             .setStepName(stepName)
-            .setType("SIMULATION")
+            .setType(Instrumented4TestStepDefinition.TYPE)
             .setResult(StepResult.PASSED);
    }
 

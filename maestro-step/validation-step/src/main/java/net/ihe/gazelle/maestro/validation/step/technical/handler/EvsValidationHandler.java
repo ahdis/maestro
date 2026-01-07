@@ -35,6 +35,11 @@ public class EvsValidationHandler implements ValidationHandler {
    private final ValidationClient validationClient;
    private final EvsValidationMapper mapper = new EvsValidationMapper();
 
+   /**
+    * Constructor for EvsValidationHandler.
+    * @param serviceName the name of the validation service
+    * @param validationClient the client to communicate with the EVS validation service
+    */
    public EvsValidationHandler(String serviceName, ValidationClient validationClient) {
       this.validationClient = validationClient;
       this.serviceName = serviceName;
@@ -69,9 +74,20 @@ public class EvsValidationHandler implements ValidationHandler {
       return validationClient.getValidationReportByOid(getOid(urlLocation));
    }
 
-   // FIXME this method is wrong if there is query parameters (like readAccessKey) in the URL
    private String getOid(String urlLocation) {
-      return urlLocation.substring(urlLocation.lastIndexOf("/") + 1);
+       if (urlLocation == null || urlLocation.isBlank()) {
+           return null;
+       }
+
+       int lastSlashIndex = urlLocation.lastIndexOf('/');
+       String lastSegment = lastSlashIndex >= 0
+               ? urlLocation.substring(lastSlashIndex + 1)
+               : urlLocation;
+
+       int queryIndex = lastSegment.indexOf('?');
+       return queryIndex >= 0
+               ? lastSegment.substring(0, queryIndex)
+               : lastSegment;
    }
 
 }

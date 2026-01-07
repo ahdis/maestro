@@ -33,6 +33,12 @@ public class StepRun extends Step {
    @Serial
    private static final long serialVersionUID = 6529685098267757690L;
 
+   /**
+    * Creates a new {@code StepRun} based on an existing {@link Step} and the provided context.
+    *
+    * @param step the step to execute
+    * @param context the test context used to resolve reference-properties
+    */
    public StepRun(Step step, List<Property> context) {
       super(
             step.getName(),

@@ -28,9 +28,14 @@ import net.ihe.gazelle.maestro.api.technical.dto.test.TestDTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
 import net.ihe.gazelle.security.technical.acl.AccessControlListDTO;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import java.util.List;
 
+@Schema(
+      name = "TestRun",
+      description = "A test run to be executed by the test engine."
+)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
       "test",
@@ -57,6 +62,11 @@ public class TestRunDTO implements DTO<TestRun> {
       return testRun;
    }
 
+   @Schema(
+         name = "test",
+         description = "The test definition that will be used for execution.",
+         required = true
+   )
    @JsonProperty("test")
    public TestDTO getTest() {
       return new TestDTO(testRun.getTest());
@@ -66,6 +76,10 @@ public class TestRunDTO implements DTO<TestRun> {
       testRun.setTest(test.getBusinessObject());
    }
 
+   @Schema(
+         name = "inputs",
+         description = "A list of input provided for test execution that shall match supported inputs of test definition."
+   )
     @SuppressWarnings("rawtypes")
    @JsonProperty("inputs")
    public List<PropertyDTO> getInputs() {
@@ -84,6 +98,11 @@ public class TestRunDTO implements DTO<TestRun> {
       );
    }
 
+   @Schema(
+         name = "accessControlList",
+         description = "An access control list for read, write authorization.",
+         required = true
+   )
    @JsonProperty("accessControlList")
    public AccessControlListDTO getAccessControlList() {
       return new AccessControlListDTO(testRun.getAccessControlList());
@@ -93,6 +112,10 @@ public class TestRunDTO implements DTO<TestRun> {
       testRun.setAccessControlList(accessControlList.getBusinessObject());
    }
 
+   @Schema(
+         name = "systemsUnderTest",
+         description = "The list of system under test involved in the test."
+   )
    @JsonProperty("systemsUnderTest")
    public List<SystemUnderTestDTO> getSystemsUnderTest() {
       return testRun.getSystemsUnderTest() != null ? testRun.getSystemsUnderTest().stream().map(SystemUnderTestDTO::new).toList() : null;

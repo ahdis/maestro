@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.quarkus.configuration;
+package net.ihe.gazelle.maestro.quarkus.websocket;
 
-public class ReadingFileException extends RuntimeException {
+import jakarta.interceptor.InterceptorBinding;
 
-    public ReadingFileException(String message) {
-        super(message);
-    }
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-    public ReadingFileException(String message, Throwable cause) {
-        super(message, cause);
-    }
+/**
+ * Interceptor binding used to secure WebSocket endpoints.
+ */
+@InterceptorBinding
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.TYPE})
+public @interface ProtectedWebSocket {
 }

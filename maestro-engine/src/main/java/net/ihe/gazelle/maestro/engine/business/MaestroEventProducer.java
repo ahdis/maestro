@@ -19,9 +19,23 @@ package net.ihe.gazelle.maestro.engine.business;
 import net.ihe.gazelle.maestro.api.business.message.StartTestRun;
 import net.ihe.gazelle.maestro.api.business.message.StartTestSuiteRun;
 
+/**
+ * Produces events to trigger the execution of test runs or test suite runs in Maestro.
+ */
 public interface MaestroEventProducer {
 
-    void command(final StartTestSuiteRun startTestSuiteRun);
+   /**
+    * Sends a command to start a {@link StartTestSuiteRun}.
+    *
+    * @param startTestSuiteRun the event representing the start of a test suite run
+    */
+   void command(final StartTestSuiteRun startTestSuiteRun);
 
-    void command(final StartTestRun startTestRun);
+   /**
+    * Sends a command to start a {@link StartTestRun}.
+    *
+    * @param startTestRun the event representing the start of a test run
+    */
+   void command(final StartTestRun startTestRun);
+
 }

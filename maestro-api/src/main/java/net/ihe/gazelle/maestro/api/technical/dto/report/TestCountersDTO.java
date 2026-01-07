@@ -19,81 +19,106 @@ package net.ihe.gazelle.maestro.api.technical.dto.report;
 import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.testreport.TestCounters;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
+@Schema(
+      name = "TestCounters",
+      description = "The counters for each possible result for a test execution."
+)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-        "total",
-        "passed",
-        "failed",
-        "undefined",
-        "unexpectedErrors"
+      "total",
+      "passed",
+      "failed",
+      "undefined",
+      "unexpectedErrors"
 })
 public class TestCountersDTO implements DTO<TestCounters> {
 
-    @JsonIgnore
-    private final TestCounters testCounters;
+   @JsonIgnore
+   private final TestCounters testCounters;
 
-    public TestCountersDTO() {
-        this(new TestCounters());
-    }
+   public TestCountersDTO() {
+      this(new TestCounters());
+   }
 
-    public TestCountersDTO(TestCounters testCounters) {
-        this.testCounters = testCounters;
-    }
+   public TestCountersDTO(TestCounters testCounters) {
+      this.testCounters = testCounters;
+   }
 
-    @Override
-    @JsonIgnore
-    public TestCounters getBusinessObject() {
-        return testCounters;
-    }
+   @Override
+   @JsonIgnore
+   public TestCounters getBusinessObject() {
+      return testCounters;
+   }
 
-    @JsonGetter(value = "total")
-    public int getTotal() {
-        return getBusinessObject().getTotal();
-    }
+   @Schema(
+         name = "total",
+         description = "The total number of tests executed.",
+         required = true
+   )
+   @JsonProperty(value = "total")
+   public int getTotal() {
+      return testCounters.getTotal();
+   }
 
-    @JsonSetter(value = "total")
-    public void setTotal(int total) {
-        getBusinessObject().setTotal(total);
-    }
+   public void setTotal(int total) {
+      testCounters.setTotal(total);
+   }
 
-    @JsonGetter(value = "passed")
-    public int getPassed() {
-        return getBusinessObject().getPassed();
-    }
+   @Schema(
+         name = "passed",
+         description = "The number of passed tests.",
+         required = true
+   )
+   @JsonProperty(value = "passed")
+   public int getPassed() {
+      return testCounters.getPassed();
+   }
 
-    @JsonSetter(value = "passed")
-    public void setPassed(int passed) {
-        getBusinessObject().setPassed(passed);
-    }
+   public void setPassed(int passed) {
+      testCounters.setPassed(passed);
+   }
 
-    @JsonGetter(value = "failed")
-    public int getFailed() {
-        return getBusinessObject().getFailed();
-    }
+   @Schema(
+         name = "failed",
+         description = "The number of failed tests.",
+         required = true
+   )
+   @JsonProperty(value = "failed")
+   public int getFailed() {
+      return testCounters.getFailed();
+   }
 
-    @JsonSetter(value = "failed")
-    public void setFailed(int failed) {
-        getBusinessObject().setFailed(failed);
-    }
+   public void setFailed(int failed) {
+      testCounters.setFailed(failed);
+   }
 
-    @JsonGetter(value = "undefined")
-    public int getUndefined() {
-        return getBusinessObject().getUndefined();
-    }
+   @Schema(
+         name = "undefined",
+         description = "The number of undefined tests.",
+         required = true
+   )
+   @JsonProperty(value = "undefined")
+   public int getUndefined() {
+      return testCounters.getUndefined();
+   }
 
-    @JsonSetter(value = "undefined")
-    public void setUndefined(int undefined) {
-        getBusinessObject().setUndefined(undefined);
-    }
+   public void setUndefined(int undefined) {
+      testCounters.setUndefined(undefined);
+   }
 
-    @JsonGetter(value = "unexpectedErrors")
-    public int getUnexpectedErrors() {
-        return getBusinessObject().getUnexpectedErrors();
-    }
+   @Schema(
+         name = "unexpectedErrors",
+         description = "The number of unexpected errors.",
+         required = true
+   )
+   @JsonProperty(value = "unexpectedErrors")
+   public int getUnexpectedErrors() {
+      return testCounters.getUnexpectedErrors();
+   }
 
-    @JsonSetter(value = "unexpectedErrors")
-    public void setUnexpectedErrors(int unexpectedErrors) {
-        getBusinessObject().setUnexpectedErrors(unexpectedErrors);
-    }
+   public void setUnexpectedErrors(int unexpectedErrors) {
+      testCounters.setUnexpectedErrors(unexpectedErrors);
+   }
 }

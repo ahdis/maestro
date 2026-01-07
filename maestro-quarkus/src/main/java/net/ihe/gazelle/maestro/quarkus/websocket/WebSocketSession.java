@@ -29,6 +29,10 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Represents a WebSocket session that listens to Maestro events and handles user interactions.
+ * Implements {@link MaestroObserver} to receive updates from test execution.
+ */
 public class WebSocketSession implements MaestroObserver {
 
     private static final Logger LOG = LoggerFactory.getLogger(WebSocketSession.class.getName());
@@ -37,10 +41,20 @@ public class WebSocketSession implements MaestroObserver {
     private final Session session;
     private CompletableFuture<UserInteractionCompleted> interactionFuture;
 
+    /**
+     * Constructs a new WebSocketSession for the given WebSocket {@link Session}.
+     *
+     * @param session the WebSocket session to be wrapped
+     */
     public WebSocketSession(Session session) {
         this.session = session;
     }
 
+    /**
+     * Completes a pending user interaction asynchronously by completing the associated future.
+     *
+     * @param userInteractionCompleted the result of the user interaction
+     */
     public void completeInteraction(UserInteractionCompleted userInteractionCompleted) {
         if (interactionFuture != null && !interactionFuture.isDone()) {
             interactionFuture.complete(userInteractionCompleted);

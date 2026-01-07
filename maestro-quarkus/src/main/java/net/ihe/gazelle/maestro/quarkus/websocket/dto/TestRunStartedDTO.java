@@ -16,50 +16,62 @@
 
 package net.ihe.gazelle.maestro.quarkus.websocket.dto;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.message.TestRunStarted;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
+@Schema(
+      name = "TestRunStarted",
+      description = "Message sent when a new test run is started."
+)
 @JsonTypeName(TestRunStartedDTO.TYPE)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-        "type",
-        "testId",
-        "dateTime"
+      "type",
+      "testId",
+      "dateTime"
 })
 public class TestRunStartedDTO extends MessageDTO<TestRunStarted> {
 
-    @JsonIgnore
-    public static final String TYPE = "TEST_RUN_STARTED";
+   @JsonIgnore
+   public static final String TYPE = "TEST_RUN_STARTED";
 
-    public TestRunStartedDTO() {
-        this(new TestRunStarted());
-    }
+   public TestRunStartedDTO() {
+      this(new TestRunStarted());
+   }
 
-    public TestRunStartedDTO(TestRunStarted message) {
-        super(message);
-    }
+   public TestRunStartedDTO(TestRunStarted message) {
+      super(message);
+   }
 
-    @JsonGetter("testId")
-    public String getTestRunId() {
-        return message.getTestId();
-    }
+   @Schema(
+         name = "testId",
+         description = "The unique identifier of the test."
+   )
+   @JsonProperty("testId")
+   public String getTestRunId() {
+      return message.getTestId();
+   }
 
-    @JsonGetter("dateTime")
-    public String getDateTime() {
-        return ZonedDateTime.ofInstant(Instant.now(), ZoneId.systemDefault())
-                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-    }
+   @Schema(
+         name = "dateTime",
+         description = "The zoned date time of the beginning of the execution of the test.",
+         examples = "2025-01-01T16:30:00.387+01:00"
+   )
+   @JsonProperty("dateTime")
+   public String getDateTime() {
+      return ZonedDateTime.ofInstant(Instant.now(), ZoneId.systemDefault())
+            .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+   }
 
-    @Override
-    @JsonIgnore
-    public Class<TestRunStarted> getBusinessObjectClass() {
-        return TestRunStarted.class;
-    }
+   @Override
+   @JsonIgnore
+   public Class<TestRunStarted> getBusinessObjectClass() {
+      return TestRunStarted.class;
+   }
 }

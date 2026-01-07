@@ -34,7 +34,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+/**
+ * Factory for creating GazelleSimulationServiceHandler instances.
+ * This factory creates handlers that interface with Gazelle simulation services.
+ */
 public class GazelleSimulationServiceHandlerFactory implements HandlerFactory {
+
+    /**
+     * Default constructor.
+     */
+    public GazelleSimulationServiceHandlerFactory() { /* Default constructor */ }
 
     @Override
     public Class<? extends Handler> getHandlerType() {

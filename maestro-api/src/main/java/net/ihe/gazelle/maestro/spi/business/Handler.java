@@ -16,11 +16,15 @@
 
 package net.ihe.gazelle.maestro.spi.business;
 
-
+/**
+ * This interface is designed for handling step execution
+ */
 public interface Handler {
 
-    /**
-     * @return true if service is available
-     */
-    boolean isAvailable();
+   /**
+    * Each step handle has to tell if its handler is available
+    *
+    * @return true if the service is available
+    */
+   boolean isAvailable();
 }

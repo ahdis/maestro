@@ -8,6 +8,9 @@ import net.ihe.gazelle.maestro.api.business.test.TestValidator;
 import net.ihe.gazelle.maestro.api.business.testreport.validator.SystemUnderTestValidator;
 import net.ihe.gazelle.security.business.acl.AccessControlListValidator;
 
+/**
+ * Validator responsible for validating {@link TestRun} instances.
+ */
 public class TestRunValidator extends AbstractValidator<TestRun> {
 
    private final TestValidator testValidator;
@@ -15,6 +18,9 @@ public class TestRunValidator extends AbstractValidator<TestRun> {
    private final SystemUnderTestValidator systemUnderTestValidator;
    private final AccessControlListValidator accessControlListValidator;
 
+   /**
+    * Default constructor
+    */
    public TestRunValidator() {
       super();
       this.testValidator = new TestValidator();
@@ -23,6 +29,12 @@ public class TestRunValidator extends AbstractValidator<TestRun> {
       this.accessControlListValidator = new AccessControlListValidator();
    }
 
+   /**
+    * Creates a {@code TestRunValidator} using the provided {@link ValidatorBuilderFactory}.
+    *
+    * @param validatorBuilderFactory the factory used to build validation rules
+    *                                and constraints. Must not be {@code null}.
+    */
    public TestRunValidator(ValidatorBuilderFactory validatorBuilderFactory) {
       super(validatorBuilderFactory);
       this.testValidator = new TestValidator(validatorBuilderFactory);
@@ -38,9 +50,11 @@ public class TestRunValidator extends AbstractValidator<TestRun> {
    }
 
    @Override
+   @SuppressWarnings("unchecked")
    protected void addRulesAndMembers(ValidatorBuilder<? extends TestRun> validatorBuilder) {
       validatorBuilder
             .addRule(TestRun::isTestDefined, "Test must be defined")
+            .addRule(TestRun::isAclDefined, "Access control list must be defined.")
             .addMember("test", TestRun::getTest, testValidator::getAssembledValidatorBuilder)
             .addMember("inputs", TestRun::getInputs, propertyValidator::getAssembledValidatorBuilder)
             .addMember("systemsUnderTest", TestRun::getSystemsUnderTest,

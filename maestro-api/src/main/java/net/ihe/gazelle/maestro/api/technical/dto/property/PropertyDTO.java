@@ -19,9 +19,15 @@ package net.ihe.gazelle.maestro.api.technical.dto.property;
 import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
+import java.io.Serializable;
 import java.util.function.Function;
 
+@Schema(
+        name = "Property",
+        description = "A property containing a typed value."
+)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
         "name",
@@ -51,6 +57,12 @@ public abstract class PropertyDTO<T extends Property> implements SubTypingDTO<T>
       return this;
    }
 
+   @Schema(
+           name = "name",
+           description = "The name of the property.",
+           examples = "stepInput",
+           required = true
+   )
    @JsonProperty("name")
    public String getName() {
       return property.getName();
@@ -60,12 +72,11 @@ public abstract class PropertyDTO<T extends Property> implements SubTypingDTO<T>
       property.setName(name);
    }
 
-
    protected boolean isReference(String value) {
       return value != null && value.startsWith("${") && value.endsWith("}");
    }
 
-   <R> void setResolvedValue(Class<R> expectedType, Function<String, R> parser, Object value) {
+   <R extends Serializable> void setResolvedValue(Class<R> expectedType, Function<String, R> parser, Serializable value) {
       if (value == null) {
          property.setValue(null);
          return;

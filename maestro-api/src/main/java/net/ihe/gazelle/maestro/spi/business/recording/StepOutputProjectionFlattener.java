@@ -40,10 +40,15 @@ final class StepOutputProjectionFlattener {
       }
 
       List<AttachmentPlan> attachmentPlans = new ArrayList<>();
-      orderedNodes.stream()
-            .flatMap(node -> node.attachments().stream())
-            .map(AttachmentOutputBuilder::build)
-            .forEach(attachmentPlans::add);
+      for (GraphNodeBuilder node : orderedNodes) {
+         Integer owningIndex = indexByNode.get(node);
+         if (owningIndex == null) {
+            throw new IllegalStateException("Attachment owner node was not registered in the builder graph");
+         }
+         for (AttachmentOutputBuilder attachment : node.attachments()) {
+            attachmentPlans.add(attachment.build(owningIndex));
+         }
+      }
 
       return new StepOutputProjection(itemPlans, attachmentPlans, propertyMutations, reportReferences);
    }

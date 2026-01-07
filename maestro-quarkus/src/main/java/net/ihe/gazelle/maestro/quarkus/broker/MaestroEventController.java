@@ -22,7 +22,7 @@ import jakarta.enterprise.event.ObservesAsync;
 import jakarta.inject.Inject;
 import net.ihe.gazelle.maestro.api.business.message.*;
 import net.ihe.gazelle.maestro.engine.business.MaestroEventProducer;
-import net.ihe.gazelle.maestro.engine.business.MaestroImpl;
+import net.ihe.gazelle.maestro.engine.business.MaestroFacade;
 
 /**
  * This class is the event broker that listen to all kind of messages used in Maestro application It will trigger
@@ -31,12 +31,18 @@ import net.ihe.gazelle.maestro.engine.business.MaestroImpl;
 @RequestScoped
 public class MaestroEventController implements MaestroEventProducer {
 
-   private final MaestroImpl maestroImpl;
+   private final MaestroFacade maestroFacade;
    private final Event<Message> messageEvent;
 
+   /**
+    * Creates a new {@code MaestroEventController} with the specified facade and event dispatcher.
+    *
+    * @param maestroFacade the facade used to delegate event handling
+    * @param messageEvent the CDI event used to fire Maestro events asynchronously
+    */
    @Inject
-   public MaestroEventController(MaestroImpl maestroImpl, Event<Message> messageEvent) {
-      this.maestroImpl = maestroImpl;
+   public MaestroEventController(MaestroFacade maestroFacade, Event<Message> messageEvent) {
+      this.maestroFacade = maestroFacade;
       this.messageEvent = messageEvent;
    }
 
@@ -45,29 +51,53 @@ public class MaestroEventController implements MaestroEventProducer {
       messageEvent.fireAsync(startTestSuiteRun);
    }
 
-    @Override
-    public void command(StartTestRun startTestRun) {
-        messageEvent.fireAsync(startTestRun);
-    }
+   @Override
+   public void command(StartTestRun startTestRun) {
+      messageEvent.fireAsync(startTestRun);
+   }
 
+   /**
+    * Handles asynchronously a {@link StartTestRun} event.
+    *
+    * @param startTestRun the start test run event
+    */
    public void onStartTestRun(@ObservesAsync StartTestRun startTestRun) {
-      maestroImpl.listen(startTestRun);
+      maestroFacade.listen(startTestRun);
    }
 
+   /**
+    * Handles asynchronously a {@link StartStepRun} event.
+    *
+    * @param startStepRun the start step run event
+    */
    public void onStartStepRun(@ObservesAsync StartStepRun startStepRun) {
-      maestroImpl.listen(startStepRun);
+      maestroFacade.listen(startStepRun);
    }
 
+   /**
+    * Handles asynchronously a {@link StepRunFinished} event.
+    *
+    * @param stepRunFinished the step run finished event
+    */
    public void onStepRunFinished(@ObservesAsync StepRunFinished stepRunFinished) {
-      maestroImpl.listen(stepRunFinished);
+      maestroFacade.listen(stepRunFinished);
    }
 
+   /**
+    * Handles asynchronously a {@link TestRunFinished} event.
+    *
+    * @param testRunFinished the test run finished event
+    */
    public void onTestRunFinished(@ObservesAsync TestRunFinished testRunFinished) {
-      maestroImpl.listen(testRunFinished);
+      maestroFacade.listen(testRunFinished);
    }
 
+   /**
+    * Handles asynchronously a {@link TestSuiteRunFinished} event.
+    *
+    * @param testSuiteRunFinished the test suite run finished event
+    */
    public void onTestSuiteRunFinished(@ObservesAsync TestSuiteRunFinished testSuiteRunFinished) {
-      maestroImpl.listen(testSuiteRunFinished);
+      maestroFacade.listen(testSuiteRunFinished);
    }
-
 }

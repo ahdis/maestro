@@ -28,7 +28,16 @@ import net.ihe.gazelle.maestro.validation.step.technical.dto.ReportSerializerImp
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Factory for creating ValidationStepExecutor instances.
+ * This factory creates executors for the validation step type.
+ */
 public class ValidationStepExecutorFactory implements StepExecutorFactory {
+
+   /**
+    * Default constructor.
+    */
+   public ValidationStepExecutorFactory() { /* Default constructor */ }
 
    @Override
    public String getSupportedStep() {

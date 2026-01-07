@@ -45,21 +45,38 @@ import java.util.Map;
  */
 public class ValidationStepDefinition implements StepDefinition {
 
+   /**
+    * The type identifier for the validation step.
+    */
    public static final String TYPE = "VALIDATION";
 
-   // inputs
+   /**
+    * Input property key for the validation service name.
+    */
    public static final String VALIDATION_SERVICE = "validationService";
+
+   /**
+    * Input property key for the validation profile name.
+    */
    public static final String VALIDATION_PROFILE = "validationProfile";
+
+   /**
+    * Input property key for the content to validate (byte array).
+    */
    public static final String CONTENT_TO_VALIDATE = "contentToValidate";
-   // outputs
+
+   /**
+    * Output property key for the validation report.
+    */
    public static final String REPORT = "VALIDATION_REPORT";
 
    @Serial
    private static final long serialVersionUID = 7657361003088468932L;
 
-   public ValidationStepDefinition() {
-       // Default constructor
-   }
+   /**
+    * Default constructor.
+    */
+   public ValidationStepDefinition() { /* Default constructor */ }
 
    @Override
    public String getType() {

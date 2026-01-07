@@ -3,13 +3,9 @@ package net.ihe.gazelle.maestro.validation.step.technical.record;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
-import net.ihe.gazelle.maestro.spi.business.recording.AttachmentPlan;
-import net.ihe.gazelle.maestro.spi.business.recording.ContentMutationContext;
-import net.ihe.gazelle.maestro.spi.business.recording.ItemPlan;
-import net.ihe.gazelle.maestro.spi.business.recording.PropertyMutation;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputContext;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputProjection;
+import net.ihe.gazelle.maestro.spi.business.recording.*;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 import net.ihe.gazelle.validation.v2.api.business.Input;
@@ -19,12 +15,7 @@ import org.junit.jupiter.api.Test;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ValidationStepOutputDissectorTest {
 
@@ -64,6 +55,7 @@ class ValidationStepOutputDissectorTest {
         PropertyMutation mutation = projection.propertyMutations().getFirst();
         assertEquals(0, mutation.outputIndex());
         assertEquals(0, mutation.sourceItemIndex(), "Single report item should be the mutation source");
+        assertReplacementItemType(mutation, ValidationStepDefinition.REPORT);
 
         JsonNode content = OBJECT_MAPPER.readTree(reportPlan.item().content());
         JsonNode inputs = content.get("inputs");
@@ -113,6 +105,16 @@ class ValidationStepOutputDissectorTest {
         assertEquals("att-42", first.get("itemId").asText());
         assertEquals("/attachments/att-42", first.get("location").asText());
         assertNull(first.get("content"));
+    }
+
+    private void assertReplacementItemType(PropertyMutation mutation, String expectedItemType) {
+        assertNotNull(mutation.factory());
+        var property = mutation.factory().create("item-1", "http://dh/items/item-1");
+        assertInstanceOf(ByteArrayItemProperty.class, property);
+        ByteArrayItemProperty itemProperty = (ByteArrayItemProperty) property;
+        assertEquals(expectedItemType, itemProperty.getItemType());
+        assertEquals("http://dh/items/item-1", itemProperty.getReference());
+        assertNull(itemProperty.getValue());
     }
 
     private SampleReport sampleReport() throws Exception {

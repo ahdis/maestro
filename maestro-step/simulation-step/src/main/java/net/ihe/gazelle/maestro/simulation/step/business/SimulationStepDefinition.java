@@ -10,18 +10,39 @@ import java.io.Serial;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Step definition for simulation operations.
+ * This step executes a simulation sequence on a specified simulation service.
+ */
 public class SimulationStepDefinition implements StepDefinition {
 
+   /**
+    * The type identifier for the simulation step.
+    */
    public static final String TYPE = "SIMULATION";
-   // inputs
+
+   /**
+    * Input property key for the simulation service name.
+    */
    public static final String SIMULATION_SERVICE = "simulationService";
+
+   /**
+    * Input property key for the simulation sequence identifier.
+    */
    public static final String SEQUENCE_ID = "sequenceId";
-   public static final String TIMEOUT_SECONDS = "timeoutSeconds";
-   // outputs
+
+   /**
+    * Output property key for the simulation report.
+    */
    public static final String REPORT = "report";
 
    @Serial
    private static final long serialVersionUID = -2808674613571801798L;
+
+   /**
+    * Default constructor.
+    */
+   public SimulationStepDefinition() { /* Default constructor */ }
 
    @Override
    public String getType() {
@@ -32,8 +53,7 @@ public class SimulationStepDefinition implements StepDefinition {
    public List<SupportedInput> getSupportedInputs() {
       return List.of(
             new SupportedTextInput().setId(SIMULATION_SERVICE).setLabel("Simulation service").setRequired(true),
-            new SupportedTextInput().setId(SEQUENCE_ID).setLabel("Sequence ID").setRequired(true),
-            new SupportedTextInput().setId(TIMEOUT_SECONDS).setLabel("Timeout (seconds)").setRequired(false)
+            new SupportedTextInput().setId(SEQUENCE_ID).setLabel("Sequence ID").setRequired(true)
       );
    }
 

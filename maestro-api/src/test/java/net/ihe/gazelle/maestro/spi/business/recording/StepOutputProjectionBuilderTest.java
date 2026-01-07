@@ -1,16 +1,13 @@
 package net.ihe.gazelle.maestro.spi.business.recording;
 
-import net.ihe.gazelle.maestro.api.business.Maestro;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
-import net.ihe.gazelle.security.business.acl.AccessControlList;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -57,6 +54,8 @@ class StepOutputProjectionBuilderTest {
 
       assertEquals(List.of("child-attachment", "root-attachment"),
             projection.attachments().stream().map(AttachmentPlan::referenceName).toList());
+      assertEquals(List.of(0, 1),
+            projection.attachments().stream().map(AttachmentPlan::owningItemIndex).toList());
    }
 
    @Test
@@ -73,7 +72,7 @@ class StepOutputProjectionBuilderTest {
    @Test
    void attachmentBuilderRequiresReferenceBeforeBuild() {
       AttachmentOutputBuilder builder = new AttachmentOutputBuilder(getSimpleAttachment("dangling.bin"));
-      assertThrows(IllegalStateException.class, builder::build);
+      assertThrows(IllegalStateException.class, () -> builder.build(0));
    }
 
    @Test

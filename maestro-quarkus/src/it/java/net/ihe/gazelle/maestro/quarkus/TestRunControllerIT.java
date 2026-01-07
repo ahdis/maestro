@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
+import static net.ihe.gazelle.oidc.server.OIDCJWTGenerator.getValidJwt;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
@@ -48,156 +49,167 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TestRunControllerIT implements QuarkusTestProfile {
 
-    @ConfigProperty(name = "gzl.it.port")
-    int port;
+   @ConfigProperty(name = "gzl.it.port")
+   int port;
 
-    TestReportValidator reportValidator = new TestReportValidator();
+   TestReportValidator reportValidator = new TestReportValidator();
+   String jwt;
 
-    @BeforeAll
-    void setUp() throws IOException {
-        WireMockSingleton.startServer(port);
-        WireMockSingleton.mockCallback();
-        WireMockSingleton.mockServiceRegistry();
-        WireMockSingleton.mockGetProfiles();
-        WireMockSingleton.mockEvsProfiles();
-        WireMockSingleton.mockValidate();
-        WireMockSingleton.mockKeycloak();
-        MockDatahouseServer.start(34501);
-    }
+   @BeforeAll
+   void setUp() throws IOException {
+      jwt = getValidJwt();
+      WireMockSingleton.startServer(port);
+      WireMockSingleton.mockCallback();
+      WireMockSingleton.mockServiceRegistry();
+      WireMockSingleton.mockGetProfiles();
+      WireMockSingleton.mockEvsProfiles();
+      WireMockSingleton.mockValidate();
+      WireMockSingleton.mockKeycloak();
+      MockDatahouseServer.start(34501);
+   }
 
-    @AfterAll
-    void tearDown() {
-        WireMockSingleton.stop();
-        try {
-            MockDatahouseServer.stop();
-        } catch (IOException e) {
-            // log and ignore in teardown
-        }
-    }
+   @AfterAll
+   void tearDown() {
+      WireMockSingleton.stop();
+      try {
+         MockDatahouseServer.stop();
+      } catch (IOException e) {
+         // log and ignore in teardown
+      }
+   }
 
-    @Test
-    void synchronous_test_executeTestSuite_with_one_step() throws IOException {
-        String testRun = WireMockSingleton.getResourceAsString("/rest/testSuiteRun_ok.json");
-        Response response = given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-                .body(testRun)
-                .when().post("/v1/test-suite/run")
-                .then()
-                .extract().response();
-        assertNotNull(response);
-        TestReport testReport = response.as(TestReportDTO.class).getBusinessObject();
-        reportValidator.assertValid(testReport);
-        assertEquals(Result.PASSED, testReport.getResult());
-    }
+   @Test
+   void synchronous_test_executeTestSuite_with_one_step() throws IOException {
+      String testRun = WireMockSingleton.getResourceAsString("/rest/testSuiteRun_ok.json");
+      Response response = given()
+            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwt)
+            .body(testRun)
+            .when().post("/v1/test-suite/run")
+            .then()
+            .extract().response();
+      assertNotNull(response);
+      TestReport testReport = response.as(TestReportDTO.class).getBusinessObject();
+      reportValidator.assertValid(testReport);
+      assertEquals(Result.PASSED, testReport.getResult());
+   }
 
-    @Test
-    void asynchronous_test_executeTestSuite_with_one_step() throws IOException {
-        String testRun = WireMockSingleton.getResourceAsString("/rest/testSuiteRun_ok.json");
-        String callback = "http://localhost:" + port + "/mock/gazelle/rest";
-        given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-                .body(testRun)
-                .when().post("/v1/test-suite/run?callback=" + callback)
-                .then()
-                .statusCode(202);
+   @Test
+   void asynchronous_test_executeTestSuite_with_one_step() throws IOException {
+      String testRun = WireMockSingleton.getResourceAsString("/rest/testSuiteRun_ok.json");
+      String callback = "http://localhost:" + port + "/mock/gazelle/rest";
+      given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwt)
+            .body(testRun)
+            .when().post("/v1/test-suite/run?callback=" + callback)
+            .then()
+            .statusCode(202);
 
-        TestReport testReport = WireMockSingleton.awaitTestReport();
-        reportValidator.assertValid(testReport);
-        assertEquals(Result.PASSED, testReport.getResult());
-    }
+      TestReport testReport = WireMockSingleton.awaitTestReport();
+      reportValidator.assertValid(testReport);
+      assertEquals(Result.PASSED, testReport.getResult());
+   }
 
-    @Test
-    void synchronous_test_executeTestRun_with_one_step() throws IOException {
-        String testRun = WireMockSingleton.getResourceAsString("/rest/testRun_ok.json");
-        Response response = given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-                .body(testRun)
-                .when().post("/v1/test/run")
-                .then()
-                .extract().response();
-        assertNotNull(response);
-        TestReport testReport = response.as(TestReportDTO.class).getBusinessObject();
-        reportValidator.assertValid(testReport);
-        assertEquals(Result.PASSED, testReport.getResult());
-    }
+   @Test
+   void synchronous_test_executeTestRun_with_one_step() throws IOException {
+      String testRun = WireMockSingleton.getResourceAsString("/rest/testRun_ok.json");
+      Response response = given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwt)
+            .body(testRun)
+            .when().post("/v1/test/run")
+            .then()
+            .extract().response();
+      assertNotNull(response);
+      TestReport testReport = response.as(TestReportDTO.class).getBusinessObject();
+      reportValidator.assertValid(testReport);
+      assertEquals(Result.PASSED, testReport.getResult());
+   }
 
-    @Test
-    void asynchronous_test_executeTestRun_with_one_step() throws IOException {
-        String testRun = WireMockSingleton.getResourceAsString("/rest/testRun_ok.json");
-        String callback = "http://localhost:" + port + "/mock/gazelle/rest";
-        given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-                .body(testRun)
-                .when().post("/v1/test/run?callback=" + callback)
-                .then()
-                .statusCode(202);
+   @Test
+   void asynchronous_test_executeTestRun_with_one_step() throws IOException {
+      String testRun = WireMockSingleton.getResourceAsString("/rest/testRun_ok.json");
+      String callback = "http://localhost:" + port + "/mock/gazelle/rest";
+      given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwt)
+            .body(testRun)
+            .when().post("/v1/test/run?callback=" + callback)
+            .then()
+            .statusCode(202);
 
-        TestReport testReport = WireMockSingleton.awaitTestReport();
-        reportValidator.assertValid(testReport);
-        assertEquals(Result.PASSED, testReport.getResult());
-    }
+      TestReport testReport = WireMockSingleton.awaitTestReport();
+      reportValidator.assertValid(testReport);
+      assertEquals(Result.PASSED, testReport.getResult());
+   }
 
-    @Test
-    void shall_return_undefined_invalid_step_type() throws IOException {
-        String testRun = WireMockSingleton.getResourceAsString("/rest/invalid_step_type.json");
-        Response response = given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-                .body(testRun)
-                .when().post("/v1/test-suite/run")
-                .then()
-                .extract().response();
-        assertNotNull(response);
-        TestReport testReport = response.as(TestReportDTO.class).getBusinessObject();
-        reportValidator.assertValid(testReport);
-        assertEquals(Result.UNDEFINED, testReport.getResult());
-    }
+   @Test
+   void shall_return_undefined_invalid_step_type() throws IOException {
+      String testRun = WireMockSingleton.getResourceAsString("/rest/invalid_step_type.json");
+      Response response = given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwt)
+            .body(testRun)
+            .when().post("/v1/test-suite/run")
+            .then()
+            .extract().response();
+      assertNotNull(response);
+      TestReport testReport = response.as(TestReportDTO.class).getBusinessObject();
+      reportValidator.assertValid(testReport);
+      assertEquals(Result.UNDEFINED, testReport.getResult());
+   }
 
-    @Test
-    void shall_return_undefined_invalid_property_name() throws IOException {
-        String testRun = WireMockSingleton.getResourceAsString("/rest/invalid_property_name.json");
-        Response response = given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-                .body(testRun)
-                .when().post("/v1/test-suite/run")
-                .then()
-                .extract().response();
-        assertNotNull(response);
-        TestReport testReport = response.as(TestReportDTO.class).getBusinessObject();
-        reportValidator.assertValid(testReport);
-        assertEquals(Result.UNDEFINED, testReport.getResult());
-    }
+   @Test
+   void shall_return_undefined_invalid_property_name() throws IOException {
+      String testRun = WireMockSingleton.getResourceAsString("/rest/invalid_property_name.json");
+      Response response = given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwt)
+            .body(testRun)
+            .when().post("/v1/test-suite/run")
+            .then()
+            .extract().response();
+      assertNotNull(response);
+      TestReport testReport = response.as(TestReportDTO.class).getBusinessObject();
+      reportValidator.assertValid(testReport);
+      assertEquals(Result.UNDEFINED, testReport.getResult());
+   }
 
-    @Test
-    void synchronous_test_executeTestRun_with_user_interaction_unsupported() throws IOException {
-        String testRun = WireMockSingleton.getResourceAsString("/rest/user_interaction.json");
-        Response response = given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-                .body(testRun)
-                .when().post("/v1/test/run")
-                .then()
-                .extract().response();
-        assertNotNull(response);
-        TestReport testReport = response.as(TestReportDTO.class).getBusinessObject();
-        reportValidator.assertValid(testReport);
-        assertEquals(Result.UNDEFINED, testReport.getResult());
-        String error = testReport.getTestRunReports().getFirst()
-                .getStepRunReports().getFirst()
-                .getUnexpectedErrors().getFirst().getMessage();
-        assertTrue(error.contains("User interaction is not supported via REST API."));
-    }
+   @Test
+   void synchronous_test_executeTestRun_with_user_interaction_unsupported() throws IOException {
+      String testRun = WireMockSingleton.getResourceAsString("/rest/user_interaction.json");
+      Response response = given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwt)
+            .body(testRun)
+            .when().post("/v1/test/run")
+            .then()
+            .extract().response();
+      assertNotNull(response);
+      TestReport testReport = response.as(TestReportDTO.class).getBusinessObject();
+      reportValidator.assertValid(testReport);
+      assertEquals(Result.UNDEFINED, testReport.getResult());
+      String error = testReport.getTestRunReports().getFirst()
+            .getStepRunReports().getFirst()
+            .getUnexpectedErrors().getFirst().getMessage();
+      assertTrue(error.contains("User interaction is not supported via REST API."));
+   }
 
-    @ParameterizedTest
-    @MethodSource("invalidTestExecuteTestSuiteProvider")
-    void should_fail_deserialization(String filePath, String expectedMessage) throws IOException {
-        String testRun = WireMockSingleton.getResourceAsString(filePath);
-        String response = given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-                .body(testRun)
-                .when().post("/v1/test-suite/run")
-                .then()
-                .statusCode(400)
-                .extract().response()
-                .body().asString();
+   @ParameterizedTest
+   @MethodSource("invalidTestExecuteTestSuiteProvider")
+   void should_fail_deserialization(String filePath, String expectedMessage) throws IOException {
+      String testRun = WireMockSingleton.getResourceAsString(filePath);
+      String response = given().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwt)
+            .body(testRun)
+            .when().post("/v1/test-suite/run")
+            .then()
+            .statusCode(400)
+            .extract().response()
+            .body().asString();
 
-        assertThat(response, containsString(expectedMessage));
-    }
+      assertThat(response, containsString(expectedMessage));
+   }
 
-    private static Stream<Arguments> invalidTestExecuteTestSuiteProvider() {
-        return Stream.of(
-                Arguments.of("/rest/invalid_property_type.json", "Could not resolve type id"),
-                Arguments.of("/rest/invalid_structure.json", "The request contains a testRun with bad format")
-        );
-    }
+   private static Stream<Arguments> invalidTestExecuteTestSuiteProvider() {
+      return Stream.of(
+            Arguments.of("/rest/invalid_property_type.json", "Could not resolve type id"),
+            Arguments.of("/rest/invalid_structure.json", "=> invalid")
+      );
+   }
 }

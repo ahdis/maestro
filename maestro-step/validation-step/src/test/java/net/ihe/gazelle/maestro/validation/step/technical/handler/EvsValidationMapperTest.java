@@ -1,6 +1,7 @@
 package net.ihe.gazelle.maestro.validation.step.technical.handler;
 
 import net.ihe.gazelle.evsapi.client.business.ValidationServiceProfile;
+import net.ihe.gazelle.evsapi.client.business.Validator;
 import net.ihe.gazelle.evsapi.client.business.response.report.*;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;
 import net.ihe.gazelle.validation.v2.api.business.Input;
@@ -37,7 +38,10 @@ class EvsValidationMapperTest {
 
    @Test
    void shouldMapServiceProfilesToValidationProfiles() {
-      ValidationServiceProfile profile = new ValidationServiceProfile().setProfileID("PROFILE-ID");
+      ValidationServiceProfile profile = new ValidationServiceProfile()
+            .setValidator(
+                  new Validator().setKeyword("PROFILE-ID")
+            );
 
       List<ValidationProfile> result =
             mapper.toValidationProfiles(List.of(profile));

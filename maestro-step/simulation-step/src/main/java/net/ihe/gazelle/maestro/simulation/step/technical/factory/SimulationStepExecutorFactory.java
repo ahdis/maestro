@@ -30,8 +30,17 @@ import net.ihe.gazelle.maestro.spi.technical.StepExecutorFactory;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Factory for creating SimulationStepExecutor instances.
+ * This factory creates executors for the simulation step type.
+ */
 @ApplicationScoped
 public class SimulationStepExecutorFactory implements StepExecutorFactory {
+
+   /**
+    * Default constructor.
+    */
+   public SimulationStepExecutorFactory() { /* Default constructor */ }
 
    @Override
    public String getSupportedStep() {

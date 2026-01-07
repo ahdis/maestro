@@ -26,9 +26,15 @@ import net.ihe.gazelle.maestro.spi.technical.StepExecutorFactory;
 import java.util.Map;
 
 /**
- * Assertion Step is not implemented. It exists just for test purpose
+ * Factory for creating AssertEqualsStepExecutor instances.
+ * This factory creates executors for the assert equals step type.
  */
 public class AssertEqualsStepExecutorFactory implements StepExecutorFactory {
+
+   /**
+    * Default constructor.
+    */
+   public AssertEqualsStepExecutorFactory() { /* Default constructor */ }
 
    @Override
     public String getSupportedStep() {

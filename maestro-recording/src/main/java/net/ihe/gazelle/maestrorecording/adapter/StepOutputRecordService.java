@@ -6,15 +6,7 @@ import com.kereval.gazelle.datahouse.api.business.record.Reference;
 import com.kereval.gazelle.datahouse.technical.rest.client.RecordItemClient;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
-import net.ihe.gazelle.maestro.spi.business.recording.ContentMutationContext;
-import net.ihe.gazelle.maestro.spi.business.recording.ItemPlan;
-import net.ihe.gazelle.maestro.spi.business.recording.ItemRelationBinding;
-import net.ihe.gazelle.maestro.spi.business.recording.MaestroItem;
-import net.ihe.gazelle.maestro.spi.business.recording.MaestroRefType;
-import net.ihe.gazelle.maestro.spi.business.recording.MaestroReference;
-import net.ihe.gazelle.maestro.spi.business.recording.PropertyMutation;
-import net.ihe.gazelle.maestro.spi.business.recording.ReferenceBinding;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputProjection;
+import net.ihe.gazelle.maestro.spi.business.recording.*;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 
 import java.util.ArrayList;
@@ -51,10 +43,12 @@ class StepOutputRecordService {
                                            StepOutputProjection stepOutputProjection,
                                            AccessControlList acl,
                                            List<Reference> attachmentsReferences,
+                                           Map<Integer, List<Reference>> attachmentReferencesByOwningItemIndex,
                                            List<Property> updatedOutputs) {
 
       // persist step outputs as items
-      ItemPersistenceState persistenceState = persistItems(stepOutputProjection.items(), attachmentsReferences, acl);
+      ItemPersistenceState persistenceState = persistItems(stepOutputProjection.items(), attachmentsReferences,
+            attachmentReferencesByOwningItemIndex, acl);
       // mutate step outputs to point to persisted items to avoid inline payloads
       applyPropertyMutations(stepOutputProjection.propertyMutations(), updatedOutputs, persistenceState);
 
@@ -74,6 +68,7 @@ class StepOutputRecordService {
    // mutations.
    private ItemPersistenceState persistItems(List<ItemPlan> itemPlans,
                                              List<Reference> reportReferences,
+                                             Map<Integer, List<Reference>> attachmentReferencesByOwningItemIndex,
                                              AccessControlList acl) {
       if (itemPlans.isEmpty()) {
          return ItemPersistenceState.EMPTY;
@@ -82,6 +77,8 @@ class StepOutputRecordService {
       Map<String, String> itemIdsByReferenceName = new HashMap<>();
       Map<String, String> attachmentIdsByReferenceName = new HashMap<>();
       updateReferenceMapsFrom(reportReferences, itemIdsByReferenceName, attachmentIdsByReferenceName);
+      Map<Integer, List<Reference>> safeAttachmentReferencesByOwningItemIndex =
+            attachmentReferencesByOwningItemIndex != null ? attachmentReferencesByOwningItemIndex : Map.of();
 
       List<Item> datahouseItems = new ArrayList<>(itemPlans.size());
       datahouseItems.addAll(itemPlans.stream()
@@ -95,6 +92,10 @@ class StepOutputRecordService {
       for (int i = 0; i < itemPlans.size(); i++) {
          ItemPlan itemPlan = itemPlans.get(i);
          Item item = prepareItemAclAndReferences(datahouseItems.get(i), acl);
+         List<Reference> attachmentRefsForItem = safeAttachmentReferencesByOwningItemIndex.get(i);
+         if (attachmentRefsForItem != null && !attachmentRefsForItem.isEmpty()) {
+            item.getReferences().addAll(attachmentRefsForItem);
+         }
          updateReferenceMapsFrom(item.getReferences(), itemIdsByReferenceName, attachmentIdsByReferenceName);
          applyContentMutation(itemPlan, item, itemIdsByReferenceName, attachmentIdsByReferenceName);
          String itemId = recordItemClient.recordItem(item);

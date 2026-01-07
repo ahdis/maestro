@@ -22,44 +22,99 @@ import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Message sent by the producer to notify a subscriber that the user interaction has been completed.
+ */
 public class UserInteractionCompleted implements Message {
 
-    @Serial
-    private static final long serialVersionUID = 8043799892319471672L;
+   @Serial
+   private static final long serialVersionUID = 8043799892319471672L;
 
-    private String sessionId;
-    private final List<Property> inputs;
+   /**
+    * The session id of the execution
+    */
+   private String sessionId;
 
-    public UserInteractionCompleted() {
-        this(null);
-    }
+   /**
+    * The inputs provided by the user
+    */
+   private final List<Property> inputs;
 
-    public UserInteractionCompleted(String sessionId) {
-        this.sessionId = sessionId;
-        this.inputs = new ArrayList<>();
-    }
+   /**
+    * Default constructor
+    */
+   public UserInteractionCompleted() {
+      this(null);
+   }
 
-    public String getSessionId() {
-        return sessionId;
-    }
+   /**
+    * Constructs an instance of {@code UserInteractionCompleted} with the provided session ID.
+    *
+    * @param sessionId the session ID associated with the user interaction.
+    *                  This ID is used to uniquely identify the execution session.
+    */
+   public UserInteractionCompleted(String sessionId) {
+      this.sessionId = sessionId;
+      this.inputs = new ArrayList<>();
+   }
 
-    public UserInteractionCompleted setSessionId(String sessionId) {
-        this.sessionId = sessionId;
-        return this;
-    }
+   /**
+    * Retrieves the session ID associated with the execution.
+    *
+    * @return the session ID as a string, or null if no session ID is set.
+    */
+   public String getSessionId() {
+      return sessionId;
+   }
 
-    public List<Property> getInputs() {
-        return new ArrayList<>(inputs);
-    }
+   /**
+    * Sets the session ID associated with the execution.
+    *
+    * @param sessionId the session ID to be set. This ID is used to uniquely identify the execution session.
+    * @return the current instance of {@code UserInteractionCompleted} for method chaining.
+    */
+   public UserInteractionCompleted setSessionId(String sessionId) {
+      this.sessionId = sessionId;
+      return this;
+   }
 
-    public UserInteractionCompleted addInput(Property input) {
-        this.inputs.add(input);
-        return this;
-    }
+   /**
+    * Retrieves the list of inputs provided by the user. Each input is
+    * represented as an instance of the {@code Property} class.
+    *
+    * @return a new list containing all inputs provided by the user. Modifications
+    * to this list will not affect the original input list.
+    */
+   public List<Property> getInputs() {
+      return new ArrayList<>(inputs);
+   }
 
-    public UserInteractionCompleted addInputs(List<Property> inputs) {
-        this.inputs.addAll(inputs);
-        return this;
-    }
+   /**
+    * Adds a user-provided input to the list of inputs associated with this instance
+    * of {@code UserInteractionCompleted}. Each input is represented as an instance
+    * of {@code Property}.
+    *
+    * @param input the {@code Property} instance representing the user-provided input
+    *              to be added. Must not be null.
+    * @return the current instance of {@code UserInteractionCompleted} for method chaining.
+    */
+   public UserInteractionCompleted addInput(Property input) {
+      this.inputs.add(input);
+      return this;
+   }
+
+   /**
+    * Adds a list of user-provided inputs to the current list of inputs associated with
+    * this instance of {@code UserInteractionCompleted}. Each input is represented as
+    * an instance of {@code Property}.
+    *
+    * @param inputs the list of {@code Property} instances representing the user-provided
+    *               inputs to be added. Must not be null.
+    * @return the current instance of {@code UserInteractionCompleted} for method chaining.
+    */
+   public UserInteractionCompleted addInputs(List<Property> inputs) {
+      this.inputs.addAll(inputs);
+      return this;
+   }
 }
 

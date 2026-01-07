@@ -2,6 +2,7 @@ package net.ihe.gazelle.maestro.validation.step.technical.handler;
 
 import net.ihe.gazelle.evsapi.client.business.ValidationClient;
 import net.ihe.gazelle.evsapi.client.business.ValidationServiceProfile;
+import net.ihe.gazelle.evsapi.client.business.Validator;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationHandler;
 import net.ihe.gazelle.validation.v2.api.business.profile.ValidationProfile;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +29,12 @@ class EvsValidationHandlerTest {
    @Test
    void isAvailableReturnsTrueWhenProfilesExist() {
       when(validationClient.getValidationProfilesByServiceName(SERVICE_NAME))
-            .thenReturn(List.of(new ValidationServiceProfile().setProfileID("profile")));
+            .thenReturn(List.of(
+                  new ValidationServiceProfile()
+                  .setValidator(
+                        new Validator().setKeyword("profile")
+                  )
+            ));
 
       assertTrue(handler.isAvailable());
    }
@@ -43,7 +49,9 @@ class EvsValidationHandlerTest {
    @Test
    void getValidationProfilesMapsEvsProfiles() {
       ValidationServiceProfile evsProfile = new ValidationServiceProfile()
-            .setProfileID("evs-profile")
+            .setValidator(
+                  new Validator().setKeyword("profile")
+            )
             .setServiceName("EVS");
       when(validationClient.getValidationProfilesByServiceName(SERVICE_NAME))
             .thenReturn(List.of(evsProfile));

@@ -10,19 +10,41 @@ import java.io.Serial;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Step definition for assertion that checks if the actual value contains the expected value.
+ * This step verifies that a given string contains a specific substring.
+ */
 public class AssertContainsStepDefinition implements StepDefinition {
 
     @Serial
     private static final long serialVersionUID = 2642778063856137804L;
 
+   /**
+    * The type identifier for the assert contains step.
+    */
    public static final String TYPE = "ASSERT_CONTAINS";
 
    // inputs
+   /**
+    * Input property key for the expected value (substring to search for).
+    */
    public static final String EXPECTED = "expected";
+
+   /**
+    * Input property key for the actual value (string to search in).
+    */
    public static final String ACTUAL = "actual";
 
    // outputs
+   /**
+    * Output property key for the failure message when the assertion fails.
+    */
    public static final String FAILURE_MESSAGE = "failureMessage";
+
+   /**
+    * Default constructor.
+    */
+   public AssertContainsStepDefinition() {/* Default constructor */}
 
 
     @Override

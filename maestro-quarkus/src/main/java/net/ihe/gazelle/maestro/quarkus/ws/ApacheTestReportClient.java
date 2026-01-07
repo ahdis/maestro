@@ -47,33 +47,47 @@ public class ApacheTestReportClient implements MaestroObserver {
 
    private static final Logger LOG = LoggerFactory.getLogger(ApacheTestReportClient.class);
 
-   String callBackAuthorization;
-   String callBackUrl;
+   private final String callBackAuthorization;
+   private final String callBackUrl;
 
+   /**
+    * Creates a new {@code ApacheTestReportClient} with the specified callback URL.
+    *
+    * @param callBackUrl the URL to which test reports will be sent
+    */
    public ApacheTestReportClient(String callBackUrl) {
       this(null, callBackUrl);
    }
 
+   /**
+    * Creates a new {@code ApacheTestReportClient} with the specified callback URL and authorization.
+    *
+    * @param callBackAuthorization the authorization token or credentials to access the callback URL, may be {@code null}
+    * @param callBackUrl           the URL to which test reports will be sent
+    */
    public ApacheTestReportClient(String callBackAuthorization, String callBackUrl) {
       this.callBackAuthorization = callBackAuthorization;
       this.callBackUrl = callBackUrl;
    }
 
-    @Override
-    public CompletableFuture<UserInteractionCompleted> interactWithUser(InteractWithUser interactWithUser) {
-        throw new UnsupportedOperationException("User interaction is not supported via REST API.");
-    }
-
-    @Override
-   public void onExecutionFinished(ExecutionFinished executionFinished) {
-      sendTestReport(executionFinished.getReport());
+   @Override
+   public CompletableFuture<UserInteractionCompleted> interactWithUser(InteractWithUser interactWithUser) {
+      throw new UnsupportedOperationException("User interaction is not supported via REST API.");
    }
 
-   private void sendTestReport(TestReport testReport) {
+   @Override
+   public void onExecutionFinished(ExecutionFinished executionFinished) {
+      sendTestReport(executionFinished.getReport(), executionFinished.getReportLocation());
+   }
+
+   private void sendTestReport(TestReport testReport, String reportLocation) {
       try (CloseableHttpClient client = HttpClients.createDefault()) {
          HttpPost httpPost = new HttpPost(callBackUrl);
          if (callBackAuthorization != null) {
             httpPost.setHeader(HttpHeaders.AUTHORIZATION, callBackAuthorization);
+         }
+         if (reportLocation != null) {
+            httpPost.setHeader(HttpHeaders.LOCATION, reportLocation);
          }
 
          TextSerDes serDes = new JacksonSerDes();
