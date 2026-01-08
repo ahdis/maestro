@@ -114,7 +114,7 @@ public abstract class Property implements Serializable {
     * @return {@code true} if the value holder is an instance of {@code ReferenceValue},
     *         otherwise {@code false}.
     */
-   boolean isReference() {
+   public boolean isReference() {
       return valueHolder instanceof ReferenceValue;
    }
 

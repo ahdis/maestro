@@ -131,7 +131,9 @@ public class TestRunner {
    private void finishTest(String sessionId, TestRunSession testRunSession) {
       sessionStore.removeSession(sessionId);
 
-      List<Property> inputs = testRunSession.getTestRun().getInputs();
+      // VLD: keep only resolvable inputs in the report (fix problem of deserialization of references)
+      List<Property> inputs = testRunSession.getTestRun().getInputs()
+              .stream().filter(property -> !property.isReference()).toList();
 
       testRunEventProducer.notify(
             new TestRunFinished(sessionId, testRunSession.getTestRun(),
