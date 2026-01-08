@@ -46,7 +46,6 @@ public class TestWebSocketClient {
    }
 
    @OnMessage
-
    public void onMessage(Session session, String msg) {
       try {
          MessageDTO<?> message = serDes.deserialize(msg, MessageDTO.class);

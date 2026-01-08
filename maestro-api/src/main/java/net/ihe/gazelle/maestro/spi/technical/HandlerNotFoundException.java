@@ -16,9 +16,9 @@
 
 package net.ihe.gazelle.maestro.spi.technical;
 
-import java.io.Serial;
-
 import net.ihe.gazelle.maestro.spi.business.Handler;
+
+import java.io.Serial;
 
 /**
  * Exception thrown when a {@link Handler} cannot be found.

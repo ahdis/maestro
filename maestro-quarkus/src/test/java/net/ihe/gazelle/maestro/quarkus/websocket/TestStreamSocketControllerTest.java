@@ -32,7 +32,9 @@ import net.ihe.gazelle.maestro.quarkus.websocket.dto.StepRunFinishedDTO;
 import net.ihe.gazelle.maestro.quarkus.websocket.dto.UserInteractionCompletedDTO;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 import java.io.IOException;
 import java.net.URI;

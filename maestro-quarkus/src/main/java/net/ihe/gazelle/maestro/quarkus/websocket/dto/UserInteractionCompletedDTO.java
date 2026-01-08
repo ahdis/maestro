@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
 import net.ihe.gazelle.maestro.api.technical.dto.property.PropertyDTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
+import net.ihe.gazelle.oidc.websocket.technical.WebSocketDTO;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import java.util.List;
@@ -30,12 +31,11 @@ import java.util.List;
 )
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonTypeName(UserInteractionCompletedDTO.TYPE)
-@JsonIgnoreProperties(value = {"authorization"})
 @JsonPropertyOrder({
       "type",
       "inputs"
 })
-public class UserInteractionCompletedDTO extends MessageDTO<UserInteractionCompleted> {
+public class UserInteractionCompletedDTO extends MessageDTO<UserInteractionCompleted> implements WebSocketDTO {
 
    @JsonIgnore
    public static final String TYPE = "USER_INTERACTION_COMPLETED";

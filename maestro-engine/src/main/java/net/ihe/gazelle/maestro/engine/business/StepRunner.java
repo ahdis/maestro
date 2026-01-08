@@ -28,9 +28,6 @@ import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 import net.ihe.gazelle.maestro.spi.business.StepRun;
 import org.slf4j.Logger;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-
 /**
  * A stepRunnerJob receive a message from producer to execute Step, launch execution and send a result to Maestro Listener
  */
@@ -62,17 +59,12 @@ public class StepRunner {
       StepRun stepRun = startStepRun.getStepRun();
       try {
          StepExecutor executor = stepExecutorProvider.getExecutor(startStepRun.getSessionId(), stepRun);
-          StepRunReport report = new CompletableFuture<StepRunReport>().completeAsync(
-                  () -> executor.execute(stepRun)
-          ).get(stepRun.getTimeout(), TimeUnit.MILLISECONDS);
+         StepRunReport report = executor.execute(stepRun);
          stepRunReportValidator.validate(report).orThrow(IllegalStateException::new);
          stepRunEventProducer.notify(
                new StepRunFinished(startStepRun.getSessionId(), startStepRun.getTestId(), startStepRun.getStepIndex(),
                      stepRun, report)
          );
-      } catch (InterruptedException e) {
-         Thread.currentThread().interrupt();
-         // nothing to do, shutting down
       } catch (UnknownStepException | MissingPropertyException | ClassCastException e) {
          // User error, due to bad test definition
          logger.atDebug().setCause(e).log("Unable to run step");

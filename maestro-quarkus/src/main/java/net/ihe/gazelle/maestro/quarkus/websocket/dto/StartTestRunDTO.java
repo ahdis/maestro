@@ -19,6 +19,7 @@ package net.ihe.gazelle.maestro.quarkus.websocket.dto;
 import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestRunDTO;
+import net.ihe.gazelle.oidc.websocket.technical.WebSocketDTO;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 @Schema(
@@ -27,13 +28,12 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 )
 @JsonTypeName(StartTestRunDTO.TYPE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonIgnoreProperties(value = {"authorization"})
 @JsonPropertyOrder({
       "type",
       "testRun",
       "persist",
 })
-public class StartTestRunDTO extends MessageDTO<TestRun> {
+public class StartTestRunDTO extends MessageDTO<TestRun> implements WebSocketDTO {
 
    @JsonIgnore
    public static final String TYPE = "START_TEST_RUN";

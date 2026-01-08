@@ -39,7 +39,7 @@ import java.io.IOException;
 import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
-import static net.ihe.gazelle.oidc.server.OIDCJWTGenerator.getValidJwt;
+import static net.ihe.gazelle.oidc.rest.technical.OIDCJWTGenerator.getValidJwt;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;

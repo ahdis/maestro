@@ -1,7 +1,7 @@
 package net.ihe.gazelle.maestrorecording.adapter;
 
-import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
+import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.spi.business.recording.*;
 
 import java.nio.charset.StandardCharsets;

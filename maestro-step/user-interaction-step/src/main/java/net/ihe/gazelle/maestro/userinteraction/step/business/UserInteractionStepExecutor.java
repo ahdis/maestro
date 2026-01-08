@@ -23,8 +23,6 @@ import net.ihe.gazelle.maestro.api.business.userinteract.UserInteractionHandler;
 import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 import net.ihe.gazelle.maestro.spi.business.StepRun;
 
-import java.util.concurrent.CompletableFuture;
-
 /**
  * Executor for user interaction steps.
  * This executor displays messages to users and waits for their acknowledgment.

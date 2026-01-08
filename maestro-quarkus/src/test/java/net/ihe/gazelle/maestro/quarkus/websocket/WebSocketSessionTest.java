@@ -25,8 +25,6 @@ import jakarta.websocket.Session;
 import net.ihe.gazelle.maestro.api.business.message.*;
 import net.ihe.gazelle.maestro.quarkus.utils.ObjectFactory;
 import net.ihe.gazelle.maestro.quarkus.websocket.dto.*;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.*;
 
 import java.io.IOException;
@@ -34,7 +32,8 @@ import java.net.URI;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @QuarkusTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

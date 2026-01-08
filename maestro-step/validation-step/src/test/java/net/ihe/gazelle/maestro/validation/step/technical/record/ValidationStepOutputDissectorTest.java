@@ -2,8 +2,8 @@ package net.ihe.gazelle.maestro.validation.step.technical.record;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.spi.business.recording.*;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;

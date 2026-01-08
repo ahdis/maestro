@@ -7,7 +7,6 @@ import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 import net.ihe.gazelle.maestro.spi.business.StepRun;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 import static net.ihe.gazelle.maestro.api.business.testreport.StepResult.FAILED;
 import static net.ihe.gazelle.maestro.api.business.testreport.StepResult.PASSED;

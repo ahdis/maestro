@@ -2,8 +2,8 @@ package net.ihe.gazelle.maestro.api.business.testreport.validator;
 
 import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilder;
 import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory;
-import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
+import net.ihe.gazelle.maestro.api.business.property.Property;
 
 /**
  * Validator implementation for {@link ByteArrayItemProperty}, responsible for defining
