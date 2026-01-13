@@ -47,6 +47,9 @@ import static net.ihe.gazelle.maestro.quarkus.ws.Constants.TEST_SUITE_RUN;
 @Path("/v1")
 public interface TestRunController {
 
+    String INTERFACE_NAME = "Test Run API";
+    String INTERFACE_VERSION = "1.0";
+
     /**
      * Execute a Gazelle test suite.
      *
@@ -60,7 +63,7 @@ public interface TestRunController {
     @ProtectedResource
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    @Tag(name = "Test Run API")
+    @Tag(name = INTERFACE_NAME)
     @SecurityRequirement(name = "Keycloak")
     @Operation(
             summary = "Run Gazelle test suite",
@@ -133,7 +136,7 @@ public interface TestRunController {
     @ProtectedResource
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    @Tag(name = "Test Run API")
+    @Tag(name = INTERFACE_NAME)
     @SecurityRequirement(name = "Keycloak")
     @Operation(
             summary = "Run Gazelle test",

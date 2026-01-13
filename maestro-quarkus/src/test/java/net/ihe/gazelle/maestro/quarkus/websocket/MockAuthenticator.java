@@ -17,7 +17,7 @@
 package net.ihe.gazelle.maestro.quarkus.websocket;
 
 import net.ihe.gazelle.oidc.common.technical.OIDCIdentity;
-import net.ihe.gazelle.oidc.rest.technical.mock.OIDCMockJsonWebToken;
+import net.ihe.gazelle.oidc.common.technical.OIDCMockJsonWebToken;
 import net.ihe.gazelle.security.business.Authenticator;
 import net.ihe.gazelle.security.business.GazelleIdentity;
 import org.eclipse.microprofile.jwt.JsonWebToken;

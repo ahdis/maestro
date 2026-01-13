@@ -214,7 +214,7 @@
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
-            <artifactId>oidc-rest-server-authenticator</artifactId>
+            <artifactId>oidc-common</artifactId>
             <version>${sso.client.version}</version>
             <type>test-jar</type>
             <scope>test</scope>

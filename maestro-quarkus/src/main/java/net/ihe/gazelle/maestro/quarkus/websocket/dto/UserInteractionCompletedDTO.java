@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
 import net.ihe.gazelle.maestro.api.technical.dto.property.PropertyDTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
-import net.ihe.gazelle.oidc.websocket.technical.WebSocketDTO;
+import net.ihe.gazelle.oidc.websocket.technical.dto.SecuredMessageDTO;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import java.util.List;
@@ -35,17 +35,20 @@ import java.util.List;
       "type",
       "inputs"
 })
-public class UserInteractionCompletedDTO extends MessageDTO<UserInteractionCompleted> implements WebSocketDTO {
+public class UserInteractionCompletedDTO extends MessageDTO<UserInteractionCompleted> implements SecuredMessageDTO {
 
    @JsonIgnore
    public static final String TYPE = "USER_INTERACTION_COMPLETED";
 
+   private final String authorization;
+
    public UserInteractionCompletedDTO() {
-      this(new UserInteractionCompleted());
+      this(new UserInteractionCompleted(), "");
    }
 
-   public UserInteractionCompletedDTO(UserInteractionCompleted userInteractionCompleted) {
+   public UserInteractionCompletedDTO(UserInteractionCompleted userInteractionCompleted,  String authorization) {
       super(userInteractionCompleted);
+      this.authorization = authorization;
    }
 
    @Schema(
@@ -68,6 +71,11 @@ public class UserInteractionCompletedDTO extends MessageDTO<UserInteractionCompl
                   .map(PropertyDTO::getBusinessObject)
                   .toList()
       );
+   }
+
+   @Override
+   public String getAuthorization() {
+      return authorization;
    }
 
    @Override

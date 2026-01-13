@@ -24,15 +24,6 @@
 
     <artifactId>maestro-engine</artifactId>
 
-    <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-        <skipTests>false</skipTests>
-        <skipITs>false</skipITs>
-    </properties>
-
     <dependencies>
         <!-- Sub modules dependencies -->
         <dependency>
@@ -113,7 +104,6 @@
             <artifactId>mockito-junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.wiremock</groupId>
             <artifactId>wiremock</artifactId>

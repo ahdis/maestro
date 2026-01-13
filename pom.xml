@@ -67,12 +67,12 @@
         <git.project.url>https://${git.user.name}:${git.user.token}@gitlab.inria.fr/gazelle/private/kereval/maestro.git</git.project.url>
 
         <framework.version>2.2.1</framework.version>
-        <search-api.version>1.1.0</search-api.version>
+        <search-api.version>1.2.0-SNAPSHOT</search-api.version>
         <validation-api.version>2.0.1</validation-api.version>
         <simulation-api.version>0.2.0</simulation-api.version>
-        <service-registry.version>1.0.0</service-registry.version>
+        <service-registry.version>1.0.1</service-registry.version>
         <lang.version>3.0.0</lang.version>
-        <datahouse.version>4.0.0</datahouse.version>
+        <datahouse.version>4.0.1</datahouse.version>
         <sso.client.version>4.0.0-SNAPSHOT</sso.client.version>
 
         <equalsverifier.version>3.16.1</equalsverifier.version>
@@ -179,6 +179,13 @@
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
+                <artifactId>sso-client</artifactId>
+                <version>${sso.client.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>net.ihe.gazelle</groupId>
                 <artifactId>service-registry-client</artifactId>
                 <version>${service-registry.version}</version>
             </dependency>
@@ -196,26 +203,6 @@
                 <groupId>com.kereval.gazelle</groupId>
                 <artifactId>datahouse-microprofile-rest-client</artifactId>
                 <version>${datahouse.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>net.ihe.gazelle</groupId>
-                <artifactId>security</artifactId>
-                <version>${sso.client.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>net.ihe.gazelle</groupId>
-                <artifactId>m2m-client</artifactId>
-                <version>${sso.client.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>net.ihe.gazelle</groupId>
-                <artifactId>oidc-rest-server-authenticator</artifactId>
-                <version>${sso.client.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>net.ihe.gazelle</groupId>
-                <artifactId>oidc-websocket-server-authenticator</artifactId>
-                <version>${sso.client.version}</version>
             </dependency>
 
             <!-- Test dependencies -->

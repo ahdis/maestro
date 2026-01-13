@@ -10,6 +10,7 @@
     <artifactId>maestro-recording</artifactId>
 
     <dependencies>
+        <!-- Sub modules dependencies -->
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>maestro-api</artifactId>
@@ -19,6 +20,8 @@
             <artifactId>maestro-engine</artifactId>
             <scope>provided</scope>
         </dependency>
+
+        <!-- Gazelle dependencies -->
         <dependency>
             <groupId>com.kereval.gazelle</groupId>
             <artifactId>datahouse-api</artifactId>
@@ -34,6 +37,8 @@
             <artifactId>error-handling</artifactId>
             <scope>provided</scope>
         </dependency>
+
+        <!-- Libraries -->
         <dependency>
             <groupId>jakarta.enterprise</groupId>
             <artifactId>jakarta.enterprise.cdi-api</artifactId>
