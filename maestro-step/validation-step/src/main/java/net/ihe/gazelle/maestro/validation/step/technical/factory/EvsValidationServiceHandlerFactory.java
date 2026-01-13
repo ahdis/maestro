@@ -31,7 +31,7 @@ import java.util.List;
 
 /**
  * Factory for creating EVS ValidationHandler instances.
- * Follows the same pattern as GazelleValidationServiceHandlerFactory.
+ * Follows the same pattern as ValidationServiceHandlerFactory.
  */
 public class EvsValidationServiceHandlerFactory implements HandlerFactory {
 

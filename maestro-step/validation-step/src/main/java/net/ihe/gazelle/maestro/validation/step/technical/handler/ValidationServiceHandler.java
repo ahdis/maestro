@@ -28,21 +28,21 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 /**
- * Handler for Gazelle validation service.
- * This handler interfaces with the Gazelle validation service to perform validation operations.
+ * Handler for validation services resolved through service metadata.
+ * This handler interfaces with a validation service to perform validation operations.
  */
-public class GazelleValidationServiceHandler implements ValidationHandler {
+public class ValidationServiceHandler implements ValidationHandler {
 
-   private static final Logger LOG = LoggerFactory.getLogger(GazelleValidationServiceHandler.class);
+   private static final Logger LOG = LoggerFactory.getLogger(ValidationServiceHandler.class);
 
    private final ValidationService validationService;
 
    /**
-    * Constructor for GazelleValidationServiceHandler.
+    * Constructor for ValidationServiceHandler.
     * @param validationService the validation service to use for validation operations
     * @throws IllegalArgumentException if validationService is null
     */
-   public GazelleValidationServiceHandler(ValidationService validationService) {
+   public ValidationServiceHandler(ValidationService validationService) {
       if (validationService == null) {
          throw new IllegalArgumentException("validationService cannot be null");
       }

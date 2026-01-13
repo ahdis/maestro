@@ -9,25 +9,26 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-class GazelleValidationServiceHandlerTest {
+class ValidationServiceHandlerTest {
 
    private final ValidationService validationService = mock(ValidationService.class);
-   private GazelleValidationServiceHandler handler;
+   private ValidationServiceHandler handler;
 
    @BeforeEach
    void setUp() {
-      handler = new GazelleValidationServiceHandler(validationService);
+      handler = new ValidationServiceHandler(validationService);
    }
 
    @Test
    void isAvailableDelegatesToValidationService() {
       when(validationService.getValidationProfiles()).thenReturn(List.of(mock(ValidationProfile.class)));
 
-      assertEquals(true, handler.isAvailable());
+       assertTrue(handler.isAvailable());
       verify(validationService).getValidationProfiles();
    }
 
@@ -53,7 +54,7 @@ class GazelleValidationServiceHandlerTest {
 
    @Test
    void constructorRejectsNullValidationService() {
-      assertThrows(IllegalArgumentException.class, () -> new GazelleValidationServiceHandler(null));
+      assertThrows(IllegalArgumentException.class, () -> new ValidationServiceHandler(null));
    }
 
    @Test

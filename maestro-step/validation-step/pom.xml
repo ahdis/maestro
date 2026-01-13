@@ -19,13 +19,14 @@
     <parent>
         <groupId>net.ihe.gazelle</groupId>
         <artifactId>maestro-step</artifactId>
-        <version>0.6.1-SNAPSHOT</version>
+        <version>0.6.1-GZL-10243-SNAPSHOT</version>
     </parent>
 
     <artifactId>validation-step</artifactId>
 
     <properties>
         <evs-client-api.version>2.0.0</evs-client-api.version>
+        <validation-service-clients.version>1.0.0-GZL-10358-SNAPSHOT</validation-service-clients.version>
     </properties>
 
     <dependencies>
@@ -55,6 +56,11 @@
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>validation-v2-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>validation-service-clients-api</artifactId>
+            <version>${validation-service-clients.version}</version>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
@@ -124,6 +130,29 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>maestro-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>model-based-client-jdk21</artifactId>
+            <version>${validation-service-clients.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>certificate-client-jdk21</artifactId>
+            <version>${validation-service-clients.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>gitb-client-jdk21</artifactId>
+            <version>${validation-service-clients.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -4,7 +4,7 @@
     <parent>
         <groupId>net.ihe.gazelle</groupId>
         <artifactId>maestro</artifactId>
-        <version>0.6.1-SNAPSHOT</version>
+        <version>0.6.1-GZL-10243-SNAPSHOT</version>
     </parent>
 
     <artifactId>maestro-quarkus</artifactId>
@@ -15,6 +15,7 @@
 
         <!-- Test properties -->
         <mongodb-driver-sync.version>5.0.0</mongodb-driver-sync.version>
+        <validation-service-clients.version>1.0.0-GZL-10358-SNAPSHOT</validation-service-clients.version>
     </properties>
 
     <dependencies>
@@ -48,6 +49,22 @@
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>assertion-step</artifactId>
+        </dependency>
+        <!-- JDK21 validation service clients (SPI factories) -->
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>model-based-client-jdk21</artifactId>
+            <version>${validation-service-clients.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>certificate-client-jdk21</artifactId>
+            <version>${validation-service-clients.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>gitb-client-jdk21</artifactId>
+            <version>${validation-service-clients.version}</version>
         </dependency>
 
         <!-- Gazelle dependencies -->
