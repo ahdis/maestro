@@ -47,7 +47,14 @@ import static net.ihe.gazelle.maestro.quarkus.ws.Constants.TEST_SUITE_RUN;
 @Path("/v1")
 public interface TestRunController {
 
+    /**
+     * Name of the interface.
+     */
     String INTERFACE_NAME = "Test Run API";
+
+    /**
+     * Version of the interface.
+     */
     String INTERFACE_VERSION = "1.0";
 
     /**

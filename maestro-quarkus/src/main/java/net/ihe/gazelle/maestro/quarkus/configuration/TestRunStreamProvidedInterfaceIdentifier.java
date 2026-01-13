@@ -25,10 +25,16 @@ import org.eclipse.microprofile.config.ConfigProvider;
 
 import java.util.Collections;
 
+/**
+ * Provided interface for Test Stream WebSocket API.
+ */
 public class TestRunStreamProvidedInterfaceIdentifier implements ProvidedInterfaceIdentifier {
 
    private final String maestroUrl;
 
+   /**
+    * Default constructor.
+    */
    public TestRunStreamProvidedInterfaceIdentifier() {
       this(
             ConfigProvider.getConfig()

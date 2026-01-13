@@ -50,7 +50,14 @@ import java.io.IOException;
 @ServerEndpoint("/v1/test-stream/run")
 public class TestStreamSocketController {
 
+   /**
+    * Name of the interface.
+    */
    public static final String INTERFACE_NAME = "Test Run Stream API";
+
+   /**
+    * Version of the interface.
+    */
    public static final String INTERFACE_VERSION = "1.0";
 
    private static final Logger LOG = LoggerFactory.getLogger(TestStreamSocketController.class.getName());
@@ -65,6 +72,7 @@ public class TestStreamSocketController {
     *
     * @param identity the current Gazelle identity used to authenticate incoming WebSocket messages
     * @param maestro  the Maestro engine used to execute tests and test suites
+    * @param sessionService the WebSocket session service used to manage WebSocket sessions
     */
    @Inject
    public TestStreamSocketController(GazelleIdentity identity, Maestro maestro, WebSocketSessionService sessionService) {

@@ -25,10 +25,16 @@ import org.eclipse.microprofile.config.ConfigProvider;
 
 import java.util.Collections;
 
+/**
+ * Provided interface for Test Run REST API.
+ */
 public class TestRunProvidedInterfaceIdentifier implements ProvidedInterfaceIdentifier {
 
    private final String maestroUrl;
 
+   /**
+    * Default constructor.
+    */
    public TestRunProvidedInterfaceIdentifier() {
       this(
             ConfigProvider.getConfig()
