@@ -59,11 +59,6 @@
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
-            <artifactId>validation-service-clients-api</artifactId>
-            <version>${validation-service-clients.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.ihe.gazelle</groupId>
             <artifactId>evs-client-api</artifactId>
             <version>${evs-client-api.version}</version>
         </dependency>

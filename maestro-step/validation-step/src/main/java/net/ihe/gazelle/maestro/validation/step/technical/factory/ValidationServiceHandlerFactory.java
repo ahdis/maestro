@@ -25,13 +25,11 @@ import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterface;
 import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterfaceBuilder;
 import net.ihe.gazelle.servicemetadata.api.business.HttpRestBinding;
 import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterface;
-import net.ihe.gazelle.validation.clients.api.SPIValidationServiceFactoryProvider;
-import net.ihe.gazelle.validation.clients.api.ValidationServiceFactoryProvider;
-import net.ihe.gazelle.validation.clients.api.ValidationServiceInterfaceFactory;
 import net.ihe.gazelle.validation.v2.api.business.ValidationService;
+import net.ihe.gazelle.validation.v2.client.SPIValidationServiceFactoryProvider;
+import net.ihe.gazelle.validation.v2.client.ValidationServiceClientFactory;
+import net.ihe.gazelle.validation.v2.client.ValidationServiceFactoryProvider;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Objects;
 
@@ -63,26 +61,22 @@ public class ValidationServiceHandlerFactory implements HandlerFactory {
 
     @Override
    public Handler createHandler(HandlerContext handlerContext, ProvidedInterface providedInterface, ConfigProvider configProvider) throws IllegalArgumentException {
-        if (providedInterface == null || providedInterface.getBindings() == null || providedInterface.getBindings().isEmpty()) {
-            throw new IllegalArgumentException("Service " + (providedInterface != null ? providedInterface.getInterfaceName() : "Validation Service") + " has no bindings");
-        }
-        try {
-            HttpRestBinding binding = (HttpRestBinding) providedInterface.getBindings().getFirst();
-            URI uri = new URI(binding.getServiceUrl());
-            ValidationServiceInterfaceFactory factory = resolveFactory(providedInterface);
-            ValidationService validationService = factory.create(uri, providedInterface);
-            return new ValidationServiceHandler(validationService);
-        } catch (NullPointerException e) {
-            throw new IllegalArgumentException("Service " + providedInterface.getInterfaceName() + " has no bindings");
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("Can't initiate validation handler due to exception while creating client from server url", e);
-        }
+     if (providedInterface == null || providedInterface.getBindings() == null || providedInterface.getBindings().isEmpty()) {
+          throw new IllegalArgumentException("Service " + (providedInterface != null ? providedInterface.getInterfaceName() : "Validation Service") + " has no bindings");
+     }
+     ValidationServiceClientFactory factory = resolveFactory(providedInterface);
+     try {
+          ValidationService validationService = factory.create(providedInterface);
+          return new ValidationServiceHandler(validationService);
+     } catch (RuntimeException e) {
+          throw new IllegalArgumentException("Can't initiate validation handler due to exception while creating client from server url", e);
+     }
     }
 
     @Override
     public List<ConsumedInterface> getConsumedInterfaces() {
         List<ConsumedInterface> consumedInterfaces = new java.util.ArrayList<>();
-        for (ValidationServiceInterfaceFactory factory : factoryProvider.getFactories()) {
+        for (ValidationServiceClientFactory factory : factoryProvider.getFactories()) {
             String interfaceName = factory.getInterfaceName();
             if (interfaceName == null || EVS_CLIENT_API.equals(interfaceName)) {
                 continue;
@@ -97,7 +91,7 @@ public class ValidationServiceHandlerFactory implements HandlerFactory {
         return consumedInterfaces;
     }
 
-    private ValidationServiceInterfaceFactory resolveFactory(ProvidedInterface providedInterface) {
+    private ValidationServiceClientFactory resolveFactory(ProvidedInterface providedInterface) {
         String interfaceName = providedInterface.getInterfaceName();
         return factoryProvider.getFactories().stream()
                 .filter(factory -> factory.getInterfaceName() != null

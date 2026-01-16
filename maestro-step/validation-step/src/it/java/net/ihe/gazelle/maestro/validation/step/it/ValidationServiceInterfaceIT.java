@@ -16,6 +16,7 @@
 
 package net.ihe.gazelle.maestro.validation.step.it;
 
+import net.ihe.gazelle.gitb.client.GitbValidationServiceClientFactory;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.test.Step;
@@ -43,7 +44,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import net.ihe.gazelle.gitb.client.GitbValidationServiceFactory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -53,7 +53,7 @@ class ValidationServiceInterfaceIT {
 
    private static final String MODEL_BASED_INTERFACE = "Model Based Validation Service";
    private static final String CERTIFICATE_INTERFACE = "Certificate Service";
-   private static final String GITB_INTERFACE = GitbValidationServiceFactory.INTERFACE_NAME;
+   private static final String GITB_INTERFACE = GitbValidationServiceClientFactory.INTERFACE_NAME;
 
    @ParameterizedTest
    @MethodSource("serviceDefinitions")
@@ -107,25 +107,20 @@ class ValidationServiceInterfaceIT {
             .setProvidedInterfaces(List.of(providedInterface));
    }
 
-   private static final class InMemoryServiceRegistry implements ServiceRegistry {
-      private final Map<String, Service> services;
-
-      private InMemoryServiceRegistry(Map<String, Service> services) {
-         this.services = services;
-      }
+   private record InMemoryServiceRegistry(Map<String, Service> services) implements ServiceRegistry {
 
       @Override
-      public List<Service> getServices() {
-         return List.copyOf(services.values());
-      }
-
-      @Override
-      public Service getService(String serviceName) {
-         Service service = services.get(serviceName);
-         if (service == null) {
-            throw new IllegalArgumentException("Service not found: " + serviceName);
+         public List<Service> getServices() {
+            return List.copyOf(services.values());
          }
-         return service;
+
+         @Override
+         public Service getService(String serviceName) {
+            Service service = services.get(serviceName);
+            if (service == null) {
+               throw new IllegalArgumentException("Service not found: " + serviceName);
+            }
+            return service;
+         }
       }
-   }
 }

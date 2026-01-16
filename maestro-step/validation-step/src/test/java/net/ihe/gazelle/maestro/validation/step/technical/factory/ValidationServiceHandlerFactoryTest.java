@@ -6,9 +6,9 @@ import net.ihe.gazelle.maestro.validation.step.technical.handler.ValidationServi
 import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterface;
 import net.ihe.gazelle.servicemetadata.api.business.HttpRestBinding;
 import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterface;
-import net.ihe.gazelle.validation.clients.api.ValidationServiceFactoryProvider;
-import net.ihe.gazelle.validation.clients.api.ValidationServiceInterfaceFactory;
 import net.ihe.gazelle.validation.v2.api.business.ValidationService;
+import net.ihe.gazelle.validation.v2.client.ValidationServiceClientFactory;
+import net.ihe.gazelle.validation.v2.client.ValidationServiceFactoryProvider;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
@@ -73,20 +73,11 @@ class ValidationServiceHandlerFactoryTest {
       assertEquals("No validation service factory found for interface Unknown Service", exception.getMessage());
    }
 
-   @Test
-   void shouldFailWhenUriIsInvalid() {
-      ValidationServiceHandlerFactory factory = new ValidationServiceHandlerFactory(providerWith(TEST_INTERFACE));
-      ProvidedInterface providedInterface = httpProvidedInterface(TEST_INTERFACE, "://bad-uri", "2.0.0");
 
-      IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> factory.createHandler(handlerContext, providedInterface, null));
-      assertEquals("Can't initiate validation handler due to exception while creating client from server url",
-            exception.getMessage());
-   }
 
    private ValidationServiceFactoryProvider providerWith(String... interfaceNames) {
-      List<ValidationServiceInterfaceFactory> factories = Stream.of(interfaceNames)
-            .map(name -> (ValidationServiceInterfaceFactory) new StubValidationServiceInterfaceFactory(name, true))
+      List<ValidationServiceClientFactory> factories = Stream.of(interfaceNames)
+            .map(name -> (ValidationServiceClientFactory) new StubValidationServiceInterfaceFactory(name, true))
             .toList();
       return () -> factories;
    }
@@ -101,12 +92,12 @@ class ValidationServiceHandlerFactoryTest {
       return providedInterface;
    }
 
-   private record StubValidationServiceInterfaceFactory(
-           String interfaceName,
-           boolean supports)
-           implements ValidationServiceInterfaceFactory {
+      private record StubValidationServiceInterfaceFactory(
+              String interfaceName,
+              boolean supports)
+              implements ValidationServiceClientFactory {
 
-      @Override
+         @Override
          public String getInterfaceName() {
             return interfaceName;
          }
@@ -117,7 +108,7 @@ class ValidationServiceHandlerFactoryTest {
          }
 
          @Override
-         public ValidationService create(URI uri, ProvidedInterface providedInterface) {
+         public ValidationService create(ProvidedInterface providedInterface) {
             return mock(ValidationService.class);
          }
       }
