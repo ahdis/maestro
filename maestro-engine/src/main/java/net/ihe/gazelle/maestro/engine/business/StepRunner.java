@@ -53,7 +53,7 @@ public class StepRunner {
    /**
     * Execute Step with a stepRunner corresponding to the step
     *
-    * @param startStepRun Message containing step to run
+    * @param startStepRun Message containing a step to run
     */
    public void run(StartStepRun startStepRun) {
       StepRun stepRun = startStepRun.getStepRun();

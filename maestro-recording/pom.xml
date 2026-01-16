@@ -34,7 +34,6 @@
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>maestro-engine</artifactId>
-            <scope>provided</scope>
         </dependency>
 
         <!-- Gazelle dependencies -->
@@ -53,11 +52,26 @@
             <artifactId>error-handling</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>security</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- Libraries -->
         <dependency>
             <groupId>jakarta.enterprise</groupId>
             <artifactId>jakarta.enterprise.cdi-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.microprofile.config</groupId>
+            <artifactId>microprofile-config-api</artifactId>
             <scope>provided</scope>
         </dependency>
 

@@ -72,7 +72,7 @@
         <simulation-api.version>0.2.0</simulation-api.version>
         <service-registry.version>1.0.1</service-registry.version>
         <lang.version>3.0.0</lang.version>
-        <datahouse.version>4.0.1</datahouse.version>
+        <datahouse.version>4.1.0-SNAPSHOT</datahouse.version>
         <sso.client.version>4.0.0-SNAPSHOT</sso.client.version>
 
         <equalsverifier.version>3.16.1</equalsverifier.version>

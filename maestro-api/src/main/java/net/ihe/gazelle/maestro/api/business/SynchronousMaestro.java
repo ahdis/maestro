@@ -115,7 +115,7 @@ public class SynchronousMaestro {
       }
    }
 
-   private class SynchronousObserver implements MaestroObserver {
+   private static class SynchronousObserver implements MaestroObserver {
 
       private final CompletableFuture<LocalizedTestReport> future;
 

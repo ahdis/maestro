@@ -22,7 +22,7 @@ import jakarta.ws.rs.core.Response;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestRunDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSuiteRunDTO;
-import net.ihe.gazelle.sso.server.technical.filter.ProtectedResource;
+import net.ihe.gazelle.oidc.rest.business.ProtectedResource;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
 import org.eclipse.microprofile.openapi.annotations.media.Content;

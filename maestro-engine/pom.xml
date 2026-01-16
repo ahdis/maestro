@@ -63,13 +63,13 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>net.ihe.gazelle</groupId>
-            <artifactId>security</artifactId>
+            <groupId>com.kereval.gazelle</groupId>
+            <artifactId>datahouse-api</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.kereval.gazelle</groupId>
-            <artifactId>datahouse-api</artifactId>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>security</artifactId>
             <scope>provided</scope>
         </dependency>
 
