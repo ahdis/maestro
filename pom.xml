@@ -69,8 +69,8 @@
         <framework.version>2.2.1</framework.version>
         <search-api.version>1.2.0-SNAPSHOT</search-api.version>
         <validation-api.version>2.0.1</validation-api.version>
-        <simulation-api.version>0.2.0</simulation-api.version>
-        <service-registry.version>1.0.1</service-registry.version>
+        <simulation-api.version>0.3.0-SNAPSHOT</simulation-api.version>
+        <service-registry.version>1.1.0-GZL-10364-SNAPSHOT</service-registry.version>
         <lang.version>3.0.0</lang.version>
         <datahouse.version>4.1.0-SNAPSHOT</datahouse.version>
         <sso.client.version>4.0.0-SNAPSHOT</sso.client.version>
