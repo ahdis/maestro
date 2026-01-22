@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
 import net.ihe.gazelle.maestro.api.technical.dto.property.PropertyDTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
-import net.ihe.gazelle.oidc.websocket.technical.dto.SecuredMessageDTO;
+import net.ihe.gazelle.oidc.common.technical.dto.SecuredMessageDTO;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import java.util.List;

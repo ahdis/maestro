@@ -26,7 +26,7 @@ import net.ihe.gazelle.maestro.api.business.testreport.Result;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testreport.validator.TestReportValidator;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
-import net.ihe.gazelle.oidc.common.technical.mock.KeycloakMockResource;
+import net.ihe.gazelle.security.mocks.KeycloakMockResource;
 import org.apache.http.HttpHeaders;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.AfterAll;
@@ -41,7 +41,7 @@ import java.io.IOException;
 import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
-import static net.ihe.gazelle.oidc.common.technical.OIDCJWTGenerator.getValidJwt;
+import static net.ihe.gazelle.security.mocks.OIDCJWTGenerator.getValidJwt;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;

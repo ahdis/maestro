@@ -28,7 +28,7 @@ import net.ihe.gazelle.maestro.quarkus.websocket.dto.UserInteractionCompletedDTO
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.DeserializationException;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
-import net.ihe.gazelle.oidc.websocket.business.ProtectedWebSocket;
+import net.ihe.gazelle.oidc.websocket.technical.ProtectedWebSocket;
 import net.ihe.gazelle.security.business.GazelleIdentity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

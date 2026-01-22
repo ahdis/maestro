@@ -85,7 +85,7 @@
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
-            <artifactId>service-metadata-api</artifactId>
+            <artifactId>service-metadata-jaxrs-ws</artifactId>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
@@ -230,9 +230,7 @@
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
-            <artifactId>oidc-common</artifactId>
-            <version>${sso.client.version}</version>
-            <type>test-jar</type>
+            <artifactId>security-mocks</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

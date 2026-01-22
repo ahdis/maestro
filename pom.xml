@@ -20,7 +20,7 @@
     <parent>
         <groupId>net.ihe.gazelle</groupId>
         <artifactId>factory-bom-jdk21-quarkus-3-27</artifactId>
-        <version>1.1.0</version>
+        <version>1.1.1</version>
     </parent>
 
     <artifactId>maestro</artifactId>
@@ -66,14 +66,12 @@
         <!--git-->
         <git.project.url>https://${git.user.name}:${git.user.token}@gitlab.inria.fr/gazelle/private/kereval/maestro.git</git.project.url>
 
-        <framework.version>2.2.1</framework.version>
-        <search-api.version>1.2.0-SNAPSHOT</search-api.version>
+        <framework.version>4.0.0-SNAPSHOT</framework.version>
         <validation-api.version>2.0.1</validation-api.version>
         <simulation-api.version>0.3.0-SNAPSHOT</simulation-api.version>
         <service-registry.version>1.1.0-GZL-10364-SNAPSHOT</service-registry.version>
         <lang.version>3.0.0</lang.version>
         <datahouse.version>4.1.0-SNAPSHOT</datahouse.version>
-        <sso.client.version>4.0.0-SNAPSHOT</sso.client.version>
 
         <equalsverifier.version>3.16.1</equalsverifier.version>
 
@@ -82,15 +80,6 @@
         <skipUnitTests>${skipTests}</skipUnitTests>
 
         <sonar.coverage.exclusions>
-            **/gazelle/business/engine/NotInitializedReferenceException.java,
-            **/gazelle/business/step/NotProvidedStep.java,
-            **/gazelle/business/validation/DuplicatedStepsException.java,
-            **/gazelle/business/validation/InvalidTestRunException.java,
-            **/gazelle/technical/ws/MissingArgumentException.java,
-            **/gazelle/technical/ws/ParsingErrorException.java,
-            **/gazelle/context/*
-            **/gazelle/maestro/technical/ws/async/tmintegration/**
-            **/gazelle/maestro/websocket/**
             **/gazelle/maestro/mlang/**
         </sonar.coverage.exclusions>
     </properties>
@@ -167,20 +156,6 @@
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>simulation-service-api</artifactId>
                 <version>${simulation-api.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>net.ihe.gazelle</groupId>
-                <artifactId>search-api</artifactId>
-                <version>${search-api.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>net.ihe.gazelle</groupId>
-                <artifactId>sso-client</artifactId>
-                <version>${sso.client.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

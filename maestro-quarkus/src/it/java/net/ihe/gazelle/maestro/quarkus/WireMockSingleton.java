@@ -41,7 +41,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static net.ihe.gazelle.oidc.common.technical.OIDCJWTGenerator.getValidJwtWithGroups;
+import static net.ihe.gazelle.security.mocks.OIDCJWTGenerator.getValidJwtWithGroups;
 import static org.awaitility.Awaitility.await;
 
 @Disabled

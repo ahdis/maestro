@@ -17,9 +17,9 @@
 package net.ihe.gazelle.maestro.quarkus.websocket;
 
 import net.ihe.gazelle.oidc.common.technical.OIDCIdentity;
-import net.ihe.gazelle.oidc.common.technical.OIDCMockJsonWebToken;
 import net.ihe.gazelle.security.business.Authenticator;
 import net.ihe.gazelle.security.business.GazelleIdentity;
+import net.ihe.gazelle.security.mocks.MockedJsonWebToken;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 public class MockAuthenticator implements Authenticator {
@@ -31,7 +31,7 @@ public class MockAuthenticator implements Authenticator {
 
    @Override
    public GazelleIdentity authenticate() {
-      JsonWebToken jwt = new OIDCMockJsonWebToken();
+      JsonWebToken jwt = new MockedJsonWebToken();
       return new OIDCIdentity(jwt)
             .setId(jwt.getName())
             .setName(jwt.getSubject());
