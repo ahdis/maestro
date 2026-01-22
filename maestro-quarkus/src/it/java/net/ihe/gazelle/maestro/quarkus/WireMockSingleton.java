@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,16 @@ package net.ihe.gazelle.maestro.quarkus;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import net.ihe.gazelle.m2m.client.technical.KeycloakConfigurationProvider;
+import net.ihe.gazelle.m2m.client.technical.configuration.SSOConfigurationProvider;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
-import net.ihe.gazelle.oidc.server.OIDCJWTGenerator;
 import net.ihe.gazelle.servicemetadata.api.business.Binding;
 import net.ihe.gazelle.servicemetadata.api.business.HttpRestBinding;
 import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterface;
 import net.ihe.gazelle.servicemetadata.api.business.Service;
 import net.ihe.gazelle.servicemetadata.technical.jaxrs.ServiceDTO;
-import net.ihe.gazelle.sso.api.business.configuration.SSOConfigurationProvider;
 import org.junit.jupiter.api.Disabled;
 
 import java.io.IOException;
@@ -42,6 +41,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static net.ihe.gazelle.security.mocks.OIDCJWTGenerator.getValidJwtWithGroups;
 import static org.awaitility.Awaitility.await;
 
 @Disabled
@@ -141,7 +141,7 @@ public class WireMockSingleton {
         wireMockServer.stubFor(post(tokenUrl)
                 .withRequestBody(containing("client_id=" + ssoConfigurationProvider.getClientId()))
                 .withRequestBody(containing("client_secret=" + ssoConfigurationProvider.getClientSecret()))
-                .willReturn(ok("{\"access_token\":\"" + OIDCJWTGenerator.getValidJwtWithGroups(List.of("admin")) + "\"}")));
+                .willReturn(ok("{\"access_token\":\"" + getValidJwtWithGroups(List.of("admin")) + "\"}")));
     }
 
     public static TestReport awaitTestReport() {

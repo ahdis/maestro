@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import net.ihe.gazelle.maestro.api.technical.dto.test.TestDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.test.TestSuiteDTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
+import net.ihe.gazelle.security.business.acl.AccessControlList;
 import net.ihe.gazelle.security.technical.acl.AccessControlListDTO;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
@@ -146,11 +147,16 @@ public class TestSuiteRunDTO implements DTO<TestSuiteRun> {
    )
    @JsonProperty("accessControlList")
    public AccessControlListDTO getAccessControlList() {
-      return new AccessControlListDTO(testSuiteRun.getAccessControlList());
+      AccessControlList acl = testSuiteRun.getAccessControlList();
+      return acl != null
+            ? new AccessControlListDTO(testSuiteRun.getAccessControlList())
+            : null;
    }
 
    public void setAccessControlList(AccessControlListDTO accessControlList) {
-      testSuiteRun.setAccessControlList(accessControlList.getBusinessObject());
+      if (accessControlList != null) {
+         testSuiteRun.setAccessControlList(accessControlList.getBusinessObject());
+      }
    }
 
 }

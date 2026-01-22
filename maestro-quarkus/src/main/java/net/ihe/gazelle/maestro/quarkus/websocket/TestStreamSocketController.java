@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package net.ihe.gazelle.maestro.quarkus.websocket;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.websocket.*;
 import jakarta.websocket.server.ServerEndpoint;
@@ -28,13 +28,12 @@ import net.ihe.gazelle.maestro.quarkus.websocket.dto.UserInteractionCompletedDTO
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.DeserializationException;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
+import net.ihe.gazelle.oidc.websocket.technical.ProtectedWebSocket;
 import net.ihe.gazelle.security.business.GazelleIdentity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * WebSocket controller for handling test execution streams.
@@ -47,14 +46,24 @@ import java.util.concurrent.ConcurrentHashMap;
  * The endpoint is located at <code>/v1/test-stream/run</code>.
  * </p>
  */
-@ApplicationScoped
+@RequestScoped
 @ServerEndpoint("/v1/test-stream/run")
 public class TestStreamSocketController {
+
+   /**
+    * Name of the interface.
+    */
+   public static final String INTERFACE_NAME = "Test Run Stream API";
+
+   /**
+    * Version of the interface.
+    */
+   public static final String INTERFACE_VERSION = "1.0";
 
    private static final Logger LOG = LoggerFactory.getLogger(TestStreamSocketController.class.getName());
 
    private final GazelleIdentity identity;
-   private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
+   private final WebSocketSessionService sessionService;
    private final TextSerDes serDes = new JacksonSerDes();
    private final Maestro maestro;
 
@@ -63,11 +72,13 @@ public class TestStreamSocketController {
     *
     * @param identity the current Gazelle identity used to authenticate incoming WebSocket messages
     * @param maestro  the Maestro engine used to execute tests and test suites
+    * @param sessionService the WebSocket session service used to manage WebSocket sessions
     */
    @Inject
-   public TestStreamSocketController(GazelleIdentity identity, Maestro maestro) {
+   public TestStreamSocketController(GazelleIdentity identity, Maestro maestro, WebSocketSessionService sessionService) {
       this.identity = identity;
       this.maestro = maestro;
+      this.sessionService = sessionService;
    }
 
    /**
@@ -79,7 +90,7 @@ public class TestStreamSocketController {
    public void onOpen(Session session) {
       LOG.info("Test Stream Socket Connected: {}", session.getId());
       WebSocketSession maestroCaller = new WebSocketSession(session);
-      sessions.put(session.getId(), maestroCaller);
+      sessionService.addSession(session.getId(), maestroCaller);
    }
 
    /**
@@ -90,7 +101,7 @@ public class TestStreamSocketController {
    @OnClose
    public void onClose(Session session) {
       LOG.info("Test Stream Socket Disconnected: {}", session.getId());
-      sessions.remove(session.getId());
+      sessionService.removeSession(session.getId());
    }
 
    /**
@@ -115,7 +126,7 @@ public class TestStreamSocketController {
          }
          LOG.debug("Received message: {}", messageString);
          MessageDTO<?> message = serDes.deserialize(messageString, MessageDTO.class);
-         WebSocketSession maestroCaller = sessions.get(session.getId());
+         WebSocketSession maestroCaller = sessionService.getSession(session.getId());
          switch (message) {
             case StartTestRunDTO testRun ->
                   maestro.executeTest(testRun.getBusinessObject(), testRun.isPersist(), maestroCaller);
@@ -124,7 +135,7 @@ public class TestStreamSocketController {
             case UserInteractionCompletedDTO userInteractionCompleted ->
                   maestroCaller.completeInteraction(userInteractionCompleted.getBusinessObject());
             default -> {
-               sessions.remove(session.getId());
+               sessionService.removeSession(session.getId());
                String error = "Unexpected message type: " + message.getClass().getName();
                session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, error));
                throw new IllegalArgumentException(error);

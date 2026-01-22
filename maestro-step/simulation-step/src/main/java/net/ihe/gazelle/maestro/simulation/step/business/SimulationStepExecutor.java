@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ public class SimulationStepExecutor implements StepExecutor {
    }
 
    @Override
-   public CompletableFuture<StepRunReport> execute(StepRun stepRun) {
+   public StepRunReport execute(StepRun stepRun) {
       try {
          String simulationService = stepRun.getPropertyValue(SimulationStepDefinition.SIMULATION_SERVICE);
          String sequenceId = stepRun.getPropertyValue(SimulationStepDefinition.SEQUENCE_ID);
@@ -88,7 +88,7 @@ public class SimulationStepExecutor implements StepExecutor {
          simulationHandler.simulate(simulationRequest, new InstructionConsumer(stepRun.getTimeout()), futureReport::complete);
          SimulationReport simulationReport = waitSimulationReport(simulationRequest, futureReport);
 
-         return CompletableFuture.completedFuture(buildStepRunReport(stepRun, simulationReport));
+         return buildStepRunReport(stepRun, simulationReport);
       } catch (RuntimeException e) {
          return buildReportWithError(stepRun, e);
       }
@@ -204,10 +204,10 @@ public class SimulationStepExecutor implements StepExecutor {
             .setType(SimulationStepDefinition.TYPE);
    }
 
-   private CompletableFuture<StepRunReport> buildReportWithError(StepRun stepRun, Exception e) {
-      return CompletableFuture.completedFuture(prepareStepReport(stepRun)
+   private StepRunReport buildReportWithError(StepRun stepRun, Exception e) {
+      return prepareStepReport(stepRun)
             .addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e))
-            .build());
+            .build();
    }
 
    private StepResult toStepResult(Result result) {

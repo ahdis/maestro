@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,10 @@ import net.ihe.gazelle.maestro.quarkus.websocket.dto.StepRunFinishedDTO;
 import net.ihe.gazelle.maestro.quarkus.websocket.dto.UserInteractionCompletedDTO;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
-import org.junit.jupiter.api.*;
+import net.ihe.gazelle.security.mocks.OIDCJWTGenerator;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 import java.io.IOException;
 import java.net.URI;
@@ -62,7 +65,8 @@ class TestStreamSocketControllerTest {
       try (Session session = ContainerProvider
             .getWebSocketContainer()
             .connectToServer(client, uri)) {
-         StartTestRunDTO message = new StartTestRunDTO(ObjectFactory.createTestRun());
+         String token = OIDCJWTGenerator.getValidJwt();
+         StartTestRunDTO message = new StartTestRunDTO(ObjectFactory.createTestRun(), token);
          message.setPersist(false);
          String messageString = serDes.serializeAsString(message);
          session.getAsyncRemote().sendText(messageString);
@@ -79,7 +83,8 @@ class TestStreamSocketControllerTest {
       try (Session session = ContainerProvider
             .getWebSocketContainer()
             .connectToServer(client, uri)) {
-         StartTestSuiteRunDTO message = new StartTestSuiteRunDTO(ObjectFactory.createTestSuiteRun());
+         String token = OIDCJWTGenerator.getValidJwt();
+         StartTestSuiteRunDTO message = new StartTestSuiteRunDTO(ObjectFactory.createTestSuiteRun(), token);
          message.setPersist(false);
          String messageString = serDes.serializeAsString(message);
          session.getAsyncRemote().sendText(messageString);
