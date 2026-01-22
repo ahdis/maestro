@@ -1,6 +1,7 @@
 package net.ihe.gazelle.maestro.client;
 
 import net.ihe.gazelle.lang.UnexpectedInternalErrorException;
+import net.ihe.gazelle.m2m.client.technical.filter.apache.ApacheM2MHttpClientBuilder;
 import net.ihe.gazelle.maestro.api.business.InvalidTestRunException;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
@@ -15,7 +16,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import net.ihe.gazelle.m2m.client.technical.filter.M2MHttpClientBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 
 import java.io.IOException;
@@ -149,7 +149,7 @@ public class MaestroHttpClient implements MaestroClient {
               .setConnectTimeout(msConnectTimeout)
               .setSocketTimeout(msReadTimeout)
               .build();
-        return M2MHttpClientBuilder.createWithAccessToken(k8sIdVariableName)
+        return ApacheM2MHttpClientBuilder.createWithAccessToken(k8sIdVariableName)
               .setDefaultRequestConfig(requestConfig)
               .build();
     }
