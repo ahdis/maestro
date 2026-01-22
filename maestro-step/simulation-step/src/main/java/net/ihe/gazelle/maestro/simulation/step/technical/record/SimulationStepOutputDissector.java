@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 package net.ihe.gazelle.maestro.simulation.step.technical.record;
 
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
-import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepDefinition;
 import net.ihe.gazelle.maestro.spi.business.recording.*;

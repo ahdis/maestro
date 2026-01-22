@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2025 Kereval.
+  ~ Copyright 2025-2026 IHE International.
   ~
   ~  Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
     <parent>
         <groupId>net.ihe.gazelle</groupId>
         <artifactId>maestro-step</artifactId>
-        <version>0.6.1-SNAPSHOT</version>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>simulation-step</artifactId>
@@ -73,6 +73,11 @@
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>service-metadata-jaxrs-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>security</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>

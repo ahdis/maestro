@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,21 @@ import net.ihe.gazelle.maestro.spi.business.recording.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The ItbStepOutputDissector class is an implementation of the {@link StepOutputDissector} interface.
+ */
 public class ItbStepOutputDissector implements StepOutputDissector {
 
     private static final String ITB_XML_REPORT = "ITB_XML_REPORT";
     private static final String ITB_PDF_REPORT = "ITB_PDF_REPORT";
     private static final String ITB_LOGS = "ITB_LOGS";
+
+    /**
+     * Default constructor.
+     */
+    public ItbStepOutputDissector() {
+        // Empty
+    }
 
     @Override
     public StepOutputProjection dissect(StepOutputContext context) {

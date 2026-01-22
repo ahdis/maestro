@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -195,16 +195,6 @@ public class TestRun implements Serializable {
     */
    public boolean isTestDefined() {
       return test != null;
-   }
-
-   /**
-    * Indicates whether an access control list is defined for this {@code TestRun}.
-    *
-    * @return {@code true} if an {@code AccessControlList} is associated with this test run,
-    *         {@code false} otherwise.
-    */
-   public boolean isAclDefined() {
-      return accessControlList != null;
    }
 
    @Override

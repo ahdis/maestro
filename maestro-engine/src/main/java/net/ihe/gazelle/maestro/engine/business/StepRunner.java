@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,6 @@ import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 import net.ihe.gazelle.maestro.spi.business.StepRun;
 import org.slf4j.Logger;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * A stepRunnerJob receive a message from producer to execute Step, launch execution and send a result to Maestro Listener
  */
@@ -55,21 +53,18 @@ public class StepRunner {
    /**
     * Execute Step with a stepRunner corresponding to the step
     *
-    * @param startStepRun Message containing step to run
+    * @param startStepRun Message containing a step to run
     */
    public void run(StartStepRun startStepRun) {
       StepRun stepRun = startStepRun.getStepRun();
       try {
          StepExecutor executor = stepExecutorProvider.getExecutor(startStepRun.getSessionId(), stepRun);
-         StepRunReport report = executor.execute(stepRun).get(stepRun.getTimeout(), TimeUnit.MILLISECONDS); // blocking call
+         StepRunReport report = executor.execute(stepRun);
          stepRunReportValidator.validate(report).orThrow(IllegalStateException::new);
          stepRunEventProducer.notify(
                new StepRunFinished(startStepRun.getSessionId(), startStepRun.getTestId(), startStepRun.getStepIndex(),
                      stepRun, report)
          );
-      } catch (InterruptedException e) {
-         Thread.currentThread().interrupt();
-         // nothing to do, shutting down
       } catch (UnknownStepException | MissingPropertyException | ClassCastException e) {
          // User error, due to bad test definition
          logger.atDebug().setCause(e).log("Unable to run step");

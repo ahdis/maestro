@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package net.ihe.gazelle.maestro.itb.step.business;
 
+import net.ihe.gazelle.errorhandling.business.UnexpectedErrorBuilder;
 import net.ihe.gazelle.itb.gateway.business.ItbSessionStore;
 import net.ihe.gazelle.itb.gateway.business.RunItbTestService;
 import net.ihe.gazelle.itb.gateway.business.reporting.ItbReporting;
@@ -23,6 +24,8 @@ import net.ihe.gazelle.itb.gateway.business.reporting.ItbResult;
 import net.ihe.gazelle.itb.gateway.business.request.Parameter;
 import net.ihe.gazelle.itb.gateway.business.request.TestCase;
 import net.ihe.gazelle.itb.gateway.business.request.TestRequest;
+import net.ihe.gazelle.lang.ExecutionRuntimeException;
+import net.ihe.gazelle.lang.TimeoutRuntimeException;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
@@ -32,6 +35,8 @@ import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 import net.ihe.gazelle.maestro.spi.business.StepRun;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -39,9 +44,17 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
+/**
+ * Implementation of the StepExecutor interface for handling ITB step executions.
+ */
 public class ItbStepExecutor implements StepExecutor {
+
+   private static final Logger LOG = LoggerFactory.getLogger(ItbStepExecutor.class);
 
    private static final Map<String, SupportedInput> SUPPORTED_INPUTS = new ItbStepDefinition().getSupportedInputs()
          .stream().collect(
@@ -50,19 +63,48 @@ public class ItbStepExecutor implements StepExecutor {
 
    private final RunItbTestService itbService;
 
+   /**
+    * Constructs an instance of the {@code ItbStepExecutor} class, which is responsible for executing
+    * ITB test steps by using the provided ITB handler and session store.
+    *
+    * @param itbHandler the handler interface for managing ITB services and test sessions.
+    * @param sessionStore the session store that handles the storage and retrieval of ITB reporting sessions.
+    */
    public ItbStepExecutor(ItbHandler itbHandler, ItbSessionStore sessionStore) {
       itbService = new RunItbTestService(itbHandler, sessionStore);
    }
 
    @Override
-   public CompletableFuture<StepRunReport> execute(StepRun stepRun) {
-      TestRequest testRequest = mapToRequest(stepRun);
-      StepRunReportBuilder reportBuilder = new StepRunReportBuilder()
-            .setStepName(stepRun.getName())
-            .setType(ItbStepDefinition.TYPE);
-      return itbService.runTests(testRequest).thenApply(
-            itbReporting -> mapToStepRunReport(reportBuilder, itbReporting)
-      );
+   public StepRunReport execute(StepRun stepRun) {
+      try {
+         TestRequest testRequest = mapToRequest(stepRun);
+         StepRunReportBuilder reportBuilder = new StepRunReportBuilder()
+               .setStepName(stepRun.getName())
+               .setType(ItbStepDefinition.TYPE);
+
+         CompletableFuture<ItbReporting> futureReport = itbService.runTests(testRequest);
+
+         return waitItbReport(stepRun, futureReport, reportBuilder);
+      } catch (RuntimeException e) {
+         return buildReportWithError(stepRun, e);
+      }
+   }
+
+   private StepRunReport waitItbReport(StepRun stepRun, CompletableFuture<ItbReporting> futureReport, StepRunReportBuilder reportBuilder) {
+      long timeout = stepRun.getTimeout();
+      try {
+         return futureReport
+               .thenApply(itbReporting -> mapToStepRunReport(reportBuilder, itbReporting))
+               .get(stepRun.getTimeout(), TimeUnit.SECONDS);
+      } catch (TimeoutException e) {
+         LOG.error("ITB timed out after {} seconds", timeout);
+         throw new TimeoutRuntimeException("ITB timed out after " + timeout + " seconds");
+      } catch (InterruptedException e) {
+         Thread.currentThread().interrupt();
+         throw new ExecutionRuntimeException(e);
+      } catch (ExecutionException e) {
+         throw new ExecutionRuntimeException(e);
+      }
    }
 
    private TestRequest mapToRequest(StepRun stepRun) {
@@ -84,15 +126,25 @@ public class ItbStepExecutor implements StepExecutor {
       return testRequest;
    }
 
+   private StepRunReportBuilder prepareStepReport(StepRun stepRun) {
+      return new StepRunReportBuilder()
+            .setStepName(stepRun.getName())
+            .setType(ItbStepDefinition.TYPE);
+   }
+
+   private StepRunReport buildReportWithError(StepRun stepRun, Exception e) {
+      return prepareStepReport(stepRun)
+            .addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e))
+            .build();
+   }
 
    private static Parameter mapToParameter(Property property) {
-      if (property instanceof ByteArrayProperty baProp) {
-         return new Parameter(baProp.getName(), "file", Base64.getEncoder().encodeToString(baProp.getValue()));
-      } else if (property instanceof StringProperty strProp) {
-         return new Parameter(strProp.getName(), "text", strProp.getValue());
-      } else {
-         return new Parameter(property.getName(), "text", String.valueOf(property.getValue()));
-      }
+      return switch (property) {
+         case ByteArrayProperty baProp ->
+               new Parameter(baProp.getName(), "file", Base64.getEncoder().encodeToString(baProp.getValue()));
+         case StringProperty strProp -> new Parameter(strProp.getName(), "text", strProp.getValue());
+         default -> new Parameter(property.getName(), "text", String.valueOf(property.getValue()));
+      };
    }
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package net.ihe.gazelle.maestro.quarkus;
 
+import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.QuarkusTestProfile;
 import io.quarkus.test.junit.TestProfile;
@@ -25,6 +26,7 @@ import net.ihe.gazelle.maestro.api.business.testreport.Result;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testreport.validator.TestReportValidator;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
+import net.ihe.gazelle.security.mocks.KeycloakMockResource;
 import org.apache.http.HttpHeaders;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.AfterAll;
@@ -39,7 +41,7 @@ import java.io.IOException;
 import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
-import static net.ihe.gazelle.oidc.server.OIDCJWTGenerator.getValidJwt;
+import static net.ihe.gazelle.security.mocks.OIDCJWTGenerator.getValidJwt;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
@@ -47,6 +49,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @QuarkusTest
 @TestProfile(TestRunControllerProfile.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@QuarkusTestResource(KeycloakMockResource.class)
 class TestRunControllerIT implements QuarkusTestProfile {
 
    @ConfigProperty(name = "gzl.it.port")

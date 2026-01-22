@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package net.ihe.gazelle.maestro.quarkus.websocket.dto;
 import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSuiteRunDTO;
+import net.ihe.gazelle.oidc.common.technical.dto.SecuredMessageDTO;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 @Schema(
@@ -27,26 +28,27 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 )
 @JsonTypeName(StartTestSuiteRunDTO.TYPE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonIgnoreProperties(value = {"authorization"})
 @JsonPropertyOrder({
       "type",
       "testSuiteRun",
       "persist"
 })
-public class StartTestSuiteRunDTO extends MessageDTO<TestSuiteRun> {
+public class StartTestSuiteRunDTO extends MessageDTO<TestSuiteRun> implements SecuredMessageDTO {
 
    @JsonIgnore
    public static final String TYPE = "START_TEST_SUITE_RUN";
 
    private boolean persist;
+   private final String authorization;
 
    public StartTestSuiteRunDTO() {
-      this(new TestSuiteRun());
+      this(new TestSuiteRun(), "");
    }
 
-   public StartTestSuiteRunDTO(TestSuiteRun testSuiteRun) {
+   public StartTestSuiteRunDTO(TestSuiteRun testSuiteRun,  String authorization) {
       super(testSuiteRun);
       this.persist = true;
+      this.authorization = authorization;
    }
 
    @Schema(
@@ -73,6 +75,11 @@ public class StartTestSuiteRunDTO extends MessageDTO<TestSuiteRun> {
 
    public void setPersist(boolean persist) {
       this.persist = persist;
+   }
+
+   @Override
+   public String getAuthorization() {
+      return authorization;
    }
 
    @Override
