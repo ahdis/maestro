@@ -94,8 +94,7 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
                     <excludePackageNames>
-                        net.ihe.gazelle.maestro.api.technical.dto.*,
-                        net.ihe.gazelle.maestro.spi.business.recording
+                        net.ihe.gazelle.maestro.api.technical.dto.*
                     </excludePackageNames>
                 </configuration>
             </plugin>

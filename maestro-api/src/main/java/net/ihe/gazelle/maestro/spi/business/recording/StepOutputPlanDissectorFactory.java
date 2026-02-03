@@ -16,9 +16,20 @@
 
 package net.ihe.gazelle.maestro.spi.business.recording;
 
-/**
- * Simple descriptor describing a reference that must be emitted once an item or attachment is persisted.
- */
-public record MaestroReference(String type, String name, MaestroRefType refType, String value) {
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 
+/**
+ * SPI entry point for v2 step output planning.
+ */
+public interface StepOutputPlanDissectorFactory {
+
+   /**
+    * @return {@code true} when this factory can produce a dissector for the given step
+    */
+   boolean supports(StepRunReport stepRunReport);
+
+   /**
+    * @return a new dissector instance
+    */
+   StepOutputPlanDissector create();
 }

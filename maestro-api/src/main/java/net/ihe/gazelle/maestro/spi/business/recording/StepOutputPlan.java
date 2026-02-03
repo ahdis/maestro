@@ -16,17 +16,19 @@
 
 package net.ihe.gazelle.maestro.spi.business.recording;
 
-import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
-import net.ihe.gazelle.security.business.acl.AccessControlList;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+import net.ihe.gazelle.maestro.spi.business.recording.plan.FutureReferencePlan;
 
-/**
- * Immutable data exposed to {@link StepOutputDissector} implementations.
- *
- * @param stepRunReport        the step report to dissect
- * @param accessControlList    ACL that must be applied to newly created Datahouse items
- */
-public record StepOutputContext(
-      StepRunReport stepRunReport,
-      AccessControlList accessControlList
-) {
+import java.util.List;
+import java.util.Objects;
+
+public record StepOutputPlan(List<FutureReferencePlan<TestReport>> reportReferencePlans) {
+
+   public StepOutputPlan {
+      reportReferencePlans = List.copyOf(Objects.requireNonNullElse(reportReferencePlans, List.of()));
+   }
+
+   public static StepOutputPlan empty() {
+      return new StepOutputPlan(List.of());
+   }
 }

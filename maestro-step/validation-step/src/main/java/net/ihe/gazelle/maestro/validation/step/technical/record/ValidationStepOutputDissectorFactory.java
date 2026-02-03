@@ -16,15 +16,15 @@
 
 package net.ihe.gazelle.maestro.validation.step.technical.record;
 
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputDissector;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputDissectorFactory;
-import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanDissector;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanDissectorFactory;
 
 /**
  * Factory for creating ValidationStepOutputDissector instances.
  * This factory creates dissectors for validation step outputs.
  */
-public class ValidationStepOutputDissectorFactory implements StepOutputDissectorFactory {
+public class ValidationStepOutputDissectorFactory implements StepOutputPlanDissectorFactory {
 
     /**
      * Default constructor.
@@ -32,13 +32,12 @@ public class ValidationStepOutputDissectorFactory implements StepOutputDissector
     public ValidationStepOutputDissectorFactory() { /* Default constructor */ }
 
     @Override
-    public boolean supports(final String stepType) {
-        return ValidationStepDefinition.TYPE.equals(stepType);
+    public boolean supports(StepRunReport stepRunReport) {
+        return stepRunReport != null && "VALIDATION".equals(stepRunReport.getType());
     }
 
     @Override
-    public StepOutputDissector create() {
+    public StepOutputPlanDissector create() {
         return new ValidationStepOutputDissector();
     }
-
 }

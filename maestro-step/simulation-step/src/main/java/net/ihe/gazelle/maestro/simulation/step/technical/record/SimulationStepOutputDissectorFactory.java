@@ -1,5 +1,5 @@
 /*
- * Copyright 2025-2026 IHE International.
+ * Copyright 2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,27 +16,24 @@
 
 package net.ihe.gazelle.maestro.simulation.step.technical.record;
 
-import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepDefinition;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputDissector;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputDissectorFactory;
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanDissector;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanDissectorFactory;
 
 /**
  * Registers the simulation step output dissector.
  */
-public class SimulationStepOutputDissectorFactory implements StepOutputDissectorFactory {
+public class SimulationStepOutputDissectorFactory implements StepOutputPlanDissectorFactory {
 
-    /**
-     * Default constructor.
-     */
     public SimulationStepOutputDissectorFactory() { /* Default constructor */ }
 
     @Override
-    public boolean supports(final String stepType) {
-        return SimulationStepDefinition.TYPE.equals(stepType);
+    public boolean supports(StepRunReport stepRunReport) {
+        return stepRunReport != null && "SIMULATION".equals(stepRunReport.getType());
     }
 
     @Override
-    public StepOutputDissector create() {
+    public StepOutputPlanDissector create() {
         return new SimulationStepOutputDissector();
     }
 }

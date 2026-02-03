@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.spi.business.recording;
+package net.ihe.gazelle.maestrorecording.adapter;
 
-record PropertyReplacement(int outputIndex, PropertyReferenceFactory factory) {
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanDissector;
+
+/**
+ * Abstraction responsible for selecting the appropriate v2 dissector for a step.
+ */
+public interface StepOutputPlanDissectorProvider {
+
+   StepOutputPlanDissector getDissector(StepRunReport stepRunReport);
 }

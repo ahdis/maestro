@@ -14,22 +14,10 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.spi.business.recording;
+package net.ihe.gazelle.maestro.spi.business.recording.plan;
 
-/**
- * Service provider loaded through {@link java.util.ServiceLoader} allowing each step
- * module to contribute its own {@link StepOutputDissector}.
- */
-public interface StepOutputDissectorFactory {
+@FunctionalInterface
+public interface ItemObjectMutation<T> {
 
-   /**
-    * @return {@code true} when this factory can produce a dissector for the given step
-    * @param stepType
-    */
-   boolean supports(final String stepType);
-
-   /**
-    * @return a new dissector instance
-    */
-   StepOutputDissector create();
+   void mutateReference(T object, String referenceName, String referenceId);
 }

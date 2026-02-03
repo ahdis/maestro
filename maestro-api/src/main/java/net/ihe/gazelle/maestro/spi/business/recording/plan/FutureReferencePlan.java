@@ -14,21 +14,14 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.spi.business.recording;
-
-import net.ihe.gazelle.maestro.api.business.property.Property;
+package net.ihe.gazelle.maestro.spi.business.recording.plan;
 
 /**
- * Functional interface used to rebuild a step property once a Datahouse identifier
- * and the corresponding URL are known.
+ * A pairing of a ReferencePlan and an ItemObjectMutation to apply once the target of the reference has been persisted.
+ *
+ * @param referencePlan the plan describing the reference to add
+ * @param mutation Optional mutation to perform in the containing item once the target of the reference has been persisted.
+ * @param <T> the type of the containing item object
  */
-@FunctionalInterface
-public interface PropertyReferenceFactory {
-
-   /**
-    * @param itemId  identifier returned by Datahouse
-    * @param itemUrl absolute URL to the newly persisted resource
-    * @return replacement property
-    */
-   Property create(String itemId, String itemUrl);
+public record FutureReferencePlan<T>(ReferencePlan referencePlan, ItemObjectMutation<T> mutation) {
 }

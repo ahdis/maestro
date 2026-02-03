@@ -1,5 +1,5 @@
 /*
- * Copyright 2025-2026 IHE International.
+ * Copyright 2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,31 +16,22 @@
 
 package net.ihe.gazelle.maestro.itb.step.technical.record;
 
-import net.ihe.gazelle.maestro.itb.step.business.ItbStepDefinition;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputDissector;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputDissectorFactory;
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanDissector;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanDissectorFactory;
 
 /**
  * Factory class responsible for creating instances of {@link ItbStepOutputDissector}.
  */
-public class ItbStepOutputDissectorFactory implements StepOutputDissectorFactory {
+public class ItbStepOutputDissectorFactory implements StepOutputPlanDissectorFactory {
 
-    /**
-     * Default constructor.
-     */
     public ItbStepOutputDissectorFactory() {
         // Empty
     }
 
-    /**
-     * Determines if the factory supports the given step type.
-     *
-     * @param stepType the type of the step to be verified for support.
-     * @return true if the specified step type is supported, false otherwise.
-     */
     @Override
-    public boolean supports(final String stepType) {
-        return ItbStepDefinition.TYPE.equals(stepType);
+    public boolean supports(StepRunReport stepRunReport) {
+        return stepRunReport != null && "ITB".equals(stepRunReport.getType());
     }
 
     /**
@@ -49,7 +40,7 @@ public class ItbStepOutputDissectorFactory implements StepOutputDissectorFactory
      * @return a new {@link ItbStepOutputDissector} instance
      */
     @Override
-    public StepOutputDissector create() {
+    public StepOutputPlanDissector create() {
         return new ItbStepOutputDissector();
     }
 }

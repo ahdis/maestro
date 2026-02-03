@@ -23,13 +23,15 @@ import net.ihe.gazelle.maestro.api.business.testreport.Result;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputProjection;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlan;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -59,8 +61,7 @@ class DatahouseTestReportRecordServiceTest {
 
         assertThat(reportLocation).isEqualTo("http://dh/items/itm-1");
         assertThat(recordItemClientMock.recordedItems).hasSize(1);
-        assertThat(recordItemClientMock.uploadedAttachmentsBatches).hasSize(1);
-        assertThat(recordItemClientMock.uploadedAttachmentsBatches.getFirst()).hasSize(2);
+        assertThat(recordItemClientMock.uploadedAttachmentsBatches).hasSize(2);
 
         List<Property> inputs = firstRun(report).getInputs();
         assertThat(inputs).hasSize(2);
@@ -95,7 +96,7 @@ class DatahouseTestReportRecordServiceTest {
     }
 
     @Test
-    void records_step_outputs_using_dissection_projection() {
+    void records_step_outputs_using_dissection_plan() {
         service = new DatahouseTestReportRecordingService(recordItemClientMock, "http://dh", staticDissectorProvider());
 
         StepRunReport step = new StepRunReport()
@@ -107,18 +108,18 @@ class DatahouseTestReportRecordServiceTest {
         TestRunReport run = newTestRun("run-outputs").addStepRunReport(step);
         TestReport report = newReport("R-outputs", run);
 
-
         String reportLocation = service.recordTestReport(report);
 
         assertThat(recordItemClientMock.recordedItems).hasSize(5);
-        assertThat(recordItemClientMock.uploadedAttachmentsBatches).hasSize(1);
-        assertThat(recordItemClientMock.uploadedAttachmentsBatches.getFirst()).hasSize(2);
+        assertThat(recordItemClientMock.uploadedAttachmentsBatches).hasSize(2);
         assertThat(reportLocation).isEqualTo("http://dh/items/itm-5");
+
+        Map<String, String> itemIdsByType = itemIdsByType();
 
         List<Property> outputs = firstStep(report).getOutputs();
         assertThat(outputs).hasSize(3);
-        assertBinaryAttachment(outputs.get(0), "http://dh/items/itm-4");
-        assertBinaryAttachment(outputs.get(1), "http://dh/items/itm-3");
+        assertBinaryAttachment(outputs.get(0), "http://dh/items/" + itemIdsByType.get(StaticStepOutputDissector.ROOT_ITEM_TYPE));
+        assertBinaryAttachment(outputs.get(1), "http://dh/items/" + itemIdsByType.get(StaticStepOutputDissector.SIBLING_ITEM_TYPE));
         assertBinaryAttachment(outputs.get(2), "/attachments/att-1");
 
         Item rootItem = recordedItemOfType(StaticStepOutputDissector.ROOT_ITEM_TYPE);
@@ -138,7 +139,8 @@ class DatahouseTestReportRecordServiceTest {
         assertThat(referenceNames(testReportItem))
                 .contains(StaticStepOutputDissector.ATTACHMENT_REFERENCE_NAME,
                         StaticStepOutputDissector.DETACHED_REFERENCE_NAME,
-                        StaticStepOutputDissector.REPORT_REFERENCE_NAME);
+                        StaticStepOutputDissector.REPORT_REFERENCE_NAME,
+                        StaticStepOutputDissector.SIBLING_REFERENCE_NAME);
     }
 
     private static ByteArrayProperty binaryInput(String name, String value) {
@@ -176,11 +178,11 @@ class DatahouseTestReportRecordServiceTest {
         assertNull(attachment.getValue());
     }
 
-    private StepOutputDissectorProvider emptyDissectorProvider() {
-        return step -> new StaticStepOutputDissector(StepOutputProjection.empty());
+    private StepOutputPlanDissectorProvider emptyDissectorProvider() {
+        return step -> new StaticStepOutputDissector(StepOutputPlan.empty());
     }
 
-    private StepOutputDissectorProvider staticDissectorProvider() {
+    private StepOutputPlanDissectorProvider staticDissectorProvider() {
         return step -> new StaticStepOutputDissector();
     }
 
@@ -190,6 +192,15 @@ class DatahouseTestReportRecordServiceTest {
                 .filter(item -> type.equals(item.getType()))
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("No recorded item of type " + type));
+    }
+
+    private Map<String, String> itemIdsByType() {
+        Map<String, String> ids = new HashMap<>();
+        for (int i = 0; i < recordItemClientMock.recordedItems.size(); i++) {
+            Item item = (Item) recordItemClientMock.recordedItems.get(i);
+            ids.put(item.getType(), "itm-" + (i + 1));
+        }
+        return ids;
     }
 
     private List<String> referenceNames(Item item) {

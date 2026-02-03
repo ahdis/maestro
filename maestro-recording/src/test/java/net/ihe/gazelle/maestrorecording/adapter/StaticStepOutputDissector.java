@@ -17,15 +17,25 @@
 package net.ihe.gazelle.maestrorecording.adapter;
 
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
-import net.ihe.gazelle.maestro.spi.business.recording.*;
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlan;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanContext;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanDissector;
+import net.ihe.gazelle.maestro.spi.business.recording.plan.AttachmentPlan;
+import net.ihe.gazelle.maestro.spi.business.recording.plan.FutureReferencePlan;
+import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemPlan;
+import net.ihe.gazelle.maestro.spi.business.recording.plan.ReferencePlan;
+import net.ihe.gazelle.modelmarshaller.technical.marshalling.MarshallingException;
+import net.ihe.gazelle.modelmarshaller.technical.marshalling.TextMarshaller;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
-final class StaticStepOutputDissector implements StepOutputDissector {
+final class StaticStepOutputDissector implements StepOutputPlanDissector {
 
     static final String ROOT_OUTPUT_NAME = "static-root-output";
     static final String SIBLING_OUTPUT_NAME = "static-sibling-output";
@@ -47,92 +57,106 @@ final class StaticStepOutputDissector implements StepOutputDissector {
     static final String DETACHED_REFERENCE_NAME = "detached-log";
     static final String ATTACHMENT_TYPE = "STATIC_ATTACHMENT";
 
-    private final StepOutputProjection projection;
+    private final StepOutputPlan plan;
 
     StaticStepOutputDissector() {
         this(null);
     }
 
-    StaticStepOutputDissector(StepOutputProjection projection) {
-        this.projection = projection;
+    StaticStepOutputDissector(StepOutputPlan plan) {
+        this.plan = plan;
     }
 
     @Override
-    public StepOutputProjection dissect(StepOutputContext context) {
-        if (projection != null) {
-            return projection;
+    public StepOutputPlan dissect(StepOutputPlanContext context) {
+        if (plan != null) {
+            return plan;
         }
         if (context == null || context.stepRunReport() == null) {
-            return StepOutputProjection.empty();
+            return StepOutputPlan.empty();
         }
-        return buildProjection(context.stepRunReport().getOutputs());
+        return buildPlan(context.stepRunReport(), context.datahouseUrl());
     }
 
-    private static StepOutputProjection buildProjection(List<Property> outputs) {
-        StepOutputProjectionBuilder graph = new StepOutputProjectionBuilder();
+    private static StepOutputPlan buildPlan(StepRunReport stepRunReport, String datahouseUrl) {
+        ItemPlan<String> root = item(ROOT_ITEM_TYPE, "{\"level\":0}");
+        ItemPlan<String> child = item(CHILD_ITEM_TYPE, "{\"level\":1}");
+        ItemPlan<String> grandchild = item(GRANDCHILD_ITEM_TYPE, "{\"level\":2}");
+        ItemPlan<String> sibling = item(SIBLING_ITEM_TYPE, "{\"level\":1}");
 
-        ItemOutputBuilder root = graph.addItem(item(ROOT_ITEM_TYPE, "{\"level\":0}"));
-        root.addReferenceBinding(new ReferenceBinding(
-                REPORT_REFERENCE_NAME,
-                REPORT_REFERENCE_TYPE,
-                MaestroRefType.ITEM_ID
+        child.withReference(GRANDCHILD_REFERENCE_NAME, grandchild);
+        root.withReference(CHILD_REFERENCE_NAME, child);
+        root.withReference(SIBLING_REFERENCE_NAME, sibling);
+
+        AttachmentPlan attached = attachment("binary-output.bin", "application/octet-stream", "root-binary");
+        AttachmentPlan detached = attachment("logs.txt", "text/plain", "log");
+        root.withReference(ATTACHMENT_REFERENCE_NAME, attached);
+        root.withReference(DETACHED_REFERENCE_NAME, detached);
+
+        List<FutureReferencePlan<TestReport>> reportPlans = new ArrayList<>();
+        reportPlans.add(new FutureReferencePlan<>(
+              ReferencePlan.forItem(REPORT_REFERENCE_NAME, root),
+              (report, refName, itemId) -> new StepOutputPlanContext(stepRunReport, null, datahouseUrl)
+                    .replaceOutput(ROOT_OUTPUT_NAME, output -> toItemReference(output, datahouseUrl, itemId, ROOT_ITEM_TYPE))
         ));
-        root.addPropertyReplacement(ROOT_OUTPUT_NAME, outputs, referenceProperty(ROOT_OUTPUT_NAME));
+        reportPlans.add(new FutureReferencePlan<>(
+              ReferencePlan.forItem(SIBLING_REFERENCE_NAME, sibling),
+              (report, refName, itemId) -> new StepOutputPlanContext(stepRunReport, null, datahouseUrl)
+                    .replaceOutput(SIBLING_OUTPUT_NAME, output -> toItemReference(output, datahouseUrl, itemId, SIBLING_ITEM_TYPE))
+        ));
+        reportPlans.add(new FutureReferencePlan<>(
+              ReferencePlan.forAttachment(ATTACHMENT_REFERENCE_NAME, attached),
+              (report, refName, attachmentId) -> new StepOutputPlanContext(stepRunReport, null, datahouseUrl)
+                    .replaceOutput(ATTACHMENT_OUTPUT_NAME, output ->
+                          new ByteArrayItemProperty(ATTACHMENT_OUTPUT_NAME, null)
+                                .setReference("/attachments/" + attachmentId))
+        ));
+        reportPlans.add(new FutureReferencePlan<>(
+              ReferencePlan.forAttachment(DETACHED_REFERENCE_NAME, detached),
+              null
+        ));
 
-        SubItemOutputBuilder child = root.addSubItem(
-                item(CHILD_ITEM_TYPE, "{\"level\":1}"),
-                CHILD_REFERENCE_NAME,
-                CHILD_ITEM_TYPE,
-                MaestroRefType.ITEM_ID
-        );
-
-        child.addSubItem(
-                item(GRANDCHILD_ITEM_TYPE, "{\"level\":2}"),
-                GRANDCHILD_REFERENCE_NAME,
-                GRANDCHILD_ITEM_TYPE,
-                MaestroRefType.ITEM_ID
-        );
-
-        SubItemOutputBuilder sibling = root.addSubItem(
-                item(SIBLING_ITEM_TYPE, "{\"level\":1}"),
-                SIBLING_REFERENCE_NAME,
-                SIBLING_ITEM_TYPE,
-                MaestroRefType.ITEM_ID
-        );
-        sibling.addPropertyReplacement(1, referenceProperty(SIBLING_OUTPUT_NAME));
-
-        root.addAttachment(new AttachmentOutputBuilder(
-                attachment("binary-output.bin", "application/octet-stream", "root-binary"))
-                .withReference(ATTACHMENT_REFERENCE_NAME, ATTACHMENT_TYPE)
-                .replaceOutput(2, (attachmentId, attachmentUrl) -> new ByteArrayItemProperty(
-                        ATTACHMENT_OUTPUT_NAME, null).setReference("/attachments/" + attachmentId)));
-
-        root.addAttachment(new AttachmentOutputBuilder(
-                attachment("logs.txt", "text/plain", "log"))
-                .withReference(DETACHED_REFERENCE_NAME, ATTACHMENT_TYPE));
-
-        return graph.build();
+        return new StepOutputPlan(reportPlans);
     }
 
-    private static MaestroItem item(String type, String content) {
-        return new MaestroItem(
-              null,
-              type,
-              content,
-              new ArrayList<>(),
-              new HashMap<>()
-        );
+    private static ByteArrayItemProperty toItemReference(Property output,
+                                                         String datahouseUrl,
+                                                         String itemId,
+                                                         String itemType) {
+        ByteArrayItemProperty replacement = new ByteArrayItemProperty((ByteArrayProperty) output);
+        replacement.setValue(null);
+        replacement.setItemType(itemType);
+        replacement.setReference(datahouseUrl + "/items/" + itemId);
+        return replacement;
     }
 
-    private static MaestroAttachment attachment(String filename, String type, String marker) {
-        return new MaestroAttachment(
-              marker.getBytes(StandardCharsets.UTF_8),
-              type,
-              filename
-        );
+    private static ItemPlan<String> item(String type, String content) {
+        return new ItemPlan<>(type, content, new StringMarshaller());
     }
 
-    private static PropertyReferenceFactory referenceProperty(String propertyName) {
-        return (itemId, itemUrl) -> new ByteArrayItemProperty(propertyName, null).setReference(itemUrl);
+    private static AttachmentPlan attachment(String filename, String type, String marker) {
+        return new AttachmentPlan(type, marker.getBytes(StandardCharsets.UTF_8), filename);
+    }
+
+    private static final class StringMarshaller implements TextMarshaller<String> {
+        @Override
+        public String marshallAsString(String value) throws MarshallingException {
+            return value;
+        }
+
+        @Override
+        public String unmarshall(String payload) {
+            throw new UnsupportedOperationException("String marshalling is one-way for recording");
+        }
+
+        @Override
+        public byte[] marshall(String value) throws MarshallingException {
+            return marshallAsString(value).getBytes();
+        }
+
+        @Override
+        public String unmarshall(byte[] payload) {
+            throw new UnsupportedOperationException("String marshalling is one-way for recording");
+        }
     }
 }

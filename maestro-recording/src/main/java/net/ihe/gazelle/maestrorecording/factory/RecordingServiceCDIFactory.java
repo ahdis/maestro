@@ -21,7 +21,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.inject.Produces;
 import net.ihe.gazelle.maestrorecording.adapter.DatahouseTestReportRecordingService;
-import net.ihe.gazelle.maestrorecording.adapter.SPIStepOutputDissectorProvider;
+import net.ihe.gazelle.maestrorecording.adapter.SPIStepOutputPlanDissectorProvider;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
@@ -33,7 +33,7 @@ public class RecordingServiceCDIFactory {
    @ConfigProperty(name = "gzl.datahouse.url")
    String datahouseUrl;
 
-   private final SPIStepOutputDissectorProvider dissectorProvider = new SPIStepOutputDissectorProvider();
+   private final SPIStepOutputPlanDissectorProvider dissectorProvider = new SPIStepOutputPlanDissectorProvider();
 
    /**
     * Default constructor
@@ -46,7 +46,7 @@ public class RecordingServiceCDIFactory {
     * Produces a new {@link DatahouseTestReportRecordingService} for each request.
     *
     * @return a {@code DatahouseTestReportRecordingService} instance configured with the
-    *         datahouse URL and {@link SPIStepOutputDissectorProvider}.
+    *         datahouse URL and {@link SPIStepOutputPlanDissectorProvider}.
     */
    @Produces
    @RequestScoped

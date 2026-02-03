@@ -16,23 +16,14 @@
 
 package net.ihe.gazelle.maestro.itb.step.technical.record;
 
-import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
-import net.ihe.gazelle.maestro.api.business.property.Property;
-import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
-import net.ihe.gazelle.maestro.itb.step.business.ItbStepDefinition;
-import net.ihe.gazelle.maestro.spi.business.recording.*;
-
-import java.util.ArrayList;
-import java.util.List;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlan;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanContext;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanDissector;
 
 /**
- * The ItbStepOutputDissector class is an implementation of the {@link StepOutputDissector} interface.
+ * The ItbStepOutputDissector class is an implementation of the v2 StepOutputPlanDissector interface.
  */
-public class ItbStepOutputDissector implements StepOutputDissector {
-
-    private static final String ITB_XML_REPORT = "ITB_XML_REPORT";
-    private static final String ITB_PDF_REPORT = "ITB_PDF_REPORT";
-    private static final String ITB_LOGS = "ITB_LOGS";
+public class ItbStepOutputDissector implements StepOutputPlanDissector {
 
     /**
      * Default constructor.
@@ -42,52 +33,7 @@ public class ItbStepOutputDissector implements StepOutputDissector {
     }
 
     @Override
-    public StepOutputProjection dissect(StepOutputContext context) {
-        if (context == null || context.stepRunReport() == null) {
-            return StepOutputProjection.empty();
-        }
-        StepRunReport stepRunReport = context.stepRunReport();
-        List<Property> outputs = stepRunReport.getOutputs();
-        if (outputs == null || outputs.isEmpty()) {
-            return StepOutputProjection.empty();
-        }
-
-        List<AttachmentOutputBuilder> attachments = extractItbOutputAttachments(outputs);
-
-        return null;
-    }
-
-    private List<AttachmentOutputBuilder> extractItbOutputAttachments(List<Property> outputs) {
-        List<AttachmentOutputBuilder> plans = new ArrayList<>();
-        ByteArrayProperty xmlReportProperty = (ByteArrayProperty) outputs.stream()
-                .filter(output -> ItbStepDefinition.XML_REPORT.equals(output.getName()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("XML report output property not found"));
-
-        ByteArrayProperty pdfReportProperty = (ByteArrayProperty) outputs.stream()
-                .filter(output -> ItbStepDefinition.PDF_REPORT.equals(output.getName()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("PDF report output property not found"));
-
-        ByteArrayProperty logsProperty = (ByteArrayProperty) outputs.stream()
-                .filter(output -> ItbStepDefinition.LOGS.equals(output.getName()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Logs output property not found"));
-
-        plans.add(createAttachment(ITB_XML_REPORT, xmlReportProperty));
-        plans.add(createAttachment(ITB_PDF_REPORT, pdfReportProperty));
-        plans.add(createAttachment(ITB_LOGS, logsProperty));
-        return plans;
-    }
-
-
-    private AttachmentOutputBuilder createAttachment(String type, ByteArrayProperty property) {
-        MaestroAttachment attachment = new MaestroAttachment(
-              property.getValue(),
-              type,
-              property.getFileName()
-        );
-        return new AttachmentOutputBuilder(attachment)
-                .withReference(type, type);
+    public StepOutputPlan dissect(StepOutputPlanContext context) {
+        return StepOutputPlan.empty();
     }
 }

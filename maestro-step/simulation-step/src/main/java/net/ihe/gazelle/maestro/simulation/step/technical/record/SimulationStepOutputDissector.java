@@ -20,9 +20,17 @@ import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepDefinition;
-import net.ihe.gazelle.maestro.spi.business.recording.*;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlan;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanContext;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanDissector;
+import net.ihe.gazelle.maestro.spi.business.recording.plan.FutureReferencePlan;
+import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemPlan;
+import net.ihe.gazelle.maestro.spi.business.recording.plan.ReferencePlan;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
+import net.ihe.gazelle.modelmarshaller.technical.marshalling.MarshallingException;
+import net.ihe.gazelle.modelmarshaller.technical.marshalling.TextMarshaller;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
 import net.ihe.gazelle.simulation.business.callback.SimulationReport;
 import net.ihe.gazelle.simulation.business.callback.TransactionReport;
@@ -30,219 +38,172 @@ import net.ihe.gazelle.simulation.business.callback.ValidationReport;
 import net.ihe.gazelle.simulation.jaxrs.api.technical.dto.callback.SimulationReportDTO;
 import net.ihe.gazelle.validation.v2.api.business.Input;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
  * Structures the simulation step report into a set of hierarchical Datahouse items.
  */
-class SimulationStepOutputDissector implements StepOutputDissector {
+class SimulationStepOutputDissector implements StepOutputPlanDissector {
 
     private static final TextSerDes serDes = new JacksonSerDes();
 
    private static final String ITEM_TYPE_SIMULATION_REPORT = "SIMULATION_REPORT";
    private static final String ITEM_TYPE_VALIDATION_REPORT = "VALIDATION_REPORT";
    private static final String VALIDATION_INPUT_TYPE = "VALIDATION_INPUT";
+   private static final String VALIDATION_REPORT_REFERENCE_PREFIX = "validation-report:";
 
    @Override
-   public StepOutputProjection dissect(StepOutputContext context) {
+   public StepOutputPlan dissect(StepOutputPlanContext context) {
       if (context == null || context.stepRunReport() == null) {
-         return StepOutputProjection.empty();
+         return StepOutputPlan.empty();
       }
       StepRunReport stepRunReport = context.stepRunReport();
       List<Property> outputs = stepRunReport.getOutputs();
       if (outputs == null || outputs.isEmpty()) {
-         return StepOutputProjection.empty();
+         return StepOutputPlan.empty();
       }
 
-
-      ByteArrayProperty reportProperty = (ByteArrayProperty) outputs.stream()
-              .filter(output -> SimulationStepDefinition.REPORT.equals(output.getName()))
-              .findFirst()
-              .orElseThrow(() -> new IllegalStateException("Simulation report output property not found"));
+      ByteArrayProperty reportProperty = context.output(SimulationStepDefinition.REPORT, ByteArrayProperty.class);
+      if (reportProperty == null) {
+         return StepOutputPlan.empty();
+      }
       SimulationReport simulationReport = deserializeReport(reportProperty);
 
-      StepOutputProjectionBuilder graph = new StepOutputProjectionBuilder();
-      MaestroItem simulationReportItem = createReportItem(context, simulationReport);
-      ItemOutputBuilder simulationReportBuilder = graph.addItem(simulationReportItem);
-      //This reference will be added to the enclosing TestRunReport item later on
-      simulationReportBuilder.addReferenceBinding(new ReferenceBinding(
-              SimulationStepDefinition.REPORT,
-              ITEM_TYPE_SIMULATION_REPORT,
-              MaestroRefType.ITEM_ID
-      ));
+      ItemPlan<SimulationReport> simulationPlan = new ItemPlan<>(
+            ITEM_TYPE_SIMULATION_REPORT,
+            simulationReport,
+            new SimulationReportMarshaller()
+      );
 
-      // Replace the original byte[] output with a reference to the persisted report hierarchy.
-      PropertyReferenceFactory factory = (itemId, itemUrl) -> {
-         ByteArrayItemProperty replacement = new ByteArrayItemProperty(reportProperty);
-         replacement.setValue(null);
-         return replacement
-               .setItemType(ITEM_TYPE_SIMULATION_REPORT)
-               .setReference(itemUrl);
-      };
-      simulationReportBuilder.addPropertyReplacement(SimulationStepDefinition.REPORT, outputs, factory);
+      addValidationReportSubItems(simulationPlan, simulationReport, context.datahouseUrl());
 
-      addValidationReportSubItems(simulationReportBuilder, context, simulationReport);
-      simulationReportBuilder.mutateContent(this::mutateSimulationReportContent);
+      FutureReferencePlan<TestReport> reportReferencePlan = new FutureReferencePlan<>(
+            ReferencePlan.forItem(SimulationStepDefinition.REPORT, simulationPlan),
+            (testReport, refName, refId) -> context.replaceOutput(
+                  SimulationStepDefinition.REPORT,
+                  output -> {
+                     ByteArrayItemProperty replacement = new ByteArrayItemProperty(reportProperty);
+                     replacement.setValue(null);
+                     replacement.setItemType(ITEM_TYPE_SIMULATION_REPORT);
+                     replacement.setReference(context.datahouseUrl() + "/items/" + refId);
+                     return replacement;
+                  }
+            )
+      );
 
-      return graph.build();
+      return new StepOutputPlan(List.of(reportReferencePlan));
    }
 
-   private void addValidationReportSubItems(ItemOutputBuilder simulationReportBuilder,
-                                            StepOutputContext context,
-                                            SimulationReport simulationReport) {
+   private void addValidationReportSubItems(ItemPlan<SimulationReport> simulationPlan,
+                                            SimulationReport simulationReport,
+                                            String datahouseUrl) {
       if (simulationReport.getTransactionReports() == null) {
          return;
       }
-      int refCounter = 0;
       for (TransactionReport transaction : simulationReport.getTransactionReports()) {
          if (transaction.getValidationReports() == null) {
             continue;
-	         }
-	         for (ValidationReport validationReport : transaction.getValidationReports()) {
-	            byte[] validationContent = validationReport.getContent();
-	            if (validationContent == null || validationContent.length == 0) {
-	               String existingReference = validationReport.getReference();
-	               if (existingReference != null && !existingReference.isBlank()) {
-	                  continue; // skip when only reference is present
-	               }
-	               throw new IllegalStateException(
-	                     "Simulation validation report is missing content and does not provide a reference");
-	            }
-	            net.ihe.gazelle.validation.v2.api.business.report.ValidationReport validationReportV2 =
-	                  deserializeValidationReportV2(validationContent);
-	            List<AttachmentOutputBuilder> attachments = extractValidationInputAttachments(validationReportV2);
-	            String refName = "validation-report-" + ++refCounter;
-
-            MaestroItem validationItem = new MaestroItem(
-                  context.accessControlList(),
-                  ITEM_TYPE_VALIDATION_REPORT,
-                  serializeValidationReport(validationReportV2),
-                  new ArrayList<>(), // references are not yet known
-                  new HashMap<>()
-            );
-
-            SubItemOutputBuilder validationBuilder = simulationReportBuilder.addSubItem(
-                  validationItem,
+         }
+         for (ValidationReport validationReport : transaction.getValidationReports()) {
+            byte[] validationContent = validationReport.getContent();
+            if (validationContent == null || validationContent.length == 0) {
+               String existingReference = validationReport.getReference();
+               if (existingReference != null && !existingReference.isBlank()) {
+                  continue; // skip when only reference is present
+               }
+               throw new IllegalStateException(
+                     "Simulation validation report is missing content and does not provide a reference");
+            }
+            net.ihe.gazelle.validation.v2.api.business.report.ValidationReport validationReportV2 =
+                  deserializeValidationReportV2(validationContent);
+            ItemPlan<net.ihe.gazelle.validation.v2.api.business.report.ValidationReport> validationPlan =
+                  new ItemPlan<>(
+                        ITEM_TYPE_VALIDATION_REPORT,
+                        validationReportV2,
+                        new ValidationReportMarshaller()
+                  );
+            addValidationInputAttachments(validationPlan, validationReportV2);
+            String refName = buildValidationReferenceName(transaction, validationReport);
+            simulationPlan.withReference(
                   refName,
-                  ITEM_TYPE_VALIDATION_REPORT,
-                  MaestroRefType.ITEM_ID);
-            validationBuilder.addAttachments(attachments);
-            validationBuilder.mutateContent(this::mutateValidationReportContent);
+                  validationPlan,
+                  (report, referenceName, itemId) ->
+                        mutateSimulationValidationReport(report, referenceName, itemId, datahouseUrl)
+            );
          }
       }
    }
 
-   private List<AttachmentOutputBuilder> extractValidationInputAttachments(
+   private void addValidationInputAttachments(
+         ItemPlan<net.ihe.gazelle.validation.v2.api.business.report.ValidationReport> validationPlan,
          net.ihe.gazelle.validation.v2.api.business.report.ValidationReport validationReport) {
-      List<AttachmentOutputBuilder> plans = new ArrayList<>();
       if (validationReport.getInputs() == null) {
-         return plans;
+         return;
       }
       for (Input input : validationReport.getInputs()) {
          if (input.getContent() != null) {
-            plans.add(createValidationInputAttachment(input));
+            String refName = resolveInputReferenceName(input.getId());
+            validationPlan.addDetachedAttachment(
+                  refName,
+                  VALIDATION_INPUT_TYPE,
+                  input.getContent(),
+                  input.getId(),
+                  this::mutateValidationInput
+            );
             input.setContent(null);
          }
       }
-      return plans;
    }
 
-   private AttachmentOutputBuilder createValidationInputAttachment(Input input) {
-      MaestroAttachment attachment = new MaestroAttachment(
-            input.getContent(),
-            VALIDATION_INPUT_TYPE,
-            input.getId()
-      );
-      return new AttachmentOutputBuilder(attachment)
-            .withReference(resolveInputReferenceName(input.getId()), VALIDATION_INPUT_TYPE);
+   private void mutateValidationInput(net.ihe.gazelle.validation.v2.api.business.report.ValidationReport report,
+                                      String referenceName,
+                                      String attachmentId) {
+      if (report.getInputs() == null) {
+         return;
+      }
+      for (Input input : report.getInputs()) {
+         String candidate = resolveInputReferenceName(input.getId());
+         if (candidate.equals(referenceName)) {
+            input.setItemId(attachmentId);
+            input.setLocation("/attachments/" + attachmentId);
+            input.setContent(null);
+         }
+      }
    }
 
-   private String mutateValidationReportContent(String content, ContentMutationContext context) {
-      net.ihe.gazelle.validation.v2.api.business.report.ValidationReport validationReport =
-            deserializeValidationReportContent(content);
-      if (validationReport.getInputs() != null) {
-         for (Input input : validationReport.getInputs()) {
-            String refName = resolveInputReferenceName(input.getId());
-            String attachmentId = context.findAttachmentId(refName);
-            if (attachmentId != null) {
-               input.setItemId(attachmentId);
-               input.setLocation("/attachments/" + attachmentId);
-               input.setContent(null);
+   private void mutateSimulationValidationReport(SimulationReport report,
+                                                 String referenceName,
+                                                 String itemId,
+                                                 String datahouseUrl) {
+      if (report == null || report.getTransactionReports() == null) {
+         return;
+      }
+      for (TransactionReport transaction : report.getTransactionReports()) {
+         if (transaction.getValidationReports() == null) {
+            continue;
+         }
+         for (ValidationReport validationReport : transaction.getValidationReports()) {
+            String candidate = buildValidationReferenceName(transaction, validationReport);
+            if (candidate.equals(referenceName)) {
+               validationReport.setReference(datahouseUrl + "/items/" + itemId);
+               validationReport.setContent(null);
+               return;
             }
          }
       }
-      return serializeValidationReport(validationReport);
    }
 
-   private String mutateSimulationReportContent(String content, ContentMutationContext context) {
-      SimulationReportDTO dto = serDes.deserialize(content.getBytes(), SimulationReportDTO.class);
-      SimulationReport report = dto.getBusinessObject();
-      if (report.getTransactionReports() != null) {
-         int refCounter = 0;
-         for (TransactionReport transaction : report.getTransactionReports()) {
-            if (transaction.getValidationReports() == null) {
-               continue;
-            }
-            for (ValidationReport validationReport : transaction.getValidationReports()) {
-               String refName = "validation-report-" + ++refCounter;
-               String itemId = context.findItemId(refName);
-               if (itemId != null) {
-                  validationReport.setReference(context.datahouseUrl() + "/items/" + itemId);
-                  validationReport.setContent(null);
-               }
-            }
-         }
-      }
-      return serDes.serializeAsString(new SimulationReportDTO(report));
-   }
-
-   private MaestroItem createReportItem(StepOutputContext context, SimulationReport simulationReport) {
-      SimulationReportDTO dto = new SimulationReportDTO(simulationReport);
-      return createItem(context, dto);
-   }
-
-   // Reads the binary report output and converts it to the SimulationReport business object.
    private SimulationReport deserializeReport(ByteArrayProperty reportProperty) {
       byte[] value = reportProperty.getValue();
       if (value == null || value.length == 0) {
          throw new IllegalStateException("Simulation report output is empty");
       }
-       return serDes.deserialize(value, SimulationReportDTO.class).getBusinessObject();
+      return serDes.deserialize(value, SimulationReportDTO.class).getBusinessObject();
    }
 
    private net.ihe.gazelle.validation.v2.api.business.report.ValidationReport deserializeValidationReportV2(byte[] content) {
       return serDes.deserialize(content, net.ihe.gazelle.validation.v2.api.technical.dto.report.ValidationReportDTO.class)
             .getBusinessObject();
-   }
-
-   private net.ihe.gazelle.validation.v2.api.business.report.ValidationReport deserializeValidationReportContent(String content) {
-      return serDes.deserialize(content.getBytes(),
-                  net.ihe.gazelle.validation.v2.api.technical.dto.report.ValidationReportDTO.class)
-            .getBusinessObject();
-   }
-
-   private String serializeValidationReport(
-         net.ihe.gazelle.validation.v2.api.business.report.ValidationReport validationReport) {
-      return serDes.serializeAsString(
-            new net.ihe.gazelle.validation.v2.api.technical.dto.report.ValidationReportDTO(validationReport));
-   }
-
-   // Creates a bare Item with the correct ACL, type, serialized payload, and empty references list.
-   private MaestroItem createItem(StepOutputContext context, Object payload) {
-      return new MaestroItem(
-            context.accessControlList(),
-            ITEM_TYPE_SIMULATION_REPORT,
-            serialize(payload),
-            new ArrayList<>(),
-            new HashMap<>()
-      );
-   }
-
-   // Serializes DTOs to JSON for persistence in Datahouse.
-   private String serialize(Object payload) {
-       return serDes.serializeAsString(payload);
    }
 
    private String resolveInputReferenceName(String candidate) {
@@ -252,4 +213,67 @@ class SimulationStepOutputDissector implements StepOutputDissector {
       return candidate;
    }
 
+   // Builds a unique reference name in the form:
+   // validation-report:<transaction-id>:<validation-subject>:<validation-profile-id>
+   private String buildValidationReferenceName(TransactionReport transaction, ValidationReport validationReport) {
+      return VALIDATION_REPORT_REFERENCE_PREFIX
+            + normalizeReferencePart(transaction == null ? null : transaction.getTransaction()) + ":"
+            + normalizeReferencePart(validationReport == null ? null : validationReport.getSubject()) + ":"
+            + normalizeReferencePart(validationReport == null ? null : validationReport.getValidationProfileId());
+   }
+
+   private String normalizeReferencePart(String value) {
+      if (value == null || value.isBlank()) {
+         return "unknown";
+      }
+      return value.trim().replaceAll("\\s+", "_");
+   }
+
+   private static final class SimulationReportMarshaller implements TextMarshaller<SimulationReport> {
+      @Override
+      public String marshallAsString(SimulationReport report) throws MarshallingException {
+         return serDes.serializeAsString(new SimulationReportDTO(report));
+      }
+
+      @Override
+      public SimulationReport unmarshall(String payload) {
+         throw new UnsupportedOperationException("SimulationReport marshalling is one-way for recording");
+      }
+
+      @Override
+      public byte[] marshall(SimulationReport report) throws MarshallingException {
+         return marshallAsString(report).getBytes();
+      }
+
+      @Override
+      public SimulationReport unmarshall(byte[] payload) {
+         throw new UnsupportedOperationException("SimulationReport marshalling is one-way for recording");
+      }
+   }
+
+   private static final class ValidationReportMarshaller
+         implements TextMarshaller<net.ihe.gazelle.validation.v2.api.business.report.ValidationReport> {
+      @Override
+      public String marshallAsString(net.ihe.gazelle.validation.v2.api.business.report.ValidationReport report)
+            throws MarshallingException {
+         return serDes.serializeAsString(
+               new net.ihe.gazelle.validation.v2.api.technical.dto.report.ValidationReportDTO(report));
+      }
+
+      @Override
+      public net.ihe.gazelle.validation.v2.api.business.report.ValidationReport unmarshall(String payload) {
+         throw new UnsupportedOperationException("ValidationReport marshalling is one-way for recording");
+      }
+
+      @Override
+      public byte[] marshall(net.ihe.gazelle.validation.v2.api.business.report.ValidationReport report)
+            throws MarshallingException {
+         return marshallAsString(report).getBytes();
+      }
+
+      @Override
+      public net.ihe.gazelle.validation.v2.api.business.report.ValidationReport unmarshall(byte[] payload) {
+         throw new UnsupportedOperationException("ValidationReport marshalling is one-way for recording");
+      }
+   }
 }
