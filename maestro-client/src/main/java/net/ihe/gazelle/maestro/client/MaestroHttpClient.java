@@ -22,7 +22,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketTimeoutException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 public class MaestroHttpClient implements MaestroClient {
 
@@ -44,17 +46,24 @@ public class MaestroHttpClient implements MaestroClient {
     }
 
     public MaestroHttpClient(URI baseUri, String k8sIdVariableName, int msConnectTimeout, int msReadTimeout) {
+        this(
+              requireBaseUri(baseUri),
+              buildM2mHttpClient(requireK8sId(k8sIdVariableName), msConnectTimeout, msReadTimeout),
+              msConnectTimeout,
+              msReadTimeout
+        );
+    }
+
+    MaestroHttpClient(URI baseUri, HttpClient client, int msConnectTimeout, int msReadTimeout) {
         if (baseUri == null) {
             throw new IllegalArgumentException("baseUri must not be null");
         }
-        if (k8sIdVariableName == null || k8sIdVariableName.isBlank()) {
-            throw new IllegalArgumentException("k8sIdVariableName must not be null or blank");
-        }
         this.baseUri = baseUri;
-        this.client = buildM2mHttpClient(k8sIdVariableName, msConnectTimeout, msReadTimeout);
+        this.client = Objects.requireNonNull(client, "client must not be null");
         this.msConnectTimeout = msConnectTimeout;
         this.msReadTimeout = msReadTimeout;
     }
+
 
     @Override
     public TestReport executeTest(TestRun testRun, boolean persist) {
@@ -66,35 +75,82 @@ public class MaestroHttpClient implements MaestroClient {
         return handleTechnicalErrors(() -> doExecuteTestSuite(testSuiteRun, persist));
     }
 
+    @Override
+    public void executeTestAsync(TestRun testRun, boolean persist, URI callback) {
+        handleTechnicalErrors(() -> {
+            doExecuteTestAsync(testRun, persist, callback);
+            return null;
+        });
+    }
+
+    @Override
+    public void executeTestSuiteAsync(TestSuiteRun testSuiteRun, boolean persist, URI callback) {
+        handleTechnicalErrors(() -> {
+            doExecuteTestSuiteAsync(testSuiteRun, persist, callback);
+            return null;
+        });
+    }
+
     private TestReport doExecuteTest(TestRun testRun, boolean persist) {
-        String url = baseUri.toString() + TEST_RUN_ENDPOINT + "?persist=" + persist;
+        String url = buildUrl(TEST_RUN_ENDPOINT, persist);
         TestRunDTO dto = new TestRunDTO(testRun);
         String payload = serDes.serializeAsString(dto);
         return executePost(url, payload);
     }
 
+    private static URI requireBaseUri(URI baseUri) {
+        if (baseUri == null) {
+            throw new IllegalArgumentException("baseUri must not be null");
+        }
+        return baseUri;
+    }
+
+    private static String requireK8sId(String k8sIdVariableName) {
+        if (k8sIdVariableName == null || k8sIdVariableName.isBlank()) {
+            throw new IllegalArgumentException("k8sIdVariableName must not be null or blank");
+        }
+        return k8sIdVariableName;
+    }
+
+
     private TestReport doExecuteTestSuite(TestSuiteRun testSuiteRun, boolean persist) {
-        String url = baseUri.toString() + TEST_SUITE_RUN_ENDPOINT + "?persist=" + persist;
+        String url = buildUrl(TEST_SUITE_RUN_ENDPOINT, persist);
         TestSuiteRunDTO dto = new TestSuiteRunDTO(testSuiteRun);
         String payload = serDes.serializeAsString(dto);
         return executePost(url, payload);
     }
 
+    private void doExecuteTestAsync(TestRun testRun, boolean persist, URI callback) {
+        String url = buildUrl(TEST_RUN_ENDPOINT, persist) + buildCallbackParameter(callback);
+        TestRunDTO dto = new TestRunDTO(testRun);
+        String payload = serDes.serializeAsString(dto);
+        executePostAsync(url, payload);
+    }
+
+    private void doExecuteTestSuiteAsync(TestSuiteRun testSuiteRun, boolean persist, URI callback) {
+        String url = buildUrl(TEST_SUITE_RUN_ENDPOINT, persist) + buildCallbackParameter(callback);
+        TestSuiteRunDTO dto = new TestSuiteRunDTO(testSuiteRun);
+        String payload = serDes.serializeAsString(dto);
+        executePostAsync(url, payload);
+    }
+
     private TestReport executePost(String url, String payload) {
         try {
-            HttpPost httpPost = new HttpPost(url);
-            RequestConfig requestConfig = RequestConfig.custom()
-                  .setConnectTimeout(msConnectTimeout)
-                  .setSocketTimeout(msReadTimeout)
-                  .build();
-            httpPost.setConfig(requestConfig);
-            StringEntity input = new StringEntity(payload, StandardCharsets.UTF_8);
-            input.setContentType(CONTENT_TYPE);
-            httpPost.addHeader("Content-type", CONTENT_TYPE);
-            httpPost.setEntity(input);
+            HttpPost httpPost = createHttpPost(url, payload);
             HttpResponse response = client.execute(httpPost);
             String body = readBody(response);
             return handleApplicationError(response, body);
+        } catch (IOException e) {
+            throw new MaestroConnectionException("Unable to execute request to Maestro at " + url, e);
+        }
+    }
+
+    private void executePostAsync(String url, String payload) {
+        try {
+            HttpPost httpPost = createHttpPost(url, payload);
+            HttpResponse response = client.execute(httpPost);
+            String body = readBody(response);
+            handleAsyncApplicationError(response, body);
         } catch (IOException e) {
             throw new MaestroConnectionException("Unable to execute request to Maestro at " + url, e);
         }
@@ -105,6 +161,10 @@ public class MaestroHttpClient implements MaestroClient {
         if (statusCode == 200) {
             return serDes.deserialize(body, TestReportDTO.class).getBusinessObject();
         }
+        return handleError(body, statusCode);
+    }
+
+    private TestReport handleError(String body, int statusCode) {
         if (statusCode == 400) {
             throw new InvalidTestRunException(body != null ? body : "Invalid test run");
         }
@@ -117,11 +177,50 @@ public class MaestroHttpClient implements MaestroClient {
         throw new UnexpectedInternalErrorException("Unexpected response from Maestro: " + statusCode);
     }
 
-    private TestReport handleTechnicalErrors(Execution operation) {
+    private void handleAsyncApplicationError(HttpResponse response, String body) {
+        int statusCode = response.getStatusLine().getStatusCode();
+        if (statusCode == 200 || statusCode == 202) {
+            return;
+        }
+        handleError(body, statusCode);
+    }
+
+    private HttpPost createHttpPost(String url, String payload) {
+        HttpPost httpPost = new HttpPost(url);
+        RequestConfig requestConfig = RequestConfig.custom()
+              .setConnectTimeout(msConnectTimeout)
+              .setSocketTimeout(msReadTimeout)
+              .build();
+        httpPost.setConfig(requestConfig);
+        StringEntity input = new StringEntity(payload, StandardCharsets.UTF_8);
+        input.setContentType(CONTENT_TYPE);
+        httpPost.addHeader("Content-type", CONTENT_TYPE);
+        httpPost.setEntity(input);
+        return httpPost;
+    }
+
+    private String buildUrl(String endpoint, boolean persist) {
+        return baseUri.toString() + endpoint + "?persist=" + persist;
+    }
+
+    private String buildCallbackParameter(URI callback) {
+        validateCallback(callback);
+        return "&callback=" + URLEncoder.encode(callback.toString(), StandardCharsets.UTF_8);
+    }
+
+    private void validateCallback(URI callback) {
+        if (callback == null) {
+            throw new IllegalArgumentException("callback must not be null");
+        }
+        String value = callback.toString();
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException("callback must not be blank");
+        }
+    }
+
+    private <T> T handleTechnicalErrors(ExceptionalSupplier<T> operation) {
         try {
             return operation.run();
-        } catch (MaestroHttpError e) {
-            throw e;
         } catch (MaestroConnectionException e) {
             if (e.getCause() instanceof SocketTimeoutException) {
                 throw new MaestroTimeoutException(
@@ -155,7 +254,7 @@ public class MaestroHttpClient implements MaestroClient {
     }
 
     @FunctionalInterface
-    private interface Execution {
-        TestReport run();
+    private interface ExceptionalSupplier<T> {
+        T run();
     }
 }
