@@ -20,9 +20,7 @@ import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlan;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanContext;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanDissector;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.AttachmentPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.FutureReferencePlan;
@@ -57,28 +55,20 @@ final class StaticStepOutputDissector implements StepOutputPlanDissector {
     static final String DETACHED_REFERENCE_NAME = "detached-log";
     static final String ATTACHMENT_TYPE = "STATIC_ATTACHMENT";
 
-    private final StepOutputPlan plan;
-
     StaticStepOutputDissector() {
-        this(null);
-    }
-
-    StaticStepOutputDissector(StepOutputPlan plan) {
-        this.plan = plan;
     }
 
     @Override
-    public StepOutputPlan dissect(StepOutputPlanContext context) {
-        if (plan != null) {
-            return plan;
+    public void dissect(StepOutputPlan stepOutputPlan) {
+        if (stepOutputPlan == null || stepOutputPlan.getStepRunReport() == null) {
+            return;
         }
-        if (context == null || context.stepRunReport() == null) {
-            return StepOutputPlan.empty();
-        }
-        return buildPlan(context.stepRunReport(), context.datahouseUrl());
+        buildPlan(stepOutputPlan);
     }
 
-    private static StepOutputPlan buildPlan(StepRunReport stepRunReport, String datahouseUrl) {
+    private static void buildPlan(StepOutputPlan stepOutputPlan) {
+        StepRunReport stepRunReport = stepOutputPlan.getStepRunReport();
+        String datahouseUrl = stepOutputPlan.getDatahouseUrl();
         ItemPlan<String> root = item(ROOT_ITEM_TYPE, "{\"level\":0}");
         ItemPlan<String> child = item(CHILD_ITEM_TYPE, "{\"level\":1}");
         ItemPlan<String> grandchild = item(GRANDCHILD_ITEM_TYPE, "{\"level\":2}");
@@ -93,30 +83,41 @@ final class StaticStepOutputDissector implements StepOutputPlanDissector {
         root.withReference(ATTACHMENT_REFERENCE_NAME, attached);
         root.withReference(DETACHED_REFERENCE_NAME, detached);
 
-        List<FutureReferencePlan<TestReport>> reportPlans = new ArrayList<>();
+        List<FutureReferencePlan<StepRunReport>> reportPlans = new ArrayList<>();
         reportPlans.add(new FutureReferencePlan<>(
               ReferencePlan.forItem(REPORT_REFERENCE_NAME, root),
-              (report, refName, itemId) -> new StepOutputPlanContext(stepRunReport, null, datahouseUrl)
-                    .replaceOutput(ROOT_OUTPUT_NAME, output -> toItemReference(output, datahouseUrl, itemId, ROOT_ITEM_TYPE))
+              (report, refName, itemId) -> StepOutputPlan.replaceOutput(
+                    ROOT_OUTPUT_NAME,
+                    output -> toItemReference(output, datahouseUrl, itemId, ROOT_ITEM_TYPE),
+                    report
+              )
         ));
         reportPlans.add(new FutureReferencePlan<>(
               ReferencePlan.forItem(SIBLING_REFERENCE_NAME, sibling),
-              (report, refName, itemId) -> new StepOutputPlanContext(stepRunReport, null, datahouseUrl)
-                    .replaceOutput(SIBLING_OUTPUT_NAME, output -> toItemReference(output, datahouseUrl, itemId, SIBLING_ITEM_TYPE))
+              (report, refName, itemId) -> StepOutputPlan.replaceOutput(
+                    SIBLING_OUTPUT_NAME,
+                    output -> toItemReference(output, datahouseUrl, itemId, SIBLING_ITEM_TYPE),
+                    report
+              )
         ));
         reportPlans.add(new FutureReferencePlan<>(
               ReferencePlan.forAttachment(ATTACHMENT_REFERENCE_NAME, attached),
-              (report, refName, attachmentId) -> new StepOutputPlanContext(stepRunReport, null, datahouseUrl)
-                    .replaceOutput(ATTACHMENT_OUTPUT_NAME, output ->
+              (report, refName, attachmentId) -> StepOutputPlan.replaceOutput(
+                    ATTACHMENT_OUTPUT_NAME,
+                    output ->
                           new ByteArrayItemProperty(ATTACHMENT_OUTPUT_NAME, null)
-                                .setReference("/attachments/" + attachmentId))
+                                .setReference("/attachments/" + attachmentId),
+                    report
+              )
         ));
         reportPlans.add(new FutureReferencePlan<>(
               ReferencePlan.forAttachment(DETACHED_REFERENCE_NAME, detached),
               null
         ));
 
-        return new StepOutputPlan(reportPlans);
+        for (FutureReferencePlan<StepRunReport> reportPlan : reportPlans) {
+            stepOutputPlan.addReferencePlan(reportPlan);
+        }
     }
 
     private static ByteArrayItemProperty toItemReference(Property output,

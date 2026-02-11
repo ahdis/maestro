@@ -43,20 +43,5 @@ public record StepOutputPlanContext(StepRunReport stepRunReport,
         return null;
     }
 
-    public boolean replaceOutput(String outputName, Function<Property, Property> replacementFactory) {
-        if (stepRunReport == null || stepRunReport.getOutputs() == null || outputName == null
-              || replacementFactory == null) {
-            return false;
-        }
-        List<Property> outputs = stepRunReport.getOutputs();
-        for (int i = 0; i < outputs.size(); i++) {
-            Property output = outputs.get(i);
-            if (outputName.equals(output.getName())) {
-                outputs.set(i, Objects.requireNonNull(replacementFactory.apply(output), "replacement"));
-                stepRunReport.setOutputs(outputs);
-                return true;
-            }
-        }
-        return false;
-    }
+
 }

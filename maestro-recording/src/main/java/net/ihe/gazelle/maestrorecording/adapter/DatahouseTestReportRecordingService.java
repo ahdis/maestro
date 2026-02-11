@@ -168,14 +168,7 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
             if (dissector == null) {
                continue;
             }
-            StepOutputPlan plan = safeDissect(dissector,
-                  new StepOutputPlanContext(stepRunReport, acl, datahouseUrl));
-            if (plan.reportReferencePlans().isEmpty()) {
-               continue;
-            }
-            for (FutureReferencePlan<TestReport> futureReferencePlan : plan.reportReferencePlans()) {
-               testReportPlan.addFutureReferencePlan(futureReferencePlan);
-            }
+            safeDissect(dissector, new StepOutputPlan(testReportPlan, stepRunReport, datahouseUrl));
          }
       }
    }
@@ -202,9 +195,14 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
       }
    }
 
-   private StepOutputPlan safeDissect(StepOutputPlanDissector dissector, StepOutputPlanContext context) {
-      StepOutputPlan plan = dissector.dissect(context);
-      return plan != null ? plan : StepOutputPlan.empty();
+   private void safeDissect(StepOutputPlanDissector dissector, StepOutputPlan stepOutputPlan) {
+      try{
+         dissector.dissect(stepOutputPlan);
+      }
+      catch (Exception e) {
+         //fixme: we should handle this more gracefully
+         throw new TestReportRecordingException("Failed to dissect step output for recording, this should be handled properly", e);
+      }
    }
 
    private String constructUrlToItem(String itemId) {

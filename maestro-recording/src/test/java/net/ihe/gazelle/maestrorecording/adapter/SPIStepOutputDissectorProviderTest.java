@@ -17,7 +17,6 @@
 package net.ihe.gazelle.maestrorecording.adapter;
 
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanDissector;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanDissectorFactory;
 import org.junit.jupiter.api.Test;
@@ -53,7 +52,7 @@ class SPIStepOutputDissectorProviderTest {
 
    private static final class RecordingFactory implements StepOutputPlanDissectorFactory {
 
-      private final StepOutputPlanDissector createdDissector = context -> StepOutputPlan.empty();
+      private final StepOutputPlanDissector createdDissector = stepOutputPlan -> { };
       private final boolean supports;
 
       private RecordingFactory(boolean supports) {

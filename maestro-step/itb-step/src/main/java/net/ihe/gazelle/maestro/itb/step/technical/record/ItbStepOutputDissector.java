@@ -16,24 +16,63 @@
 
 package net.ihe.gazelle.maestro.itb.step.technical.record;
 
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
+import net.ihe.gazelle.maestro.itb.step.business.ItbStepDefinition;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlan;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanContext;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanDissector;
+import net.ihe.gazelle.maestro.spi.business.recording.plan.AttachmentPlan;
+import net.ihe.gazelle.maestro.spi.business.recording.plan.FutureReferencePlan;
+import net.ihe.gazelle.maestro.spi.business.recording.plan.ReferencePlan;
 
 /**
- * The ItbStepOutputDissector class is an implementation of the v2 StepOutputPlanDissector interface.
+ * Dissects ITB outputs for recording by persisting report/log outputs as attachments.
  */
 public class ItbStepOutputDissector implements StepOutputPlanDissector {
 
-    /**
-     * Default constructor.
-     */
-    public ItbStepOutputDissector() {
-        // Empty
-    }
+   static final String BYTE_ARRAY = "BYTE_ARRAY";
 
-    @Override
-    public StepOutputPlan dissect(StepOutputPlanContext context) {
-        return StepOutputPlan.empty();
-    }
+   @Override
+   public void dissect(StepOutputPlan stepOutputPlan) {
+      if (stepOutputPlan == null || stepOutputPlan.getStepRunReport() == null) {
+         return;
+      }
+
+      StepRunReport stepRunReport = stepOutputPlan.getStepRunReport();
+      if (stepRunReport.getOutputs().isEmpty()) {
+         return;
+      }
+
+      addAttachmentReferenceForOutput(stepOutputPlan, ItbStepDefinition.XML_REPORT);
+      addAttachmentReferenceForOutput(stepOutputPlan, ItbStepDefinition.PDF_REPORT);
+      addAttachmentReferenceForOutput(stepOutputPlan, ItbStepDefinition.LOGS);
+   }
+
+   private void addAttachmentReferenceForOutput(StepOutputPlan stepOutputPlan, String outputName) {
+      ByteArrayProperty property = stepOutputPlan.getStepRunReport().getOutput(outputName);
+      if (property == null || property.getValue() == null) {
+         return;
+      }
+
+      AttachmentPlan attachmentPlan = new AttachmentPlan(
+            BYTE_ARRAY,
+            property.getValue(),
+            property.getFileName()
+      );
+
+      stepOutputPlan.addReferencePlan(new FutureReferencePlan<>(
+            ReferencePlan.forAttachment(outputName, attachmentPlan),
+            (stepRunReport, referenceName, attachmentId) -> StepOutputPlan.replaceOutput(
+                  outputName,
+                  output -> {
+                     ByteArrayItemProperty replacement = new ByteArrayItemProperty((ByteArrayProperty) output);
+                     replacement.setValue(null);
+                     replacement.setReference("/attachments/" + attachmentId);
+                     return replacement;
+                  },
+                  stepRunReport
+            )
+      ));
+   }
 }

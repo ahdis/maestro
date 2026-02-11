@@ -72,12 +72,6 @@ public class ItemPlan<T> {
       return addFutureReferencePlan(ReferencePlan.forAttachment(referenceName, attachmentPlan), mutation);
    }
 
-   public ItemPlan<T> addDetachedAttachment(String referenceName,
-                                            String type,
-                                            byte[] content,
-                                            String filename) {
-      return addDetachedAttachment(referenceName, type, content, filename, null);
-   }
 
    public ItemPlan<T> addDetachedAttachment(String referenceName,
                                             String type,

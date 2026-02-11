@@ -180,6 +180,20 @@ public class StepRunReport implements Serializable {
    }
 
    /**
+    * Get a single output property by its name.
+    * @param name the name of the output property to retrieve
+    * @param <T> the expected type of the output property
+    * @return the output property with the specified name, or null if no such property exists
+    */
+   @SuppressWarnings("unchecked")
+   public <T extends Property> T getOutput(String name) {
+      return (T) outputs.stream()
+            .filter(property -> property.getName().equals(name))
+            .findFirst()
+            .orElse(null);
+   }
+
+   /**
     * Sets the list of output properties associated with this step run report.
     *
     * @param outputs the list of {@code Property} instances representing the output properties to set;

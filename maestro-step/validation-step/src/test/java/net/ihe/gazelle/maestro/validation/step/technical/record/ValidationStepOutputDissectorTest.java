@@ -21,22 +21,25 @@ import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
-import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
-import net.ihe.gazelle.maestro.spi.business.recording.plan.AttachmentPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlan;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanContext;
+import net.ihe.gazelle.maestro.spi.business.recording.plan.AttachmentPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.FutureReferencePlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.MaestroRefType;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;
+import net.ihe.gazelle.modelmarshaller.technical.marshalling.MarshallingException;
+import net.ihe.gazelle.modelmarshaller.technical.marshalling.TextMarshaller;
 import net.ihe.gazelle.validation.v2.api.business.Input;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ValidationStepOutputDissectorTest {
 
@@ -44,24 +47,26 @@ class ValidationStepOutputDissectorTest {
     private final ValidationStepOutputDissector dissector = new ValidationStepOutputDissector();
 
     @Test
-    void shouldReturnEmptyPlanWhenNoValidationReportProperty() {
+    void shouldCreateNoReferenceWhenNoValidationReportProperty() {
         StepRunReport step = new StepRunReport();
-        StepOutputPlan plan = dissector.dissect(new StepOutputPlanContext(step, null, "http://dh"));
+        Fixture fixture = newFixture(step);
 
-        assertNotNull(plan);
-        assertTrue(plan.reportReferencePlans().isEmpty());
+        dissector.dissect(fixture.stepOutputPlan());
+
+        assertTrue(fixture.rootPlan().futureReferencePlans().isEmpty());
     }
 
     @Test
     void shouldCreateReportItemAndAttachmentsForInputsWithContent() throws Exception {
         SampleReport sample = sampleReport();
         StepRunReport step = new StepRunReport()
-                .addOutput(new ByteArrayProperty(ValidationStepDefinition.REPORT, sample.serializedReport()));
+              .addOutput(new ByteArrayProperty(ValidationStepDefinition.REPORT, sample.serializedReport()));
+        Fixture fixture = newFixture(step);
 
-        StepOutputPlan plan = dissector.dissect(new StepOutputPlanContext(step, null, "http://dh"));
+        dissector.dissect(fixture.stepOutputPlan());
 
-        assertEquals(1, plan.reportReferencePlans().size(), "One report reference expected");
-        FutureReferencePlan<TestReport> reportReference = plan.reportReferencePlans().getFirst();
+        assertEquals(1, fixture.rootPlan().futureReferencePlans().size(), "One report reference expected");
+        FutureReferencePlan<TestReport> reportReference = fixture.rootPlan().futureReferencePlans().getFirst();
         assertEquals(ValidationStepDefinition.REPORT, reportReference.referencePlan().getName());
         assertEquals(MaestroRefType.ITEM_ID, reportReference.referencePlan().getRefType());
 
@@ -86,14 +91,12 @@ class ValidationStepOutputDissectorTest {
     void shouldReplaceOutputWithItemReferenceWhenPersisted() throws Exception {
         SampleReport sample = sampleReport();
         StepRunReport step = new StepRunReport()
-                .addOutput(new ByteArrayProperty(ValidationStepDefinition.REPORT, sample.serializedReport()));
-        TestRunReport run = new TestRunReport().addStepRunReport(step);
-        TestReport report = new TestReport().addTestRunReport(run);
+              .addOutput(new ByteArrayProperty(ValidationStepDefinition.REPORT, sample.serializedReport()));
+        Fixture fixture = newFixture(step);
 
-        StepOutputPlan plan = dissector.dissect(new StepOutputPlanContext(step, null, "http://dh"));
-        FutureReferencePlan<TestReport> reportReference = plan.reportReferencePlans().getFirst();
-
-        reportReference.mutation().mutateReference(report, reportReference.referencePlan().getName(), "itm-1");
+        dissector.dissect(fixture.stepOutputPlan());
+        FutureReferencePlan<TestReport> reportReference = fixture.rootPlan().futureReferencePlans().getFirst();
+        reportReference.mutation().mutateReference(new TestReport(), reportReference.referencePlan().getName(), "itm-1");
 
         ByteArrayItemProperty output = (ByteArrayItemProperty) step.getOutputs().getFirst();
         assertEquals("http://dh/items/itm-1", output.getReference());
@@ -105,12 +108,13 @@ class ValidationStepOutputDissectorTest {
     void shouldPopulateAttachmentIdsInReportDuringMutation() throws Exception {
         SampleReport sample = sampleReport();
         StepRunReport step = new StepRunReport()
-                .addOutput(new ByteArrayProperty(ValidationStepDefinition.REPORT, sample.serializedReport()));
+              .addOutput(new ByteArrayProperty(ValidationStepDefinition.REPORT, sample.serializedReport()));
+        Fixture fixture = newFixture(step);
 
-        StepOutputPlan plan = dissector.dissect(new StepOutputPlanContext(step, null, "http://dh"));
+        dissector.dissect(fixture.stepOutputPlan());
         @SuppressWarnings("unchecked")
         ItemPlan<ValidationReport> reportPlan =
-              (ItemPlan<ValidationReport>) plan.reportReferencePlans().getFirst().referencePlan().getTarget();
+              (ItemPlan<ValidationReport>) fixture.rootPlan().futureReferencePlans().getFirst().referencePlan().getTarget();
 
         FutureReferencePlan<ValidationReport> attachmentRef = reportPlan.futureReferencePlans().getFirst();
         attachmentRef.mutation().mutateReference(reportPlan.itemObject(), attachmentRef.referencePlan().getName(), "att-42");
@@ -122,26 +126,53 @@ class ValidationStepOutputDissectorTest {
         assertNull(input.getContent());
     }
 
+    private Fixture newFixture(StepRunReport stepRunReport) {
+        ItemPlan<TestReport> rootPlan = new ItemPlan<>("TEST_REPORT", new TestReport(), new TestReportMarshaller());
+        StepOutputPlan stepOutputPlan = new StepOutputPlan(rootPlan, stepRunReport, "http://dh");
+        return new Fixture(rootPlan, stepOutputPlan);
+    }
+
     private SampleReport sampleReport() throws Exception {
         byte[] payload = "validation-input".getBytes(StandardCharsets.UTF_8);
         Input inputWithContent = new Input()
-                .setId("payload-input")
-                .setContent(payload);
+              .setId("payload-input")
+              .setContent(payload);
         Input inputWithoutContent = new Input()
-                .setId("metadata-input");
+              .setId("metadata-input");
 
         ValidationReport report = new ValidationReport()
-                .setUuid("validation-report-id")
-                .addInput(inputWithContent)
-                .addInput(inputWithoutContent);
+              .setUuid("validation-report-id")
+              .addInput(inputWithContent)
+              .addInput(inputWithoutContent);
 
-        byte[] serialized = OBJECT_MAPPER.writeValueAsBytes(report);
-        return new SampleReport(serialized, payload);
+        return new SampleReport(OBJECT_MAPPER.writeValueAsBytes(report), payload);
     }
 
     private record SampleReport(byte[] serializedReport, byte[] inputPayload) {
-        String encodedPayload() {
-            return Base64.getEncoder().encodeToString(inputPayload);
+    }
+
+    private record Fixture(ItemPlan<TestReport> rootPlan, StepOutputPlan stepOutputPlan) {
+    }
+
+    private static final class TestReportMarshaller implements TextMarshaller<TestReport> {
+        @Override
+        public String marshallAsString(TestReport report) throws MarshallingException {
+            return "{}";
+        }
+
+        @Override
+        public TestReport unmarshall(String payload) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public byte[] marshall(TestReport report) throws MarshallingException {
+            return marshallAsString(report).getBytes();
+        }
+
+        @Override
+        public TestReport unmarshall(byte[] payload) {
+            throw new UnsupportedOperationException();
         }
     }
 }

@@ -29,9 +29,12 @@ import net.ihe.gazelle.maestro.spi.business.recording.plan.PersistencePlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ReferencePlan;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class RecordItemService {
 
@@ -42,17 +45,18 @@ public class RecordItemService {
    }
 
    public <T> String recordPlan(PersistencePlan<T> persistencePlan) {
-      return recordItemPlan(persistencePlan.getRootItem(), persistencePlan.getAcl(), new Recorded());
+      return recordItemPlan(persistencePlan.getRootItem(), persistencePlan.getAcl(), new History());
    }
 
-   private <T> String recordItemPlan(ItemPlan<T> itemPlan, AccessControlList acl, Recorded recorded) {
-      if (recorded.items.containsKey(itemPlan)) {
-         return recorded.items.get(itemPlan);
+   private <T> String recordItemPlan(ItemPlan<T> itemPlan, AccessControlList acl, History history) {
+      if (history.items.containsKey(itemPlan)) {
+         return history.items.get(itemPlan);
       }
+      history.addVisited(itemPlan);
       Item item = initItem(itemPlan, acl);
       for (FutureReferencePlan<T> futureReferencePlan : itemPlan.futureReferencePlans()) {
          ReferencePlan referencePlan = futureReferencePlan.referencePlan();
-         String referenceId = recordReferencedObject(referencePlan, acl, recorded);
+         String referenceId = recordReferencedObject(referencePlan, acl, history);
          if (futureReferencePlan.mutation() != null) {
             futureReferencePlan.mutation().mutateReference(itemPlan.itemObject(), referencePlan.getName(), referenceId);
          }
@@ -60,22 +64,23 @@ public class RecordItemService {
       }
       item.setContent(itemPlan.textMarshaller().marshallAsString(itemPlan.itemObject()));
       String id = recordItemClient.recordItem(item);
-      recorded.items.put(itemPlan, id);
+      history.addRecorded(itemPlan, id);
       return id;
+
    }
 
-   private String recordReferencedObject(ReferencePlan referencePlan, AccessControlList acl, Recorded recorded) {
+   private String recordReferencedObject(ReferencePlan referencePlan, AccessControlList acl, History history) {
       return switch (referencePlan.getRefType()) {
-         case ITEM_ID -> recordItemPlan((ItemPlan<?>) referencePlan.getTarget(), acl, recorded);
-         case ATTACHMENT -> recordAttachmentPlan((AttachmentPlan) referencePlan.getTarget(), recorded);
+         case ITEM_ID -> recordItemPlan((ItemPlan<?>) referencePlan.getTarget(), acl, history);
+         case ATTACHMENT -> recordAttachmentPlan((AttachmentPlan) referencePlan.getTarget(), history);
          case URL -> (String) referencePlan.getTarget();
          default -> throw new IllegalStateException("Unexpected RefType: " + referencePlan.getRefType());
       };
    }
 
-   private String recordAttachmentPlan(AttachmentPlan attachmentPlan, Recorded recorded) {
-      if (recorded.attachments.containsKey(attachmentPlan)) {
-         return recorded.attachments.get(attachmentPlan);
+   private String recordAttachmentPlan(AttachmentPlan attachmentPlan, History history) {
+      if (history.attachments.containsKey(attachmentPlan)) {
+         return history.attachments.get(attachmentPlan);
       }
       String id = recordItemClient.uploadAttachments(List.of(
             new Attachment()
@@ -83,7 +88,7 @@ public class RecordItemService {
                   .setFilename(attachmentPlan.filename())
                   .setContent(attachmentPlan.content())
       )).getFirst();
-      recorded.attachments.put(attachmentPlan, id);
+      history.attachments.put(attachmentPlan, id);
       return id;
    }
 
@@ -110,8 +115,20 @@ public class RecordItemService {
       };
    }
 
-   private static class Recorded {
-      private final Map<ItemPlan<?>, String> items = new HashMap<>();
+   private static class History {
+      private final Map<ItemPlan<?>, String> items = new IdentityHashMap<>();
       private final Map<AttachmentPlan, String> attachments = new HashMap<>();
+      private final Set<ItemPlan<?>> inProgress = Collections.newSetFromMap(new IdentityHashMap<>());
+
+      private void addVisited(ItemPlan<?> itemPlan) {
+          if(!inProgress.add(itemPlan)){
+             throw new IllegalStateException("Cyclic ItemPlan reference detected on: " + itemPlan.type());
+          }
+      }
+
+      private void addRecorded(ItemPlan<?> itemPlan, String id) {
+         items.put(itemPlan, id);
+         inProgress.remove(itemPlan);
+      }
    }
 }

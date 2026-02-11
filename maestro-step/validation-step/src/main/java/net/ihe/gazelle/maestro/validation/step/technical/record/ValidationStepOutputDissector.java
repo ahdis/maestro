@@ -26,6 +26,7 @@ import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanContext;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanDissector;
+import net.ihe.gazelle.maestro.spi.business.recording.plan.AttachmentPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.FutureReferencePlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ReferencePlan;
@@ -59,46 +60,45 @@ public class ValidationStepOutputDissector implements StepOutputPlanDissector {
     public ValidationStepOutputDissector() { /* Default constructor */ }
 
     @Override
-    public StepOutputPlan dissect(StepOutputPlanContext context) {
-        if (context == null || context.stepRunReport() == null) {
-            return StepOutputPlan.empty();
+    public void dissect(StepOutputPlan stepOutputPlan) {
+        if (stepOutputPlan == null || stepOutputPlan.getStepRunReport() == null) {
+            return;
         }
-        StepRunReport stepRunReport = context.stepRunReport();
+        StepRunReport stepRunReport = stepOutputPlan.getStepRunReport();
         List<Property> outputs = stepRunReport.getOutputs();
         if (outputs == null || outputs.isEmpty()) {
-            return StepOutputPlan.empty();
+            return;
         }
-        ByteArrayProperty validationReportProperty =
-              context.output(ValidationStepDefinition.REPORT, ByteArrayProperty.class);
+        ByteArrayProperty validationReportProperty = stepRunReport.getOutput(ValidationStepDefinition.REPORT);
         if (validationReportProperty == null) {
-            return StepOutputPlan.empty();
+            return;
         }
         byte[] validationReportBytes = validationReportProperty.getValue();
         ValidationReport validationReport = deserializeReport(validationReportBytes);
 
-        ItemPlan<ValidationReport> reportPlan = new ItemPlan<>(
+        ItemPlan<ValidationReport> validationReportPlan = new ItemPlan<>(
               ValidationStepDefinition.REPORT,
               validationReport,
               new ValidationReportMarshaller()
         );
 
-        addInputAttachments(reportPlan, validationReport);
+        addInputAttachments(validationReportPlan, validationReport);
 
-        FutureReferencePlan<TestReport> reportReferencePlan = new FutureReferencePlan<>(
-              ReferencePlan.forItem(ValidationStepDefinition.REPORT, reportPlan),
-              (testReport, refName, refId) -> context.replaceOutput(
+        stepOutputPlan.addReferencePlan(new FutureReferencePlan<>(
+                ReferencePlan.forItem(ValidationStepDefinition.REPORT, validationReportPlan),
+                (currentStepReport, refName, refId) -> StepOutputPlan.replaceOutput(
                     ValidationStepDefinition.REPORT,
                     output -> {
                         ByteArrayItemProperty replacement = new ByteArrayItemProperty(validationReportProperty);
                         replacement.setValue(null);
                         replacement.setItemType(ValidationStepDefinition.REPORT);
-                        replacement.setReference(context.datahouseUrl() + "/items/" + refId);
+                        replacement.setReference(stepOutputPlan.getDatahouseUrl() + "/items/" + refId);
                         return replacement;
-                    }
+                    },
+                    currentStepReport
               )
-        );
+        ));
 
-        return new StepOutputPlan(List.of(reportReferencePlan));
     }
 
     private ValidationReport deserializeReport(byte[] content) {
@@ -115,13 +115,13 @@ public class ValidationStepOutputDissector implements StepOutputPlanDissector {
         }
         for (Input input : validationReport.getInputs()) {
             if (input.getContent() != null) {
-                String referenceName = resolveReferenceName(input.getId());
-                reportPlan.addDetachedAttachment(
-                      referenceName,
-                      VALIDATION_INPUT,
-                      input.getContent(),
-                      input.getId(),
-                      this::mutateInputReference
+                String referenceName = resolveInputName(input.getId());
+                reportPlan.addFutureReferencePlan(
+                        ReferencePlan.forAttachment(
+                                referenceName,
+                                new AttachmentPlan(VALIDATION_INPUT, input.getContent(), input.getId())
+                        ),
+                        this::mutateInputReference
                 );
                 input.setContent(null);
             }
@@ -133,7 +133,7 @@ public class ValidationStepOutputDissector implements StepOutputPlanDissector {
             return;
         }
         for (Input input : report.getInputs()) {
-            String candidate = resolveReferenceName(input.getId());
+            String candidate = resolveInputName(input.getId());
             if (candidate.equals(refName)) {
                 input.setItemId(attachmentId);
                 input.setLocation("/attachments/" + attachmentId);
@@ -142,7 +142,8 @@ public class ValidationStepOutputDissector implements StepOutputPlanDissector {
         }
     }
 
-    private String resolveReferenceName(String candidate) {
+    private String resolveInputName(String candidate) {
+        // This is based on the fact that if we have multiple inputs, they should have an id, and if we have a single input, it may not have an id.
         if (candidate == null || candidate.isBlank()) {
             return "validation-input";
         }

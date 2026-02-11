@@ -16,19 +16,72 @@
 
 package net.ihe.gazelle.maestro.spi.business.recording;
 
+import net.ihe.gazelle.maestro.api.business.property.Property;
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.FutureReferencePlan;
+import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemPlan;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
-public record StepOutputPlan(List<FutureReferencePlan<TestReport>> reportReferencePlans) {
+public class StepOutputPlan {
 
-   public StepOutputPlan {
-      reportReferencePlans = List.copyOf(Objects.requireNonNullElse(reportReferencePlans, List.of()));
+
+   private final ItemPlan<TestReport> rootReportPlan;
+
+   private final StepRunReport stepRunReport;
+
+   private final String datahouseUrl;
+
+   public StepOutputPlan(ItemPlan<TestReport> rootReportPlan, StepRunReport stepRunReport, String datahouseUrl) {
+      this.rootReportPlan = rootReportPlan;
+      this.stepRunReport = stepRunReport;
+      this.datahouseUrl = datahouseUrl;
    }
 
-   public static StepOutputPlan empty() {
-      return new StepOutputPlan(List.of());
+   public StepOutputPlan addReferencePlan(FutureReferencePlan<StepRunReport> futureReferencePlan) {
+      if (futureReferencePlan == null) {
+         return this;
+      }
+      if (futureReferencePlan.mutation() == null) {
+         rootReportPlan.addFutureReferencePlan(futureReferencePlan.referencePlan(), null);
+         return this;
+      }
+      rootReportPlan.addFutureReferencePlan(
+            futureReferencePlan.referencePlan(),
+            (testReport, referenceName, referenceId) ->
+                  futureReferencePlan.mutation().mutateReference(stepRunReport, referenceName, referenceId)
+      );
+
+      return this;
    }
+
+   public String getDatahouseUrl() {
+      return datahouseUrl;
+   }
+
+   public StepRunReport getStepRunReport() {
+      return stepRunReport;
+   }
+
+   public static boolean replaceOutput(String outputName, Function<Property, Property> replacementFactory,
+                                       StepRunReport stepRunReport) {
+      if (stepRunReport == null || stepRunReport.getOutputs() == null || outputName == null
+              || replacementFactory == null) {
+         return false;
+      }
+      List<Property> outputs = stepRunReport.getOutputs();
+      for (int i = 0; i < outputs.size(); i++) {
+         Property output = outputs.get(i);
+         if (outputName.equals(output.getName())) {
+            outputs.set(i, Objects.requireNonNull(replacementFactory.apply(output), "replacement"));
+            stepRunReport.setOutputs(outputs);
+            return true;
+         }
+      }
+      return false;
+   }
+
 }

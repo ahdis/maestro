@@ -18,5 +18,5 @@ package net.ihe.gazelle.maestro.spi.business.recording;
 
 public interface StepOutputPlanDissector {
 
-   StepOutputPlan dissect(StepOutputPlanContext context);
+   void dissect(StepOutputPlan stepOutputPlan);
 }

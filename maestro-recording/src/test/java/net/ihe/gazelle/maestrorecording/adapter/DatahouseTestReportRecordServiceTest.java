@@ -23,7 +23,6 @@ import net.ihe.gazelle.maestro.api.business.testreport.Result;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlan;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -179,7 +178,7 @@ class DatahouseTestReportRecordServiceTest {
     }
 
     private StepOutputPlanDissectorProvider emptyDissectorProvider() {
-        return step -> new StaticStepOutputDissector(StepOutputPlan.empty());
+        return step -> stepOutputPlan -> { };
     }
 
     private StepOutputPlanDissectorProvider staticDissectorProvider() {
