@@ -22,9 +22,7 @@ import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlan;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanContext;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanDissector;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.AttachmentPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.FutureReferencePlan;
@@ -84,7 +82,7 @@ public class ValidationStepOutputDissector implements StepOutputPlanDissector {
 
         addInputAttachments(validationReportPlan, validationReport);
 
-        stepOutputPlan.addReferencePlan(new FutureReferencePlan<>(
+        stepOutputPlan.addReferencePlan(
                 ReferencePlan.forItem(ValidationStepDefinition.REPORT, validationReportPlan),
                 (currentStepReport, refName, refId) -> StepOutputPlan.replaceOutput(
                     ValidationStepDefinition.REPORT,
@@ -97,7 +95,7 @@ public class ValidationStepOutputDissector implements StepOutputPlanDissector {
                     },
                     currentStepReport
               )
-        ));
+        );
 
     }
 

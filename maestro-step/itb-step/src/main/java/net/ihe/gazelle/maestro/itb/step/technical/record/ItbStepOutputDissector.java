@@ -61,7 +61,7 @@ public class ItbStepOutputDissector implements StepOutputPlanDissector {
             property.getFileName()
       );
 
-      stepOutputPlan.addReferencePlan(new FutureReferencePlan<>(
+      stepOutputPlan.addReferencePlan(
             ReferencePlan.forAttachment(outputName, attachmentPlan),
             (stepRunReport, referenceName, attachmentId) -> StepOutputPlan.replaceOutput(
                   outputName,
@@ -73,6 +73,6 @@ public class ItbStepOutputDissector implements StepOutputPlanDissector {
                   },
                   stepRunReport
             )
-      ));
+      );
    }
 }

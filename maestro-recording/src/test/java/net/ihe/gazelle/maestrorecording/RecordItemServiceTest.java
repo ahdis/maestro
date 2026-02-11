@@ -28,9 +28,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class RecordItemServiceTest {
 
@@ -38,8 +36,8 @@ class RecordItemServiceTest {
    void shouldDetectCycleInItemPlanReferences() {
       ItemPlan<String> itemA = item("A", "a");
       ItemPlan<String> itemB = item("B", "b");
-      itemA.withReference("to-b", itemB);
-      itemB.withReference("to-a", itemA);
+      itemA.withItemReference("to-b", itemB);
+      itemB.withItemReference("to-a", itemA);
 
       RecordItemClientStub client = new RecordItemClientStub();
       RecordItemService service = new RecordItemService(client);
@@ -57,8 +55,8 @@ class RecordItemServiceTest {
    void shouldRecordSharedChildOnlyOnce() {
       ItemPlan<String> root = item("ROOT", "root");
       ItemPlan<String> sharedChild = item("CHILD", "child");
-      root.withReference("child-1", sharedChild);
-      root.withReference("child-2", sharedChild);
+      root.withItemReference("child-1", sharedChild);
+      root.withItemReference("child-2", sharedChild);
 
       RecordItemClientStub client = new RecordItemClientStub();
       RecordItemService service = new RecordItemService(client);

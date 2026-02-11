@@ -11,7 +11,6 @@ import net.ihe.gazelle.validation.v2.client.ValidationServiceClientFactory;
 import net.ihe.gazelle.validation.v2.client.ValidationServiceFactoryProvider;
 import org.junit.jupiter.api.Test;
 
-import java.net.URI;
 import java.util.List;
 import java.util.stream.Stream;
 

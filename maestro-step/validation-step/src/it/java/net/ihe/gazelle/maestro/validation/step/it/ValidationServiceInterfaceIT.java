@@ -17,12 +17,15 @@
 package net.ihe.gazelle.maestro.validation.step.it;
 
 import net.ihe.gazelle.gitb.client.GitbValidationServiceClientFactory;
+import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.test.Step;
+import net.ihe.gazelle.maestro.engine.business.context.ReadSessionStore;
 import net.ihe.gazelle.maestro.spi.business.Handler;
 import net.ihe.gazelle.maestro.spi.technical.ConfigProvider;
 import net.ihe.gazelle.maestro.spi.technical.HandlerContext;
+import net.ihe.gazelle.maestro.spi.technical.HandlerProvider;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationHandler;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;
 import net.ihe.gazelle.maestro.validation.step.technical.factory.ValidationStepExecutorFactory;
@@ -30,9 +33,6 @@ import net.ihe.gazelle.maestro.validation.step.technical.handler.ValidationServi
 import net.ihe.gazelle.servicemetadata.api.business.HttpRestBinding;
 import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterface;
 import net.ihe.gazelle.servicemetadata.api.business.Service;
-import net.ihe.gazelle.maestro.engine.business.context.ReadSessionStore;
-import net.ihe.gazelle.maestro.api.business.MaestroObserver;
-import net.ihe.gazelle.maestro.spi.technical.HandlerProvider;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -44,10 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ValidationServiceInterfaceIT {
 

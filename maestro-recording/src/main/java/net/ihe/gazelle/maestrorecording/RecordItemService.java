@@ -21,20 +21,10 @@ import com.kereval.gazelle.datahouse.api.business.record.Item;
 import com.kereval.gazelle.datahouse.api.business.record.RefType;
 import com.kereval.gazelle.datahouse.api.business.record.Reference;
 import com.kereval.gazelle.datahouse.technical.rest.client.RecordItemClient;
-import net.ihe.gazelle.maestro.spi.business.recording.plan.AttachmentPlan;
-import net.ihe.gazelle.maestro.spi.business.recording.plan.FutureReferencePlan;
-import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemPlan;
-import net.ihe.gazelle.maestro.spi.business.recording.plan.MaestroRefType;
-import net.ihe.gazelle.maestro.spi.business.recording.plan.PersistencePlan;
-import net.ihe.gazelle.maestro.spi.business.recording.plan.ReferencePlan;
+import net.ihe.gazelle.maestro.spi.business.recording.plan.*;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class RecordItemService {
 

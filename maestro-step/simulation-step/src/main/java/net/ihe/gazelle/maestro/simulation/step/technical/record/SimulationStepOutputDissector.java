@@ -24,7 +24,6 @@ import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepDefinition
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanDissector;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.AttachmentPlan;
-import net.ihe.gazelle.maestro.spi.business.recording.plan.FutureReferencePlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ReferencePlan;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
@@ -76,7 +75,7 @@ class SimulationStepOutputDissector implements StepOutputPlanDissector {
 
       addValidationReportSubItems(simulationPlan, simulationReport, stepOutputPlan.getDatahouseUrl());
 
-      stepOutputPlan.addReferencePlan(new FutureReferencePlan<>(
+      stepOutputPlan.addReferencePlan(
             ReferencePlan.forItem(SimulationStepDefinition.REPORT, simulationPlan),
             (currentStepRunReport, refName, refId) -> StepOutputPlan.replaceOutput(
                   SimulationStepDefinition.REPORT,
@@ -89,7 +88,7 @@ class SimulationStepOutputDissector implements StepOutputPlanDissector {
                   },
                   currentStepRunReport
             )
-      ));
+      );
    }
 
    private void addValidationReportSubItems(ItemPlan<SimulationReport> simulationPlan,
@@ -122,7 +121,7 @@ class SimulationStepOutputDissector implements StepOutputPlanDissector {
                   );
             addValidationInputAttachments(validationPlan, validationReportV2);
             String refName = buildValidationReferenceName(transaction, validationReport);
-            simulationPlan.withReference(
+            simulationPlan.withItemReference(
                   refName,
                   validationPlan,
                   (report, referenceName, itemId) ->

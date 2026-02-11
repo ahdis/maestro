@@ -1,88 +1,64 @@
-# Step Output Dissection (v2)
+# Step Output Dissection
 
-The v2 dissection API lets a step describe how its execution outputs should be persisted without exposing index
-management or recorder internals. A step declares a `StepOutputPlanDissector` that analyzes the `StepRunReport`
-and returns a `StepOutputPlan`.
+The dissection API lets a step describe how its outputs must be persisted in Datahouse, without exposing recorder internals.
+A step provides a `StepOutputPlanDissector` that mutates the provided `StepOutputPlan`.
 
 ## High-level flow
 
-1. The step executes and populates its `StepRunReport` outputs (typically inline JSON or binaries).
-2. `StepOutputPlanDissector#dissect(StepOutputPlanContext)` inspects the report and builds a plan.
-3. The recorder persists `ItemPlan` and `AttachmentPlan` objects, then runs the declared mutations to:
-   * update references inside item payloads, and
-   * replace inline outputs with `ByteArrayItemProperty` references.
+1. The step executes and fills a `StepRunReport` with inline outputs (JSON, binaries, etc.).
+2. The recorder creates `StepOutputPlan(rootItemPlan, stepRunReport, datahouseUrl)` and calls:
+   `StepOutputPlanDissector#dissect(StepOutputPlan)`.
+3. The dissector appends references with `stepOutputPlan.addReferencePlan(...)`.
+4. The recorder persists referenced items/attachments, applies mutations, then stores the final root report item.
 
-## Plan concepts
+## Core concepts
 
-* `ItemPlan<T>`: describes a Datahouse item to persist from a business object.
-* `AttachmentPlan`: describes a binary attachment to upload.
-* `ReferencePlan`: describes a reference between items, attachments, or URLs.
-* `FutureReferencePlan<T>`: pairs a `ReferencePlan` with an optional mutation on the containing item object.
+* `ItemPlan<T>`: Datahouse item to persist from a business object.
+* `AttachmentPlan`: binary attachment to upload.
+* `ReferencePlan`: reference descriptor (item ID, attachment, URL).
+* `FutureReferencePlan<T>`: `ReferencePlan` + optional mutation on containing object after persistence.
+* `StepOutputPlan`: bridge between a `StepRunReport` and the root `ItemPlan<TestReport>`.
 
-### DX helpers (v2)
+## Main helper methods
 
-* `ItemPlan#withReference(...)` adds an item or attachment reference (with optional mutation).
-* `ItemPlan#addDetachedAttachment(...)` creates an `AttachmentPlan` and wires it as a reference.
-* `StepOutputPlanContext#output(...)` finds an output by name and type.
-* `StepOutputPlanContext#replaceOutput(...)` replaces an output by name without manual index updates.
+* `StepOutputPlan#addReferencePlan(...)`: attaches step-level references to the root report plan.
+* `StepOutputPlan#replaceOutput(...)`: replaces an output in `StepRunReport` index-safely.
+* `ItemPlan#withReference(...)`: adds item/attachment child references with optional mutation.
+* `ItemPlan#addDetachedAttachment(...)`: convenience for detached attachment references.
 
-## Example (validation report)
+## Example pattern
 
 ```java
-public class ValidationStepOutputDissector implements StepOutputPlanDissector {
-
-   @Override
-   public StepOutputPlan dissect(StepOutputPlanContext context) {
-      if (context == null || context.stepRunReport() == null) {
-         return StepOutputPlan.empty();
-      }
-
-      ByteArrayProperty reportProperty =
-            context.output(ValidationStepDefinition.REPORT, ByteArrayProperty.class);
-      if (reportProperty == null) {
-         return StepOutputPlan.empty();
-      }
-
-      ValidationReport report = deserializeReport(reportProperty.getValue());
-      ItemPlan<ValidationReport> reportPlan =
-            new ItemPlan<>(ValidationStepDefinition.REPORT, report, new ValidationReportMarshaller());
-
-      for (Input input : report.getInputs()) {
-         if (input.getContent() != null) {
-            reportPlan.addDetachedAttachment(
-                  input.getId(),
-                  "VALIDATION_INPUT",
-                  input.getContent(),
-                  input.getId(),
-                  (mutated, refName, attachmentId) -> {
-                     input.setItemId(attachmentId);
-                     input.setLocation("/attachments/" + attachmentId);
-                     input.setContent(null);
-                  }
-            );
-         }
-      }
-
-      FutureReferencePlan<TestReport> reportReference =
-            new FutureReferencePlan<>(
-                  ReferencePlan.forItem(ValidationStepDefinition.REPORT, reportPlan),
-                  (testReport, refName, itemId) -> context.replaceOutput(
-                        ValidationStepDefinition.REPORT,
-                        output -> new ByteArrayItemProperty(reportProperty)
-                              .setValue(null)
-                              .setItemType(ValidationStepDefinition.REPORT)
-                              .setReference(context.datahouseUrl() + "/items/" + itemId)
-                  )
-            );
-
-      return new StepOutputPlan(List.of(reportReference));
+@Override
+public void dissect(StepOutputPlan stepOutputPlan) {
+   if (stepOutputPlan == null || stepOutputPlan.getStepRunReport() == null) {
+      return;
    }
+
+   StepRunReport stepRunReport = stepOutputPlan.getStepRunReport();
+   ByteArrayProperty reportProperty = stepRunReport.getOutput("report");
+   if (reportProperty == null) {
+      return;
+   }
+
+   ItemPlan<MyReport> reportPlan = new ItemPlan<>("REPORT_TYPE", parse(reportProperty), new MyMarshaller());
+
+   stepOutputPlan.addReferencePlan(new FutureReferencePlan<>(
+         ReferencePlan.forItem("report", reportPlan),
+         (currentStep, refName, refId) -> StepOutputPlan.replaceOutput(
+               "report",
+               output -> new ByteArrayItemProperty((ByteArrayProperty) output)
+                     .setValue(null)
+                     .setItemType("REPORT_TYPE")
+                     .setReference(stepOutputPlan.getDatahouseUrl() + "/items/" + refId),
+               currentStep
+         )
+   ));
 }
 ```
 
 ## Tips
 
-* Always null-check the context and its report; return `StepOutputPlan.empty()` when nothing must be persisted.
-* Prefer `addDetachedAttachment` over manual `AttachmentPlan` wiring.
-* Use `context.replaceOutput(...)` to keep output replacement index-free.
-* Keep mutations focused on the item instance passed to the mutation; do not assume hidden global state.
+* Always guard against `null` / missing outputs and just `return` when nothing must be persisted.
+* Keep mutation lambdas focused on the object they mutate.
+* When replacing binary outputs, preserve useful metadata (filename, mimeType) in `ByteArrayItemProperty`.

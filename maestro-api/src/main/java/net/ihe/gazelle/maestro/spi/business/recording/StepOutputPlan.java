@@ -20,7 +20,9 @@ import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.FutureReferencePlan;
+import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemObjectMutation;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemPlan;
+import net.ihe.gazelle.maestro.spi.business.recording.plan.ReferencePlan;
 
 import java.util.List;
 import java.util.Objects;
@@ -41,18 +43,15 @@ public class StepOutputPlan {
       this.datahouseUrl = datahouseUrl;
    }
 
-   public StepOutputPlan addReferencePlan(FutureReferencePlan<StepRunReport> futureReferencePlan) {
-      if (futureReferencePlan == null) {
-         return this;
-      }
-      if (futureReferencePlan.mutation() == null) {
-         rootReportPlan.addFutureReferencePlan(futureReferencePlan.referencePlan(), null);
-         return this;
+   public StepOutputPlan addReferencePlan(ReferencePlan referencePlan, ItemObjectMutation<StepRunReport> mutation) {
+      if (referencePlan == null || mutation == null) {
+         throw new IllegalArgumentException("referencePlan and mutation must not be null");
       }
       rootReportPlan.addFutureReferencePlan(
-            futureReferencePlan.referencePlan(),
-            (testReport, referenceName, referenceId) ->
-                  futureReferencePlan.mutation().mutateReference(stepRunReport, referenceName, referenceId)
+              referencePlan,
+              (testReport, referenceName, referenceId) ->
+                      mutation.mutateReference(stepRunReport, referenceName, referenceId)
+
       );
 
       return this;

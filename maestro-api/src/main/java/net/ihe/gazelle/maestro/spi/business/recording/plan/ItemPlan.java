@@ -18,11 +18,7 @@ package net.ihe.gazelle.maestro.spi.business.recording.plan;
 
 import net.ihe.gazelle.modelmarshaller.technical.marshalling.TextMarshaller;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class ItemPlan<T> {
 
@@ -54,33 +50,25 @@ public class ItemPlan<T> {
       return new ArrayList<>(futureReferencePlans);
    }
 
-   public ItemPlan<T> withReference(String referenceName, ItemPlan<?> itemPlan) {
-      return withReference(referenceName, itemPlan, null);
+   public ItemPlan<T> withItemReference(String referenceName, ItemPlan<?> itemPlan) {
+      return withItemReference(referenceName, itemPlan, null);
    }
 
-   public ItemPlan<T> withReference(String referenceName, ItemPlan<?> itemPlan, ItemObjectMutation<T> mutation) {
+   public ItemPlan<T> withItemReference(String referenceName, ItemPlan<?> itemPlan, ItemObjectMutation<T> mutation) {
       return addFutureReferencePlan(ReferencePlan.forItem(referenceName, itemPlan), mutation);
    }
 
-   public ItemPlan<T> withReference(String referenceName, AttachmentPlan attachmentPlan) {
-      return withReference(referenceName, attachmentPlan, null);
+   public ItemPlan<T> withAttachmentReference(String referenceName, AttachmentPlan attachmentPlan) {
+      return withAttachmentReference(referenceName, attachmentPlan, null);
    }
 
-   public ItemPlan<T> withReference(String referenceName,
-                                    AttachmentPlan attachmentPlan,
-                                    ItemObjectMutation<T> mutation) {
+   public ItemPlan<T> withAttachmentReference(String referenceName,
+                                              AttachmentPlan attachmentPlan,
+                                              ItemObjectMutation<T> mutation) {
       return addFutureReferencePlan(ReferencePlan.forAttachment(referenceName, attachmentPlan), mutation);
    }
 
 
-   public ItemPlan<T> addDetachedAttachment(String referenceName,
-                                            String type,
-                                            byte[] content,
-                                            String filename,
-                                            ItemObjectMutation<T> mutation) {
-      AttachmentPlan attachmentPlan = new AttachmentPlan(type, content, filename);
-      return withReference(referenceName, attachmentPlan, mutation);
-   }
 
    /**
     * Add a child reference plan, with an optional mutation to apply to the item once the target of the reference has
@@ -93,11 +81,6 @@ public class ItemPlan<T> {
     */
    public ItemPlan<T> addFutureReferencePlan(ReferencePlan referencePlan, ItemObjectMutation<T> mutation) {
       this.futureReferencePlans.add(new FutureReferencePlan<>(referencePlan, mutation));
-      return this;
-   }
-
-   public ItemPlan<T> addFutureReferencePlan(FutureReferencePlan<T> futureReferencePlan) {
-      this.futureReferencePlans.add(futureReferencePlan);
       return this;
    }
 

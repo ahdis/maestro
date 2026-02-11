@@ -74,14 +74,14 @@ final class StaticStepOutputDissector implements StepOutputPlanDissector {
         ItemPlan<String> grandchild = item(GRANDCHILD_ITEM_TYPE, "{\"level\":2}");
         ItemPlan<String> sibling = item(SIBLING_ITEM_TYPE, "{\"level\":1}");
 
-        child.withReference(GRANDCHILD_REFERENCE_NAME, grandchild);
-        root.withReference(CHILD_REFERENCE_NAME, child);
-        root.withReference(SIBLING_REFERENCE_NAME, sibling);
+        child.withItemReference(GRANDCHILD_REFERENCE_NAME, grandchild);
+        root.withItemReference(CHILD_REFERENCE_NAME, child);
+        root.withItemReference(SIBLING_REFERENCE_NAME, sibling);
 
         AttachmentPlan attached = attachment("binary-output.bin", "application/octet-stream", "root-binary");
         AttachmentPlan detached = attachment("logs.txt", "text/plain", "log");
-        root.withReference(ATTACHMENT_REFERENCE_NAME, attached);
-        root.withReference(DETACHED_REFERENCE_NAME, detached);
+        root.withAttachmentReference(ATTACHMENT_REFERENCE_NAME, attached);
+        root.withAttachmentReference(DETACHED_REFERENCE_NAME, detached);
 
         List<FutureReferencePlan<StepRunReport>> reportPlans = new ArrayList<>();
         reportPlans.add(new FutureReferencePlan<>(
@@ -116,7 +116,7 @@ final class StaticStepOutputDissector implements StepOutputPlanDissector {
         ));
 
         for (FutureReferencePlan<StepRunReport> reportPlan : reportPlans) {
-            stepOutputPlan.addReferencePlan(reportPlan);
+            stepOutputPlan.addReferencePlan(reportPlan.referencePlan(), reportPlan.mutation());
         }
     }
 

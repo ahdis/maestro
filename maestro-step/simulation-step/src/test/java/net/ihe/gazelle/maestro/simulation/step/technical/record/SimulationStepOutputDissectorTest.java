@@ -28,12 +28,7 @@ import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.marshalling.MarshallingException;
 import net.ihe.gazelle.modelmarshaller.technical.marshalling.TextMarshaller;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
-import net.ihe.gazelle.simulation.business.callback.Result;
-import net.ihe.gazelle.simulation.business.callback.Role;
-import net.ihe.gazelle.simulation.business.callback.SimulationReport;
-import net.ihe.gazelle.simulation.business.callback.TransactionReport;
-import net.ihe.gazelle.simulation.business.callback.ValidationReport;
-import net.ihe.gazelle.simulation.business.callback.ValidationResult;
+import net.ihe.gazelle.simulation.business.callback.*;
 import net.ihe.gazelle.simulation.jaxrs.api.technical.dto.callback.SimulationReportDTO;
 import net.ihe.gazelle.validation.v2.api.business.Input;
 import org.junit.jupiter.api.Test;
@@ -41,10 +36,7 @@ import org.junit.jupiter.api.Test;
 import java.time.Instant;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class SimulationStepOutputDissectorTest {
 
