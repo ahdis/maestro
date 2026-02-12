@@ -18,14 +18,12 @@ package net.ihe.gazelle.maestro.validation.step.technical.record;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanDissector;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.AttachmentPlan;
-import net.ihe.gazelle.maestro.spi.business.recording.plan.FutureReferencePlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ReferencePlan;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;
@@ -82,20 +80,7 @@ public class ValidationStepOutputDissector implements StepOutputPlanDissector {
 
         addInputAttachments(validationReportPlan, validationReport);
 
-        stepOutputPlan.addReferencePlan(
-                ReferencePlan.forItem(ValidationStepDefinition.REPORT, validationReportPlan),
-                (currentStepReport, refName, refId) -> StepOutputPlan.replaceOutput(
-                    ValidationStepDefinition.REPORT,
-                    output -> {
-                        ByteArrayItemProperty replacement = new ByteArrayItemProperty(validationReportProperty);
-                        replacement.setValue(null);
-                        replacement.setItemType(ValidationStepDefinition.REPORT);
-                        replacement.setReference(stepOutputPlan.getDatahouseUrl() + "/items/" + refId);
-                        return replacement;
-                    },
-                    currentStepReport
-              )
-        );
+        stepOutputPlan.addItemReferencePlan(ValidationStepDefinition.REPORT, validationReportPlan);
 
     }
 

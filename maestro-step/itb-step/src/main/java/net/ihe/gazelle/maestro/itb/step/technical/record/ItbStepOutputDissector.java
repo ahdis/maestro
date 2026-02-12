@@ -16,15 +16,12 @@
 
 package net.ihe.gazelle.maestro.itb.step.technical.record;
 
-import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.itb.step.business.ItbStepDefinition;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanDissector;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.AttachmentPlan;
-import net.ihe.gazelle.maestro.spi.business.recording.plan.FutureReferencePlan;
-import net.ihe.gazelle.maestro.spi.business.recording.plan.ReferencePlan;
 
 /**
  * Dissects ITB outputs for recording by persisting report/log outputs as attachments.
@@ -61,18 +58,6 @@ public class ItbStepOutputDissector implements StepOutputPlanDissector {
             property.getFileName()
       );
 
-      stepOutputPlan.addReferencePlan(
-            ReferencePlan.forAttachment(outputName, attachmentPlan),
-            (stepRunReport, referenceName, attachmentId) -> StepOutputPlan.replaceOutput(
-                  outputName,
-                  output -> {
-                     ByteArrayItemProperty replacement = new ByteArrayItemProperty((ByteArrayProperty) output);
-                     replacement.setValue(null);
-                     replacement.setReference("/attachments/" + attachmentId);
-                     return replacement;
-                  },
-                  stepRunReport
-            )
-      );
+      stepOutputPlan.addAttachmentReferencePlan(outputName, attachmentPlan);
    }
 }

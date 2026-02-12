@@ -16,10 +16,12 @@
 
 package net.ihe.gazelle.maestro.spi.business.recording;
 
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
-import net.ihe.gazelle.maestro.spi.business.recording.plan.FutureReferencePlan;
+import net.ihe.gazelle.maestro.spi.business.recording.plan.AttachmentPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemObjectMutation;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ReferencePlan;
@@ -44,17 +46,44 @@ public class StepOutputPlan {
    }
 
    public StepOutputPlan addReferencePlan(ReferencePlan referencePlan, ItemObjectMutation<StepRunReport> mutation) {
-      if (referencePlan == null || mutation == null) {
-         throw new IllegalArgumentException("referencePlan and mutation must not be null");
+      if (referencePlan == null) {
+         throw new IllegalArgumentException("referencePlan must not be null");
       }
-      rootReportPlan.addFutureReferencePlan(
-              referencePlan,
-              (testReport, referenceName, referenceId) ->
-                      mutation.mutateReference(stepRunReport, referenceName, referenceId)
-
-      );
+      if (mutation == null) {
+         rootReportPlan.addFutureReferencePlan(referencePlan, null);
+         return this;
+      }
+      rootReportPlan.addFutureReferencePlan(referencePlan,
+            (testReport, referenceName, referenceId) ->
+                  mutation.mutateReference(stepRunReport, referenceName, referenceId));
 
       return this;
+   }
+
+   public StepOutputPlan addItemReferencePlan(String outputName, ItemPlan<?> itemPlan) {
+      if (outputName == null || outputName.isBlank() || itemPlan == null) {
+         throw new IllegalArgumentException("outputName and itemPlan must not be null or blank");
+      }
+      return addReferencePlan(
+            ReferencePlan.forItem(outputName, itemPlan),
+            (currentStepReport, referenceName, itemId) ->
+                  replaceOutput(referenceName,
+                        output -> toItemOutputReference(output, itemPlan.type(), datahouseUrl + "/items/" + itemId),
+                        currentStepReport)
+      );
+   }
+
+   public StepOutputPlan addAttachmentReferencePlan(String outputName, AttachmentPlan attachmentPlan) {
+      if (outputName == null || outputName.isBlank() || attachmentPlan == null) {
+         throw new IllegalArgumentException("outputName and attachmentPlan must not be null or blank");
+      }
+      return addReferencePlan(
+            ReferencePlan.forAttachment(outputName, attachmentPlan),
+            (currentStepReport, referenceName, attachmentId) ->
+                  replaceOutput(referenceName,
+                        output -> toAttachmentOutputReference(output, "/attachments/" + attachmentId),
+                        currentStepReport)
+      );
    }
 
    public String getDatahouseUrl() {
@@ -81,6 +110,27 @@ public class StepOutputPlan {
          }
       }
       return false;
+   }
+
+   private static Property toItemOutputReference(Property output, String itemType, String reference) {
+      if (output instanceof ByteArrayProperty byteArrayProperty) {
+         ByteArrayItemProperty replacement = new ByteArrayItemProperty(byteArrayProperty);
+         replacement.setValue(null);
+         replacement.setItemType(itemType);
+         replacement.setReference(reference);
+         return replacement;
+      }
+      return output;
+   }
+
+   private static Property toAttachmentOutputReference(Property output, String reference) {
+      if (output instanceof ByteArrayProperty byteArrayProperty) {
+         ByteArrayItemProperty replacement = new ByteArrayItemProperty(byteArrayProperty);
+         replacement.setValue(null);
+         replacement.setReference(reference);
+         return replacement;
+      }
+      return output;
    }
 
 }

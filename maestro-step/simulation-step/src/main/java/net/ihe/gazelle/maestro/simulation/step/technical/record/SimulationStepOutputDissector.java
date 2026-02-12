@@ -16,7 +16,6 @@
 
 package net.ihe.gazelle.maestro.simulation.step.technical.record;
 
-import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
@@ -75,20 +74,7 @@ class SimulationStepOutputDissector implements StepOutputPlanDissector {
 
       addValidationReportSubItems(simulationPlan, simulationReport, stepOutputPlan.getDatahouseUrl());
 
-      stepOutputPlan.addReferencePlan(
-            ReferencePlan.forItem(SimulationStepDefinition.REPORT, simulationPlan),
-            (currentStepRunReport, refName, refId) -> StepOutputPlan.replaceOutput(
-                  SimulationStepDefinition.REPORT,
-                  output -> {
-                     ByteArrayItemProperty replacement = new ByteArrayItemProperty(reportProperty);
-                     replacement.setValue(null);
-                     replacement.setItemType(ITEM_TYPE_SIMULATION_REPORT);
-                     replacement.setReference(stepOutputPlan.getDatahouseUrl() + "/items/" + refId);
-                     return replacement;
-                  },
-                  currentStepRunReport
-            )
-      );
+      stepOutputPlan.addItemReferencePlan(SimulationStepDefinition.REPORT, simulationPlan);
    }
 
    private void addValidationReportSubItems(ItemPlan<SimulationReport> simulationPlan,
