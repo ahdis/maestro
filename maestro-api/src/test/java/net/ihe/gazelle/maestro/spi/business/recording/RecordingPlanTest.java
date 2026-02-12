@@ -27,6 +27,7 @@ import net.ihe.gazelle.modelmarshaller.technical.marshalling.MarshallingExceptio
 import net.ihe.gazelle.modelmarshaller.technical.marshalling.TextMarshaller;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,12 +48,12 @@ class RecordingPlanTest {
 
       @Override
       public byte[] marshall(String value) throws MarshallingException {
-         return value.getBytes();
+         return value.getBytes(StandardCharsets.UTF_8);
       }
 
       @Override
       public String unmarshall(byte[] payload) {
-         return new String(payload);
+         return new String(payload, StandardCharsets.UTF_8);
       }
    };
 
@@ -82,7 +83,7 @@ class RecordingPlanTest {
    void addItemReferencePlanUsesItemType() {
       ItemPlan<TestReport> rootReportPlan = new ItemPlan<>("test-report", newTestReport(), null);
       StepRunReport stepRunReport = new StepRunReport()
-            .addOutput(new ByteArrayProperty("output-a", "value".getBytes()));
+            .addOutput(new ByteArrayProperty("output-a", "value".getBytes(StandardCharsets.UTF_8)));
       StepOutputPlan stepOutputPlan = new StepOutputPlan(rootReportPlan, stepRunReport, "http://dh");
       ItemPlan<String> outputPlan = new ItemPlan<>("output-type", "output-payload", STRING_MARSHALLER);
 
