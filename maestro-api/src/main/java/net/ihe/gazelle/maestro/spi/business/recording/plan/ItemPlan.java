@@ -55,7 +55,7 @@ public class ItemPlan<T> {
    }
 
    public ItemPlan<T> withItemReference(String referenceName, ItemPlan<?> itemPlan, ItemObjectMutation<T> mutation) {
-      return addFutureReferencePlan(ReferencePlan.forItem(referenceName, itemPlan), mutation);
+      return addFutureReferencePlan(ReferencePlan.forItem(referenceName, itemPlan.type(), itemPlan), mutation);
    }
 
    public ItemPlan<T> withAttachmentReference(String referenceName, AttachmentPlan attachmentPlan) {

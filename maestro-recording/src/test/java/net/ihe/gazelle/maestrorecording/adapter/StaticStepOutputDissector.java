@@ -85,7 +85,7 @@ final class StaticStepOutputDissector implements StepOutputPlanDissector {
 
         List<FutureReferencePlan<StepRunReport>> reportPlans = new ArrayList<>();
         reportPlans.add(new FutureReferencePlan<>(
-              ReferencePlan.forItem(REPORT_REFERENCE_NAME, root),
+              ReferencePlan.forItem(REPORT_REFERENCE_NAME, root.type(), root),
               (report, refName, itemId) -> StepOutputPlan.replaceOutput(
                     ROOT_OUTPUT_NAME,
                     output -> toItemReference(output, datahouseUrl, itemId, ROOT_ITEM_TYPE),
@@ -93,7 +93,7 @@ final class StaticStepOutputDissector implements StepOutputPlanDissector {
               )
         ));
         reportPlans.add(new FutureReferencePlan<>(
-              ReferencePlan.forItem(SIBLING_REFERENCE_NAME, sibling),
+              ReferencePlan.forItem(SIBLING_REFERENCE_NAME, sibling.type(), sibling),
               (report, refName, itemId) -> StepOutputPlan.replaceOutput(
                     SIBLING_OUTPUT_NAME,
                     output -> toItemReference(output, datahouseUrl, itemId, SIBLING_ITEM_TYPE),

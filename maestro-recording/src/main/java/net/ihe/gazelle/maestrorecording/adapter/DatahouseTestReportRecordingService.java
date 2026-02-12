@@ -181,7 +181,7 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
       for (TestReport subReport : report.getSubReports()) {
          ItemPlan<TestReport> subReportPlan = buildTestReportPlan(subReport, acl);
          testReportPlan.addFutureReferencePlan(
-               ReferencePlan.forItem(subReport.getTestSuiteName(), subReportPlan),
+               ReferencePlan.forItem(subReport.getTestSuiteName(), subReportPlan.type(), subReportPlan),
                (testReport, refName, refId) -> {
                   TestReportReferenceDTO ref = new TestReportReferenceDTO();
                   ref.setTestReportId(refId);

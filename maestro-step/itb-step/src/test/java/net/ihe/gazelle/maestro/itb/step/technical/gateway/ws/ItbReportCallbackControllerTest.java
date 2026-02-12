@@ -19,7 +19,7 @@ import jakarta.ws.rs.core.Response;
 import net.ihe.gazelle.itb.gateway.business.ItbReportingService;
 import net.ihe.gazelle.itb.gateway.business.reporting.ItbReporting;
 import net.ihe.gazelle.itb.gateway.business.reporting.ItbTestSession;
-import net.ihe.gazelle.itb.gateway.technical.client.ItbClient;
+import net.ihe.gazelle.itb.gateway.technical.client.ItbHttpClient;
 import net.ihe.gazelle.itb.gateway.technical.dao.ItbSessionStoreImpl;
 import net.ihe.gazelle.itb.gateway.technical.ws.ItbReportCallbackController;
 import org.junit.jupiter.api.BeforeAll;
@@ -40,7 +40,7 @@ class ItbReportCallbackControllerTest {
     @BeforeAll
     static void init() {
         store = new ItbSessionStoreImpl();
-        itbReportingService = new ItbReportingService(new ItbClient("baseUrl", "apiKey"), store);
+        itbReportingService = new ItbReportingService(new ItbHttpClient("baseUrl", "apiKey"), store);
     }
 
     @Test
@@ -89,4 +89,3 @@ class ItbReportCallbackControllerTest {
         return dto;
     }
 }
-

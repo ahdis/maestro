@@ -20,7 +20,7 @@ import net.ihe.gazelle.itb.gateway.business.reporting.ItbReporting;
 import net.ihe.gazelle.itb.gateway.business.reporting.ItbResult;
 import net.ihe.gazelle.itb.gateway.business.reporting.ItbSystem;
 import net.ihe.gazelle.itb.gateway.business.reporting.ItbTestSession;
-import net.ihe.gazelle.itb.gateway.technical.client.ItbClient;
+import net.ihe.gazelle.itb.gateway.technical.client.ItbHttpClient;
 import net.ihe.gazelle.itb.gateway.technical.dao.ItbSessionStoreImpl;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
@@ -49,7 +49,7 @@ class ItbStepExecutorTest {
         ItbStepExecutor runner = new ItbStepExecutor(handler, store);
         StepRun stepRun = new StepRun(step(), List.of());
         ItbReportingService service =
-              new ItbReportingService(new ItbClient("baseUrl", "itbApiKey"), store);
+              new ItbReportingService(new ItbHttpClient("baseUrl", "itbApiKey"), store);
 
         CompletableFuture<StepRunReport> reportFuture =
               CompletableFuture.supplyAsync(() -> runner.execute(stepRun));

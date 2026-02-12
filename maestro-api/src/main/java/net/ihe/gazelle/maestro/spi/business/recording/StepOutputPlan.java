@@ -65,7 +65,7 @@ public class StepOutputPlan {
          throw new IllegalArgumentException("outputName and itemPlan must not be null or blank");
       }
       return addReferencePlan(
-            ReferencePlan.forItem(outputName, itemPlan),
+            ReferencePlan.forItem(outputName, itemPlan.type(), itemPlan),
             (currentStepReport, referenceName, itemId) ->
                   replaceOutput(referenceName,
                         output -> toItemOutputReference(output, itemPlan.type(), datahouseUrl + "/items/" + itemId),

@@ -35,8 +35,8 @@ public class ReferencePlan {
       this.target = target;
    }
 
-   public static <C> ReferencePlan forItem(String name, ItemPlan<C> itemPlan) {
-      return new ReferencePlan(MaestroRefType.ITEM_ID, name, itemPlan.type(), itemPlan);
+   public static ReferencePlan forItem(String name, String targetType, Object target) {
+      return new ReferencePlan(MaestroRefType.ITEM_ID, name, targetType, target);
    }
 
    public static ReferencePlan forAttachment(String name, AttachmentPlan attachmentPlan) {

@@ -142,6 +142,25 @@ class DatahouseTestReportRecordServiceTest {
                         StaticStepOutputDissector.SIBLING_REFERENCE_NAME);
     }
 
+    @Test
+    void records_sub_reports_as_item_references() {
+        TestReport subReport = newReport("R-child", newTestRun("run-child"))
+              .setTestSuiteName("child-suite")
+              .setResult(Result.PASSED);
+        TestReport parentReport = newReport("R-parent", newTestRun("run-parent"))
+              .setTestSuiteName("parent-suite")
+              .addSubReport(subReport);
+
+        service.recordTestReport(parentReport);
+
+        assertThat(recordItemClientMock.recordedItems).hasSize(2);
+        assertThat(recordItemClientMock.recordedItems.stream()
+              .map(Item.class::cast)
+              .flatMap(item -> item.getReferences().stream())
+              .map(Reference::getName))
+              .contains("child-suite");
+    }
+
     private static ByteArrayProperty binaryInput(String name, String value) {
         return new ByteArrayProperty(name, value.getBytes(StandardCharsets.UTF_8));
     }

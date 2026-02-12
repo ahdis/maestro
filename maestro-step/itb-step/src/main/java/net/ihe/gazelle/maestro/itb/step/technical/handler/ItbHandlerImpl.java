@@ -16,13 +16,13 @@
 
 package net.ihe.gazelle.maestro.itb.step.technical.handler;
 
-import net.ihe.gazelle.itb.gateway.technical.client.ItbClient;
+import net.ihe.gazelle.itb.gateway.technical.client.ItbHttpClient;
 import net.ihe.gazelle.maestro.itb.step.business.ItbHandler;
 
 /**
  * Implementation of {@link ItbHandler}.
  */
-public class ItbHandlerImpl extends ItbClient implements ItbHandler {
+public class ItbHandlerImpl extends ItbHttpClient implements ItbHandler {
 
    /**
     * Constructs an instance of {@code ItbHandlerImpl} by initializing its base URL and API key.

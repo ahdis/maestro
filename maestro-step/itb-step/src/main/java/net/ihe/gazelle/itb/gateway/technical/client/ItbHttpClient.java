@@ -39,9 +39,9 @@ import java.util.*;
 // FIXME Data transformation into an ITB request is not understandable and NOT thread safe. We miss a DTO structure.
 // ceoche: Check in ITB github repo if there isn't a java client or at least data types for the request (I remember GITB
 // data-types for GITB soap version APIs, so they may exists for JSON Test bed APIs)
-public class ItbClient implements net.ihe.gazelle.itb.gateway.business.ItbClient {
+public class ItbHttpClient implements net.ihe.gazelle.itb.gateway.business.ItbClient {
 
-    private static final Logger logger = LoggerFactory.getLogger(ItbClient.class);
+    private static final Logger logger = LoggerFactory.getLogger(ItbHttpClient.class);
     public static final String INPUT = "input";
 
     private Map<String, Object> map;
@@ -52,7 +52,7 @@ public class ItbClient implements net.ihe.gazelle.itb.gateway.business.ItbClient
     private final String baseItbUrl;
     private final String itbApiKey;
 
-    public ItbClient(String baseItbUrl, String itbApiKey) {
+    public ItbHttpClient(String baseItbUrl, String itbApiKey) {
         this.baseItbUrl = baseItbUrl;
         this.itbApiKey = itbApiKey;
     }
