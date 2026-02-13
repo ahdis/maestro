@@ -16,8 +16,20 @@
 
 package net.ihe.gazelle.maestro.spi.business.recording.plan;
 
+/**
+ * Callback applied when a referenced object receives its persisted identifier.
+ *
+ * @param <T> owner object type being mutated
+ */
 @FunctionalInterface
 public interface ItemObjectMutation<T> {
 
+   /**
+    * Applies a reference-based mutation on the owning object.
+    *
+    * @param object owning object to mutate
+    * @param referenceName logical reference name
+    * @param referenceId persisted reference identifier
+    */
    void mutateReference(T object, String referenceName, String referenceId);
 }

@@ -24,16 +24,29 @@ import net.ihe.gazelle.itb.gateway.business.ItbClient;
 import net.ihe.gazelle.itb.gateway.business.ItbReportingService;
 import net.ihe.gazelle.itb.gateway.technical.dao.ItbSessionStoreImpl;
 
+/**
+ * CDI factory creating {@link ItbReportingService} with default session store implementation.
+ */
 @ApplicationScoped
 public class ItbReportingServiceFactory {
 
    private final ItbClient itbClient;
 
+   /**
+    * Creates the factory.
+    *
+    * @param itbClient ITB client dependency
+    */
    @Inject
    public ItbReportingServiceFactory(ItbClient itbClient) {
       this.itbClient = itbClient;
    }
 
+   /**
+    * Produces the default ITB reporting service bean.
+    *
+    * @return ITB reporting service
+    */
    @Default
    @Produces
    public ItbReportingService createItbReportingService() {

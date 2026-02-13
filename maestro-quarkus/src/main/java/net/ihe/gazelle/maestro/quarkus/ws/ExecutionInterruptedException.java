@@ -16,8 +16,17 @@
 
 package net.ihe.gazelle.maestro.quarkus.ws;
 
+/**
+ * Runtime wrapper used when synchronous execution is interrupted.
+ */
 public class ExecutionInterruptedException extends RuntimeException {
 
+   /**
+    * Creates the exception.
+    *
+    * @param message contextual message
+    * @param cause interruption cause
+    */
    public ExecutionInterruptedException(String message, InterruptedException cause) {
       super(message, cause);
    }

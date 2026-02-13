@@ -16,8 +16,20 @@
 
 package net.ihe.gazelle.maestro.spi.business.recording.plan;
 
+/**
+ * Reference kinds supported by Maestro persistence planning.
+ */
 public enum MaestroRefType {
+   /**
+    * Reference to another persisted item identifier.
+    */
    ITEM_ID,
+   /**
+    * Reference to a persisted attachment identifier.
+    */
    ATTACHMENT,
+   /**
+    * Reference to an external URL.
+    */
    URL
 }

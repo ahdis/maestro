@@ -16,7 +16,15 @@
 
 package net.ihe.gazelle.maestro.spi.business.recording;
 
+/**
+ * Strategy interface used to enrich a {@link StepOutputPlan} before persistence.
+ */
 public interface StepOutputPlanDissector {
 
+   /**
+    * Applies step-specific decomposition logic to the provided plan.
+    *
+    * @param stepOutputPlan plan to enrich
+    */
    void dissect(StepOutputPlan stepOutputPlan);
 }

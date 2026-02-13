@@ -16,7 +16,15 @@
 
 package net.ihe.gazelle.itb.gateway.business;
 
+/**
+ * Exception thrown when an ITB run request is invalid.
+ */
 public class RunItbTestServiceException extends RuntimeException {
+    /**
+     * Creates an exception with message.
+     *
+     * @param message error message
+     */
     public RunItbTestServiceException(String message) {
         super(message);
     }

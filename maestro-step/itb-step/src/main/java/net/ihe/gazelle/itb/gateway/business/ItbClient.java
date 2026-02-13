@@ -18,6 +18,9 @@ package net.ihe.gazelle.itb.gateway.business;
 
 import net.ihe.gazelle.itb.gateway.business.request.TestRequest;
 
+/**
+ * Client abstraction for calling ITB APIs.
+ */
 public interface ItbClient {
    /**
     * Method to execute test request
@@ -36,10 +39,11 @@ public interface ItbClient {
    String getTestLogs(String sessionID);
 
    /**
-    * Method to retrieve ITB test session logs
+    * Retrieves ITB PDF report for a test session.
     *
     * @param sessionID ITB test session identifier
-    * @return ITB test session logs
+    * @param testCaseName optional test case identifier (implementation dependent)
+    * @return ITB PDF report bytes
     */
    byte[] requestPDFReport(String sessionID, String testCaseName);
 }

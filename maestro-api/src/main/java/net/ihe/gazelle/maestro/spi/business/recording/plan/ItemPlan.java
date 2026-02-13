@@ -20,6 +20,11 @@ import net.ihe.gazelle.modelmarshaller.technical.marshalling.TextMarshaller;
 
 import java.util.*;
 
+/**
+ * Mutable item persistence plan with deferred references and optional in-place mutations.
+ *
+ * @param <T> business object type to persist
+ */
 public class ItemPlan<T> {
 
    private final String type;
@@ -28,40 +33,97 @@ public class ItemPlan<T> {
    private final List<FutureReferencePlan<T>> futureReferencePlans = new ArrayList<>();
    private final Map<String, String> additionalParameters = new HashMap<>();
 
+   /**
+    * Creates a new item plan.
+    *
+    * @param type item type
+    * @param itemObject business object to persist
+    * @param textMarshaller serializer used to produce item payload
+    */
    public ItemPlan(String type, T itemObject, TextMarshaller<T> textMarshaller) {
       this.type = type;
       this.itemObject = itemObject;
       this.textMarshaller = textMarshaller;
    }
 
+   /**
+    * Returns item type.
+    *
+    * @return item type
+    */
    public String type() {
       return type;
    }
 
+   /**
+    * Returns mutable business object held by this plan.
+    *
+    * @return business object
+    */
    public T itemObject() {
       return itemObject;
    }
 
+   /**
+    * Returns item serializer.
+    *
+    * @return text marshaller
+    */
    public TextMarshaller<T> textMarshaller() {
       return textMarshaller;
    }
 
+   /**
+    * Returns a copy of deferred references.
+    *
+    * @return deferred references
+    */
    public List<FutureReferencePlan<T>> futureReferencePlans() {
       return new ArrayList<>(futureReferencePlans);
    }
 
+   /**
+    * Adds a child item reference without mutation.
+    *
+    * @param referenceName reference name
+    * @param itemPlan target item plan
+    * @return current plan
+    */
    public ItemPlan<T> withItemReference(String referenceName, ItemPlan<?> itemPlan) {
       return withItemReference(referenceName, itemPlan, null);
    }
 
+   /**
+    * Adds a child item reference with optional mutation.
+    *
+    * @param referenceName reference name
+    * @param itemPlan target item plan
+    * @param mutation optional mutation
+    * @return current plan
+    */
    public ItemPlan<T> withItemReference(String referenceName, ItemPlan<?> itemPlan, ItemObjectMutation<T> mutation) {
       return addFutureReferencePlan(ReferencePlan.forItem(referenceName, itemPlan.type(), itemPlan), mutation);
    }
 
+   /**
+    * Adds an attachment reference without mutation.
+    *
+    * @param referenceName reference name
+    * @param attachmentPlan attachment plan
+    * @return current plan
+    */
    public ItemPlan<T> withAttachmentReference(String referenceName, AttachmentPlan attachmentPlan) {
       return withAttachmentReference(referenceName, attachmentPlan, null);
    }
 
+   /**
+    * Adds an attachment reference with optional mutation.
+    *
+    * @param referenceName reference name
+    * @param attachmentPlan attachment plan
+    * @param mutation optional mutation
+    * @return current plan
+    */
    public ItemPlan<T> withAttachmentReference(String referenceName,
                                               AttachmentPlan attachmentPlan,
                                               ItemObjectMutation<T> mutation) {
@@ -84,20 +146,43 @@ public class ItemPlan<T> {
       return this;
    }
 
+   /**
+    * Returns a defensive copy of additional parameters.
+    *
+    * @return additional parameters
+    */
    public Map<String, String> additionalParameters() {
       return new HashMap<>(additionalParameters);
    }
 
+   /**
+    * Adds one additional parameter.
+    *
+    * @param key parameter key
+    * @param value parameter value
+    * @return current plan
+    */
    public ItemPlan<T> addAdditionalParameter(String key, String value) {
       this.additionalParameters.put(key, value);
       return this;
    }
 
+   /**
+    * Adds many additional parameters.
+    *
+    * @param additionalParameters parameters to merge
+    * @return current plan
+    */
    public ItemPlan<T> addAdditionalParameters(Map<String, String> additionalParameters) {
       this.additionalParameters.putAll(additionalParameters);
       return this;
    }
 
+   /**
+    * Creates a deep copy of this plan graph while preserving shared/cyclic references.
+    *
+    * @return deep-copied item plan
+    */
    public ItemPlan<T> deepCopy() {
       return deepCopy(new IdentityHashMap<>());
    }

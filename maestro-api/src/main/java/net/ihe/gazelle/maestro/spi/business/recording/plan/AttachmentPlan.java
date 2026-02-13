@@ -19,12 +19,27 @@ package net.ihe.gazelle.maestro.spi.business.recording.plan;
 import java.util.Arrays;
 import java.util.Objects;
 
+/**
+ * Immutable payload describing an attachment to store in Datahouse.
+ *
+ * @param type attachment logical type
+ * @param content attachment binary content
+ * @param filename attachment file name
+ */
 public record AttachmentPlan(String type, byte[] content, String filename) {
 
+   /**
+    * Builds a defensive-copy attachment plan.
+    */
    public AttachmentPlan {
       content = content == null ? null : Arrays.copyOf(content, content.length);
    }
 
+   /**
+    * Returns a defensive copy of attachment content.
+    *
+    * @return copied content bytes, or {@code null}
+    */
    @Override
    public byte[] content() {
       return content == null ? null : Arrays.copyOf(content, content.length);

@@ -26,14 +26,29 @@ import net.ihe.gazelle.security.business.acl.AccessControlList;
 
 import java.util.*;
 
+/**
+ * Persists {@link PersistencePlan} graphs into Datahouse using {@link RecordItemClient}.
+ */
 public class RecordItemService {
 
    private final RecordItemClient recordItemClient;
 
+   /**
+    * Creates a record service using the provided Datahouse client.
+    *
+    * @param recordItemClient Datahouse recording client
+    */
    public RecordItemService(RecordItemClient recordItemClient) {
       this.recordItemClient = recordItemClient;
    }
 
+   /**
+    * Records the full persistence plan and returns the root item identifier.
+    *
+    * @param persistencePlan persistence plan to record
+    * @param <T> root object type
+    * @return persisted root item identifier
+    */
    public <T> String recordPlan(PersistencePlan<T> persistencePlan) {
       return recordItemPlan(persistencePlan.getRootItem(), persistencePlan.getAcl(), new History());
    }

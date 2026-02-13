@@ -20,10 +20,30 @@ import net.ihe.gazelle.itb.gateway.business.reporting.ItbReporting;
 
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Stores pending ITB session callbacks keyed by session identifier.
+ */
 public interface ItbSessionStore {
+   /**
+    * Retrieves callback future for a session.
+    *
+    * @param sessionId session identifier
+    * @return registered future, or {@code null}
+    */
    CompletableFuture<ItbReporting> get(String sessionId);
 
+   /**
+    * Registers callback future for a session.
+    *
+    * @param sessionId session identifier
+    * @param future callback future
+    */
    void add(String sessionId, CompletableFuture<ItbReporting> future);
 
+   /**
+    * Removes callback registration for a session.
+    *
+    * @param sessionId session identifier
+    */
    void remove(String sessionId);
 }

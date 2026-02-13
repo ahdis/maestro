@@ -30,6 +30,12 @@ public class ItbStepOutputDissector implements StepOutputPlanDissector {
 
    static final String BYTE_ARRAY = "BYTE_ARRAY";
 
+   /**
+    * Creates an ITB output dissector.
+    */
+   public ItbStepOutputDissector() {
+   }
+
    @Override
    public void dissect(StepOutputPlan stepOutputPlan) {
       if (stepOutputPlan == null || stepOutputPlan.getStepRunReport() == null) {

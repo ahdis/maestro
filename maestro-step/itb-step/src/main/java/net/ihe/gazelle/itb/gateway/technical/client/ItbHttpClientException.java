@@ -16,7 +16,15 @@
 
 package net.ihe.gazelle.itb.gateway.technical.client;
 
+/**
+ * Exception thrown when HTTP exchanges with ITB fail.
+ */
 public class ItbHttpClientException extends RuntimeException {
+    /**
+     * Creates an exception with message.
+     *
+     * @param message error message
+     */
     public ItbHttpClientException(String message) {
         super(message);
     }

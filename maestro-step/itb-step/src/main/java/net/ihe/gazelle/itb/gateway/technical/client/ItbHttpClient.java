@@ -41,6 +41,9 @@ import java.util.*;
 public class ItbHttpClient implements net.ihe.gazelle.itb.gateway.business.ItbClient {
 
     private static final Logger logger = LoggerFactory.getLogger(ItbHttpClient.class);
+    /**
+     * ITB input field name used in request mappings.
+     */
     public static final String INPUT = "input";
 
     private Map<String, Object> map;
@@ -51,6 +54,12 @@ public class ItbHttpClient implements net.ihe.gazelle.itb.gateway.business.ItbCl
     private final String baseItbUrl;
     private final String itbApiKey;
 
+    /**
+     * Creates an ITB REST client.
+     *
+     * @param baseItbUrl ITB base URL
+     * @param itbApiKey ITB API key
+     */
     public ItbHttpClient(String baseItbUrl, String itbApiKey) {
         this.baseItbUrl = baseItbUrl;
         this.itbApiKey = itbApiKey;

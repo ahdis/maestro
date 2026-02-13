@@ -31,6 +31,9 @@ import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
 
+/**
+ * Mutable plan used to transform step outputs into item/attachment references before persistence.
+ */
 public class StepOutputPlan {
 
    private final BiFunction<ReferencePlan, ItemObjectMutation<TestReport>, ItemPlan<TestReport>> addReferencePlanFunction;
@@ -39,12 +42,26 @@ public class StepOutputPlan {
 
    private final String datahouseUrl;
 
+   /**
+    * Creates a new output plan for a single step execution.
+    *
+    * @param rootReportPlan root report plan receiving future references
+    * @param stepRunReport step run report to mutate
+    * @param datahouseUrl base Datahouse URL used to build item references
+    */
    public StepOutputPlan(ItemPlan<TestReport> rootReportPlan, StepRunReport stepRunReport, String datahouseUrl) {
       this.addReferencePlanFunction = rootReportPlan::addFutureReferencePlan;
       this.stepRunReport = stepRunReport;
       this.datahouseUrl = datahouseUrl;
    }
 
+   /**
+    * Adds a reference plan and optionally mutates the step report once the reference is persisted.
+    *
+    * @param referencePlan reference definition to add
+    * @param mutation optional mutation callback
+    * @return current plan
+    */
    public StepOutputPlan addReferencePlan(ReferencePlan referencePlan, ItemObjectMutation<StepRunReport> mutation) {
       if (referencePlan == null) {
          throw new IllegalArgumentException("referencePlan must not be null");
@@ -60,6 +77,13 @@ public class StepOutputPlan {
       return this;
    }
 
+   /**
+    * Adds an item reference and attempts to replace a matching byte-array output with a reference output.
+    *
+    * @param outputName output property name
+    * @param itemPlan referenced item plan
+    * @return current plan
+    */
    public StepOutputPlan addItemReferencePlan(String outputName, ItemPlan<?> itemPlan) {
       if (outputName == null || outputName.isBlank() || itemPlan == null) {
          throw new IllegalArgumentException("outputName and itemPlan must not be null or blank");
@@ -73,6 +97,13 @@ public class StepOutputPlan {
       );
    }
 
+   /**
+    * Adds an attachment reference and attempts to replace a matching byte-array output with a reference output.
+    *
+    * @param outputName output property name
+    * @param attachmentPlan attachment definition to persist
+    * @return current plan
+    */
    public StepOutputPlan addAttachmentReferencePlan(String outputName, AttachmentPlan attachmentPlan) {
       if (outputName == null || outputName.isBlank() || attachmentPlan == null) {
          throw new IllegalArgumentException("outputName and attachmentPlan must not be null or blank");
@@ -86,14 +117,32 @@ public class StepOutputPlan {
       );
    }
 
+   /**
+    * Returns Datahouse base URL used when building references.
+    *
+    * @return Datahouse base URL
+    */
    public String getDatahouseUrl() {
       return datahouseUrl;
    }
 
+   /**
+    * Returns the step run report currently being transformed.
+    *
+    * @return mutable step run report
+    */
    public StepRunReport getStepRunReport() {
       return stepRunReport;
    }
 
+   /**
+    * Replaces one output property in place when found.
+    *
+    * @param outputName output name to replace
+    * @param replacementFactory replacement factory
+    * @param stepRunReport target report
+    * @return {@code true} if a property was replaced
+    */
    public static boolean replaceOutput(String outputName, UnaryOperator<Property> replacementFactory,
                                        StepRunReport stepRunReport) {
       if (stepRunReport == null || stepRunReport.getOutputs() == null || outputName == null

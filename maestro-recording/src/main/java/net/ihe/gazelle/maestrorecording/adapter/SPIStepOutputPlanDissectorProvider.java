@@ -32,6 +32,9 @@ public class SPIStepOutputPlanDissectorProvider implements StepOutputPlanDissect
 
    private final List<StepOutputPlanDissectorFactory> factories;
 
+   /**
+    * Creates a provider backed by Java {@link ServiceLoader}.
+    */
    public SPIStepOutputPlanDissectorProvider() {
       this(loadFactories());
    }
@@ -40,6 +43,12 @@ public class SPIStepOutputPlanDissectorProvider implements StepOutputPlanDissect
       this.factories = List.copyOf(Objects.requireNonNull(dissectorFactories, "dissector factories must not be null"));
    }
 
+   /**
+    * Returns the first SPI dissector matching the provided step run report.
+    *
+    * @param stepRunReport step run report to inspect
+    * @return matching dissector, or {@code null}
+    */
    @Override
    public StepOutputPlanDissector getDissector(StepRunReport stepRunReport) {
       return factories.stream()

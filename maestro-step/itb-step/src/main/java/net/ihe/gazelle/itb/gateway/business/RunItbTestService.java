@@ -37,6 +37,12 @@ public class RunItbTestService {
    private final ItbClient itbClient;
    private final ItbSessionStore sessionStore;
 
+   /**
+    * Creates a service to launch ITB tests and await asynchronous reports.
+    *
+    * @param itbClient ITB client
+    * @param sessionStore ITB callback session store
+    */
    public RunItbTestService(ItbClient itbClient, ItbSessionStore sessionStore) {
       this.itbClient = itbClient;
       this.sessionStore = sessionStore;

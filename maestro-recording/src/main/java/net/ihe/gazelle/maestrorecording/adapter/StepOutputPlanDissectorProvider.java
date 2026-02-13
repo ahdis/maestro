@@ -24,5 +24,11 @@ import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanDissector;
  */
 public interface StepOutputPlanDissectorProvider {
 
+   /**
+    * Returns a dissector supporting the provided step run report.
+    *
+    * @param stepRunReport step run report to inspect
+    * @return matching dissector, or {@code null} if none supports the step
+    */
    StepOutputPlanDissector getDissector(StepRunReport stepRunReport);
 }

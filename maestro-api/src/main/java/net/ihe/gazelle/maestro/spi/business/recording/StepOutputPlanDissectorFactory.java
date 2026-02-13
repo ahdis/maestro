@@ -24,11 +24,16 @@ import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 public interface StepOutputPlanDissectorFactory {
 
    /**
+    * Indicates whether this factory can dissect outputs for the provided step run report.
+    *
+    * @param stepRunReport step run report to inspect
     * @return {@code true} when this factory can produce a dissector for the given step
     */
    boolean supports(StepRunReport stepRunReport);
 
    /**
+    * Creates a new dissector instance.
+    *
     * @return a new dissector instance
     */
    StepOutputPlanDissector create();

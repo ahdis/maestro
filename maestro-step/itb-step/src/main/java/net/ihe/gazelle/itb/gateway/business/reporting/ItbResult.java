@@ -16,10 +16,21 @@
 
 package net.ihe.gazelle.itb.gateway.business.reporting;
 
+/**
+ * ITB execution status extracted from callback payload.
+ */
 public enum ItbResult {
-
+   /**
+    * ITB execution succeeded.
+    */
    SUCCESS,
+   /**
+    * ITB execution failed.
+    */
    FAILURE,
+   /**
+    * ITB execution status is unknown.
+    */
    UNDEFINED
 
 }

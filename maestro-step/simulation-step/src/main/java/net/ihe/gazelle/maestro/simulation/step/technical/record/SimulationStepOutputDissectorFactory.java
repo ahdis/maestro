@@ -25,6 +25,9 @@ import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanDissectorFac
  */
 public class SimulationStepOutputDissectorFactory implements StepOutputPlanDissectorFactory {
 
+    /**
+     * Creates the factory.
+     */
     public SimulationStepOutputDissectorFactory() { /* Default constructor */ }
 
     @Override

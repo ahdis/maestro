@@ -25,6 +25,9 @@ import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanDissectorFac
  */
 public class ItbStepOutputDissectorFactory implements StepOutputPlanDissectorFactory {
 
+    /**
+     * Creates the factory.
+     */
     public ItbStepOutputDissectorFactory() {
         // Empty
     }
