@@ -33,9 +33,9 @@ import net.ihe.gazelle.simulation.jaxrs.api.technical.dto.callback.SimulationRep
 import net.ihe.gazelle.validation.v2.api.business.Input;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
-import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
 

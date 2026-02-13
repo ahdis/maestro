@@ -14,10 +14,13 @@
     <artifactId>maestro-client</artifactId>
 
     <dependencies>
+        <!-- Maestro sub modules -->
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>maestro-api</artifactId>
         </dependency>
+
+        <!-- Gazelle dependencies -->
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>framework-model-marshaller</artifactId>
@@ -30,6 +33,8 @@
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>m2m-client</artifactId>
         </dependency>
+
+        <!-- Libraries -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
@@ -39,6 +44,7 @@
             <artifactId>jackson-databind</artifactId>
         </dependency>
 
+        <!-- Test dependencies -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>

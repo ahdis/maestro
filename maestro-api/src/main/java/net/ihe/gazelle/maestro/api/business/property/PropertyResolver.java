@@ -58,7 +58,7 @@ public class PropertyResolver {
          assertNotALoop(visited, refName);
          Property referencedProperty = getPropertyByName(properties, refName);
          assertTypeMatch(property, referencedProperty);
-         // once we identify the referenced property, we immediatly resolve it to detect if there is a circular
+         // once we identify the referenced property, we immediately resolve it to detect if there is a circular
          // reference
          if (referencedProperty.isReference()) {
             supplyValue(referencedProperty, properties, visited);

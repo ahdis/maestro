@@ -19,9 +19,7 @@ package net.ihe.gazelle.maestro.spi.business.recording.plan;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.*;
 
 class PersistencePlanTest {
 

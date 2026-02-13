@@ -20,11 +20,11 @@ import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.userinteract.UserInteractionHandler;
 import net.ihe.gazelle.maestro.api.business.userinteract.stub.UserInteractionHandlerStub;
-import net.ihe.gazelle.maestro.spi.business.Handler;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepDefinition;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepExecutor;
 import net.ihe.gazelle.maestro.simulation.step.technical.handler.GazelleSimulationServiceHandler;
 import net.ihe.gazelle.maestro.simulation.step.technical.mock.SimulationClientMock;
+import net.ihe.gazelle.maestro.spi.business.Handler;
 import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 import org.junit.jupiter.api.Test;
 
