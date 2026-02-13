@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.util.List;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -50,7 +51,7 @@ class SimulationStepOutputDissectorTest {
                   .addInput(new Input().setId("input-1").setContent("data".getBytes()));
       byte[] validationContent = SER_DES.serializeAsString(
             new net.ihe.gazelle.validation.v2.api.technical.dto.report.ValidationReportDTO(validationReportV2))
-            .getBytes();
+            .getBytes(StandardCharsets.UTF_8);
 
       ValidationReport simValidation = new ValidationReport()
             .setValidationProfileId("profile")
@@ -150,8 +151,9 @@ class SimulationStepOutputDissectorTest {
       StepRunReport step = new StepRunReport()
             .addOutput(new ByteArrayProperty(SimulationStepDefinition.REPORT, simulationBytes(simulationReport)));
       Fixture fixture = newFixture(step);
+      StepOutputPlan plan = fixture.stepOutputPlan();
 
-      assertThrows(IllegalStateException.class, () -> dissector.dissect(fixture.stepOutputPlan()));
+      assertThrows(IllegalStateException.class, () -> dissector.dissect(plan));
    }
 
    @Test
@@ -182,7 +184,7 @@ class SimulationStepOutputDissectorTest {
    }
 
    private byte[] simulationBytes(SimulationReport simulationReport) {
-      return SER_DES.serializeAsString(new SimulationReportDTO(simulationReport)).getBytes();
+      return SER_DES.serializeAsString(new SimulationReportDTO(simulationReport)).getBytes(StandardCharsets.UTF_8);
    }
 
    private record Fixture(ItemPlan<TestReport> rootPlan, StepOutputPlan stepOutputPlan) {
@@ -201,7 +203,7 @@ class SimulationStepOutputDissectorTest {
 
       @Override
       public byte[] marshall(TestReport report) throws MarshallingException {
-         return marshallAsString(report).getBytes();
+         return marshallAsString(report).getBytes(StandardCharsets.UTF_8);
       }
 
       @Override

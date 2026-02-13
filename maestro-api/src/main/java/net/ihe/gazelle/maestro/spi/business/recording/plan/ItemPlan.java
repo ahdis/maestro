@@ -98,6 +98,47 @@ public class ItemPlan<T> {
       return this;
    }
 
+   public ItemPlan<T> deepCopy() {
+      return deepCopy(new IdentityHashMap<>());
+   }
+
+   @SuppressWarnings("unchecked")
+   private ItemPlan<T> deepCopy(Map<ItemPlan<?>, ItemPlan<?>> copies) {
+      ItemPlan<?> existingCopy = copies.get(this);
+      if (existingCopy != null) {
+         return (ItemPlan<T>) existingCopy;
+      }
+
+      ItemPlan<T> copy = new ItemPlan<>(type, itemObject, textMarshaller);
+      copies.put(this, copy);
+      copy.additionalParameters.putAll(this.additionalParameters);
+
+      for (FutureReferencePlan<T> futureReferencePlan : this.futureReferencePlans) {
+         ReferencePlan copiedReferencePlan = copyReferencePlan(futureReferencePlan.referencePlan(), copies);
+         copy.futureReferencePlans.add(new FutureReferencePlan<>(copiedReferencePlan, futureReferencePlan.mutation()));
+      }
+      return copy;
+   }
+
+   private static ReferencePlan copyReferencePlan(ReferencePlan referencePlan, Map<ItemPlan<?>, ItemPlan<?>> copies) {
+      return switch (referencePlan.getRefType()) {
+         case ITEM_ID -> {
+            Object target = referencePlan.getTarget();
+            Object copiedTarget = target instanceof ItemPlan<?> itemPlan ? itemPlan.deepCopy(copies) : target;
+            yield ReferencePlan.forItem(referencePlan.getName(), referencePlan.getTargetType(), copiedTarget);
+         }
+         case ATTACHMENT -> ReferencePlan.forAttachment(
+               referencePlan.getName(),
+               (AttachmentPlan) referencePlan.getTarget()
+         );
+         case URL -> ReferencePlan.forURL(
+               referencePlan.getName(),
+               referencePlan.getTargetType(),
+               (String) referencePlan.getTarget()
+         );
+      };
+   }
+
    @Override
    public boolean equals(Object o) {
       if (!(o instanceof ItemPlan<?> itemPlan)) {

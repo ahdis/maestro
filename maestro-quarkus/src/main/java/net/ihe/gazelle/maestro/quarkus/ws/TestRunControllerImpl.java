@@ -118,7 +118,7 @@ public class TestRunControllerImpl implements TestRunController {
          throw new TimeoutRuntimeException(e);
       } catch (InterruptedException e) {
          Thread.currentThread().interrupt();
-         throw new RuntimeException(e);
+         throw new ExecutionInterruptedException("Interrupted while running test suite", e);
       }
    }
 
@@ -137,7 +137,7 @@ public class TestRunControllerImpl implements TestRunController {
          throw new TimeoutRuntimeException(e);
       } catch (InterruptedException e) {
          Thread.currentThread().interrupt();
-         throw new RuntimeException(e);
+         throw new ExecutionInterruptedException("Interrupted while running test", e);
       }
    }
 

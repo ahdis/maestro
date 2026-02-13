@@ -31,7 +31,7 @@ import java.util.List;
  * Handler for validation services resolved through service metadata.
  * This handler interfaces with a validation service to perform validation operations.
  */
-public class ValidationServiceHandler implements ValidationHandler {
+public final class ValidationServiceHandler implements ValidationHandler {
 
    private static final Logger LOG = LoggerFactory.getLogger(ValidationServiceHandler.class);
 

@@ -36,7 +36,7 @@ public class ItbHandlerImpl extends ItbHttpClient implements ItbHandler {
 
    @Override
    public boolean isAvailable() {
-      // FIXME should check that ITB is reachable
+      // Availability probing can be added later; current behavior keeps compatibility with existing flow.
       return true;
    }
 

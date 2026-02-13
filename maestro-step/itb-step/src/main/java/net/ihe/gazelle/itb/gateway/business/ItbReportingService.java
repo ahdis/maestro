@@ -78,7 +78,7 @@ public class ItbReportingService {
          return itbClient.requestPDFReport(sessionId, testCaseIdentifier);
       } catch (Exception e) {
          LOG.atWarn().setCause(e).log("Could not request ITB PDF for session {}", sessionId);
-         return null;
+         return new byte[0];
       }
    }
 

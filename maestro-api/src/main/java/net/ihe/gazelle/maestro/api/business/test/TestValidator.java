@@ -36,7 +36,7 @@ public class TestValidator extends AbstractValidator<Test> {
    public TestValidator() {
       super();
       this.stepValidator = new StepValidator();
-      this.supportedInputValidators = SupportedInputValidator.getAllSupportedInputValidators();
+      this.supportedInputValidators = SupportedInputValidators.getAllSupportedInputValidators();
    }
 
    /**
@@ -48,7 +48,7 @@ public class TestValidator extends AbstractValidator<Test> {
    public TestValidator(ValidatorBuilderFactory validatorBuilderFactory) {
       super(validatorBuilderFactory);
       this.stepValidator = new StepValidator(validatorBuilderFactory);
-      this.supportedInputValidators = SupportedInputValidator.getAllSupportedInputValidators(validatorBuilderFactory);
+      this.supportedInputValidators = SupportedInputValidators.getAllSupportedInputValidators(validatorBuilderFactory);
    }
 
    @Override
@@ -67,7 +67,7 @@ public class TestValidator extends AbstractValidator<Test> {
             .addRule(Test::areStepsUnique, "Steps must be unique")
             .addMember("steps", Test::getSteps, stepValidator::getAssembledValidatorBuilder)
             .addMember("supportedInputs", Test::getSupportedInputs,
-                  SupportedInputValidator.getAssembledSuppliers(supportedInputValidators)
+                  SupportedInputValidators.getAssembledSuppliers(supportedInputValidators)
             );
    }
 

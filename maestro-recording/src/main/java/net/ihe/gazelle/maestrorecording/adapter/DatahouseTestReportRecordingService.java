@@ -38,6 +38,7 @@ import net.ihe.gazelle.modelmarshaller.technical.marshalling.TextMarshaller;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,7 +49,6 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
 
    static final String TEST_REPORT_TYPE = "TEST_REPORT";
    static final String BYTE_ARRAY_TYPE = "BYTE_ARRAY";
-   private final RecordItemClient recordItemClient;
    private final String datahouseUrl;
 
    private final StepOutputPlanDissectorProvider dissectorProvider;
@@ -66,7 +66,6 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
    public DatahouseTestReportRecordingService(RecordItemClient recordItemClient,
                                               String datahouseUrl,
                                               StepOutputPlanDissectorProvider dissectorProvider) {
-      this.recordItemClient = recordItemClient;
       this.datahouseUrl = datahouseUrl;
       this.dissectorProvider = dissectorProvider;
       this.recordItemService = new RecordItemService(recordItemClient);
@@ -109,7 +108,7 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
       );
 
       planInputReferences(report.getTestRunReports(), testReportPlan);
-      planStepOutputReferences(report.getTestRunReports(), acl, testReportPlan);
+      planStepOutputReferences(report.getTestRunReports(), testReportPlan);
       planSubReportReferences(report, subReportRefs, testReportPlan, acl);
 
       return testReportPlan;
@@ -151,7 +150,6 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
    }
 
    private void planStepOutputReferences(List<TestRunReport> testRunReports,
-                                         AccessControlList acl,
                                          ItemPlan<TestReport> testReportPlan) {
       if (testRunReports == null) {
          return;
@@ -198,7 +196,6 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
          dissector.dissect(stepOutputPlan);
       }
       catch (Exception e) {
-         //fixme: we should handle this more gracefully
          throw new TestReportRecordingException("Failed to dissect step output for recording, this should be handled properly", e);
       }
    }
@@ -235,7 +232,7 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
 
       @Override
       public byte[] marshall(TestReport report) throws MarshallingException {
-         return marshallAsString(report).getBytes();
+         return marshallAsString(report).getBytes(StandardCharsets.UTF_8);
       }
 
       @Override

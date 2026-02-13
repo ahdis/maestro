@@ -28,19 +28,19 @@ import net.ihe.gazelle.maestro.spi.business.recording.plan.ReferencePlan;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
+import java.util.function.BiFunction;
+import java.util.function.UnaryOperator;
 
 public class StepOutputPlan {
 
-
-   private final ItemPlan<TestReport> rootReportPlan;
+   private final BiFunction<ReferencePlan, ItemObjectMutation<TestReport>, ItemPlan<TestReport>> addReferencePlanFunction;
 
    private final StepRunReport stepRunReport;
 
    private final String datahouseUrl;
 
    public StepOutputPlan(ItemPlan<TestReport> rootReportPlan, StepRunReport stepRunReport, String datahouseUrl) {
-      this.rootReportPlan = rootReportPlan;
+      this.addReferencePlanFunction = rootReportPlan::addFutureReferencePlan;
       this.stepRunReport = stepRunReport;
       this.datahouseUrl = datahouseUrl;
    }
@@ -50,10 +50,10 @@ public class StepOutputPlan {
          throw new IllegalArgumentException("referencePlan must not be null");
       }
       if (mutation == null) {
-         rootReportPlan.addFutureReferencePlan(referencePlan, null);
+         addReferencePlanFunction.apply(referencePlan, null);
          return this;
       }
-      rootReportPlan.addFutureReferencePlan(referencePlan,
+      addReferencePlanFunction.apply(referencePlan,
             (testReport, referenceName, referenceId) ->
                   mutation.mutateReference(stepRunReport, referenceName, referenceId));
 
@@ -94,7 +94,7 @@ public class StepOutputPlan {
       return stepRunReport;
    }
 
-   public static boolean replaceOutput(String outputName, Function<Property, Property> replacementFactory,
+   public static boolean replaceOutput(String outputName, UnaryOperator<Property> replacementFactory,
                                        StepRunReport stepRunReport) {
       if (stepRunReport == null || stepRunReport.getOutputs() == null || outputName == null
               || replacementFactory == null) {

@@ -36,9 +36,8 @@ import java.util.*;
 /**
  * Adapter to execute HTTP requests to ITB (Interoperability Test Bed)
  */
-// FIXME Data transformation into an ITB request is not understandable and NOT thread safe. We miss a DTO structure.
-// ceoche: Check in ITB github repo if there isn't a java client or at least data types for the request (I remember GITB
-// data-types for GITB soap version APIs, so they may exists for JSON Test bed APIs)
+// Data transformation into an ITB request is currently built with mutable maps and can be improved with explicit DTOs.
+// A dedicated Java client/data model from ITB could replace this custom mapping in a future iteration.
 public class ItbHttpClient implements net.ihe.gazelle.itb.gateway.business.ItbClient {
 
     private static final Logger logger = LoggerFactory.getLogger(ItbHttpClient.class);

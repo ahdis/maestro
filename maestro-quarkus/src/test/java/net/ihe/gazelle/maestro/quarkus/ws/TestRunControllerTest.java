@@ -47,6 +47,7 @@ import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -263,13 +264,8 @@ class TestRunControllerTest {
    void testTestSuiteRunTimeout() {
       maestroMock.setTestReportSupplier(() -> {
          // Simulate a long-running test to trigger a timeout in synchronousMaestro
-         try {
-            Thread.sleep(10*1000);
-            return null;
-         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return null;
-         }
+         LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(10));
+         return null;
       });
 
       try (Response response = controller.executeTestSuite(getTestSuiteRunDTO(), false, null)) {
@@ -282,13 +278,8 @@ class TestRunControllerTest {
    void testTestRunTimeout() {
       maestroMock.setTestReportSupplier(() -> {
          // Simulate a long-running test to trigger a timeout in synchronousMaestro
-         try {
-            Thread.sleep(4*1000);
-            return null;
-         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return null;
-         }
+         LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(4));
+         return null;
       });
 
       try (Response response = controller.executeTest(getTestRunDTO(), false, null)) {

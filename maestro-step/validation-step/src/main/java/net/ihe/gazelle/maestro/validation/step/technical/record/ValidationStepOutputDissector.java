@@ -34,6 +34,7 @@ import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
 import net.ihe.gazelle.validation.v2.api.technical.dto.report.ValidationReportDTO;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -150,7 +151,7 @@ public class ValidationStepOutputDissector implements StepOutputPlanDissector {
 
         @Override
         public byte[] marshall(ValidationReport report) throws MarshallingException {
-            return marshallAsString(report).getBytes();
+            return marshallAsString(report).getBytes(StandardCharsets.UTF_8);
         }
 
         @Override

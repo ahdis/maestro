@@ -21,6 +21,15 @@ import java.util.Objects;
 
 public record AttachmentPlan(String type, byte[] content, String filename) {
 
+   public AttachmentPlan {
+      content = content == null ? null : Arrays.copyOf(content, content.length);
+   }
+
+   @Override
+   public byte[] content() {
+      return content == null ? null : Arrays.copyOf(content, content.length);
+   }
+
    @Override
    public String toString() {
       return "AttachmentPlan{" +

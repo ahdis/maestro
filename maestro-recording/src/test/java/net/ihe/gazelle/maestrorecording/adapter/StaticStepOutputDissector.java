@@ -67,7 +67,6 @@ final class StaticStepOutputDissector implements StepOutputPlanDissector {
     }
 
     private static void buildPlan(StepOutputPlan stepOutputPlan) {
-        StepRunReport stepRunReport = stepOutputPlan.getStepRunReport();
         String datahouseUrl = stepOutputPlan.getDatahouseUrl();
         ItemPlan<String> root = item(ROOT_ITEM_TYPE, "{\"level\":0}");
         ItemPlan<String> child = item(CHILD_ITEM_TYPE, "{\"level\":1}");
@@ -152,7 +151,7 @@ final class StaticStepOutputDissector implements StepOutputPlanDissector {
 
         @Override
         public byte[] marshall(String value) throws MarshallingException {
-            return marshallAsString(value).getBytes();
+            return marshallAsString(value).getBytes(StandardCharsets.UTF_8);
         }
 
         @Override

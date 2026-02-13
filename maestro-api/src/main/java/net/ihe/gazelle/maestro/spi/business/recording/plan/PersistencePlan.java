@@ -26,12 +26,12 @@ public class PersistencePlan<T> {
    private final AccessControlList acl;
 
    public PersistencePlan(ItemPlan<T> rootItem, AccessControlList acl) {
-      this.rootItem = rootItem;
+      this.rootItem = rootItem == null ? null : rootItem.deepCopy();
       this.acl = acl;
    }
 
    public ItemPlan<T> getRootItem() {
-      return rootItem;
+      return rootItem == null ? null : rootItem.deepCopy();
    }
 
    public AccessControlList getAcl() {

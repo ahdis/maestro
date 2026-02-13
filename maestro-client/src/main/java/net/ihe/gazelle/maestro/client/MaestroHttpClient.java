@@ -26,7 +26,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
-public class MaestroHttpClient implements MaestroClient {
+public final class MaestroHttpClient implements MaestroClient {
 
     public static final String TEST_RUN_ENDPOINT = "/v1/test/run";
     public static final String TEST_SUITE_RUN_ENDPOINT = "/v1/test-suite/run";

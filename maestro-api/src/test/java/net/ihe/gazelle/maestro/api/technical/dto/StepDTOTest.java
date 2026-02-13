@@ -147,14 +147,16 @@ class StepDTOTest {
     @Test
     void shouldThrowExceptionForInvalidOutputMapping() {
         StepDTO dto = new StepDTO();
+        List<String> invalidMapping = List.of("invalidMapping");
+        List<String> tooManyDelimiters = List.of("key:value:extra");
 
         // Missing delimiter
         assertThrows(IllegalArgumentException.class, () ->
-                dto.setOutputMappings(List.of("invalidMapping")));
+                dto.setOutputMappings(invalidMapping));
 
         // Too many delimiters
         assertThrows(IllegalArgumentException.class, () ->
-                dto.setOutputMappings(List.of("key:value:extra")));
+                dto.setOutputMappings(tooManyDelimiters));
     }
 
     @Test

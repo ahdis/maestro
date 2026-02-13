@@ -17,9 +17,12 @@
 package net.ihe.gazelle.maestro.spi.business.recording;
 
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
+import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.Result;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+import net.ihe.gazelle.maestro.spi.business.recording.plan.AttachmentPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.FutureReferencePlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ReferencePlan;
@@ -29,9 +32,12 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RecordingPlanTest {
 
@@ -92,6 +98,63 @@ class RecordingPlanTest {
 
       assertEquals("output-type", futureReferencePlan.referencePlan().getTargetType());
       assertSame(outputPlan, futureReferencePlan.referencePlan().getTarget());
+   }
+
+   @Test
+   void replaceOutputReturnsFalseForInvalidInput() {
+      StepRunReport stepRunReport = new StepRunReport();
+
+      assertFalse(StepOutputPlan.replaceOutput(null, property -> property, stepRunReport));
+      assertFalse(StepOutputPlan.replaceOutput("out", null, stepRunReport));
+      assertFalse(StepOutputPlan.replaceOutput("out", property -> property, null));
+   }
+
+   @Test
+   void addAttachmentReferencePlanReplacesByteArrayOutput() {
+      ItemPlan<TestReport> rootReportPlan = new ItemPlan<>("test-report", newTestReport(), null);
+      StepRunReport stepRunReport = new StepRunReport()
+            .addOutput(new ByteArrayProperty("output-a", "value".getBytes(StandardCharsets.UTF_8)));
+      StepOutputPlan stepOutputPlan = new StepOutputPlan(rootReportPlan, stepRunReport, "http://dh");
+      AttachmentPlan attachmentPlan = new AttachmentPlan("application/pdf", "abc".getBytes(StandardCharsets.UTF_8), "report.pdf");
+
+      stepOutputPlan.addAttachmentReferencePlan("output-a", attachmentPlan);
+      FutureReferencePlan<TestReport> futureReferencePlan = rootReportPlan.futureReferencePlans().getFirst();
+      futureReferencePlan.mutation().mutateReference(null, "output-a", "att-1");
+
+      ByteArrayItemProperty output = stepRunReport.getOutput("output-a");
+      assertEquals("/attachments/att-1", output.getReference());
+      assertEquals("application/pdf", futureReferencePlan.referencePlan().getTargetType());
+      assertSame(attachmentPlan, futureReferencePlan.referencePlan().getTarget());
+   }
+
+   @Test
+   void addAdditionalParametersMergesParameters() {
+      ItemPlan<String> itemPlan = new ItemPlan<>("type", "payload", STRING_MARSHALLER);
+      itemPlan.addAdditionalParameter("a", "1");
+      itemPlan.addAdditionalParameters(Map.of("b", "2"));
+      Map<String, String> copy = itemPlan.additionalParameters();
+      copy.put("c", "3");
+
+      assertEquals("1", itemPlan.additionalParameters().get("a"));
+      assertEquals("2", itemPlan.additionalParameters().get("b"));
+      assertFalse(itemPlan.additionalParameters().containsKey("c"));
+   }
+
+   @Test
+   void replaceOutputUpdatesMatchingOutputOnly() {
+      StepRunReport stepRunReport = new StepRunReport()
+            .addOutput(new StringProperty("first", "value-1"))
+            .addOutput(new StringProperty("second", "value-2"));
+
+      boolean replaced = StepOutputPlan.replaceOutput(
+            "second",
+            property -> new StringProperty(property.getName(), "value-2-updated"),
+            stepRunReport
+      );
+
+      assertTrue(replaced);
+      assertEquals("value-1", ((StringProperty) stepRunReport.getOutput("first")).getValue());
+      assertEquals("value-2-updated", ((StringProperty) stepRunReport.getOutput("second")).getValue());
    }
 
    private static TestReport newTestReport() {

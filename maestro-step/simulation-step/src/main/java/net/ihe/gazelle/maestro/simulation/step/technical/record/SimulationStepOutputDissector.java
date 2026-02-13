@@ -35,6 +35,7 @@ import net.ihe.gazelle.simulation.business.callback.ValidationReport;
 import net.ihe.gazelle.simulation.jaxrs.api.technical.dto.callback.SimulationReportDTO;
 import net.ihe.gazelle.validation.v2.api.business.Input;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -225,7 +226,7 @@ class SimulationStepOutputDissector implements StepOutputPlanDissector {
 
       @Override
       public byte[] marshall(SimulationReport report) throws MarshallingException {
-         return marshallAsString(report).getBytes();
+         return marshallAsString(report).getBytes(StandardCharsets.UTF_8);
       }
 
       @Override
@@ -251,7 +252,7 @@ class SimulationStepOutputDissector implements StepOutputPlanDissector {
       @Override
       public byte[] marshall(net.ihe.gazelle.validation.v2.api.business.report.ValidationReport report)
             throws MarshallingException {
-         return marshallAsString(report).getBytes();
+         return marshallAsString(report).getBytes(StandardCharsets.UTF_8);
       }
 
       @Override

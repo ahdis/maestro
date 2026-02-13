@@ -25,6 +25,7 @@ import net.ihe.gazelle.modelmarshaller.technical.marshalling.MarshallingExceptio
 import net.ihe.gazelle.modelmarshaller.technical.marshalling.TextMarshaller;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,10 +42,11 @@ class RecordItemServiceTest {
 
       RecordItemClientStub client = new RecordItemClientStub();
       RecordItemService service = new RecordItemService(client);
+      PersistencePlan<String> plan = new PersistencePlan<>(itemA, null);
 
       IllegalStateException exception = assertThrows(
             IllegalStateException.class,
-            () -> service.recordPlan(new PersistencePlan<>(itemA, null))
+            () -> service.recordPlan(plan)
       );
 
       assertTrue(exception.getMessage().contains("Cyclic ItemPlan reference detected on: " + itemA.type()));
@@ -110,7 +112,7 @@ class RecordItemServiceTest {
 
       @Override
       public byte[] marshall(String value) throws MarshallingException {
-         return marshallAsString(value).getBytes();
+         return marshallAsString(value).getBytes(StandardCharsets.UTF_8);
       }
 
       @Override

@@ -36,7 +36,7 @@ public class TestSuiteValidator extends AbstractValidator<TestSuite> {
    public TestSuiteValidator() {
       super();
       this.testReferenceValidator = new TestReferenceValidator();
-      this.supportedInputValidators = SupportedInputValidator.getAllSupportedInputValidators();
+      this.supportedInputValidators = SupportedInputValidators.getAllSupportedInputValidators();
    }
 
    /**
@@ -48,7 +48,7 @@ public class TestSuiteValidator extends AbstractValidator<TestSuite> {
    public TestSuiteValidator(ValidatorBuilderFactory validatorBuilderFactory) {
       super(validatorBuilderFactory);
       this.testReferenceValidator = new TestReferenceValidator(validatorBuilderFactory);
-      this.supportedInputValidators = SupportedInputValidator.getAllSupportedInputValidators(validatorBuilderFactory);
+      this.supportedInputValidators = SupportedInputValidators.getAllSupportedInputValidators(validatorBuilderFactory);
    }
 
    @Override
@@ -66,6 +66,6 @@ public class TestSuiteValidator extends AbstractValidator<TestSuite> {
             .addMember("testReferences", TestSuite::getTestReferences,
                   testReferenceValidator::getAssembledValidatorBuilder)
             .addMember("supportedInputs", TestSuite::getSupportedInputs,
-                  SupportedInputValidator.getAssembledSuppliers(supportedInputValidators));
+                  SupportedInputValidators.getAssembledSuppliers(supportedInputValidators));
    }
 }

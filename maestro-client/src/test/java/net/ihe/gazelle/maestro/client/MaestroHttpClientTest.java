@@ -55,8 +55,9 @@ class MaestroHttpClientTest {
               MaestroHttpClient.DEFAULT_CONNECT_TIMEOUT_MILLISECONDS,
               MaestroHttpClient.DEFAULT_READ_TIMEOUT_MILLISECONDS
         );
+        TestRun testRun = simpleTestRun();
 
-        assertThrows(IllegalArgumentException.class, () -> client.executeTestAsync(simpleTestRun(), true, null));
+        assertThrows(IllegalArgumentException.class, () -> client.executeTestAsync(testRun, true, null));
     }
 
     @Test
@@ -68,9 +69,10 @@ class MaestroHttpClientTest {
               MaestroHttpClient.DEFAULT_CONNECT_TIMEOUT_MILLISECONDS,
               MaestroHttpClient.DEFAULT_READ_TIMEOUT_MILLISECONDS
         );
+        TestRun testRun = simpleTestRun();
+        URI callback = new URI("http://callback");
 
-        assertThrows(InvalidTestRunException.class, () ->
-              client.executeTestAsync(simpleTestRun(), true, new URI("http://callback")));
+        assertThrows(InvalidTestRunException.class, () -> client.executeTestAsync(testRun, true, callback));
     }
 
     private static HttpResponse stubResponse(int statusCode, String body) {
@@ -134,13 +136,15 @@ class MaestroHttpClientTest {
         }
 
         @Override
+        @SuppressWarnings("java:S1874")
         public org.apache.http.conn.ClientConnectionManager getConnectionManager() {
-            return null;
+            throw new UnsupportedOperationException();
         }
 
         @Override
+        @SuppressWarnings("java:S1874")
         public org.apache.http.params.HttpParams getParams() {
-            return null;
+            throw new UnsupportedOperationException();
         }
 
     }

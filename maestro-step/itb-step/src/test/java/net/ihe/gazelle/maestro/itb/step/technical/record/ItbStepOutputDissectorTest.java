@@ -41,7 +41,7 @@ class ItbStepOutputDissectorTest {
 
       @Override
       public byte[] marshall(TestReport report) throws MarshallingException {
-         return marshallAsString(report).getBytes();
+         return marshallAsString(report).getBytes(StandardCharsets.UTF_8);
       }
 
       @Override

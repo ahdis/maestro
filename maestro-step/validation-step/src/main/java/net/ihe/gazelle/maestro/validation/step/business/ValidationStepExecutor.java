@@ -69,9 +69,7 @@ public class ValidationStepExecutor implements StepExecutor {
             validationProfile,
             getSupportedInputs(validationService, validationProfile)
       );
-      ValidationReport validationReport = new ValidationReport();
-
-      validationReport = handler.validate(validationRequest);
+      ValidationReport validationReport = handler.validate(validationRequest);
 
 
       ByteArrayProperty reportOutput =
