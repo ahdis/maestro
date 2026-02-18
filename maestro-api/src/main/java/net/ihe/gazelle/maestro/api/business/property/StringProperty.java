@@ -46,6 +46,6 @@ public class StringProperty extends Property {
 
    @Override
    public Property copy() {
-      return new StringProperty(getName(), getValue());
+      return new StringProperty(getName(), getCopyValue());
    }
 }

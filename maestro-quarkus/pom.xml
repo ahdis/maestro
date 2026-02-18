@@ -28,10 +28,10 @@
     <properties>
         <quarkus.container-image.name>app/maestro</quarkus.container-image.name>
         <quarkus.container-image.tag>${project.version}</quarkus.container-image.tag>
+        <validation-service-clients.version>1.0.0-VP-1-SNAPSHOT</validation-service-clients.version>
 
         <!-- Test properties -->
         <mongodb-driver-sync.version>5.0.0</mongodb-driver-sync.version>
-        <validation-service-clients.version>1.0.0-GZL-10358-SNAPSHOT</validation-service-clients.version>
     </properties>
 
     <dependencies>

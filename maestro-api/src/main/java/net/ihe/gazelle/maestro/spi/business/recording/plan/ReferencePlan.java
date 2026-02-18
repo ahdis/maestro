@@ -62,6 +62,18 @@ public class ReferencePlan {
    }
 
    /**
+    * Creates an attachment reference to an already persisted attachment.
+    *
+    * @param name reference name
+    * @param type target type
+    * @param attachmentId target attachment identifier
+    * @return attachment reference plan
+    */
+   public static ReferencePlan forAttachmentId(String name, String type, String attachmentId) {
+      return new ReferencePlan(MaestroRefType.ATTACHMENT, name, type, attachmentId);
+   }
+
+   /**
     * Creates an URL reference.
     *
     * @param name reference name

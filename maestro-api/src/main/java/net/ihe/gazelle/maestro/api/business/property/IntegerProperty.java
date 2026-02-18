@@ -46,6 +46,6 @@ public class IntegerProperty extends Property {
 
    @Override
    public Property copy() {
-      return new IntegerProperty(getName(), getValue());
+      return new IntegerProperty(getName(), getCopyValue());
    }
 }

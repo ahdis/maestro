@@ -135,6 +135,34 @@ public abstract class Property implements Serializable {
    }
 
    /**
+    * Returns the referenced property name when this property is a reference.
+    *
+    * @return referenced property name, or {@code null} when this property is not a reference
+    */
+   public String getReferenceName() {
+      if (!isReference()) {
+         return null;
+      }
+      return ((ReferenceValue) valueHolder).getReference();
+   }
+
+   /**
+    * Returns a value suitable for property copy operations.
+    * <p>
+    * For reference properties, this returns the original reference expression (e.g. {@code ${inputName}})
+    * so the copied property preserves provenance metadata.
+    * For direct values, this returns the resolved value as-is.
+    *
+    * @return copy-safe value preserving references when applicable
+    */
+   protected Serializable getCopyValue() {
+      if (valueHolder instanceof ReferenceValue referenceValue && !referenceValue.isSupplied()) {
+         return ReferenceValue.format(getReferenceName());
+      }
+      return getValue();
+   }
+
+   /**
     * Determines whether the name of the property has been defined.
     *
     * @return true if the name is not null and not blank, otherwise false

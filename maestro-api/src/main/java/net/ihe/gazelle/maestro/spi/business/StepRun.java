@@ -22,6 +22,7 @@ import net.ihe.gazelle.maestro.api.business.test.Step;
 
 import java.io.Serial;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +33,7 @@ public class StepRun extends Step {
 
    @Serial
    private static final long serialVersionUID = 6529685098267757690L;
+   private final Map<String, String> referenceNameByPropertyName;
 
    /**
     * Creates a new {@code StepRun} based on an existing {@link Step} and the provided context.
@@ -40,13 +42,18 @@ public class StepRun extends Step {
     * @param context the test context used to resolve reference-properties
     */
    public StepRun(Step step, List<Property> context) {
+      this(step, prepareInitializationData(context, step.getProperties()));
+   }
+
+   private StepRun(Step step, InitializationData initializationData) {
       super(
             step.getName(),
             step.getType(),
             step.getTimeout(),
-            resolveProperties(aggregateProperties(context, step.getProperties())),
+            initializationData.resolvedProperties(),
             step.getOutputMappings()
       );
+      this.referenceNameByPropertyName = initializationData.referenceNameByPropertyName();
    }
 
    private static List<Property> aggregateProperties(List<Property> context, List<Property> stepProperties) {
@@ -62,6 +69,39 @@ public class StepRun extends Step {
    private static List<Property> resolveProperties(final List<Property> properties) {
       PropertyResolver.resolveProperties(properties);
       return properties;
+   }
+
+   private static InitializationData prepareInitializationData(List<Property> context, List<Property> stepProperties) {
+      List<Property> aggregatedProperties = aggregateProperties(context, stepProperties);
+      List<Property> resolvedProperties = resolveProperties(aggregatedProperties);
+      Map<String, String> references = extractReferenceNames(aggregatedProperties);
+      return new InitializationData(resolvedProperties, references);
+   }
+
+   private static Map<String, String> extractReferenceNames(List<Property> properties) {
+      Map<String, String> extracted = new HashMap<>();
+      if (properties == null) {
+         return extracted;
+      }
+      for (Property property : properties) {
+         if (property != null && property.getReferenceName() != null) {
+            extracted.put(property.getName(), property.getReferenceName());
+         }
+      }
+      return extracted;
+   }
+
+   /**
+    * Returns the reference name originally declared for the given property, when available.
+    *
+    * @param propertyName property to inspect
+    * @return the referenced property name, or {@code null} when not a reference
+    */
+   public String getPropertyReferenceName(String propertyName) {
+      return referenceNameByPropertyName.get(propertyName);
+   }
+
+   private record InitializationData(List<Property> resolvedProperties, Map<String, String> referenceNameByPropertyName) {
    }
 
 }

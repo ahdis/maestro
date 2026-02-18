@@ -21,6 +21,7 @@ import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.itb.step.business.ItbStepDefinition;
+import net.ihe.gazelle.maestro.spi.business.recording.FutureReferenceCallbackRegistry;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.AttachmentPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.FutureReferencePlan;
@@ -63,7 +64,8 @@ class ItbStepOutputDissectorTest {
                   .setFileName("logs.txt"));
 
       ItemPlan<TestReport> rootPlan = new ItemPlan<>("TEST_REPORT", new TestReport(), TEST_REPORT_MARSHALLER);
-      StepOutputPlan stepOutputPlan = new StepOutputPlan(rootPlan, stepRunReport, "http://dh");
+      StepOutputPlan stepOutputPlan = new StepOutputPlan(rootPlan, stepRunReport, "http://dh",
+            new NoOpFutureReferenceCallbackRegistry());
 
       dissector.dissect(stepOutputPlan);
 
@@ -83,7 +85,8 @@ class ItbStepOutputDissectorTest {
                   .setFileName("report.xml"));
 
       ItemPlan<TestReport> rootPlan = new ItemPlan<>("TEST_REPORT", new TestReport(), TEST_REPORT_MARSHALLER);
-      StepOutputPlan stepOutputPlan = new StepOutputPlan(rootPlan, stepRunReport, "http://dh");
+      StepOutputPlan stepOutputPlan = new StepOutputPlan(rootPlan, stepRunReport, "http://dh",
+            new NoOpFutureReferenceCallbackRegistry());
 
       dissector.dissect(stepOutputPlan);
       FutureReferencePlan<TestReport> xmlReference = rootPlan.futureReferencePlans().getFirst();
@@ -100,10 +103,20 @@ class ItbStepOutputDissectorTest {
       StepRunReport stepRunReport = new StepRunReport();
 
       ItemPlan<TestReport> rootPlan = new ItemPlan<>("TEST_REPORT", new TestReport(), TEST_REPORT_MARSHALLER);
-      StepOutputPlan stepOutputPlan = new StepOutputPlan(rootPlan, stepRunReport, "http://dh");
+      StepOutputPlan stepOutputPlan = new StepOutputPlan(rootPlan, stepRunReport, "http://dh",
+            new NoOpFutureReferenceCallbackRegistry());
 
       dissector.dissect(stepOutputPlan);
 
       assertTrue(rootPlan.futureReferencePlans().isEmpty());
+   }
+   private static final class NoOpFutureReferenceCallbackRegistry implements FutureReferenceCallbackRegistry {
+      @Override
+      public void registerCallback(String referenceName, java.util.function.BiConsumer<String, String> callback) {
+      }
+
+      @Override
+      public void notifyResolved(String referenceName, String referenceId) {
+      }
    }
 }

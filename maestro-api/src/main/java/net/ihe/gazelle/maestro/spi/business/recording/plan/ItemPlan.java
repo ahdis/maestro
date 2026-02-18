@@ -212,10 +212,20 @@ public class ItemPlan<T> {
             Object copiedTarget = target instanceof ItemPlan<?> itemPlan ? itemPlan.deepCopy(copies) : target;
             yield ReferencePlan.forItem(referencePlan.getName(), referencePlan.getTargetType(), copiedTarget);
          }
-         case ATTACHMENT -> ReferencePlan.forAttachment(
-               referencePlan.getName(),
-               (AttachmentPlan) referencePlan.getTarget()
-         );
+         case ATTACHMENT -> {
+            Object target = referencePlan.getTarget();
+            if (target instanceof AttachmentPlan attachmentPlan) {
+               yield ReferencePlan.forAttachment(referencePlan.getName(), attachmentPlan);
+            }
+            if (!(target instanceof String attachmentId)) {
+               throw new IllegalStateException("Unsupported ATTACHMENT reference target: " + target);
+            }
+            yield ReferencePlan.forAttachmentId(
+                  referencePlan.getName(),
+                  referencePlan.getTargetType(),
+                  attachmentId
+            );
+         }
          case URL -> ReferencePlan.forURL(
                referencePlan.getName(),
                referencePlan.getTargetType(),

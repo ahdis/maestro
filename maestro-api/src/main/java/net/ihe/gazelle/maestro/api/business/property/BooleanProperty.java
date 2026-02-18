@@ -45,7 +45,7 @@ public class BooleanProperty extends Property {
 
    @Override
    public Property copy() {
-      return new BooleanProperty(getName(), getValue());
+      return new BooleanProperty(getName(), getCopyValue());
    }
 
 }

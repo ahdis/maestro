@@ -25,11 +25,11 @@ import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
 import net.ihe.gazelle.maestro.engine.business.TestReportRecordingException;
 import net.ihe.gazelle.maestro.engine.business.TestReportRecordingService;
+import net.ihe.gazelle.maestro.spi.business.recording.FutureReferenceCallbackRegistry;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanDissector;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.AttachmentPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemPlan;
-import net.ihe.gazelle.maestro.spi.business.recording.plan.PersistencePlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ReferencePlan;
 import net.ihe.gazelle.maestrorecording.RecordItemService;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
@@ -40,7 +40,9 @@ import net.ihe.gazelle.security.business.acl.AccessControlList;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Implementation of {@link TestReportRecordingService} that records test reports to the Datahouse system.
@@ -49,6 +51,7 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
 
    static final String TEST_REPORT_TYPE = "TEST_REPORT";
    static final String BYTE_ARRAY_TYPE = "BYTE_ARRAY";
+   private static final String ATTACHMENTS_PATH = "/attachments/";
    private final String datahouseUrl;
 
    private final StepOutputPlanDissectorProvider dissectorProvider;
@@ -92,7 +95,7 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
    private ItemReference recordTestReportWithReferences(TestReport report) {
       try {
          ItemPlan<TestReport> testReportPlan = buildTestReportPlan(report, report.getAccessControlList());
-         String id = recordItemService.recordPlan(new PersistencePlan<>(testReportPlan, report.getAccessControlList()));
+         String id = recordItemService.recordPlan(testReportPlan, report.getAccessControlList());
          return new ItemReference(id, constructUrlToItem(id));
       } catch (Exception e) {
          throw new TestReportRecordingException("Failed to record TestReport", e);
@@ -106,19 +109,28 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
             report,
             new TestReportItemMarshaller(subReportRefs, serDes)
       );
+      FutureReferenceCallbackRegistry callbackRegistry = new InMemoryFutureReferenceCallbackRegistry();
+      Map<TestRunReport, FutureReferenceCallbackRegistry> runScopedRegistries =
+            buildRunScopedRegistries(report.getTestRunReports(), callbackRegistry);
 
-      planInputReferences(report.getTestRunReports(), testReportPlan);
-      planStepOutputReferences(report.getTestRunReports(), testReportPlan);
+      planInputReferences(report.getTestRunReports(), testReportPlan, runScopedRegistries);
+      planStepOutputReferences(report.getTestRunReports(), testReportPlan, runScopedRegistries);
       planSubReportReferences(report, subReportRefs, testReportPlan, acl);
 
       return testReportPlan;
    }
 
-   private void planInputReferences(List<TestRunReport> testRunReports, ItemPlan<TestReport> testReportPlan) {
+   private void planInputReferences(List<TestRunReport> testRunReports,
+                                    ItemPlan<TestReport> testReportPlan,
+                                    Map<TestRunReport, FutureReferenceCallbackRegistry> runScopedRegistries) {
       if (testRunReports == null) {
          return;
       }
       for (TestRunReport testRunReport : testRunReports) {
+         FutureReferenceCallbackRegistry callbackRegistry = runScopedRegistries.get(testRunReport);
+         if (callbackRegistry == null) {
+            continue;
+         }
          List<Property> inputs = testRunReport.getInputs();
          if (inputs == null) {
             continue;
@@ -126,10 +138,25 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
          for (int inputIndex = 0; inputIndex < inputs.size(); inputIndex++) {
             Property input = inputs.get(inputIndex);
             if (input instanceof ByteArrayProperty byteArrayProperty) {
+               String existingAttachmentReference = getExistingAttachmentReference(input);
+               if (existingAttachmentReference != null) {
+                  String attachmentId = extractAttachmentId(existingAttachmentReference);
+                  if (attachmentId == null || attachmentId.isBlank()) {
+                     continue;
+                  }
+                  testReportPlan.addFutureReferencePlan(
+                        ReferencePlan.forAttachmentId(byteArrayProperty.getName(), BYTE_ARRAY_TYPE, attachmentId),
+                        (testReport, refName, refValue) -> callbackRegistry.notifyResolved(refName, refValue)
+                  );
+                  continue;
+               }
+               if (byteArrayProperty.getValue() == null) {
+                  continue;
+               }
                AttachmentPlan attachmentPlan = new AttachmentPlan(
                      BYTE_ARRAY_TYPE,
                      byteArrayProperty.getValue(),
-                     byteArrayProperty.getName()
+                     resolveAttachmentFilename(byteArrayProperty)
                );
                final int finalInputIndex = inputIndex;
                testReportPlan.addFutureReferencePlan(
@@ -142,6 +169,7 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
                            updatedInputs.set(finalInputIndex, itemProperty);
                         }
                         testRunReport.setInputs(updatedInputs);
+                        callbackRegistry.notifyResolved(refName, refId);
                      }
                );
             }
@@ -150,11 +178,16 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
    }
 
    private void planStepOutputReferences(List<TestRunReport> testRunReports,
-                                         ItemPlan<TestReport> testReportPlan) {
+                                         ItemPlan<TestReport> testReportPlan,
+                                         Map<TestRunReport, FutureReferenceCallbackRegistry> runScopedRegistries) {
       if (testRunReports == null) {
          return;
       }
       for (TestRunReport testRunReport : testRunReports) {
+         FutureReferenceCallbackRegistry callbackRegistry = runScopedRegistries.get(testRunReport);
+         if (callbackRegistry == null) {
+            continue;
+         }
          List<StepRunReport> stepRunReports = testRunReport.getStepRunReports();
          if (stepRunReports == null) {
             continue;
@@ -164,7 +197,7 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
             if (dissector == null) {
                continue;
             }
-            safeDissect(dissector, new StepOutputPlan(testReportPlan, stepRunReport, datahouseUrl));
+            safeDissect(dissector, new StepOutputPlan(testReportPlan, stepRunReport, datahouseUrl, callbackRegistry));
          }
       }
    }
@@ -206,6 +239,74 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
 
    private String constructPathToAttachment(String attachmentId) {
       return "/attachments/" + attachmentId;
+   }
+
+   private Map<TestRunReport, FutureReferenceCallbackRegistry> buildRunScopedRegistries(
+         List<TestRunReport> testRunReports,
+         FutureReferenceCallbackRegistry callbackRegistry) {
+      Map<TestRunReport, FutureReferenceCallbackRegistry> registries = new IdentityHashMap<>();
+      if (testRunReports == null) {
+         return registries;
+      }
+      for (int index = 0; index < testRunReports.size(); index++) {
+         TestRunReport testRunReport = testRunReports.get(index);
+         registries.put(
+               testRunReport,
+               new NamespacedFutureReferenceCallbackRegistry(callbackRegistry, "run-" + index)
+         );
+      }
+      return registries;
+   }
+
+   private static String getExistingAttachmentReference(Property property) {
+      if (property instanceof ByteArrayItemProperty byteArrayItemProperty) {
+         String reference = byteArrayItemProperty.getReference();
+         if (reference != null && !reference.isBlank()) {
+            return reference;
+         }
+      }
+      return null;
+   }
+
+   private static String extractAttachmentId(String referenceValue) {
+      if (referenceValue == null || referenceValue.isBlank()) {
+         return null;
+      }
+      int marker = referenceValue.indexOf(ATTACHMENTS_PATH);
+      if (marker < 0) {
+         return null;
+      }
+      String remainder = referenceValue.substring(marker + ATTACHMENTS_PATH.length());
+      int endIndex = findEndOfAttachmentId(remainder);
+      String attachmentId = endIndex >= 0 ? remainder.substring(0, endIndex) : remainder;
+      if (attachmentId.isBlank()) {
+         return null;
+      }
+      return attachmentId;
+   }
+
+   private static int findEndOfAttachmentId(String remainder) {
+      int slashIndex = remainder.indexOf('/');
+      int queryIndex = remainder.indexOf('?');
+      int fragmentIndex = remainder.indexOf('#');
+      int endIndex = -1;
+      if (slashIndex >= 0) {
+         endIndex = slashIndex;
+      }
+      if (queryIndex >= 0 && (endIndex < 0 || queryIndex < endIndex)) {
+         endIndex = queryIndex;
+      }
+      if (fragmentIndex >= 0 && (endIndex < 0 || fragmentIndex < endIndex)) {
+         endIndex = fragmentIndex;
+      }
+      return endIndex;
+   }
+
+   private static String resolveAttachmentFilename(ByteArrayProperty byteArrayProperty) {
+      if (byteArrayProperty.getFileName() != null && !byteArrayProperty.getFileName().isBlank()) {
+         return byteArrayProperty.getFileName();
+      }
+      return byteArrayProperty.getName();
    }
 
    private static final class TestReportItemMarshaller implements TextMarshaller<TestReport> {

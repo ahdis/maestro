@@ -16,12 +16,16 @@
 
 package net.ihe.gazelle.maestro.simulation.step.business;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.ihe.gazelle.errorhandling.business.UnexpectedErrorBuilder;
 import net.ihe.gazelle.framework.modelvalidator.business.ObjectResult;
 import net.ihe.gazelle.lang.ExecutionRuntimeException;
 import net.ihe.gazelle.lang.TimeoutRuntimeException;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
+import net.ihe.gazelle.maestro.api.business.property.PropertyBindingPayload;
+import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
@@ -38,6 +42,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Base64;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -51,6 +56,7 @@ import java.util.function.Consumer;
 public class SimulationStepExecutor implements StepExecutor {
 
    private static final Logger LOG = LoggerFactory.getLogger(SimulationStepExecutor.class);
+   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
    private final SimulationHandler simulationHandler;
    private final UserInteractionHandler userInteractionHandler;
@@ -76,19 +82,21 @@ public class SimulationStepExecutor implements StepExecutor {
       try {
          String simulationService = stepRun.getPropertyValue(SimulationStepDefinition.SIMULATION_SERVICE);
          String sequenceId = stepRun.getPropertyValue(SimulationStepDefinition.SEQUENCE_ID);
+         List<PropertyBindingPayload.Binding> propertyBindings = new ArrayList<>();
 
          SimulationRequest simulationRequest = createSimulationRequest(
                sequenceId,
                getTimeoutSeconds(stepRun),
                stepRun,
-               getSupportedParameters(simulationService, sequenceId)
+               getSupportedParameters(simulationService, sequenceId),
+               propertyBindings
          );
 
          CompletableFuture<SimulationReport> futureReport = new CompletableFuture<>();
          simulationHandler.simulate(simulationRequest, new InstructionConsumer(stepRun.getTimeout()), futureReport::complete);
          SimulationReport simulationReport = waitSimulationReport(simulationRequest, futureReport);
 
-         return buildStepRunReport(stepRun, simulationReport);
+         return buildStepRunReport(stepRun, simulationReport, propertyBindings);
       } catch (RuntimeException e) {
          return buildReportWithError(stepRun, e);
       }
@@ -120,8 +128,11 @@ public class SimulationStepExecutor implements StepExecutor {
     * @param supportedParameters the list of supported parameters for this sequence
     * @return the configured simulation request
     */
-   public static SimulationRequest createSimulationRequest(String sequenceId, int timeoutSeconds, StepRun stepRun,
-                                                           List<SupportedParameter> supportedParameters) {
+   public static SimulationRequest createSimulationRequest(String sequenceId,
+                                                           int timeoutSeconds,
+                                                           StepRun stepRun,
+                                                           List<SupportedParameter> supportedParameters,
+                                                           List<PropertyBindingPayload.Binding> propertyBindings) {
       SimulationRequestBuilder simulationRequest = new SimulationRequestBuilder()
             .setSequenceId(sequenceId)
             .setTimeoutSeconds(timeoutSeconds);
@@ -129,14 +140,18 @@ public class SimulationStepExecutor implements StepExecutor {
       if (!supportedParameters.isEmpty()) {
          for (SupportedParameter supportedParameter : supportedParameters) {
             if (supportedParameter.isRequired()) {
+               Property property = stepRun.getProperty(supportedParameter.getName());
                simulationRequest.addSimulationParameter(
-                     toParameter(stepRun.getProperty(supportedParameter.getName()), supportedParameter)
+                     toParameter(property, supportedParameter)
                );
+               propertyBindings.add(toPropertyBinding(stepRun, property, supportedParameter.getName(), "simulationParameter"));
             } else {
                if (stepRun.hasProperty(supportedParameter.getName())) {
+                  Property property = stepRun.getProperty(supportedParameter.getName());
                   simulationRequest.addSimulationParameter(
-                        toParameter(stepRun.getProperty(supportedParameter.getName()), supportedParameter)
+                        toParameter(property, supportedParameter)
                   );
+                  propertyBindings.add(toPropertyBinding(stepRun, property, supportedParameter.getName(), "simulationParameter"));
                }
             }
          }
@@ -178,15 +193,24 @@ public class SimulationStepExecutor implements StepExecutor {
       }
    }
 
-   private StepRunReport buildStepRunReport(StepRun stepRun, SimulationReport simulationReport) {
+   private StepRunReport buildStepRunReport(StepRun stepRun,
+                                            SimulationReport simulationReport,
+                                            List<PropertyBindingPayload.Binding> propertyBindings) {
 
       ObjectResult reportValidationResult = reportValidator.validate(simulationReport);
+      StringProperty propertyBindingOutput = new StringProperty(
+            PropertyBindingPayload.PROPERTY_NAME,
+            serializeBindings(new PropertyBindingPayload()
+                  .setStepType(SimulationStepDefinition.TYPE)
+                  .setBindings(propertyBindings))
+      );
       return prepareStepReport(stepRun)
             .setResult(toStepResult(simulationReport.getResult()))
             .setOutputs(List.of(
                   new ByteArrayProperty(SimulationStepDefinition.REPORT, serializer.toByteArray(simulationReport))
                         .setFileName("simulation-report.json")
-                        .setMimeType("application/json")
+                        .setMimeType("application/json"),
+                  propertyBindingOutput
             ))
             .addUnexpectedErrors(
                   reportValidationResult.getAllInvalidRules().stream()
@@ -216,6 +240,35 @@ public class SimulationStepExecutor implements StepExecutor {
          case FAILED -> StepResult.FAILED;
          default -> StepResult.UNDEFINED;
       };
+   }
+
+   private static PropertyBindingPayload.Binding toPropertyBinding(StepRun stepRun,
+                                                                   Property property,
+                                                                   String targetId,
+                                                                   String targetKind) {
+      PropertyBindingPayload.Binding binding = new PropertyBindingPayload.Binding()
+            .setTargetKind(targetKind)
+            .setTargetId(targetId)
+            .setReferenceName(resolveReferenceName(stepRun, property))
+            .setPropertyName(property.getName());
+      if (property instanceof ByteArrayProperty byteArrayProperty) {
+         binding.setFileName(byteArrayProperty.getFileName());
+         binding.setMimeType(byteArrayProperty.getMimeType());
+      }
+      return binding;
+   }
+
+   private static String resolveReferenceName(StepRun stepRun, Property property) {
+      String referenceName = stepRun.getPropertyReferenceName(property.getName());
+      return referenceName != null ? referenceName : property.getReferenceName();
+   }
+
+   private static String serializeBindings(PropertyBindingPayload payload) {
+      try {
+         return OBJECT_MAPPER.writeValueAsString(payload);
+      } catch (JsonProcessingException e) {
+         throw new IllegalStateException("Failed to serialize property bindings", e);
+      }
    }
 
     private class InstructionConsumer implements Consumer<AdditionalInstructions> {

@@ -30,6 +30,10 @@
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>maestro-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>validation-step</artifactId>
+        </dependency>
 
         <!-- Gazelle dependencies -->
         <dependency>

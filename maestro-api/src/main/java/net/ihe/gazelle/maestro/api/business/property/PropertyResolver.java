@@ -63,8 +63,20 @@ public class PropertyResolver {
          if (referencedProperty.isReference()) {
             supplyValue(referencedProperty, properties, visited);
          }
+         propagateByteArrayMetadata(property, referencedProperty);
          referenceValue.supply(referencedProperty::getValue);
          visited.remove(refName);
+      }
+   }
+
+   private static void propagateByteArrayMetadata(Property property, Property referencedProperty) {
+      if (property instanceof ByteArrayProperty target && referencedProperty instanceof ByteArrayProperty source) {
+         if (target.getFileName() == null || target.getFileName().isBlank()) {
+            target.setFileName(source.getFileName());
+         }
+         if (target.getMimeType() == null || target.getMimeType().isBlank()) {
+            target.setMimeType(source.getMimeType());
+         }
       }
    }
 

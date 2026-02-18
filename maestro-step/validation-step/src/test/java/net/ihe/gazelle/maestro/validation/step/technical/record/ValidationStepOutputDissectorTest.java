@@ -19,13 +19,16 @@ package net.ihe.gazelle.maestro.validation.step.technical.record;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
+import net.ihe.gazelle.maestro.api.business.property.PropertyBindingPayload;
+import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+import net.ihe.gazelle.maestro.spi.business.recording.FutureReferenceCallbackRegistry;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlan;
-import net.ihe.gazelle.maestro.spi.business.recording.plan.AttachmentPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.FutureReferencePlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.MaestroRefType;
+import net.ihe.gazelle.maestro.spi.business.recording.plan.ReferencePlan;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;
 import net.ihe.gazelle.modelmarshaller.technical.marshalling.MarshallingException;
 import net.ihe.gazelle.modelmarshaller.technical.marshalling.TextMarshaller;
@@ -53,10 +56,11 @@ class ValidationStepOutputDissectorTest {
     }
 
     @Test
-    void shouldCreateReportItemAndAttachmentsForInputsWithContent() throws Exception {
+    void shouldCreateReportItemAndKeepMappedInputInlineUntilReferenceResolution() throws Exception {
         SampleReport sample = sampleReport();
         StepRunReport step = new StepRunReport()
-              .addOutput(new ByteArrayProperty(ValidationStepDefinition.REPORT, sample.serializedReport()));
+              .addOutput(new ByteArrayProperty(ValidationStepDefinition.REPORT, sample.serializedReport()))
+              .addOutput(new StringProperty(PropertyBindingPayload.PROPERTY_NAME, sample.propertyBindingPayload()));
         Fixture fixture = newFixture(step);
 
         dissector.dissect(fixture.stepOutputPlan());
@@ -70,24 +74,21 @@ class ValidationStepOutputDissectorTest {
         ItemPlan<ValidationReport> reportPlan = (ItemPlan<ValidationReport>) reportReference.referencePlan().getTarget();
         assertEquals(ValidationStepDefinition.REPORT, reportPlan.type());
 
-        assertEquals(1, reportPlan.futureReferencePlans().size(), "Only inputs with content should become attachments");
+        assertTrue(reportPlan.futureReferencePlans().isEmpty(), "Validation report should not create input futures");
         ValidationReport report = reportPlan.itemObject();
         assertNotNull(report.getInputs());
         assertEquals(2, report.getInputs().size());
-        assertNull(report.getInputs().getFirst().getContent());
+        assertNotNull(report.getInputs().getFirst().getContent());
         assertNull(report.getInputs().get(1).getContent());
-
-        FutureReferencePlan<ValidationReport> attachmentRef = reportPlan.futureReferencePlans().getFirst();
-        assertEquals("payload-input", attachmentRef.referencePlan().getName());
-        assertArrayEquals(sample.inputPayload(),
-              ((AttachmentPlan) attachmentRef.referencePlan().getTarget()).content());
+        assertNull(step.getOutput(PropertyBindingPayload.PROPERTY_NAME), "Ephemeral propertyBinding output must be removed");
     }
 
     @Test
     void shouldReplaceOutputWithItemReferenceWhenPersisted() throws Exception {
         SampleReport sample = sampleReport();
         StepRunReport step = new StepRunReport()
-              .addOutput(new ByteArrayProperty(ValidationStepDefinition.REPORT, sample.serializedReport()));
+              .addOutput(new ByteArrayProperty(ValidationStepDefinition.REPORT, sample.serializedReport()))
+              .addOutput(new StringProperty(PropertyBindingPayload.PROPERTY_NAME, sample.propertyBindingPayload()));
         Fixture fixture = newFixture(step);
 
         dissector.dissect(fixture.stepOutputPlan());
@@ -104,7 +105,8 @@ class ValidationStepOutputDissectorTest {
     void shouldPopulateAttachmentIdsInReportDuringMutation() throws Exception {
         SampleReport sample = sampleReport();
         StepRunReport step = new StepRunReport()
-              .addOutput(new ByteArrayProperty(ValidationStepDefinition.REPORT, sample.serializedReport()));
+              .addOutput(new ByteArrayProperty(ValidationStepDefinition.REPORT, sample.serializedReport()))
+              .addOutput(new StringProperty(PropertyBindingPayload.PROPERTY_NAME, sample.propertyBindingPayload()));
         Fixture fixture = newFixture(step);
 
         dissector.dissect(fixture.stepOutputPlan());
@@ -112,20 +114,57 @@ class ValidationStepOutputDissectorTest {
         ItemPlan<ValidationReport> reportPlan =
               (ItemPlan<ValidationReport>) fixture.rootPlan().futureReferencePlans().getFirst().referencePlan().getTarget();
 
-        FutureReferencePlan<ValidationReport> attachmentRef = reportPlan.futureReferencePlans().getFirst();
-        attachmentRef.mutation().mutateReference(reportPlan.itemObject(), attachmentRef.referencePlan().getName(), "att-42");
+        fixture.callbackRegistry().notifyResolved("inputFile1", "att-42");
 
         ValidationReport mutated = reportPlan.itemObject();
         Input input = mutated.getInputs().getFirst();
         assertEquals("att-42", input.getItemId());
         assertEquals("/attachments/att-42", input.getLocation());
         assertNull(input.getContent());
+        ReferencePlan inputReference = reportPlan.futureReferencePlans().stream()
+              .map(FutureReferencePlan::referencePlan)
+              .filter(referencePlan -> "payload-input".equals(referencePlan.getName()))
+              .findFirst()
+              .orElseThrow();
+        assertEquals(MaestroRefType.ATTACHMENT, inputReference.getRefType());
+        assertEquals("att-42", inputReference.getTarget());
+    }
+
+    @Test
+    void shouldSynthesizeReportInputsFromPropertyBindingWhenServiceOmitsInputs() throws Exception {
+        ValidationReport reportWithoutInputs = new ValidationReport().setUuid("validation-report-id");
+        String payload = OBJECT_MAPPER.writeValueAsString(new PropertyBindingPayload()
+              .setStepType(ValidationStepDefinition.TYPE)
+              .addBinding(new PropertyBindingPayload.Binding()
+                    .setTargetKind("validationInput")
+                    .setTargetId("payload-input")
+                    .setReferenceName("inputFile1")
+                    .setPropertyName("contentToValidate")));
+
+        StepRunReport step = new StepRunReport()
+              .addOutput(new ByteArrayProperty(ValidationStepDefinition.REPORT, OBJECT_MAPPER.writeValueAsBytes(reportWithoutInputs)))
+              .addOutput(new StringProperty(PropertyBindingPayload.PROPERTY_NAME, payload));
+        Fixture fixture = newFixture(step);
+
+        dissector.dissect(fixture.stepOutputPlan());
+        @SuppressWarnings("unchecked")
+        ItemPlan<ValidationReport> reportPlan =
+              (ItemPlan<ValidationReport>) fixture.rootPlan().futureReferencePlans().getFirst().referencePlan().getTarget();
+
+        fixture.callbackRegistry().notifyResolved("inputFile1", "att-99");
+        ValidationReport mutated = reportPlan.itemObject();
+        assertNotNull(mutated.getInputs());
+        assertEquals(1, mutated.getInputs().size());
+        assertEquals("payload-input", mutated.getInputs().getFirst().getId());
+        assertEquals("att-99", mutated.getInputs().getFirst().getItemId());
+        assertEquals("/attachments/att-99", mutated.getInputs().getFirst().getLocation());
     }
 
     private Fixture newFixture(StepRunReport stepRunReport) {
         ItemPlan<TestReport> rootPlan = new ItemPlan<>("TEST_REPORT", new TestReport(), new TestReportMarshaller());
-        StepOutputPlan stepOutputPlan = new StepOutputPlan(rootPlan, stepRunReport, "http://dh");
-        return new Fixture(rootPlan, stepOutputPlan);
+        TestFutureReferenceCallbackRegistry callbackRegistry = new TestFutureReferenceCallbackRegistry();
+        StepOutputPlan stepOutputPlan = new StepOutputPlan(rootPlan, stepRunReport, "http://dh", callbackRegistry);
+        return new Fixture(rootPlan, stepOutputPlan, callbackRegistry);
     }
 
     private SampleReport sampleReport() throws Exception {
@@ -141,13 +180,26 @@ class ValidationStepOutputDissectorTest {
               .addInput(inputWithContent)
               .addInput(inputWithoutContent);
 
-        return new SampleReport(OBJECT_MAPPER.writeValueAsBytes(report), payload);
+        PropertyBindingPayload propertyBindingPayload = new PropertyBindingPayload()
+              .setStepType(ValidationStepDefinition.TYPE)
+              .addBinding(new PropertyBindingPayload.Binding()
+                    .setTargetKind("validationInput")
+                    .setTargetId("payload-input")
+                    .setReferenceName("inputFile1")
+                    .setPropertyName("contentToValidate"));
+
+        return new SampleReport(
+              OBJECT_MAPPER.writeValueAsBytes(report),
+              OBJECT_MAPPER.writeValueAsString(propertyBindingPayload)
+        );
     }
 
-    private record SampleReport(byte[] serializedReport, byte[] inputPayload) {
+    private record SampleReport(byte[] serializedReport, String propertyBindingPayload) {
     }
 
-    private record Fixture(ItemPlan<TestReport> rootPlan, StepOutputPlan stepOutputPlan) {
+    private record Fixture(ItemPlan<TestReport> rootPlan,
+                           StepOutputPlan stepOutputPlan,
+                           TestFutureReferenceCallbackRegistry callbackRegistry) {
     }
 
     private static final class TestReportMarshaller implements TextMarshaller<TestReport> {
@@ -169,6 +221,27 @@ class ValidationStepOutputDissectorTest {
         @Override
         public TestReport unmarshall(byte[] payload) {
             throw new UnsupportedOperationException();
+        }
+    }
+
+    private static final class TestFutureReferenceCallbackRegistry implements FutureReferenceCallbackRegistry {
+        private final java.util.Map<String, java.util.List<java.util.function.BiConsumer<String, String>>> callbacksByReferenceName =
+              new java.util.HashMap<>();
+
+        @Override
+        public void registerCallback(String referenceName, java.util.function.BiConsumer<String, String> callback) {
+            callbacksByReferenceName.computeIfAbsent(referenceName, key -> new java.util.ArrayList<>()).add(callback);
+        }
+
+        @Override
+        public void notifyResolved(String referenceName, String referenceId) {
+            java.util.List<java.util.function.BiConsumer<String, String>> callbacks = callbacksByReferenceName.get(referenceName);
+            if (callbacks == null) {
+                return;
+            }
+            for (java.util.function.BiConsumer<String, String> callback : callbacks) {
+                callback.accept(referenceName, referenceId);
+            }
         }
     }
 }

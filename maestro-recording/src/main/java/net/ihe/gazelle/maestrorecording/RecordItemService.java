@@ -50,7 +50,19 @@ public class RecordItemService {
     * @return persisted root item identifier
     */
    public <T> String recordPlan(PersistencePlan<T> persistencePlan) {
-      return recordItemPlan(persistencePlan.getRootItem(), persistencePlan.getAcl(), new History());
+      return recordPlan(persistencePlan.getRootItem(), persistencePlan.getAcl());
+   }
+
+   /**
+    * Records an item plan graph and returns the root item identifier.
+    *
+    * @param rootItem root item plan to persist
+    * @param acl access control list to apply
+    * @param <T> root object type
+    * @return persisted root item identifier
+    */
+   public <T> String recordPlan(ItemPlan<T> rootItem, AccessControlList acl) {
+      return recordItemPlan(rootItem, acl, new History());
    }
 
    private <T> String recordItemPlan(ItemPlan<T> itemPlan, AccessControlList acl, History history) {
@@ -77,10 +89,21 @@ public class RecordItemService {
    private String recordReferencedObject(ReferencePlan referencePlan, AccessControlList acl, History history) {
       return switch (referencePlan.getRefType()) {
          case ITEM_ID -> recordItemPlan((ItemPlan<?>) referencePlan.getTarget(), acl, history);
-         case ATTACHMENT -> recordAttachmentPlan((AttachmentPlan) referencePlan.getTarget(), history);
+         case ATTACHMENT -> recordAttachmentReference(referencePlan, history);
          case URL -> (String) referencePlan.getTarget();
          default -> throw new IllegalStateException("Unexpected RefType: " + referencePlan.getRefType());
       };
+   }
+
+   private String recordAttachmentReference(ReferencePlan referencePlan, History history) {
+      Object target = referencePlan.getTarget();
+      if (target instanceof AttachmentPlan attachmentPlan) {
+         return recordAttachmentPlan(attachmentPlan, history);
+      }
+      if (target instanceof String attachmentId) {
+         return attachmentId;
+      }
+      throw new IllegalStateException("Unsupported ATTACHMENT reference target: " + target);
    }
 
    private String recordAttachmentPlan(AttachmentPlan attachmentPlan, History history) {

@@ -87,7 +87,12 @@ class RecordingPlanTest {
       ItemPlan<TestReport> rootReportPlan = new ItemPlan<>("test-report", newTestReport(), null);
       StepRunReport stepRunReport = new StepRunReport()
             .addOutput(new ByteArrayProperty("output-a", "value".getBytes(StandardCharsets.UTF_8)));
-      StepOutputPlan stepOutputPlan = new StepOutputPlan(rootReportPlan, stepRunReport, "http://dh");
+      StepOutputPlan stepOutputPlan = new StepOutputPlan(
+            rootReportPlan,
+            stepRunReport,
+            "http://dh",
+            new NoOpFutureReferenceCallbackRegistry()
+      );
       ItemPlan<String> outputPlan = new ItemPlan<>("output-type", "output-payload", STRING_MARSHALLER);
 
       stepOutputPlan.addItemReferencePlan("output-a", outputPlan);
@@ -111,7 +116,12 @@ class RecordingPlanTest {
       ItemPlan<TestReport> rootReportPlan = new ItemPlan<>("test-report", newTestReport(), null);
       StepRunReport stepRunReport = new StepRunReport()
             .addOutput(new ByteArrayProperty("output-a", "value".getBytes(StandardCharsets.UTF_8)));
-      StepOutputPlan stepOutputPlan = new StepOutputPlan(rootReportPlan, stepRunReport, "http://dh");
+      StepOutputPlan stepOutputPlan = new StepOutputPlan(
+            rootReportPlan,
+            stepRunReport,
+            "http://dh",
+            new NoOpFutureReferenceCallbackRegistry()
+      );
       AttachmentPlan attachmentPlan = new AttachmentPlan("application/pdf", "abc".getBytes(StandardCharsets.UTF_8), "report.pdf");
 
       stepOutputPlan.addAttachmentReferencePlan("output-a", attachmentPlan);
@@ -159,5 +169,15 @@ class RecordingPlanTest {
             .setUuid("report-1")
             .setDateTime(Instant.now())
             .setResult(Result.UNDEFINED);
+   }
+
+   private static final class NoOpFutureReferenceCallbackRegistry implements FutureReferenceCallbackRegistry {
+      @Override
+      public void registerCallback(String referenceName, java.util.function.BiConsumer<String, String> callback) {
+      }
+
+      @Override
+      public void notifyResolved(String referenceName, String referenceId) {
+      }
    }
 }

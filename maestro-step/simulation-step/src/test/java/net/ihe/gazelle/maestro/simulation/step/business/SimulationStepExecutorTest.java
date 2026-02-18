@@ -18,6 +18,7 @@ package net.ihe.gazelle.maestro.simulation.step.business;
 import net.ihe.gazelle.maestro.api.business.property.BooleanProperty;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
+import net.ihe.gazelle.maestro.api.business.property.PropertyBindingPayload;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
@@ -71,6 +72,8 @@ class SimulationStepExecutorTest {
       assertEquals(SimulationStepDefinition.TYPE, report.getType());
       assertFalse(report.getOutputs().isEmpty());
       assertEquals(SimulationStepDefinition.REPORT, report.getOutputs().getFirst().getName());
+      StringProperty propertyBinding = report.getOutput(PropertyBindingPayload.PROPERTY_NAME);
+      assertNotNull(propertyBinding);
    }
 
    @Test

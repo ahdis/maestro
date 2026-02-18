@@ -17,6 +17,7 @@
 package net.ihe.gazelle.maestro.validation.step.business;
 
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
+import net.ihe.gazelle.maestro.api.business.property.PropertyBindingPayload;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
@@ -33,6 +34,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -44,6 +46,8 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ValidationStepExecutorTest {
+
+   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
    @Mock
    private ValidationHandler handler;
@@ -72,6 +76,8 @@ class ValidationStepExecutorTest {
       ByteArrayProperty output = (ByteArrayProperty) report.getOutputs().getFirst();
       assertArrayEquals(serialized, output.getValue());
       assertEquals("validation-report.json", output.getFileName());
+      StringProperty bindingProperty = report.getOutput(PropertyBindingPayload.PROPERTY_NAME);
+      assertNotNull(bindingProperty);
 
       ArgumentCaptor<ValidationRequest> requestCaptor = ArgumentCaptor.forClass(ValidationRequest.class);
       verify(handler).validate(requestCaptor.capture());
@@ -91,6 +97,33 @@ class ValidationStepExecutorTest {
       assertThrows(UnknownValidationProfileException.class, () -> executor.execute(stepRun));
    }
 
+   @Test
+   void shouldExposeReferenceNameInPropertyBindingWhenInputIsAReference() throws Exception {
+      ValidationStepExecutor executor = new ValidationStepExecutor(handler, serializer);
+      StepRun stepRun = stepRunWithReferencedContent("inputFile1", "payload".getBytes(StandardCharsets.UTF_8));
+      ValidationProfile profile = new ValidationProfile()
+            .setProfileID("PROFILE")
+            .addSupportedInput(new SupportedInput()
+                  .setId(ValidationStepDefinition.CONTENT_TO_VALIDATE)
+                  .setRequired(true));
+      when(handler.getValidationProfiles()).thenReturn(List.of(profile));
+      ValidationReport validationReport = new ValidationReport().setOverallResult(ValidationTestResult.PASSED);
+      when(handler.validate(any(ValidationRequest.class))).thenReturn(validationReport);
+      when(serializer.toByteArray(validationReport)).thenReturn("{\"status\":\"ok\"}".getBytes(StandardCharsets.UTF_8));
+
+      StepRunReport report = executor.execute(stepRun);
+
+      StringProperty bindingProperty = report.getOutput(PropertyBindingPayload.PROPERTY_NAME);
+      assertNotNull(bindingProperty);
+      PropertyBindingPayload payload = OBJECT_MAPPER.readValue((String) bindingProperty.getValue(), PropertyBindingPayload.class);
+      assertEquals(PropertyBindingPayload.SCHEMA_VERSION, payload.getSchemaVersion());
+      assertEquals(1, payload.getBindings().size());
+      assertEquals("validationInput", payload.getBindings().getFirst().getTargetKind());
+      assertEquals(ValidationStepDefinition.CONTENT_TO_VALIDATE, payload.getBindings().getFirst().getTargetId());
+      assertEquals("inputFile1", payload.getBindings().getFirst().getReferenceName());
+   }
+
+
    private StepRun stepRunWithContent(byte[] content) {
       Step step = new Step()
             .setName("Validation")
@@ -101,5 +134,17 @@ class ValidationStepExecutorTest {
                   new ByteArrayProperty(ValidationStepDefinition.CONTENT_TO_VALIDATE, content)
             ));
       return new StepRun(step, List.of());
+   }
+
+   private StepRun stepRunWithReferencedContent(String inputName, byte[] content) {
+      Step step = new Step()
+            .setName("Validation")
+            .setType(ValidationStepDefinition.TYPE)
+            .setProperties(List.of(
+                  new StringProperty(ValidationStepDefinition.VALIDATION_SERVICE, "MATCHBOX"),
+                  new StringProperty(ValidationStepDefinition.VALIDATION_PROFILE, "PROFILE"),
+                  new ByteArrayProperty(ValidationStepDefinition.CONTENT_TO_VALIDATE, "${" + inputName + "}")
+            ));
+      return new StepRun(step, List.of(new ByteArrayProperty(inputName, content)));
    }
 }
