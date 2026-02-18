@@ -113,10 +113,12 @@ class ItbStepOutputDissectorTest {
    private static final class NoOpFutureReferenceCallbackRegistry implements FutureReferenceCallbackRegistry {
       @Override
       public void registerCallback(String referenceName, java.util.function.BiConsumer<String, String> callback) {
+         // intentionally empty no-op
       }
 
       @Override
       public void notifyResolved(String referenceName, String referenceId) {
+         // intentionally empty no-op
       }
    }
 }

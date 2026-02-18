@@ -135,46 +135,78 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
          if (inputs == null) {
             continue;
          }
-         for (int inputIndex = 0; inputIndex < inputs.size(); inputIndex++) {
-            Property input = inputs.get(inputIndex);
-            if (input instanceof ByteArrayProperty byteArrayProperty) {
-               String existingAttachmentReference = getExistingAttachmentReference(input);
-               if (existingAttachmentReference != null) {
-                  String attachmentId = extractAttachmentId(existingAttachmentReference);
-                  if (attachmentId == null || attachmentId.isBlank()) {
-                     continue;
-                  }
-                  testReportPlan.addFutureReferencePlan(
-                        ReferencePlan.forAttachmentId(byteArrayProperty.getName(), BYTE_ARRAY_TYPE, attachmentId),
-                        (testReport, refName, refValue) -> callbackRegistry.notifyResolved(refName, refValue)
-                  );
-                  continue;
-               }
-               if (byteArrayProperty.getValue() == null) {
-                  continue;
-               }
-               AttachmentPlan attachmentPlan = new AttachmentPlan(
-                     BYTE_ARRAY_TYPE,
-                     byteArrayProperty.getValue(),
-                     resolveAttachmentFilename(byteArrayProperty)
-               );
-               final int finalInputIndex = inputIndex;
-               testReportPlan.addFutureReferencePlan(
-                     ReferencePlan.forAttachment(byteArrayProperty.getName(), attachmentPlan),
-                     (testReport, refName, refId) -> {
-                        List<Property> updatedInputs = new ArrayList<>(testRunReport.getInputs());
-                        ByteArrayItemProperty itemProperty = new ByteArrayItemProperty(input.getName(), null);
-                        itemProperty.setReference(constructPathToAttachment(refId));
-                        if (finalInputIndex < updatedInputs.size()) {
-                           updatedInputs.set(finalInputIndex, itemProperty);
-                        }
-                        testRunReport.setInputs(updatedInputs);
-                        callbackRegistry.notifyResolved(refName, refId);
-                     }
-               );
-            }
+         planInputPropertiesForRun(testRunReport, inputs, testReportPlan, callbackRegistry);
+      }
+   }
+
+   private void planInputPropertiesForRun(TestRunReport testRunReport,
+                                          List<Property> inputs,
+                                          ItemPlan<TestReport> testReportPlan,
+                                          FutureReferenceCallbackRegistry callbackRegistry) {
+      for (int inputIndex = 0; inputIndex < inputs.size(); inputIndex++) {
+         Property input = inputs.get(inputIndex);
+         if (input instanceof ByteArrayProperty byteArrayProperty) {
+            planByteArrayInputReference(testRunReport, input, inputIndex, byteArrayProperty, testReportPlan, callbackRegistry);
          }
       }
+   }
+
+   private void planByteArrayInputReference(TestRunReport testRunReport,
+                                             Property input,
+                                             int inputIndex,
+                                             ByteArrayProperty byteArrayProperty,
+                                             ItemPlan<TestReport> testReportPlan,
+                                             FutureReferenceCallbackRegistry callbackRegistry) {
+      String existingAttachmentReference = getExistingAttachmentReference(input);
+      if (existingAttachmentReference != null) {
+         planExistingAttachmentReference(byteArrayProperty, existingAttachmentReference, testReportPlan, callbackRegistry);
+         return;
+      }
+      if (byteArrayProperty.getValue() == null) {
+         return;
+      }
+      planNewAttachmentReference(testRunReport, input, inputIndex, byteArrayProperty, testReportPlan, callbackRegistry);
+   }
+
+   private void planExistingAttachmentReference(ByteArrayProperty byteArrayProperty,
+                                                 String existingAttachmentReference,
+                                                 ItemPlan<TestReport> testReportPlan,
+                                                 FutureReferenceCallbackRegistry callbackRegistry) {
+      String attachmentId = extractAttachmentId(existingAttachmentReference);
+      if (attachmentId == null || attachmentId.isBlank()) {
+         return;
+      }
+      testReportPlan.addFutureReferencePlan(
+            ReferencePlan.forAttachmentId(byteArrayProperty.getName(), BYTE_ARRAY_TYPE, attachmentId),
+            (testReport, refName, refValue) -> callbackRegistry.notifyResolved(refName, refValue)
+      );
+   }
+
+   private void planNewAttachmentReference(TestRunReport testRunReport,
+                                            Property input,
+                                            int inputIndex,
+                                            ByteArrayProperty byteArrayProperty,
+                                            ItemPlan<TestReport> testReportPlan,
+                                            FutureReferenceCallbackRegistry callbackRegistry) {
+      AttachmentPlan attachmentPlan = new AttachmentPlan(
+            BYTE_ARRAY_TYPE,
+            byteArrayProperty.getValue(),
+            resolveAttachmentFilename(byteArrayProperty)
+      );
+      final int finalInputIndex = inputIndex;
+      testReportPlan.addFutureReferencePlan(
+            ReferencePlan.forAttachment(byteArrayProperty.getName(), attachmentPlan),
+            (testReport, refName, refId) -> {
+               List<Property> updatedInputs = new ArrayList<>(testRunReport.getInputs());
+               ByteArrayItemProperty itemProperty = new ByteArrayItemProperty(input.getName(), null);
+               itemProperty.setReference(constructPathToAttachment(refId));
+               if (finalInputIndex < updatedInputs.size()) {
+                  updatedInputs.set(finalInputIndex, itemProperty);
+               }
+               testRunReport.setInputs(updatedInputs);
+               callbackRegistry.notifyResolved(refName, refId);
+            }
+      );
    }
 
    private void planStepOutputReferences(List<TestRunReport> testRunReports,
@@ -238,7 +270,7 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
    }
 
    private String constructPathToAttachment(String attachmentId) {
-      return "/attachments/" + attachmentId;
+      return ATTACHMENTS_PATH + attachmentId;
    }
 
    private Map<TestRunReport, FutureReferenceCallbackRegistry> buildRunScopedRegistries(

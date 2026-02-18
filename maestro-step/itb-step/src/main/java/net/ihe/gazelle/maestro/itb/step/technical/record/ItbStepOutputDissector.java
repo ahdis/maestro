@@ -34,6 +34,7 @@ public class ItbStepOutputDissector implements StepOutputPlanDissector {
     * Creates an ITB output dissector.
     */
    public ItbStepOutputDissector() {
+      // default constructor
    }
 
    @Override

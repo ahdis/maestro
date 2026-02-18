@@ -53,6 +53,7 @@ import java.util.ArrayList;
 public class ValidationStepExecutor implements StepExecutor {
 
    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+   private static final String VALIDATION_INPUT = "validationInput";
    private final ReportSerializer serializer;
    private final ValidationHandler handler;
 
@@ -113,7 +114,7 @@ public class ValidationStepExecutor implements StepExecutor {
                getInputInRequest(ValidationStepDefinition.CONTENT_TO_VALIDATE, stepRun)
          );
          propertyBindings.add(toPropertyBinding(stepRun, stepRun.getProperty(ValidationStepDefinition.CONTENT_TO_VALIDATE),
-               ValidationStepDefinition.CONTENT_TO_VALIDATE, "validationInput"));
+               ValidationStepDefinition.CONTENT_TO_VALIDATE, VALIDATION_INPUT));
       } else {
          for (SupportedInput supportedInput : supportedInputs) {
             if (supportedInput.isRequired()) {
@@ -121,14 +122,14 @@ public class ValidationStepExecutor implements StepExecutor {
                      getInputInRequest(supportedInput.getId(), stepRun)
                );
                propertyBindings.add(toPropertyBinding(stepRun, stepRun.getProperty(supportedInput.getId()),
-                     supportedInput.getId(), "validationInput"));
+                     supportedInput.getId(), VALIDATION_INPUT));
             } else {
                if (stepRun.hasProperty(supportedInput.getId())) {
                   requestBuilder.addInput(
                         getInputInRequest(supportedInput.getId(), stepRun)
                   );
                   propertyBindings.add(toPropertyBinding(stepRun, stepRun.getProperty(supportedInput.getId()),
-                        supportedInput.getId(), "validationInput"));
+                        supportedInput.getId(), VALIDATION_INPUT));
                }
             }
          }
