@@ -24,6 +24,7 @@ import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.AttachmentPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemObjectMutation;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemPlan;
+import net.ihe.gazelle.maestro.spi.business.recording.plan.MaestroRefType;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ReferencePlan;
 
 import java.util.List;
@@ -73,13 +74,13 @@ public class StepOutputPlan {
       if (referencePlan == null) {
          throw new IllegalArgumentException("referencePlan must not be null");
       }
-      if (mutation == null) {
-         addReferencePlanFunction.apply(referencePlan, null);
-         return this;
-      }
       addReferencePlanFunction.apply(referencePlan,
-            (testReport, referenceName, referenceId) ->
-                  mutation.mutateReference(stepRunReport, referenceName, referenceId));
+            (testReport, referenceName, referenceId) -> {
+               if (mutation != null) {
+                  mutation.mutateReference(stepRunReport, referenceName, referenceId);
+               }
+               notifyResolvedAttachment(referencePlan, referenceName, referenceId);
+            });
 
       return this;
    }
@@ -200,6 +201,12 @@ public class StepOutputPlan {
          return replacement;
       }
       return output;
+   }
+
+   private void notifyResolvedAttachment(ReferencePlan referencePlan, String referenceName, String referenceId) {
+      if (referencePlan.getRefType() == MaestroRefType.ATTACHMENT) {
+         callbackRegistry.notifyResolved(referenceName, referenceId);
+      }
    }
 
 }
