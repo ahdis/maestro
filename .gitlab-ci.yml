@@ -38,6 +38,13 @@ package:
     - job: compile/unit-test
       artifacts: true
 
+integration-tests:
+  stage: test
+  extends:
+    - .testJavaMavenIntegrationTestsWithDocker
+  variables:
+    P_MAVEN_EXTRA_ARGS: "-DskipUTs"
+
 security/dependenciesWithOwaspDependencyCheck:
   stage: test
   extends:
