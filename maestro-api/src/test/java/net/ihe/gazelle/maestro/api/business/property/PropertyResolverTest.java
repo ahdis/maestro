@@ -18,6 +18,7 @@ package net.ihe.gazelle.maestro.api.business.property;
 
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -82,7 +83,7 @@ class PropertyResolverTest {
 
    @Test
    void shouldPropagateByteArrayMetadataFromReferencedProperty() {
-      ByteArrayProperty source = (ByteArrayProperty) new ByteArrayProperty("inputFile1", "payload".getBytes())
+      ByteArrayProperty source = (ByteArrayProperty) new ByteArrayProperty("inputFile1", "payload".getBytes(StandardCharsets.UTF_8))
             .setFileName("input.xml")
             .setMimeType("application/xml");
       ByteArrayProperty reference = (ByteArrayProperty) new ByteArrayProperty("contentToValidate", "${inputFile1}");

@@ -33,6 +33,7 @@ import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.format.DateTimeParseException;
@@ -79,7 +80,7 @@ class TestRunDTOTest {
                                 ))
                     )))
               .setAccessControlList(new AccessControlList())
-              .setInputs(List.of(new ByteArrayProperty("inputFile1", "payload".getBytes())));
+              .setInputs(List.of(new ByteArrayProperty("inputFile1", "payload".getBytes(StandardCharsets.UTF_8))));
         List<TestRunDTO> testRunDTOS = List.of(new TestRunDTO(testRun));
 
         assertDoesNotThrow(() -> SER_DES.serializeAsString(testRunDTOS));

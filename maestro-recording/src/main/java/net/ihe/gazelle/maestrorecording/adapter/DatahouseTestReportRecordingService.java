@@ -128,14 +128,10 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
       }
       for (TestRunReport testRunReport : testRunReports) {
          FutureReferenceCallbackRegistry callbackRegistry = runScopedRegistries.get(testRunReport);
-         if (callbackRegistry == null) {
-            continue;
-         }
          List<Property> inputs = testRunReport.getInputs();
-         if (inputs == null) {
-            continue;
+         if (callbackRegistry != null && inputs != null) {
+            planInputPropertiesForRun(testRunReport, inputs, testReportPlan, callbackRegistry);
          }
-         planInputPropertiesForRun(testRunReport, inputs, testReportPlan, callbackRegistry);
       }
    }
 
@@ -217,18 +213,21 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
       }
       for (TestRunReport testRunReport : testRunReports) {
          FutureReferenceCallbackRegistry callbackRegistry = runScopedRegistries.get(testRunReport);
-         if (callbackRegistry == null) {
-            continue;
-         }
-         List<StepRunReport> stepRunReports = testRunReport.getStepRunReports();
-         if (stepRunReports == null) {
-            continue;
-         }
-         for (StepRunReport stepRunReport : stepRunReports) {
-            StepOutputPlanDissector dissector = dissectorProvider.getDissector(stepRunReport);
-            if (dissector == null) {
-               continue;
+         if (callbackRegistry != null) {
+            List<StepRunReport> stepRunReports = testRunReport.getStepRunReports();
+            if (stepRunReports != null) {
+               planStepOutputReferencesForRun(stepRunReports, testReportPlan, callbackRegistry);
             }
+         }
+      }
+   }
+
+   private void planStepOutputReferencesForRun(List<StepRunReport> stepRunReports,
+                                               ItemPlan<TestReport> testReportPlan,
+                                               FutureReferenceCallbackRegistry callbackRegistry) {
+      for (StepRunReport stepRunReport : stepRunReports) {
+         StepOutputPlanDissector dissector = dissectorProvider.getDissector(stepRunReport);
+         if (dissector != null) {
             safeDissect(dissector, new StepOutputPlan(testReportPlan, stepRunReport, datahouseUrl, callbackRegistry));
          }
       }
