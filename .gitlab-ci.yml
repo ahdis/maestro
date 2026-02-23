@@ -74,7 +74,7 @@ install-cache-repo:
 publish-code:
   stage: publish
   extends:
-    - .publishJavaMavenDeploy
+    - .publishJavaMavenQuarkusDeploy
   needs:
     - job: package
       artifacts: true
