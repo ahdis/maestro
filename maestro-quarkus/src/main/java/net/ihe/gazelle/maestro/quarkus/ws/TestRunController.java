@@ -19,6 +19,7 @@ package net.ihe.gazelle.maestro.quarkus.ws;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import net.ihe.gazelle.maestro.api.business.testreport.Test;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestRunDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSuiteRunDTO;
@@ -26,6 +27,7 @@ import net.ihe.gazelle.oidc.rest.business.ProtectedResource;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.ExampleObject;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
@@ -33,8 +35,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
-import static net.ihe.gazelle.maestro.quarkus.ws.Constants.TEST_RUN;
-import static net.ihe.gazelle.maestro.quarkus.ws.Constants.TEST_SUITE_RUN;
+import static net.ihe.gazelle.maestro.quarkus.ws.Constants.*;
 
 /**
  * REST API interface for executing Gazelle tests and test suites.
@@ -114,7 +115,11 @@ public interface TestRunController {
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON,
                             schema = @Schema(implementation = TestSuiteRunDTO.class),
-                            example = TEST_SUITE_RUN
+                            examples = {
+                                    @ExampleObject(name = "Simple example", value = TEST_SUITE_RUN),
+                                    @ExampleObject(name = "Example with two validations", value = TEST_SUITE_TWO_VALIDATIONS),
+                                    @ExampleObject(name = "Example with different type of tests", value = TEST_SUITE_MULTIPLE_TESTS)
+                            }
                     )
             ) TestSuiteRunDTO testSuiteRun,
             @Parameter(
@@ -187,8 +192,10 @@ public interface TestRunController {
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON,
                             schema = @Schema(implementation = TestRunDTO.class),
-                            example = TEST_RUN
-                    )
+                            examples = {
+                                    @ExampleObject(name = "Simple assert test run", value = TEST_RUN_ASSERT),
+                                    @ExampleObject(name = "Simple validation test run", value = TEST_RUN_VALIDATION),
+                            })
             ) TestRunDTO testRun,
             @Parameter(
                     in = ParameterIn.QUERY,
