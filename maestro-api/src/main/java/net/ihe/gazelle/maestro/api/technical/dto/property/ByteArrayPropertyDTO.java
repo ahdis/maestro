@@ -20,6 +20,8 @@ import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
+import java.io.Serializable;
+
 @Schema(
         name = "ByteArrayProperty",
         description = "A property containing a byte array value."
@@ -48,10 +50,10 @@ public class ByteArrayPropertyDTO extends PropertyDTO<ByteArrayProperty> {
 
     @Schema(
             name = "value",
-            description = "The byte array typed value of the property."
+            description = "The byte array typed value of the property, or a reference expression like ${inputName}."
     )
    @JsonProperty(VALUE)
-   public byte[] getValue() {
+   public Serializable getValue() {
       return property.getValue();
    }
 

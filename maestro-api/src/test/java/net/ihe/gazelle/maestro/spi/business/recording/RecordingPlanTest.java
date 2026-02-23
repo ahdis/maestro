@@ -32,7 +32,12 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -87,7 +92,12 @@ class RecordingPlanTest {
       ItemPlan<TestReport> rootReportPlan = new ItemPlan<>("test-report", newTestReport(), null);
       StepRunReport stepRunReport = new StepRunReport()
             .addOutput(new ByteArrayProperty("output-a", "value".getBytes(StandardCharsets.UTF_8)));
-      StepOutputPlan stepOutputPlan = new StepOutputPlan(rootReportPlan, stepRunReport, "http://dh");
+      StepOutputPlan stepOutputPlan = new StepOutputPlan(
+            rootReportPlan,
+            stepRunReport,
+            "http://dh",
+            new NoOpFutureReferenceCallbackRegistry()
+      );
       ItemPlan<String> outputPlan = new ItemPlan<>("output-type", "output-payload", STRING_MARSHALLER);
 
       stepOutputPlan.addItemReferencePlan("output-a", outputPlan);
@@ -111,7 +121,12 @@ class RecordingPlanTest {
       ItemPlan<TestReport> rootReportPlan = new ItemPlan<>("test-report", newTestReport(), null);
       StepRunReport stepRunReport = new StepRunReport()
             .addOutput(new ByteArrayProperty("output-a", "value".getBytes(StandardCharsets.UTF_8)));
-      StepOutputPlan stepOutputPlan = new StepOutputPlan(rootReportPlan, stepRunReport, "http://dh");
+      StepOutputPlan stepOutputPlan = new StepOutputPlan(
+            rootReportPlan,
+            stepRunReport,
+            "http://dh",
+            new NoOpFutureReferenceCallbackRegistry()
+      );
       AttachmentPlan attachmentPlan = new AttachmentPlan("application/pdf", "abc".getBytes(StandardCharsets.UTF_8), "report.pdf");
 
       stepOutputPlan.addAttachmentReferencePlan("output-a", attachmentPlan);
@@ -122,6 +137,56 @@ class RecordingPlanTest {
       assertEquals("/attachments/att-1", output.getReference());
       assertEquals("application/pdf", futureReferencePlan.referencePlan().getTargetType());
       assertSame(attachmentPlan, futureReferencePlan.referencePlan().getTarget());
+   }
+
+   @Test
+   void addAttachmentReferencePlanNotifiesCallbackWhenResolved() {
+      ItemPlan<TestReport> rootReportPlan = new ItemPlan<>("test-report", newTestReport(), null);
+      StepRunReport stepRunReport = new StepRunReport()
+            .addOutput(new ByteArrayProperty("output-a", "value".getBytes(StandardCharsets.UTF_8)));
+      TestFutureReferenceCallbackRegistry callbackRegistry = new TestFutureReferenceCallbackRegistry();
+      StepOutputPlan stepOutputPlan = new StepOutputPlan(
+            rootReportPlan,
+            stepRunReport,
+            "http://dh",
+            callbackRegistry
+      );
+      AtomicReference<String> resolvedReferenceId = new AtomicReference<>();
+      stepOutputPlan.onFutureReferenceResolved("output-a", (referenceName, referenceId) -> resolvedReferenceId.set(referenceId));
+
+      stepOutputPlan.addAttachmentReferencePlan(
+            "output-a",
+            new AttachmentPlan("application/pdf", "abc".getBytes(StandardCharsets.UTF_8), "report.pdf")
+      );
+      FutureReferencePlan<TestReport> futureReferencePlan = rootReportPlan.futureReferencePlans().getFirst();
+      futureReferencePlan.mutation().mutateReference(null, "output-a", "att-1");
+
+      assertEquals("att-1", resolvedReferenceId.get());
+   }
+
+   @Test
+   void addItemReferencePlanDoesNotNotifyCallbackWhenResolved() {
+      ItemPlan<TestReport> rootReportPlan = new ItemPlan<>("test-report", newTestReport(), null);
+      StepRunReport stepRunReport = new StepRunReport()
+            .addOutput(new ByteArrayProperty("output-a", "value".getBytes(StandardCharsets.UTF_8)));
+      TestFutureReferenceCallbackRegistry callbackRegistry = new TestFutureReferenceCallbackRegistry();
+      StepOutputPlan stepOutputPlan = new StepOutputPlan(
+            rootReportPlan,
+            stepRunReport,
+            "http://dh",
+            callbackRegistry
+      );
+      AtomicReference<String> resolvedReferenceId = new AtomicReference<>();
+      stepOutputPlan.onFutureReferenceResolved("output-a", (referenceName, referenceId) -> resolvedReferenceId.set(referenceId));
+
+      stepOutputPlan.addItemReferencePlan(
+            "output-a",
+            new ItemPlan<>("output-type", "output-payload", STRING_MARSHALLER)
+      );
+      FutureReferencePlan<TestReport> futureReferencePlan = rootReportPlan.futureReferencePlans().getFirst();
+      futureReferencePlan.mutation().mutateReference(null, "output-a", "itm-1");
+
+      assertNull(resolvedReferenceId.get());
    }
 
    @Test
@@ -159,5 +224,37 @@ class RecordingPlanTest {
             .setUuid("report-1")
             .setDateTime(Instant.now())
             .setResult(Result.UNDEFINED);
+   }
+
+   private static final class NoOpFutureReferenceCallbackRegistry implements FutureReferenceCallbackRegistry {
+      @Override
+      public void registerCallback(String referenceName, java.util.function.BiConsumer<String, String> callback) {
+         // intentionally empty no-op
+      }
+
+      @Override
+      public void notifyResolved(String referenceName, String referenceId) {
+         // intentionally empty no-op
+      }
+   }
+
+   private static final class TestFutureReferenceCallbackRegistry implements FutureReferenceCallbackRegistry {
+      private final Map<String, List<BiConsumer<String, String>>> callbacksByReferenceName = new HashMap<>();
+
+      @Override
+      public void registerCallback(String referenceName, BiConsumer<String, String> callback) {
+         callbacksByReferenceName.computeIfAbsent(referenceName, key -> new ArrayList<>()).add(callback);
+      }
+
+      @Override
+      public void notifyResolved(String referenceName, String referenceId) {
+         List<BiConsumer<String, String>> callbacks = callbacksByReferenceName.get(referenceName);
+         if (callbacks == null) {
+            return;
+         }
+         for (BiConsumer<String, String> callback : callbacks) {
+            callback.accept(referenceName, referenceId);
+         }
+      }
    }
 }

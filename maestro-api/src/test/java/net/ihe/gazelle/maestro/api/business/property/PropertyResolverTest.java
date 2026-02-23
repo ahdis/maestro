@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PropertyResolverTest {
@@ -78,5 +79,24 @@ class PropertyResolverTest {
             PropertyResolver.resolveProperties(properties)
       );
    }
-}
 
+   @Test
+   void shouldPropagateByteArrayMetadataFromReferencedProperty() {
+      ByteArrayProperty source = (ByteArrayProperty) new ByteArrayProperty("inputFile1", "payload".getBytes())
+            .setFileName("input.xml")
+            .setMimeType("application/xml");
+      ByteArrayProperty reference = (ByteArrayProperty) new ByteArrayProperty("contentToValidate", "${inputFile1}");
+
+      PropertyResolver.resolveProperties(List.of(source, reference));
+
+      assertEquals("input.xml", reference.getFileName());
+      assertEquals("application/xml", reference.getMimeType());
+      assertEquals("inputFile1", reference.getReferenceName());
+   }
+
+   @Test
+   void getReferenceNameShouldReturnNullForDirectValues() {
+      Property property = new StringProperty("plain", "value");
+      assertNull(property.getReferenceName());
+   }
+}

@@ -24,10 +24,12 @@ import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.AttachmentPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemObjectMutation;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemPlan;
+import net.ihe.gazelle.maestro.spi.business.recording.plan.MaestroRefType;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ReferencePlan;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
 
@@ -41,6 +43,7 @@ public class StepOutputPlan {
    private final StepRunReport stepRunReport;
 
    private final String datahouseUrl;
+   private final FutureReferenceCallbackRegistry callbackRegistry;
 
    /**
     * Creates a new output plan for a single step execution.
@@ -48,11 +51,16 @@ public class StepOutputPlan {
     * @param rootReportPlan root report plan receiving future references
     * @param stepRunReport step run report to mutate
     * @param datahouseUrl base Datahouse URL used to build item references
+    * @param callbackRegistry registry used to subscribe to resolved future references
     */
-   public StepOutputPlan(ItemPlan<TestReport> rootReportPlan, StepRunReport stepRunReport, String datahouseUrl) {
+   public StepOutputPlan(ItemPlan<TestReport> rootReportPlan,
+                         StepRunReport stepRunReport,
+                         String datahouseUrl,
+                         FutureReferenceCallbackRegistry callbackRegistry) {
       this.addReferencePlanFunction = rootReportPlan::addFutureReferencePlan;
       this.stepRunReport = stepRunReport;
       this.datahouseUrl = datahouseUrl;
+      this.callbackRegistry = callbackRegistry;
    }
 
    /**
@@ -66,13 +74,13 @@ public class StepOutputPlan {
       if (referencePlan == null) {
          throw new IllegalArgumentException("referencePlan must not be null");
       }
-      if (mutation == null) {
-         addReferencePlanFunction.apply(referencePlan, null);
-         return this;
-      }
       addReferencePlanFunction.apply(referencePlan,
-            (testReport, referenceName, referenceId) ->
-                  mutation.mutateReference(stepRunReport, referenceName, referenceId));
+            (testReport, referenceName, referenceId) -> {
+               if (mutation != null) {
+                  mutation.mutateReference(stepRunReport, referenceName, referenceId);
+               }
+               notifyResolvedAttachment(referencePlan, referenceName, referenceId);
+            });
 
       return this;
    }
@@ -136,6 +144,19 @@ public class StepOutputPlan {
    }
 
    /**
+    * Registers a callback to run when a future reference with the given name is resolved.
+    *
+    * @param referenceName logical reference name
+    * @param callback callback invoked with (referenceName, resolvedReferenceId)
+    */
+   public void onFutureReferenceResolved(String referenceName, BiConsumer<String, String> callback) {
+      if (referenceName == null || referenceName.isBlank() || callback == null) {
+         throw new IllegalArgumentException("referenceName and callback must not be null or blank");
+      }
+      callbackRegistry.registerCallback(referenceName, callback);
+   }
+
+   /**
     * Replaces one output property in place when found.
     *
     * @param outputName output name to replace
@@ -180,6 +201,12 @@ public class StepOutputPlan {
          return replacement;
       }
       return output;
+   }
+
+   private void notifyResolvedAttachment(ReferencePlan referencePlan, String referenceName, String referenceId) {
+      if (referencePlan.getRefType() == MaestroRefType.ATTACHMENT) {
+         callbackRegistry.notifyResolved(referenceName, referenceId);
+      }
    }
 
 }

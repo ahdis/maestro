@@ -17,14 +17,13 @@
 package net.ihe.gazelle.maestro.simulation.step.technical.record;
 
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
+import net.ihe.gazelle.maestro.api.business.property.PropertyBindingPayload;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepDefinition;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanDissector;
-import net.ihe.gazelle.maestro.spi.business.recording.plan.AttachmentPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemPlan;
-import net.ihe.gazelle.maestro.spi.business.recording.plan.ReferencePlan;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.marshalling.MarshallingException;
 import net.ihe.gazelle.modelmarshaller.technical.marshalling.TextMarshaller;
@@ -33,22 +32,29 @@ import net.ihe.gazelle.simulation.business.callback.SimulationReport;
 import net.ihe.gazelle.simulation.business.callback.TransactionReport;
 import net.ihe.gazelle.simulation.business.callback.ValidationReport;
 import net.ihe.gazelle.simulation.jaxrs.api.technical.dto.callback.SimulationReportDTO;
-import net.ihe.gazelle.validation.v2.api.business.Input;
+import net.ihe.gazelle.maestro.validation.step.technical.record.ValidationInputReferenceBindingService;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Structures the simulation step report into a set of hierarchical Datahouse items.
  */
 class SimulationStepOutputDissector implements StepOutputPlanDissector {
 
-    private static final TextSerDes serDes = new JacksonSerDes();
+   private static final TextSerDes serDes = new JacksonSerDes();
+   private static final List<String> ACCEPTED_TARGET_KINDS = List.of("validationInput", "simulationParameter");
 
    private static final String ITEM_TYPE_SIMULATION_REPORT = "SIMULATION_REPORT";
    private static final String ITEM_TYPE_VALIDATION_REPORT = "VALIDATION_REPORT";
    private static final String VALIDATION_INPUT_TYPE = "VALIDATION_INPUT";
    private static final String VALIDATION_REPORT_REFERENCE_PREFIX = "validation-report:";
+   private final ValidationInputReferenceBindingService inputReferenceBindingService;
+
+   SimulationStepOutputDissector() {
+      this.inputReferenceBindingService = new ValidationInputReferenceBindingService();
+   }
 
    @Override
    public void dissect(StepOutputPlan stepOutputPlan) {
@@ -56,6 +62,7 @@ class SimulationStepOutputDissector implements StepOutputPlanDissector {
          return;
       }
       StepRunReport stepRunReport = stepOutputPlan.getStepRunReport();
+      PropertyBindingPayload propertyBindingPayload = inputReferenceBindingService.consumePropertyBinding(stepRunReport);
       List<Property> outputs = stepRunReport.getOutputs();
       if (outputs == null || outputs.isEmpty()) {
          return;
@@ -73,14 +80,18 @@ class SimulationStepOutputDissector implements StepOutputPlanDissector {
             new SimulationReportMarshaller()
       );
 
-      addValidationReportSubItems(simulationPlan, simulationReport, stepOutputPlan.getDatahouseUrl());
+      Map<String, String> referenceByTargetId =
+            inputReferenceBindingService.toReferenceByTargetId(propertyBindingPayload, ACCEPTED_TARGET_KINDS);
+      addValidationReportSubItems(simulationPlan, simulationReport, stepOutputPlan, stepOutputPlan.getDatahouseUrl(), referenceByTargetId);
 
       stepOutputPlan.addItemReferencePlan(SimulationStepDefinition.REPORT, simulationPlan);
    }
 
    private void addValidationReportSubItems(ItemPlan<SimulationReport> simulationPlan,
                                             SimulationReport simulationReport,
-                                            String datahouseUrl) {
+                                            StepOutputPlan stepOutputPlan,
+                                            String datahouseUrl,
+                                            Map<String, String> referenceByTargetId) {
       if (simulationReport.getTransactionReports() == null) {
          return;
       }
@@ -106,7 +117,13 @@ class SimulationStepOutputDissector implements StepOutputPlanDissector {
                         validationReportV2,
                         new ValidationReportMarshaller()
                   );
-            addValidationInputAttachments(validationPlan, validationReportV2);
+            inputReferenceBindingService.registerInputPersistence(
+                  stepOutputPlan,
+                  validationPlan,
+                  validationReportV2,
+                  referenceByTargetId,
+                  VALIDATION_INPUT_TYPE
+            );
             String refName = buildValidationReferenceName(transaction, validationReport);
             simulationPlan.withItemReference(
                   refName,
@@ -114,43 +131,6 @@ class SimulationStepOutputDissector implements StepOutputPlanDissector {
                   (report, referenceName, itemId) ->
                         mutateSimulationValidationReport(report, referenceName, itemId, datahouseUrl)
             );
-         }
-      }
-   }
-
-   private void addValidationInputAttachments(
-         ItemPlan<net.ihe.gazelle.validation.v2.api.business.report.ValidationReport> validationPlan,
-         net.ihe.gazelle.validation.v2.api.business.report.ValidationReport validationReport) {
-      if (validationReport.getInputs() == null) {
-         return;
-      }
-      for (Input input : validationReport.getInputs()) {
-         if (input.getContent() != null) {
-            String refName = resolveInputReferenceName(input.getId());
-            validationPlan.addFutureReferencePlan(
-                    ReferencePlan.forAttachment(
-                            refName,
-                            new AttachmentPlan(VALIDATION_INPUT_TYPE, input.getContent(), input.getId())
-                    ),
-                    this::mutateValidationInput
-            );
-            input.setContent(null);
-         }
-      }
-   }
-
-   private void mutateValidationInput(net.ihe.gazelle.validation.v2.api.business.report.ValidationReport report,
-                                      String referenceName,
-                                      String attachmentId) {
-      if (report.getInputs() == null) {
-         return;
-      }
-      for (Input input : report.getInputs()) {
-         String candidate = resolveInputReferenceName(input.getId());
-         if (candidate.equals(referenceName)) {
-            input.setItemId(attachmentId);
-            input.setLocation("/attachments/" + attachmentId);
-            input.setContent(null);
          }
       }
    }
@@ -188,13 +168,6 @@ class SimulationStepOutputDissector implements StepOutputPlanDissector {
    private net.ihe.gazelle.validation.v2.api.business.report.ValidationReport deserializeValidationReportV2(byte[] content) {
       return serDes.deserialize(content, net.ihe.gazelle.validation.v2.api.technical.dto.report.ValidationReportDTO.class)
             .getBusinessObject();
-   }
-
-   private String resolveInputReferenceName(String candidate) {
-      if (candidate == null || candidate.isBlank()) {
-         return "validation-input";
-      }
-      return candidate;
    }
 
    // Builds a unique reference name in the form:

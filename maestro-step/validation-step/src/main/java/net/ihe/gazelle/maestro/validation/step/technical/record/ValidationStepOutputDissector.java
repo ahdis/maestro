@@ -20,22 +20,21 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
+import net.ihe.gazelle.maestro.api.business.property.PropertyBindingPayload;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanDissector;
-import net.ihe.gazelle.maestro.spi.business.recording.plan.AttachmentPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemPlan;
-import net.ihe.gazelle.maestro.spi.business.recording.plan.ReferencePlan;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;
 import net.ihe.gazelle.modelmarshaller.technical.marshalling.MarshallingException;
 import net.ihe.gazelle.modelmarshaller.technical.marshalling.TextMarshaller;
-import net.ihe.gazelle.validation.v2.api.business.Input;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
 import net.ihe.gazelle.validation.v2.api.technical.dto.report.ValidationReportDTO;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Dissects validation step outputs for recording purposes.
@@ -45,16 +44,16 @@ public class ValidationStepOutputDissector implements StepOutputPlanDissector {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-    /**
-     * Constant identifier for validation input attachments.
-     */
-    public static final String VALIDATION_INPUT = "VALIDATION_INPUT";
+    private static final String VALIDATION_INPUT_TYPE = "VALIDATION_INPUT";
+    private static final List<String> ACCEPTED_TARGET_KINDS = List.of("validationInput");
+    private final ValidationInputReferenceBindingService inputReferenceBindingService;
 
     /**
      * Default constructor.
      */
-    public ValidationStepOutputDissector() { /* Default constructor */ }
+    public ValidationStepOutputDissector() {
+        this.inputReferenceBindingService = new ValidationInputReferenceBindingService(OBJECT_MAPPER);
+    }
 
     @Override
     public void dissect(StepOutputPlan stepOutputPlan) {
@@ -62,6 +61,7 @@ public class ValidationStepOutputDissector implements StepOutputPlanDissector {
             return;
         }
         StepRunReport stepRunReport = stepOutputPlan.getStepRunReport();
+        PropertyBindingPayload propertyBindingPayload = inputReferenceBindingService.consumePropertyBinding(stepRunReport);
         List<Property> outputs = stepRunReport.getOutputs();
         if (outputs == null || outputs.isEmpty()) {
             return;
@@ -79,7 +79,15 @@ public class ValidationStepOutputDissector implements StepOutputPlanDissector {
               new ValidationReportMarshaller()
         );
 
-        addInputAttachments(validationReportPlan, validationReport);
+        Map<String, String> referenceByTargetId =
+              inputReferenceBindingService.toReferenceByTargetId(propertyBindingPayload, ACCEPTED_TARGET_KINDS);
+        inputReferenceBindingService.registerInputPersistence(
+              stepOutputPlan,
+              validationReportPlan,
+              validationReport,
+              referenceByTargetId,
+              VALIDATION_INPUT_TYPE
+        );
 
         stepOutputPlan.addItemReferencePlan(ValidationStepDefinition.REPORT, validationReportPlan);
 
@@ -91,47 +99,6 @@ public class ValidationStepOutputDissector implements StepOutputPlanDissector {
         } catch (IOException e) {
             throw new IllegalStateException("Failed to deserialize ValidationReport from JSON", e);
         }
-    }
-
-    private void addInputAttachments(ItemPlan<ValidationReport> reportPlan, ValidationReport validationReport) {
-        if (validationReport.getInputs() == null) {
-            return;
-        }
-        for (Input input : validationReport.getInputs()) {
-            if (input.getContent() != null) {
-                String referenceName = resolveInputName(input.getId());
-                reportPlan.addFutureReferencePlan(
-                        ReferencePlan.forAttachment(
-                                referenceName,
-                                new AttachmentPlan(VALIDATION_INPUT, input.getContent(), input.getId())
-                        ),
-                        this::mutateInputReference
-                );
-                input.setContent(null);
-            }
-        }
-    }
-
-    private void mutateInputReference(ValidationReport report, String refName, String attachmentId) {
-        if (report.getInputs() == null) {
-            return;
-        }
-        for (Input input : report.getInputs()) {
-            String candidate = resolveInputName(input.getId());
-            if (candidate.equals(refName)) {
-                input.setItemId(attachmentId);
-                input.setLocation("/attachments/" + attachmentId);
-                input.setContent(null);
-            }
-        }
-    }
-
-    private String resolveInputName(String candidate) {
-        // This is based on the fact that if we have multiple inputs, they should have an id, and if we have a single input, it may not have an id.
-        if (candidate == null || candidate.isBlank()) {
-            return "validation-input";
-        }
-        return candidate;
     }
 
     private static final class ValidationReportMarshaller implements TextMarshaller<ValidationReport> {

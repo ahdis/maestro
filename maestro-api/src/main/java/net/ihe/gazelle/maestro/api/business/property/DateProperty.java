@@ -46,6 +46,6 @@ public class DateProperty extends Property {
 
    @Override
    public Property copy() {
-      return new DateProperty(getName(), getValue());
+      return new DateProperty(getName(), getCopyValue());
    }
 }

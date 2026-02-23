@@ -46,6 +46,6 @@ public class FloatProperty extends Property {
 
    @Override
    public Property copy() {
-      return new FloatProperty(getName(), getValue());
+      return new FloatProperty(getName(), getCopyValue());
    }
 }

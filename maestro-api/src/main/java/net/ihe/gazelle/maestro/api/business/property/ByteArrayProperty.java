@@ -96,7 +96,7 @@ public class ByteArrayProperty extends Property {
 
    @Override
    public Property copy() {
-      return new ByteArrayProperty(getName(), getValue())
+      return new ByteArrayProperty(getName(), getCopyValue())
             .setFileName(getFileName())
             .setMimeType(getMimeType());
    }
