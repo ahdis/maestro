@@ -126,6 +126,7 @@ public class SimulationStepExecutor implements StepExecutor {
     * @param timeoutSeconds the timeout in seconds for the simulation
     * @param stepRun the step run containing the parameters
     * @param supportedParameters the list of supported parameters for this sequence
+    * @param propertyBindings the list of property bindings
     * @return the configured simulation request
     */
    public static SimulationRequest createSimulationRequest(String sequenceId,

@@ -33,6 +33,10 @@ public class StepRun extends Step {
 
    @Serial
    private static final long serialVersionUID = 6529685098267757690L;
+
+   /**
+    * The map of <propertyName, referenceName>
+    */
    private final Map<String, String> referenceNameByPropertyName;
 
    /**

@@ -185,7 +185,7 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
                                             ItemPlan<TestReport> testReportPlan,
                                             FutureReferenceCallbackRegistry callbackRegistry) {
       AttachmentPlan attachmentPlan = new AttachmentPlan(
-            BYTE_ARRAY_TYPE,
+            byteArrayProperty.getMimeType(),
             byteArrayProperty.getValue(),
             resolveAttachmentFilename(byteArrayProperty)
       );
@@ -194,8 +194,9 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
             ReferencePlan.forAttachment(byteArrayProperty.getName(), attachmentPlan),
             (testReport, refName, refId) -> {
                List<Property> updatedInputs = new ArrayList<>(testRunReport.getInputs());
-               ByteArrayItemProperty itemProperty = new ByteArrayItemProperty(input.getName(), null);
-               itemProperty.setReference(constructPathToAttachment(refId));
+               ByteArrayItemProperty itemProperty = new ByteArrayItemProperty(byteArrayProperty)
+                     .setReference(constructPathToAttachment(refId));
+               itemProperty.setValue(null);
                if (finalInputIndex < updatedInputs.size()) {
                   updatedInputs.set(finalInputIndex, itemProperty);
                }
