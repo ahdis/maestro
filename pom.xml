@@ -67,7 +67,7 @@
         <!--git-->
         <git.project.url>https://${git.user.name}:${git.user.token}@gitlab.inria.fr/gazelle/private/kereval/maestro.git</git.project.url>
 
-        <framework.version>4.0.0-SNAPSHOT</framework.version>
+        <framework.version>4.0.0</framework.version>
         <validation-api.version>2.0.2-GZL-10243-SNAPSHOT</validation-api.version>
         <simulation-api.version>0.3.0-SNAPSHOT</simulation-api.version>
         <service-registry.version>2.0.0-SNAPSHOT</service-registry.version>
