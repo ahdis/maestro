@@ -161,7 +161,7 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
       if (byteArrayProperty.getValue() == null) {
          return;
       }
-      planNewAttachmentReference(testRunReport, input, inputIndex, byteArrayProperty, testReportPlan, callbackRegistry);
+      planNewAttachmentReference(testRunReport, inputIndex, byteArrayProperty, testReportPlan, callbackRegistry);
    }
 
    private void planExistingAttachmentReference(ByteArrayProperty byteArrayProperty,
@@ -179,7 +179,6 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
    }
 
    private void planNewAttachmentReference(TestRunReport testRunReport,
-                                            Property input,
                                             int inputIndex,
                                             ByteArrayProperty byteArrayProperty,
                                             ItemPlan<TestReport> testReportPlan,
