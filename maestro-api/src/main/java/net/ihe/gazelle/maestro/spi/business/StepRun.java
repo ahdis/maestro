@@ -87,12 +87,37 @@ public class StepRun extends Step {
       if (properties == null) {
          return extracted;
       }
+      Map<String, String> directReferenceByPropertyName = new HashMap<>();
       for (Property property : properties) {
          if (property != null && property.getReferenceName() != null) {
-            extracted.put(property.getName(), property.getReferenceName());
+            directReferenceByPropertyName.put(property.getName(), property.getReferenceName());
          }
       }
+      for (Map.Entry<String, String> entry : directReferenceByPropertyName.entrySet()) {
+         extracted.put(entry.getKey(), resolveTerminalReferenceName(entry.getValue(), directReferenceByPropertyName));
+      }
       return extracted;
+   }
+
+   private static String resolveTerminalReferenceName(String referenceName, Map<String, String> directReferenceByPropertyName) {
+      if (referenceName == null) {
+         return null;
+      }
+      String current = referenceName;
+      List<String> visited = new ArrayList<>();
+      while (!current.isBlank()) {
+         if (visited.contains(current)) {
+            // Loop on references; keep the closest stable value.
+            return current;
+         }
+         visited.add(current);
+         String next = directReferenceByPropertyName.get(current);
+         if (next == null || next.isBlank()) {
+            return current;
+         }
+         current = next;
+      }
+      return referenceName;
    }
 
    /**

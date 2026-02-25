@@ -50,7 +50,8 @@ import java.util.Map;
 public class DatahouseTestReportRecordingService implements TestReportRecordingService {
 
    static final String TEST_REPORT_TYPE = "TEST_REPORT";
-   static final String BYTE_ARRAY_TYPE = "BYTE_ARRAY";
+   static final String INPUT_ATTACHMENT_REFERENCE_TYPE = "INPUT_ATTACHMENT";
+   static final String DEFAULT_ATTACHMENT_MIME_TYPE = "application/octet-stream";
    private static final String ATTACHMENTS_PATH = "/attachments/";
    private final String datahouseUrl;
 
@@ -173,7 +174,7 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
          return;
       }
       testReportPlan.addFutureReferencePlan(
-            ReferencePlan.forAttachmentId(byteArrayProperty.getName(), BYTE_ARRAY_TYPE, attachmentId),
+            ReferencePlan.forAttachmentId(byteArrayProperty.getName(), INPUT_ATTACHMENT_REFERENCE_TYPE, attachmentId),
             (testReport, refName, refValue) -> callbackRegistry.notifyResolved(refName, refValue)
       );
    }
@@ -184,13 +185,13 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
                                             ItemPlan<TestReport> testReportPlan,
                                             FutureReferenceCallbackRegistry callbackRegistry) {
       AttachmentPlan attachmentPlan = new AttachmentPlan(
-            byteArrayProperty.getMimeType(),
+            resolveAttachmentContentType(byteArrayProperty),
             byteArrayProperty.getValue(),
             resolveAttachmentFilename(byteArrayProperty)
       );
       final int finalInputIndex = inputIndex;
       testReportPlan.addFutureReferencePlan(
-            ReferencePlan.forAttachment(byteArrayProperty.getName(), attachmentPlan),
+            ReferencePlan.forAttachment(byteArrayProperty.getName(), INPUT_ATTACHMENT_REFERENCE_TYPE, attachmentPlan),
             (testReport, refName, refId) -> {
                List<Property> updatedInputs = new ArrayList<>(testRunReport.getInputs());
                ByteArrayItemProperty itemProperty = new ByteArrayItemProperty(byteArrayProperty)
@@ -338,6 +339,13 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
          return byteArrayProperty.getFileName();
       }
       return byteArrayProperty.getName();
+   }
+
+   private static String resolveAttachmentContentType(ByteArrayProperty byteArrayProperty) {
+      if (byteArrayProperty.getMimeType() != null && !byteArrayProperty.getMimeType().isBlank()) {
+         return byteArrayProperty.getMimeType();
+      }
+      return DEFAULT_ATTACHMENT_MIME_TYPE;
    }
 
    private static final class TestReportItemMarshaller implements TextMarshaller<TestReport> {

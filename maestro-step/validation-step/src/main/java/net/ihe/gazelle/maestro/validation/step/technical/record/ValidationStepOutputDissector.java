@@ -79,13 +79,13 @@ public class ValidationStepOutputDissector implements StepOutputPlanDissector {
               new ValidationReportMarshaller()
         );
 
-        Map<String, String> referenceByTargetId =
-              inputReferenceBindingService.toReferenceByTargetId(propertyBindingPayload, ACCEPTED_TARGET_KINDS);
+        Map<String, ValidationInputReferenceBindingService.BindingInfo> bindingInfoByTargetId =
+              inputReferenceBindingService.toBindingInfoByTargetId(propertyBindingPayload, ACCEPTED_TARGET_KINDS);
         inputReferenceBindingService.registerInputPersistence(
               stepOutputPlan,
               validationReportPlan,
               validationReport,
-              referenceByTargetId,
+              bindingInfoByTargetId,
               VALIDATION_INPUT_TYPE
         );
 

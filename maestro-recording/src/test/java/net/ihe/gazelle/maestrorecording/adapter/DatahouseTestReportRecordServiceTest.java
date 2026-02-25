@@ -71,12 +71,43 @@ class DatahouseTestReportRecordServiceTest {
         assertThat(recordItemClientMock.recordedItems).hasSize(1);
         assertThat(recordItemClientMock.uploadedAttachmentsBatches).hasSize(2);
         assertThat(recordItemClientMock.uploadedAttachmentsBatches.getFirst().getFirst().getFilename()).isEqualTo("alpha.xml");
+        assertThat(recordItemClientMock.uploadedAttachmentsBatches.getFirst().getFirst().getType())
+              .isEqualTo(DatahouseTestReportRecordingService.DEFAULT_ATTACHMENT_MIME_TYPE);
         assertThat(recordItemClientMock.uploadedAttachmentsBatches.get(1).getFirst().getFilename()).isEqualTo("in2");
+        assertThat(recordItemClientMock.uploadedAttachmentsBatches.get(1).getFirst().getType())
+              .isEqualTo(DatahouseTestReportRecordingService.DEFAULT_ATTACHMENT_MIME_TYPE);
 
         List<Property> inputs = firstRun(report).getInputs();
         assertThat(inputs).hasSize(2);
         assertBinaryAttachment(inputs.get(0), "/attachments/att-1");
         assertBinaryAttachment(inputs.get(1), "/attachments/att-2");
+
+        Item testReportItem = recordedItemOfType(DatahouseTestReportRecordingService.TEST_REPORT_TYPE);
+        assertThat(testReportItem.getReferences()).filteredOn(reference -> "in1".equals(reference.getName()))
+              .singleElement()
+              .satisfies(reference -> {
+                 assertEquals(RefType.ATTACHMENT, reference.getRefType());
+                 assertEquals(DatahouseTestReportRecordingService.INPUT_ATTACHMENT_REFERENCE_TYPE, reference.getType());
+              });
+        assertThat(testReportItem.getReferences()).filteredOn(reference -> "in2".equals(reference.getName()))
+              .singleElement()
+              .satisfies(reference -> {
+                 assertEquals(RefType.ATTACHMENT, reference.getRefType());
+                 assertEquals(DatahouseTestReportRecordingService.INPUT_ATTACHMENT_REFERENCE_TYPE, reference.getType());
+              });
+    }
+
+    @Test
+    void keeps_explicit_mime_type_on_uploaded_attachments() {
+        ByteArrayProperty typedInput = binaryInput("in1", "alpha").setMimeType("application/xml");
+        TestRunReport run = newTestRun("run-mime").addInput(typedInput);
+        TestReport report = newReport("R-mime", run);
+
+        service.recordTestReport(report);
+
+        assertThat(recordItemClientMock.uploadedAttachmentsBatches).hasSize(1);
+        assertThat(recordItemClientMock.uploadedAttachmentsBatches.getFirst().getFirst().getType())
+              .isEqualTo("application/xml");
     }
 
     @Test

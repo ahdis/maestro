@@ -18,7 +18,9 @@ package net.ihe.gazelle.maestrorecording;
 
 import com.kereval.gazelle.datahouse.api.business.record.Attachment;
 import com.kereval.gazelle.datahouse.api.business.record.Item;
+import com.kereval.gazelle.datahouse.api.business.record.RefType;
 import com.kereval.gazelle.datahouse.technical.rest.client.RecordItemClient;
+import net.ihe.gazelle.maestro.spi.business.recording.plan.AttachmentPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.PersistencePlan;
 import net.ihe.gazelle.modelmarshaller.technical.marshalling.MarshallingException;
@@ -67,6 +69,29 @@ class RecordItemServiceTest {
 
       assertEquals("itm-2", rootId);
       assertEquals(2, client.recordedItems.size(), "Shared child should be recorded once");
+   }
+
+   @Test
+   void shouldDeduplicateIdenticalReferencesOnRecordedItem() {
+      ItemPlan<String> root = item("ROOT", "root");
+      root.withAttachmentReference("in1",
+            new AttachmentPlan("application/octet-stream", "same".getBytes(StandardCharsets.UTF_8), "a.bin"),
+            null);
+      root.withAttachmentReference("in1",
+            new AttachmentPlan("application/octet-stream", "same".getBytes(StandardCharsets.UTF_8), "a.bin"),
+            null);
+
+      RecordItemClientStub client = new RecordItemClientStub();
+      RecordItemService service = new RecordItemService(client);
+
+      String rootId = service.recordPlan(new PersistencePlan<>(root, null));
+
+      assertEquals("itm-1", rootId);
+      assertEquals(1, client.recordedItems.size());
+      Item persisted = client.recordedItems.getFirst();
+      assertEquals(1, persisted.getReferences().size());
+      assertEquals("in1", persisted.getReferences().getFirst().getName());
+      assertEquals(RefType.ATTACHMENT, persisted.getReferences().getFirst().getRefType());
    }
 
    private static ItemPlan<String> item(String type, String content) {

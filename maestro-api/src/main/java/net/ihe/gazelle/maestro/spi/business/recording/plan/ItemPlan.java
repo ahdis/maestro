@@ -215,7 +215,7 @@ public class ItemPlan<T> {
          case ATTACHMENT -> {
             Object target = referencePlan.getTarget();
             if (target instanceof AttachmentPlan attachmentPlan) {
-               yield ReferencePlan.forAttachment(referencePlan.getName(), attachmentPlan);
+               yield ReferencePlan.forAttachment(referencePlan.getName(), referencePlan.getTargetType(), attachmentPlan);
             }
             if (!(target instanceof String attachmentId)) {
                throw new IllegalStateException("Unsupported ATTACHMENT reference target: " + target);

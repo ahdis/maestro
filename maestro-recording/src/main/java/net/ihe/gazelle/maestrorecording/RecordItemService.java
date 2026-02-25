@@ -77,7 +77,10 @@ public class RecordItemService {
          if (futureReferencePlan.mutation() != null) {
             futureReferencePlan.mutation().mutateReference(itemPlan.itemObject(), referencePlan.getName(), referenceId);
          }
-         item.addReference(asReference(referencePlan, referenceId));
+         Reference reference = asReference(referencePlan, referenceId);
+         if (!containsSameReference(item.getReferences(), reference)) {
+            item.addReference(reference);
+         }
       }
       item.setContent(itemPlan.textMarshaller().marshallAsString(itemPlan.itemObject()));
       String id = recordItemClient.recordItem(item);
@@ -133,6 +136,24 @@ public class RecordItemService {
             .setRefType(toDatahouseRefType(referencePlan.getRefType()))
             .setType(referencePlan.getTargetType())
             .setValue(referenceId);
+   }
+
+   private static boolean containsSameReference(List<Reference> references, Reference candidate) {
+      if (references == null || candidate == null) {
+         return false;
+      }
+      for (Reference existing : references) {
+         if (existing == null) {
+            continue;
+         }
+         if (Objects.equals(existing.getName(), candidate.getName())
+               && existing.getRefType() == candidate.getRefType()
+               && Objects.equals(existing.getType(), candidate.getType())
+               && Objects.equals(existing.getValue(), candidate.getValue())) {
+            return true;
+         }
+      }
+      return false;
    }
 
    private static RefType toDatahouseRefType(MaestroRefType refType) {

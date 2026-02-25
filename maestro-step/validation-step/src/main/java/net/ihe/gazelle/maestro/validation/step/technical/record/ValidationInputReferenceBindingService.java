@@ -85,31 +85,43 @@ public class ValidationInputReferenceBindingService {
    }
 
    /**
-    * Builds a map of report target id -> source reference name from propertyBinding payload.
+    * Builds a map of report target id -> binding metadata from propertyBinding payload.
     *
     * @param payload parsed binding payload
     * @param acceptedTargetKinds accepted binding kinds
-    * @return map of target id to reference name
+    * @return map of target id to binding metadata
     */
-   public Map<String, String> toReferenceByTargetId(PropertyBindingPayload payload, Collection<String> acceptedTargetKinds) {
-      Map<String, String> referenceByTargetId = new HashMap<>();
+   public Map<String, BindingInfo> toBindingInfoByTargetId(PropertyBindingPayload payload,
+                                                           Collection<String> acceptedTargetKinds) {
+      Map<String, BindingInfo> bindingInfoByTargetId = new HashMap<>();
       if (payload == null || payload.getBindings() == null || acceptedTargetKinds == null || acceptedTargetKinds.isEmpty()) {
-         return referenceByTargetId;
+         return bindingInfoByTargetId;
       }
       Set<String> kinds = Set.copyOf(acceptedTargetKinds);
       for (PropertyBindingPayload.Binding binding : payload.getBindings()) {
-         if (!kinds.contains(binding.getTargetKind())) {
-            continue;
+         if (isAcceptedBinding(binding, kinds)) {
+            bindingInfoByTargetId.put(
+                  binding.getTargetId(),
+                  new BindingInfo(
+                        binding.getReferenceName(),
+                        binding.getFileName(),
+                        binding.getPropertyName(),
+                        binding.getMimeType()
+                  )
+            );
          }
-         if (binding.getTargetId() == null || binding.getTargetId().isBlank()) {
-            continue;
-         }
-         if (binding.getReferenceName() == null || binding.getReferenceName().isBlank()) {
-            continue;
-         }
-         referenceByTargetId.put(binding.getTargetId(), binding.getReferenceName());
       }
-      return referenceByTargetId;
+      return bindingInfoByTargetId;
+   }
+
+   private static boolean isAcceptedBinding(PropertyBindingPayload.Binding binding, Set<String> acceptedKinds) {
+      if (binding == null) {
+         return false;
+      }
+      if (binding.getTargetId() == null || binding.getTargetId().isBlank()) {
+         return false;
+      }
+      return acceptedKinds.contains(binding.getTargetKind());
    }
 
    /**
@@ -118,31 +130,33 @@ public class ValidationInputReferenceBindingService {
     * @param stepOutputPlan step output plan used to subscribe to resolved references
     * @param validationReportPlan validation report plan to mutate
     * @param validationReport report business object
-    * @param referenceByTargetId target id -> source reference map
+    * @param bindingInfoByTargetId target id -> source binding metadata
     * @param attachmentType attachment type to use for fallback uploads
     */
    public void registerInputPersistence(StepOutputPlan stepOutputPlan,
                                         ItemPlan<ValidationReport> validationReportPlan,
                                         ValidationReport validationReport,
-                                        Map<String, String> referenceByTargetId,
+                                        Map<String, BindingInfo> bindingInfoByTargetId,
                                         String attachmentType) {
-      ensureInputsFromBindings(validationReport, referenceByTargetId);
+      ensureInputsFromBindings(validationReport, bindingInfoByTargetId);
       if (validationReport.getInputs() == null || validationReport.getInputs().isEmpty()) {
          return;
       }
       for (Input input : validationReport.getInputs()) {
          String inputId = resolveInputName(input.getId());
-         String referenceName = referenceByTargetId.get(inputId);
+         BindingInfo bindingInfo = bindingInfoByTargetId.get(inputId);
+         String referenceName = bindingInfo != null ? bindingInfo.referenceName() : null;
+         if (isContentDefined(input)) {
+            // Content in report is authoritative; persist it as attachment to guarantee a resolvable reference.
+            registerInputAttachmentFallback(validationReportPlan, input, inputId, attachmentType, bindingInfo);
+            continue;
+         }
          if (referenceName != null && !referenceName.isBlank()) {
             stepOutputPlan.onFutureReferenceResolved(referenceName,
                   (refName, referenceId) -> {
                      mutateInputReference(input, referenceId);
                      addAttachmentReferenceIfMissing(validationReportPlan, inputId, referenceId, attachmentType);
                   });
-            continue;
-         }
-         if (input.getContent() != null) {
-            registerInputAttachmentFallback(validationReportPlan, input, inputId, attachmentType);
          }
       }
    }
@@ -162,8 +176,8 @@ public class ValidationInputReferenceBindingService {
       }
    }
 
-   private void ensureInputsFromBindings(ValidationReport validationReport, Map<String, String> referenceByTargetId) {
-      if (referenceByTargetId == null || referenceByTargetId.isEmpty()) {
+   private void ensureInputsFromBindings(ValidationReport validationReport, Map<String, BindingInfo> bindingInfoByTargetId) {
+      if (bindingInfoByTargetId == null || bindingInfoByTargetId.isEmpty()) {
          return;
       }
       if (validationReport.getInputs() == null) {
@@ -173,7 +187,7 @@ public class ValidationInputReferenceBindingService {
       for (Input existing : validationReport.getInputs()) {
          inputsById.put(resolveInputName(existing.getId()), existing);
       }
-      for (String targetId : referenceByTargetId.keySet()) {
+      for (String targetId : bindingInfoByTargetId.keySet()) {
          if (!inputsById.containsKey(targetId)) {
             validationReport.addInput(new Input().setId(targetId));
          }
@@ -183,11 +197,12 @@ public class ValidationInputReferenceBindingService {
    private void registerInputAttachmentFallback(ItemPlan<ValidationReport> validationReportPlan,
                                                 Input input,
                                                 String inputId,
-                                                String attachmentType) {
+                                                String attachmentType,
+                                                BindingInfo bindingInfo) {
       validationReportPlan.addFutureReferencePlan(
             ReferencePlan.forAttachment(
                   inputId,
-                  new AttachmentPlan(attachmentType, input.getContent(), input.getId())
+                  new AttachmentPlan(attachmentType, input.getContent(), resolveAttachmentFilename(input, inputId, bindingInfo))
             ),
             (report, refName, attachmentId) -> {
                for (Input candidate : report.getInputs()) {
@@ -221,10 +236,45 @@ public class ValidationInputReferenceBindingService {
       input.setContent(null);
    }
 
+   private static boolean isContentDefined(Input input) {
+      return input != null && input.getContent() != null && input.getContent().length > 0;
+   }
+
+   private String resolveAttachmentFilename(Input input, String inputId, BindingInfo bindingInfo) {
+      String bindingFilename = bindingInfo != null ? bindingInfo.fileName() : null;
+      String referenceName = bindingInfo != null ? bindingInfo.referenceName() : null;
+      String propertyName = bindingInfo != null ? bindingInfo.propertyName() : null;
+      String inputName = input == null ? null : input.getId();
+      return firstNonBlank(bindingFilename, referenceName, propertyName, inputName, inputId, DEFAULT_INPUT_NAME);
+   }
+
+   private static String firstNonBlank(String... candidates) {
+      if (candidates == null) {
+         return null;
+      }
+      for (String candidate : candidates) {
+         if (candidate != null && !candidate.isBlank()) {
+            return candidate;
+         }
+      }
+      return null;
+   }
+
    private String resolveInputName(String candidate) {
       if (candidate == null || candidate.isBlank()) {
          return DEFAULT_INPUT_NAME;
       }
       return candidate;
+   }
+
+   /**
+    * Internal binding metadata extracted from propertyBinding output.
+    *
+    * @param referenceName resolved or direct source reference name
+    * @param fileName source filename when available
+    * @param propertyName source property name
+    * @param mimeType source mime type
+    */
+   public record BindingInfo(String referenceName, String fileName, String propertyName, String mimeType) {
    }
 }

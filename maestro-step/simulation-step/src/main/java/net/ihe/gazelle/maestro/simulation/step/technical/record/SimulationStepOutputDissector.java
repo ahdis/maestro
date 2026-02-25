@@ -80,9 +80,15 @@ class SimulationStepOutputDissector implements StepOutputPlanDissector {
             new SimulationReportMarshaller()
       );
 
-      Map<String, String> referenceByTargetId =
-            inputReferenceBindingService.toReferenceByTargetId(propertyBindingPayload, ACCEPTED_TARGET_KINDS);
-      addValidationReportSubItems(simulationPlan, simulationReport, stepOutputPlan, stepOutputPlan.getDatahouseUrl(), referenceByTargetId);
+      Map<String, ValidationInputReferenceBindingService.BindingInfo> bindingInfoByTargetId =
+            inputReferenceBindingService.toBindingInfoByTargetId(propertyBindingPayload, ACCEPTED_TARGET_KINDS);
+      addValidationReportSubItems(
+            simulationPlan,
+            simulationReport,
+            stepOutputPlan,
+            stepOutputPlan.getDatahouseUrl(),
+            bindingInfoByTargetId
+      );
 
       stepOutputPlan.addItemReferencePlan(SimulationStepDefinition.REPORT, simulationPlan);
    }
@@ -91,7 +97,7 @@ class SimulationStepOutputDissector implements StepOutputPlanDissector {
                                             SimulationReport simulationReport,
                                             StepOutputPlan stepOutputPlan,
                                             String datahouseUrl,
-                                            Map<String, String> referenceByTargetId) {
+                                            Map<String, ValidationInputReferenceBindingService.BindingInfo> bindingInfoByTargetId) {
       if (simulationReport.getTransactionReports() == null) {
          return;
       }
@@ -121,7 +127,7 @@ class SimulationStepOutputDissector implements StepOutputPlanDissector {
                   stepOutputPlan,
                   validationPlan,
                   validationReportV2,
-                  referenceByTargetId,
+                  bindingInfoByTargetId,
                   VALIDATION_INPUT_TYPE
             );
             String refName = buildValidationReferenceName(transaction, validationReport);

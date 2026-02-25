@@ -56,9 +56,21 @@ public class ReferencePlan {
     * @param name reference name
     * @param attachmentPlan attachment plan
     * @return attachment reference plan
-    */
+   */
    public static ReferencePlan forAttachment(String name, AttachmentPlan attachmentPlan) {
-      return new ReferencePlan(MaestroRefType.ATTACHMENT, name, attachmentPlan.type(), attachmentPlan);
+      return forAttachment(name, attachmentPlan.type(), attachmentPlan);
+   }
+
+   /**
+    * Creates an attachment reference with an explicit reference type.
+    *
+    * @param name reference name
+    * @param targetType logical reference type stored on the Datahouse reference
+    * @param attachmentPlan attachment plan
+    * @return attachment reference plan
+    */
+   public static ReferencePlan forAttachment(String name, String targetType, AttachmentPlan attachmentPlan) {
+      return new ReferencePlan(MaestroRefType.ATTACHMENT, name, targetType, attachmentPlan);
    }
 
    /**
