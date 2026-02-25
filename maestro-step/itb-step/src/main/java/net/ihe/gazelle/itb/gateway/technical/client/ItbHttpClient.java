@@ -240,7 +240,8 @@ public class ItbHttpClient implements net.ihe.gazelle.itb.gateway.business.ItbCl
         } catch (JsonProcessingException e) {
             throw new ItbHttpClientException("Error parsing request body : " + e);
         }
-        return sendPOSTRequest(baseItbUrl + "/api/rest/tests/start", "application/json", body);
+        String responseBody = sendPOSTRequest(baseItbUrl + "/api/rest/tests/start", "application/json", body);
+        return parseCreatedSessionId(responseBody);
     }
 
     /**
@@ -264,11 +265,12 @@ public class ItbHttpClient implements net.ihe.gazelle.itb.gateway.business.ItbCl
             try {
                 HttpResponse<String> response = client.send(req, HttpResponse.BodyHandlers.ofString());
                 String respBody = response.body();
-                JsonNode content = mapper.readTree(respBody);
-                if (response.statusCode() == 400) {
-                    throw new ItbHttpClientException("ITB request error : " + content.get("error_description"));
+                if (response.statusCode() >= 400) {
+                    throw new ItbHttpClientException(
+                            "ITB request error (status " + response.statusCode() + "): " + extractErrorMessage(respBody)
+                    );
                 }
-                return content.get("createdSessions").get(0).get("session").asText();
+                return respBody;
             } catch (IOException e) {
                 logger.error("Error sending POST request", e);
                 throw new ItbHttpClientException("Error request interrupted. Try again.");
@@ -276,6 +278,49 @@ public class ItbHttpClient implements net.ihe.gazelle.itb.gateway.business.ItbCl
                 Thread.currentThread().interrupt();
                 throw new ItbHttpClientException("Error request interrupted. Try again.");
             }
+        }
+    }
+
+    private String parseCreatedSessionId(String responseBody) {
+        try {
+            JsonNode content = mapper.readTree(responseBody);
+            JsonNode createdSessions = content.path("createdSessions");
+            if (!createdSessions.isArray() || createdSessions.isEmpty()) {
+                throw new ItbHttpClientException(
+                        "Unexpected ITB response: missing created session list. Body: " + responseBody
+                );
+            }
+            JsonNode sessionNode = createdSessions.get(0).path("session");
+            String sessionId = sessionNode.asText(null);
+            if (sessionId == null || sessionId.isBlank()) {
+                throw new ItbHttpClientException(
+                        "Unexpected ITB response: missing session identifier. Body: " + responseBody
+                );
+            }
+            return sessionId;
+        } catch (JsonProcessingException e) {
+            throw new ItbHttpClientException("Unable to parse ITB response body: " + e.getMessage());
+        }
+    }
+
+    private String extractErrorMessage(String responseBody) {
+        if (responseBody == null || responseBody.isBlank()) {
+            return "empty response body";
+        }
+        try {
+            JsonNode content = mapper.readTree(responseBody);
+            if (content.hasNonNull("error_description")) {
+                return content.get("error_description").asText();
+            }
+            if (content.hasNonNull("error")) {
+                return content.get("error").asText();
+            }
+            if (content.hasNonNull("message")) {
+                return content.get("message").asText();
+            }
+            return responseBody;
+        } catch (JsonProcessingException ignored) {
+            return responseBody;
         }
     }
 }

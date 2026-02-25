@@ -51,7 +51,7 @@ class SimulationStepOutputDissectorTest {
    private final SimulationStepOutputDissector dissector = new SimulationStepOutputDissector();
 
    @Test
-   void shouldPersistValidationReportAsSubItemWithAttachmentsAndMutations() {
+   void shouldPersistValidationReportAsSubItemAndSynthesizeInputsFromBindings() {
       net.ihe.gazelle.validation.v2.api.business.report.ValidationReport validationReportV2 =
             new net.ihe.gazelle.validation.v2.api.business.report.ValidationReport()
                   .addInput(new Input().setId("input-1").setContent("data".getBytes()));
@@ -77,7 +77,8 @@ class SimulationStepOutputDissectorTest {
 
       StepRunReport step = new StepRunReport()
             .addOutput(new ByteArrayProperty(SimulationStepDefinition.REPORT, simulationBytes(simulationReport)))
-            .addOutput(new StringProperty(PropertyBindingPayload.PROPERTY_NAME, "{\"schemaVersion\":1,\"stepType\":\"SIMULATION\",\"bindings\":[]}"));
+            .addOutput(new StringProperty(PropertyBindingPayload.PROPERTY_NAME,
+                  "{\"schemaVersion\":1,\"stepType\":\"SIMULATION\",\"bindings\":[{\"targetKind\":\"simulationParameter\",\"targetId\":\"input-1\",\"referenceName\":\"inputFile1\",\"propertyName\":\"p-file\"}]}"));
       Fixture fixture = newFixture(step);
 
       dissector.dissect(fixture.stepOutputPlan());
@@ -94,15 +95,19 @@ class SimulationStepOutputDissectorTest {
             (ItemPlan<net.ihe.gazelle.validation.v2.api.business.report.ValidationReport>)
                   validationRef.referencePlan().getTarget();
 
-      assertEquals(1, validationPlan.futureReferencePlans().size());
-      validationPlan.futureReferencePlans().getFirst()
-            .mutation()
-            .mutateReference(validationPlan.itemObject(), "input-1", "att-1");
-
-      Input mutatedInput = validationPlan.itemObject().getInputs().getFirst();
-      assertNull(mutatedInput.getContent());
-      assertEquals("att-1", mutatedInput.getItemId());
-      assertEquals("/attachments/att-1", mutatedInput.getLocation());
+      assertTrue(validationPlan.futureReferencePlans().isEmpty());
+      assertNotNull(validationPlan.itemObject().getInputs());
+      assertEquals(1, validationPlan.itemObject().getInputs().size());
+      assertEquals("input-1", validationPlan.itemObject().getInputs().getFirst().getId());
+      fixture.callbackRegistry().notifyResolved("inputFile1", "att-1");
+      assertEquals("att-1", validationPlan.itemObject().getInputs().getFirst().getItemId());
+      assertEquals("/attachments/att-1", validationPlan.itemObject().getInputs().getFirst().getLocation());
+      assertTrue(validationPlan.futureReferencePlans().stream()
+            .map(FutureReferencePlan::referencePlan)
+            .anyMatch(referencePlan ->
+                  "input-1".equals(referencePlan.getName())
+                        && referencePlan.getRefType() == MaestroRefType.ATTACHMENT
+                        && "att-1".equals(referencePlan.getTarget())));
 
       validationRef.mutation().mutateReference(simulationReport, validationRef.referencePlan().getName(), "itm-2");
       ValidationReport mutatedSimValidation = simulationReport.getTransactionReports().getFirst()
@@ -186,7 +191,7 @@ class SimulationStepOutputDissectorTest {
    }
 
    @Test
-   void shouldSynthesizeNestedValidationInputsFromPropertyBindingWhenInputsAreMissing() throws Exception {
+   void shouldLinkNestedValidationInputsFromResolvedTestRunAttachments() throws Exception {
       net.ihe.gazelle.validation.v2.api.business.report.ValidationReport validationReportV2 =
             new net.ihe.gazelle.validation.v2.api.business.report.ValidationReport();
       byte[] validationContent = SER_DES.serializeAsString(

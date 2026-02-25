@@ -25,11 +25,9 @@ import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.spi.business.recording.FutureReferenceCallbackRegistry;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlan;
-import net.ihe.gazelle.maestro.spi.business.recording.plan.AttachmentPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.FutureReferencePlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.MaestroRefType;
-import net.ihe.gazelle.maestro.spi.business.recording.plan.ReferencePlan;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;
 import net.ihe.gazelle.modelmarshaller.technical.marshalling.MarshallingException;
 import net.ihe.gazelle.modelmarshaller.technical.marshalling.TextMarshaller;
@@ -57,7 +55,7 @@ class ValidationStepOutputDissectorTest {
     }
 
     @Test
-    void shouldCreateReportItemAndPersistMappedInputAsAttachmentFallback() throws Exception {
+    void shouldCreateReportItemAndSynthesizeValidationInputsFromBindings() throws Exception {
         SampleReport sample = sampleReport();
         StepRunReport step = new StepRunReport()
               .addOutput(new ByteArrayProperty(ValidationStepDefinition.REPORT, sample.serializedReport()))
@@ -75,16 +73,13 @@ class ValidationStepOutputDissectorTest {
         ItemPlan<ValidationReport> reportPlan = (ItemPlan<ValidationReport>) reportReference.referencePlan().getTarget();
         assertEquals(ValidationStepDefinition.REPORT, reportPlan.type());
 
-        assertEquals(1, reportPlan.futureReferencePlans().size(), "Validation report should create one input attachment future");
-        ReferencePlan plannedInputReference = reportPlan.futureReferencePlans().getFirst().referencePlan();
-        assertEquals("payload-input", plannedInputReference.getName());
-        assertEquals(MaestroRefType.ATTACHMENT, plannedInputReference.getRefType());
-        assertEquals("inputFile1", ((AttachmentPlan) plannedInputReference.getTarget()).filename());
+        assertTrue(reportPlan.futureReferencePlans().isEmpty(), "References are added when callback resolves");
         ValidationReport report = reportPlan.itemObject();
         assertNotNull(report.getInputs());
-        assertEquals(2, report.getInputs().size());
-        assertNull(report.getInputs().getFirst().getContent());
-        assertNull(report.getInputs().get(1).getContent());
+        assertEquals(1, report.getInputs().size());
+        assertEquals("payload-input", report.getInputs().getFirst().getId());
+        assertNull(report.getInputs().getFirst().getItemId());
+        assertNull(report.getInputs().getFirst().getLocation());
         assertNull(step.getOutput(PropertyBindingPayload.PROPERTY_NAME), "Ephemeral propertyBinding output must be removed");
     }
 
@@ -107,37 +102,7 @@ class ValidationStepOutputDissectorTest {
     }
 
     @Test
-    void shouldPopulateAttachmentIdsInReportDuringFallbackMutation() throws Exception {
-        SampleReport sample = sampleReport();
-        StepRunReport step = new StepRunReport()
-              .addOutput(new ByteArrayProperty(ValidationStepDefinition.REPORT, sample.serializedReport()))
-              .addOutput(new StringProperty(PropertyBindingPayload.PROPERTY_NAME, sample.propertyBindingPayload()));
-        Fixture fixture = newFixture(step);
-
-        dissector.dissect(fixture.stepOutputPlan());
-        @SuppressWarnings("unchecked")
-        ItemPlan<ValidationReport> reportPlan =
-              (ItemPlan<ValidationReport>) fixture.rootPlan().futureReferencePlans().getFirst().referencePlan().getTarget();
-
-        FutureReferencePlan<ValidationReport> inputFutureReference = reportPlan.futureReferencePlans().stream()
-              .filter(plan -> "payload-input".equals(plan.referencePlan().getName()))
-              .findFirst()
-              .orElseThrow();
-        inputFutureReference.mutation().mutateReference(reportPlan.itemObject(), "payload-input", "att-42");
-
-        ValidationReport mutated = reportPlan.itemObject();
-        Input input = mutated.getInputs().getFirst();
-        assertEquals("att-42", input.getItemId());
-        assertEquals("/attachments/att-42", input.getLocation());
-        assertNull(input.getContent());
-        ReferencePlan inputReference = inputFutureReference.referencePlan();
-        assertEquals(MaestroRefType.ATTACHMENT, inputReference.getRefType());
-        assertEquals("payload-input", inputReference.getName());
-        assertEquals("inputFile1", ((AttachmentPlan) inputReference.getTarget()).filename());
-    }
-
-    @Test
-    void shouldPopulateAttachmentIdsFromCallbackWhenInputIsSynthesizedFromBinding() throws Exception {
+    void shouldLinkSynthesizedInputsWhenAttachmentIdIsResolved() throws Exception {
         ValidationReport reportWithoutInputs = new ValidationReport().setUuid("validation-report-id");
         String payload = OBJECT_MAPPER.writeValueAsString(new PropertyBindingPayload()
               .setStepType(ValidationStepDefinition.TYPE)
@@ -156,51 +121,18 @@ class ValidationStepOutputDissectorTest {
         @SuppressWarnings("unchecked")
         ItemPlan<ValidationReport> reportPlan =
               (ItemPlan<ValidationReport>) fixture.rootPlan().futureReferencePlans().getFirst().referencePlan().getTarget();
-
-        fixture.callbackRegistry().notifyResolved("inputFile1", "att-99");
-
-        ValidationReport mutated = reportPlan.itemObject();
-        assertNotNull(mutated.getInputs());
-        assertEquals(1, mutated.getInputs().size());
-        assertEquals("payload-input", mutated.getInputs().getFirst().getId());
-        assertEquals("att-99", mutated.getInputs().getFirst().getItemId());
-        assertEquals("/attachments/att-99", mutated.getInputs().getFirst().getLocation());
-
-        ReferencePlan inputReference = reportPlan.futureReferencePlans().stream()
+        fixture.callbackRegistry().notifyResolved("inputFile1", "att-77");
+        assertNotNull(reportPlan.itemObject().getInputs());
+        assertEquals(1, reportPlan.itemObject().getInputs().size());
+        assertEquals("payload-input", reportPlan.itemObject().getInputs().getFirst().getId());
+        assertEquals("att-77", reportPlan.itemObject().getInputs().getFirst().getItemId());
+        assertEquals("/attachments/att-77", reportPlan.itemObject().getInputs().getFirst().getLocation());
+        assertTrue(reportPlan.futureReferencePlans().stream()
               .map(FutureReferencePlan::referencePlan)
-              .filter(referencePlan -> "payload-input".equals(referencePlan.getName())
-                    && referencePlan.getRefType() == MaestroRefType.ATTACHMENT)
-              .findFirst()
-              .orElseThrow();
-        assertEquals(MaestroRefType.ATTACHMENT, inputReference.getRefType());
-        assertEquals("att-99", inputReference.getTarget());
-    }
-
-    @Test
-    void shouldPreferBindingFileNameForFallbackAttachment() throws Exception {
-        ValidationReport report = new ValidationReport()
-              .setUuid("validation-report-id")
-              .addInput(new Input().setId("contentToValidate").setContent("x".getBytes(StandardCharsets.UTF_8)));
-        String payload = OBJECT_MAPPER.writeValueAsString(new PropertyBindingPayload()
-              .setStepType(ValidationStepDefinition.TYPE)
-              .addBinding(new PropertyBindingPayload.Binding()
-                    .setTargetKind("validationInput")
-                    .setTargetId("contentToValidate")
-                    .setReferenceName("inputFile1")
-                    .setPropertyName("contentToValidate")
-                    .setFileName("audit-message.xml")));
-
-        StepRunReport step = new StepRunReport()
-              .addOutput(new ByteArrayProperty(ValidationStepDefinition.REPORT, OBJECT_MAPPER.writeValueAsBytes(report)))
-              .addOutput(new StringProperty(PropertyBindingPayload.PROPERTY_NAME, payload));
-        Fixture fixture = newFixture(step);
-
-        dissector.dissect(fixture.stepOutputPlan());
-        @SuppressWarnings("unchecked")
-        ItemPlan<ValidationReport> reportPlan =
-              (ItemPlan<ValidationReport>) fixture.rootPlan().futureReferencePlans().getFirst().referencePlan().getTarget();
-        ReferencePlan plannedInputReference = reportPlan.futureReferencePlans().getFirst().referencePlan();
-        assertEquals("audit-message.xml", ((AttachmentPlan) plannedInputReference.getTarget()).filename());
+              .anyMatch(referencePlan ->
+                    "payload-input".equals(referencePlan.getName())
+                          && referencePlan.getRefType() == MaestroRefType.ATTACHMENT
+                          && "att-77".equals(referencePlan.getTarget())));
     }
 
     private Fixture newFixture(StepRunReport stepRunReport) {

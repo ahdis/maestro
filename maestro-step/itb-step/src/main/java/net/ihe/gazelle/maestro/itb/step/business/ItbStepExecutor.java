@@ -29,7 +29,6 @@ import net.ihe.gazelle.lang.TimeoutRuntimeException;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
-import net.ihe.gazelle.maestro.api.business.test.SupportedInput;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
@@ -42,12 +41,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
 
 /**
  * Implementation of the StepExecutor interface for handling ITB step executions.
@@ -56,10 +54,7 @@ public class ItbStepExecutor implements StepExecutor {
 
    private static final Logger LOG = LoggerFactory.getLogger(ItbStepExecutor.class);
 
-   private static final Map<String, SupportedInput> SUPPORTED_INPUTS = new ItbStepDefinition().getSupportedInputs()
-         .stream().collect(
-               Collectors.toMap(SupportedInput::getId, input -> input)
-         );
+   private static final String SYSTEM_ID = "systemID";
 
    private final RunItbTestService itbService;
 
@@ -86,6 +81,7 @@ public class ItbStepExecutor implements StepExecutor {
 
          return waitItbReport(stepRun, futureReport, reportBuilder);
       } catch (RuntimeException e) {
+         LOG.error("Error while executing ITB step '{}'", stepRun.getName(), e);
          return buildReportWithError(stepRun, e);
       }
    }
@@ -109,19 +105,27 @@ public class ItbStepExecutor implements StepExecutor {
 
    private TestRequest mapToRequest(StepRun stepRun) {
       TestRequest testRequest = new TestRequest();
-      testRequest.setTestID(stepRun.getPropertyValue(ItbStepDefinition.ACTOR_ID));
+      // testID is only used by the validator layer and must be a UUID.
+      testRequest.setTestID(UUID.randomUUID().toString());
       TestCase testCase = new TestCase();
       testCase.setTestCase(stepRun.getPropertyValue(ItbStepDefinition.TEST_CASE));
 
-      List<Parameter> parameters = new ArrayList<>();
+      List<Parameter> requestParameters = new ArrayList<>();
+      List<Parameter> testCaseParameters = new ArrayList<>();
 
       for (Property property : stepRun.getProperties()) {
-         if (!SUPPORTED_INPUTS.containsKey(property.getName())) {
-            parameters.add(mapToParameter(property));
+         String propertyName = property.getName();
+         if (!ItbStepDefinition.TEST_CASE.equals(propertyName)) {
+            Parameter parameter = mapToParameter(property);
+            if (ItbStepDefinition.ACTOR_ID.equals(propertyName) || SYSTEM_ID.equals(propertyName)) {
+               requestParameters.add(parameter);
+            } else {
+               testCaseParameters.add(parameter);
+            }
          }
       }
-      testCase.setParameters(parameters);
-      testRequest.setParameters(List.of());
+      testCase.setParameters(testCaseParameters);
+      testRequest.setParameters(requestParameters);
       testRequest.setTestCases(List.of(testCase));
       return testRequest;
    }
@@ -189,5 +193,3 @@ public class ItbStepExecutor implements StepExecutor {
    }
 
 }
-
-

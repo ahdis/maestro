@@ -23,7 +23,6 @@ import net.ihe.gazelle.maestro.api.business.property.PropertyBindingPayload;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlan;
-import net.ihe.gazelle.maestro.spi.business.recording.plan.AttachmentPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ReferencePlan;
 import net.ihe.gazelle.validation.v2.api.business.Input;
@@ -32,7 +31,7 @@ import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -93,7 +92,7 @@ public class ValidationInputReferenceBindingService {
     */
    public Map<String, BindingInfo> toBindingInfoByTargetId(PropertyBindingPayload payload,
                                                            Collection<String> acceptedTargetKinds) {
-      Map<String, BindingInfo> bindingInfoByTargetId = new HashMap<>();
+      Map<String, BindingInfo> bindingInfoByTargetId = new LinkedHashMap<>();
       if (payload == null || payload.getBindings() == null || acceptedTargetKinds == null || acceptedTargetKinds.isEmpty()) {
          return bindingInfoByTargetId;
       }
@@ -138,26 +137,26 @@ public class ValidationInputReferenceBindingService {
                                         ValidationReport validationReport,
                                         Map<String, BindingInfo> bindingInfoByTargetId,
                                         String attachmentType) {
-      ensureInputsFromBindings(validationReport, bindingInfoByTargetId);
+      if (validationReport == null) {
+         return;
+      }
+      Map<String, BindingInfo> bindings = bindingInfoByTargetId == null ? Map.of() : bindingInfoByTargetId;
+      validationReport.setInputs(synthesizeInputsFromBindings(bindings));
       if (validationReport.getInputs() == null || validationReport.getInputs().isEmpty()) {
          return;
       }
       for (Input input : validationReport.getInputs()) {
          String inputId = resolveInputName(input.getId());
-         BindingInfo bindingInfo = bindingInfoByTargetId.get(inputId);
+         BindingInfo bindingInfo = bindings.get(inputId);
          String referenceName = bindingInfo != null ? bindingInfo.referenceName() : null;
-         if (isContentDefined(input)) {
-            // Content in report is authoritative; persist it as attachment to guarantee a resolvable reference.
-            registerInputAttachmentFallback(validationReportPlan, input, inputId, attachmentType, bindingInfo);
+         if (referenceName == null || referenceName.isBlank()) {
             continue;
          }
-         if (referenceName != null && !referenceName.isBlank()) {
-            stepOutputPlan.onFutureReferenceResolved(referenceName,
-                  (refName, referenceId) -> {
-                     mutateInputReference(input, referenceId);
-                     addAttachmentReferenceIfMissing(validationReportPlan, inputId, referenceId, attachmentType);
-                  });
-         }
+         stepOutputPlan.onFutureReferenceResolved(referenceName,
+               (refName, referenceId) -> {
+                  mutateInputReference(input, referenceId);
+                  addAttachmentReferenceIfMissing(validationReportPlan, inputId, referenceId, attachmentType);
+               });
       }
    }
 
@@ -176,43 +175,15 @@ public class ValidationInputReferenceBindingService {
       }
    }
 
-   private void ensureInputsFromBindings(ValidationReport validationReport, Map<String, BindingInfo> bindingInfoByTargetId) {
+   private List<Input> synthesizeInputsFromBindings(Map<String, BindingInfo> bindingInfoByTargetId) {
+      List<Input> inputs = new ArrayList<>();
       if (bindingInfoByTargetId == null || bindingInfoByTargetId.isEmpty()) {
-         return;
-      }
-      if (validationReport.getInputs() == null) {
-         validationReport.setInputs(new ArrayList<>());
-      }
-      Map<String, Input> inputsById = new HashMap<>();
-      for (Input existing : validationReport.getInputs()) {
-         inputsById.put(resolveInputName(existing.getId()), existing);
+         return inputs;
       }
       for (String targetId : bindingInfoByTargetId.keySet()) {
-         if (!inputsById.containsKey(targetId)) {
-            validationReport.addInput(new Input().setId(targetId));
-         }
+         inputs.add(new Input().setId(targetId));
       }
-   }
-
-   private void registerInputAttachmentFallback(ItemPlan<ValidationReport> validationReportPlan,
-                                                Input input,
-                                                String inputId,
-                                                String attachmentType,
-                                                BindingInfo bindingInfo) {
-      validationReportPlan.addFutureReferencePlan(
-            ReferencePlan.forAttachment(
-                  inputId,
-                  new AttachmentPlan(attachmentType, input.getContent(), resolveAttachmentFilename(input, inputId, bindingInfo))
-            ),
-            (report, refName, attachmentId) -> {
-               for (Input candidate : report.getInputs()) {
-                  if (resolveInputName(candidate.getId()).equals(refName)) {
-                     mutateInputReference(candidate, attachmentId);
-                  }
-               }
-            }
-      );
-      input.setContent(null);
+      return inputs;
    }
 
    private void addAttachmentReferenceIfMissing(ItemPlan<ValidationReport> validationReportPlan,
@@ -234,30 +205,6 @@ public class ValidationInputReferenceBindingService {
       input.setItemId(attachmentId);
       input.setLocation("/attachments/" + attachmentId);
       input.setContent(null);
-   }
-
-   private static boolean isContentDefined(Input input) {
-      return input != null && input.getContent() != null && input.getContent().length > 0;
-   }
-
-   private String resolveAttachmentFilename(Input input, String inputId, BindingInfo bindingInfo) {
-      String bindingFilename = bindingInfo != null ? bindingInfo.fileName() : null;
-      String referenceName = bindingInfo != null ? bindingInfo.referenceName() : null;
-      String propertyName = bindingInfo != null ? bindingInfo.propertyName() : null;
-      String inputName = input == null ? null : input.getId();
-      return firstNonBlank(bindingFilename, referenceName, propertyName, inputName, inputId, DEFAULT_INPUT_NAME);
-   }
-
-   private static String firstNonBlank(String... candidates) {
-      if (candidates == null) {
-         return null;
-      }
-      for (String candidate : candidates) {
-         if (candidate != null && !candidate.isBlank()) {
-            return candidate;
-         }
-      }
-      return null;
    }
 
    private String resolveInputName(String candidate) {
