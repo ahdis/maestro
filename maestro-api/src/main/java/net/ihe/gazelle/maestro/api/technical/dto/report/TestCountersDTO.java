@@ -46,13 +46,13 @@ public class TestCountersDTO implements DTO<TestCounters> {
    }
 
    public TestCountersDTO(TestCounters testCounters) {
-      this.testCounters = testCounters;
+      this.testCounters = new TestCounters(testCounters);
    }
 
    @Override
    @JsonIgnore
    public TestCounters getBusinessObject() {
-      return testCounters;
+      return new TestCounters(testCounters);
    }
 
    @Schema(

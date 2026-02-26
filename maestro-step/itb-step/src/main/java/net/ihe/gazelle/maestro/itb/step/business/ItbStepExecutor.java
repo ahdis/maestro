@@ -29,6 +29,7 @@ import net.ihe.gazelle.lang.TimeoutRuntimeException;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
+import net.ihe.gazelle.maestro.api.business.test.SupportedInput;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
@@ -41,11 +42,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of the StepExecutor interface for handling ITB step executions.
@@ -54,6 +56,10 @@ public class ItbStepExecutor implements StepExecutor {
 
    private static final Logger LOG = LoggerFactory.getLogger(ItbStepExecutor.class);
 
+   private static final Map<String, SupportedInput> SUPPORTED_INPUTS = new ItbStepDefinition().getSupportedInputs()
+         .stream().collect(
+               Collectors.toMap(SupportedInput::getId, input -> input)
+         );
    private static final String SYSTEM_ID = "systemID";
 
    private final RunItbTestService itbService;
@@ -105,8 +111,7 @@ public class ItbStepExecutor implements StepExecutor {
 
    private TestRequest mapToRequest(StepRun stepRun) {
       TestRequest testRequest = new TestRequest();
-      // testID is only used by the validator layer and must be a UUID.
-      testRequest.setTestID(UUID.randomUUID().toString());
+      testRequest.setTestID(stepRun.getPropertyValue(ItbStepDefinition.ACTOR_ID));
       TestCase testCase = new TestCase();
       testCase.setTestCase(stepRun.getPropertyValue(ItbStepDefinition.TEST_CASE));
 
@@ -114,10 +119,9 @@ public class ItbStepExecutor implements StepExecutor {
       List<Parameter> testCaseParameters = new ArrayList<>();
 
       for (Property property : stepRun.getProperties()) {
-         String propertyName = property.getName();
-         if (!ItbStepDefinition.TEST_CASE.equals(propertyName)) {
+         if (!SUPPORTED_INPUTS.containsKey(property.getName())) {
             Parameter parameter = mapToParameter(property);
-            if (ItbStepDefinition.ACTOR_ID.equals(propertyName) || SYSTEM_ID.equals(propertyName)) {
+            if (SYSTEM_ID.equals(property.getName())) {
                requestParameters.add(parameter);
             } else {
                testCaseParameters.add(parameter);

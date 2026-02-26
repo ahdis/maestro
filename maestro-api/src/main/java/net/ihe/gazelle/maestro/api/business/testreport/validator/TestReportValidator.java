@@ -57,7 +57,7 @@ public class TestReportValidator extends AbstractValidator<TestReport> {
       testServiceValidator = new TestServiceValidator();
       systemUnderTestValidator = new SystemUnderTestValidator();
       testCountersValidator = new TestCountersValidator();
-      subReportValidator = testReportValidator;
+      subReportValidator = testReportValidator; // NOSONAR - recursive validator linkage is intentional
       testRunReportValidator = new TestRunReportValidator();
       unexpectedErrorValidator = new UnexpectedErrorValidator();
    }
@@ -88,7 +88,7 @@ public class TestReportValidator extends AbstractValidator<TestReport> {
       testServiceValidator = new TestServiceValidator(builderFactory);
       systemUnderTestValidator = new SystemUnderTestValidator(builderFactory);
       testCountersValidator = new TestCountersValidator(builderFactory);
-      subReportValidator = testReportValidator;
+      subReportValidator = testReportValidator; // NOSONAR - recursive validator linkage is intentional
       testRunReportValidator = new TestRunReportValidator(builderFactory);
       unexpectedErrorValidator = new UnexpectedErrorValidator(builderFactory);
    }

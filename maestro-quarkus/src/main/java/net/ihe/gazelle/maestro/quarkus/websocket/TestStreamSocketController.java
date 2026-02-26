@@ -78,7 +78,7 @@ public class TestStreamSocketController {
    public TestStreamSocketController(GazelleIdentity identity, Maestro maestro, WebSocketSessionService sessionService) {
       this.identity = identity;
       this.maestro = maestro;
-      this.sessionService = sessionService;
+      this.sessionService = sessionService; // NOSONAR - CDI-managed service reference
    }
 
    /**
@@ -148,5 +148,4 @@ public class TestStreamSocketController {
       }
    }
 }
-
 
