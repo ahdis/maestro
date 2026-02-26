@@ -16,7 +16,8 @@
 
 package net.ihe.gazelle.maestro.validation.step.it;
 
-import net.ihe.gazelle.gitb.client.GitbValidationServiceClientFactory;
+import net.ihe.gazelle.certificate.client.CertificateValidationServiceClientFactory;
+import net.ihe.gazelle.itb.client.ItbValidationServiceClientFactory;
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
@@ -30,6 +31,7 @@ import net.ihe.gazelle.maestro.validation.step.business.ValidationHandler;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;
 import net.ihe.gazelle.maestro.validation.step.technical.factory.ValidationStepExecutorFactory;
 import net.ihe.gazelle.maestro.validation.step.technical.handler.ValidationServiceHandler;
+import net.ihe.gazelle.modelbased.client.ModelBasedValidationServiceClientFactory;
 import net.ihe.gazelle.servicemetadata.api.business.HttpRestBinding;
 import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterface;
 import net.ihe.gazelle.servicemetadata.api.business.Service;
@@ -48,9 +50,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ValidationServiceInterfaceIT {
 
-   private static final String MODEL_BASED_INTERFACE = "Model Based Validation Service";
-   private static final String CERTIFICATE_INTERFACE = "Certificate Service";
-   private static final String GITB_INTERFACE = GitbValidationServiceClientFactory.INTERFACE_NAME;
+   private static final String MODEL_BASED_INTERFACE = ModelBasedValidationServiceClientFactory.INTERFACE_NAME;
+   private static final String CERTIFICATE_INTERFACE = CertificateValidationServiceClientFactory.INTERFACE_NAME;
+   private static final String GITB_INTERFACE = ItbValidationServiceClientFactory.INTERFACE_NAME;
 
    @ParameterizedTest
    @MethodSource("serviceDefinitions")
