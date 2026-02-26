@@ -26,7 +26,6 @@
 
     <properties>
         <evs-client-api.version>2.0.0</evs-client-api.version>
-        <validation-service-clients.version>1.0.0-GZL-10358-SNAPSHOT</validation-service-clients.version>
     </properties>
 
     <dependencies>
@@ -138,19 +137,19 @@
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
-            <artifactId>model-based-client-jdk21</artifactId>
+            <artifactId>model-based-client</artifactId>
             <version>${validation-service-clients.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
-            <artifactId>certificate-client-jdk21</artifactId>
+            <artifactId>certificate-client</artifactId>
             <version>${validation-service-clients.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
-            <artifactId>gitb-client-jdk21</artifactId>
+            <artifactId>itb-client</artifactId>
             <version>${validation-service-clients.version}</version>
             <scope>test</scope>
         </dependency>

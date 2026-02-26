@@ -28,7 +28,6 @@
     <properties>
         <quarkus.container-image.name>app/maestro</quarkus.container-image.name>
         <quarkus.container-image.tag>${project.version}</quarkus.container-image.tag>
-        <validation-service-clients.version>1.0.0-VP-1-SNAPSHOT</validation-service-clients.version>
 
         <!-- Test properties -->
         <mongodb-driver-sync.version>5.0.0</mongodb-driver-sync.version>
@@ -69,17 +68,17 @@
         <!-- JDK21 validation service clients (SPI factories) -->
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
-            <artifactId>model-based-client-jdk21</artifactId>
+            <artifactId>model-based-client</artifactId>
             <version>${validation-service-clients.version}</version>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
-            <artifactId>certificate-client-jdk21</artifactId>
+            <artifactId>certificate-client</artifactId>
             <version>${validation-service-clients.version}</version>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
-            <artifactId>gitb-client-jdk21</artifactId>
+            <artifactId>itb-client</artifactId>
             <version>${validation-service-clients.version}</version>
         </dependency>
 
