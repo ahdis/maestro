@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2025 Kereval.
+  ~ Copyright 2025-2026 IHE International.
   ~
   ~  Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -19,19 +19,10 @@
     <parent>
         <groupId>net.ihe.gazelle</groupId>
         <artifactId>maestro</artifactId>
-        <version>0.6.1-SNAPSHOT</version>
+        <version>1.0.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>maestro-engine</artifactId>
-
-    <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-        <skipTests>false</skipTests>
-        <skipITs>false</skipITs>
-    </properties>
 
     <dependencies>
         <!-- Sub modules dependencies -->
@@ -72,13 +63,13 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>net.ihe.gazelle</groupId>
-            <artifactId>security</artifactId>
+            <groupId>com.kereval.gazelle</groupId>
+            <artifactId>datahouse-api</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.kereval.gazelle</groupId>
-            <artifactId>datahouse-api</artifactId>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>security</artifactId>
             <scope>provided</scope>
         </dependency>
 
@@ -113,7 +104,6 @@
             <artifactId>mockito-junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.wiremock</groupId>
             <artifactId>wiremock</artifactId>

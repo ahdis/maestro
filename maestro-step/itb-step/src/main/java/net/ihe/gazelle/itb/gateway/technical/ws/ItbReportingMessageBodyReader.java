@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,19 +36,38 @@ import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
+/**
+ * JAX-RS reader/writer mapping ITB callback payloads to {@link ItbReporting}.
+ */
 @Provider
 @Consumes("application/json")
 @Produces("application/json")
 public class ItbReportingMessageBodyReader implements MessageBodyReader<ItbReporting>, MessageBodyWriter<ItbReporting> {
 
+    /**
+     * JSON field carrying raw value.
+     */
     public static final String VALUE = "value";
     private final ObjectMapper mapper = new ObjectMapper();
 
+    /**
+     * Creates the message body reader/writer.
+     */
+    public ItbReportingMessageBodyReader() {
+      // Default constructor
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
         return type == ItbReporting.class;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ItbReporting readFrom(Class<ItbReporting> type, Type genericType, Annotation[] annotations,
                                  MediaType mediaType, MultivaluedMap<String, String> httpHeaders,
@@ -133,11 +152,17 @@ public class ItbReportingMessageBodyReader implements MessageBodyReader<ItbRepor
         return new ItbTestSession(testSuiteId, testCaseId, testSessionId);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
         return type == ItbReporting.class;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void writeTo(ItbReporting itbReporting, Class<?> type, Type genericType, Annotation[] annotations,
                         MediaType mediaType, MultivaluedMap<String, Object> httpHeaders,

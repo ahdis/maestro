@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,32 +25,68 @@ public class Parameter {
     private String type;
     private String value;
 
+    /**
+     * Creates an empty parameter.
+     */
     public Parameter() {
     }
 
+    /**
+     * Creates a parameter with name and value.
+     *
+     * @param name parameter name
+     * @param value parameter value
+     */
     public Parameter(String name, String value) {
         this.name = name;
         this.value = value;
     }
 
+    /**
+     * Creates a fully specified parameter.
+     *
+     * @param name parameter name
+     * @param type parameter type
+     * @param value parameter value
+     */
     public Parameter(String name, String type, String value) {
         this.name = name;
         this.type = type;
         this.value = value;
     }
 
+    /**
+     * Returns parameter name.
+     *
+     * @return parameter name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Sets parameter name.
+     *
+     * @param name parameter name
+     */
     public void setName(String name) {
         this.name = name;
     }
 
+    /**
+     * Returns parameter type.
+     *
+     * @return parameter type
+     */
     public String getType() {
         return type;
     }
 
+    /**
+     * Sets parameter type.
+     *
+     * @param type parameter type
+     */
     public void setType(String type) {
         this.type = type;
     }
@@ -64,10 +100,20 @@ public class Parameter {
                 '}';
     }
 
+    /**
+     * Returns parameter value.
+     *
+     * @return parameter value
+     */
     public String getValue() {
         return value;
     }
 
+    /**
+     * Sets parameter value.
+     *
+     * @param value parameter value
+     */
     public void setValue(String value) {
         this.value = value;
     }

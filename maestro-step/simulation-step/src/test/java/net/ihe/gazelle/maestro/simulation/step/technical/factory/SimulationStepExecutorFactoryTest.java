@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepDefinition
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepExecutor;
 import net.ihe.gazelle.maestro.simulation.step.technical.handler.GazelleSimulationServiceHandler;
 import net.ihe.gazelle.maestro.simulation.step.technical.mock.SimulationClientMock;
+import net.ihe.gazelle.maestro.spi.business.Handler;
 import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 import org.junit.jupiter.api.Test;
 
@@ -50,13 +51,19 @@ class SimulationStepExecutorFactoryTest {
     @Test
     void createStepExecutorTest() {
         Step simulationStep = getSimulationStep();
-
-        assertThrows(IllegalArgumentException.class, () -> factory.createStepExecutor(simulationStep, Map.of(
+        Map<String, Handler> onlyUserInteractionService = Map.of(
                 UserInteractionHandler.SERVICE_NAME,
-                new UserInteractionHandlerStub())));
-        assertThrows(IllegalArgumentException.class, () -> factory.createStepExecutor(simulationStep, Map.of(
+                new UserInteractionHandlerStub()
+        );
+        Map<String, Handler> onlySimulationService = Map.of(
                 SimulationStepDefinition.SIMULATION_SERVICE,
-                new GazelleSimulationServiceHandler(new SimulationClientMock()))));
+                new GazelleSimulationServiceHandler(new SimulationClientMock())
+        );
+
+        assertThrows(IllegalArgumentException.class,
+                () -> factory.createStepExecutor(simulationStep, onlyUserInteractionService));
+        assertThrows(IllegalArgumentException.class,
+                () -> factory.createStepExecutor(simulationStep, onlySimulationService));
 
         StepExecutor executor = factory.createStepExecutor(simulationStep, Map.of(
                 SimulationStepDefinition.SIMULATION_SERVICE,

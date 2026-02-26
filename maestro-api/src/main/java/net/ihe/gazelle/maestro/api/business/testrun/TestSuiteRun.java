@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,6 @@ public class TestSuiteRun implements Serializable {
    public TestSuiteRun() {
       this.tests = new ArrayList<>();
       this.inputs = new ArrayList<>();
-      this.accessControlList = new AccessControlList();
       this.systemsUnderTest = new ArrayList<>();
    }
 
@@ -243,14 +242,4 @@ public class TestSuiteRun implements Serializable {
       }
       return true;
    }
-
-   /**
-    * Indicates whether an access control list is defined.
-    *
-    * @return {@code true} if an access control list is present, {@code false} otherwise
-    */
-   public boolean isAclDefined() {
-      return accessControlList != null;
-   }
-
 }

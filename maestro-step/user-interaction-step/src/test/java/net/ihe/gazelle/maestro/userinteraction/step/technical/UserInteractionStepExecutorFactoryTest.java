@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.userinteract.UserInteractionHandler;
 import net.ihe.gazelle.maestro.api.business.userinteract.stub.UserInteractionHandlerStub;
+import net.ihe.gazelle.maestro.spi.business.Handler;
 import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionStepDefinition;
 import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionStepExecutor;
@@ -49,7 +50,8 @@ class UserInteractionStepExecutorFactoryTest {
     void createStepExecutorTest() {
         Step userInteractionStep = getUserInteractionStep();
         UserInteractionHandler handler = new UserInteractionHandlerStub();
-        assertThrows(IllegalArgumentException.class, () -> factory.createStepExecutor(userInteractionStep, Map.of()));
+        Map<String, Handler> emptyHandlers = Map.of();
+        assertThrows(IllegalArgumentException.class, () -> factory.createStepExecutor(userInteractionStep, emptyHandlers));
 
         StepExecutor executor = factory.createStepExecutor(userInteractionStep, Map.of(
                 UserInteractionHandler.SERVICE_NAME,

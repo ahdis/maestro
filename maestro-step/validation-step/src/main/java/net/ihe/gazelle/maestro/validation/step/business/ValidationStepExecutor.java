@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,12 @@
 
 package net.ihe.gazelle.maestro.validation.step.business;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
+import net.ihe.gazelle.maestro.api.business.property.Property;
+import net.ihe.gazelle.maestro.api.business.property.PropertyBindingPayload;
+import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
@@ -32,7 +37,7 @@ import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
 import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequestBuilder;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.ArrayList;
 
 /**
  * A StepExecutor is an object used to run ValidationStep {@link ValidationStepDefinition}
@@ -47,6 +52,8 @@ import java.util.concurrent.CompletableFuture;
  */
 public class ValidationStepExecutor implements StepExecutor {
 
+   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+   private static final String VALIDATION_INPUT = "validationInput";
    private final ReportSerializer serializer;
    private final ValidationHandler handler;
 
@@ -61,18 +68,18 @@ public class ValidationStepExecutor implements StepExecutor {
    }
 
    @Override
-   public CompletableFuture<StepRunReport> execute(StepRun stepRun) {
+   public StepRunReport execute(StepRun stepRun) {
       String validationService = stepRun.getPropertyValue(ValidationStepDefinition.VALIDATION_SERVICE);
       String validationProfile = stepRun.getPropertyValue(ValidationStepDefinition.VALIDATION_PROFILE);
+      List<PropertyBindingPayload.Binding> propertyBindings = new ArrayList<>();
 
       ValidationRequest validationRequest = buildValidationRequest(
             stepRun,
             validationProfile,
-            getSupportedInputs(validationService, validationProfile)
+            getSupportedInputs(validationService, validationProfile),
+            propertyBindings
       );
-      ValidationReport validationReport = new ValidationReport();
-
-      validationReport = handler.validate(validationRequest);
+      ValidationReport validationReport = handler.validate(validationRequest);
 
 
       ByteArrayProperty reportOutput =
@@ -80,16 +87,24 @@ public class ValidationStepExecutor implements StepExecutor {
             .setFileName("validation-report.json")
             .setMimeType("application/json");
 
+      StringProperty propertyBindingOutput = new StringProperty(
+            PropertyBindingPayload.PROPERTY_NAME,
+            serializeBindings(new PropertyBindingPayload()
+                  .setStepType(ValidationStepDefinition.TYPE)
+                  .setBindings(propertyBindings))
+      );
+
       StepRunReportBuilder stepRunReportBuilder = new StepRunReportBuilder()
             .setStepName(stepRun.getName())
             .setType(ValidationStepDefinition.TYPE)
             .setResult(mapResult(validationReport.getOverallResult()))
-            .setOutputs(List.of(reportOutput));
-      return CompletableFuture.completedFuture(stepRunReportBuilder.build());
+            .setOutputs(List.of(reportOutput, propertyBindingOutput));
+      return stepRunReportBuilder.build();
    }
 
    private ValidationRequest buildValidationRequest(StepRun stepRun, String validationProfile,
-                                                    final List<SupportedInput> supportedInputs) {
+                                                    final List<SupportedInput> supportedInputs,
+                                                    List<PropertyBindingPayload.Binding> propertyBindings) {
       ValidationRequestBuilder requestBuilder = new ValidationRequestBuilder()
             .setValidationProfileId(validationProfile);
 
@@ -98,17 +113,23 @@ public class ValidationStepExecutor implements StepExecutor {
          requestBuilder.addInput(
                getInputInRequest(ValidationStepDefinition.CONTENT_TO_VALIDATE, stepRun)
          );
+         propertyBindings.add(toPropertyBinding(stepRun, stepRun.getProperty(ValidationStepDefinition.CONTENT_TO_VALIDATE),
+               ValidationStepDefinition.CONTENT_TO_VALIDATE, VALIDATION_INPUT));
       } else {
          for (SupportedInput supportedInput : supportedInputs) {
             if (supportedInput.isRequired()) {
                requestBuilder.addInput(
                      getInputInRequest(supportedInput.getId(), stepRun)
                );
+               propertyBindings.add(toPropertyBinding(stepRun, stepRun.getProperty(supportedInput.getId()),
+                     supportedInput.getId(), VALIDATION_INPUT));
             } else {
                if (stepRun.hasProperty(supportedInput.getId())) {
                   requestBuilder.addInput(
                         getInputInRequest(supportedInput.getId(), stepRun)
                   );
+                  propertyBindings.add(toPropertyBinding(stepRun, stepRun.getProperty(supportedInput.getId()),
+                        supportedInput.getId(), VALIDATION_INPUT));
                }
             }
          }
@@ -120,6 +141,35 @@ public class ValidationStepExecutor implements StepExecutor {
       return new InputInRequestBuilder()
             .setId(contentToValidate)
             .setContent((byte[]) stepRun.getPropertyValue(contentToValidate));
+   }
+
+   private static PropertyBindingPayload.Binding toPropertyBinding(StepRun stepRun,
+                                                                   Property property,
+                                                                   String targetId,
+                                                                   String targetKind) {
+      PropertyBindingPayload.Binding binding = new PropertyBindingPayload.Binding()
+            .setTargetKind(targetKind)
+            .setTargetId(targetId)
+            .setReferenceName(resolveReferenceName(stepRun, property))
+            .setPropertyName(property.getName());
+      if (property instanceof ByteArrayProperty byteArrayProperty) {
+         binding.setFileName(byteArrayProperty.getFileName());
+         binding.setMimeType(byteArrayProperty.getMimeType());
+      }
+      return binding;
+   }
+
+   private static String resolveReferenceName(StepRun stepRun, Property property) {
+      String referenceName = stepRun.getPropertyReferenceName(property.getName());
+      return referenceName != null ? referenceName : property.getReferenceName();
+   }
+
+   private static String serializeBindings(PropertyBindingPayload payload) {
+      try {
+         return OBJECT_MAPPER.writeValueAsString(payload);
+      } catch (JsonProcessingException e) {
+         throw new IllegalStateException("Failed to serialize property bindings", e);
+      }
    }
 
    private List<SupportedInput> getSupportedInputs(String validationService, String validationProfile) {

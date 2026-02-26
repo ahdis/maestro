@@ -1,3 +1,19 @@
+/*
+ * Copyright 2026 IHE International.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.ihe.gazelle.maestro.api.business.test;
 
 import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilder;
@@ -20,7 +36,7 @@ public class TestValidator extends AbstractValidator<Test> {
    public TestValidator() {
       super();
       this.stepValidator = new StepValidator();
-      this.supportedInputValidators = SupportedInputValidator.getAllSupportedInputValidators();
+      this.supportedInputValidators = SupportedInputValidators.getAllSupportedInputValidators();
    }
 
    /**
@@ -32,7 +48,7 @@ public class TestValidator extends AbstractValidator<Test> {
    public TestValidator(ValidatorBuilderFactory validatorBuilderFactory) {
       super(validatorBuilderFactory);
       this.stepValidator = new StepValidator(validatorBuilderFactory);
-      this.supportedInputValidators = SupportedInputValidator.getAllSupportedInputValidators(validatorBuilderFactory);
+      this.supportedInputValidators = SupportedInputValidators.getAllSupportedInputValidators(validatorBuilderFactory);
    }
 
    @Override
@@ -51,7 +67,7 @@ public class TestValidator extends AbstractValidator<Test> {
             .addRule(Test::areStepsUnique, "Steps must be unique")
             .addMember("steps", Test::getSteps, stepValidator::getAssembledValidatorBuilder)
             .addMember("supportedInputs", Test::getSupportedInputs,
-                  SupportedInputValidator.getAssembledSuppliers(supportedInputValidators)
+                  SupportedInputValidators.getAssembledSuppliers(supportedInputValidators)
             );
    }
 

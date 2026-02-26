@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,7 +118,7 @@ public class TestRunControllerImpl implements TestRunController {
          throw new TimeoutRuntimeException(e);
       } catch (InterruptedException e) {
          Thread.currentThread().interrupt();
-         throw new RuntimeException(e);
+         throw new ExecutionInterruptedException("Interrupted while running test suite", e);
       }
    }
 
@@ -137,7 +137,7 @@ public class TestRunControllerImpl implements TestRunController {
          throw new TimeoutRuntimeException(e);
       } catch (InterruptedException e) {
          Thread.currentThread().interrupt();
-         throw new RuntimeException(e);
+         throw new ExecutionInterruptedException("Interrupted while running test", e);
       }
    }
 

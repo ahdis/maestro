@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,22 +26,46 @@ public class TestCase {
     private String caseID;
     private List<Parameter> parameters;
 
+    /**
+     * Creates an empty test case.
+     */
     public TestCase() {
     }
 
+    /**
+     * Creates a test case with identifier.
+     *
+     * @param testCase test case identifier
+     */
     public TestCase(String testCase) {
         this.caseID = testCase;
     }
 
+    /**
+     * Creates a test case with identifier and parameters.
+     *
+     * @param caseID test case identifier
+     * @param inputs test case parameters
+     */
     public TestCase(String caseID, List<Parameter> inputs) {
         this.caseID = caseID;
         this.parameters = inputs;
     }
 
+    /**
+     * Returns test case identifier.
+     *
+     * @return test case identifier
+     */
     public String getCaseID() {
         return caseID;
     }
 
+    /**
+     * Sets test case identifier.
+     *
+     * @param caseID test case identifier
+     */
     public void setTestCase(String caseID) {
         this.caseID = caseID;
     }
@@ -54,10 +78,20 @@ public class TestCase {
                 '}';
     }
 
+    /**
+     * Returns test case parameters.
+     *
+     * @return test case parameters
+     */
     public List<Parameter> getParameters() {
         return parameters;
     }
 
+    /**
+     * Sets test case parameters.
+     *
+     * @param inputs test case parameters
+     */
     public void setParameters(List<Parameter> inputs) {
         this.parameters = inputs;
     }

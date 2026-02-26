@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,9 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.NoSuchElementException;
 
+/**
+ * Receives ITB callbacks, enriches them with logs/PDF, and completes waiting session futures.
+ */
 public class ItbReportingService {
 
    private static final Logger LOG = LoggerFactory.getLogger(ItbReportingService.class);
@@ -42,6 +45,12 @@ public class ItbReportingService {
    private final ItbClient itbClient;
    private final ItbSessionStore sessionStore;
 
+   /**
+    * Creates an ITB reporting service.
+    *
+    * @param itbClient ITB HTTP client
+    * @param sessionStore pending-session store
+    */
    @Inject
    public ItbReportingService(ItbClient itbClient, ItbSessionStore sessionStore) {
       this.itbClient = itbClient;
@@ -78,7 +87,7 @@ public class ItbReportingService {
          return itbClient.requestPDFReport(sessionId, testCaseIdentifier);
       } catch (Exception e) {
          LOG.atWarn().setCause(e).log("Could not request ITB PDF for session {}", sessionId);
-         return null;
+         return new byte[0];
       }
    }
 

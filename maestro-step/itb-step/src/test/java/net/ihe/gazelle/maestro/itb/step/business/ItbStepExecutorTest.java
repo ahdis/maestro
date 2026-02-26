@@ -1,5 +1,17 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package net.ihe.gazelle.maestro.itb.step.business;
 
@@ -8,7 +20,7 @@ import net.ihe.gazelle.itb.gateway.business.reporting.ItbReporting;
 import net.ihe.gazelle.itb.gateway.business.reporting.ItbResult;
 import net.ihe.gazelle.itb.gateway.business.reporting.ItbSystem;
 import net.ihe.gazelle.itb.gateway.business.reporting.ItbTestSession;
-import net.ihe.gazelle.itb.gateway.technical.client.ItbClient;
+import net.ihe.gazelle.itb.gateway.technical.client.ItbHttpClient;
 import net.ihe.gazelle.itb.gateway.technical.dao.ItbSessionStoreImpl;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
@@ -21,8 +33,9 @@ import org.junit.jupiter.api.Test;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ItbStepExecutorTest {
@@ -30,20 +43,26 @@ class ItbStepExecutorTest {
     private static final String SESSION_ID = "SESSION-123";
 
     @Test
-    void execute_registersFutureInDB_withSessionId_fromHandler() throws ExecutionException, InterruptedException {
+    void execute_registersFutureInDB_withSessionId_fromHandler() {
         ItbHandler handler = new ItbHandlerMock(SESSION_ID);
         ItbSessionStoreImpl store = new ItbSessionStoreImpl();
         ItbStepExecutor runner = new ItbStepExecutor(handler, store);
-
         StepRun stepRun = new StepRun(step(), List.of());
+        ItbReportingService service =
+              new ItbReportingService(new ItbHttpClient("baseUrl", "itbApiKey"), store);
 
-        CompletableFuture<StepRunReport> future = runner.execute(stepRun);
-        ItbReportingService service = new ItbReportingService(new ItbClient("baseUrl", "itbApiKey"), store);
+        CompletableFuture<StepRunReport> reportFuture =
+              CompletableFuture.supplyAsync(() -> runner.execute(stepRun));
+
+        await()
+              .atMost(2, TimeUnit.SECONDS)
+              .until(() -> store.get(SESSION_ID) != null);
+
         service.receiveReporting(getItbReporting());
-
-        StepRunReport report = future.get();
+        StepRunReport report = reportFuture.join();
         assertEquals(StepResult.PASSED, report.getResult());
     }
+
 
     private ItbReporting getItbReporting() {
         return new ItbReporting(

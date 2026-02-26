@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import net.ihe.gazelle.maestro.api.business.testrun.TestRunValidator;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRunValidator;
 import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
+import net.ihe.gazelle.security.business.acl.AccessControlList;
 import net.ihe.gazelle.security.business.acl.AccessControlListBuilder;
 import net.ihe.gazelle.servicemetadata.api.business.MetadataService;
 import net.ihe.gazelle.servicemetadata.api.business.Service;
@@ -70,6 +71,9 @@ public class MaestroFacade {
     * @param testSuiteRunObserver the observer for this test suite run
     */
    public void executeTestSuite(TestSuiteRun testSuiteRun, MaestroObserver testSuiteRunObserver) {
+      if (testSuiteRun.getAccessControlList() == null) {
+         testSuiteRun.setAccessControlList(new AccessControlList().setPublic(true));
+      }
       testSuiteRunValidator.assertValid(testSuiteRun);
       String sessionId = UUID.randomUUID().toString();
       long timeout = testSuiteRun.computeTestSuiteTimeout();
@@ -84,6 +88,9 @@ public class MaestroFacade {
     * @param testRunObservers the observer for this test run
     */
    public void executeTest(TestRun testRun, MaestroObserver testRunObservers) {
+      if (testRun.getAccessControlList() == null) {
+         testRun.setAccessControlList(new AccessControlList().setPublic(true));
+      }
       testRunValidator.assertValid(testRun);
       String sessionId = UUID.randomUUID().toString();
       long timeout = testRun.getTest().computeTestRunTimeout();

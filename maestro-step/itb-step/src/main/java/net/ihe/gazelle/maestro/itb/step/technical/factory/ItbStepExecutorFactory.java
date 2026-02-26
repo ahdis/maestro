@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,17 @@ import net.ihe.gazelle.maestro.spi.technical.StepExecutorFactory;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Factory class for creating step executors that handle ITB (Integration Test Bed) steps.
+ */
 public class ItbStepExecutorFactory implements StepExecutorFactory {
+
+   /**
+    * Default constructor.
+    */
+   public ItbStepExecutorFactory() {
+      // Empty
+   }
 
    @Override
    public String getSupportedStep() {

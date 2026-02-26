@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,14 +147,16 @@ class StepDTOTest {
     @Test
     void shouldThrowExceptionForInvalidOutputMapping() {
         StepDTO dto = new StepDTO();
+        List<String> invalidMapping = List.of("invalidMapping");
+        List<String> tooManyDelimiters = List.of("key:value:extra");
 
         // Missing delimiter
         assertThrows(IllegalArgumentException.class, () ->
-                dto.setOutputMappings(List.of("invalidMapping")));
+                dto.setOutputMappings(invalidMapping));
 
         // Too many delimiters
         assertThrows(IllegalArgumentException.class, () ->
-                dto.setOutputMappings(List.of("key:value:extra")));
+                dto.setOutputMappings(tooManyDelimiters));
     }
 
     @Test

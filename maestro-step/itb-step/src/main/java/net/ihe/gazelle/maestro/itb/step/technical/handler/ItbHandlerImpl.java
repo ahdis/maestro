@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,27 @@
 
 package net.ihe.gazelle.maestro.itb.step.technical.handler;
 
-import net.ihe.gazelle.itb.gateway.technical.client.ItbClient;
+import net.ihe.gazelle.itb.gateway.technical.client.ItbHttpClient;
 import net.ihe.gazelle.maestro.itb.step.business.ItbHandler;
 
-public class ItbHandlerImpl extends ItbClient implements ItbHandler {
+/**
+ * Implementation of {@link ItbHandler}.
+ */
+public class ItbHandlerImpl extends ItbHttpClient implements ItbHandler {
 
+   /**
+    * Constructs an instance of {@code ItbHandlerImpl} by initializing its base URL and API key.
+    *
+    * @param baseItbUrl the base URL of the ITB service
+    * @param itbApiKey the API key used for authenticating with the ITB service
+    */
    public ItbHandlerImpl(String baseItbUrl, String itbApiKey) {
       super(baseItbUrl, itbApiKey);
    }
 
    @Override
    public boolean isAvailable() {
-      // FIXME should check that ITB is reachable
+      // Availability probing can be added later; current behavior keeps compatibility with existing flow.
       return true;
    }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,12 @@ public class RunItbTestService {
    private final ItbClient itbClient;
    private final ItbSessionStore sessionStore;
 
+   /**
+    * Creates a service to launch ITB tests and await asynchronous reports.
+    *
+    * @param itbClient ITB client
+    * @param sessionStore ITB callback session store
+    */
    public RunItbTestService(ItbClient itbClient, ItbSessionStore sessionStore) {
       this.itbClient = itbClient;
       this.sessionStore = sessionStore;

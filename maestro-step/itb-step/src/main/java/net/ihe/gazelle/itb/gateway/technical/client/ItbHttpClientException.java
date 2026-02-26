@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,15 @@
 
 package net.ihe.gazelle.itb.gateway.technical.client;
 
+/**
+ * Exception thrown when HTTP exchanges with ITB fail.
+ */
 public class ItbHttpClientException extends RuntimeException {
+    /**
+     * Creates an exception with message.
+     *
+     * @param message error message
+     */
     public ItbHttpClientException(String message) {
         super(message);
     }
