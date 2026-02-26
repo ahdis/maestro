@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,10 @@
 
 package net.ihe.gazelle.maestro.api.technical.dto.report;
 
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import net.ihe.gazelle.maestro.api.business.testreport.TestCounters;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -43,13 +46,13 @@ public class TestCountersDTO implements DTO<TestCounters> {
    }
 
    public TestCountersDTO(TestCounters testCounters) {
-      this.testCounters = testCounters;
+      this.testCounters = new TestCounters(testCounters);
    }
 
    @Override
    @JsonIgnore
    public TestCounters getBusinessObject() {
-      return testCounters;
+      return new TestCounters(testCounters);
    }
 
    @Schema(

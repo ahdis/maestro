@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,27 +26,58 @@ public class TestSuite {
     private String suiteID;
     private List<Parameter> parameters;
 
+    /**
+     * Creates a test suite selector with identifier.
+     *
+     * @param suiteID test suite identifier
+     */
     public TestSuite(String suiteID) {
         this.suiteID = suiteID;
     }
 
+    /**
+     * Creates a test suite selector with identifier and parameters.
+     *
+     * @param suiteID test suite identifier
+     * @param parameters test suite parameters
+     */
     public TestSuite(String suiteID, List<Parameter> parameters) {
         this.suiteID = suiteID;
         this.parameters = parameters;
     }
 
+    /**
+     * Returns test suite identifier.
+     *
+     * @return test suite identifier
+     */
     public String getSuiteID() {
         return suiteID;
     }
 
+    /**
+     * Sets test suite identifier.
+     *
+     * @param suiteID test suite identifier
+     */
     public void setSuiteID(String suiteID) {
         this.suiteID = suiteID;
     }
 
+    /**
+     * Returns test suite parameters.
+     *
+     * @return test suite parameters
+     */
     public List<Parameter> getParameters() {
         return parameters;
     }
 
+    /**
+     * Sets test suite parameters.
+     *
+     * @param parameters test suite parameters
+     */
     public void setParameters(List<Parameter> parameters) {
         this.parameters = parameters;
     }

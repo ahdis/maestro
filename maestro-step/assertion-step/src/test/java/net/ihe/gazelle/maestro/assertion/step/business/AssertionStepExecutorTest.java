@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,6 @@ import net.ihe.gazelle.maestro.spi.business.StepRun;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class AssertionStepExecutorTest {
 
     @Test
-    void execute_assert_equals_passed() throws Exception {
+    void execute_assert_equals_passed() {
         AssertEqualsStepExecutor runner = new AssertEqualsStepExecutor();
         Step step = buildStep(AssertEqualsStepDefinition.TYPE);
         Property expected = new StringProperty(AssertEqualsStepDefinition.EXPECTED, "Expected");
@@ -47,8 +45,7 @@ class AssertionStepExecutorTest {
         step.setProperties(List.of(expected, actual));
         StepRun stepRun = new StepRun(step, List.of());
 
-        CompletableFuture<StepRunReport> future = runner.execute(stepRun);
-        StepRunReport report = future.get(1, TimeUnit.SECONDS);
+        StepRunReport report = runner.execute(stepRun);
 
         assertEquals(step.getName(), report.getStepName());
         assertEquals(AssertEqualsStepDefinition.TYPE, report.getType());
@@ -57,7 +54,7 @@ class AssertionStepExecutorTest {
     }
 
     @Test
-    void execute_assert_equals_failed() throws Exception {
+    void execute_assert_equals_failed() {
         AssertEqualsStepExecutor runner = new AssertEqualsStepExecutor();
         Step step = buildStep(AssertEqualsStepDefinition.TYPE);
         Property expected = new StringProperty(AssertEqualsStepDefinition.EXPECTED, "Expected");
@@ -65,8 +62,7 @@ class AssertionStepExecutorTest {
         step.setProperties(List.of(expected, actual));
         StepRun stepRun = new StepRun(step, List.of());
 
-        CompletableFuture<StepRunReport> future = runner.execute(stepRun);
-        StepRunReport report = future.get(1, TimeUnit.SECONDS);
+        StepRunReport report = runner.execute(stepRun);
 
         assertEquals(step.getName(), report.getStepName());
         assertEquals(AssertEqualsStepDefinition.TYPE, report.getType());
@@ -75,7 +71,7 @@ class AssertionStepExecutorTest {
     }
 
     @Test
-    void execute_assert_contains_passed() throws Exception {
+    void execute_assert_contains_passed() {
         AssertContainsStepExecutor runner = new AssertContainsStepExecutor();
         Step step = buildStep(AssertContainsStepDefinition.TYPE);
         Property expected = new StringProperty(AssertEqualsStepDefinition.EXPECTED, "Expected");
@@ -83,8 +79,7 @@ class AssertionStepExecutorTest {
         step.setProperties(List.of(expected, actual));
         StepRun stepRun = new StepRun(step, List.of());
 
-        CompletableFuture<StepRunReport> future = runner.execute(stepRun);
-        StepRunReport report = future.get(1, TimeUnit.SECONDS);
+        StepRunReport report = runner.execute(stepRun);
 
         assertEquals(step.getName(), report.getStepName());
         assertEquals(AssertContainsStepDefinition.TYPE, report.getType());
@@ -93,7 +88,7 @@ class AssertionStepExecutorTest {
     }
 
     @Test
-    void execute_assert_contains_failed() throws Exception {
+    void execute_assert_contains_failed() {
         AssertContainsStepExecutor runner = new AssertContainsStepExecutor();
         Step step = buildStep(AssertContainsStepDefinition.TYPE);
         Property expected = new StringProperty(AssertEqualsStepDefinition.EXPECTED, "Expected");
@@ -101,8 +96,7 @@ class AssertionStepExecutorTest {
         step.setProperties(List.of(expected, actual));
         StepRun stepRun = new StepRun(step, List.of());
 
-        CompletableFuture<StepRunReport> future = runner.execute(stepRun);
-        StepRunReport report = future.get(1, TimeUnit.SECONDS);
+        StepRunReport report = runner.execute(stepRun);
 
         assertEquals(step.getName(), report.getStepName());
         assertEquals(AssertContainsStepDefinition.TYPE, report.getType());

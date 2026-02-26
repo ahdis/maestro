@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -177,6 +177,20 @@ public class StepRunReport implements Serializable {
     */
    public List<Property> getOutputs() {
       return new ArrayList<>(outputs);
+   }
+
+   /**
+    * Get a single output property by its name.
+    * @param name the name of the output property to retrieve
+    * @param <T> the expected type of the output property
+    * @return the output property with the specified name, or null if no such property exists
+    */
+   @SuppressWarnings("unchecked")
+   public <T extends Property> T getOutput(String name) {
+      return (T) outputs.stream()
+            .filter(property -> property.getName().equals(name))
+            .findFirst()
+            .orElse(null);
    }
 
    /**

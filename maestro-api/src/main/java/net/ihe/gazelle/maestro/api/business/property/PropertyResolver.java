@@ -1,3 +1,19 @@
+/*
+ * Copyright 2026 IHE International.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.ihe.gazelle.maestro.api.business.property;
 
 import java.util.Collection;
@@ -42,13 +58,25 @@ public class PropertyResolver {
          assertNotALoop(visited, refName);
          Property referencedProperty = getPropertyByName(properties, refName);
          assertTypeMatch(property, referencedProperty);
-         // once we identify the referenced property, we immediatly resolve it to detect if there is a circular
+         // once we identify the referenced property, we immediately resolve it to detect if there is a circular
          // reference
          if (referencedProperty.isReference()) {
             supplyValue(referencedProperty, properties, visited);
          }
+         propagateByteArrayMetadata(property, referencedProperty);
          referenceValue.supply(referencedProperty::getValue);
          visited.remove(refName);
+      }
+   }
+
+   private static void propagateByteArrayMetadata(Property property, Property referencedProperty) {
+      if (property instanceof ByteArrayProperty target && referencedProperty instanceof ByteArrayProperty source) {
+         if (target.getFileName() == null || target.getFileName().isBlank()) {
+            target.setFileName(source.getFileName());
+         }
+         if (target.getMimeType() == null || target.getMimeType().isBlank()) {
+            target.setMimeType(source.getMimeType());
+         }
       }
    }
 

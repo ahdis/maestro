@@ -1,19 +1,41 @@
+/*
+ * Copyright 2026 IHE International.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.ihe.gazelle.maestro.validation.step.technical.record;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
+import net.ihe.gazelle.maestro.api.business.property.PropertyBindingPayload;
+import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
-import net.ihe.gazelle.maestro.spi.business.recording.*;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+import net.ihe.gazelle.maestro.spi.business.recording.FutureReferenceCallbackRegistry;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlan;
+import net.ihe.gazelle.maestro.spi.business.recording.plan.FutureReferencePlan;
+import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemPlan;
+import net.ihe.gazelle.maestro.spi.business.recording.plan.MaestroRefType;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;
-import net.ihe.gazelle.security.business.acl.AccessControlList;
+import net.ihe.gazelle.modelmarshaller.technical.marshalling.MarshallingException;
+import net.ihe.gazelle.modelmarshaller.technical.marshalling.TextMarshaller;
 import net.ihe.gazelle.validation.v2.api.business.Input;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,120 +45,178 @@ class ValidationStepOutputDissectorTest {
     private final ValidationStepOutputDissector dissector = new ValidationStepOutputDissector();
 
     @Test
-    void shouldReturnEmptyProjectionWhenNoValidationReportProperty() {
+    void shouldCreateNoReferenceWhenNoValidationReportProperty() {
         StepRunReport step = new StepRunReport();
-        StepOutputProjection projection = dissector.dissect(new StepOutputContext(step, new AccessControlList()));
+        Fixture fixture = newFixture(step);
 
-        assertNotNull(projection);
-        assertTrue(projection.items().isEmpty());
-        assertTrue(projection.attachments().isEmpty());
-        assertTrue(projection.propertyMutations().isEmpty());
+        dissector.dissect(fixture.stepOutputPlan());
+
+        assertTrue(fixture.rootPlan().futureReferencePlans().isEmpty());
     }
 
     @Test
-    void shouldCreateReportItemAndAttachmentsForInputsWithContent() throws Exception {
+    void shouldCreateReportItemAndSynthesizeValidationInputsFromBindings() throws Exception {
         SampleReport sample = sampleReport();
         StepRunReport step = new StepRunReport()
-                .addOutput(new ByteArrayProperty(ValidationStepDefinition.REPORT, sample.serializedReport()));
+              .addOutput(new ByteArrayProperty(ValidationStepDefinition.REPORT, sample.serializedReport()))
+              .addOutput(new StringProperty(PropertyBindingPayload.PROPERTY_NAME, sample.propertyBindingPayload()));
+        Fixture fixture = newFixture(step);
 
-        StepOutputProjection projection = dissector.dissect(new StepOutputContext(step, new AccessControlList()));
+        dissector.dissect(fixture.stepOutputPlan());
 
-        assertEquals(1, projection.items().size(), "One validation report item expected");
-        ItemPlan reportPlan = projection.items().get(0);
-        assertEquals(ValidationStepDefinition.REPORT, reportPlan.item().type());
+        assertEquals(1, fixture.rootPlan().futureReferencePlans().size(), "One report reference expected");
+        FutureReferencePlan<TestReport> reportReference = fixture.rootPlan().futureReferencePlans().getFirst();
+        assertEquals(ValidationStepDefinition.REPORT, reportReference.referencePlan().getName());
+        assertEquals(MaestroRefType.ITEM_ID, reportReference.referencePlan().getRefType());
 
-        assertEquals(1, projection.attachments().size(), "Only inputs with content should become attachments");
-        AttachmentPlan attachmentPlan = projection.attachments().getFirst();
-        assertEquals(-1, attachmentPlan.outputIndex());
-        assertNull(attachmentPlan.propertyFactory(), "Detached attachments must not target a step output");
-        assertArrayEquals(sample.inputPayload(), attachmentPlan.attachment().content());
+        @SuppressWarnings("unchecked")
+        ItemPlan<ValidationReport> reportPlan = (ItemPlan<ValidationReport>) reportReference.referencePlan().getTarget();
+        assertEquals(ValidationStepDefinition.REPORT, reportPlan.type());
 
-        assertEquals(1, projection.propertyMutations().size());
-        PropertyMutation mutation = projection.propertyMutations().getFirst();
-        assertEquals(0, mutation.outputIndex());
-        assertEquals(0, mutation.sourceItemIndex(), "Single report item should be the mutation source");
-        assertReplacementItemType(mutation, ValidationStepDefinition.REPORT);
-
-        JsonNode content = OBJECT_MAPPER.readTree(reportPlan.item().content());
-        JsonNode inputs = content.get("inputs");
-        assertNotNull(inputs);
-        assertEquals(2, inputs.size());
-        JsonNode attachedInput = inputs.get(0);
-        assertEquals("payload-input", attachedInput.get("id").asText());
-        assertNull(attachedInput.get("content"), "Payload should be stripped");
-        assertNull(attachedInput.get("itemId"));
+        assertTrue(reportPlan.futureReferencePlans().isEmpty(), "References are added when callback resolves");
+        ValidationReport report = reportPlan.itemObject();
+        assertNotNull(report.getInputs());
+        assertEquals(1, report.getInputs().size());
+        assertEquals("payload-input", report.getInputs().getFirst().getId());
+        assertNull(report.getInputs().getFirst().getItemId());
+        assertNull(report.getInputs().getFirst().getLocation());
+        assertNull(step.getOutput(PropertyBindingPayload.PROPERTY_NAME), "Ephemeral propertyBinding output must be removed");
     }
 
     @Test
-    void shouldStripInputPayloadFromSerializedReportContent() throws Exception {
+    void shouldReplaceOutputWithItemReferenceWhenPersisted() throws Exception {
         SampleReport sample = sampleReport();
         StepRunReport step = new StepRunReport()
-                .addOutput(new ByteArrayProperty(ValidationStepDefinition.REPORT, sample.serializedReport()));
+              .addOutput(new ByteArrayProperty(ValidationStepDefinition.REPORT, sample.serializedReport()))
+              .addOutput(new StringProperty(PropertyBindingPayload.PROPERTY_NAME, sample.propertyBindingPayload()));
+        Fixture fixture = newFixture(step);
 
-        StepOutputProjection projection = dissector.dissect(new StepOutputContext(step, new AccessControlList()));
-        String persistedContent = projection.items().getFirst().item().content();
+        dissector.dissect(fixture.stepOutputPlan());
+        FutureReferencePlan<TestReport> reportReference = fixture.rootPlan().futureReferencePlans().getFirst();
+        reportReference.mutation().mutateReference(new TestReport(), reportReference.referencePlan().getName(), "itm-1");
 
-        assertNotNull(persistedContent);
-        assertFalse(persistedContent.contains(sample.encodedPayload()),
-                "Detached attachment payload must not remain in the stored report JSON");
+        ByteArrayItemProperty output = (ByteArrayItemProperty) step.getOutputs().getFirst();
+        assertEquals("http://dh/items/itm-1", output.getReference());
+        assertNull(output.getValue());
+        assertEquals(ValidationStepDefinition.REPORT, output.getItemType());
     }
 
     @Test
-    void shouldPopulateAttachmentIdsInReportContentDuringMutation() throws Exception {
-        SampleReport sample = sampleReport();
+    void shouldLinkSynthesizedInputsWhenAttachmentIdIsResolved() throws Exception {
+        ValidationReport reportWithoutInputs = new ValidationReport().setUuid("validation-report-id");
+        String payload = OBJECT_MAPPER.writeValueAsString(new PropertyBindingPayload()
+              .setStepType(ValidationStepDefinition.TYPE)
+              .addBinding(new PropertyBindingPayload.Binding()
+                    .setTargetKind("validationInput")
+                    .setTargetId("payload-input")
+                    .setReferenceName("inputFile1")
+                    .setPropertyName("contentToValidate")));
+
         StepRunReport step = new StepRunReport()
-                .addOutput(new ByteArrayProperty(ValidationStepDefinition.REPORT, sample.serializedReport()));
+              .addOutput(new ByteArrayProperty(ValidationStepDefinition.REPORT, OBJECT_MAPPER.writeValueAsBytes(reportWithoutInputs)))
+              .addOutput(new StringProperty(PropertyBindingPayload.PROPERTY_NAME, payload));
+        Fixture fixture = newFixture(step);
 
-        StepOutputProjection projection = dissector.dissect(new StepOutputContext(step, new AccessControlList()));
-        ItemPlan reportPlan = projection.items().getFirst();
-
-        assertNotNull(reportPlan.contentMutator(), "Expected content mutator to be provided");
-
-        ContentMutationContext mutationContext = new ContentMutationContext(
-                null,
-                java.util.Map.of("payload-input", "att-42"),
-                "http://dh");
-
-        String mutated = reportPlan.contentMutator().mutate(reportPlan.item().content(), mutationContext);
-        JsonNode root = OBJECT_MAPPER.readTree(mutated);
-        JsonNode inputs = root.get("inputs");
-        assertNotNull(inputs);
-        JsonNode first = inputs.get(0);
-        assertEquals("att-42", first.get("itemId").asText());
-        assertEquals("/attachments/att-42", first.get("location").asText());
-        assertNull(first.get("content"));
+        dissector.dissect(fixture.stepOutputPlan());
+        @SuppressWarnings("unchecked")
+        ItemPlan<ValidationReport> reportPlan =
+              (ItemPlan<ValidationReport>) fixture.rootPlan().futureReferencePlans().getFirst().referencePlan().getTarget();
+        fixture.callbackRegistry().notifyResolved("inputFile1", "att-77");
+        assertNotNull(reportPlan.itemObject().getInputs());
+        assertEquals(1, reportPlan.itemObject().getInputs().size());
+        assertEquals("payload-input", reportPlan.itemObject().getInputs().getFirst().getId());
+        assertEquals("att-77", reportPlan.itemObject().getInputs().getFirst().getItemId());
+        assertEquals("/attachments/att-77", reportPlan.itemObject().getInputs().getFirst().getLocation());
+        assertTrue(reportPlan.futureReferencePlans().stream()
+              .map(FutureReferencePlan::referencePlan)
+              .anyMatch(referencePlan ->
+                    "payload-input".equals(referencePlan.getName())
+                          && referencePlan.getRefType() == MaestroRefType.ATTACHMENT
+                          && "att-77".equals(referencePlan.getTarget())));
     }
 
-    private void assertReplacementItemType(PropertyMutation mutation, String expectedItemType) {
-        assertNotNull(mutation.factory());
-        var property = mutation.factory().create("item-1", "http://dh/items/item-1");
-        assertInstanceOf(ByteArrayItemProperty.class, property);
-        ByteArrayItemProperty itemProperty = (ByteArrayItemProperty) property;
-        assertEquals(expectedItemType, itemProperty.getItemType());
-        assertEquals("http://dh/items/item-1", itemProperty.getReference());
-        assertNull(itemProperty.getValue());
+    private Fixture newFixture(StepRunReport stepRunReport) {
+        ItemPlan<TestReport> rootPlan = new ItemPlan<>("TEST_REPORT", new TestReport(), new TestReportMarshaller());
+        TestFutureReferenceCallbackRegistry callbackRegistry = new TestFutureReferenceCallbackRegistry();
+        StepOutputPlan stepOutputPlan = new StepOutputPlan(rootPlan, stepRunReport, "http://dh", callbackRegistry);
+        return new Fixture(rootPlan, stepOutputPlan, callbackRegistry);
     }
 
     private SampleReport sampleReport() throws Exception {
         byte[] payload = "validation-input".getBytes(StandardCharsets.UTF_8);
         Input inputWithContent = new Input()
-                .setId("payload-input")
-                .setContent(payload);
+              .setId("payload-input")
+              .setContent(payload);
         Input inputWithoutContent = new Input()
-                .setId("metadata-input");
+              .setId("metadata-input");
 
         ValidationReport report = new ValidationReport()
-                .setUuid("validation-report-id")
-                .addInput(inputWithContent)
-                .addInput(inputWithoutContent);
+              .setUuid("validation-report-id")
+              .addInput(inputWithContent)
+              .addInput(inputWithoutContent);
 
-        byte[] serialized = OBJECT_MAPPER.writeValueAsBytes(report);
-        return new SampleReport(serialized, payload);
+        PropertyBindingPayload propertyBindingPayload = new PropertyBindingPayload()
+              .setStepType(ValidationStepDefinition.TYPE)
+              .addBinding(new PropertyBindingPayload.Binding()
+                    .setTargetKind("validationInput")
+                    .setTargetId("payload-input")
+                    .setReferenceName("inputFile1")
+                    .setPropertyName("contentToValidate"));
+
+        return new SampleReport(
+              OBJECT_MAPPER.writeValueAsBytes(report),
+              OBJECT_MAPPER.writeValueAsString(propertyBindingPayload)
+        );
     }
 
-    private record SampleReport(byte[] serializedReport, byte[] inputPayload) {
-        String encodedPayload() {
-            return Base64.getEncoder().encodeToString(inputPayload);
+    private record SampleReport(byte[] serializedReport, String propertyBindingPayload) {
+    }
+
+    private record Fixture(ItemPlan<TestReport> rootPlan,
+                           StepOutputPlan stepOutputPlan,
+                           TestFutureReferenceCallbackRegistry callbackRegistry) {
+    }
+
+    private static final class TestReportMarshaller implements TextMarshaller<TestReport> {
+        @Override
+        public String marshallAsString(TestReport report) throws MarshallingException {
+            return "{}";
+        }
+
+        @Override
+        public TestReport unmarshall(String payload) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public byte[] marshall(TestReport report) throws MarshallingException {
+            return marshallAsString(report).getBytes(StandardCharsets.UTF_8);
+        }
+
+        @Override
+        public TestReport unmarshall(byte[] payload) {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    private static final class TestFutureReferenceCallbackRegistry implements FutureReferenceCallbackRegistry {
+        private final java.util.Map<String, java.util.List<java.util.function.BiConsumer<String, String>>> callbacksByReferenceName =
+              new java.util.HashMap<>();
+
+        @Override
+        public void registerCallback(String referenceName, java.util.function.BiConsumer<String, String> callback) {
+            callbacksByReferenceName.computeIfAbsent(referenceName, key -> new java.util.ArrayList<>()).add(callback);
+        }
+
+        @Override
+        public void notifyResolved(String referenceName, String referenceId) {
+            java.util.List<java.util.function.BiConsumer<String, String>> callbacks = callbacksByReferenceName.get(referenceName);
+            if (callbacks == null) {
+                return;
+            }
+            for (java.util.function.BiConsumer<String, String> callback : callbacks) {
+                callback.accept(referenceName, referenceId);
+            }
         }
     }
 }

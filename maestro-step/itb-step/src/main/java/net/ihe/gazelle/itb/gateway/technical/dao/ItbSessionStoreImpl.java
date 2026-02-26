@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * In-memory implementation of {@link ItbSessionStore}.
+ */
 public class ItbSessionStoreImpl implements ItbSessionStore {
 
 
     private static final Map<String, CompletableFuture<ItbReporting>> REPORT_FUTURES = new HashMap<>();
 
+    /**
+     * Creates in-memory session store.
+     */
     public ItbSessionStoreImpl() {
-        // Private constructor to prevent instantiation
+        // Default constructor
     }
 
     @Override

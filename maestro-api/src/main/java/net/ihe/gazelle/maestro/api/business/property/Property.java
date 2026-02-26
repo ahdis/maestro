@@ -1,3 +1,19 @@
+/*
+ * Copyright 2026 IHE International.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.ihe.gazelle.maestro.api.business.property;
 
 import java.io.Serial;
@@ -114,8 +130,36 @@ public abstract class Property implements Serializable {
     * @return {@code true} if the value holder is an instance of {@code ReferenceValue},
     *         otherwise {@code false}.
     */
-   boolean isReference() {
+   public boolean isReference() {
       return valueHolder instanceof ReferenceValue;
+   }
+
+   /**
+    * Returns the referenced property name when this property is a reference.
+    *
+    * @return referenced property name, or {@code null} when this property is not a reference
+    */
+   public String getReferenceName() {
+      if (!isReference()) {
+         return null;
+      }
+      return ((ReferenceValue) valueHolder).getReference();
+   }
+
+   /**
+    * Returns a value suitable for property copy operations.
+    * <p>
+    * For reference properties, this returns the original reference expression (e.g. {@code ${inputName}})
+    * so the copied property preserves provenance metadata.
+    * For direct values, this returns the resolved value as-is.
+    *
+    * @return copy-safe value preserving references when applicable
+    */
+   protected Serializable getCopyValue() {
+      if (valueHolder instanceof ReferenceValue referenceValue && !referenceValue.isSupplied()) {
+         return ReferenceValue.format(getReferenceName());
+      }
+      return getValue();
    }
 
    /**

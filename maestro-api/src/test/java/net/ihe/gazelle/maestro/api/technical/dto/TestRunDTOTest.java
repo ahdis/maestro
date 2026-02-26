@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,15 @@
 package net.ihe.gazelle.maestro.api.technical.dto;
 
 import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.property.PropertyResolver;
 import net.ihe.gazelle.maestro.api.business.property.UnsupportedTestProperty;
+import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.technical.dto.property.PropertyDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestRunDTO;
+import net.ihe.gazelle.security.business.acl.AccessControlList;
 import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.DeserializationException;
@@ -30,6 +33,7 @@ import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.format.DateTimeParseException;
@@ -58,6 +62,27 @@ class TestRunDTOTest {
         testRuns.forEach(this::resolveReferencedProperties);
 
         List<TestRunDTO> testRunDTOS = testRuns.stream().map(TestRunDTO::new).toList();
+        assertDoesNotThrow(() -> SER_DES.serializeAsString(testRunDTOS));
+    }
+
+    @Test
+    void shouldSerializeUnresolvedByteArrayReferences() {
+        TestRun testRun = new TestRun()
+              .setTest(new net.ihe.gazelle.maestro.api.business.test.Test()
+                    .setId("byte-array-reference-test")
+                    .setName("byte-array-reference-test")
+                    .setSteps(List.of(
+                          new Step()
+                                .setName("step")
+                                .setType("MOCK")
+                                .setProperties(List.of(
+                                      new ByteArrayProperty("contentToValidate", "${inputFile1}")
+                                ))
+                    )))
+              .setAccessControlList(new AccessControlList())
+              .setInputs(List.of(new ByteArrayProperty("inputFile1", "payload".getBytes(StandardCharsets.UTF_8))));
+        List<TestRunDTO> testRunDTOS = List.of(new TestRunDTO(testRun));
+
         assertDoesNotThrow(() -> SER_DES.serializeAsString(testRunDTOS));
     }
 

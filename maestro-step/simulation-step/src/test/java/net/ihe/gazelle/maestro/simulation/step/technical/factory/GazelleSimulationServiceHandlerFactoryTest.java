@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,9 +69,10 @@ class GazelleSimulationServiceHandlerFactoryTest {
         providedInterface.setInterfaceVersion("1.0.0");
         providedInterface.setInterfaceName("test");
         ConfigProviderMock configProvider = new ConfigProviderMock();
+        HandlerContext handlerContext = new HandlerContext("simulator");
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> factory.createHandler(new HandlerContext("simulator"), providedInterface, configProvider)
+                () -> factory.createHandler(handlerContext, providedInterface, configProvider)
         );
         assertEquals("Service test has no bindings", exception.getMessage());
     }

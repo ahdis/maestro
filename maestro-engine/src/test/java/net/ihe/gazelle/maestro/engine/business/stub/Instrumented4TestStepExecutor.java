@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,12 @@ import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 import net.ihe.gazelle.maestro.spi.business.StepRun;
 
-import java.util.concurrent.CompletableFuture;
-
 import static net.ihe.gazelle.maestro.api.business.testreport.StepResult.PASSED;
 
 public class Instrumented4TestStepExecutor implements StepExecutor {
 
     @Override
-    public CompletableFuture<StepRunReport> execute(StepRun stepRun) {
+    public StepRunReport execute(StepRun stepRun) {
         stepRun.getPropertyValue(Instrumented4TestStepDefinition.REQUIRED_INPUT);
 
         StepRunReportBuilder reportBuilder = new StepRunReportBuilder()
@@ -36,6 +34,6 @@ public class Instrumented4TestStepExecutor implements StepExecutor {
                 .setType(stepRun.getType())
                 .setResult(PASSED);
 
-        return CompletableFuture.completedFuture(reportBuilder.build());
+        return reportBuilder.build();
     }
 }

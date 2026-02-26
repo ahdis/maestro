@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,11 @@ public class ItbReportCallbackController {
 
     private final ItbReportingService itbReportingService;
 
+    /**
+     * Creates callback controller.
+     *
+     * @param itbReportingService service handling ITB callbacks
+     */
     @Inject
     public ItbReportCallbackController(ItbReportingService itbReportingService) {
         this.itbReportingService = itbReportingService;
@@ -44,6 +49,9 @@ public class ItbReportCallbackController {
 
     /**
      * Method to trigger report generation
+     *
+     * @param itbReporting ITB callback payload
+     * @return HTTP response describing callback handling result
      */
     @POST
     @Path("/report")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,39 +16,48 @@
 
 package net.ihe.gazelle.maestro.simulation.step.technical.record;
 
-import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
+import net.ihe.gazelle.maestro.api.business.property.PropertyBindingPayload;
+import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepDefinition;
-import net.ihe.gazelle.maestro.spi.business.recording.*;
+import net.ihe.gazelle.maestro.spi.business.recording.FutureReferenceCallbackRegistry;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlan;
+import net.ihe.gazelle.maestro.spi.business.recording.plan.FutureReferencePlan;
+import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemPlan;
+import net.ihe.gazelle.maestro.spi.business.recording.plan.MaestroRefType;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
+import net.ihe.gazelle.modelmarshaller.technical.marshalling.MarshallingException;
+import net.ihe.gazelle.modelmarshaller.technical.marshalling.TextMarshaller;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
-import net.ihe.gazelle.security.business.acl.AccessControlList;
 import net.ihe.gazelle.simulation.business.callback.*;
 import net.ihe.gazelle.simulation.jaxrs.api.technical.dto.callback.SimulationReportDTO;
 import net.ihe.gazelle.validation.v2.api.business.Input;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class SimulationStepOutputDissectorTest {
 
    private static final TextSerDes SER_DES = new JacksonSerDes();
+   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
    private final SimulationStepOutputDissector dissector = new SimulationStepOutputDissector();
 
    @Test
-   void shouldPersistValidationReportAsSubItemWithAttachmentsAndMutations() {
-      // Prepare validation report v2 with an input payload
+   void shouldPersistValidationReportAsSubItemAndSynthesizeInputsFromBindings() {
       net.ihe.gazelle.validation.v2.api.business.report.ValidationReport validationReportV2 =
             new net.ihe.gazelle.validation.v2.api.business.report.ValidationReport()
-            .addInput(new Input().setId("input-1").setContent("data".getBytes()));
+                  .addInput(new Input().setId("input-1").setContent("data".getBytes()));
       byte[] validationContent = SER_DES.serializeAsString(
             new net.ihe.gazelle.validation.v2.api.technical.dto.report.ValidationReportDTO(validationReportV2))
-            .getBytes();
+            .getBytes(StandardCharsets.UTF_8);
 
       ValidationReport simValidation = new ValidationReport()
             .setValidationProfileId("profile")
@@ -56,6 +65,7 @@ class SimulationStepOutputDissectorTest {
             .setContent(validationContent);
 
       TransactionReport transactionReport = new TransactionReport()
+            .setTransaction("iti-42")
             .setResult(Result.DONE)
             .setInitiator(new Role().setName("init"))
             .setResponder(new Role().setName("resp"))
@@ -65,54 +75,43 @@ class SimulationStepOutputDissectorTest {
             .setResult(Result.DONE)
             .setTransactionReports(List.of(transactionReport));
 
-      byte[] simulationBytes = SER_DES.serializeAsString(new SimulationReportDTO(simulationReport)).getBytes();
       StepRunReport step = new StepRunReport()
-            .addOutput(new ByteArrayProperty(SimulationStepDefinition.REPORT, simulationBytes));
+            .addOutput(new ByteArrayProperty(SimulationStepDefinition.REPORT, simulationBytes(simulationReport)))
+            .addOutput(new StringProperty(PropertyBindingPayload.PROPERTY_NAME,
+                  "{\"schemaVersion\":1,\"stepType\":\"SIMULATION\",\"bindings\":[{\"targetKind\":\"simulationParameter\",\"targetId\":\"input-1\",\"referenceName\":\"inputFile1\",\"propertyName\":\"p-file\"}]}"));
+      Fixture fixture = newFixture(step);
 
-      StepOutputProjection projection = dissector.dissect(new StepOutputContext(step, new AccessControlList()));
+      dissector.dissect(fixture.stepOutputPlan());
 
-      // Items: validation sub-item + simulation root
-      assertEquals(2, projection.items().size());
-      ItemPlan validationItem = projection.items().getFirst();
-      ItemPlan simulationItem = projection.items().getLast();
-      assertEquals("VALIDATION_REPORT", validationItem.item().type());
-      assertEquals("SIMULATION_REPORT", simulationItem.item().type());
+      assertEquals(1, fixture.rootPlan().futureReferencePlans().size());
+      @SuppressWarnings("unchecked")
+      ItemPlan<SimulationReport> simulationPlan =
+            (ItemPlan<SimulationReport>) fixture.rootPlan().futureReferencePlans().getFirst().referencePlan().getTarget();
 
-      assertEquals(1, projection.propertyMutations().size());
-      PropertyMutation outputMutation = projection.propertyMutations().getFirst();
-      assertEquals(0, outputMutation.outputIndex());
-      assertEquals(simulationItemIndex(projection), outputMutation.sourceItemIndex());
-      assertReplacementItemType(outputMutation, "SIMULATION_REPORT");
+      assertEquals(1, simulationPlan.futureReferencePlans().size());
+      FutureReferencePlan<SimulationReport> validationRef = simulationPlan.futureReferencePlans().getFirst();
+      @SuppressWarnings("unchecked")
+      ItemPlan<net.ihe.gazelle.validation.v2.api.business.report.ValidationReport> validationPlan =
+            (ItemPlan<net.ihe.gazelle.validation.v2.api.business.report.ValidationReport>)
+                  validationRef.referencePlan().getTarget();
 
-      // Attachments: validation input content
-      assertEquals(1, projection.attachments().size());
-      AttachmentPlan attachmentPlan = projection.attachments().getFirst();
-      assertEquals("input-1", attachmentPlan.referenceName());
-      assertEquals("VALIDATION_INPUT", attachmentPlan.referenceType());
+      assertTrue(validationPlan.futureReferencePlans().isEmpty());
+      assertNotNull(validationPlan.itemObject().getInputs());
+      assertEquals(1, validationPlan.itemObject().getInputs().size());
+      assertEquals("input-1", validationPlan.itemObject().getInputs().getFirst().getId());
+      fixture.callbackRegistry().notifyResolved("inputFile1", "att-1");
+      assertEquals("att-1", validationPlan.itemObject().getInputs().getFirst().getItemId());
+      assertEquals("/attachments/att-1", validationPlan.itemObject().getInputs().getFirst().getLocation());
+      assertTrue(validationPlan.futureReferencePlans().stream()
+            .map(FutureReferencePlan::referencePlan)
+            .anyMatch(referencePlan ->
+                  "input-1".equals(referencePlan.getName())
+                        && referencePlan.getRefType() == MaestroRefType.ATTACHMENT
+                        && "att-1".equals(referencePlan.getTarget())));
 
-      // Validation content mutation sets attachment references
-      ContentMutationContext validationCtx = new ContentMutationContext(
-            null,
-            Map.of("input-1", "att-1"),
-            "http://dh");
-      String mutatedValidationContent = validationItem.contentMutator().mutate(validationItem.item().content(), validationCtx);
-      net.ihe.gazelle.validation.v2.api.business.report.ValidationReport mutatedValidation =
-            SER_DES.deserialize(mutatedValidationContent.getBytes(),
-                        net.ihe.gazelle.validation.v2.api.technical.dto.report.ValidationReportDTO.class)
-                  .getBusinessObject();
-      Input mutatedInput = mutatedValidation.getInputs().getFirst();
-      assertNull(mutatedInput.getContent());
-      assertEquals("att-1", mutatedInput.getItemId());
-      assertEquals("/attachments/att-1", mutatedInput.getLocation());
-
-      // Simulation content mutation replaces validation report content with reference
-      ContentMutationContext simCtx = new ContentMutationContext(
-            Map.of("validation-report-1", "itm-2"),
-            Map.of("input-1", "att-1"),
-            "http://dh");
-      String mutatedSimulationContent = simulationItem.contentMutator().mutate(simulationItem.item().content(), simCtx);
-      SimulationReport mutatedSim = SER_DES.deserialize(mutatedSimulationContent.getBytes(), SimulationReportDTO.class).getBusinessObject();
-      ValidationReport mutatedSimValidation = mutatedSim.getTransactionReports().getFirst().getValidationReports().getFirst();
+      validationRef.mutation().mutateReference(simulationReport, validationRef.referencePlan().getName(), "itm-2");
+      ValidationReport mutatedSimValidation = simulationReport.getTransactionReports().getFirst()
+            .getValidationReports().getFirst();
       assertNull(mutatedSimValidation.getContent());
       assertEquals("http://dh/items/itm-2", mutatedSimValidation.getReference());
    }
@@ -133,15 +132,17 @@ class SimulationStepOutputDissectorTest {
             .setResult(Result.DONE)
             .setTransactionReports(List.of(tx));
 
-      byte[] simulationBytes = SER_DES.serializeAsString(new SimulationReportDTO(simulationReport)).getBytes();
       StepRunReport step = new StepRunReport()
-            .addOutput(new ByteArrayProperty(SimulationStepDefinition.REPORT, simulationBytes));
+            .addOutput(new ByteArrayProperty(SimulationStepDefinition.REPORT, simulationBytes(simulationReport)));
+      Fixture fixture = newFixture(step);
 
-      StepOutputProjection projection = dissector.dissect(new StepOutputContext(step, new AccessControlList()));
+      dissector.dissect(fixture.stepOutputPlan());
 
-      assertEquals(1, projection.items().size(), "Only simulation report item should be present");
-      assertTrue(projection.attachments().isEmpty());
-      assertEquals(1, projection.propertyMutations().size());
+      assertEquals(1, fixture.rootPlan().futureReferencePlans().size(), "Only simulation report should be referenced");
+      @SuppressWarnings("unchecked")
+      ItemPlan<SimulationReport> simulationPlan =
+            (ItemPlan<SimulationReport>) fixture.rootPlan().futureReferencePlans().getFirst().referencePlan().getTarget();
+      assertTrue(simulationPlan.futureReferencePlans().isEmpty());
    }
 
    @Test
@@ -159,30 +160,152 @@ class SimulationStepOutputDissectorTest {
             .setResult(Result.DONE)
             .setTransactionReports(List.of(tx));
 
-      byte[] simulationBytes = SER_DES.serializeAsString(new SimulationReportDTO(simulationReport)).getBytes();
       StepRunReport step = new StepRunReport()
-            .addOutput(new ByteArrayProperty(SimulationStepDefinition.REPORT, simulationBytes));
+            .addOutput(new ByteArrayProperty(SimulationStepDefinition.REPORT, simulationBytes(simulationReport)));
+      Fixture fixture = newFixture(step);
+      StepOutputPlan plan = fixture.stepOutputPlan();
 
-      assertThrows(IllegalStateException.class,
-            () -> dissector.dissect(new StepOutputContext(step, new AccessControlList())));
+      assertThrows(IllegalStateException.class, () -> dissector.dissect(plan));
    }
 
-   private void assertReplacementItemType(PropertyMutation mutation, String expectedItemType) {
-      assertNotNull(mutation.factory());
-      var property = mutation.factory().create("item-1", "http://dh/items/item-1");
-      assertInstanceOf(ByteArrayItemProperty.class, property);
-      ByteArrayItemProperty itemProperty = (ByteArrayItemProperty) property;
-      assertEquals(expectedItemType, itemProperty.getItemType());
-      assertEquals("http://dh/items/item-1", itemProperty.getReference());
-      assertNull(itemProperty.getValue());
+   @Test
+   void shouldReplaceOutputWithItemReferenceWhenPersisted() {
+      SimulationReport simulationReport = new SimulationReport()
+            .setDateTime(Instant.now())
+            .setResult(Result.DONE)
+            .setTransactionReports(List.of());
+
+      StepRunReport step = new StepRunReport()
+            .addOutput(new ByteArrayProperty(SimulationStepDefinition.REPORT, simulationBytes(simulationReport)));
+      Fixture fixture = newFixture(step);
+
+      dissector.dissect(fixture.stepOutputPlan());
+      FutureReferencePlan<TestReport> reportReference = fixture.rootPlan().futureReferencePlans().getFirst();
+      reportReference.mutation().mutateReference(new TestReport(), reportReference.referencePlan().getName(), "itm-1");
+
+      ByteArrayItemProperty output = (ByteArrayItemProperty) step.getOutputs().getFirst();
+      assertEquals("http://dh/items/itm-1", output.getReference());
+      assertNull(output.getValue());
+      assertEquals("SIMULATION_REPORT", output.getItemType());
+      assertNull(step.getOutput(PropertyBindingPayload.PROPERTY_NAME));
    }
 
-   private int simulationItemIndex(StepOutputProjection projection) {
-      for (int i = 0; i < projection.items().size(); i++) {
-         if ("SIMULATION_REPORT".equals(projection.items().get(i).item().type())) {
-            return i;
+   @Test
+   void shouldLinkNestedValidationInputsFromResolvedTestRunAttachments() throws Exception {
+      net.ihe.gazelle.validation.v2.api.business.report.ValidationReport validationReportV2 =
+            new net.ihe.gazelle.validation.v2.api.business.report.ValidationReport();
+      byte[] validationContent = SER_DES.serializeAsString(
+            new net.ihe.gazelle.validation.v2.api.technical.dto.report.ValidationReportDTO(validationReportV2))
+            .getBytes(StandardCharsets.UTF_8);
+
+      ValidationReport simValidation = new ValidationReport()
+            .setValidationProfileId("profile")
+            .setValidationResult(ValidationResult.PASSED)
+            .setContent(validationContent);
+      TransactionReport transactionReport = new TransactionReport()
+            .setTransaction("iti-42")
+            .setResult(Result.DONE)
+            .setInitiator(new Role().setName("init"))
+            .setResponder(new Role().setName("resp"))
+            .setValidationReports(List.of(simValidation));
+      SimulationReport simulationReport = new SimulationReport()
+            .setDateTime(Instant.now())
+            .setResult(Result.DONE)
+            .setTransactionReports(List.of(transactionReport));
+
+      String propertyBinding = OBJECT_MAPPER.writeValueAsString(new PropertyBindingPayload()
+            .setStepType("SIMULATION")
+            .addBinding(new PropertyBindingPayload.Binding()
+                  .setTargetKind("simulationParameter")
+                  .setTargetId("input-1")
+                  .setReferenceName("inputFile1")
+                  .setPropertyName("p-file")));
+
+      StepRunReport step = new StepRunReport()
+            .addOutput(new ByteArrayProperty(SimulationStepDefinition.REPORT, simulationBytes(simulationReport)))
+            .addOutput(new StringProperty(PropertyBindingPayload.PROPERTY_NAME, propertyBinding));
+      Fixture fixture = newFixture(step);
+
+      dissector.dissect(fixture.stepOutputPlan());
+      @SuppressWarnings("unchecked")
+      ItemPlan<SimulationReport> simulationPlan =
+            (ItemPlan<SimulationReport>) fixture.rootPlan().futureReferencePlans().getFirst().referencePlan().getTarget();
+      @SuppressWarnings("unchecked")
+      ItemPlan<net.ihe.gazelle.validation.v2.api.business.report.ValidationReport> validationPlan =
+            (ItemPlan<net.ihe.gazelle.validation.v2.api.business.report.ValidationReport>)
+                  simulationPlan.futureReferencePlans().getFirst().referencePlan().getTarget();
+
+      fixture.callbackRegistry().notifyResolved("inputFile1", "att-77");
+      net.ihe.gazelle.validation.v2.api.business.report.ValidationReport mutated = validationPlan.itemObject();
+      assertNotNull(mutated.getInputs());
+      assertEquals(1, mutated.getInputs().size());
+      assertEquals("input-1", mutated.getInputs().getFirst().getId());
+      assertEquals("att-77", mutated.getInputs().getFirst().getItemId());
+      assertEquals("/attachments/att-77", mutated.getInputs().getFirst().getLocation());
+      assertTrue(validationPlan.futureReferencePlans().stream()
+            .map(FutureReferencePlan::referencePlan)
+            .anyMatch(referencePlan ->
+                  "input-1".equals(referencePlan.getName())
+                        && referencePlan.getRefType() == MaestroRefType.ATTACHMENT
+                        && "att-77".equals(referencePlan.getTarget())));
+   }
+
+   private Fixture newFixture(StepRunReport stepRunReport) {
+      ItemPlan<TestReport> rootPlan = new ItemPlan<>("TEST_REPORT", new TestReport(), new TestReportMarshaller());
+      TestFutureReferenceCallbackRegistry callbackRegistry = new TestFutureReferenceCallbackRegistry();
+      StepOutputPlan stepOutputPlan = new StepOutputPlan(rootPlan, stepRunReport, "http://dh", callbackRegistry);
+      return new Fixture(rootPlan, stepOutputPlan, callbackRegistry);
+   }
+
+   private byte[] simulationBytes(SimulationReport simulationReport) {
+      return SER_DES.serializeAsString(new SimulationReportDTO(simulationReport)).getBytes(StandardCharsets.UTF_8);
+   }
+
+   private record Fixture(ItemPlan<TestReport> rootPlan,
+                          StepOutputPlan stepOutputPlan,
+                          TestFutureReferenceCallbackRegistry callbackRegistry) {
+   }
+
+   private static final class TestReportMarshaller implements TextMarshaller<TestReport> {
+      @Override
+      public String marshallAsString(TestReport report) throws MarshallingException {
+         return "{}";
+      }
+
+      @Override
+      public TestReport unmarshall(String payload) {
+         throw new UnsupportedOperationException();
+      }
+
+      @Override
+      public byte[] marshall(TestReport report) throws MarshallingException {
+         return marshallAsString(report).getBytes(StandardCharsets.UTF_8);
+      }
+
+      @Override
+      public TestReport unmarshall(byte[] payload) {
+         throw new UnsupportedOperationException();
+      }
+   }
+
+   private static final class TestFutureReferenceCallbackRegistry implements FutureReferenceCallbackRegistry {
+      private final java.util.Map<String, java.util.List<java.util.function.BiConsumer<String, String>>> callbacksByReferenceName =
+            new java.util.HashMap<>();
+
+      @Override
+      public void registerCallback(String referenceName, java.util.function.BiConsumer<String, String> callback) {
+         callbacksByReferenceName.computeIfAbsent(referenceName, key -> new java.util.ArrayList<>()).add(callback);
+      }
+
+      @Override
+      public void notifyResolved(String referenceName, String referenceId) {
+         java.util.List<java.util.function.BiConsumer<String, String>> callbacks = callbacksByReferenceName.get(referenceName);
+         if (callbacks == null) {
+            return;
+         }
+         for (java.util.function.BiConsumer<String, String> callback : callbacks) {
+            callback.accept(referenceName, referenceId);
          }
       }
-      throw new AssertionError("Simulation report item not found");
    }
 }
