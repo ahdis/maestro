@@ -27,9 +27,11 @@ class ItbStepDefinitionTest {
     void simulation_step_definition_test() {
         ItbStepDefinition definition = new ItbStepDefinition();
         assertEquals(ItbStepDefinition.TYPE, definition.getType());
-        assertEquals(2, definition.getSupportedInputs().size());
+        assertEquals(4, definition.getSupportedInputs().size());
         assertEquals(ItbStepDefinition.TEST_CASE, definition.getSupportedInputs().getFirst().getId());
         assertEquals(ItbStepDefinition.ACTOR_ID, definition.getSupportedInputs().get(1).getId());
+        assertEquals(ItbStepDefinition.EXECUTION_MODE, definition.getSupportedInputs().get(2).getId());
+        assertEquals(ItbStepDefinition.ITB_PAYLOAD_MODE, definition.getSupportedInputs().get(3).getId());
         assertEquals(3, definition.getOutputsDefinition().size());
         assertEquals(ByteArrayProperty.class, definition.getOutputsDefinition().get(ItbStepDefinition.XML_REPORT));
         assertEquals(ByteArrayProperty.class, definition.getOutputsDefinition().get(ItbStepDefinition.PDF_REPORT));

@@ -19,7 +19,7 @@
     <parent>
         <groupId>net.ihe.gazelle</groupId>
         <artifactId>maestro-step</artifactId>
-        <version>1.0.1-SNAPSHOT</version>
+        <version>1.0.1-GZL-10576-DTE-SNAPSHOT</version>
     </parent>
 
     <artifactId>user-interaction-step</artifactId>

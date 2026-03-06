@@ -58,7 +58,7 @@
     ]
   },
   {
-    "name": "itb",
+    "name": "ITB",
     "version": "1.0.0",
     "instanceId": "instanceId",
     "replicaId": "replicaId",
@@ -69,7 +69,7 @@
         "bindings": [
           {
             "@type": "REST",
-            "serviceUrl": "http://localhost/itb"
+            "serviceUrl": "http://localhost:port"
           }
         ]
       }

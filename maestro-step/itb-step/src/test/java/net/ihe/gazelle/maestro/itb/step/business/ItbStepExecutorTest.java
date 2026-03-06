@@ -37,6 +37,8 @@ import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ItbStepExecutorTest {
 
@@ -63,6 +65,64 @@ class ItbStepExecutorTest {
         assertEquals(StepResult.PASSED, report.getResult());
     }
 
+    @Test
+    void execute_syncMode_completesWithoutCallback() {
+        ItbHandler handler = new ItbHandlerMock(SESSION_ID);
+        ItbSessionStoreImpl store = new ItbSessionStoreImpl();
+        ItbStepExecutor runner = new ItbStepExecutor(handler, store);
+        StepRun stepRun = new StepRun(syncStep(), List.of());
+
+        StepRunReport report = runner.execute(stepRun);
+
+        assertEquals(StepResult.PASSED, report.getResult());
+        assertNotNull(report.getOutputs());
+    }
+
+    @Test
+    void execute_syncMode_doesNotDuplicateReferencedBinaryInput() {
+        ItbHandlerMock handler = new ItbHandlerMock(SESSION_ID);
+        ItbSessionStoreImpl store = new ItbSessionStoreImpl();
+        ItbStepExecutor runner = new ItbStepExecutor(handler, store);
+        StepRun stepRun = new StepRun(syncStepWithReferencedBinaryInput(),
+              List.of(new ByteArrayProperty("inputFile", "bytes".getBytes(StandardCharsets.UTF_8))));
+
+        StepRunReport report = runner.execute(stepRun);
+
+        assertEquals(StepResult.PASSED, report.getResult());
+        assertNotNull(handler.getLastStartAndWaitRequest());
+        assertNotNull(handler.getLastStartAndWaitRequest().getInputMapping());
+        List<String> inputNames = handler.getLastStartAndWaitRequest().getInputMapping()
+              .stream().map(entry -> entry.getInput().getName()).toList();
+        assertEquals(2, inputNames.size());
+        assertTrue(inputNames.contains("lab_report_fhir"));
+        assertTrue(inputNames.contains("uploadedFileName"));
+    }
+
+    @Test
+    void execute_syncMode_userInputMapMode_buildsSingleMappedInput() {
+        ItbHandlerMock handler = new ItbHandlerMock(SESSION_ID);
+        ItbSessionStoreImpl store = new ItbSessionStoreImpl();
+        ItbStepExecutor runner = new ItbStepExecutor(handler, store);
+        StepRun stepRun = new StepRun(syncStepWithReferencedBinaryInputAndMapMode(),
+              List.of(new ByteArrayProperty("inputFile", "bytes".getBytes(StandardCharsets.UTF_8))));
+
+        StepRunReport report = runner.execute(stepRun);
+
+        assertEquals(StepResult.PASSED, report.getResult());
+        assertNotNull(handler.getLastStartAndWaitRequest());
+        assertNotNull(handler.getLastStartAndWaitRequest().getInputMapping());
+        assertEquals(1, handler.getLastStartAndWaitRequest().getInputMapping().size());
+
+        var mappedInput = handler.getLastStartAndWaitRequest().getInputMapping().getFirst().getInput();
+        assertEquals("userInput", mappedInput.getName());
+        assertEquals("map", mappedInput.getType());
+        assertNotNull(mappedInput.getItem());
+        assertEquals(2, mappedInput.getItem().size());
+        List<String> itemNames = mappedInput.getItem().stream().map(item -> item.getName()).toList();
+        assertTrue(itemNames.contains("lab_report_fhir"));
+        assertTrue(itemNames.contains("uploadedFileName"));
+    }
+
 
     private ItbReporting getItbReporting() {
         return new ItbReporting(
@@ -83,8 +143,50 @@ class ItbStepExecutorTest {
                 .setProperties(List.of(
                         new StringProperty(ItbStepDefinition.ACTOR_ID, "actor"),
                         new StringProperty(ItbStepDefinition.TEST_CASE, "test1"),
+                        new StringProperty("systemID", "system"),
                         new StringProperty("note", "hello world"),
                         new ByteArrayProperty("payload", "bytes".getBytes(StandardCharsets.UTF_8))
                 ));
+    }
+
+    private Step syncStep() {
+        return new Step()
+                .setName("itb-sync")
+                .setType(ItbStepDefinition.TYPE)
+                .setProperties(List.of(
+                        new StringProperty(ItbStepDefinition.ACTOR_ID, "actor"),
+                        new StringProperty(ItbStepDefinition.TEST_CASE, "test1"),
+                        new StringProperty("systemID", "system"),
+                        new StringProperty(ItbStepDefinition.EXECUTION_MODE, "SYNC")
+                ));
+    }
+
+    private Step syncStepWithReferencedBinaryInput() {
+        return new Step()
+              .setName("itb-sync")
+              .setType(ItbStepDefinition.TYPE)
+              .setProperties(List.of(
+                    new StringProperty(ItbStepDefinition.ACTOR_ID, "actor"),
+                    new StringProperty(ItbStepDefinition.TEST_CASE, "test1"),
+                    new StringProperty("systemID", "system"),
+                    new StringProperty(ItbStepDefinition.EXECUTION_MODE, "SYNC"),
+                    new ByteArrayProperty("lab_report_fhir", "${inputFile}"),
+                    new StringProperty("uploadedFileName", "1-1234-W7.json")
+              ));
+    }
+
+    private Step syncStepWithReferencedBinaryInputAndMapMode() {
+        return new Step()
+              .setName("itb-sync")
+              .setType(ItbStepDefinition.TYPE)
+              .setProperties(List.of(
+                    new StringProperty(ItbStepDefinition.ACTOR_ID, "actor"),
+                    new StringProperty(ItbStepDefinition.TEST_CASE, "test1"),
+                    new StringProperty("systemID", "system"),
+                    new StringProperty(ItbStepDefinition.EXECUTION_MODE, "SYNC"),
+                    new StringProperty(ItbStepDefinition.ITB_PAYLOAD_MODE, "USER_INPUT_MAP"),
+                    new ByteArrayProperty("lab_report_fhir", "${inputFile}"),
+                    new StringProperty("uploadedFileName", "Valid - 1-1234-W7.json")
+              ));
     }
 }

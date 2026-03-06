@@ -16,7 +16,8 @@
 
 package net.ihe.gazelle.itb.gateway.business;
 
-import net.ihe.gazelle.itb.gateway.business.request.TestRequest;
+import net.ihe.gazelle.itb.gateway.business.reporting.ItbReporting;
+import net.ihe.gazelle.itb.gateway.technical.client.model.ItbStartRequest;
 
 /**
  * Client abstraction for calling ITB APIs.
@@ -25,10 +26,19 @@ public interface ItbClient {
    /**
     * Method to execute test request
     *
-    * @param testRequest request to send
+    * @param startRequest request to send
     * @return SessionId of the started ITB test session
+   */
+   String startTest(ItbStartRequest startRequest);
+
+   /**
+    * Starts an ITB test and waits for completion in a single ITB call.
+    *
+    * @param startRequest request to send
+    * @param timeoutMs timeout in milliseconds used both for ITB wait and client request timeout
+    * @return ITB reporting payload containing at least session identifier and raw test report
     */
-   String startTest(TestRequest testRequest);
+   ItbReporting startTestAndWait(ItbStartRequest startRequest, long timeoutMs);
 
    /**
     * Method to retrieve ITB test session logs

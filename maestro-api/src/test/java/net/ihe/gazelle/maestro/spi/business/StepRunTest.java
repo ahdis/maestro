@@ -17,6 +17,7 @@
 package net.ihe.gazelle.maestro.spi.business;
 
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
+import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import org.junit.jupiter.api.Test;
 
@@ -24,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class StepRunTest {
 
@@ -40,5 +42,22 @@ class StepRunTest {
       StepRun stepRun = new StepRun(validationStep, List.of(sourceInput, mappedInput));
 
       assertEquals("inputFile1", stepRun.getPropertyReferenceName("contentToValidate"));
+   }
+
+   @Test
+   void getPropertyReferenceNameSupportsReferenceNameWithDashes() {
+      ByteArrayProperty sourceInput = new ByteArrayProperty("dicom-sr-conformance", "payload".getBytes(StandardCharsets.UTF_8));
+      ByteArrayProperty mappedInput = new ByteArrayProperty("audit-input", "${dicom-sr-conformance}");
+      Step validationStep = new Step()
+            .setType("VALIDATION")
+            .setProperties(List.of(
+                  new ByteArrayProperty("contentToValidate", "${audit-input}"),
+                  new StringProperty("validationProfile", "dicom-sr-conformance")
+            ));
+
+      StepRun stepRun = new StepRun(validationStep, List.of(sourceInput, mappedInput));
+
+      assertEquals("dicom-sr-conformance", stepRun.getPropertyReferenceName("contentToValidate"));
+      assertNull(stepRun.getPropertyReferenceName("validationProfile"));
    }
 }

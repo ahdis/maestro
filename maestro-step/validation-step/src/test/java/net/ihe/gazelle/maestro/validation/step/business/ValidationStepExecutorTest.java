@@ -17,6 +17,7 @@
 package net.ihe.gazelle.maestro.validation.step.business;
 
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
+import net.ihe.gazelle.maestro.api.business.property.MissingPropertyException;
 import net.ihe.gazelle.maestro.api.business.property.PropertyBindingPayload;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.test.Step;
@@ -95,6 +96,21 @@ class ValidationStepExecutorTest {
             .thenReturn(List.of(new ValidationProfile().setProfileID("OTHER_PROFILE")));
 
       assertThrows(UnknownValidationProfileException.class, () -> executor.execute(stepRun));
+   }
+
+   @Test
+   void shouldFailWhenProfileRequiresInputIdNotPresentInStepProperties() {
+      ValidationStepExecutor executor = new ValidationStepExecutor(handler, serializer);
+      StepRun stepRun = stepRunWithContent("content".getBytes(StandardCharsets.UTF_8));
+      ValidationProfile profile = new ValidationProfile()
+            .setProfileID("PROFILE")
+            .addSupportedInput(new SupportedInput()
+                  .setId("dicom")
+                  .setRequired(true));
+      when(handler.getValidationProfiles()).thenReturn(List.of(profile));
+
+      MissingPropertyException exception = assertThrows(MissingPropertyException.class, () -> executor.execute(stepRun));
+      assertEquals("No property found with name: dicom", exception.getMessage());
    }
 
    @Test
