@@ -25,13 +25,16 @@ import net.ihe.gazelle.itb.gateway.technical.client.model.ItbStartRequest;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 /**
  * Service to execute an ITB test suite.
  */
 public class RunItbTestService {
+
+   private static final String TYPE_STRING = "string";
+   private static final String TYPE_NUMBER = "number";
+   private static final String TYPE_BINARY = "binary";
 
    private final ItbClient itbClient;
    private final ItbSessionStore sessionStore;
@@ -156,9 +159,9 @@ public class RunItbTestService {
       String embeddingMethod = input.getEmbeddingMethod();
 
       switch (type) {
-         case "string" -> validateTextInput(input.getName(), input.getValue());
-         case "number" -> validateNumberInput(input.getName(), input.getValue());
-         case "binary" -> {
+         case TYPE_STRING -> validateTextInput(input.getName(), input.getValue());
+         case TYPE_NUMBER -> validateNumberInput(input.getName(), input.getValue());
+         case TYPE_BINARY -> {
             validateBinaryInput(input.getName(), input.getValue());
             if (isBlank(embeddingMethod)) {
                embeddingMethod = "BASE64";
@@ -180,26 +183,26 @@ public class RunItbTestService {
       }
       String normalized = inputType.trim().toLowerCase();
       return switch (normalized) {
-         case "text", "uuid", "apikey", "string" -> "string";
-         case "integer", "float", "number" -> "number";
-         case "file", "binary" -> "binary";
+         case "text", "uuid", "apikey", TYPE_STRING -> TYPE_STRING;
+         case "integer", "float", TYPE_NUMBER -> TYPE_NUMBER;
+         case "file", TYPE_BINARY -> TYPE_BINARY;
          default -> normalized;
       };
    }
 
    private String inferTypeFromValue(String value) {
       if (value != null && isBase64(value)) {
-         return "binary";
+         return TYPE_BINARY;
       }
       if (value != null) {
          try {
             Double.parseDouble(value);
-            return "number";
+            return TYPE_NUMBER;
          } catch (NumberFormatException ignored) {
             // no-op
          }
       }
-      return "string";
+      return TYPE_STRING;
    }
 
    private void validateTextInput(String inputName, String value) {

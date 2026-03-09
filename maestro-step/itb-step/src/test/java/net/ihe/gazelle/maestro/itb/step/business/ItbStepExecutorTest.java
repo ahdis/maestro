@@ -21,6 +21,7 @@ import net.ihe.gazelle.itb.gateway.business.reporting.ItbResult;
 import net.ihe.gazelle.itb.gateway.business.reporting.ItbSystem;
 import net.ihe.gazelle.itb.gateway.business.reporting.ItbTestSession;
 import net.ihe.gazelle.itb.gateway.technical.client.ItbHttpClient;
+import net.ihe.gazelle.itb.gateway.technical.client.model.ItbInput;
 import net.ihe.gazelle.itb.gateway.technical.dao.ItbSessionStoreImpl;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
@@ -118,7 +119,7 @@ class ItbStepExecutorTest {
         assertEquals("map", mappedInput.getType());
         assertNotNull(mappedInput.getItem());
         assertEquals(2, mappedInput.getItem().size());
-        List<String> itemNames = mappedInput.getItem().stream().map(item -> item.getName()).toList();
+        List<String> itemNames = mappedInput.getItem().stream().map(ItbInput::getName).toList();
         assertTrue(itemNames.contains("lab_report_fhir"));
         assertTrue(itemNames.contains("uploadedFileName"));
     }

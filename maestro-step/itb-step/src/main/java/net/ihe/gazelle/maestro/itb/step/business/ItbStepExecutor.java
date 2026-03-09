@@ -136,7 +136,15 @@ public class ItbStepExecutor implements StepExecutor {
       ItbStartRequest testRequest = new ItbStartRequest()
             .setActor(stepRun.getPropertyValue(ItbStepDefinition.ACTOR_ID))
             .setTestCase(testCaseSelection);
-      List<Property> propertiesToSend = new ArrayList<>();
+      Set<String> sourceReferenceNames = collectSourceReferenceNames(stepRun);
+      List<Property> propertiesToSend = collectPropertiesToSend(stepRun, testRequest, sourceReferenceNames);
+      if (!propertiesToSend.isEmpty()) {
+         testRequest.setInputMapping(buildInputMapping(stepRun, testCaseSelection, propertiesToSend));
+      }
+      return testRequest;
+   }
+
+   private Set<String> collectSourceReferenceNames(StepRun stepRun) {
       Set<String> sourceReferenceNames = new HashSet<>();
       for (Property property : stepRun.getProperties()) {
          String referenceName = stepRun.getPropertyReferenceName(property.getName());
@@ -144,7 +152,11 @@ public class ItbStepExecutor implements StepExecutor {
             sourceReferenceNames.add(referenceName);
          }
       }
+      return sourceReferenceNames;
+   }
 
+   private List<Property> collectPropertiesToSend(StepRun stepRun, ItbStartRequest testRequest, Set<String> sourceReferenceNames) {
+      List<Property> propertiesToSend = new ArrayList<>();
       for (Property property : stepRun.getProperties()) {
          if (sourceReferenceNames.contains(property.getName()) && !SYSTEM_ID.equals(property.getName())
                && !SUPPORTED_INPUTS.containsKey(property.getName())) {
@@ -159,24 +171,24 @@ public class ItbStepExecutor implements StepExecutor {
             }
          }
       }
-      if (!propertiesToSend.isEmpty()) {
-         ItbPayloadMode payloadMode = resolvePayloadMode(stepRun);
-         if (payloadMode == ItbPayloadMode.USER_INPUT_MAP) {
-            testRequest.setInputMapping(List.of(new ItbInputMappingEntry()
-                  .setTestCase(testCaseSelection)
-                  .setInput(new ItbInput()
-                        .setName("userInput")
-                        .setType("map")
-                        .setItem(propertiesToSend.stream().map(ItbStepExecutor::mapToUserInputItem).toList()))));
-         } else {
-            testRequest.setInputMapping(propertiesToSend.stream()
-                  .map(property -> new ItbInputMappingEntry()
-                        .setTestCase(testCaseSelection)
-                        .setInput(mapToInput(property)))
-                  .toList());
-         }
+      return propertiesToSend;
+   }
+
+   private List<ItbInputMappingEntry> buildInputMapping(StepRun stepRun, List<String> testCaseSelection, List<Property> propertiesToSend) {
+      ItbPayloadMode payloadMode = resolvePayloadMode(stepRun);
+      if (payloadMode == ItbPayloadMode.USER_INPUT_MAP) {
+         return List.of(new ItbInputMappingEntry()
+               .setTestCase(testCaseSelection)
+               .setInput(new ItbInput()
+                     .setName("userInput")
+                     .setType("map")
+                     .setItem(propertiesToSend.stream().map(ItbStepExecutor::mapToUserInputItem).toList())));
       }
-      return testRequest;
+      return propertiesToSend.stream()
+            .map(property -> new ItbInputMappingEntry()
+                  .setTestCase(testCaseSelection)
+                  .setInput(mapToInput(property)))
+            .toList();
    }
 
    private StepRunReportBuilder prepareStepReport(StepRun stepRun) {
