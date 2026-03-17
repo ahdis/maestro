@@ -19,10 +19,15 @@ package net.ihe.gazelle.itb.gateway.technical.client;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.ihe.gazelle.itb.gateway.business.request.Parameter;
-import net.ihe.gazelle.itb.gateway.business.request.TestCase;
-import net.ihe.gazelle.itb.gateway.business.request.TestRequest;
-import net.ihe.gazelle.itb.gateway.business.request.TestSuite;
+import net.ihe.gazelle.itb.gateway.business.ItbClient;
+import net.ihe.gazelle.itb.gateway.business.reporting.ItbReporting;
+import net.ihe.gazelle.itb.gateway.business.reporting.ItbTestSession;
+import net.ihe.gazelle.itb.gateway.technical.client.model.ItbSessionCreationInformation;
+import net.ihe.gazelle.itb.gateway.technical.client.model.ItbSessionStatusInformation;
+import net.ihe.gazelle.itb.gateway.technical.client.model.ItbStartRequest;
+import net.ihe.gazelle.itb.gateway.technical.client.model.ItbStartResponse;
+import net.ihe.gazelle.itb.gateway.technical.client.model.ItbStatusRequest;
+import net.ihe.gazelle.itb.gateway.technical.client.model.ItbStatusResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,24 +36,16 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.*;
+import java.time.Duration;
+import java.util.List;
 
 /**
  * Adapter to execute HTTP requests to ITB (Interoperability Test Bed)
  */
-// Data transformation into an ITB request is currently built with mutable maps and can be improved with explicit DTOs.
-// A dedicated Java client/data model from ITB could replace this custom mapping in a future iteration.
-public class ItbHttpClient implements net.ihe.gazelle.itb.gateway.business.ItbClient {
+public class ItbHttpClient implements ItbClient {
 
     private static final Logger logger = LoggerFactory.getLogger(ItbHttpClient.class);
-    /**
-     * ITB input field name used in request mappings.
-     */
-    public static final String INPUT = "input";
-
-    private Map<String, Object> map;
-
-    private List<Map<String, Object>> inputMapping;
+    public static final String APPLICATION_JSON = "application/json";
 
     private final ObjectMapper mapper = new ObjectMapper();
     private final String baseItbUrl;
@@ -65,44 +62,70 @@ public class ItbHttpClient implements net.ihe.gazelle.itb.gateway.business.ItbCl
         this.itbApiKey = itbApiKey;
     }
 
-   @Override
-    public String startTest(TestRequest testRequest) {
-        List<Parameter> requestParams = testRequest.getParameters();
-        map = new HashMap<>();
-        inputMapping = new ArrayList<>();
-        // Go through all the request parameters to set ITB request
-        setUpRequestParameters(requestParams);
-        // Go through all the test suite parameters to set ITB request
-        TestSuite ts = testRequest.getTestSuite();
-        setUpTestSuite(ts);
-        // Go through all the test cases parameters to set ITB request
-        setUpTestCases(testRequest.getTestCases());
-        if (!inputMapping.isEmpty()) map.put("inputMapping", inputMapping);
-        return sendTestRequest();
+    @Override
+    public String startTest(ItbStartRequest testRequest) {
+        ItbStartRequest request = withAsyncOptions(testRequest);
+        ItbStartResponse response = sendPOSTRequest(
+                baseItbUrl + "/api/rest/tests/start",
+                request,
+                null,
+                ItbStartResponse.class
+        );
+        ItbSessionCreationInformation sessionInfo = extractFirstCreatedSession(response);
+        return sessionInfo.getSession();
+    }
+
+    @Override
+    public ItbReporting startTestAndWait(ItbStartRequest testRequest, long timeoutMs) {
+        ItbStartRequest request = withSyncOptions(testRequest, timeoutMs);
+        ItbStartResponse response = sendPOSTRequest(
+                baseItbUrl + "/api/rest/tests/start",
+                request,
+                timeoutMs,
+                ItbStartResponse.class
+        );
+        ItbSessionCreationInformation sessionInfo = extractFirstCreatedSession(response);
+        String sessionId = sessionInfo.getSession();
+        if (!Boolean.TRUE.equals(sessionInfo.getCompleted())) {
+            throw new ItbHttpClientException(
+                    "ITB sync start did not complete within maximumWaitTime for session " + sessionId
+            );
+        }
+
+        ItbSessionStatusInformation status = getSessionStatusInformation(sessionId, true, true, timeoutMs);
+        String report = status.getReport();
+        if (report == null || report.isBlank()) {
+            throw new ItbHttpClientException(
+                    "ITB sync response does not contain test report for session " + sessionId
+            );
+        }
+        String logs = status.getLogs() == null || status.getLogs().isEmpty()
+                ? ""
+                : String.join("\n", status.getLogs());
+
+        String testCaseIdentifier = extractTestCaseIdentifier(testRequest);
+        return new ItbReporting(
+                null,
+                new ItbTestSession(null, testCaseIdentifier, sessionId),
+                report
+        ).setLogs(logs);
     }
 
     @Override
     public String getTestLogs(String sessionID) {
-        if (sessionID != null) {
-            try {
-                Map<String, Object> content = new HashMap<>();
-                List<String> sessionIDs = new ArrayList<>();
-                sessionIDs.add(sessionID);
-                content.put("session", sessionIDs);
-                content.put("withLogs", true);
-                String body = mapper.writeValueAsString(content);
-                return sendPOSTRequest(baseItbUrl + "/api/rest/tests/status", "application/json", body);
-            } catch (JsonProcessingException e) {
-                throw new ItbHttpClientException("Error parsing request body : " + e);
-            }
+        if (sessionID == null) {
+            return "";
         }
-        return "";
+        ItbSessionStatusInformation sessionStatus = getSessionStatusInformation(sessionID, true, false, null);
+        if (sessionStatus.getLogs() == null || sessionStatus.getLogs().isEmpty()) {
+            return "";
+        }
+        return String.join("\n", sessionStatus.getLogs());
     }
 
     @Override
     public byte[] requestPDFReport(String sessionID, String testCaseName) {
         if (sessionID != null) {
-            //Set up http request
             try (HttpClient client = HttpClient.newHttpClient()) {
                 HttpRequest req = HttpRequest.newBuilder()
                         .uri(URI.create(baseItbUrl + "/api/rest/tests/report/" + sessionID))
@@ -110,14 +133,12 @@ public class ItbHttpClient implements net.ihe.gazelle.itb.gateway.business.ItbCl
                         .header("Accept", "application/pdf")
                         .GET()
                         .build();
-                // Execute request and return response to the controller
                 try {
                     HttpResponse<byte[]> response = client.send(req, HttpResponse.BodyHandlers.ofByteArray());
                     return response.body();
                 } catch (IOException e) {
                     throw new ItbHttpClientException("Error request interrupted requesting PDF report. Try again.");
-                }
-                catch (InterruptedException e) {
+                } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     throw new ItbHttpClientException("Error request interrupted requesting PDF report. Try again.");
                 }
@@ -126,170 +147,100 @@ public class ItbHttpClient implements net.ihe.gazelle.itb.gateway.business.ItbCl
         return new byte[0];
     }
 
-    /**
-     * Method to convert an additional Parameter object in a json input for an ITB test entity
-     *
-     * @param param Parameter object
-     * @return Map created from the object
-     */
-    private Map<String, Object> setUpAdditionalInput(Parameter param) {
-        Map<String, Object> input = new HashMap<>();
-        input.put("name", param.getName());
-        if (param.getType().equals("file")) {
-            input.put("embeddingMethod", "BASE64");
-            input.put("type", "binary");
-
-        } else if (param.getType().equals("integer") || param.getType().equals("float")) {
-            input.put("type", "number");
-        } else if(param.getType().equals("text")) {
-            input.put("type", "string");
-        }
-        input.put("value", param.getValue());
-        return input;
+    private ItbStartRequest withAsyncOptions(ItbStartRequest request) {
+        return new ItbStartRequest(requireRequest(request))
+                .setWaitForCompletion(null)
+                .setMaximumWaitTime(null);
     }
 
-    /**
-     * Method to convert a Parameter object in a json input for an ITB test request
-     *
-     * @param param Parameter object
-     * @return Map created from the object
-     */
-    private Map<String, Object> setUpRequestParameter(Parameter param) {
-        Map<String, Object> input = new HashMap<>();
-        String name = param.getName();
-        switch (name) {
-            case "systemID" -> map.put("system", param.getValue());
-            case "actorID" -> map.put("actor", param.getValue());
-            default -> input = setUpAdditionalInput(param);
+    private ItbStartRequest withSyncOptions(ItbStartRequest request, long timeoutMs) {
+        if (timeoutMs <= 0) {
+            throw new ItbHttpClientException("Sync timeout must be greater than 0");
         }
-        return input;
+        return new ItbStartRequest(requireRequest(request))
+                .setWaitForCompletion(true)
+                .setMaximumWaitTime(timeoutMs);
     }
 
-    /**
-     * Method to set up all the request parameters to construct ITB request
-     *
-     * @param requestParams list of request parameters
-     */
-    private void setUpRequestParameters(List<Parameter> requestParams) {
-        // Go through all the request parameters to set ITB request
-        for (Parameter requestParam : requestParams) {
-            Map<String, Object> input = setUpRequestParameter(requestParam);
-            if (!input.isEmpty()) {
-                Map<String, Object> inputWrapper = new HashMap<>();
-                inputWrapper.put(INPUT, input);
-                inputMapping.add(inputWrapper);
-            }
+    private ItbStartRequest requireRequest(ItbStartRequest request) {
+        if (request == null) {
+            throw new ItbHttpClientException("ITB start request cannot be null");
         }
+        return request;
     }
 
-    /**
-     * Method to set up ITB test suite execution request
-     *
-     * @param ts test suite to execute
-     */
-    private void setUpTestSuite(TestSuite ts) {
-        if (Objects.nonNull(ts)) {
-            map.put("testSuite", new String[]{ts.getSuiteID()});
-            if (Objects.nonNull(ts.getParameters())) {
-                for (Parameter suiteParameter : ts.getParameters()) {
-                    Map<String, Object> input = setUpAdditionalInput(suiteParameter);
-                    Map<String, Object> inputWrapper = new HashMap<>();
-                    inputWrapper.put("testSuite", new String[]{ts.getSuiteID()});
-                    inputWrapper.put(INPUT, input);
-                    inputMapping.add(inputWrapper);
-                }
-            }
+    private ItbSessionStatusInformation getSessionStatusInformation(
+            String sessionId,
+            boolean withLogs,
+            boolean withReports,
+            Long timeoutMs
+    ) {
+        ItbStatusRequest statusRequest = new ItbStatusRequest()
+                .setSession(List.of(sessionId))
+                .setWithLogs(withLogs)
+                .setWithReports(withReports);
+
+        ItbStatusResponse statusResponse = sendPOSTRequest(
+                baseItbUrl + "/api/rest/tests/status",
+                statusRequest,
+                timeoutMs,
+                ItbStatusResponse.class
+        );
+
+        if (statusResponse.getSessions() == null || statusResponse.getSessions().isEmpty()) {
+            throw new ItbHttpClientException(
+                    "ITB status response does not contain sessions for session " + sessionId
+            );
         }
+
+        ItbSessionStatusInformation sessionStatus = statusResponse.getSessions().getFirst();
+        if (sessionStatus.getSession() == null || sessionStatus.getSession().isBlank()) {
+            throw new ItbHttpClientException("ITB status response does not contain valid session identifier");
+        }
+        return sessionStatus;
     }
 
-    /**
-     * Method to set up ITB test cases execution request
-     *
-     * @param tcs list of test cases to execute
-     */
-    private void setUpTestCases(List<TestCase> tcs) {
-        if (Objects.nonNull(tcs)) {
-            List<String> tcsName = new ArrayList<>();
-            for (TestCase tc : tcs) {
-                tcsName.add(tc.getCaseID());
-                if (Objects.nonNull(tc.getParameters())) {
-                    for (Parameter caseParameter : tc.getParameters()) {
-                        Map<String, Object> input = setUpAdditionalInput(caseParameter);
-                        inputMapping.add(Map.of(
-                            "testCase", new String[]{tc.getCaseID()},
-                                INPUT, input
-                        ));
-                    }
-                }
-            }
-            tcsName.toArray(new String[0]);
-            map.put("testCase", tcsName);
+    private ItbSessionCreationInformation extractFirstCreatedSession(ItbStartResponse response) {
+        if (response.getCreatedSessions() == null || response.getCreatedSessions().isEmpty()) {
+            throw new ItbHttpClientException("ITB response does not contain createdSessions.");
         }
+        ItbSessionCreationInformation sessionInfo = response.getCreatedSessions().getFirst();
+        if (sessionInfo.getSession() == null || sessionInfo.getSession().isBlank()) {
+            throw new ItbHttpClientException("ITB response does not contain a valid session identifier.");
+        }
+        return sessionInfo;
     }
 
-    /**
-     * Method to send ITB test request through the REST API
-     *
-     * @return Created session ID
-     */
-    private String sendTestRequest() {
-        // Convert our map with data request in ITB body request
+    private <T> T sendPOSTRequest(String uri, Object payload, Long timeoutMs, Class<T> responseType) {
         String body;
         try {
-            body = mapper.writeValueAsString(map);
+            body = mapper.writeValueAsString(payload);
         } catch (JsonProcessingException e) {
             throw new ItbHttpClientException("Error parsing request body : " + e);
         }
         if (logger.isInfoEnabled()) {
-            logger.info("Sending ITB start request payload: {}", body);
+            logger.info("Sending ITB request payload: {}", body);
         }
-        return sendPOSTRequest(baseItbUrl + "/api/rest/tests/start", "application/json", body);
-    }
 
-    /**
-     * Method to send a POST Request to ITB REST API
-     *
-     * @param uri       endpoint
-     * @param mediatype media type accepted
-     * @param body      request content
-     * @return ITB response
-     */
-    private String sendPOSTRequest(String uri, String mediatype, String body) {
-        //Set up http request
-        try(HttpClient client = HttpClient.newHttpClient()) {
-            HttpRequest req = HttpRequest.newBuilder()
+        try (HttpClient client = HttpClient.newHttpClient()) {
+            HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                     .uri(URI.create(uri))
                     .header("ITB_API_KEY", itbApiKey)
-                    .header("Content-Type", mediatype)
-                    .POST(HttpRequest.BodyPublishers.ofString(body))
-                    .build();
-            // Execute request and return response to the controller
+                    .header("Content-Type", ItbHttpClient.APPLICATION_JSON)
+                    .POST(HttpRequest.BodyPublishers.ofString(body));
+            if (timeoutMs != null && timeoutMs > 0) {
+                requestBuilder.timeout(Duration.ofMillis(timeoutMs));
+            }
+            HttpRequest req = requestBuilder.build();
             try {
                 HttpResponse<String> response = client.send(req, HttpResponse.BodyHandlers.ofString());
-                String respBody = response.body();
-                JsonNode content = mapper.readTree(respBody);
+                String responseBody = response.body();
                 if (response.statusCode() >= 400) {
-                    String errorMessage = content.path("error_description").asText(
-                            content.path("message").asText(respBody)
-                    );
                     throw new ItbHttpClientException(
-                            "ITB request error (status " + response.statusCode() + "): " + errorMessage
+                            "ITB request error (status " + response.statusCode() + "): " + extractErrorMessage(responseBody)
                     );
                 }
-                JsonNode createdSessions = content.path("createdSessions");
-                if (!createdSessions.isArray() || createdSessions.isEmpty()) {
-                    throw new ItbHttpClientException(
-                            "ITB response does not contain createdSessions. Body: " + respBody
-                    );
-                }
-                JsonNode sessionNode = createdSessions.get(0).path("session");
-                String sessionId = sessionNode.asText();
-                if (sessionId == null || sessionId.isBlank()) {
-                    throw new ItbHttpClientException(
-                            "ITB response does not contain a valid session identifier. Body: " + respBody
-                    );
-                }
-                return sessionId;
+                return mapper.readValue(responseBody, responseType);
             } catch (IOException e) {
                 logger.error("Error sending POST request", e);
                 throw new ItbHttpClientException("Error request interrupted. Try again.");
@@ -300,4 +251,21 @@ public class ItbHttpClient implements net.ihe.gazelle.itb.gateway.business.ItbCl
         }
     }
 
+    private String extractErrorMessage(String responseBody) {
+        try {
+            JsonNode content = mapper.readTree(responseBody);
+            return content.path("error_description").asText(
+                    content.path("message").asText(responseBody)
+            );
+        } catch (JsonProcessingException e) {
+            return responseBody;
+        }
+    }
+
+    private String extractTestCaseIdentifier(ItbStartRequest testRequest) {
+        if (testRequest.getTestCase() == null || testRequest.getTestCase().isEmpty()) {
+            return null;
+        }
+        return testRequest.getTestCase().getFirst();
+    }
 }

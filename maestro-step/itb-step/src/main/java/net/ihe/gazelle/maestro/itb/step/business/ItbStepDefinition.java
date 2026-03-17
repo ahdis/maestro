@@ -47,6 +47,14 @@ public class ItbStepDefinition implements StepDefinition {
     * Represents the identifier of the actor in the Integration Test Bed (ITB) step.
     */
    public static final String ACTOR_ID = "actorID";
+   /**
+    * Execution mode for ITB step: ASYNC (default) or SYNC.
+    */
+   public static final String EXECUTION_MODE = "executionMode";
+   /**
+    * ITB payload mapping mode: FLAT (default) or USER_INPUT_MAP.
+    */
+   public static final String ITB_PAYLOAD_MODE = "itbPayloadMode";
 
    // outputs
    /**
@@ -83,7 +91,9 @@ public class ItbStepDefinition implements StepDefinition {
    public List<SupportedInput> getSupportedInputs() {
       return List.of(
             new SupportedTextInput().setId(TEST_CASE).setLabel("Test Case").setRequired(true),
-            new SupportedTextInput().setId(ACTOR_ID).setLabel("Actor ID").setRequired(true)
+            new SupportedTextInput().setId(ACTOR_ID).setLabel("Actor ID").setRequired(true),
+            new SupportedTextInput().setId(EXECUTION_MODE).setLabel("Execution Mode").setRequired(false),
+            new SupportedTextInput().setId(ITB_PAYLOAD_MODE).setLabel("ITB Payload Mode").setRequired(false)
       );
    }
 

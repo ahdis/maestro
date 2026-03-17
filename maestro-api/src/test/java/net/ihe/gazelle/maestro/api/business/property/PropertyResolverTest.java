@@ -50,6 +50,26 @@ class PropertyResolverTest {
    }
 
    @Test
+   void shouldNotTreatDirectStringWithDashesAsReference() {
+      Property profile = new StringProperty("validationProfile", "dicom-sr-conformance");
+
+      PropertyResolver.resolveProperties(List.of(profile));
+
+      assertEquals("dicom-sr-conformance", profile.getValue());
+      assertNull(profile.getReferenceName());
+   }
+
+   @Test
+   void shouldResolveReferenceWithDashesInPropertyName() {
+      Property source = new StringProperty("dicom-sr-conformance", "profile-id");
+      Property reference = new StringProperty("validationProfile", "${dicom-sr-conformance}");
+
+      PropertyResolver.resolveProperties(List.of(source, reference));
+
+      assertEquals("profile-id", reference.getValue());
+   }
+
+   @Test
    void shouldDetectCircularReferences() {
       Property first = new StringProperty("first", "${second}");
       Property second = new StringProperty("second", "${first}");
