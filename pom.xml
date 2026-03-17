@@ -67,10 +67,10 @@
         <!--git-->
         <git.project.url>https://${git.user.name}:${git.user.token}@gitlab.inria.fr/gazelle/private/kereval/maestro.git</git.project.url>
 
-        <framework.version>4.0.0</framework.version>
+        <framework.version>4.0.1</framework.version>
         <validation-api.version>2.1.0</validation-api.version>
         <simulation-api.version>0.3.0</simulation-api.version>
-        <service-registry.version>2.0.0</service-registry.version>
+        <service-registry.version>2.0.1</service-registry.version>
         <lang.version>3.0.0</lang.version>
         <datahouse.version>4.1.0</datahouse.version>
         <validation-service-clients.version>1.0.1</validation-service-clients.version>
