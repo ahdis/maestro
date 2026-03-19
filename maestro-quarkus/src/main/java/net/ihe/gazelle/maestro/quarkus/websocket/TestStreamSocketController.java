@@ -30,6 +30,7 @@ import net.ihe.gazelle.modelmarshaller.technical.serialization.DeserializationEx
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
 import net.ihe.gazelle.oidc.websocket.technical.ProtectedWebSocket;
 import net.ihe.gazelle.security.business.GazelleIdentity;
+import net.ihe.gazelle.security.business.UnauthorizedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -119,12 +120,11 @@ public class TestStreamSocketController {
    @OnMessage
    @ProtectedWebSocket
    public void onMessage(Session session, String messageString) throws IOException {
+      LOG.debug("Received message: {}", messageString);
       try {
          if (!identity.isAuthenticated()) {
-            session.close(new CloseReason(CloseReason.CloseCodes.VIOLATED_POLICY, "Unauthenticated"));
-            return;
+            throw new UnauthorizedException("Identity is not authenticated");
          }
-         LOG.debug("Received message: {}", messageString);
          MessageDTO<?> message = serDes.deserialize(messageString, MessageDTO.class);
          WebSocketSession maestroCaller = sessionService.getSession(session.getId());
          switch (message) {
@@ -142,9 +142,13 @@ public class TestStreamSocketController {
             }
          }
       } catch (DeserializationException e) {
-         session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, "Unable to execute simulation, please contact an administrator."));
+         LOG.error("Unable to execute test, please contact an administrator", e);
+         session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, "Error while parsing test message"));
+      } catch (UnauthorizedException e) {
+         session.close(new CloseReason(CloseReason.CloseCodes.VIOLATED_POLICY, "Authorization required"));
       } catch (Exception e) {
-         session.close(new CloseReason(CloseReason.CloseCodes.VIOLATED_POLICY, "Unauthenticated"));
+         LOG.error("Unable to execute test, please contact an administrator", e);
+         session.close(new CloseReason(CloseReason.CloseCodes.CLOSED_ABNORMALLY, "Unable to execute test, please contact an administrator."));
       }
    }
 }
