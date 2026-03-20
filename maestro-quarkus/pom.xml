@@ -1,10 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2026 IHE International.
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>net.ihe.gazelle</groupId>
         <artifactId>maestro</artifactId>
-        <version>0.6.1-SNAPSHOT</version>
+        <version>1.1.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>maestro-quarkus</artifactId>
@@ -57,6 +73,23 @@
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>conversion-step</artifactId>
         </dependency>
+
+        <!-- JDK21 validation service clients (SPI factories) -->
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>model-based-client</artifactId>
+            <version>${validation-service-clients.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>certificate-client</artifactId>
+            <version>${validation-service-clients.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>itb-client</artifactId>
+            <version>${validation-service-clients.version}</version>
+        </dependency>
         <!-- Gazelle dependencies -->
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
@@ -76,7 +109,7 @@
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
-            <artifactId>service-metadata-api</artifactId>
+            <artifactId>service-metadata-jaxrs-ws</artifactId>
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
@@ -96,7 +129,11 @@
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
-            <artifactId>oidc-server</artifactId>
+            <artifactId>oidc-rest-server-authenticator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>oidc-websocket-server-authenticator</artifactId>
         </dependency>
         <dependency>
             <groupId>com.kereval.gazelle</groupId>
@@ -217,9 +254,7 @@
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
-            <artifactId>oidc-server</artifactId>
-            <version>${sso.client.version}</version>
-            <type>test-jar</type>
+            <artifactId>security-mocks</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -231,6 +266,13 @@
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
             <artifactId>maestro-engine</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>itb-step</artifactId>
+            <version>${project.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,25 @@
 
 package net.ihe.gazelle.itb.gateway.business;
 
+/**
+ * Exception thrown when ITB callback payload cannot be interpreted.
+ */
 public class CatchItbReportServiceException extends RuntimeException {
+    /**
+     * Creates an exception with message.
+     *
+     * @param message error message
+     */
     public CatchItbReportServiceException(String message) {
         super(message);
     }
 
+    /**
+     * Creates an exception with message and cause.
+     *
+     * @param message error message
+     * @param cause root cause
+     */
     public CatchItbReportServiceException(String message, Throwable cause) {
         super(message, cause);
     }

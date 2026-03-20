@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,40 @@
 
 package net.ihe.gazelle.maestro.itb.step.business;
 
-import net.ihe.gazelle.itb.gateway.business.request.TestRequest;
+import net.ihe.gazelle.itb.gateway.business.reporting.ItbReporting;
+import net.ihe.gazelle.itb.gateway.business.reporting.ItbResult;
+import net.ihe.gazelle.itb.gateway.business.reporting.ItbSystem;
+import net.ihe.gazelle.itb.gateway.business.reporting.ItbTestSession;
+import net.ihe.gazelle.itb.gateway.technical.client.model.ItbStartRequest;
 
 public class ItbHandlerMock implements ItbHandler {
 
     private final String sessionId;
+    private ItbStartRequest lastStartRequest;
+    private ItbStartRequest lastStartAndWaitRequest;
 
     public ItbHandlerMock(String sessionId) {
         this.sessionId = sessionId;
     }
 
     @Override
-    public String startTest(TestRequest testRequest) {
+    public String startTest(ItbStartRequest testRequest) {
+        this.lastStartRequest = testRequest;
         return sessionId;
+    }
+
+    @Override
+    public ItbReporting startTestAndWait(ItbStartRequest testRequest, long timeoutMs) {
+        this.lastStartAndWaitRequest = testRequest;
+        return new ItbReporting(
+                new ItbSystem(64L,"shortName", "fullName"),
+                new ItbTestSession("testSuite",
+                        testRequest.getTestCase() == null || testRequest.getTestCase().isEmpty()
+                                ? null
+                                : testRequest.getTestCase().getFirst(),
+                        sessionId),
+                "<ItbReport><n1/><n2/><n3/><n4/><n5/><n6/><n7/><status>SUCCESS</status></ItbReport>"
+        ).setResult(ItbResult.SUCCESS);
     }
 
     @Override
@@ -43,4 +64,12 @@ public class ItbHandlerMock implements ItbHandler {
 
     @Override
     public boolean isAvailable() { return true; }
+
+    public ItbStartRequest getLastStartRequest() {
+        return lastStartRequest;
+    }
+
+    public ItbStartRequest getLastStartAndWaitRequest() {
+        return lastStartAndWaitRequest;
+    }
 }

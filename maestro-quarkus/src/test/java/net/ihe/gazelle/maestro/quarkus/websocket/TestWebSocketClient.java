@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,6 @@ public class TestWebSocketClient {
    }
 
    @OnMessage
-
    public void onMessage(Session session, String msg) {
       try {
          MessageDTO<?> message = serDes.deserialize(msg, MessageDTO.class);

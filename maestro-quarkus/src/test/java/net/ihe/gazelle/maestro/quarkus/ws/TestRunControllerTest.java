@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,14 +47,10 @@ import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.containing;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 class TestRunControllerTest {
 
@@ -268,13 +264,8 @@ class TestRunControllerTest {
    void testTestSuiteRunTimeout() {
       maestroMock.setTestReportSupplier(() -> {
          // Simulate a long-running test to trigger a timeout in synchronousMaestro
-         try {
-            Thread.sleep(10*1000);
-            return null;
-         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return null;
-         }
+         LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(10));
+         return null;
       });
 
       try (Response response = controller.executeTestSuite(getTestSuiteRunDTO(), false, null)) {
@@ -287,13 +278,8 @@ class TestRunControllerTest {
    void testTestRunTimeout() {
       maestroMock.setTestReportSupplier(() -> {
          // Simulate a long-running test to trigger a timeout in synchronousMaestro
-         try {
-            Thread.sleep(4*1000);
-            return null;
-         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return null;
-         }
+         LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(4));
+         return null;
       });
 
       try (Response response = controller.executeTest(getTestRunDTO(), false, null)) {

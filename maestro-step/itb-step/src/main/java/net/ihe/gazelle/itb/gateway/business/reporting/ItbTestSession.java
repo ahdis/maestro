@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,41 +18,84 @@ package net.ihe.gazelle.itb.gateway.business.reporting;
 
 import java.util.Objects;
 
+/**
+ * ITB callback session metadata.
+ */
 public class ItbTestSession {
 
     private String testSuiteIdentifier;
     private String testCaseIdentifier;
     private String testSessionIdentifier;
 
+    /**
+     * Creates an empty test session descriptor.
+     */
     public ItbTestSession() {
     }
 
+    /**
+     * Creates a fully initialized test session descriptor.
+     *
+     * @param testSuiteIdentifier test suite identifier
+     * @param testCaseIdentifier test case identifier
+     * @param testSessionIdentifier ITB session identifier
+     */
     public ItbTestSession(String testSuiteIdentifier, String testCaseIdentifier, String testSessionIdentifier) {
         this.testSuiteIdentifier = testSuiteIdentifier;
         this.testCaseIdentifier = testCaseIdentifier;
         this.testSessionIdentifier = testSessionIdentifier;
     }
 
+    /**
+     * Returns test suite identifier.
+     *
+     * @return test suite identifier
+     */
     public String getTestSuiteIdentifier() {
         return testSuiteIdentifier;
     }
 
+    /**
+     * Sets test suite identifier.
+     *
+     * @param testSuiteIdentifier test suite identifier
+     */
     public void setTestSuiteIdentifier(String testSuiteIdentifier) {
         this.testSuiteIdentifier = testSuiteIdentifier;
     }
 
+    /**
+     * Returns test case identifier.
+     *
+     * @return test case identifier
+     */
     public String getTestCaseIdentifier() {
         return testCaseIdentifier;
     }
 
+    /**
+     * Sets test case identifier.
+     *
+     * @param testCaseIdentifier test case identifier
+     */
     public void setTestCaseIdentifier(String testCaseIdentifier) {
         this.testCaseIdentifier = testCaseIdentifier;
     }
 
+    /**
+     * Returns ITB session identifier.
+     *
+     * @return session identifier
+     */
     public String getTestSessionIdentifier() {
         return testSessionIdentifier;
     }
 
+    /**
+     * Sets ITB session identifier.
+     *
+     * @param testSessionIdentifier session identifier
+     */
     public void setTestSessionIdentifier(String testSessionIdentifier) {
         this.testSessionIdentifier = testSessionIdentifier;
     }

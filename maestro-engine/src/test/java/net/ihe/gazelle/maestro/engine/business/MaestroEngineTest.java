@@ -1,3 +1,19 @@
+/*
+ * Copyright 2026 IHE International.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.ihe.gazelle.maestro.engine.business;
 
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
@@ -22,7 +38,9 @@ import net.ihe.gazelle.maestro.engine.business.mock.RecordingMaestroObserver;
 import net.ihe.gazelle.maestro.engine.business.mock.ScriptedStepExecutorProvider;
 import net.ihe.gazelle.maestro.engine.business.stub.Instrumented4TestStepDefinition;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import technical.dao.SessionStoreImpl;
 
 import java.time.Duration;
@@ -38,7 +56,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class MaestroEngineTest {
 
    private static ExecutorService executorService;
-    private RecordingMaestro maestro;
+   private RecordingMaestro maestro;
    private ScriptedStepExecutorProvider stepExecutorProvider;
    private InMemoryTestReportRecordingService reportRecordService;
 
@@ -49,12 +67,12 @@ class MaestroEngineTest {
 
    @BeforeEach
    void setUp() {
-       HardWiredEventBroker broker = new HardWiredEventBroker(executorService);
+      HardWiredEventBroker broker = new HardWiredEventBroker(executorService);
       stepExecutorProvider = new ScriptedStepExecutorProvider();
       reportRecordService = new InMemoryTestReportRecordingService();
 
       SessionStoreImpl<MaestroObserver> testRunObserverStore = new SessionStoreImpl<>();
-       SessionStoreImpl<MaestroObserver> testSuiteRunObserverStore = new SessionStoreImpl<>();
+      SessionStoreImpl<MaestroObserver> testSuiteRunObserverStore = new SessionStoreImpl<>();
       SessionStoreImpl<TestSuiteSession> suiteSessionStore = new SessionStoreImpl<>();
       SessionStoreImpl<TestRunSession> testRunSessionStore = new SessionStoreImpl<>();
 
@@ -215,7 +233,7 @@ class MaestroEngineTest {
                   .setOutputs(List.of(new StringProperty("payload", "HELLO-CONTEXT"))))
             .withExecutor("Consumer", stepRun -> {
                observedValue.set(stepRun.getPropertyValue("echo"));
-               return CompletableFuture.completedFuture(passedReport("Consumer"));
+               return passedReport("Consumer");
             });
 
       maestro.executeTestSuite(suiteRun, true, observer);
@@ -274,9 +292,11 @@ class MaestroEngineTest {
       ManualInteractionObserver observer = new ManualInteractionObserver();
       TestSuiteRun suiteRun = buildSuiteRun("suite-interact", createTest("interaction-test", "interaction-step"));
 
-      stepExecutorProvider.withExecutor("interaction-step", stepRun -> observer.interactWithUser(
-                  new InteractWithUser("Confirm", "Proceed?", 1L))
-            .thenApply(done -> passedReport("interaction-step")));
+      stepExecutorProvider.withExecutor("interaction-step", stepRun ->
+            observer.interactWithUser(
+                  new InteractWithUser("Confirm", "Proceed?", 1L)
+            ).thenApply(done -> passedReport("interaction-step")).join()
+      );
 
       maestro.executeTestSuite(suiteRun,true, observer);
 
@@ -316,7 +336,7 @@ class MaestroEngineTest {
             .withExecutor("Consumer", stepRun -> {
                // Force a ClassCastException to mimic a type mismatch at execution time
                Integer ignored = (Integer) stepRun.getPropertyValue("payloadRef");
-               return CompletableFuture.completedFuture(passedReport("Consumer" + ignored));
+               return passedReport("Consumer" + ignored);
             });
 
       runSuite(observer, suiteRun);

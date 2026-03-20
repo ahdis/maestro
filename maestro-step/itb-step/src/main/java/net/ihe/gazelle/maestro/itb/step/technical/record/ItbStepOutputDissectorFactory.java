@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,34 @@
 
 package net.ihe.gazelle.maestro.itb.step.technical.record;
 
-import net.ihe.gazelle.maestro.itb.step.business.ItbStepDefinition;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputDissector;
-import net.ihe.gazelle.maestro.spi.business.recording.StepOutputDissectorFactory;
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanDissector;
+import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanDissectorFactory;
 
-public class ItbStepOutputDissectorFactory implements StepOutputDissectorFactory {
+/**
+ * Factory class responsible for creating instances of {@link ItbStepOutputDissector}.
+ */
+public class ItbStepOutputDissectorFactory implements StepOutputPlanDissectorFactory {
 
-    @Override
-    public boolean supports(final String stepType) {
-        return ItbStepDefinition.TYPE.equals(stepType);
+    /**
+     * Creates the factory.
+     */
+    public ItbStepOutputDissectorFactory() {
+        // Empty
     }
 
     @Override
-    public StepOutputDissector create() {
+    public boolean supports(StepRunReport stepRunReport) {
+        return stepRunReport != null && "ITB".equals(stepRunReport.getType());
+    }
+
+    /**
+     * Creates a new instance of {@link ItbStepOutputDissector}.
+     *
+     * @return a new {@link ItbStepOutputDissector} instance
+     */
+    @Override
+    public StepOutputPlanDissector create() {
         return new ItbStepOutputDissector();
     }
 }

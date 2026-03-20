@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Kereval.
+ * Copyright 2025-2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,42 +18,84 @@ package net.ihe.gazelle.itb.gateway.business.reporting;
 
 import java.util.Objects;
 
+/**
+ * ITB system descriptor sent in callback payload.
+ */
 public class ItbSystem {
 
     private Long id;
     private String shortName;
     private String fullName;
 
+    /**
+     * Creates an empty system descriptor.
+     */
     public ItbSystem() {
     }
 
+    /**
+     * Creates a fully initialized system descriptor.
+     *
+     * @param id system identifier
+     * @param shortName short label
+     * @param fullName full label
+     */
     public ItbSystem(Long id, String shortName, String fullName) {
         this.id = id;
         this.shortName = shortName;
         this.fullName = fullName;
     }
 
-    // Getters et Setters
+    /**
+     * Returns system identifier.
+     *
+     * @return system identifier
+     */
     public Long getId() {
         return id;
     }
 
+    /**
+     * Sets system identifier.
+     *
+     * @param id system identifier
+     */
     public void setId(Long id) {
         this.id = id;
     }
 
+    /**
+     * Returns system short name.
+     *
+     * @return short name
+     */
     public String getShortName() {
         return shortName;
     }
 
+    /**
+     * Sets system short name.
+     *
+     * @param shortName short name
+     */
     public void setShortName(String shortName) {
         this.shortName = shortName;
     }
 
+    /**
+     * Returns system full name.
+     *
+     * @return full name
+     */
     public String getFullName() {
         return fullName;
     }
 
+    /**
+     * Sets system full name.
+     *
+     * @param fullName full name
+     */
     public void setFullName(String fullName) {
         this.fullName = fullName;
     }
