@@ -24,7 +24,7 @@
     </parent>
 
     <artifactId>maestro</artifactId>
-    <version>1.1.1-SNAPSHOT</version>
+    <version>1.2.0-DGSANTE2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <organization>
@@ -92,59 +92,59 @@
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-api</artifactId>
-                <version>1.1.1-SNAPSHOT</version>
+                <version>1.2.0-DGSANTE2-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-engine</artifactId>
-                <version>1.1.1-SNAPSHOT</version>
+                <version>1.2.0-DGSANTE2-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-recording</artifactId>
-                <version>1.1.1-SNAPSHOT</version>
+                <version>1.2.0-DGSANTE2-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>validation-step</artifactId>
-                <version>1.1.1-SNAPSHOT</version>
+                <version>1.2.0-DGSANTE2-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>simulation-step</artifactId>
-                <version>1.1.1-SNAPSHOT</version>
+                <version>1.2.0-DGSANTE2-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>user-interaction-step</artifactId>
-                <version>1.1.1-SNAPSHOT</version>
+                <version>1.2.0-DGSANTE2-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>itb-step</artifactId>
-                <version>1.1.1-SNAPSHOT</version>
+                <version>1.2.0-DGSANTE2-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>assertion-step</artifactId>
-                <version>1.1.1-SNAPSHOT</version>
+                <version>1.2.0-DGSANTE2-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>extraction-step</artifactId>
-                <version>1.1.1-SNAPSHOT</version>
+                <version>1.2.0-DGSANTE2-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>conversion-step</artifactId>
-                <version>1.1.1-SNAPSHOT</version>
+                <version>1.2.0-DGSANTE2-SNAPSHOT</version>
             </dependency>
 
             <!-- to be removed when maestro-websocket has it own tests -->
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-websocket</artifactId>
-                <version>1.1.1-SNAPSHOT</version>
+                <version>1.2.0-DGSANTE2-SNAPSHOT</version>
             </dependency>
 
             <!-- Gazelle dependencies -->
@@ -194,7 +194,7 @@
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-engine</artifactId>
-                <version>1.1.1-SNAPSHOT</version>
+                <version>1.2.0-DGSANTE2-SNAPSHOT</version>
                 <type>test-jar</type>
                 <scope>test</scope>
             </dependency>
