@@ -1,7 +1,7 @@
 [
   {
     "logicalName": "validation_overall_result",
-    "itemType": "VALIDATION",
+    "itemType": "VALIDATION_REPORT",
     "fieldType": "STRING",
     "fullName": "content.overallResult",
     "keys": {
@@ -15,7 +15,7 @@
   },
   {
     "logicalName": "validation_service_name",
-    "itemType": "VALIDATION",
+    "itemType": "VALIDATION_REPORT",
     "fieldType": "STRING",
     "fullName": "content.validationMethod.validationServiceName",
     "keys": {
@@ -29,7 +29,7 @@
   },
   {
     "logicalName": "validation_service_version",
-    "itemType": "VALIDATION",
+    "itemType": "VALIDATION_REPORT",
     "fieldType": "STRING",
     "fullName": "content.validationMethod.validationServiceVersion",
     "keys": {
@@ -43,7 +43,7 @@
   },
   {
     "logicalName": "validation_profile_id",
-    "itemType": "VALIDATION",
+    "itemType": "VALIDATION_REPORT",
     "fieldType": "STRING",
     "fullName": "content.validationMethod.validationProfileID",
     "keys": {
@@ -57,7 +57,7 @@
   },
   {
     "logicalName": "validation_profile_name",
-    "itemType": "VALIDATION",
+    "itemType": "VALIDATION_REPORT",
     "fieldType": "STRING",
     "fullName": "content.validationMethod.validationProfileName",
     "keys": {
@@ -71,7 +71,7 @@
   },
   {
     "logicalName": "validation_profile_version",
-    "itemType": "VALIDATION",
+    "itemType": "VALIDATION_REPORT",
     "fieldType": "STRING",
     "fullName": "content.validationMethod.validationProfileVersion",
     "keys": {
@@ -85,7 +85,7 @@
   },
   {
     "logicalName": "validation_date_time",
-    "itemType": "VALIDATION",
+    "itemType": "VALIDATION_REPORT",
     "fieldType": "DATE_STRING",
     "fullName": "content.dateTime",
     "keys": {
@@ -95,7 +95,7 @@
   },
   {
     "logicalName": "1",
-    "itemType": "VALIDATION",
+    "itemType": "VALIDATION_REPORT",
     "fieldType": "INTEGER",
     "fullName": "content.counters.numberOfAssertions",
     "keys": {
@@ -109,7 +109,7 @@
   },
   {
     "logicalName": "validation_failed_with_infos",
-    "itemType": "VALIDATION",
+    "itemType": "VALIDATION_REPORT",
     "fieldType": "INTEGER",
     "fullName": "content.counters.numberOfFailedWithInfos",
     "keys": {
@@ -123,7 +123,7 @@
   },
   {
     "logicalName": "validation_failed_with_warnings",
-    "itemType": "VALIDATION",
+    "itemType": "VALIDATION_REPORT",
     "fieldType": "INTEGER",
     "fullName": "content.counters.numberOfFailedWithWarnings",
     "keys": {
@@ -137,7 +137,7 @@
   },
   {
     "logicalName": "validation_failed_with_errors",
-    "itemType": "VALIDATION",
+    "itemType": "VALIDATION_REPORT",
     "fieldType": "INTEGER",
     "fullName": "content.counters.numberOfFailedWithErrors",
     "keys": {
@@ -151,7 +151,7 @@
   },
   {
     "logicalName": "validation_unexpected_errors",
-    "itemType": "VALIDATION",
+    "itemType": "VALIDATION_REPORT",
     "fieldType": "INTEGER",
     "fullName": "content.counters.numberOfUnexpectedErrors",
     "keys": {
@@ -165,7 +165,7 @@
   },
   {
     "logicalName": "validation_undefined_assertions",
-    "itemType": "VALIDATION",
+    "itemType": "VALIDATION_REPORT",
     "fieldType": "INTEGER",
     "fullName": "content.counters.numberOfUndefined",
     "keys": {
