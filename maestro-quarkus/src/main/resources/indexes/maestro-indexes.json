@@ -455,5 +455,41 @@
       "accessControlListMongo.entries.role": 1,
       "accessControlListMongo.entries.user": 1
     }
+  },
+  {
+    "logicalName": "simulation_report_transaction_name",
+    "itemType": "SIMULATION_REPORT",
+    "fieldType": "STRING",
+    "fullName": "content.transactionReports.transaction",
+    "keys": {
+      "content.transactionReports.transaction": 1,
+      "type": 1,
+      "content.dateTime": -1,
+      "accessControlListMongo.public": 1
+    }
+  },
+  {
+    "logicalName": "simulation_report_transaction_result",
+    "itemType": "SIMULATION_REPORT",
+    "fieldType": "STRING",
+    "fullName": "content.transactionReports.result",
+    "keys": {
+      "content.transactionReports.result": 1,
+      "type": 1,
+      "content.dateTime": -1,
+      "accessControlListMongo.public": 1
+    }
+  },
+  {
+    "logicalName": "simulation_report_transaction_standard",
+    "itemType": "SIMULATION_REPORT",
+    "fieldType": "STRING",
+    "fullName": "content.transactionReports.standards",
+    "keys": {
+      "content.transactionReports.standards": 1,
+      "type": 1,
+      "content.dateTime": -1,
+      "accessControlListMongo.public": 1
+    }
   }
 ]
