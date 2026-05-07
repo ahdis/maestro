@@ -374,7 +374,7 @@ export GZL_SSO_ADMIN_USER="gazelle-clients-admin"
 export GZL_SSO_ADMIN_PASSWORD="gazelle"
 export GZL_M2M_CLIENT_SECRET="change-me"
 
-export GZL_DATAHOUSE_URL="http://localhost/datahouse/rest/v1"
+export DATAHOUSE_URL="http://localhost/datahouse/rest/v1"
 ```
 
 ## Minimal End-to-End Validation

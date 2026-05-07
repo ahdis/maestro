@@ -30,7 +30,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @ApplicationScoped
 public class RecordingServiceCDIFactory {
 
-   @ConfigProperty(name = "gzl.datahouse.url")
+   @ConfigProperty(name = "datahouse.url")
    String datahouseUrl;
 
    private final SPIStepOutputPlanDissectorProvider dissectorProvider = new SPIStepOutputPlanDissectorProvider();
