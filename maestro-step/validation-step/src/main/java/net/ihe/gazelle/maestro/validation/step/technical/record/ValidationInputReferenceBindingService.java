@@ -152,17 +152,19 @@ public class ValidationInputReferenceBindingService {
          String inputId = resolveInputName(input.getId());
          input.setId(inputId);
          BindingInfo bindingInfo = bindings.get(inputId);
-         String referenceName = bindingInfo != null ? bindingInfo.referenceName() : null;
-         if (referenceName != null && !referenceName.isBlank()) {
-            stepOutputPlan.onFutureReferenceResolved(referenceName,
-                  (refName, referenceId) -> {
-                     mutateInputReference(input, referenceId);
-                     addAttachmentReferenceIfMissing(validationReportPlan, inputId, referenceId, attachmentType);
-                  });
-            continue;
-         }
          if (input.getContent() != null) {
             addAttachmentPlanIfMissing(validationReportPlan, input, inputId, bindingInfo, attachmentType);
+         } else if (input.getItemId() != null) {
+            addAttachmentReferenceIfMissing(validationReportPlan, inputId, input.getItemId(), attachmentType);
+         } else if (input.getLocation() == null) {
+            String referenceName = bindingInfo != null ? bindingInfo.referenceName() : null;
+            if (referenceName != null && !referenceName.isBlank()) {
+               stepOutputPlan.onFutureReferenceResolved(referenceName,
+                     (refName, referenceId) -> {
+                        mutateInputReference(input, referenceId);
+                        addAttachmentReferenceIfMissing(validationReportPlan, inputId, referenceId, attachmentType);
+                     });
+            }
          }
       }
    }

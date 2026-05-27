@@ -74,7 +74,12 @@ class ValidationStepOutputDissectorTest {
         ItemPlan<ValidationReport> reportPlan = (ItemPlan<ValidationReport>) reportReference.referencePlan().getTarget();
         assertEquals(ValidationStepDefinition.REPORT, reportPlan.type());
 
-        assertTrue(reportPlan.futureReferencePlans().isEmpty(), "References are added when callback resolves");
+        assertEquals(1, reportPlan.futureReferencePlans().size());
+        FutureReferencePlan<ValidationReport> attachmentReference = reportPlan.futureReferencePlans().getFirst();
+        AttachmentPlan attachmentPlan = assertInstanceOf(AttachmentPlan.class, attachmentReference.referencePlan().getTarget());
+        assertEquals("payload-input", attachmentReference.referencePlan().getName());
+        assertEquals(MaestroRefType.ATTACHMENT, attachmentReference.referencePlan().getRefType());
+        assertArrayEquals("validation-input".getBytes(StandardCharsets.UTF_8), attachmentPlan.content());
         ValidationReport report = reportPlan.itemObject();
         assertNotNull(report.getInputs());
         assertEquals(1, report.getInputs().size());
@@ -172,6 +177,51 @@ class ValidationStepOutputDissectorTest {
 
         assertEquals("att-88", persistedInput.getItemId());
         assertEquals("/attachments/att-88", persistedInput.getLocation());
+        assertNull(persistedInput.getContent());
+    }
+
+    @Test
+    void shouldPreserveServiceProvidedInputContentWhenBindingUsesSameId() throws Exception {
+        byte[] parsedPayload = "parsed-validation-input".getBytes(StandardCharsets.UTF_8);
+        ValidationReport reportWithParsedInput = new ValidationReport()
+              .setUuid("validation-report-id")
+              .addInput(new Input()
+                    .setId("payload-input")
+                    .setContent(parsedPayload));
+        String payload = OBJECT_MAPPER.writeValueAsString(new PropertyBindingPayload()
+              .setStepType(ValidationStepDefinition.TYPE)
+              .addBinding(new PropertyBindingPayload.Binding()
+                    .setTargetKind("validationInput")
+                    .setTargetId("payload-input")
+                    .setReferenceName("inputFile1")
+                    .setPropertyName("contentToValidate")));
+
+        StepRunReport step = new StepRunReport()
+              .addOutput(new ByteArrayProperty(ValidationStepDefinition.REPORT, OBJECT_MAPPER.writeValueAsBytes(reportWithParsedInput)))
+              .addOutput(new StringProperty(PropertyBindingPayload.PROPERTY_NAME, payload));
+        Fixture fixture = newFixture(step);
+
+        dissector.dissect(fixture.stepOutputPlan());
+
+        @SuppressWarnings("unchecked")
+        ItemPlan<ValidationReport> reportPlan =
+              (ItemPlan<ValidationReport>) fixture.rootPlan().futureReferencePlans().getFirst().referencePlan().getTarget();
+        Input persistedInput = reportPlan.itemObject().getInputs().getFirst();
+        FutureReferencePlan<ValidationReport> attachmentReference = reportPlan.futureReferencePlans().getFirst();
+        AttachmentPlan attachmentPlan = (AttachmentPlan) attachmentReference.referencePlan().getTarget();
+
+        fixture.callbackRegistry().notifyResolved("inputFile1", "original-att-77");
+
+        assertEquals(1, reportPlan.itemObject().getInputs().size());
+        assertEquals("payload-input", persistedInput.getId());
+        assertArrayEquals(parsedPayload, attachmentPlan.content());
+        assertNull(persistedInput.getItemId(), "Original test run input reference must not overwrite service content");
+        assertNull(persistedInput.getLocation(), "Original test run input reference must not overwrite service content");
+
+        attachmentReference.mutation().mutateReference(reportPlan.itemObject(), "payload-input", "parsed-att-88");
+
+        assertEquals("parsed-att-88", persistedInput.getItemId());
+        assertEquals("/attachments/parsed-att-88", persistedInput.getLocation());
         assertNull(persistedInput.getContent());
     }
 

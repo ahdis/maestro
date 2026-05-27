@@ -25,6 +25,7 @@ import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepDefinition;
 import net.ihe.gazelle.maestro.spi.business.recording.FutureReferenceCallbackRegistry;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlan;
+import net.ihe.gazelle.maestro.spi.business.recording.plan.AttachmentPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.FutureReferencePlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.MaestroRefType;
@@ -95,19 +96,22 @@ class SimulationStepOutputDissectorTest {
             (ItemPlan<net.ihe.gazelle.validation.v2.api.business.report.ValidationReport>)
                   validationRef.referencePlan().getTarget();
 
-      assertTrue(validationPlan.futureReferencePlans().isEmpty());
+      assertEquals(1, validationPlan.futureReferencePlans().size());
+      FutureReferencePlan<net.ihe.gazelle.validation.v2.api.business.report.ValidationReport> attachmentReference =
+            validationPlan.futureReferencePlans().getFirst();
+      AttachmentPlan attachmentPlan = assertInstanceOf(AttachmentPlan.class, attachmentReference.referencePlan().getTarget());
+      assertEquals("input-1", attachmentReference.referencePlan().getName());
+      assertEquals(MaestroRefType.ATTACHMENT, attachmentReference.referencePlan().getRefType());
+      assertArrayEquals("data".getBytes(StandardCharsets.UTF_8), attachmentPlan.content());
       assertNotNull(validationPlan.itemObject().getInputs());
       assertEquals(1, validationPlan.itemObject().getInputs().size());
       assertEquals("input-1", validationPlan.itemObject().getInputs().getFirst().getId());
       fixture.callbackRegistry().notifyResolved("inputFile1", "att-1");
-      assertEquals("att-1", validationPlan.itemObject().getInputs().getFirst().getItemId());
-      assertEquals("/attachments/att-1", validationPlan.itemObject().getInputs().getFirst().getLocation());
-      assertTrue(validationPlan.futureReferencePlans().stream()
-            .map(FutureReferencePlan::referencePlan)
-            .anyMatch(referencePlan ->
-                  "input-1".equals(referencePlan.getName())
-                        && referencePlan.getRefType() == MaestroRefType.ATTACHMENT
-                        && "att-1".equals(referencePlan.getTarget())));
+      assertNull(validationPlan.itemObject().getInputs().getFirst().getItemId());
+      assertNull(validationPlan.itemObject().getInputs().getFirst().getLocation());
+      attachmentReference.mutation().mutateReference(validationPlan.itemObject(), "input-1", "parsed-att-1");
+      assertEquals("parsed-att-1", validationPlan.itemObject().getInputs().getFirst().getItemId());
+      assertEquals("/attachments/parsed-att-1", validationPlan.itemObject().getInputs().getFirst().getLocation());
 
       validationRef.mutation().mutateReference(simulationReport, validationRef.referencePlan().getName(), "itm-2");
       ValidationReport mutatedSimValidation = simulationReport.getTransactionReports().getFirst()
