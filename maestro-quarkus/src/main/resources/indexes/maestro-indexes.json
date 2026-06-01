@@ -457,6 +457,19 @@
     }
   },
   {
+    "logicalName": "simulation_report_date_time",
+    "itemType": "SIMULATION_REPORT",
+    "fieldType": "DATE_STRING",
+    "fullName": "content.dateTime",
+    "keys": {
+      "content.dateTime": -1,
+      "type": 1,
+      "accessControlListMongo.public": 1,
+      "accessControlListMongo.entries.role": 1,
+      "accessControlListMongo.entries.user": 1
+    }
+  },
+  {
     "logicalName": "simulation_report_transaction_name",
     "itemType": "SIMULATION_REPORT",
     "fieldType": "STRING",
