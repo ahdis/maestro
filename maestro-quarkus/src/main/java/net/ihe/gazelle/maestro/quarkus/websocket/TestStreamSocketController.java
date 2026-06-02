@@ -142,13 +142,13 @@ public class TestStreamSocketController {
             }
          }
       } catch (DeserializationException e) {
-         LOG.error("Unable to execute test, please contact an administrator", e);
-         session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, "Error while parsing test message"));
+         LOG.error("Unable to parse test run", e);
+         session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, "Unable to parse test run, please contact an administrator."));
       } catch (UnauthorizedException e) {
-         session.close(new CloseReason(CloseReason.CloseCodes.VIOLATED_POLICY, "Authorization required"));
+         session.close(new CloseReason(CloseReason.CloseCodes.VIOLATED_POLICY, "Unauthenticated"));
       } catch (Exception e) {
-         LOG.error("Unable to execute test, please contact an administrator", e);
-         session.close(new CloseReason(CloseReason.CloseCodes.CLOSED_ABNORMALLY, "Unable to execute test, please contact an administrator."));
+         LOG.error("Unexpected error during websocket test execution", e);
+         session.close(new CloseReason(CloseReason.CloseCodes.CLOSED_ABNORMALLY, "Unexpected error, please contact an administrator."));
       }
    }
 }
