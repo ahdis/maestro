@@ -19,6 +19,7 @@ package net.ihe.gazelle.maestro.quarkus;
 import io.quarkus.test.junit.QuarkusTestProfile;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -44,5 +45,10 @@ public class TestRunControllerProfile implements QuarkusTestProfile {
     @Override
     public Set<Class<?>> getEnabledAlternatives() {
         return QuarkusTestProfile.super.getEnabledAlternatives();
+    }
+
+    @Override
+    public List<TestResourceEntry> testResources() {
+        return List.of(new TestResourceEntry(MaestroExternalServicesResource.class));
     }
 }
