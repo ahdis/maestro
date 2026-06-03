@@ -32,6 +32,7 @@ public class TestRunControllerProfile implements QuarkusTestProfile {
         overrides.put("gzl.it.port", "34500");
         overrides.put("gzl.service.registry.enabled", "false");
         overrides.put("gzl.service.registry.url", "http://localhost:34500/service-registry");
+        overrides.put("gzl.sso.url", "http://localhost:34500");
         overrides.put("gzl.m2m.registration.startup.enabled", "false");
         overrides.put("mp.jwt.verify.issuer", "https://localhost:12345");
         overrides.put("mp.jwt.verify.publickey.location", "http://localhost:12345/public.pem");

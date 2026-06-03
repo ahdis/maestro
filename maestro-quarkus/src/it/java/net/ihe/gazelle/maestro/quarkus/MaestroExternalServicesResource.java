@@ -40,6 +40,7 @@ public class MaestroExternalServicesResource implements QuarkusTestResourceLifec
             return Map.of(
                     "gzl.it.port", String.valueOf(WIREMOCK_PORT),
                     "gzl.service.registry.url", "http://localhost:" + WIREMOCK_PORT + "/service-registry",
+                    "gzl.sso.url", "http://localhost:" + WIREMOCK_PORT,
                     "datahouse.url", "http://localhost:" + DATAHOUSE_PORT + "/datahouse/rest/v1"
             );
         } catch (IOException e) {
