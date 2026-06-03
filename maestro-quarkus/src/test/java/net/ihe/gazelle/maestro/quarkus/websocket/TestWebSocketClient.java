@@ -35,6 +35,8 @@ import java.util.concurrent.*;
 @ApplicationScoped
 public class TestWebSocketClient {
 
+   private static final int TIMEOUT_SECONDS = 15;
+
    private final TextSerDes serDes = new JacksonSerDes();
    private static final Map<String, CompletableFuture<ExecutionFinished>> EXECUTIONS = new ConcurrentHashMap<>();
    private static final Map<String, CompletableFuture<String>> ERRORS = new ConcurrentHashMap<>();
@@ -50,7 +52,7 @@ public class TestWebSocketClient {
       try {
          MessageDTO<?> message = serDes.deserialize(msg, MessageDTO.class);
          if (message instanceof ExecutionFinishedDTO executionFinishedDTO) {
-            EXECUTIONS.get(session.getId()).complete(executionFinishedDTO.getBusinessObject());
+            executionFuture(session.getId()).complete(executionFinishedDTO.getBusinessObject());
 
          }
       } catch (DeserializationException e) {
@@ -60,12 +62,19 @@ public class TestWebSocketClient {
 
    @OnClose
    public void onClose(Session session, CloseReason reason) {
-      ERRORS.get(session.getId()).complete(reason.getReasonPhrase());
+      errorFuture(session.getId()).complete(reason.getReasonPhrase());
+   }
+
+   @OnError
+   public void onError(Session session, Throwable error) {
+      if (session != null) {
+         errorFuture(session.getId()).complete(error.getMessage());
+      }
    }
 
    public TestReport getTestReport(String sessionId) {
       try {
-         return EXECUTIONS.get(sessionId).get(2, TimeUnit.SECONDS).getReport();
+         return executionFuture(sessionId).get(TIMEOUT_SECONDS, TimeUnit.SECONDS).getReport();
       } catch (TimeoutException e) {
          throw new TimeoutRuntimeException(e);
       } catch (ExecutionException e) {
@@ -78,7 +87,7 @@ public class TestWebSocketClient {
 
    public String getError(String sessionId) {
       try {
-         return ERRORS.get(sessionId).get(2, TimeUnit.SECONDS);
+         return errorFuture(sessionId).get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
       } catch (TimeoutException e) {
          throw new TimeoutRuntimeException(e);
       } catch (ExecutionException e) {
@@ -92,5 +101,13 @@ public class TestWebSocketClient {
    public static void clear(String sessionId) {
       EXECUTIONS.remove(sessionId);
       ERRORS.remove(sessionId);
+   }
+
+   private static CompletableFuture<ExecutionFinished> executionFuture(String sessionId) {
+      return EXECUTIONS.computeIfAbsent(sessionId, ignored -> new CompletableFuture<>());
+   }
+
+   private static CompletableFuture<String> errorFuture(String sessionId) {
+      return ERRORS.computeIfAbsent(sessionId, ignored -> new CompletableFuture<>());
    }
 }

@@ -18,7 +18,6 @@ package net.ihe.gazelle.maestro.quarkus;
 
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.QuarkusTestProfile;
 import io.quarkus.test.junit.TestProfile;
 import io.restassured.response.Response;
 import jakarta.ws.rs.core.MediaType;
@@ -50,7 +49,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestProfile(TestRunControllerProfile.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @QuarkusTestResource(KeycloakMockResource.class)
-class TestRunControllerIT implements QuarkusTestProfile {
+@QuarkusTestResource(MaestroExternalServicesResource.class)
+class MaestroTestRunControllerIT {
 
    @ConfigProperty(name = "gzl.it.port")
    int port;

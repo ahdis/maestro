@@ -19,6 +19,7 @@ package net.ihe.gazelle.maestro.quarkus;
 import io.quarkus.test.junit.QuarkusTestProfile;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,11 +29,26 @@ public class TestRunControllerProfile implements QuarkusTestProfile {
     public Map<String, String> getConfigOverrides() {
         Map<String, String> overrides = new HashMap<>();
         overrides.put("gzl.service.registry.file.path", this.getClass().getResource("/services.json").getPath());
+        overrides.put("gzl.it.port", "34500");
+        overrides.put("gzl.service.registry.enabled", "false");
+        overrides.put("gzl.service.registry.url", "http://localhost:34500/service-registry");
+        overrides.put("gzl.m2m.registration.startup.enabled", "false");
+        overrides.put("mp.jwt.verify.issuer", "https://localhost:12345");
+        overrides.put("mp.jwt.verify.publickey.location", "http://localhost:12345/public.pem");
+        overrides.put("gzl.report.recording.enabled", "true");
+        overrides.put("datahouse.indexes.enabled", "false");
+        overrides.put("datahouse.url", "http://localhost:34501/datahouse/rest/v1");
+        overrides.put("itb.api.key", "1234567890abcdef");
         return overrides;
     }
 
     @Override
     public Set<Class<?>> getEnabledAlternatives() {
         return QuarkusTestProfile.super.getEnabledAlternatives();
+    }
+
+    @Override
+    public List<TestResourceEntry> testResources() {
+        return List.of(new TestResourceEntry(MaestroExternalServicesResource.class));
     }
 }
