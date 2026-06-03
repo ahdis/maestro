@@ -28,6 +28,11 @@ public class TestRunControllerProfile implements QuarkusTestProfile {
     public Map<String, String> getConfigOverrides() {
         Map<String, String> overrides = new HashMap<>();
         overrides.put("gzl.service.registry.file.path", this.getClass().getResource("/services.json").getPath());
+        overrides.put("gzl.it.port", "34500");
+        overrides.put("gzl.service.registry.enabled", "false");
+        overrides.put("gzl.service.registry.url", "http://localhost:34500/service-registry");
+        overrides.put("mp.jwt.verify.issuer", "https://localhost:12345");
+        overrides.put("mp.jwt.verify.publickey.location", "http://localhost:12345/public.pem");
         return overrides;
     }
 
