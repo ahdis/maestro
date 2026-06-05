@@ -72,7 +72,7 @@
         <simulation-api.version>0.3.0</simulation-api.version>
         <service-registry.version>2.0.1</service-registry.version>
         <lang.version>3.0.0</lang.version>
-        <datahouse.version>4.2.1-SNAPSHOT</datahouse.version>
+        <datahouse.version>4.3.0</datahouse.version>
         <validation-service-clients.version>1.0.1</validation-service-clients.version>
 
         <equalsverifier.version>3.16.1</equalsverifier.version>
