@@ -24,7 +24,7 @@
     </parent>
 
     <artifactId>maestro</artifactId>
-    <version>1.2.0-SNAPSHOT</version>
+    <version>1.2.0</version>
     <packaging>pom</packaging>
 
     <organization>
@@ -59,7 +59,7 @@
     <scm>
         <connection>scm:git:${git.project.url}</connection>
         <developerConnection>scm:git:${git.project.url}</developerConnection>
-        <tag>HEAD</tag>
+        <tag>1.2.0</tag>
         <url>scm:git:${git.project.url}</url>
     </scm>
 
@@ -92,42 +92,42 @@
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-api</artifactId>
-                <version>1.2.0-SNAPSHOT</version>
+                <version>1.2.0</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-engine</artifactId>
-                <version>1.2.0-SNAPSHOT</version>
+                <version>1.2.0</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-recording</artifactId>
-                <version>1.2.0-SNAPSHOT</version>
+                <version>1.2.0</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>validation-step</artifactId>
-                <version>1.2.0-SNAPSHOT</version>
+                <version>1.2.0</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>simulation-step</artifactId>
-                <version>1.2.0-SNAPSHOT</version>
+                <version>1.2.0</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>user-interaction-step</artifactId>
-                <version>1.2.0-SNAPSHOT</version>
+                <version>1.2.0</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>itb-step</artifactId>
-                <version>1.2.0-SNAPSHOT</version>
+                <version>1.2.0</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>assertion-step</artifactId>
-                <version>1.2.0-SNAPSHOT</version>
+                <version>1.2.0</version>
             </dependency>
 
             <!-- Gazelle dependencies -->
@@ -182,7 +182,7 @@
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-engine</artifactId>
-                <version>1.2.0-SNAPSHOT</version>
+                <version>1.2.0</version>
                 <type>test-jar</type>
                 <scope>test</scope>
             </dependency>
