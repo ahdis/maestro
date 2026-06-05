@@ -188,8 +188,42 @@ Use ITB when the test case must be executed on an external ITB platform.
 - Required properties in the step:
 - `testCase`
 - `actorID`
-- Optional but commonly required:
 - `systemID`
+- Optional properties:
+- `executionMode`
+- `itbPayloadMode`
+
+### ITB step properties
+
+- `testCase`: ITB test case identifier to execute.
+- `actorID`: ITB actor identifier.
+- `systemID`: ITB system identifier.
+- `executionMode`: execution strategy for the ITB call.
+  Accepted values: `ASYNC` and `SYNC`.
+  Default: `ASYNC`.
+- `itbPayloadMode`: how Maestro maps business inputs to the ITB `inputMapping`.
+  Accepted values: `FLAT` and `USER_INPUT_MAP`.
+  Default: `FLAT`.
+
+### Synchronous ITB execution
+
+Set `executionMode` to `SYNC` when Maestro must wait for the ITB execution to complete during the step execution.
+
+- In `SYNC`, Maestro sends `waitForCompletion=true` and `maximumWaitTime=<step timeout>` to ITB.
+- The step `timeout` must be greater than `0`, otherwise the ITB step fails immediately.
+- The step completes with the ITB report, logs and PDF report enrichment collected during the same execution.
+- The Maestro `/itb/report` callback is not used to complete the step in this mode.
+
+Use `ASYNC` when ITB should start the session and complete it later through the callback flow.
+
+### ITB payload mapping modes
+
+All ITB step properties other than `testCase`, `actorID`, `systemID`, `executionMode` and `itbPayloadMode` are sent to ITB as business inputs.
+
+- `FLAT`: one ITB `inputMapping` entry is created per business property.
+- `USER_INPUT_MAP`: Maestro creates a single ITB input named `userInput` with type `map`, and places the business properties inside `userInput.item[]`.
+
+Use `USER_INPUT_MAP` for ITB test sessions that expect a grouped `userInput` object instead of flat top-level inputs.
 
 Example `TestRun` payload for ITB:
 
@@ -209,7 +243,48 @@ Example `TestRun` payload for ITB:
         "properties": [
           { "name": "testCase", "type": "STRING", "value": "018_01_01" },
           { "name": "actorID", "type": "STRING", "value": "CE72C162X6307X41A8X8AD4X9498BDAE7220" },
-          { "name": "systemID", "type": "STRING", "value": "69461385X812CX4CFDX83A0X3D6D54F70FB2" }
+          { "name": "systemID", "type": "STRING", "value": "69461385X812CX4CFDX83A0X3D6D54F70FB2" },
+          { "name": "document", "type": "BYTE_ARRAY", "value": "${inputFile}" },
+          { "name": "documentName", "type": "STRING", "value": "sample.xml" }
+        ]
+      }
+    ]
+  },
+  "inputs": [
+    {
+      "name": "inputFile",
+      "type": "BYTE_ARRAY",
+      "value": "PHNhbXBsZT5vazwvc2FtcGxlPg=="
+    }
+  ]
+}
+```
+
+### Example with `executionMode=SYNC` and `itbPayloadMode=USER_INPUT_MAP`
+
+Use this combination when the ITB test must finish during the Maestro step and expects one grouped `userInput` map.
+
+```json
+{
+  "testRunId": "itb-sync-run",
+  "systemsUnderTest": [],
+  "test": {
+    "id": "itb-sync-test",
+    "name": "ITB Sync Example",
+    "steps": [
+      {
+        "id": "itb-sync-step",
+        "name": "ITB synchronous step",
+        "type": "ITB",
+        "timeout": 120000,
+        "properties": [
+          { "name": "testCase", "type": "STRING", "value": "testCase_uploadLabReport" },
+          { "name": "actorID", "type": "STRING", "value": "37A313E9X1378X4380X9A7BXBEE7846B8A7B" },
+          { "name": "systemID", "type": "STRING", "value": "F0B93C0FX8D8DX48FCXBAE0X0084CDC34200" },
+          { "name": "executionMode", "type": "STRING", "value": "SYNC" },
+          { "name": "itbPayloadMode", "type": "STRING", "value": "USER_INPUT_MAP" },
+          { "name": "content", "type": "BYTE_ARRAY", "value": "${inputFile}" },
+          { "name": "uploadedFileName", "type": "STRING", "value": "1-1234-W7.json" }
         ]
       }
     ]
@@ -217,10 +292,38 @@ Example `TestRun` payload for ITB:
 }
 ```
 
+With this mode, Maestro builds the ITB `inputMapping` like this:
+
+```json
+[
+  {
+    "testCase": ["testCase_uploadLabReport"],
+    "input": {
+      "name": "userInput",
+      "type": "map",
+      "item": [
+        {
+          "name": "content",
+          "type": "binary",
+          "embeddingMethod": "BASE64",
+          "value": "<base64 content>"
+        },
+        {
+          "name": "uploadedFileName",
+          "value": "1-1234-W7.json"
+        }
+      ]
+    }
+  }
+]
+```
+
 ITB callback expected by Maestro:
 
 - `POST {GZL_MAESTRO_URL}/itb/report`
 - Local example: `POST http://localhost:8150/maestro/itb/report`
+- Required for `executionMode=ASYNC`
+- Not used to complete the step for `executionMode=SYNC`
 
 ## Configuration Checklist for ITB + TM
 
@@ -271,7 +374,7 @@ export GZL_SSO_ADMIN_USER="gazelle-clients-admin"
 export GZL_SSO_ADMIN_PASSWORD="gazelle"
 export GZL_M2M_CLIENT_SECRET="change-me"
 
-export GZL_DATAHOUSE_URL="http://localhost/datahouse/rest/v1"
+export DATAHOUSE_URL="http://localhost/datahouse/rest/v1"
 ```
 
 ## Minimal End-to-End Validation
@@ -279,8 +382,9 @@ export GZL_DATAHOUSE_URL="http://localhost/datahouse/rest/v1"
 1. Start Maestro.
 2. Check Swagger at `/maestro/swagger-ui`.
 3. Execute one test suite through `/v1/test-suite/run`.
-4. Include one ITB step and verify callback arrives on `/maestro/itb/report`.
-5. Confirm final report is returned (sync) or sent to callback (async).
+4. Run one ITB step with `executionMode=SYNC` and confirm the ITB report is returned in the step outputs.
+5. Run one ITB step with `executionMode=ASYNC` and verify the callback arrives on `/maestro/itb/report`.
+6. If the target ITB session expects grouped business inputs, use `itbPayloadMode=USER_INPUT_MAP`; otherwise keep the default `FLAT`.
 
 ## Additional Documentation
 
