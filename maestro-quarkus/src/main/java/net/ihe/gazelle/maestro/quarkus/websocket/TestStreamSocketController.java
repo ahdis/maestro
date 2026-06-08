@@ -138,7 +138,6 @@ public class TestStreamSocketController {
                sessionService.removeSession(session.getId());
                String error = "Unexpected message type: " + message.getClass().getName();
                session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, error));
-               throw new IllegalArgumentException(error);
             }
          }
       } catch (DeserializationException e) {
@@ -152,4 +151,3 @@ public class TestStreamSocketController {
       }
    }
 }
-
