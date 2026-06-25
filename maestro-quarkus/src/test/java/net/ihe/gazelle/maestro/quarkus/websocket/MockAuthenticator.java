@@ -19,8 +19,11 @@ package net.ihe.gazelle.maestro.quarkus.websocket;
 import net.ihe.gazelle.oidc.common.technical.OIDCIdentity;
 import net.ihe.gazelle.security.business.Authenticator;
 import net.ihe.gazelle.security.business.GazelleIdentity;
+import net.ihe.gazelle.security.business.Groups;
 import net.ihe.gazelle.security.mocks.MockedJsonWebToken;
 import org.eclipse.microprofile.jwt.JsonWebToken;
+
+import java.util.Set;
 
 public class MockAuthenticator implements Authenticator {
 
@@ -34,6 +37,7 @@ public class MockAuthenticator implements Authenticator {
       JsonWebToken jwt = new MockedJsonWebToken();
       return new OIDCIdentity(jwt)
             .setId(jwt.getName())
-            .setName(jwt.getSubject());
+            .setName(jwt.getSubject())
+            .setGroups(Set.of(Groups.ROLE_ADMIN));
    }
 }
