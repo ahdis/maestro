@@ -335,7 +335,6 @@ Maestro uses property `itb.api.key` and sends it as HTTP header `ITB_API_KEY` to
 
 - Recommended env var: `ITB_API_KEY` (maps to `itb.api.key`)
 - If your deployment naming uses `ITB_API_ORGANIZATION_KEY`, map it to `itb.api.key` in your deployment config.
-- Also set `ITB_API_URL` (maps to `itb.api.url`)
 
 ### 2) Add services in Service Registry
 
@@ -365,7 +364,6 @@ export GZL_MAESTRO_URL="http://localhost:8150/maestro"
 export GZL_SERVICE_REGISTRY_URL="http://localhost:8088/service-registry"
 export GZL_SERVICE_REGISTRY_ENABLED="true"
 
-export ITB_API_URL="https://your-itb-host"
 export ITB_API_KEY="your-itb-organization-key"
 
 export GZL_SSO_URL="http://localhost/auth"
