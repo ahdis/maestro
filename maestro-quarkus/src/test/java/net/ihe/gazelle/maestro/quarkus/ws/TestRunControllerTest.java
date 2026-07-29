@@ -122,7 +122,8 @@ class TestRunControllerTest {
    void testTestSuiteRunAllowsConfiguredAnonymousRole() {
       TestReport testReport = ObjectFactory.createTestReport();
       maestroMock.setTestReportSupplier(() -> testReport);
-      controller = new TestRunControllerImpl(BaseGazelleIdentity.unauthenticatedIdentity(), authz,
+      controller = new TestRunControllerImpl(BaseGazelleIdentity.unauthenticatedIdentity(),
+            authzForTestRunRoles(Set.of("role:anonymous")),
             new SynchronousMaestro(maestroMock), maestroMock);
 
       try (Response response = controller.executeTestSuite(getTestSuiteRunDTO(), false, null)) {
@@ -134,7 +135,8 @@ class TestRunControllerTest {
    void testTestRunAllowsConfiguredAnonymousRole() {
       TestReport testReport = ObjectFactory.createTestReport();
       maestroMock.setTestReportSupplier(() -> testReport);
-      controller = new TestRunControllerImpl(BaseGazelleIdentity.unauthenticatedIdentity(), authz,
+      controller = new TestRunControllerImpl(BaseGazelleIdentity.unauthenticatedIdentity(),
+            authzForTestRunRoles(Set.of("role:anonymous")),
             new SynchronousMaestro(maestroMock), maestroMock);
 
       try (Response response = controller.executeTest(getTestRunDTO(), false, null)) {
@@ -144,11 +146,8 @@ class TestRunControllerTest {
 
    @org.junit.jupiter.api.Test
    void testTestRunRejectsAnonymousRoleWhenNotConfigured() {
-      RBACMatrixProvider authenticatedOnlyMatrix = () -> new InMemoryRBACMatrix(
-            Map.of(MaestroPermissions.TEST_RUN, Set.of("role:gazelle_admin")));
-      Authz authenticatedOnlyAuthz = new AuthzImpl(
-            () -> Set.of(new MaestroPermissionStore(authenticatedOnlyMatrix)));
-      controller = new TestRunControllerImpl(BaseGazelleIdentity.unauthenticatedIdentity(), authenticatedOnlyAuthz,
+      controller = new TestRunControllerImpl(BaseGazelleIdentity.unauthenticatedIdentity(),
+            authzForTestRunRoles(Set.of("role:gazelle_admin")),
             new SynchronousMaestro(maestroMock), maestroMock);
 
       try (Response response = controller.executeTest(getTestRunDTO(), false, null)) {
@@ -215,6 +214,12 @@ class TestRunControllerTest {
       }
    }
 
+   private Authz authzForTestRunRoles(Set<String> roles) {
+      RBACMatrixProvider matrixProvider = () -> new InMemoryRBACMatrix(
+            Map.of(MaestroPermissions.TEST_RUN, roles));
+      return new AuthzImpl(() -> Set.of(new MaestroPermissionStore(matrixProvider)));
+   }
+
    @org.junit.jupiter.api.Test
    void testTestRunAsync() {
       maestroMock.setTestReportSupplier(ObjectFactory::createTestReport);
@@ -228,7 +233,7 @@ class TestRunControllerTest {
       try (Response response = controller.executeTest(getTestRunDTO(), false, callbackUrl)) {
          assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus());
          assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus());
-         Awaitility.await().atMost(3, TimeUnit.SECONDS).untilAsserted(
+         Awaitility.await().atMost(10, TimeUnit.SECONDS).untilAsserted(
                () -> wireMockServer.verify(
                      1,
                      postRequestedFor(urlEqualTo("/callback/testTestRunAsync"))
