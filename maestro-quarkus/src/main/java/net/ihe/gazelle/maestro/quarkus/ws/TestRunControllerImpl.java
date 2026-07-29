@@ -95,9 +95,6 @@ public class TestRunControllerImpl implements TestRunController {
 
    private Response handleErrors(Supplier<Response> serviceCall) {
       try {
-         if (!identity.isAuthenticated()) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
-         }
          return serviceCall.get();
       } catch (UnauthorizedException e) {
          return Response.status(Response.Status.UNAUTHORIZED).build();
@@ -118,7 +115,7 @@ public class TestRunControllerImpl implements TestRunController {
 
    private Response runTestSuiteSynchronously(TestSuiteRun testSuiteRun, boolean persist) {
       try {
-         authz.assertAuthorized(identity, MaestroPermissions.TEST_SUITE_RUN);
+         authz.assertAuthorized(identity, MaestroPermissions.TEST_RUN);
          LocalizedTestReport report = (LocalizedTestReport) synchronousMaestro.executeTestSuite(testSuiteRun, persist);
          return Response
                .ok(new TestReportDTO(report))
@@ -132,7 +129,7 @@ public class TestRunControllerImpl implements TestRunController {
    }
 
    private Response runTestSuiteAsynchronously(TestSuiteRun testSuiteRun, boolean persist, String callback) {
-      authz.assertAuthorized(identity, MaestroPermissions.TEST_SUITE_RUN);
+      authz.assertAuthorized(identity, MaestroPermissions.TEST_RUN);
       maestro.executeTestSuite(testSuiteRun, persist, new ApacheTestReportClient(callback));
       return Response.accepted().build();
    }

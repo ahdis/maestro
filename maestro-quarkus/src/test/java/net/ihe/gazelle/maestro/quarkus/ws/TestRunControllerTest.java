@@ -35,11 +35,14 @@ import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestRunDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSuiteRunDTO;
 import net.ihe.gazelle.maestro.quarkus.configuration.MaestroPermissionStore;
+import net.ihe.gazelle.maestro.quarkus.configuration.MaestroPermissions;
 import net.ihe.gazelle.maestro.quarkus.mock.IdentityMock;
 import net.ihe.gazelle.maestro.quarkus.utils.ObjectFactory;
 import net.ihe.gazelle.security.business.Authz;
 import net.ihe.gazelle.security.business.AuthzImpl;
+import net.ihe.gazelle.security.business.BaseGazelleIdentity;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
+import net.ihe.gazelle.security.business.rbac.InMemoryRBACMatrix;
 import net.ihe.gazelle.security.business.rbac.RBACMatrixProvider;
 import net.ihe.gazelle.security.technical.rbac.RBACMatrixProviderImpl;
 import org.awaitility.Awaitility;
@@ -48,6 +51,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -111,6 +115,44 @@ class TestRunControllerTest {
          TestReportDTO entity = (TestReportDTO) response.getEntity();
          assertNotNull(entity);
          assertEquals(testReport.getTestSuiteName(), entity.getTestSuiteName());
+      }
+   }
+
+   @org.junit.jupiter.api.Test
+   void testTestSuiteRunAllowsConfiguredAnonymousRole() {
+      TestReport testReport = ObjectFactory.createTestReport();
+      maestroMock.setTestReportSupplier(() -> testReport);
+      controller = new TestRunControllerImpl(BaseGazelleIdentity.unauthenticatedIdentity(), authz,
+            new SynchronousMaestro(maestroMock), maestroMock);
+
+      try (Response response = controller.executeTestSuite(getTestSuiteRunDTO(), false, null)) {
+         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+      }
+   }
+
+   @org.junit.jupiter.api.Test
+   void testTestRunAllowsConfiguredAnonymousRole() {
+      TestReport testReport = ObjectFactory.createTestReport();
+      maestroMock.setTestReportSupplier(() -> testReport);
+      controller = new TestRunControllerImpl(BaseGazelleIdentity.unauthenticatedIdentity(), authz,
+            new SynchronousMaestro(maestroMock), maestroMock);
+
+      try (Response response = controller.executeTest(getTestRunDTO(), false, null)) {
+         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+      }
+   }
+
+   @org.junit.jupiter.api.Test
+   void testTestRunRejectsAnonymousRoleWhenNotConfigured() {
+      RBACMatrixProvider authenticatedOnlyMatrix = () -> new InMemoryRBACMatrix(
+            Map.of(MaestroPermissions.TEST_RUN, Set.of("role:gazelle_admin")));
+      Authz authenticatedOnlyAuthz = new AuthzImpl(
+            () -> Set.of(new MaestroPermissionStore(authenticatedOnlyMatrix)));
+      controller = new TestRunControllerImpl(BaseGazelleIdentity.unauthenticatedIdentity(), authenticatedOnlyAuthz,
+            new SynchronousMaestro(maestroMock), maestroMock);
+
+      try (Response response = controller.executeTest(getTestRunDTO(), false, null)) {
+         assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), response.getStatus());
       }
    }
 

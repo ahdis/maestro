@@ -2,9 +2,9 @@
   "permissions": [
     {
       "key": "test:run",
-      "title": "Run test",
+      "title": "Execute test",
       "section": "Test execution",
-      "description": "Execute a single Maestro test.",
+      "description": "Execute a Maestro test or test suite.",
       "controlLevel": "CONFIGURABLE",
       "enabled": true,
       "policies": [
@@ -13,25 +13,8 @@
           "groups": [
             "role:gazelle_admin",
             "role:project_admin",
-            "role:testing_session_manager"
-          ]
-        }
-      ]
-    },
-    {
-      "key": "test-suite:run",
-      "title": "Run test suite",
-      "section": "Test execution",
-      "description": "Execute a Maestro test suite.",
-      "controlLevel": "CONFIGURABLE",
-      "enabled": true,
-      "policies": [
-        {
-          "type": "RBAC",
-          "groups": [
-            "role:gazelle_admin",
-            "role:project_admin",
-            "role:testing_session_manager"
+            "role:testing_session_manager",
+            "role:anonymous"
           ]
         }
       ]

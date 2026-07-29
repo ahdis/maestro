@@ -19,7 +19,6 @@ package net.ihe.gazelle.maestro.quarkus.configuration;
 public final class MaestroPermissions {
 
    public static final String TEST_RUN = "test:run";
-   public static final String TEST_SUITE_RUN = "test-suite:run";
 
    private MaestroPermissions() {
       // Constants class.

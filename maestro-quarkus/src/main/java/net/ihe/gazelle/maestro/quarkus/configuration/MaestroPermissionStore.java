@@ -36,8 +36,7 @@ public class MaestroPermissionStore implements PermissionStore {
    @Override
    public Set<Permission> getPermissions() {
       return Set.of(
-            new Permission(MaestroPermissions.TEST_RUN, new RBACPolicy(MaestroPermissions.TEST_RUN, rbacMatrixProvider)),
-            new Permission(MaestroPermissions.TEST_SUITE_RUN, new RBACPolicy(MaestroPermissions.TEST_SUITE_RUN, rbacMatrixProvider))
+            new Permission(MaestroPermissions.TEST_RUN, new RBACPolicy(MaestroPermissions.TEST_RUN, rbacMatrixProvider))
       );
    }
 }

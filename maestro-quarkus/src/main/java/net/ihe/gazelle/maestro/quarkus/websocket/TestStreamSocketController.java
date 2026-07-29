@@ -127,9 +127,6 @@ public class TestStreamSocketController {
    public void onMessage(Session session, String messageString) throws IOException {
       LOG.debug("Received message: {}", messageString);
       try {
-         if (!identity.isAuthenticated()) {
-            throw new UnauthorizedException("Identity is not authenticated");
-         }
          MessageDTO<?> message = serDes.deserialize(messageString, MessageDTO.class);
          WebSocketSession maestroCaller = sessionService.getSession(session.getId());
          switch (message) {
@@ -138,7 +135,7 @@ public class TestStreamSocketController {
                maestro.executeTest(testRun.getBusinessObject(), testRun.isPersist(), maestroCaller);
             }
             case StartTestSuiteRunDTO testSuiteRun -> {
-               authz.assertAuthorized(identity, MaestroPermissions.TEST_SUITE_RUN);
+               authz.assertAuthorized(identity, MaestroPermissions.TEST_RUN);
                maestro.executeTestSuite(testSuiteRun.getBusinessObject(), testSuiteRun.isPersist(), maestroCaller);
             }
             case UserInteractionCompletedDTO userInteractionCompleted ->
