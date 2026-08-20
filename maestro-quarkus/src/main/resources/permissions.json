@@ -12,8 +12,6 @@
           "type": "RBAC",
           "groups": [
             "role:gazelle_admin",
-            "role:project_admin",
-            "role:testing_session_manager",
             "role:anonymous"
           ]
         }
