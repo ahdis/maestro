@@ -131,11 +131,11 @@ public class TestStreamSocketController {
          WebSocketSession maestroCaller = sessionService.getSession(session.getId());
          switch (message) {
             case StartTestRunDTO testRun -> {
-               authz.assertAuthorized(identity, MaestroPermissions.TEST_RUN);
+               authz.assertAuthorizedForIdentityOrganization(identity, MaestroPermissions.TEST_RUN);
                maestro.executeTest(testRun.getBusinessObject(), testRun.isPersist(), maestroCaller);
             }
             case StartTestSuiteRunDTO testSuiteRun -> {
-               authz.assertAuthorized(identity, MaestroPermissions.TEST_RUN);
+               authz.assertAuthorizedForIdentityOrganization(identity, MaestroPermissions.TEST_RUN);
                maestro.executeTestSuite(testSuiteRun.getBusinessObject(), testSuiteRun.isPersist(), maestroCaller);
             }
             case UserInteractionCompletedDTO userInteractionCompleted ->

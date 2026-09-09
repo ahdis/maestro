@@ -115,7 +115,7 @@ public class TestRunControllerImpl implements TestRunController {
 
    private Response runTestSuiteSynchronously(TestSuiteRun testSuiteRun, boolean persist) {
       try {
-         authz.assertAuthorized(identity, MaestroPermissions.TEST_RUN);
+         authz.assertAuthorizedForIdentityOrganization(identity, MaestroPermissions.TEST_RUN);
          LocalizedTestReport report = (LocalizedTestReport) synchronousMaestro.executeTestSuite(testSuiteRun, persist);
          return Response
                .ok(new TestReportDTO(report))
@@ -129,14 +129,14 @@ public class TestRunControllerImpl implements TestRunController {
    }
 
    private Response runTestSuiteAsynchronously(TestSuiteRun testSuiteRun, boolean persist, String callback) {
-      authz.assertAuthorized(identity, MaestroPermissions.TEST_RUN);
+      authz.assertAuthorizedForIdentityOrganization(identity, MaestroPermissions.TEST_RUN);
       maestro.executeTestSuite(testSuiteRun, persist, new ApacheTestReportClient(callback));
       return Response.accepted().build();
    }
 
    private Response runTestSynchronously(TestRun testRun, boolean persist) {
       try {
-         authz.assertAuthorized(identity, MaestroPermissions.TEST_RUN);
+         authz.assertAuthorizedForIdentityOrganization(identity, MaestroPermissions.TEST_RUN);
          LocalizedTestReport report = (LocalizedTestReport) synchronousMaestro.executeTest(testRun, persist);
          return Response
                .ok(new TestReportDTO(report))
@@ -150,7 +150,7 @@ public class TestRunControllerImpl implements TestRunController {
    }
 
    private Response runTestAsynchronously(TestRun testRun, boolean persist, String callback) {
-      authz.assertAuthorized(identity, MaestroPermissions.TEST_RUN);
+      authz.assertAuthorizedForIdentityOrganization(identity, MaestroPermissions.TEST_RUN);
       maestro.executeTest(testRun, persist, new ApacheTestReportClient(callback));
       return Response.accepted().build();
    }

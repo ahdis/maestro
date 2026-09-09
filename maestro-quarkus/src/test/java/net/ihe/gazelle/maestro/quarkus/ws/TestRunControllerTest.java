@@ -156,6 +156,20 @@ class TestRunControllerTest {
    }
 
    @org.junit.jupiter.api.Test
+   void testTestRunAllowsOrganizationAdministrator() {
+      TestReport testReport = ObjectFactory.createTestReport();
+      maestroMock.setTestReportSupplier(() -> testReport);
+      IdentityMock identity = new IdentityMock(Set.of("org-adm:acme")).setOrganizationId("acme");
+      controller = new TestRunControllerImpl(identity,
+            authzForTestRunRoles(Set.of("org-adm:{}")),
+            new SynchronousMaestro(maestroMock), maestroMock);
+
+      try (Response response = controller.executeTest(getTestRunDTO(), false, null)) {
+         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+      }
+   }
+
+   @org.junit.jupiter.api.Test
    void testTestSuiteRunUnauthorizedWithoutRequiredRole() {
       controller = new TestRunControllerImpl(new IdentityMock(Set.of("role:vendor_user")), authz,
             new SynchronousMaestro(maestroMock), maestroMock);
