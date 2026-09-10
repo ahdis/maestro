@@ -25,10 +25,12 @@ import net.ihe.gazelle.maestro.quarkus.websocket.dto.MessageDTO;
 import net.ihe.gazelle.maestro.quarkus.websocket.dto.StartTestRunDTO;
 import net.ihe.gazelle.maestro.quarkus.websocket.dto.StartTestSuiteRunDTO;
 import net.ihe.gazelle.maestro.quarkus.websocket.dto.UserInteractionCompletedDTO;
+import net.ihe.gazelle.maestro.quarkus.configuration.MaestroPermissions;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.DeserializationException;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
 import net.ihe.gazelle.oidc.websocket.technical.ProtectedWebSocket;
+import net.ihe.gazelle.security.business.Authz;
 import net.ihe.gazelle.security.business.GazelleIdentity;
 import net.ihe.gazelle.security.business.UnauthorizedException;
 import org.slf4j.Logger;
@@ -64,6 +66,7 @@ public class TestStreamSocketController {
    private static final Logger LOG = LoggerFactory.getLogger(TestStreamSocketController.class.getName());
 
    private final GazelleIdentity identity;
+   private final Authz authz;
    private final WebSocketSessionService sessionService;
    private final TextSerDes serDes = new JacksonSerDes();
    private final Maestro maestro;
@@ -72,12 +75,14 @@ public class TestStreamSocketController {
     * Creates a new TestStreamSocketController instance.
     *
     * @param identity the current Gazelle identity used to authenticate incoming WebSocket messages
+    * @param authz the authorization service
     * @param maestro  the Maestro engine used to execute tests and test suites
     * @param sessionService the WebSocket session service used to manage WebSocket sessions
     */
    @Inject
-   public TestStreamSocketController(GazelleIdentity identity, Maestro maestro, WebSocketSessionService sessionService) {
+   public TestStreamSocketController(GazelleIdentity identity, Authz authz, Maestro maestro, WebSocketSessionService sessionService) {
       this.identity = identity;
+      this.authz = authz;
       this.maestro = maestro;
       this.sessionService = sessionService; // NOSONAR - CDI-managed service reference
    }
@@ -122,16 +127,17 @@ public class TestStreamSocketController {
    public void onMessage(Session session, String messageString) throws IOException {
       LOG.debug("Received message: {}", messageString);
       try {
-         if (!identity.isAuthenticated()) {
-            throw new UnauthorizedException("Identity is not authenticated");
-         }
          MessageDTO<?> message = serDes.deserialize(messageString, MessageDTO.class);
          WebSocketSession maestroCaller = sessionService.getSession(session.getId());
          switch (message) {
-            case StartTestRunDTO testRun ->
-                  maestro.executeTest(testRun.getBusinessObject(), testRun.isPersist(), maestroCaller);
-            case StartTestSuiteRunDTO testSuiteRun ->
-                  maestro.executeTestSuite(testSuiteRun.getBusinessObject(), testSuiteRun.isPersist(), maestroCaller);
+            case StartTestRunDTO testRun -> {
+               authz.assertAuthorizedForIdentityOrganization(identity, MaestroPermissions.TEST_RUN);
+               maestro.executeTest(testRun.getBusinessObject(), testRun.isPersist(), maestroCaller);
+            }
+            case StartTestSuiteRunDTO testSuiteRun -> {
+               authz.assertAuthorizedForIdentityOrganization(identity, MaestroPermissions.TEST_RUN);
+               maestro.executeTestSuite(testSuiteRun.getBusinessObject(), testSuiteRun.isPersist(), maestroCaller);
+            }
             case UserInteractionCompletedDTO userInteractionCompleted ->
                   maestroCaller.completeInteraction(userInteractionCompleted.getBusinessObject());
             default -> {

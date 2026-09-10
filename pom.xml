@@ -24,7 +24,7 @@
     </parent>
 
     <artifactId>maestro</artifactId>
-    <version>1.2.1-SNAPSHOT</version>
+    <version>1.3.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <organization>
@@ -68,9 +68,11 @@
         <git.project.url>https://${git.user.name}:${git.user.token}@gitlab.inria.fr/gazelle/private/kereval/maestro.git</git.project.url>
 
         <framework.version>4.1.0</framework.version>
+        <security.version>4.2.0</security.version>
         <validation-api.version>2.1.0</validation-api.version>
         <simulation-api.version>0.3.0</simulation-api.version>
         <service-registry.version>2.0.1</service-registry.version>
+        <permission-manager.version>1.0.0</permission-manager.version>
         <lang.version>3.0.0</lang.version>
         <datahouse.version>4.3.0</datahouse.version>
         <validation-service-clients.version>1.0.1</validation-service-clients.version>
@@ -92,42 +94,42 @@
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-api</artifactId>
-                <version>1.2.1-SNAPSHOT</version>
+                <version>1.3.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-engine</artifactId>
-                <version>1.2.1-SNAPSHOT</version>
+                <version>1.3.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-recording</artifactId>
-                <version>1.2.1-SNAPSHOT</version>
+                <version>1.3.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>validation-step</artifactId>
-                <version>1.2.1-SNAPSHOT</version>
+                <version>1.3.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>simulation-step</artifactId>
-                <version>1.2.1-SNAPSHOT</version>
+                <version>1.3.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>user-interaction-step</artifactId>
-                <version>1.2.1-SNAPSHOT</version>
+                <version>1.3.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>itb-step</artifactId>
-                <version>1.2.1-SNAPSHOT</version>
+                <version>1.3.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>assertion-step</artifactId>
-                <version>1.2.1-SNAPSHOT</version>
+                <version>1.3.0-SNAPSHOT</version>
             </dependency>
 
             <!-- Gazelle dependencies -->
@@ -159,6 +161,16 @@
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
+                <artifactId>security</artifactId>
+                <version>${security.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.ihe.gazelle</groupId>
+                <artifactId>permission-manager-client</artifactId>
+                <version>${permission-manager.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.ihe.gazelle</groupId>
                 <artifactId>lang</artifactId>
                 <version>${lang.version}</version>
             </dependency>
@@ -182,7 +194,7 @@
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-engine</artifactId>
-                <version>1.2.1-SNAPSHOT</version>
+                <version>1.3.0-SNAPSHOT</version>
                 <type>test-jar</type>
                 <scope>test</scope>
             </dependency>
@@ -231,7 +243,7 @@
                     <dependency>
                         <groupId>net.ihe.gazelle</groupId>
                         <artifactId>mlang-converter</artifactId>
-                        <version>1.2.0-SNAPSHOT</version>
+                        <version>1.3.0-SNAPSHOT</version>
                     </dependency>
                 </dependencies>
             </dependencyManagement>

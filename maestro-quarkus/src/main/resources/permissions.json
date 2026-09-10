@@ -1,0 +1,21 @@
+{
+  "permissions": [
+    {
+      "key": "test:run",
+      "title": "Execute test",
+      "section": "Test execution",
+      "description": "Execute a Maestro test or test suite.",
+      "controlLevel": "CONFIGURABLE",
+      "enabled": true,
+      "policies": [
+        {
+          "type": "RBAC",
+          "groups": [
+            "role:gazelle_admin",
+            "role:anonymous"
+          ]
+        }
+      ]
+    }
+  ]
+}

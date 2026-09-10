@@ -33,7 +33,10 @@ import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestRunDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSuiteRunDTO;
+import net.ihe.gazelle.maestro.quarkus.configuration.MaestroPermissions;
+import net.ihe.gazelle.security.business.Authz;
 import net.ihe.gazelle.security.business.GazelleIdentity;
+import net.ihe.gazelle.security.business.UnauthorizedException;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +53,7 @@ public class TestRunControllerImpl implements TestRunController {
    private static final Logger LOG = LoggerFactory.getLogger(TestRunControllerImpl.class);
 
    private final GazelleIdentity identity;
+   private final Authz authz;
    private final SynchronousMaestro synchronousMaestro;
    private final Maestro maestro;
 
@@ -57,12 +61,14 @@ public class TestRunControllerImpl implements TestRunController {
     * Creates a new instance of {@code TestRunControllerImpl}.
     *
     * @param identity           the authenticated user identity
+    * @param authz              the authorization service
     * @param synchronousMaestro the synchronous Maestro engine for executing tests
     * @param maestro            the generic Maestro engine for asynchronous test execution
     */
    @Inject
-   public TestRunControllerImpl(GazelleIdentity identity, SynchronousMaestro synchronousMaestro, Maestro maestro) {
+   public TestRunControllerImpl(GazelleIdentity identity, Authz authz, SynchronousMaestro synchronousMaestro, Maestro maestro) {
       this.identity = identity;
+      this.authz = authz;
       this.synchronousMaestro = synchronousMaestro;
       this.maestro = maestro;
    }
@@ -89,10 +95,9 @@ public class TestRunControllerImpl implements TestRunController {
 
    private Response handleErrors(Supplier<Response> serviceCall) {
       try {
-         if (!identity.isAuthenticated()) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
-         }
          return serviceCall.get();
+      } catch (UnauthorizedException e) {
+         return Response.status(Response.Status.UNAUTHORIZED).build();
       } catch (IllegalArgumentException e) {
          LOG.debug("TestRun format Exception", e);
          return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
@@ -110,6 +115,7 @@ public class TestRunControllerImpl implements TestRunController {
 
    private Response runTestSuiteSynchronously(TestSuiteRun testSuiteRun, boolean persist) {
       try {
+         authz.assertAuthorizedForIdentityOrganization(identity, MaestroPermissions.TEST_RUN);
          LocalizedTestReport report = (LocalizedTestReport) synchronousMaestro.executeTestSuite(testSuiteRun, persist);
          return Response
                .ok(new TestReportDTO(report))
@@ -123,12 +129,14 @@ public class TestRunControllerImpl implements TestRunController {
    }
 
    private Response runTestSuiteAsynchronously(TestSuiteRun testSuiteRun, boolean persist, String callback) {
+      authz.assertAuthorizedForIdentityOrganization(identity, MaestroPermissions.TEST_RUN);
       maestro.executeTestSuite(testSuiteRun, persist, new ApacheTestReportClient(callback));
       return Response.accepted().build();
    }
 
    private Response runTestSynchronously(TestRun testRun, boolean persist) {
       try {
+         authz.assertAuthorizedForIdentityOrganization(identity, MaestroPermissions.TEST_RUN);
          LocalizedTestReport report = (LocalizedTestReport) synchronousMaestro.executeTest(testRun, persist);
          return Response
                .ok(new TestReportDTO(report))
@@ -142,6 +150,7 @@ public class TestRunControllerImpl implements TestRunController {
    }
 
    private Response runTestAsynchronously(TestRun testRun, boolean persist, String callback) {
+      authz.assertAuthorizedForIdentityOrganization(identity, MaestroPermissions.TEST_RUN);
       maestro.executeTest(testRun, persist, new ApacheTestReportClient(callback));
       return Response.accepted().build();
    }

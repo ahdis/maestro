@@ -78,6 +78,21 @@ class TestStreamSocketControllerTest {
    }
 
    @Test
+   void should_run_test_for_anonymous_identity_when_public_access_is_configured() throws DeploymentException, IOException {
+      try (Session session = ContainerProvider
+            .getWebSocketContainer()
+            .connectToServer(client, uri)) {
+         StartTestRunDTO message = new StartTestRunDTO(ObjectFactory.createTestRun(), "");
+         message.setPersist(false);
+         session.getAsyncRemote().sendText(serDes.serializeAsString(message));
+
+         TestReport report = client.getTestReport(session.getId());
+         assertEquals(Result.PASSED, report.getResult());
+         TestWebSocketClient.clear(session.getId());
+      }
+   }
+
+   @Test
    void should_send_test_suite_run_started_message() throws DeploymentException, IOException {
       TestWebSocketServer.clear();
       try (Session session = ContainerProvider

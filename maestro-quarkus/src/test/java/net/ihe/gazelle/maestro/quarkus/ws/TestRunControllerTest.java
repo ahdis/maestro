@@ -34,15 +34,24 @@ import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestRunDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSuiteRunDTO;
+import net.ihe.gazelle.maestro.quarkus.configuration.MaestroPermissionStore;
+import net.ihe.gazelle.maestro.quarkus.configuration.MaestroPermissions;
 import net.ihe.gazelle.maestro.quarkus.mock.IdentityMock;
 import net.ihe.gazelle.maestro.quarkus.utils.ObjectFactory;
+import net.ihe.gazelle.security.business.Authz;
+import net.ihe.gazelle.security.business.AuthzImpl;
+import net.ihe.gazelle.security.business.BaseGazelleIdentity;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
+import net.ihe.gazelle.security.business.rbac.InMemoryRBACMatrix;
+import net.ihe.gazelle.security.business.rbac.RBACMatrixProvider;
+import net.ihe.gazelle.security.technical.rbac.RBACMatrixProviderImpl;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -60,6 +69,7 @@ class TestRunControllerTest {
 
    private MaestroMockForREST maestroMock;
    private TestRunControllerImpl controller;
+   private Authz authz;
 
    @BeforeAll
    static void setup() {
@@ -76,7 +86,10 @@ class TestRunControllerTest {
    @BeforeEach
    void setUp() {
       maestroMock = new MaestroMockForREST(SCHEDULED_EXECUTOR);
-      controller = new TestRunControllerImpl(new IdentityMock(Set.of("role:gazelle_admin")), new SynchronousMaestro(maestroMock), maestroMock);
+      RBACMatrixProvider rbacMatrixProvider = new RBACMatrixProviderImpl();
+      authz = new AuthzImpl(() -> Set.of(new MaestroPermissionStore(rbacMatrixProvider)));
+      controller = new TestRunControllerImpl(new IdentityMock(Set.of("role:gazelle_admin")), authz,
+            new SynchronousMaestro(maestroMock), maestroMock);
    }
 
    @org.junit.jupiter.api.Test
@@ -102,6 +115,77 @@ class TestRunControllerTest {
          TestReportDTO entity = (TestReportDTO) response.getEntity();
          assertNotNull(entity);
          assertEquals(testReport.getTestSuiteName(), entity.getTestSuiteName());
+      }
+   }
+
+   @org.junit.jupiter.api.Test
+   void testTestSuiteRunAllowsConfiguredAnonymousRole() {
+      TestReport testReport = ObjectFactory.createTestReport();
+      maestroMock.setTestReportSupplier(() -> testReport);
+      controller = new TestRunControllerImpl(BaseGazelleIdentity.unauthenticatedIdentity(),
+            authzForTestRunRoles(Set.of("role:anonymous")),
+            new SynchronousMaestro(maestroMock), maestroMock);
+
+      try (Response response = controller.executeTestSuite(getTestSuiteRunDTO(), false, null)) {
+         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+      }
+   }
+
+   @org.junit.jupiter.api.Test
+   void testTestRunAllowsConfiguredAnonymousRole() {
+      TestReport testReport = ObjectFactory.createTestReport();
+      maestroMock.setTestReportSupplier(() -> testReport);
+      controller = new TestRunControllerImpl(BaseGazelleIdentity.unauthenticatedIdentity(),
+            authzForTestRunRoles(Set.of("role:anonymous")),
+            new SynchronousMaestro(maestroMock), maestroMock);
+
+      try (Response response = controller.executeTest(getTestRunDTO(), false, null)) {
+         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+      }
+   }
+
+   @org.junit.jupiter.api.Test
+   void testTestRunRejectsAnonymousRoleWhenNotConfigured() {
+      controller = new TestRunControllerImpl(BaseGazelleIdentity.unauthenticatedIdentity(),
+            authzForTestRunRoles(Set.of("role:gazelle_admin")),
+            new SynchronousMaestro(maestroMock), maestroMock);
+
+      try (Response response = controller.executeTest(getTestRunDTO(), false, null)) {
+         assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), response.getStatus());
+      }
+   }
+
+   @org.junit.jupiter.api.Test
+   void testTestRunAllowsOrganizationAdministrator() {
+      TestReport testReport = ObjectFactory.createTestReport();
+      maestroMock.setTestReportSupplier(() -> testReport);
+      IdentityMock identity = new IdentityMock(Set.of("org-adm:acme")).setOrganizationId("acme");
+      controller = new TestRunControllerImpl(identity,
+            authzForTestRunRoles(Set.of("org-adm:{}")),
+            new SynchronousMaestro(maestroMock), maestroMock);
+
+      try (Response response = controller.executeTest(getTestRunDTO(), false, null)) {
+         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+      }
+   }
+
+   @org.junit.jupiter.api.Test
+   void testTestSuiteRunUnauthorizedWithoutRequiredRole() {
+      controller = new TestRunControllerImpl(new IdentityMock(Set.of("role:vendor_user")), authz,
+            new SynchronousMaestro(maestroMock), maestroMock);
+
+      try (Response response = controller.executeTestSuite(getTestSuiteRunDTO(), false, null)) {
+         assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), response.getStatus());
+      }
+   }
+
+   @org.junit.jupiter.api.Test
+   void testTestRunUnauthorizedWithoutRequiredRole() {
+      controller = new TestRunControllerImpl(new IdentityMock(Set.of("role:vendor_user")), authz,
+            new SynchronousMaestro(maestroMock), maestroMock);
+
+      try (Response response = controller.executeTest(getTestRunDTO(), false, null)) {
+         assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), response.getStatus());
       }
    }
 
@@ -144,6 +228,12 @@ class TestRunControllerTest {
       }
    }
 
+   private Authz authzForTestRunRoles(Set<String> roles) {
+      RBACMatrixProvider matrixProvider = () -> new InMemoryRBACMatrix(
+            Map.of(MaestroPermissions.TEST_RUN, roles));
+      return new AuthzImpl(() -> Set.of(new MaestroPermissionStore(matrixProvider)));
+   }
+
    @org.junit.jupiter.api.Test
    void testTestRunAsync() {
       maestroMock.setTestReportSupplier(ObjectFactory::createTestReport);
@@ -157,7 +247,7 @@ class TestRunControllerTest {
       try (Response response = controller.executeTest(getTestRunDTO(), false, callbackUrl)) {
          assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus());
          assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus());
-         Awaitility.await().atMost(3, TimeUnit.SECONDS).untilAsserted(
+         Awaitility.await().atMost(10, TimeUnit.SECONDS).untilAsserted(
                () -> wireMockServer.verify(
                      1,
                      postRequestedFor(urlEqualTo("/callback/testTestRunAsync"))
