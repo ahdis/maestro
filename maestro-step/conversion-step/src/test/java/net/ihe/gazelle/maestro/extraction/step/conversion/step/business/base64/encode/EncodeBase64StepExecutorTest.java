@@ -25,7 +25,7 @@ class EncodeBase64StepExecutorTest {
         StepRun stepRun = new StepRun(step, List.of());
 
         // When: Executing the step
-        StepRunReport stepRunReport = stepExecutor.execute(stepRun).join();
+        StepRunReport stepRunReport = stepExecutor.execute(stepRun);
 
         // Then: The step should succeed with encoded content
         assertEquals(DONE, stepRunReport.getResult());
@@ -42,7 +42,7 @@ class EncodeBase64StepExecutorTest {
         StepRun stepRun = new StepRun(step, List.of());
 
         // When: Executing the step
-        StepRunReport stepRunReport = stepExecutor.execute(stepRun).join();
+        StepRunReport stepRunReport = stepExecutor.execute(stepRun);
 
         // Then: The step should fail with a failure message
         assertEquals(UNDEFINED, stepRunReport.getResult());
@@ -59,7 +59,7 @@ class EncodeBase64StepExecutorTest {
         StepRun stepRun = new StepRun(step, List.of());
 
         // When: Executing the step
-        StepRunReport stepRunReport = stepExecutor.execute(stepRun).join();
+        StepRunReport stepRunReport = stepExecutor.execute(stepRun);
 
         // Then: The step should fail with a failure message
         assertEquals(UNDEFINED, stepRunReport.getResult());
@@ -77,7 +77,7 @@ class EncodeBase64StepExecutorTest {
         StepRun stepRun = new StepRun(step, List.of());
 
         // When: Executing the step
-        StepRunReport stepRunReport = stepExecutor.execute(stepRun).join();
+        StepRunReport stepRunReport = stepExecutor.execute(stepRun);
 
         // Then: The step should succeed with encoded content
         assertEquals(DONE, stepRunReport.getResult());
@@ -96,7 +96,7 @@ class EncodeBase64StepExecutorTest {
         StepRun stepRun = new StepRun(step, List.of());
 
         // When: Executing the step
-        StepRunReport stepRunReport = stepExecutor.execute(stepRun).join();
+        StepRunReport stepRunReport = stepExecutor.execute(stepRun);
 
         // Then: The step should succeed with encoded content
         assertEquals(DONE, stepRunReport.getResult());
@@ -115,7 +115,7 @@ class EncodeBase64StepExecutorTest {
         StepRun stepRun = new StepRun(step, List.of());
 
         // When: Executing the step
-        StepRunReport stepRunReport = stepExecutor.execute(stepRun).join();
+        StepRunReport stepRunReport = stepExecutor.execute(stepRun);
 
         // Then: The step should succeed with encoded content
         assertEquals(DONE, stepRunReport.getResult());

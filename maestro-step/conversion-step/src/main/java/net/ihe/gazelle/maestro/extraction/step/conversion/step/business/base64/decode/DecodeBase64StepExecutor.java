@@ -23,7 +23,7 @@ public class DecodeBase64StepExecutor implements StepExecutor {
     }
 
     @Override
-    public CompletableFuture<StepRunReport> execute(StepRun stepRun) {
+    public StepRunReport execute(StepRun stepRun) {
         StepRunReportBuilder reportBuilder = new StepRunReportBuilder()
                 .setStepName(stepRun.getName())
                 .setType(stepRun.getType());
@@ -37,19 +37,18 @@ public class DecodeBase64StepExecutor implements StepExecutor {
         try {
             byte[] decodedBytes = java.util.Base64.getDecoder().decode(contentToEncode);
             Property output = new ByteArrayProperty(DECODED_CONTENT, decodedBytes);
-            return CompletableFuture.completedFuture(reportBuilder.setResult(DONE)
+            return reportBuilder.setResult(DONE)
                     .setOutputs(List.of(output))
-                    .build());
+                    .build();
         } catch (IllegalArgumentException e) {
             String failureMessage = "Unable to decode base64 content : " + e.getMessage();
             return buildStepRunReportFailed(failureMessage, reportBuilder);
         }
     }
 
-    private static CompletableFuture<StepRunReport> buildStepRunReportFailed(String failureMessage, StepRunReportBuilder reportBuilder) {
+    private static StepRunReport buildStepRunReportFailed(String failureMessage, StepRunReportBuilder reportBuilder) {
         UnexpectedErrorBuilder unexpectedError =
                 new UnexpectedErrorBuilder().setName("Base64 decoding error").setMessage(failureMessage);
-        return CompletableFuture.completedFuture(
-                reportBuilder.setResult(UNDEFINED).setUnexpectedErrors(List.of(unexpectedError)).build());
+        return reportBuilder.setResult(UNDEFINED).setUnexpectedErrors(List.of(unexpectedError)).build();
     }
 }

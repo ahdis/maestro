@@ -30,7 +30,7 @@ public class XmlExtractionStepExecutor implements StepExecutor {
     }
 
     @Override
-    public CompletableFuture<StepRunReport> execute(StepRun stepRun) {
+    public StepRunReport execute(StepRun stepRun) {
         StepRunReportBuilder reportBuilder = new StepRunReportBuilder()
                 .setStepName(stepRun.getName())
                 .setType(stepRun.getType());
@@ -60,19 +60,18 @@ public class XmlExtractionStepExecutor implements StepExecutor {
         try {
             String extractedValue = xmlExtractionService.extractValue(xmlFile, xmlPath, namespaces);
             Property output = new StringProperty(EXTRACTED_VALUE, extractedValue);
-            return CompletableFuture.completedFuture(reportBuilder.setResult(DONE)
+            return reportBuilder.setResult(DONE)
                     .setOutputs(List.of(output))
-                    .build());
+                    .build();
         } catch (XmlExtractionException exception) {
             String failureMessage = String.format("XML extraction error for xmlPath: '%s'. Error: %s", xmlPath, exception.getMessage());
             return buildStepRunReportFailed(failureMessage, reportBuilder);
         }
     }
 
-    private static CompletableFuture<StepRunReport> buildStepRunReportFailed(String failureMessage, StepRunReportBuilder reportBuilder) {
+    private static StepRunReport buildStepRunReportFailed(String failureMessage, StepRunReportBuilder reportBuilder) {
         UnexpectedErrorBuilder unexpectedError =
                 new UnexpectedErrorBuilder().setName("XML_EXTRACTION_ERROR").setMessage(failureMessage);
-        return CompletableFuture.completedFuture(
-                reportBuilder.setResult(UNDEFINED).setUnexpectedErrors(List.of(unexpectedError)).build());
+        return reportBuilder.setResult(UNDEFINED).setUnexpectedErrors(List.of(unexpectedError)).build();
     }
 }

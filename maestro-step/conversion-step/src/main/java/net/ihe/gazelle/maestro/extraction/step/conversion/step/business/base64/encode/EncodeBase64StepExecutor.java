@@ -24,7 +24,7 @@ public class EncodeBase64StepExecutor implements StepExecutor {
     }
 
     @Override
-    public CompletableFuture<StepRunReport> execute(StepRun stepRun) {
+    public StepRunReport execute(StepRun stepRun) {
         StepRunReportBuilder reportBuilder = new StepRunReportBuilder()
                 .setStepName(stepRun.getName())
                 .setType(stepRun.getType());
@@ -38,19 +38,18 @@ public class EncodeBase64StepExecutor implements StepExecutor {
         try {
             String encodedContent = getEncoder().encodeToString(contentToEncode.getBytes());
             Property output = new StringProperty(ENCODED_CONTENT, encodedContent);
-            return CompletableFuture.completedFuture(reportBuilder.setResult(DONE)
+            return reportBuilder.setResult(DONE)
                     .setOutputs(List.of(output))
-                    .build());
+                    .build();
         } catch (Exception e) {
             String failureMessage = "Error during Base64 encoding: " + e.getMessage();
             return buildStepRunReportFailed(failureMessage, reportBuilder);
         }
     }
 
-    private static CompletableFuture<StepRunReport> buildStepRunReportFailed(String failureMessage, StepRunReportBuilder reportBuilder) {
+    private static StepRunReport buildStepRunReportFailed(String failureMessage, StepRunReportBuilder reportBuilder) {
         UnexpectedErrorBuilder unexpectedError =
                 new UnexpectedErrorBuilder().setName("Base64 encoding error").setMessage(failureMessage);
-        return CompletableFuture.completedFuture(
-                reportBuilder.setResult(UNDEFINED).setUnexpectedErrors(List.of(unexpectedError)).build());
+        return reportBuilder.setResult(UNDEFINED).setUnexpectedErrors(List.of(unexpectedError)).build();
     }
 }

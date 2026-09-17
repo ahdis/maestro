@@ -28,7 +28,7 @@ class XmlExtractionStepExecutorTest {
         Step step = buildStep("".getBytes(), "/root");
         StepRun stepRun = new StepRun(step, List.of());
 
-        StepRunReport stepRunReport = stepExecutor.execute(stepRun).join();
+        StepRunReport stepRunReport = stepExecutor.execute(stepRun);
 
         assertEquals(UNDEFINED, stepRunReport.getResult());
         assertEquals(0, stepRunReport.getOutputs().size());

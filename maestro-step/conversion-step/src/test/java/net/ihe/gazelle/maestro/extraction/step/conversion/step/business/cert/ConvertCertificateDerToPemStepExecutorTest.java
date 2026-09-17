@@ -30,7 +30,7 @@ class ConvertCertificateDerToPemStepExecutorTest {
         Step step = buildStep(derCertificate);
         StepRun stepRun = new StepRun(step, List.of());
 
-        StepRunReport stepRunReport = stepExecutor.execute(stepRun).join();
+        StepRunReport stepRunReport = stepExecutor.execute(stepRun);
 
         assertEquals(DONE, stepRunReport.getResult());
         assertEquals(1, stepRunReport.getOutputs().size());
@@ -58,7 +58,7 @@ class ConvertCertificateDerToPemStepExecutorTest {
         StepRun stepRun = new StepRun(step, List.of());
 
         // Act
-        StepRunReport stepRunReport = stepExecutor.execute(stepRun).join();
+        StepRunReport stepRunReport = stepExecutor.execute(stepRun);
 
         // Assert
         assertEquals(UNDEFINED, stepRunReport.getResult());
@@ -75,7 +75,7 @@ class ConvertCertificateDerToPemStepExecutorTest {
         StepRun stepRun = new StepRun(step, List.of());
 
         // Act
-        StepRunReport stepRunReport = stepExecutor.execute(stepRun).join();
+        StepRunReport stepRunReport = stepExecutor.execute(stepRun);
 
         // Assert
         assertEquals(UNDEFINED, stepRunReport.getResult());
@@ -97,7 +97,7 @@ class ConvertCertificateDerToPemStepExecutorTest {
         StepRun stepRun = new StepRun(step, List.of());
 
         // Act
-        StepRunReport stepRunReport = stepExecutor.execute(stepRun).join();
+        StepRunReport stepRunReport = stepExecutor.execute(stepRun);
 
         // Assert
         assertEquals(DONE, stepRunReport.getResult());
@@ -125,7 +125,7 @@ class ConvertCertificateDerToPemStepExecutorTest {
         Step step = buildStep(derCertificate);
         StepRun stepRun = new StepRun(step, List.of());
 
-        StepRunReport stepRunReport = failingExecutor.execute(stepRun).join();
+        StepRunReport stepRunReport = failingExecutor.execute(stepRun);
 
         assertEquals(UNDEFINED, stepRunReport.getResult());
         assertEquals(0, stepRunReport.getOutputs().size());

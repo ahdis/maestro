@@ -25,7 +25,7 @@ public class ConvertCertificateDerToPemStepExecutor implements StepExecutor {
     }
 
     @Override
-    public CompletableFuture<StepRunReport> execute(StepRun stepRun) {
+    public StepRunReport execute(StepRun stepRun) {
         StepRunReportBuilder reportBuilder = new StepRunReportBuilder()
                 .setStepName(stepRun.getName())
                 .setType(stepRun.getType());
@@ -37,19 +37,18 @@ public class ConvertCertificateDerToPemStepExecutor implements StepExecutor {
         try {
             String pemCertificate = pemConverterService.convertToPemFormat(derCertificateBytes);
             Property output = new ByteArrayProperty(PEM_CERTIFICATE, pemCertificate.getBytes());
-            return CompletableFuture.completedFuture(reportBuilder.setResult(DONE)
+            return reportBuilder.setResult(DONE)
                     .setOutputs(List.of(output))
-                    .build());
+                    .build();
         } catch (Exception e) {
             String failureMessage = "Unable to convert certificate from DER to PEM format : " + e.getMessage();
             return buildStepRunReportFailed(failureMessage, reportBuilder);
         }
     }
 
-    private static CompletableFuture<StepRunReport> buildStepRunReportFailed(String failureMessage, StepRunReportBuilder reportBuilder) {
+    private static StepRunReport buildStepRunReportFailed(String failureMessage, StepRunReportBuilder reportBuilder) {
         UnexpectedErrorBuilder unexpectedError =
                 new UnexpectedErrorBuilder().setName("Certificate DER to PEM conversion error").setMessage(failureMessage);
-        return CompletableFuture.completedFuture(
-                reportBuilder.setResult(UNDEFINED).setUnexpectedErrors(List.of(unexpectedError)).build());
+        return reportBuilder.setResult(UNDEFINED).setUnexpectedErrors(List.of(unexpectedError)).build();
     }
 }
