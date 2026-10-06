@@ -55,7 +55,7 @@ public final class ValidationServiceHandler implements ValidationHandler {
    @Override
    public boolean isAvailable() {
       try {
-         return validationService.getValidationProfiles() != null;
+         return getValidationProfiles() != null;
       } catch (Exception e) {
          LOG.error("Error while trying to reach validation service", e);
          return false;
@@ -67,11 +67,20 @@ public final class ValidationServiceHandler implements ValidationHandler {
       if (validationRequest == null) {
          throw new IllegalArgumentException("validationRequest cannot be null");
       }
-      return validationService.validate(validationRequest);
+      return call(() -> validationService.validate(validationRequest));
    }
 
    @Override
    public List<ValidationProfile> getValidationProfiles() {
-       return validationService.getValidationProfiles();
+       return call(validationService::getValidationProfiles);
+   }
+   private static <T> T call(java.util.function.Supplier<T> operation) {
+      try {
+         return operation.get();
+      } catch (net.ihe.gazelle.validation.v2.client.HttpError failure) {
+         throw new ValidationHttpException(failure.getStatus(), failure);
+      } catch (net.ihe.gazelle.validation.v1.client.HttpError failure) {
+         throw new ValidationHttpException(failure.getStatus(), failure);
+      }
    }
 }
