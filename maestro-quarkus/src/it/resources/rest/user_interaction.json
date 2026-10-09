@@ -16,6 +16,11 @@
             "name": "message",
             "value": "message",
             "type": "STRING"
+          },
+          {
+            "name": "interactionInputs",
+            "value": [],
+            "type": "SUPPORTED_INPUTS"
           }
         ]
       }

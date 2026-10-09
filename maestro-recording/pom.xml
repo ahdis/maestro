@@ -57,6 +57,11 @@
             <artifactId>security</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>oidc-common</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- Libraries -->
         <dependency>
