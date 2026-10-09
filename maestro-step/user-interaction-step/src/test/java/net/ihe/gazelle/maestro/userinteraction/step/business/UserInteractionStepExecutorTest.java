@@ -16,7 +16,9 @@
 
 package net.ihe.gazelle.maestro.userinteraction.step.business;
 
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
+import net.ihe.gazelle.maestro.api.business.property.SupportedInputsProperty;
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
@@ -24,34 +26,39 @@ import net.ihe.gazelle.maestro.api.business.userinteract.stub.UserInteractionHan
 import net.ihe.gazelle.maestro.spi.business.StepRun;
 import org.junit.jupiter.api.Test;
 
+import java.io.Serializable;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class UserInteractionStepExecutorTest {
 
-    @Test
-    void user_interaction_step_executor_test() {
-        UserInteractionStepExecutor executor = new UserInteractionStepExecutor(new UserInteractionHandlerStub());
-        StepRun stepRun = stepRun();
+   @Test
+   void user_interaction_step_executor_test() {
+      UserInteractionStepExecutor executor = new UserInteractionStepExecutor(new UserInteractionHandlerStub());
+      StepRun stepRun = stepRun();
 
-        StepRunReport report = executor.execute(stepRun);
-        assertEquals(stepRun.getName(), report.getStepName());
-        assertEquals(UserInteractionStepDefinition.TYPE, report.getType());
-        assertEquals(StepResult.DONE, report.getResult());
-    }
+      StepRunReport report = executor.execute(stepRun);
+      assertEquals(stepRun.getName(), report.getStepName());
+      assertEquals(UserInteractionStepDefinition.TYPE, report.getType());
+      assertEquals(StepResult.DONE, report.getResult());
+   }
 
-    private Step step() {
-        return new Step()
-                .setName("Simulation")
-                .setType(UserInteractionStepDefinition.TYPE)
-                .setProperties(List.of(
-                        new StringProperty(UserInteractionStepDefinition.INTERACTION_TITLE, "title"),
-                        new StringProperty(UserInteractionStepDefinition.MESSAGE, "message")
-                ));
-    }
+   private Step step() {
+      return new Step()
+            .setName("User interaction")
+            .setType(UserInteractionStepDefinition.TYPE)
+            .setProperties(List.of(
+                  new StringProperty(UserInteractionStepDefinition.INTERACTION_TITLE, "title"),
+                  new StringProperty(UserInteractionStepDefinition.MESSAGE, "message"),
+                  new SupportedInputsProperty(UserInteractionStepDefinition.INTERACTION_INPUTS, (Serializable) List.of(
+                        new ByteArrayProperty("MyFile input", new byte[]{1,2,3,4,5}),
+                        new StringProperty("MyString input", "MyString value")
+                  ))
+            ));
+   }
 
-    private StepRun stepRun() {
-        return new StepRun(step(),  List.of());
-    }
+   private StepRun stepRun() {
+      return new StepRun(step(), List.of());
+   }
 }

@@ -23,8 +23,8 @@ import jakarta.websocket.ContainerProvider;
 import jakarta.websocket.DeploymentException;
 import jakarta.websocket.Session;
 import net.ihe.gazelle.maestro.api.business.message.*;
+import net.ihe.gazelle.maestro.api.technical.dto.message.*;
 import net.ihe.gazelle.maestro.quarkus.utils.ObjectFactory;
-import net.ihe.gazelle.maestro.quarkus.websocket.dto.*;
 import org.junit.jupiter.api.*;
 
 import java.io.IOException;

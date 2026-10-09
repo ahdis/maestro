@@ -72,6 +72,12 @@ public abstract class PropertyDTO<T extends Property> implements SubTypingDTO<T>
       property.setName(name);
    }
 
+   /**
+    * Returns the Jackson polymorphic type name.
+    */
+   @JsonIgnore
+   public abstract String getType();
+
    protected boolean isReference(String value) {
       return value != null && value.startsWith("${") && value.endsWith("}");
    }

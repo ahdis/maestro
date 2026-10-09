@@ -48,6 +48,11 @@ public class ByteArrayItemPropertyDTO extends PropertyDTO<ByteArrayItemProperty>
       super(property);
    }
 
+   @Override
+   public String getType() {
+      return TYPE;
+   }
+
    @Schema(
          name = "value",
          description = "The byte array typed value of the property."

@@ -16,8 +16,16 @@
 
 package net.ihe.gazelle.maestro.quarkus.configuration;
 
+/**
+ * A utility class that defines various permission constants used within the Maestro application.
+ * This class is intended to centralize the definitions of permissions for consistent usage
+ * across the codebase.
+ */
 public final class MaestroPermissions {
 
+   /**
+    * Permission required to execute test runs.
+    */
    public static final String TEST_RUN = "test:run";
 
    private MaestroPermissions() {

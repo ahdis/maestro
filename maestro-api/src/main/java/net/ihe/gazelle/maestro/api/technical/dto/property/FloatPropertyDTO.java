@@ -44,6 +44,11 @@ public class FloatPropertyDTO extends PropertyDTO<FloatProperty> {
       super(property);
    }
 
+   @Override
+   public String getType() {
+      return TYPE;
+   }
+
     @Schema(
             name = "value",
             description = "The float typed value of the property.",

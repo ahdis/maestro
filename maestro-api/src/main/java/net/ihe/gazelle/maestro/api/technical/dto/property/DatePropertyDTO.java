@@ -47,6 +47,11 @@ public class DatePropertyDTO extends PropertyDTO<DateProperty> {
       super(property);
    }
 
+   @Override
+   public String getType() {
+      return TYPE;
+   }
+
     @Schema(
             name = "value",
             description = "The date typed value of the property.",

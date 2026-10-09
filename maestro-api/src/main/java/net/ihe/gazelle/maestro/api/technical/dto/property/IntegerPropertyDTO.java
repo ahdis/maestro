@@ -44,6 +44,11 @@ public class IntegerPropertyDTO extends PropertyDTO<IntegerProperty> {
       super(property);
    }
 
+   @Override
+   public String getType() {
+      return TYPE;
+   }
+
    @Schema(
          name = "value",
          description = "The integer typed value of the property.",

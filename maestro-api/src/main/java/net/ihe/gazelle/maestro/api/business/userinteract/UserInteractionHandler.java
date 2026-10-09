@@ -16,7 +16,11 @@
 
 package net.ihe.gazelle.maestro.api.business.userinteract;
 
+import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
+import net.ihe.gazelle.maestro.api.business.test.SupportedInput;
 import net.ihe.gazelle.maestro.spi.business.Handler;
+
+import java.util.List;
 
 /**
  * The user interaction handler is used to ask additional actions to the user during test execution
@@ -39,6 +43,22 @@ public interface UserInteractionHandler extends Handler {
     * @param interactionTitle the title of the interaction
     * @param message the message to display
     * @param timeout the maximum time to wait for user interaction, in milliseconds
+    * @return the result of the user interaction
     */
-   void displayMessage(String interactionTitle, String message, long timeout);
+   default UserInteractionCompleted displayMessage(String interactionTitle, String message, long timeout) {
+      return null;
+   }
+
+   /**
+    * Displays a message to the user during test execution.
+    *
+    * @param interactionTitle the title of the interaction
+    * @param message the message to display
+    * @param timeout the maximum time to wait for user interaction, in milliseconds
+    * @param supportedInputs the list of supported inputs
+    * @return the result of the user interaction
+    */
+   default UserInteractionCompleted displayMessage(String interactionTitle, String message, long timeout, List<SupportedInput> supportedInputs) {
+      return displayMessage(interactionTitle, message, timeout);
+   }
 }

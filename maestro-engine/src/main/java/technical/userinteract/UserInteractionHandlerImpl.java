@@ -17,12 +17,15 @@
 package technical.userinteract;
 
 import net.ihe.gazelle.lang.ExecutionRuntimeException;
+import net.ihe.gazelle.lang.InterruptedRuntimeException;
 import net.ihe.gazelle.lang.TimeoutRuntimeException;
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.api.business.message.InteractWithUser;
 import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
+import net.ihe.gazelle.maestro.api.business.test.SupportedInput;
 import net.ihe.gazelle.maestro.api.business.userinteract.UserInteractionHandler;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -34,37 +37,38 @@ import java.util.concurrent.TimeoutException;
  */
 public class UserInteractionHandlerImpl implements UserInteractionHandler {
 
-    private final MaestroObserver observer;
+   private final MaestroObserver observer;
 
-    /**
-     * Creates a new {@code UserInteractionHandlerImpl} using the specified observer.
-     *
-     * @param observer the {@link MaestroObserver} that will receive user interaction events
-     */
-    public UserInteractionHandlerImpl(MaestroObserver observer) {
-        this.observer = observer;
-    }
+   /**
+    * Creates a new {@code UserInteractionHandlerImpl} using the specified observer.
+    *
+    * @param observer the {@link MaestroObserver} that will receive user interaction events
+    */
+   public UserInteractionHandlerImpl(MaestroObserver observer) {
+      this.observer = observer;
+   }
 
-    @Override
-    public void displayMessage(String interactionTitle, String message, long timeout) {
-        CompletableFuture<UserInteractionCompleted> future = observer.interactWithUser(
-                new InteractWithUser(interactionTitle, message, timeout)
-        );
+   @Override
+   public UserInteractionCompleted displayMessage(String interactionTitle, String message, long timeout, List<SupportedInput> supportedInputs) {
+      CompletableFuture<UserInteractionCompleted> future = observer.interactWithUser(
+            new InteractWithUser(interactionTitle, message, timeout).addSupportedInputs(supportedInputs)
+      );
 
-        try {
-            future.get(timeout, TimeUnit.MILLISECONDS);
-        } catch (TimeoutException e) {
-            throw new TimeoutRuntimeException("Timeout while waiting for user", e);
-        } catch (ExecutionException e) {
-            throw new ExecutionRuntimeException(e);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
+      try {
+         return future.get(timeout, TimeUnit.MILLISECONDS);
+      } catch (TimeoutException e) {
+         throw new TimeoutRuntimeException("Timeout while waiting for user", e);
+      } catch (ExecutionException e) {
+         throw new ExecutionRuntimeException(e);
+      } catch (InterruptedException _) {
+         Thread.currentThread().interrupt();
+         throw new InterruptedRuntimeException("Interrupted while waiting for user");
+      }
+   }
 
-    @Override
-    public boolean isAvailable() {
-        return true;
-    }
+   @Override
+   public boolean isAvailable() {
+      return true;
+   }
 
 }

@@ -44,6 +44,7 @@ import java.util.List;
       "type",
       "dateTime",
       "result",
+      "inputs",
       "outputs",
       "unexpectedErrors"
 })
@@ -127,6 +128,28 @@ public class StepRunReportDTO implements DTO<StepRunReport> {
 
    public void setResult(String result) {
       stepRunReport.setResult(StepResult.valueOf(result));
+   }
+
+   @Schema(
+         name = "inputs",
+         description = "The inputs of the step execution."
+   )
+   @SuppressWarnings("rawtypes")
+   @JsonProperty(value = "inputs")
+   public List<PropertyDTO> getInputs() {
+      return stepRunReport.getInputs().stream()
+            .map(SubTypingDTO::fromBusinessObject)
+            .map(PropertyDTO.class::cast)
+            .toList();
+   }
+
+   @SuppressWarnings("rawtypes")
+   public void setInputs(List<PropertyDTO> outputs) {
+      stepRunReport.setInputs(
+            outputs.stream()
+                  .map(PropertyDTO::getBusinessObject)
+                  .toList()
+      );
    }
 
    @Schema(

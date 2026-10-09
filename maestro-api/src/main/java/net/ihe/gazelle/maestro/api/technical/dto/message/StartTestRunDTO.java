@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.quarkus.websocket.dto;
+package net.ihe.gazelle.maestro.api.technical.dto.message;
 
 import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
@@ -56,11 +56,11 @@ public class StartTestRunDTO extends MessageDTO<TestRun> implements SecuredMessa
          description = "The test run that is staring."
    )
    @JsonProperty("testRun")
-   public TestRunDTO getTestSuiteRun() {
+   public TestRunDTO getTestRun() {
       return new TestRunDTO(message);
    }
 
-   public void setTestSuiteRun(TestRunDTO testRun) {
+   public void setTestRun(TestRunDTO testRun) {
       this.message = testRun.getBusinessObject();
    }
 

@@ -56,6 +56,11 @@ public class StepRunReport implements Serializable {
    private StepResult result;
 
    /**
+    * The inputs of the step execution.
+    */
+   private List<Property> inputs;
+
+   /**
     * The outputs of the step execution.
     */
    private List<Property> outputs;
@@ -71,6 +76,7 @@ public class StepRunReport implements Serializable {
    public StepRunReport() {
       dateTime = Instant.now();
       result = StepResult.UNDEFINED;
+      inputs = new ArrayList<>();
       outputs = new ArrayList<>();
       unexpectedErrors = new ArrayList<>();
    }
@@ -166,6 +172,28 @@ public class StepRunReport implements Serializable {
     */
    public StepRunReport setResult(StepResult result) {
       this.result = result;
+      return this;
+   }
+
+   /**
+    * Retrieves the list of input properties associated with this step run report.
+    *
+    * @return a list of {@code Property} instances representing the input properties,
+    *         or an empty list if no inputs are defined.
+    */
+   public List<Property> getInputs() {
+      return new ArrayList<>(inputs);
+   }
+
+   /**
+    * Sets the list of input properties associated with this step run report.
+    *
+    * @param inputs the list of {@code Property} instances to set as input properties.
+    *               Must not be null but can be an empty list.
+    * @return the current instance of {@code StepRunReport} with the updated input properties.
+    */
+   public StepRunReport setInputs(List<Property> inputs) {
+      this.inputs = new ArrayList<>(inputs);
       return this;
    }
 
@@ -311,14 +339,17 @@ public class StepRunReport implements Serializable {
       if (!(o instanceof StepRunReport report)) {
          return false;
       }
-      return Objects.equals(stepName, report.stepName) && Objects.equals(type,
-            report.type) && Objects.equals(dateTime,
-            report.dateTime) && result == report.result && Objects.equals(outputs,
-            report.outputs) && Objects.equals(unexpectedErrors, report.unexpectedErrors);
+      return Objects.equals(stepName, report.stepName)
+            && Objects.equals(type, report.type)
+            && Objects.equals(dateTime, report.dateTime)
+            && result == report.result
+            && Objects.equals(inputs, report.inputs)
+            && Objects.equals(outputs, report.outputs)
+            && Objects.equals(unexpectedErrors, report.unexpectedErrors);
    }
 
    @Override
    public int hashCode() {
-      return Objects.hash(stepName, type, dateTime, result, outputs, unexpectedErrors);
+      return Objects.hash(stepName, type, dateTime, result, inputs, outputs, unexpectedErrors);
    }
 }

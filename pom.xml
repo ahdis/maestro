@@ -19,12 +19,12 @@
 
     <parent>
         <groupId>net.ihe.gazelle</groupId>
-        <artifactId>factory-bom-jdk21-quarkus-3-27</artifactId>
-        <version>1.2.0</version>
+        <artifactId>factory-bom-jdk25-quarkus-3-40</artifactId>
+        <version>1.3.0</version>
     </parent>
 
     <artifactId>maestro</artifactId>
-    <version>1.3.1-GZL-11294-SNAPSHOT</version>
+    <version>1.4.0-NG-02-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <organization>
@@ -94,42 +94,50 @@
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-api</artifactId>
-                <version>1.3.1-GZL-11294-SNAPSHOT</version>
+                <version>1.4.0-NG-02-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-engine</artifactId>
-                <version>1.3.1-GZL-11294-SNAPSHOT</version>
+                <version>1.4.0-NG-02-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-recording</artifactId>
-                <version>1.3.1-GZL-11294-SNAPSHOT</version>
+                <version>1.4.0-NG-02-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>validation-step</artifactId>
-                <version>1.3.1-GZL-11294-SNAPSHOT</version>
+                <version>1.4.0-NG-02-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>simulation-step</artifactId>
-                <version>1.3.1-GZL-11294-SNAPSHOT</version>
+                <version>1.4.0-NG-02-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>user-interaction-step</artifactId>
-                <version>1.3.1-GZL-11294-SNAPSHOT</version>
+                <version>1.4.0-NG-02-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>itb-step</artifactId>
-                <version>1.3.1-GZL-11294-SNAPSHOT</version>
+                <version>1.4.0-NG-02-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>assertion-step</artifactId>
-                <version>1.3.1-GZL-11294-SNAPSHOT</version>
+                <version>1.4.0-NG-02-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.quarkus.platform</groupId>
+                <artifactId>quarkus-bom</artifactId>
+                <version>${quarkus.platform.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
             <!-- Gazelle dependencies -->
@@ -194,7 +202,7 @@
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>maestro-engine</artifactId>
-                <version>1.3.1-GZL-11294-SNAPSHOT</version>
+                <version>1.4.0-NG-02-SNAPSHOT</version>
                 <type>test-jar</type>
                 <scope>test</scope>
             </dependency>
@@ -243,7 +251,7 @@
                     <dependency>
                         <groupId>net.ihe.gazelle</groupId>
                         <artifactId>mlang-converter</artifactId>
-                        <version>1.3.1-GZL-11294-SNAPSHOT</version>
+                        <version>1.4.0-NG-02-SNAPSHOT</version>
                     </dependency>
                 </dependencies>
             </dependencyManagement>

@@ -20,7 +20,7 @@ import jakarta.websocket.Session;
 import net.ihe.gazelle.lang.IORuntimeException;
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.api.business.message.*;
-import net.ihe.gazelle.maestro.quarkus.websocket.dto.*;
+import net.ihe.gazelle.maestro.api.technical.dto.message.*;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
 import org.slf4j.Logger;

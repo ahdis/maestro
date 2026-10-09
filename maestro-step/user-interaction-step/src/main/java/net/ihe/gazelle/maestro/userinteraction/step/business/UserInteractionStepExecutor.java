@@ -16,6 +16,9 @@
 
 package net.ihe.gazelle.maestro.userinteraction.step.business;
 
+import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
+import net.ihe.gazelle.maestro.api.business.property.Property;
+import net.ihe.gazelle.maestro.api.business.test.SupportedInput;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
@@ -23,36 +26,41 @@ import net.ihe.gazelle.maestro.api.business.userinteract.UserInteractionHandler;
 import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 import net.ihe.gazelle.maestro.spi.business.StepRun;
 
+import java.util.List;
+
 /**
  * Executor for user interaction steps.
  * This executor displays messages to users and waits for their acknowledgment.
  */
 public class UserInteractionStepExecutor implements StepExecutor {
 
-    private final UserInteractionHandler userInteractionHandler;
+   private final UserInteractionHandler userInteractionHandler;
 
-    /**
-     * Constructor for UserInteractionStepExecutor.
-     * @param userInteractionHandler the handler to manage user interactions
-     */
-    public UserInteractionStepExecutor(UserInteractionHandler userInteractionHandler) {
-        this.userInteractionHandler = userInteractionHandler;
-    }
+   /**
+    * Constructor for UserInteractionStepExecutor.
+    *
+    * @param userInteractionHandler the handler to manage user interactions
+    */
+   public UserInteractionStepExecutor(UserInteractionHandler userInteractionHandler) {
+      this.userInteractionHandler = userInteractionHandler;
+   }
 
-    @Override
-    public StepRunReport execute(StepRun stepRun) {
-        String interactionTitle = stepRun.getPropertyValue(UserInteractionStepDefinition.INTERACTION_TITLE);
-        String message = stepRun.getPropertyValue(UserInteractionStepDefinition.MESSAGE);
+   @Override
+   public StepRunReport execute(StepRun stepRun) {
+      String interactionTitle = stepRun.getPropertyValue(UserInteractionStepDefinition.INTERACTION_TITLE);
+      String message = stepRun.getPropertyValue(UserInteractionStepDefinition.MESSAGE);
+      List<SupportedInput> supportedInputs = stepRun.getPropertyValue(UserInteractionStepDefinition.INTERACTION_INPUTS);
 
-        userInteractionHandler.displayMessage(interactionTitle, message, stepRun.getTimeout());
-        return buildStepRunReport(stepRun);
-    }
+      UserInteractionCompleted interactionCompleted = userInteractionHandler.displayMessage(interactionTitle, message, stepRun.getTimeout(), supportedInputs);
+      return buildStepRunReport(stepRun, interactionCompleted.getInputs());
+   }
 
-    private StepRunReport buildStepRunReport(StepRun stepRun) {
-        return new StepRunReportBuilder()
-                .setStepName(stepRun.getName())
-                .setType(UserInteractionStepDefinition.TYPE)
-                .setResult(StepResult.DONE)
-                .build();
-    }
+   private StepRunReport buildStepRunReport(StepRun stepRun,  List<Property> inputs) {
+      return new StepRunReportBuilder()
+            .setStepName(stepRun.getName())
+            .setType(UserInteractionStepDefinition.TYPE)
+            .setResult(StepResult.DONE)
+            .setInputs(inputs)
+            .build();
+   }
 }

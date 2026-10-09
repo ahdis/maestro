@@ -18,6 +18,7 @@ package net.ihe.gazelle.maestro.api.technical.dto.test;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import net.ihe.gazelle.maestro.api.business.test.SupportedBooleanInput;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -39,6 +40,19 @@ public class SupportedBooleanInputDTO extends SupportedInputDTO<SupportedBoolean
 
    public SupportedBooleanInputDTO(SupportedBooleanInput supportedInput) {
       super(supportedInput);
+   }
+
+   @Schema(
+         name = "defaultValue",
+         description = "A default value provided by the step definition."
+   )
+   @JsonProperty("defaultValue")
+   public boolean getDefaultValue() {
+      return supportedInput.getDefaultValue();
+   }
+
+   public void setDefaultValue(boolean defaultValue) {
+      supportedInput.setDefaultValue(defaultValue);
    }
 
    @Override

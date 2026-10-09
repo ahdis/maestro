@@ -42,7 +42,12 @@ public class StringPropertyDTO extends PropertyDTO<StringProperty> {
       super(property);
    }
 
-    @Schema(
+   @Override
+   public String getType() {
+      return TYPE;
+   }
+
+   @Schema(
             name = "value",
             description = "The string typed value of the property.",
             examples = "any text"

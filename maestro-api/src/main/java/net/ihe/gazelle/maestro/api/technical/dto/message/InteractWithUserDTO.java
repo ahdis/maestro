@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.quarkus.websocket.dto;
+package net.ihe.gazelle.maestro.api.technical.dto.message;
 
 import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.message.InteractWithUser;

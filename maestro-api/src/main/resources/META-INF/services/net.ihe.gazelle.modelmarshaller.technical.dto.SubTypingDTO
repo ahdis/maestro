@@ -21,8 +21,19 @@ net.ihe.gazelle.maestro.api.technical.dto.property.FloatPropertyDTO
 net.ihe.gazelle.maestro.api.technical.dto.property.DatePropertyDTO
 net.ihe.gazelle.maestro.api.technical.dto.property.ByteArrayPropertyDTO
 net.ihe.gazelle.maestro.api.technical.dto.property.ByteArrayItemPropertyDTO
+net.ihe.gazelle.maestro.api.technical.dto.property.SupportedInputsPropertyDTO
 
 net.ihe.gazelle.maestro.api.technical.dto.test.SupportedTextInputDTO
 net.ihe.gazelle.maestro.api.technical.dto.test.SupportedFileInputDTO
 net.ihe.gazelle.maestro.api.technical.dto.test.SupportedBooleanInputDTO
 net.ihe.gazelle.maestro.api.technical.dto.test.SupportedValueSetInputDTO
+
+net.ihe.gazelle.maestro.api.technical.dto.message.StartTestSuiteRunDTO
+net.ihe.gazelle.maestro.api.technical.dto.message.StartTestRunDTO
+net.ihe.gazelle.maestro.api.technical.dto.message.TestRunStartedDTO
+net.ihe.gazelle.maestro.api.technical.dto.message.StepRunStartedDTO
+net.ihe.gazelle.maestro.api.technical.dto.message.InteractWithUserDTO
+net.ihe.gazelle.maestro.api.technical.dto.message.UserInteractionCompletedDTO
+net.ihe.gazelle.maestro.api.technical.dto.message.StepRunFinishedDTO
+net.ihe.gazelle.maestro.api.technical.dto.message.TestRunFinishedDTO
+net.ihe.gazelle.maestro.api.technical.dto.message.ExecutionFinishedDTO
