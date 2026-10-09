@@ -21,7 +21,7 @@ stages:
 
 # Define global variables
 variables:
-  P_MAVEN_IMAGE_TAG: "3.9.6-openjdk-21-slim"
+  P_MAVEN_IMAGE_TAG: "3.9.15-jdk-25-slim"
 
 compile/unit-test:
   stage: build
@@ -58,7 +58,7 @@ static-analysis:
   extends:
     - .testJavaMavenSonarAnalysis
   variables:
-    P_MAVEN_IMAGE_TAG: "3.9.6-openjdk-21-slim"
+    P_MAVEN_IMAGE_TAG: "3.9.15-jdk-25-slim"
   needs:
     - job: compile/unit-test
       artifacts: true
