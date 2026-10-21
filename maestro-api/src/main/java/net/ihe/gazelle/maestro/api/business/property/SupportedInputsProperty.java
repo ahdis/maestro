@@ -18,34 +18,47 @@ package net.ihe.gazelle.maestro.api.business.property;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.Instant;
 
 /**
  * Supported Inputs property
  */
 public class SupportedInputsProperty extends Property {
 
-   @Serial
-   private static final long serialVersionUID = -2488516985661313786L;
+    @Serial
+    private static final long serialVersionUID = -2488516985661313786L;
 
-   /**
-    * Default constructor
-    */
-   public SupportedInputsProperty() {
-      super();
-   }
+    /**
+     * Default constructor
+     */
+    public SupportedInputsProperty() {
+        super();
+    }
 
-   /**
-    * Constructs a new SupportedInputsProperty with the specified name and value.
-    *
-    * @param name  the name of the property, which identifies it uniquely
-    * @param value the value to be assigned to the property; must be a Serializable object
-    */
-   public SupportedInputsProperty(String name, Serializable value) {
-      super(name, value);
-   }
+    /**
+     * Constructs a new SupportedInputsProperty with the specified name and value.
+     *
+     * @param name  the name of the property, which identifies it uniquely
+     * @param value the value to be assigned to the property; must be a Serializable object
+     */
+    public SupportedInputsProperty(String name, Serializable value) {
+        super(name, value);
+    }
 
-   @Override
-   public Property copy() {
-      return new SupportedInputsProperty(getName(), getCopyValue());
-   }
+    /**
+     * Constructs a new SupportedInputsProperty with the specified name and value.
+     *
+     * @param name  the name of the property, which identifies it uniquely
+     * @param value the value to be assigned to the property; must be a Serializable object
+     * @param userId the user id of the user who created the property
+     * @param dateTime the date and time when the property was created
+     */
+    public SupportedInputsProperty(String name, Serializable value, String userId, Instant dateTime) {
+        super(name, value, userId, dateTime);
+    }
+
+    @Override
+    public Property copy() {
+        return new SupportedInputsProperty(getName(), getCopyValue());
+    }
 }

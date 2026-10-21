@@ -40,7 +40,7 @@ public class UserInteractionCompletedDTO extends MessageDTO<UserInteractionCompl
    @JsonIgnore
    public static final String TYPE = "USER_INTERACTION_COMPLETED";
 
-   private final String authorization;
+   private String authorization;
 
    public UserInteractionCompletedDTO() {
       this(new UserInteractionCompleted(), "");
@@ -77,6 +77,10 @@ public class UserInteractionCompletedDTO extends MessageDTO<UserInteractionCompl
    public String getAuthorization() {
       return authorization;
    }
+
+   public void setAuthorization(String authorization) {
+        this.authorization = authorization;
+    }
 
    @Override
    @JsonGetter

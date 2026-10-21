@@ -39,7 +39,7 @@ public class StartTestRunDTO extends MessageDTO<TestRun> implements SecuredMessa
    public static final String TYPE = "START_TEST_RUN";
 
    private boolean persist;
-   private final String authorization;
+   private String authorization;
 
    public StartTestRunDTO() {
       this(new TestRun(), "");
@@ -81,6 +81,10 @@ public class StartTestRunDTO extends MessageDTO<TestRun> implements SecuredMessa
    public String getAuthorization() {
       return authorization;
    }
+
+   public void setAuthorization(String authorization) {
+        this.authorization = authorization;
+    }
 
    @Override
    @JsonIgnore

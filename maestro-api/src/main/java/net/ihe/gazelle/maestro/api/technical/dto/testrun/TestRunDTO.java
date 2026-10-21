@@ -80,7 +80,7 @@ public class TestRunDTO implements DTO<TestRun> {
          name = "inputs",
          description = "A list of input provided for test execution that shall match supported inputs of test definition."
    )
-    @SuppressWarnings("rawtypes")
+   @SuppressWarnings("rawtypes")
    @JsonProperty("inputs")
    public List<PropertyDTO> getInputs() {
       return testRun.getInputs().stream()

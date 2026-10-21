@@ -18,34 +18,47 @@ package net.ihe.gazelle.maestro.api.business.property;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.Instant;
 
 /**
  * Integer property
  */
 public class IntegerProperty extends Property {
 
-   @Serial
-   private static final long serialVersionUID = 5284763560506283622L;
+    @Serial
+    private static final long serialVersionUID = 5284763560506283622L;
 
-   /**
-    * Default constructor
-    */
-   public IntegerProperty() {
-      super();
-   }
+    /**
+     * Default constructor
+     */
+    public IntegerProperty() {
+        super();
+    }
 
-   /**
-    * Constructs a new IntegerProperty with the specified name and value.
-    *
-    * @param name  the name of the property, which identifies it uniquely
-    * @param value the value to be assigned to the property; must be a Serializable object
-    */
-   public IntegerProperty(String name, Serializable value) {
-      super(name, value);
-   }
+    /**
+     * Constructs a new IntegerProperty with the specified name and value.
+     *
+     * @param name  the name of the property, which identifies it uniquely
+     * @param value the value to be assigned to the property; must be a Serializable object
+     */
+    public IntegerProperty(String name, Serializable value) {
+        super(name, value);
+    }
 
-   @Override
-   public Property copy() {
-      return new IntegerProperty(getName(), getCopyValue());
-   }
+    /**
+     * Constructs a new IntegerProperty with the specified name and value.
+     *
+     * @param name  the name of the property, which identifies it uniquely
+     * @param value the value to be assigned to the property; must be a Serializable object
+     * @param userId the user id of the property
+     * @param dateTime the date and time of the property
+     */
+    public IntegerProperty(String name, Serializable value, String userId, Instant dateTime) {
+        super(name, value, userId, dateTime);
+    }
+
+    @Override
+    public Property copy() {
+        return new IntegerProperty(getName(), getCopyValue(), getUserId(), getDateTime());
+    }
 }

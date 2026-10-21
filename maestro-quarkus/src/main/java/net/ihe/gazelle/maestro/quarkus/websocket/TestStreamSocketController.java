@@ -94,7 +94,7 @@ public class TestStreamSocketController {
     */
    @OnOpen
    public void onOpen(Session session) {
-      LOG.info("Test Stream Socket Connected: {}", session.getId());
+       LOG.info("Test Stream Socket Connected: {}", session.getId());
       WebSocketSession maestroCaller = new WebSocketSession(session);
       sessionService.addSession(session.getId(), maestroCaller);
    }

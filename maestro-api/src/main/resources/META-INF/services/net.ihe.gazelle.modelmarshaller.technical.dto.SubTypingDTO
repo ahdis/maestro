@@ -22,6 +22,7 @@ net.ihe.gazelle.maestro.api.technical.dto.property.DatePropertyDTO
 net.ihe.gazelle.maestro.api.technical.dto.property.ByteArrayPropertyDTO
 net.ihe.gazelle.maestro.api.technical.dto.property.ByteArrayItemPropertyDTO
 net.ihe.gazelle.maestro.api.technical.dto.property.SupportedInputsPropertyDTO
+net.ihe.gazelle.maestro.api.technical.dto.property.LinkPropertyDTO
 
 net.ihe.gazelle.maestro.api.technical.dto.test.SupportedTextInputDTO
 net.ihe.gazelle.maestro.api.technical.dto.test.SupportedFileInputDTO
@@ -37,3 +38,4 @@ net.ihe.gazelle.maestro.api.technical.dto.message.UserInteractionCompletedDTO
 net.ihe.gazelle.maestro.api.technical.dto.message.StepRunFinishedDTO
 net.ihe.gazelle.maestro.api.technical.dto.message.TestRunFinishedDTO
 net.ihe.gazelle.maestro.api.technical.dto.message.ExecutionFinishedDTO
+net.ihe.gazelle.maestro.api.technical.dto.message.PutEvidenceDTO

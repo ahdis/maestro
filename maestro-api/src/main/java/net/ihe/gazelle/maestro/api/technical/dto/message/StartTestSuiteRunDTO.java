@@ -39,7 +39,7 @@ public class StartTestSuiteRunDTO extends MessageDTO<TestSuiteRun> implements Se
    public static final String TYPE = "START_TEST_SUITE_RUN";
 
    private boolean persist;
-   private final String authorization;
+   private String authorization;
 
    public StartTestSuiteRunDTO() {
       this(new TestSuiteRun(), "");
@@ -81,6 +81,10 @@ public class StartTestSuiteRunDTO extends MessageDTO<TestSuiteRun> implements Se
    public String getAuthorization() {
       return authorization;
    }
+
+   public void setAuthorization(String authorization) {
+        this.authorization = authorization;
+    }
 
    @Override
    @JsonIgnore

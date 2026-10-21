@@ -18,34 +18,47 @@ package net.ihe.gazelle.maestro.api.business.property;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.Instant;
 
 /**
  * Boolean property
  */
 public class BooleanProperty extends Property {
 
-   @Serial
-   private static final long serialVersionUID = -8823778950334584409L;
+    @Serial
+    private static final long serialVersionUID = -8823778950334584409L;
 
-   /**
-    * Default constructor
-    */
-   public BooleanProperty() {
-   }
+    /**
+     * Default constructor
+     */
+    public BooleanProperty() {
+    }
 
-   /**
-    * Constructs a new BooleanProperty with the specified name and value.
-    *
-    * @param name  the name of the property, which identifies it uniquely
-    * @param value the value to be assigned to the property; must be a Serializable object
-    */
-   public BooleanProperty(String name, Serializable value) {
-      super(name, value);
-   }
+    /**
+     * Constructs a new BooleanProperty with the specified name and value.
+     *
+     * @param name  the name of the property, which identifies it uniquely
+     * @param value the value to be assigned to the property; must be a Serializable object
+     */
+    public BooleanProperty(String name, Serializable value) {
+        super(name, value);
+    }
 
-   @Override
-   public Property copy() {
-      return new BooleanProperty(getName(), getCopyValue());
-   }
+    /**
+     * Constructs a new BooleanProperty with the specified name and value.
+     *
+     * @param name     the name of the property, which identifies it uniquely
+     * @param value    the value to be assigned to the property; must be a Serializable object
+     * @param userId   the user id of the property
+     * @param dateTime the date and time of the property
+     */
+    public BooleanProperty(String name, Serializable value, String userId, Instant dateTime) {
+        super(name, value, userId, dateTime);
+    }
+
+    @Override
+    public Property copy() {
+        return new BooleanProperty(getName(), getCopyValue(), getUserId(), getDateTime());
+    }
 
 }

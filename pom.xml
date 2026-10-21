@@ -71,7 +71,7 @@
         <security.version>4.2.0</security.version>
         <validation-api.version>2.1.0</validation-api.version>
         <simulation-api.version>0.3.0</simulation-api.version>
-        <service-registry.version>2.0.1</service-registry.version>
+        <service-registry.version>2.1.0</service-registry.version>
         <permission-manager.version>1.0.0</permission-manager.version>
         <lang.version>3.0.0</lang.version>
         <datahouse.version>4.3.0</datahouse.version>

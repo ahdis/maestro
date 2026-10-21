@@ -18,6 +18,7 @@ package net.ihe.gazelle.maestro.api.business.property;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.Instant;
 
 /**
  * A property containing a byte array
@@ -53,6 +54,18 @@ public class ByteArrayProperty extends Property {
    public ByteArrayProperty(String name, Serializable value) {
       super(name, value);
    }
+
+    /**
+     * Constructs a new {@code ByteArrayProperty} with the specified name and value.
+     *
+     * @param name  the name of the property, which uniquely identifies it
+     * @param value the value to be assigned to this property; must be a {@code Serializable} object
+     * @param userId the user ID associated with this property
+     * @param dateTime the date and time when this property was created or modified
+     */
+    public ByteArrayProperty(String name, Serializable value, String userId, Instant dateTime) {
+        super(name, value, userId, dateTime);
+    }
 
    /**
     * Retrieves the name of the file associated with this property.
@@ -96,7 +109,7 @@ public class ByteArrayProperty extends Property {
 
    @Override
    public Property copy() {
-      return new ByteArrayProperty(getName(), getCopyValue())
+      return new ByteArrayProperty(getName(), getCopyValue(), getUserId(), getDateTime())
             .setFileName(getFileName())
             .setMimeType(getMimeType());
    }
