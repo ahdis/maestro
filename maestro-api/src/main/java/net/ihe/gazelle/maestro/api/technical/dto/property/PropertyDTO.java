@@ -116,7 +116,7 @@ public abstract class PropertyDTO<T extends Property> implements SubTypingDTO<T>
     /**
      * Returns the value of the property.
      */
-    public abstract Serializable getValue();
+    public abstract <U> U getValue();
 
     protected boolean isReference(String value) {
         return value != null && value.startsWith("${") && value.endsWith("}");
