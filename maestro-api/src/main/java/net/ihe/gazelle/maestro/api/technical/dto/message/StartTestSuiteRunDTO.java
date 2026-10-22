@@ -23,73 +23,88 @@ import net.ihe.gazelle.oidc.common.technical.dto.SecuredMessageDTO;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 @Schema(
-      name = "StartTestSuiteRun",
-      description = "Message sent when a new test suite run is started."
+        name = "StartTestSuiteRun",
+        description = "Message sent when a new test suite run is started."
 )
 @JsonTypeName(StartTestSuiteRunDTO.TYPE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-      "type",
-      "testSuiteRun",
-      "persist"
+        "type",
+        "testSuiteRun",
+        "testSessionId",
+        "persist"
 })
 public class StartTestSuiteRunDTO extends MessageDTO<TestSuiteRun> implements SecuredMessageDTO {
 
-   @JsonIgnore
-   public static final String TYPE = "START_TEST_SUITE_RUN";
+    @JsonIgnore
+    public static final String TYPE = "START_TEST_SUITE_RUN";
 
-   private boolean persist;
-   private String authorization;
+    private String testSessionId;
+    private boolean persist;
+    private String authorization;
 
-   public StartTestSuiteRunDTO() {
-      this(new TestSuiteRun(), "");
-   }
+    public StartTestSuiteRunDTO() {
+        this(new TestSuiteRun(), "");
+    }
 
-   public StartTestSuiteRunDTO(TestSuiteRun testSuiteRun,  String authorization) {
-      super(testSuiteRun);
-      this.persist = true;
-      this.authorization = authorization;
-   }
-
-   @Schema(
-         name = "testSuiteRun",
-         description = "The test suite run that is starting."
-   )
-   @JsonProperty("testSuiteRun")
-   public TestSuiteRunDTO getTestSuiteRun() {
-      return new TestSuiteRunDTO(getBusinessObject());
-   }
-
-   public void setTestSuiteRun(TestSuiteRunDTO testSuiteRun) {
-      this.message = testSuiteRun.getBusinessObject();
-   }
-
-   @Schema(
-         name = "persist",
-         description = "Whether the test suite report should be persisted."
-   )
-   @JsonProperty("persist")
-   public boolean isPersist() {
-      return persist;
-   }
-
-   public void setPersist(boolean persist) {
-      this.persist = persist;
-   }
-
-   @Override
-   public String getAuthorization() {
-      return authorization;
-   }
-
-   public void setAuthorization(String authorization) {
+    public StartTestSuiteRunDTO(TestSuiteRun testSuiteRun, String authorization) {
+        super(testSuiteRun);
+        this.persist = true;
         this.authorization = authorization;
     }
 
-   @Override
-   @JsonIgnore
-   public Class<TestSuiteRun> getBusinessObjectClass() {
-      return TestSuiteRun.class;
-   }
+    @Schema(
+            name = "testSuiteRun",
+            description = "The test suite run that is starting."
+    )
+    @JsonProperty("testSuiteRun")
+    public TestSuiteRunDTO getTestSuiteRun() {
+        return new TestSuiteRunDTO(getBusinessObject());
+    }
+
+    public void setTestSuiteRun(TestSuiteRunDTO testSuiteRun) {
+        this.message = testSuiteRun.getBusinessObject();
+    }
+
+    @Schema(
+            name = "testSessionId",
+            description = "The id of the test session in which the test run is executed."
+    )
+    @JsonProperty("testSessionId")
+    public String getTestSessionId() {
+        return testSessionId;
+    }
+
+    public void setTestSessionId(String testSessionId) {
+        this.testSessionId = testSessionId;
+    }
+
+    @Schema(
+            name = "persist",
+            description = "Whether the test suite report should be persisted."
+    )
+    @JsonProperty("persist")
+    public boolean isPersist() {
+        return persist;
+    }
+
+    public void setPersist(boolean persist) {
+        this.persist = persist;
+    }
+
+    @Override
+    public String getAuthorization() {
+        return authorization;
+    }
+
+    public void setAuthorization(String authorization) {
+        this.authorization = authorization;
+    }
+
+    @Override
+    @JsonIgnore
+    public Class<TestSuiteRun> getBusinessObjectClass() {
+        return TestSuiteRun.class;
+    }
 }
 

@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -186,7 +187,9 @@ class StepDTOTest {
                 .setName("serialize-step")
                 .setType("assertion-step")
                 .setProperties(List.of(
-                        new StringProperty("expression", "response.status == 200"),
+                        new StringProperty("expression", "response.status == 200")
+                                .setDateTime(Instant.now())
+                                .setUserId("user"),
                         new IntegerProperty("retries", 3)
                 ));
         source.addOutputMapping("assertionResult", "testResult");

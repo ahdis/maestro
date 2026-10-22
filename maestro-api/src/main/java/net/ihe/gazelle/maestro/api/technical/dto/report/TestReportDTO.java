@@ -33,251 +33,265 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Schema(
-      name = "TestReport",
-      description = "The report containing the result of a test suite or test execution."
+        name = "TestReport",
+        description = "The report containing the result of a test suite or test execution."
 )
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
-      "reportVersion",
-      "uuid",
-      "result",
-      "dateTime",
-      "testService",
-      "systemsUnderTest",
-      "testSuiteName",
-      "testCounters",
-      "note",
-      "urlToTestSuiteResult",
-      "testRunReports",
-      "subReports",
-      "unexpectedErrors"
+        "reportVersion",
+        "uuid",
+        "result",
+        "dateTime",
+        "testService",
+        "testSessionId",
+        "systemsUnderTest",
+        "testSuiteName",
+        "testCounters",
+        "note",
+        "urlToTestSuiteResult",
+        "testRunReports",
+        "subReports",
+        "unexpectedErrors"
 })
 public class TestReportDTO implements DTO<TestReport> {
 
-   @JsonIgnore
-   private final TestReport testReport;
+    @JsonIgnore
+    private final TestReport testReport;
 
-   public TestReportDTO() {
-      this(new TestReport());
-   }
+    public TestReportDTO() {
+        this(new TestReport());
+    }
 
-   public TestReportDTO(TestReport testReport) {
-      this.testReport = testReport;
-   }
+    public TestReportDTO(TestReport testReport) {
+        this.testReport = testReport;
+    }
 
-   @Override
-   @JsonIgnore
-   public TestReport getBusinessObject() {
-      return testReport;
-   }
+    @Override
+    @JsonIgnore
+    public TestReport getBusinessObject() {
+        return testReport;
+    }
 
-   @Schema(
-         name = "reportVersion",
-         description = "The version of the test report model."
-   )
-   @JsonProperty(value = "reportVersion")
-   public String getReportVersion() {
-      return testReport.getReportVersion();
-   }
+    @Schema(
+            name = "reportVersion",
+            description = "The version of the test report model."
+    )
+    @JsonProperty(value = "reportVersion")
+    public String getReportVersion() {
+        return testReport.getReportVersion();
+    }
 
-   public void setReportVersion(String reportVersion) {
-      // for deserialization
-   }
+    public void setReportVersion(String reportVersion) {
+        // for deserialization
+    }
 
-   @Schema(
-         name = "uuid",
-         description = "The unique identifier of the test report.",
-         required = true
-   )
-   @JsonProperty(value = "uuid")
-   public String getUuid() {
-      return testReport.getUuid();
-   }
+    @Schema(
+            name = "uuid",
+            description = "The unique identifier of the test report.",
+            required = true
+    )
+    @JsonProperty(value = "uuid")
+    public String getUuid() {
+        return testReport.getUuid();
+    }
 
-   public void setUuid(String uuid) {
-      testReport.setUuid(uuid);
-   }
+    public void setUuid(String uuid) {
+        testReport.setUuid(uuid);
+    }
 
-   @Schema(
-         name = "result",
-         description = "The global result of the test suite.",
-         enumeration = {Result.RESULT_PASSED, Result.RESULT_FAILED, Result.RESULT_UNDEFINED},
-         required = true
-   )
-   @JsonProperty(value = "result")
-   public String getResult() {
-      return testReport.getResult().name();
-   }
+    @Schema(
+            name = "result",
+            description = "The global result of the test suite.",
+            enumeration = {Result.RESULT_PASSED, Result.RESULT_FAILED, Result.RESULT_UNDEFINED},
+            required = true
+    )
+    @JsonProperty(value = "result")
+    public String getResult() {
+        return testReport.getResult().name();
+    }
 
-   public void setResult(String result) {
-      testReport.setResult(Result.valueOf(result));
-   }
+    public void setResult(String result) {
+        testReport.setResult(Result.valueOf(result));
+    }
 
-   @Schema(
-         name = "dateTime",
-         description = "The zoned date time of the test suite execution.",
-         examples = "2025-01-01T16:30:00.387+01:00",
-         required = true
-   )
-   @JsonProperty(value = "dateTime")
-   public String getDateTime() {
-      return ZonedDateTime.ofInstant(testReport.getDateTime(), ZoneId.systemDefault())
-            .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-   }
+    @Schema(
+            name = "dateTime",
+            description = "The zoned date time of the test suite execution.",
+            examples = "2025-01-01T16:30:00.387+01:00",
+            required = true
+    )
+    @JsonProperty(value = "dateTime")
+    public String getDateTime() {
+        return ZonedDateTime.ofInstant(testReport.getDateTime(), ZoneId.systemDefault())
+                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+    }
 
-   public void setDateTime(String dateTime) {
-      testReport.setDateTime(
-            Instant.from(ZonedDateTime.parse(dateTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME))
-      );
-   }
+    public void setDateTime(String dateTime) {
+        testReport.setDateTime(
+                Instant.from(ZonedDateTime.parse(dateTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+        );
+    }
 
-   @Schema(
-         name = "testService",
-         description = "The service used as the test engine to execute the test suite."
-   )
-   @JsonProperty(value = "testService")
-   public TestServiceDTO getTestService() {
-      if (testReport.getTestService() != null) {
-         return new TestServiceDTO(testReport.getTestService());
-      }
-      return null;
-   }
+    @Schema(
+            name = "testService",
+            description = "The service used as the test engine to execute the test suite."
+    )
+    @JsonProperty(value = "testService")
+    public TestServiceDTO getTestService() {
+        if (testReport.getTestService() != null) {
+            return new TestServiceDTO(testReport.getTestService());
+        }
+        return null;
+    }
 
-   public void setTestService(TestServiceDTO testServiceDTO) {
-      testReport.setTestService(testServiceDTO != null ? testServiceDTO.getBusinessObject() : null);
-   }
+    public void setTestService(TestServiceDTO testServiceDTO) {
+        testReport.setTestService(testServiceDTO != null ? testServiceDTO.getBusinessObject() : null);
+    }
 
-   @Schema(
-         name = "systemsUnderTest",
-         description = "The list of system under test involved in the test suite."
-   )
-   @JsonProperty(value = "systemsUnderTest")
-   public List<SystemUnderTestDTO> getSystemsUnderTest() {
-      return testReport
-            .getSystemsUnderTest()
-            .stream()
-            .map(SystemUnderTestDTO::new)
-            .toList();
-   }
+    @Schema(
+            name = "testSessionId",
+            description = "The id of the test session in which the test report has been produced."
+    )
+    @JsonProperty("testSessionId")
+    public String getTestSessionId() {
+        return testReport.getTestSessionId();
+    }
 
-   public void setSystemsUnderTest(List<SystemUnderTestDTO> systemsUnderTest) {
-      testReport.setSystemsUnderTest(
-            systemsUnderTest == null ? List.of() :
-                  systemsUnderTest.stream().map(SystemUnderTestDTO::getBusinessObject).toList()
-      );
-   }
+    public void setTestSessionId(String testSessionId) {
+        testReport.setTestSessionId(testSessionId);
+    }
 
-   @Schema(
-         name = "testSuiteName",
-         description = "The name of the test suite that has been executed."
-   )
-   @JsonProperty(value = "testSuiteName")
-   public String getTestSuiteName() {
-      return testReport.getTestSuiteName();
-   }
+    @Schema(
+            name = "systemsUnderTest",
+            description = "The list of system under test involved in the test suite."
+    )
+    @JsonProperty(value = "systemsUnderTest")
+    public List<SystemUnderTestDTO> getSystemsUnderTest() {
+        return testReport
+                .getSystemsUnderTest()
+                .stream()
+                .map(SystemUnderTestDTO::new)
+                .toList();
+    }
 
-   public void setTestSuiteName(String testSuiteName) {
-      testReport.setTestSuiteName(testSuiteName);
-   }
+    public void setSystemsUnderTest(List<SystemUnderTestDTO> systemsUnderTest) {
+        testReport.setSystemsUnderTest(
+                systemsUnderTest == null ? List.of() :
+                        systemsUnderTest.stream().map(SystemUnderTestDTO::getBusinessObject).toList()
+        );
+    }
 
-   @Schema(
-         name = "testCounters",
-         description = "The counters that summarize the results of test runs in the suite."
-   )
-   @JsonProperty(value = "testCounters")
-   public TestCountersDTO getTestCounters() {
-      return testReport.getTestCounters() != null
-            ? new TestCountersDTO(testReport.getTestCounters())
-            : new TestCountersDTO();
-   }
+    @Schema(
+            name = "testSuiteName",
+            description = "The name of the test suite that has been executed."
+    )
+    @JsonProperty(value = "testSuiteName")
+    public String getTestSuiteName() {
+        return testReport.getTestSuiteName();
+    }
 
-   public void setTestCounters(TestCountersDTO testCounters) {
-      testReport.setTestCounters(testCounters != null ? testCounters.getBusinessObject() : null);
-   }
+    public void setTestSuiteName(String testSuiteName) {
+        testReport.setTestSuiteName(testSuiteName);
+    }
 
-   @Schema(
-         name = "note",
-         description = "A note to attach to the test report."
-   )
-   @JsonProperty(value = "note")
-   public String getNote() {
-      return testReport.getNote();
-   }
+    @Schema(
+            name = "testCounters",
+            description = "The counters that summarize the results of test runs in the suite."
+    )
+    @JsonProperty(value = "testCounters")
+    public TestCountersDTO getTestCounters() {
+        return testReport.getTestCounters() != null
+                ? new TestCountersDTO(testReport.getTestCounters())
+                : new TestCountersDTO();
+    }
 
-   public void setNote(String note) {
-      testReport.setNote(note);
-   }
+    public void setTestCounters(TestCountersDTO testCounters) {
+        testReport.setTestCounters(testCounters != null ? testCounters.getBusinessObject() : null);
+    }
 
-   @Schema(
-         name = "urlToTestSuiteResult",
-         description = "A link to retrieve the test report."
-   )
-   @JsonProperty(value = "urlToTestSuiteResult")
-   public String getUrlToTestSuiteResult() {
-      return testReport.getUrlToTestSuiteResult();
-   }
+    @Schema(
+            name = "note",
+            description = "A note to attach to the test report."
+    )
+    @JsonProperty(value = "note")
+    public String getNote() {
+        return testReport.getNote();
+    }
 
-   public void setUrlToTestSuiteResult(String urlToTestSuiteResult) {
-      testReport.setUrlToTestSuiteResult(urlToTestSuiteResult);
-   }
+    public void setNote(String note) {
+        testReport.setNote(note);
+    }
 
-   @Schema(
-         name = "testRunReports",
-         description = "The list of test run report that was part of the test suite."
-   )
-   @JsonProperty(value = "testRunReports")
-   public List<TestRunReportDTO> getTestRunReports() {
-      return testReport
-            .getTestRunReports()
-            .stream()
-            .map(TestRunReportDTO::new)
-            .toList();
-   }
+    @Schema(
+            name = "urlToTestSuiteResult",
+            description = "A link to retrieve the test report."
+    )
+    @JsonProperty(value = "urlToTestSuiteResult")
+    public String getUrlToTestSuiteResult() {
+        return testReport.getUrlToTestSuiteResult();
+    }
 
-   public void setTestRunReports(List<TestRunReportDTO> testRunReports) {
-      testReport.setTestRunReports(
-            testRunReports == null ? List.of() :
-                  testRunReports.stream().map(TestRunReportDTO::getBusinessObject).toList()
-      );
-   }
+    public void setUrlToTestSuiteResult(String urlToTestSuiteResult) {
+        testReport.setUrlToTestSuiteResult(urlToTestSuiteResult);
+    }
 
-   @Schema(
-         name = "subReports",
-         description = "A list of included test reports."
-   )
-   @JsonProperty(value = "subReports")
-   public List<TestReportDTO> getSubReports() {
-      return testReport
-            .getSubReports()
-            .stream()
-            .map(TestReportDTO::new)
-            .toList();
-   }
+    @Schema(
+            name = "testRunReports",
+            description = "The list of test run report that was part of the test suite."
+    )
+    @JsonProperty(value = "testRunReports")
+    public List<TestRunReportDTO> getTestRunReports() {
+        return testReport
+                .getTestRunReports()
+                .stream()
+                .map(TestRunReportDTO::new)
+                .toList();
+    }
 
-   public void setSubReports(List<TestReportDTO> subReports) {
-      testReport.setSubReports(
-            subReports == null ? List.of() :
-                  subReports.stream().map(TestReportDTO::getBusinessObject).toList()
-      );
-   }
+    public void setTestRunReports(List<TestRunReportDTO> testRunReports) {
+        testReport.setTestRunReports(
+                testRunReports == null ? List.of() :
+                        testRunReports.stream().map(TestRunReportDTO::getBusinessObject).toList()
+        );
+    }
 
-   @Schema(
-         name = "unexpectedErrors",
-         description = "The list of unexpected errors that can occur during test suite execution."
-   )
-   @JsonProperty(value = "unexpectedErrors")
-   public List<UnexpectedErrorDTO> getUnexpectedErrors() {
-      return testReport
-            .getUnexpectedErrors()
-            .stream()
-            .map(UnexpectedErrorDTO::new)
-            .toList();
-   }
+    @Schema(
+            name = "subReports",
+            description = "A list of included test reports."
+    )
+    @JsonProperty(value = "subReports")
+    public List<TestReportDTO> getSubReports() {
+        return testReport
+                .getSubReports()
+                .stream()
+                .map(TestReportDTO::new)
+                .toList();
+    }
 
-   public void setUnexpectedErrors(List<UnexpectedErrorDTO> unexpectedErrors) {
-      testReport.setUnexpectedErrors(
-            unexpectedErrors == null ? List.of() :
-                  unexpectedErrors.stream().map(UnexpectedErrorDTO::getBusinessObject).toList()
-      );
-   }
+    public void setSubReports(List<TestReportDTO> subReports) {
+        testReport.setSubReports(
+                subReports == null ? List.of() :
+                        subReports.stream().map(TestReportDTO::getBusinessObject).toList()
+        );
+    }
+
+    @Schema(
+            name = "unexpectedErrors",
+            description = "The list of unexpected errors that can occur during test suite execution."
+    )
+    @JsonProperty(value = "unexpectedErrors")
+    public List<UnexpectedErrorDTO> getUnexpectedErrors() {
+        return testReport
+                .getUnexpectedErrors()
+                .stream()
+                .map(UnexpectedErrorDTO::new)
+                .toList();
+    }
+
+    public void setUnexpectedErrors(List<UnexpectedErrorDTO> unexpectedErrors) {
+        testReport.setUnexpectedErrors(
+                unexpectedErrors == null ? List.of() :
+                        unexpectedErrors.stream().map(UnexpectedErrorDTO::getBusinessObject).toList()
+        );
+    }
 }

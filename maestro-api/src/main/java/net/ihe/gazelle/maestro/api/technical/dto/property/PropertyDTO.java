@@ -97,14 +97,20 @@ public abstract class PropertyDTO<T extends Property> implements SubTypingDTO<T>
     )
     @JsonProperty("dateTime")
     public String getDateTime() {
-        return ZonedDateTime.ofInstant(property.getDateTime(), ZoneId.systemDefault())
-                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        if (property.getDateTime() != null) {
+            return ZonedDateTime.ofInstant(property.getDateTime(), ZoneId.systemDefault())
+                    .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        } else {
+            return null;
+        }
     }
 
     public void setDateTime(String dateTime) {
-        property.setDateTime(
-                Instant.from(ZonedDateTime.parse(dateTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME))
-        );
+        if (dateTime != null) {
+            property.setDateTime(
+                    Instant.from(ZonedDateTime.parse(dateTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+            );
+        }
     }
 
     /**
