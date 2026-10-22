@@ -102,8 +102,10 @@ public class WebSocketSession implements MaestroObserver {
     public void onExecutionFinished(ExecutionFinished executionFinished) {
         String message = serDes.serializeAsString(new ExecutionFinishedDTO(executionFinished));
         LOG.debug("Execution Finished: {}", message);
-        this.session.getAsyncRemote().sendText(message);
-        closeSession();
+        this.session.getAsyncRemote().sendText(message, result -> {
+            if (!result.isOK()) LOG.error("Cannot deliver persisted execution result to session {}", session.getId(), result.getException());
+            closeSession();
+        });
     }
 
     private void closeSession() {

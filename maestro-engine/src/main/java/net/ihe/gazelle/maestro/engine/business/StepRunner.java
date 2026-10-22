@@ -56,6 +56,7 @@ public class StepRunner {
     * @param startStepRun Message containing a step to run
     */
    public void run(StartStepRun startStepRun) {
+      long started = System.nanoTime();
       StepRun stepRun = startStepRun.getStepRun();
       try {
          StepExecutor executor = stepExecutorProvider.getExecutor(startStepRun.getSessionId(), stepRun);
@@ -74,7 +75,9 @@ public class StepRunner {
          );
       } catch (Exception e) {
          // Unexpected error
-         logger.atError().setCause(e).log("Unexpected error while running step");
+         logger.error("Unexpected error while running step: sessionId={}, testId={}, stepIndex={}, elapsedMs={}",
+               startStepRun.getSessionId(), startStepRun.getTestId(), startStepRun.getStepIndex(),
+               java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - started), e);
          stepRunEventProducer.notify(
                new StepRunFinished(startStepRun.getSessionId(), startStepRun.getTestId(), startStepRun.getStepIndex(),
                      stepRun, buildErrorReport(stepRun, e))
