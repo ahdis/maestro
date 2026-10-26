@@ -73,6 +73,10 @@ public class PutEvidenceDTO extends MessageDTO<PutEvidence> implements SecuredMe
         return message.getStepId();
     }
 
+    public void setStepId(Integer stepId) {
+        message.setStepId(stepId);
+    }
+
     @Schema(
             name = "content",
             description = "The content of the evidence."
