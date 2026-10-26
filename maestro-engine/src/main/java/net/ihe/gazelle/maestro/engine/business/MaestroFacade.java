@@ -106,7 +106,7 @@ public class MaestroFacade {
    public void listen(StartTestRun startTestRun) {
       Optional.ofNullable(testSuiteRunObserverStore.getSession(startTestRun.getSessionId()))
             .ifPresent(observer -> observer.onTestRunStarted(
-                  new TestRunStarted(startTestRun.getTestRun().getTest().getId())
+                  new TestRunStarted(startTestRun.getSessionId(), startTestRun.getTestRun().getTest().getId())
             ));
    }
 
