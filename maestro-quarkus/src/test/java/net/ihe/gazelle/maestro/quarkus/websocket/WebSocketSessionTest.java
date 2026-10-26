@@ -67,7 +67,7 @@ class WebSocketSessionTest {
     @Test
     void should_send_test_run_started_message() throws InterruptedException {
         WebSocketSession ws = new WebSocketSession(session);
-        ws.onTestRunStarted(new TestRunStarted("testId"));
+        ws.onTestRunStarted(new TestRunStarted("sessionId", "testId"));
 
         String messageString = TestWebSocketServer.pollLastMessage();
         assertNotNull(messageString);
