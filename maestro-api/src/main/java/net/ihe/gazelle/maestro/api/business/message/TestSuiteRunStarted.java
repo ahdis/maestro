@@ -26,46 +26,74 @@ import java.io.Serial;
 @Event
 public class TestSuiteRunStarted implements Message {
 
-   @Serial
-   private static final long serialVersionUID = 1L;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-   /**
-    * The id of the test suite run
-    */
-   private String testSuiteRunId;
+    /**
+     * The is of the test run execution session
+     */
+    private String sessionId;
 
-   /**
-    * Default constructor
-    */
-   public TestSuiteRunStarted() {
-   }
+    /**
+     * The id of the test suite run
+     */
+    private String testSuiteRunId;
 
-   /**
-    * Constructs a new TestSuiteRunStarted instance with the specified test suite run ID.
-    *
-    * @param testSuiteRunId the ID of the test suite run that has started.
-    */
-   public TestSuiteRunStarted(String testSuiteRunId) {
-      this.testSuiteRunId = testSuiteRunId;
-   }
+    /**
+     * Default constructor
+     */
+    public TestSuiteRunStarted() {
+    }
 
-   /**
-    * Retrieves the ID of the test suite run.
-    *
-    * @return the ID of the test suite run as a string.
-    */
-   public String getTestSuiteRunId() {
-      return testSuiteRunId;
-   }
+    /**
+     * Constructs a new TestSuiteRunStarted instance with the specified test suite run ID.
+     *
+     * @param sessionId      the session ID associated with the test suite run execution
+     * @param testSuiteRunId the ID of the test suite run that has started.
+     */
+    public TestSuiteRunStarted(String sessionId, String testSuiteRunId) {
+        this.sessionId = sessionId;
+        this.testSuiteRunId = testSuiteRunId;
+    }
 
-   /**
-    * Sets the ID of the test suite run and returns the current instance for method chaining.
-    *
-    * @param testSuiteRunId the ID of the test suite run to be set.
-    * @return the current instance of {@code TestSuiteRunStarted} for method chaining.
-    */
-   public TestSuiteRunStarted setTestSuiteRunId(String testSuiteRunId) {
-      this.testSuiteRunId = testSuiteRunId;
-      return this;
-   }
+    /**
+     * Retrieves the session ID associated with the test suite run execution.
+     *
+     * @return the session ID as a string.
+     */
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    /**
+     * Sets the session ID associated with the test suite run execution and returns the
+     * current instance for method chaining.
+     *
+     * @param sessionId the session ID to be set.
+     * @return the current instance of {@code TestSuiteRunStarted} for method chaining.
+     */
+    public TestSuiteRunStarted setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+        return this;
+    }
+
+    /**
+     * Retrieves the ID of the test suite run.
+     *
+     * @return the ID of the test suite run as a string.
+     */
+    public String getTestSuiteRunId() {
+        return testSuiteRunId;
+    }
+
+    /**
+     * Sets the ID of the test suite run and returns the current instance for method chaining.
+     *
+     * @param testSuiteRunId the ID of the test suite run to be set.
+     * @return the current instance of {@code TestSuiteRunStarted} for method chaining.
+     */
+    public TestSuiteRunStarted setTestSuiteRunId(String testSuiteRunId) {
+        this.testSuiteRunId = testSuiteRunId;
+        return this;
+    }
 }

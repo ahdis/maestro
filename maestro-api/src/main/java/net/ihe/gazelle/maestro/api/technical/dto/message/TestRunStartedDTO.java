@@ -26,52 +26,62 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Schema(
-      name = "TestRunStarted",
-      description = "Message sent when a new test run is started."
+        name = "TestRunStarted",
+        description = "Message sent when a new test run is started."
 )
 @JsonTypeName(TestRunStartedDTO.TYPE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-      "type",
-      "testId",
-      "dateTime"
+        "type",
+        "testId",
+        "sessionId",
+        "dateTime"
 })
 public class TestRunStartedDTO extends MessageDTO<TestRunStarted> {
 
-   @JsonIgnore
-   public static final String TYPE = "TEST_RUN_STARTED";
+    @JsonIgnore
+    public static final String TYPE = "TEST_RUN_STARTED";
 
-   public TestRunStartedDTO() {
-      this(new TestRunStarted());
-   }
+    public TestRunStartedDTO() {
+        this(new TestRunStarted());
+    }
 
-   public TestRunStartedDTO(TestRunStarted message) {
-      super(message);
-   }
+    public TestRunStartedDTO(TestRunStarted message) {
+        super(message);
+    }
 
-   @Schema(
-         name = "testId",
-         description = "The unique identifier of the test."
-   )
-   @JsonProperty("testId")
-   public String getTestRunId() {
-      return message.getTestId();
-   }
+    @Schema(
+            name = "testId",
+            description = "The unique identifier of the test."
+    )
+    @JsonProperty("testId")
+    public String getTestRunId() {
+        return message.getTestId();
+    }
 
-   @Schema(
-         name = "dateTime",
-         description = "The zoned date time of the beginning of the execution of the test.",
-         examples = "2025-01-01T16:30:00.387+01:00"
-   )
-   @JsonProperty("dateTime")
-   public String getDateTime() {
-      return ZonedDateTime.ofInstant(Instant.now(), ZoneId.systemDefault())
-            .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-   }
+    @Schema(
+            name = "sessionId",
+            description = "The is of the test run execution session."
+    )
+    @JsonProperty("sessionId")
+    public String getSessionId() {
+        return message.getSessionId();
+    }
 
-   @Override
-   @JsonIgnore
-   public Class<TestRunStarted> getBusinessObjectClass() {
-      return TestRunStarted.class;
-   }
+    @Schema(
+            name = "dateTime",
+            description = "The zoned date time of the beginning of the execution of the test.",
+            examples = "2025-01-01T16:30:00.387+01:00"
+    )
+    @JsonProperty("dateTime")
+    public String getDateTime() {
+        return ZonedDateTime.ofInstant(Instant.now(), ZoneId.systemDefault())
+                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+    }
+
+    @Override
+    @JsonIgnore
+    public Class<TestRunStarted> getBusinessObjectClass() {
+        return TestRunStarted.class;
+    }
 }

@@ -35,163 +35,186 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Schema(
-      name = "StepRunReport",
-      description = "A report containing the result of a test step execution."
+        name = "StepRunReport",
+        description = "A report containing the result of a test step execution."
 )
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
-      "stepName",
-      "type",
-      "dateTime",
-      "result",
-      "inputs",
-      "outputs",
-      "unexpectedErrors"
+        "stepName",
+        "type",
+        "dateTime",
+        "result",
+        "inputs",
+        "unsolicitedEvidences",
+        "outputs",
+        "unexpectedErrors"
 })
 public class StepRunReportDTO implements DTO<StepRunReport> {
 
-   @JsonIgnore
-   private final StepRunReport stepRunReport;
+    @JsonIgnore
+    private final StepRunReport stepRunReport;
 
-   public StepRunReportDTO() {
-      this(new StepRunReport());
-   }
+    public StepRunReportDTO() {
+        this(new StepRunReport());
+    }
 
-   public StepRunReportDTO(StepRunReport stepRunReport) {
-      this.stepRunReport = stepRunReport;
-   }
+    public StepRunReportDTO(StepRunReport stepRunReport) {
+        this.stepRunReport = stepRunReport;
+    }
 
-   @Override
-   @JsonIgnore
-   public StepRunReport getBusinessObject() {
-      return stepRunReport;
-   }
+    @Override
+    @JsonIgnore
+    public StepRunReport getBusinessObject() {
+        return stepRunReport;
+    }
 
-   @Schema(
-         name = "stepName",
-         description = "The name of the step that was executed.",
-         examples = "ITI-90 Simulation step",
-         required = true
-   )
-   @JsonProperty(value = "stepName")
-   public String getStepName() {
-      return stepRunReport.getStepName();
-   }
+    @Schema(
+            name = "stepName",
+            description = "The name of the step that was executed.",
+            examples = "ITI-90 Simulation step",
+            required = true
+    )
+    @JsonProperty(value = "stepName")
+    public String getStepName() {
+        return stepRunReport.getStepName();
+    }
 
-   public void setStepName(String stepName) {
-      stepRunReport.setStepName(stepName);
-   }
+    public void setStepName(String stepName) {
+        stepRunReport.setStepName(stepName);
+    }
 
-   @Schema(
-         name = "type",
-         description = "The type of the step that was executed.",
-         examples = {"SIMULATION", "VALIDATION"},
-         required = true
-   )
-   @JsonProperty(value = "type")
-   public String getType() {
-      return stepRunReport.getType();
-   }
+    @Schema(
+            name = "type",
+            description = "The type of the step that was executed.",
+            examples = {"SIMULATION", "VALIDATION"},
+            required = true
+    )
+    @JsonProperty(value = "type")
+    public String getType() {
+        return stepRunReport.getType();
+    }
 
-   public void setType(String type) {
-      stepRunReport.setType(type);
-   }
+    public void setType(String type) {
+        stepRunReport.setType(type);
+    }
 
-   @Schema(
-         name = "dateTime",
-         description = "The zoned date time of the step execution.",
-         examples = "2025-01-01T16:30:00.387+01:00",
-         required = true
-   )
-   @JsonProperty(value = "dateTime")
-   public String getDateTime() {
-      return ZonedDateTime.ofInstant(getBusinessObject().getDateTime(), ZoneId.systemDefault())
-            .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-   }
+    @Schema(
+            name = "dateTime",
+            description = "The zoned date time of the step execution.",
+            examples = "2025-01-01T16:30:00.387+01:00",
+            required = true
+    )
+    @JsonProperty(value = "dateTime")
+    public String getDateTime() {
+        return ZonedDateTime.ofInstant(getBusinessObject().getDateTime(), ZoneId.systemDefault())
+                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+    }
 
-   public void setDateTime(String dateTime) {
-      getBusinessObject().setDateTime(
-            Instant.from(ZonedDateTime.parse(dateTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME))
-      );
-   }
+    public void setDateTime(String dateTime) {
+        getBusinessObject().setDateTime(
+                Instant.from(ZonedDateTime.parse(dateTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+        );
+    }
 
-   @Schema(
-         name = "result",
-         description = "The result of the test step.",
-         enumeration = {StepResult.RESULT_DONE, StepResult.RESULT_PASSED, StepResult.RESULT_FAILED, StepResult.RESULT_UNDEFINED},
-         required = true
-   )
-   @JsonProperty(value = "result")
-   public String getResult() {
-      return stepRunReport.getResult().name();
-   }
+    @Schema(
+            name = "result",
+            description = "The result of the test step.",
+            enumeration = {StepResult.RESULT_DONE, StepResult.RESULT_PASSED, StepResult.RESULT_FAILED, StepResult.RESULT_UNDEFINED},
+            required = true
+    )
+    @JsonProperty(value = "result")
+    public String getResult() {
+        return stepRunReport.getResult().name();
+    }
 
-   public void setResult(String result) {
-      stepRunReport.setResult(StepResult.valueOf(result));
-   }
+    public void setResult(String result) {
+        stepRunReport.setResult(StepResult.valueOf(result));
+    }
 
-   @Schema(
-         name = "inputs",
-         description = "The inputs of the step execution."
-   )
-   @SuppressWarnings("rawtypes")
-   @JsonProperty(value = "inputs")
-   public List<PropertyDTO> getInputs() {
-      return stepRunReport.getInputs().stream()
-            .map(SubTypingDTO::fromBusinessObject)
-            .map(PropertyDTO.class::cast)
-            .toList();
-   }
+    @Schema(
+            name = "inputs",
+            description = "The inputs of the step execution."
+    )
+    @SuppressWarnings("rawtypes")
+    @JsonProperty(value = "inputs")
+    public List<PropertyDTO> getInputs() {
+        return stepRunReport.getInputs().stream()
+                .map(SubTypingDTO::fromBusinessObject)
+                .map(PropertyDTO.class::cast)
+                .toList();
+    }
 
-   @SuppressWarnings("rawtypes")
-   public void setInputs(List<PropertyDTO> outputs) {
-      stepRunReport.setInputs(
-            outputs.stream()
-                  .map(PropertyDTO::getBusinessObject)
-                  .toList()
-      );
-   }
+    @SuppressWarnings("rawtypes")
+    public void setInputs(List<PropertyDTO> outputs) {
+        stepRunReport.setInputs(
+                outputs.stream()
+                        .map(PropertyDTO::getBusinessObject)
+                        .toList()
+        );
+    }
 
-   @Schema(
-         name = "outputs",
-         description = "The outputs of the step execution."
-   )
-   @SuppressWarnings("rawtypes")
-   @JsonProperty(value = "outputs")
-   public List<PropertyDTO> getOutputs() {
-      return stepRunReport.getOutputs().stream()
-            .map(SubTypingDTO::fromBusinessObject)
-            .map(PropertyDTO.class::cast)
-            .toList();
-   }
+    @Schema(
+            name = "unsolicitedEvidences",
+            description = "The additional unsolicited evidences attached to the step execution."
+    )
+    @SuppressWarnings("rawtypes")
+    @JsonProperty(value = "unsolicitedEvidences")
+    public List<PropertyDTO> getEvidences() {
+        return stepRunReport.getEvidences().stream()
+                .map(SubTypingDTO::fromBusinessObject)
+                .map(PropertyDTO.class::cast)
+                .toList();
+    }
 
-   @SuppressWarnings("rawtypes")
-   public void setOutputs(List<PropertyDTO> outputs) {
-      stepRunReport.setOutputs(
-            outputs.stream()
-                  .map(PropertyDTO::getBusinessObject)
-                  .toList()
-      );
-   }
+    @SuppressWarnings("rawtypes")
+    public void setEvidences(List<PropertyDTO> outputs) {
+        stepRunReport.setEvidences(
+                outputs.stream()
+                        .map(PropertyDTO::getBusinessObject)
+                        .toList()
+        );
+    }
 
-   @Schema(
-         name = "unexpectedErrors",
-         description = "The errors that can happen during step execution."
-   )
-   @JsonProperty(value = "unexpectedErrors")
-   public List<UnexpectedErrorDTO> getUnexpectedErrors() {
-      return stepRunReport
-            .getUnexpectedErrors()
-            .stream()
-            .map(UnexpectedErrorDTO::new)
-            .toList();
-   }
+    @Schema(
+            name = "outputs",
+            description = "The outputs of the step execution."
+    )
+    @SuppressWarnings("rawtypes")
+    @JsonProperty(value = "outputs")
+    public List<PropertyDTO> getOutputs() {
+        return stepRunReport.getOutputs().stream()
+                .map(SubTypingDTO::fromBusinessObject)
+                .map(PropertyDTO.class::cast)
+                .toList();
+    }
 
-   public void setUnexpectedErrors(List<UnexpectedErrorDTO> unexpectedErrors) {
-      stepRunReport.setUnexpectedErrors(
-            unexpectedErrors.stream()
-                  .map(UnexpectedErrorDTO::getBusinessObject)
-                  .toList()
-      );
-   }
+    @SuppressWarnings("rawtypes")
+    public void setOutputs(List<PropertyDTO> outputs) {
+        stepRunReport.setOutputs(
+                outputs.stream()
+                        .map(PropertyDTO::getBusinessObject)
+                        .toList()
+        );
+    }
+
+    @Schema(
+            name = "unexpectedErrors",
+            description = "The errors that can happen during step execution."
+    )
+    @JsonProperty(value = "unexpectedErrors")
+    public List<UnexpectedErrorDTO> getUnexpectedErrors() {
+        return stepRunReport
+                .getUnexpectedErrors()
+                .stream()
+                .map(UnexpectedErrorDTO::new)
+                .toList();
+    }
+
+    public void setUnexpectedErrors(List<UnexpectedErrorDTO> unexpectedErrors) {
+        stepRunReport.setUnexpectedErrors(
+                unexpectedErrors.stream()
+                        .map(UnexpectedErrorDTO::getBusinessObject)
+                        .toList()
+        );
+    }
 }
