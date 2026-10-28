@@ -28,6 +28,7 @@ import net.ihe.gazelle.maestro.spi.business.recording.plan.MaestroRefType;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ReferencePlan;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -42,6 +43,7 @@ public class StepOutputPlan {
 
    private final StepRunReport stepRunReport;
 
+   private final Map<String, String> outputAliases;
    private final String datahouseUrl;
    private final FutureReferenceCallbackRegistry callbackRegistry;
 
@@ -57,6 +59,14 @@ public class StepOutputPlan {
                          StepRunReport stepRunReport,
                          String datahouseUrl,
                          FutureReferenceCallbackRegistry callbackRegistry) {
+      this(rootReportPlan, stepRunReport, datahouseUrl, callbackRegistry, Map.of());
+   }
+
+   /** Creates a plan using output aliases from the original step definition. */
+   public StepOutputPlan(ItemPlan<TestReport> rootReportPlan, StepRunReport stepRunReport,
+                         String datahouseUrl, FutureReferenceCallbackRegistry callbackRegistry,
+                         Map<String, String> outputAliases) {
+      this.outputAliases = Map.copyOf(outputAliases);
       this.addReferencePlanFunction = rootReportPlan::addFutureReferencePlan;
       this.stepRunReport = stepRunReport;
       this.datahouseUrl = datahouseUrl;
@@ -204,8 +214,10 @@ public class StepOutputPlan {
    }
 
    private void notifyResolvedAttachment(ReferencePlan referencePlan, String referenceName, String referenceId) {
-      if (referencePlan.getRefType() == MaestroRefType.ATTACHMENT) {
-         callbackRegistry.notifyResolved(referenceName, referenceId);
+      // Only aliased outputs reach the execution context, so only they can be consumed by later steps.
+      String alias = outputAliases.get(referenceName);
+      if (referencePlan.getRefType() == MaestroRefType.ATTACHMENT && alias != null) {
+         callbackRegistry.notifyResolved(alias, referenceId);
       }
    }
 

@@ -94,6 +94,26 @@ class TestValidatorTest {
       );
    }
 
+   @org.junit.jupiter.api.Test
+   void testOutputAliasCannotBeReused() {
+      Test test = getMinimalTest()
+            .addStep(new Step().setName("Second Step").setType("VALIDATION")
+                  .setOutputMappings(java.util.Map.of("document", "sharedDocument")));
+      test.getSteps().getFirst().setOutputMappings(java.util.Map.of("report", "sharedDocument"));
+      var result = new TestValidator().validate(test);
+      assertThat(result.toString(),
+            containsString("Output aliases must be unique and must not reuse a supported input ID => invalid"));
+   }
+
+   @org.junit.jupiter.api.Test
+   void testOutputAliasCannotShadowSupportedInput() {
+      Test test = getMinimalTest().addSupportedInput(new SupportedTextInput().setId("document").setLabel("Document"));
+      test.getSteps().getFirst().setOutputMappings(java.util.Map.of("report", "document"));
+      var result = new TestValidator().validate(test);
+      assertThat(result.toString(),
+            containsString("Output aliases must be unique and must not reuse a supported input ID => invalid"));
+   }
+
    private static Test getMinimalTest() {
       return new Test()
             .setId("123456")

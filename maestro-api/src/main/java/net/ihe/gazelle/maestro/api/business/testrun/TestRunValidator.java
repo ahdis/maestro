@@ -69,6 +69,8 @@ public class TestRunValidator extends AbstractValidator<TestRun> {
    @SuppressWarnings("unchecked")
    protected void addRulesAndMembers(ValidatorBuilder<? extends TestRun> validatorBuilder) {
       validatorBuilder
+            .addRule(TestRun::areOutputAliasesDisjointFromInputs,
+                  "Output aliases must not reuse execution input names")
             .addRule(TestRun::isTestDefined, "Test must be defined")
             .addMember("test", TestRun::getTest, testValidator::getAssembledValidatorBuilder)
             .addMember("inputs", TestRun::getInputs, propertyValidator::getAssembledValidatorBuilder)

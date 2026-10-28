@@ -20,9 +20,11 @@ import net.ihe.gazelle.errorhandling.business.UnexpectedErrorBuilder;
 import net.ihe.gazelle.maestro.api.business.Maestro;
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.api.business.message.*;
+import net.ihe.gazelle.maestro.api.business.test.Test;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -61,6 +63,16 @@ public class RecordingMaestro implements Maestro {
       maestro.executeTest(testRun, observer);
    }
 
+   private List<Test> testDefinitions(ExecutionFinished finished) {
+      if (finished.getRun() instanceof TestRun run) {
+         return List.of(run.getTest());
+      }
+      if (finished.getRun() instanceof TestSuiteRun run) {
+         return run.getTests();
+      }
+      return List.of();
+   }
+
    private class RecordObserver implements MaestroObserver {
 
       private final MaestroObserver delegate;
@@ -97,7 +109,8 @@ public class RecordingMaestro implements Maestro {
       @Override
       public void onExecutionFinished(ExecutionFinished executionFinished) {
          try {
-            String location = testReportRecordingService.recordTestReport(executionFinished.getReport());
+            String location = testReportRecordingService.recordTestReport(
+                  executionFinished.getReport(), testDefinitions(executionFinished));
             executionFinished.setReportLocation(location);
          } catch (Exception e) {
             executionFinished.getReport().addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e).build());

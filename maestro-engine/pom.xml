@@ -25,6 +25,7 @@
     <artifactId>maestro-engine</artifactId>
 
     <dependencies>
+
         <!-- Sub modules dependencies -->
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
@@ -139,6 +140,12 @@
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>user-interaction-step</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

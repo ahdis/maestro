@@ -92,6 +92,13 @@ class TestRunValidatorTest {
       );
    }
 
+   @org.junit.jupiter.api.Test
+   void rejectsOutputAliasShadowingAnUndeclaredExecutionInput() {
+      var run = buildValidTestRun();
+      run.getTest().getSteps().getFirst().addOutputMapping("result", "input-key");
+      assertFalse(validator.validate(run).isValid());
+   }
+
    private TestRun buildValidTestRun() {
       Property input = new StringProperty("input-key", "value");
       SystemUnderTest systemUnderTest = new SystemUnderTest()

@@ -51,16 +51,24 @@ public class UserInteractionStepExecutor implements StepExecutor {
         String message = stepRun.getPropertyValue(UserInteractionStepDefinition.MESSAGE);
         List<SupportedInput> supportedInputs = stepRun.getPropertyValue(UserInteractionStepDefinition.INTERACTION_INPUTS);
 
+        UserInteractionResponseValidator responseValidator = new UserInteractionResponseValidator(supportedInputs);
         UserInteractionCompleted interactionCompleted = userInteractionHandler.displayMessage(interactionTitle, message, stepRun.getTimeout(), supportedInputs);
-        return buildStepRunReport(stepRun, interactionCompleted.getInputs());
+        List<Property> inputs = interactionCompleted.getInputs();
+        responseValidator.validate(interactionCompleted).orThrow(IllegalArgumentException::new);
+        return buildStepRunReport(stepRun, inputs);
     }
 
-    private StepRunReport buildStepRunReport(StepRun stepRun,  List<Property> inputs) {
+    private StepRunReport buildStepRunReport(StepRun stepRun, List<Property> inputs) {
         return new StepRunReportBuilder()
                 .setStepName(stepRun.getName())
                 .setType(UserInteractionStepDefinition.TYPE)
                 .setResult(StepResult.DONE)
-                .setInputs(inputs)
+                .setInputs(inputs.stream().map(Property::copy).toList())
+                .setOutputs(inputs.stream()
+                        .filter(input -> input.getValue() != null
+                                && !(input.getValue() instanceof String text && text.isBlank()))
+                        .map(Property::copy).toList())
                 .build();
     }
+
 }

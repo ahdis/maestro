@@ -123,6 +123,35 @@ class TestSuiteRunValidatorTest {
       );
    }
 
+   @org.junit.jupiter.api.Test
+   void rejectsAliasShadowingAnActualSuiteInput() {
+      var run = buildValidTestSuiteRun();
+      run.getTests().getFirst().getSteps().getFirst().addOutputMapping("result", "suite-input");
+      assertFalse(validator.validate(run).isValid());
+   }
+
+   @org.junit.jupiter.api.Test
+   void rejectsAliasShadowingAReferenceInput() {
+      var run = buildValidTestSuiteRun();
+      run.getTestSuite().getTestReferences().getFirst()
+            .setProperties(List.of(new StringProperty("reference-input", "value")));
+      run.getTests().getFirst().getSteps().getFirst().addOutputMapping("result", "reference-input");
+      assertFalse(validator.validate(run).isValid());
+   }
+
+   @org.junit.jupiter.api.Test
+   void permitsSameAliasInSeparateTests() {
+      var run = buildValidTestSuiteRun();
+      var first = run.getTests().getFirst();
+      var second = buildValidTest().setId("test-2");
+      first.getSteps().getFirst().addOutputMapping("result", "shared-alias");
+      second.getSteps().getFirst().addOutputMapping("result", "shared-alias");
+      run.setTests(List.of(first, second));
+      run.getTestSuite().setTestReferences(List.of(new TestReference().setTestId(first.getId()),
+            new TestReference().setTestId(second.getId())));
+      assertDoesNotThrow(() -> validator.assertValid(run));
+   }
+
    private TestSuiteRun buildValidTestSuiteRun() {
       Property input = new StringProperty("suite-input", "value");
       SystemUnderTest systemUnderTest = new SystemUnderTest()

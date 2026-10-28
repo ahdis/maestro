@@ -72,6 +72,8 @@ public class TestSuiteRunValidator extends AbstractValidator<TestSuiteRun> {
    @SuppressWarnings("unchecked")
    protected void addRulesAndMembers(ValidatorBuilder<? extends TestSuiteRun> validatorBuilder) {
       validatorBuilder
+            .addRule(TestSuiteRun::areOutputAliasesDisjointFromInputs,
+                  "Output aliases must not reuse execution input names")
             .addRule(TestSuiteRun::isTestSuiteDefined, "Test Suite must be set")
             .addRule(TestSuiteRun::areAllReferencedTestsAttached, "All Tests referenced in the Test Suite must be attached to the Test Suite Run")
             .addMember("testSuite", TestSuiteRun::getTestSuite, testSuiteValidator::getAssembledValidatorBuilder)

@@ -65,6 +65,8 @@ public class TestValidator extends AbstractValidator<Test> {
             .addRule(Test::isNameDefined, "Name must be set and not empty")
             .addRule(Test::atLeastOneStep, "Test must contain at least one step")
             .addRule(Test::areStepsUnique, "Steps must be unique")
+            .addRule(Test::areOutputAliasesUnique,
+                  "Output aliases must be unique and must not reuse a supported input ID")
             .addMember("steps", Test::getSteps, stepValidator::getAssembledValidatorBuilder)
             .addMember("supportedInputs", Test::getSupportedInputs,
                   SupportedInputValidators.getAssembledSuppliers(supportedInputValidators)

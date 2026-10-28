@@ -26,13 +26,20 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class InMemoryTestReportRecordingService implements TestReportRecordingService {
 
+   private List<net.ihe.gazelle.maestro.api.business.test.Test> testDefinitions = List.of();
+
+   @Override
+   public String recordTestReport(TestReport report, List<net.ihe.gazelle.maestro.api.business.test.Test> definitions) {
+      testDefinitions = List.copyOf(definitions);
+      return recordTestReportWithReferences(report);
+   }
+
+   public List<net.ihe.gazelle.maestro.api.business.test.Test> getTestDefinitions() {
+      return testDefinitions;
+   }
+
    private final List<TestReport> recordedReports = new CopyOnWriteArrayList<>();
    private final AtomicReference<TestReportRecordingException> nextFailure = new AtomicReference<>();
-
-    @Override
-    public String recordTestReport(TestReport report) {
-        return recordTestReportWithReferences(report);
-    }
 
    private synchronized String recordTestReportWithReferences(TestReport report) {
       TestReportRecordingException failure = nextFailure.getAndSet(null);

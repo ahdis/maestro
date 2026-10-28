@@ -73,6 +73,10 @@ public class UserInteractionStepDefinition implements StepDefinition {
       );
    }
 
+   /**
+    * Interaction outputs are dynamic: each configured interactionInputs field supplies its ID and type.
+    * This static definition intentionally does not enumerate instance-specific fields.
+    */
    @Override
    public Map<String, Class<? extends Property>> getOutputsDefinition() {
       return Map.of();
