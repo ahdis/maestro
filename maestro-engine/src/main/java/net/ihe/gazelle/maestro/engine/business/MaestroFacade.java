@@ -118,7 +118,7 @@ public class MaestroFacade {
    public void listen(StartStepRun startStepRun) {
       getObserver(startStepRun.getSessionId())
             .ifPresent(observer -> observer.onStepRunStarted(
-                  new StepRunStarted(startStepRun.getTestId(), startStepRun.getStepIndex())
+                  new StepRunStarted(startStepRun.getTestId(), startStepRun.getStepRun().getName())
             ));
    }
 
