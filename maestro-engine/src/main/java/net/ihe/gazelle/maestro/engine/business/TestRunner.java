@@ -161,12 +161,12 @@ public class TestRunner {
         testRunSession.addPropertiesToContext(
                 mapOutputs(testRunSession.currentStep(), stepRunReport)
         );
-        testRunSession.getEvidences().stream()
+        /*testRunSession.getEvidences().stream()
                 .filter(putEvidence -> putEvidence.getStepName().equals(stepRunReport.getStepName()))
                 .forEach(putEvidence -> {
                     stepRunReport.addEvidence(putEvidence.getContent());
                     testRunSession.removeEvidence(putEvidence);
-                });
+                });*/
     }
 
     private boolean isPreviousStepSuccessful(StepRunFinished stepRunFinished) {
