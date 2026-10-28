@@ -34,7 +34,7 @@ import java.time.format.DateTimeFormatter;
 @JsonPropertyOrder({
         "type",
         "testId",
-        "sessionId",
+        "maestroSessionId",
         "dateTime"
 })
 public class TestRunStartedDTO extends MessageDTO<TestRunStarted> {
@@ -60,11 +60,11 @@ public class TestRunStartedDTO extends MessageDTO<TestRunStarted> {
     }
 
     @Schema(
-            name = "sessionId",
-            description = "The is of the test run execution session."
+            name = "maestroSessionId",
+            description = "The is of the test run execution maestro session."
     )
-    @JsonProperty("sessionId")
-    public String getSessionId() {
+    @JsonProperty("maestroSessionId")
+    public String getMaestroSessionId() {
         return message.getSessionId();
     }
 

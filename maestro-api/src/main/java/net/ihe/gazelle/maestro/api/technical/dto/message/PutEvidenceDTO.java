@@ -31,6 +31,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
         "type",
+        "maestroSessionId",
         "runId",
         "stepId",
         "content"
@@ -49,6 +50,19 @@ public class PutEvidenceDTO extends MessageDTO<PutEvidence> implements SecuredMe
     public PutEvidenceDTO(PutEvidence message, String authorization) {
         super(message);
         this.authorization = authorization;
+    }
+
+    @Schema(
+            name = "maestroSessionId",
+            description = "The id of the maestro execution session where this evidence is added."
+    )
+    @JsonProperty("maestroSessionId")
+    public String getMaestroSessionId() {
+        return message.getSessionId();
+    }
+
+    public void setMaestroSessionId(String sessionId) {
+        message.setSessionId(sessionId);
     }
 
     @Schema(

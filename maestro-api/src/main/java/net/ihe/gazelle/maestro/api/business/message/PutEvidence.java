@@ -28,9 +28,19 @@ public class PutEvidence implements Message {
     @Serial
     private static final long serialVersionUID = -6052477359002871277L;
 
+    private String sessionId;
     private Integer runId;
     private Integer stepId;
     private Property content;
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public PutEvidence setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+        return this;
+    }
 
     public Integer getRunId() {
         return runId;
@@ -62,13 +72,14 @@ public class PutEvidence implements Message {
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof PutEvidence that)) return false;
-        return Objects.equals(runId, that.runId)
+        return Objects.equals(sessionId, that.sessionId)
+                && Objects.equals(runId, that.runId)
                 && Objects.equals(stepId, that.stepId)
                 && Objects.equals(content, that.content);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(runId, stepId, content);
+        return Objects.hash(sessionId, runId, stepId, content);
     }
 }

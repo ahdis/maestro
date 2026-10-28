@@ -145,9 +145,9 @@ public class StepRunReportDTO implements DTO<StepRunReport> {
     }
 
     @SuppressWarnings("rawtypes")
-    public void setInputs(List<PropertyDTO> outputs) {
+    public void setInputs(List<PropertyDTO> inputs) {
         stepRunReport.setInputs(
-                outputs.stream()
+                inputs.stream()
                         .map(PropertyDTO::getBusinessObject)
                         .toList()
         );
@@ -167,9 +167,9 @@ public class StepRunReportDTO implements DTO<StepRunReport> {
     }
 
     @SuppressWarnings("rawtypes")
-    public void setEvidences(List<PropertyDTO> outputs) {
+    public void setEvidences(List<PropertyDTO> evidences) {
         stepRunReport.setEvidences(
-                outputs.stream()
+                evidences.stream()
                         .map(PropertyDTO::getBusinessObject)
                         .toList()
         );
