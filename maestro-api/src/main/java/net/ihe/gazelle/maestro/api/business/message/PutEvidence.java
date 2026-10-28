@@ -30,7 +30,7 @@ public class PutEvidence implements Message {
 
     private String sessionId;
     private Integer runId;
-    private Integer stepId;
+    private String stepName;
     private Property content;
 
     public String getSessionId() {
@@ -51,12 +51,12 @@ public class PutEvidence implements Message {
         return this;
     }
 
-    public Integer getStepId() {
-        return stepId;
+    public String getStepName() {
+        return stepName;
     }
 
-    public PutEvidence setStepId(Integer stepId) {
-        this.stepId = stepId;
+    public PutEvidence setStepName(String stepName) {
+        this.stepName = stepName;
         return this;
     }
 
@@ -74,12 +74,12 @@ public class PutEvidence implements Message {
         if (!(o instanceof PutEvidence that)) return false;
         return Objects.equals(sessionId, that.sessionId)
                 && Objects.equals(runId, that.runId)
-                && Objects.equals(stepId, that.stepId)
+                && Objects.equals(stepName, that.stepName)
                 && Objects.equals(content, that.content);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sessionId, runId, stepId, content);
+        return Objects.hash(sessionId, runId, stepName, content);
     }
 }

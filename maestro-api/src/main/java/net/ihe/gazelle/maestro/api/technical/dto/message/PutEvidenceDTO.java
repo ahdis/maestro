@@ -33,7 +33,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
         "type",
         "maestroSessionId",
         "runId",
-        "stepId",
+        "stepName",
         "content"
 })
 public class PutEvidenceDTO extends MessageDTO<PutEvidence> implements SecuredMessageDTO {
@@ -45,6 +45,10 @@ public class PutEvidenceDTO extends MessageDTO<PutEvidence> implements SecuredMe
 
     public PutEvidenceDTO() {
         this(new PutEvidence(), "");
+    }
+
+    public PutEvidenceDTO(PutEvidence message) {
+        this(message, "");
     }
 
     public PutEvidenceDTO(PutEvidence message, String authorization) {
@@ -79,16 +83,16 @@ public class PutEvidenceDTO extends MessageDTO<PutEvidence> implements SecuredMe
     }
 
     @Schema(
-            name = "stepId",
-            description = "The id of the step where this evidence is added."
+            name = "stepName",
+            description = "The name of the step where this evidence is added."
     )
-    @JsonProperty("stepId")
-    public Integer getStepId() {
-        return message.getStepId();
+    @JsonProperty("stepName")
+    public String getStepName() {
+        return message.getStepName();
     }
 
-    public void setStepId(Integer stepId) {
-        message.setStepId(stepId);
+    public void setStepName(String stepId) {
+        message.setStepName(stepId);
     }
 
     @Schema(
