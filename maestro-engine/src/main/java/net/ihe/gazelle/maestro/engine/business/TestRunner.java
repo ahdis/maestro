@@ -146,7 +146,7 @@ public class TestRunner {
     private void runNextStep(TestRunSession testRunSession, String sessionId, String testId) {
         Step nextStep = testRunSession.nextStep();
         long timeout = testRunSession.getTestRun().getTest().computeTestRunTimeout();
-        sessionStore.putSession(sessionId, testRunSession, timeout);
+        sessionStore.addSession(sessionId, testRunSession, timeout);
         testRunEventProducer.command(new StartStepRun(
                 sessionId,
                 testId,
