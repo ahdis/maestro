@@ -35,9 +35,9 @@ public class StepRunStarted implements Message {
    private String testId;
 
    /**
-    * The index of the step to execute
+    * The name of the step to execute
     */
-   private int stepIndex;
+   private String stepName;
 
    /**
     * Default constructor
@@ -49,11 +49,11 @@ public class StepRunStarted implements Message {
     * Creates a new instance of StepRunStarted with the specified test ID and step index.
     *
     * @param testId the ID of the test for which the step execution has started.
-    * @param stepIndex the index of the step in the test that has started execution.
+    * @param stepName the index of the step in the test that has started execution.
     */
-   public StepRunStarted(String testId, int stepIndex) {
+   public StepRunStarted(String testId, String stepName) {
       this.testId = testId;
-      this.stepIndex = stepIndex;
+      this.stepName = stepName;
    }
 
    /**
@@ -81,18 +81,18 @@ public class StepRunStarted implements Message {
     *
     * @return the step index as an integer.
     */
-   public int getStepIndex() {
-      return stepIndex;
+   public String getStepName() {
+      return stepName;
    }
 
    /**
     * Sets the index of the step to execute.
     *
-    * @param stepIndex the index of the step to be executed.
+    * @param stepName the index of the step to be executed.
     * @return the current instance of {@code StepRunStarted} to allow method chaining.
     */
-   public StepRunStarted setStepIndex(int stepIndex) {
-      this.stepIndex = stepIndex;
+   public StepRunStarted setStepName(String stepName) {
+      this.stepName = stepName;
       return this;
    }
 }

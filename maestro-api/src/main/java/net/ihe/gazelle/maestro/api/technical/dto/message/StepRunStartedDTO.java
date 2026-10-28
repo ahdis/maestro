@@ -18,7 +18,6 @@ package net.ihe.gazelle.maestro.api.technical.dto.message;
 
 import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.message.StepRunStarted;
-import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import java.time.Instant;
@@ -35,7 +34,7 @@ import java.time.format.DateTimeFormatter;
 @JsonPropertyOrder({
       "type",
       "testId",
-      "stepIndex",
+      "stepName",
       "dateTime"
 })
 public class StepRunStartedDTO extends MessageDTO<StepRunStarted> {
@@ -61,13 +60,12 @@ public class StepRunStartedDTO extends MessageDTO<StepRunStarted> {
    }
 
    @Schema(
-         name = "stepIndex",
-         description = "The index of the step.",
-         type = SchemaType.INTEGER
+         name = "stepName",
+         description = "The name of the step."
    )
-   @JsonProperty("stepIndex")
-   public int getStepName() {
-      return message.getStepIndex();
+   @JsonProperty("stepName")
+   public String getStepName() {
+      return message.getStepName();
    }
 
    @Schema(

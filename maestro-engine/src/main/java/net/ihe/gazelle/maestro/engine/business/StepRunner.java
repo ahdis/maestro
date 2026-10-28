@@ -62,21 +62,21 @@ public class StepRunner {
          StepRunReport report = executor.execute(stepRun);
          stepRunReportValidator.validate(report).orThrow(IllegalStateException::new);
          stepRunEventProducer.notify(
-               new StepRunFinished(startStepRun.getSessionId(), startStepRun.getTestId(), startStepRun.getStepIndex(),
+               new StepRunFinished(startStepRun.getSessionId(), startStepRun.getTestId(), stepRun.getName(),
                      stepRun, report)
          );
       } catch (UnknownStepException | MissingPropertyException | ClassCastException e) {
          // User error, due to bad test definition
          logger.atDebug().setCause(e).log("Unable to run step");
          stepRunEventProducer.notify(
-               new StepRunFinished(startStepRun.getSessionId(), startStepRun.getTestId(), startStepRun.getStepIndex(),
+               new StepRunFinished(startStepRun.getSessionId(), startStepRun.getTestId(), stepRun.getName(),
                      stepRun, buildErrorReport(stepRun, e))
          );
       } catch (Exception e) {
          // Unexpected error
          logger.atError().setCause(e).log("Unexpected error while running step");
          stepRunEventProducer.notify(
-               new StepRunFinished(startStepRun.getSessionId(), startStepRun.getTestId(), startStepRun.getStepIndex(),
+               new StepRunFinished(startStepRun.getSessionId(), startStepRun.getTestId(), stepRun.getName(),
                      stepRun, buildErrorReport(stepRun, e))
          );
       }

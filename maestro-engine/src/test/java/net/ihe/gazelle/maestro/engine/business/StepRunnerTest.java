@@ -62,7 +62,7 @@ class StepRunnerTest {
       stepRunner.run(new StartStepRun("123456", "abc123", 4, new StepRun(step, step.getProperties())));
 
       StepRunFinished finished = eventProducer.awaitFinishedEvent(Duration.ofSeconds(2));
-      assertEquals(4, finished.getStepIndex());
+      assertEquals("Step 1", finished.getStepName());
       assertEquals("123456", finished.getSessionId());
       assertEquals("abc123", finished.getTestId());
       assertThat(finished.getStepRunReport(), sameInstance(report));
@@ -99,7 +99,7 @@ class StepRunnerTest {
 
       StepRunFinished finished = eventProducer.awaitFinishedEvent(Duration.ofSeconds(2));
       assertThat(finished.getStepRunReport().getResult(), is(StepResult.UNDEFINED));
-      assertEquals(0, finished.getStepIndex());
+      assertEquals("Step 1", finished.getStepName());
       assertThat(finished.getStepRunReport().getUnexpectedErrors(), is(not(empty())));
    }
 

@@ -22,7 +22,6 @@ import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.technical.dto.property.PropertyDTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
-import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import java.time.ZoneId;
@@ -39,7 +38,7 @@ import java.util.List;
 @JsonPropertyOrder({
         "type",
         "testId",
-        "stepIndex",
+        "stepName",
         "dateTime",
         "result",
         "unexpectedErrors"
@@ -67,13 +66,12 @@ public class StepRunFinishedDTO extends MessageDTO<StepRunFinished> {
     }
 
     @Schema(
-            name = "stepIndex",
-            description = "The index of the step.",
-            type = SchemaType.INTEGER
+            name = "stepName",
+            description = "The name of the step."
     )
-    @JsonProperty("stepIndex")
-    public int getStepIndex() {
-        return message.getStepIndex();
+    @JsonProperty("stepName")
+    public String getStepName() {
+        return message.getStepName();
     }
 
     @Schema(
