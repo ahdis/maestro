@@ -30,7 +30,7 @@ import net.ihe.gazelle.maestro.engine.business.context.TestRunSession;
 import net.ihe.gazelle.maestro.spi.business.StepRun;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 import org.junit.jupiter.api.BeforeEach;
-import technical.dao.SessionStoreCache;
+import technical.dao.SessionStoreImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +40,7 @@ import static org.hamcrest.Matchers.*;
 
 class TestRunnerTest {
 
-    private SessionStoreCache<TestRunSession> sessionStore;
+    private SessionStoreImpl<TestRunSession> sessionStore;
     private RecordingTestRunEventProducer eventProducer;
     private TestRunner testRunner;
     private Step firstStep;
@@ -48,7 +48,7 @@ class TestRunnerTest {
 
     @BeforeEach
     void setUp() {
-        sessionStore = new SessionStoreCache<>();
+        sessionStore = new SessionStoreImpl<>();
         eventProducer = new RecordingTestRunEventProducer();
         testRunner = new TestRunner(sessionStore, eventProducer);
 
