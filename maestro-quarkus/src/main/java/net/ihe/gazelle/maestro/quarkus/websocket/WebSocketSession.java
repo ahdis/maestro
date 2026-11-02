@@ -40,7 +40,6 @@ public class WebSocketSession implements MaestroObserver {
     private final TextSerDes serDes = new JacksonSerDes();
     private final Session session;
     private CompletableFuture<UserInteractionCompleted> interactionFuture;
-    private CompletableFuture<GradingCompleted> gradingFuture;
 
     /**
      * Constructs a new WebSocketSession for the given WebSocket {@link Session}.
@@ -112,8 +111,7 @@ public class WebSocketSession implements MaestroObserver {
         String message = serDes.serializeAsString(new AskGradingDTO(askGrading));
         LOG.debug("Ask grading: {}", message);
         this.session.getAsyncRemote().sendText(message);
-        this.gradingFuture = new CompletableFuture<>();
-        return gradingFuture;
+        return new CompletableFuture<>();
     }
 
     private void closeSession() {

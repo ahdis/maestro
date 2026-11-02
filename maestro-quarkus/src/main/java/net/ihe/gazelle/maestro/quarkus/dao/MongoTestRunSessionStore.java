@@ -39,6 +39,7 @@ import static com.mongodb.client.model.Projections.include;
 //@ApplicationScoped
 public class MongoTestRunSessionStore implements SessionStore<TestRunSession> {
 
+    private static final String SESSION_ID_REQUIRED = "sessionId must not be null";
     private static final String COLLECTION_NAME = "test_run_session";
 
     private final MongoCollection<Document> collection;
@@ -70,7 +71,7 @@ public class MongoTestRunSessionStore implements SessionStore<TestRunSession> {
      */
     @Override
     public void putSession(String sessionId, TestRunSession session, long timeout) {
-        Objects.requireNonNull(sessionId, "sessionId must not be null");
+        Objects.requireNonNull(sessionId, SESSION_ID_REQUIRED);
         Objects.requireNonNull(session, "session must not be null");
         Document document = toMongoDocument(sessionId, session);
         collection.replaceOne(
@@ -88,7 +89,7 @@ public class MongoTestRunSessionStore implements SessionStore<TestRunSession> {
      */
     @Override
     public boolean hasSession(String sessionId) {
-        Objects.requireNonNull(sessionId, "sessionId must not be null");
+        Objects.requireNonNull(sessionId, SESSION_ID_REQUIRED);
         return collection
                 .find(eq("_id", sessionId))
                 .projection(include("_id"))
@@ -104,7 +105,7 @@ public class MongoTestRunSessionStore implements SessionStore<TestRunSession> {
      */
     @Override
     public void removeSession(String sessionId) {
-        Objects.requireNonNull(sessionId, "sessionId must not be null");
+        Objects.requireNonNull(sessionId, SESSION_ID_REQUIRED);
         collection.deleteOne(eq("_id", sessionId));
     }
 
@@ -116,7 +117,7 @@ public class MongoTestRunSessionStore implements SessionStore<TestRunSession> {
      */
     @Override
     public TestRunSession getSession(String sessionId) {
-        Objects.requireNonNull(sessionId, "sessionId must not be null");
+        Objects.requireNonNull(sessionId, SESSION_ID_REQUIRED);
         Document document = collection
                 .find(eq("_id", sessionId))
                 .first();

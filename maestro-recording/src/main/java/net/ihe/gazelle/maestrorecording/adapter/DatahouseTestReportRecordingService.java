@@ -221,25 +221,30 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
          if (stepReports == null || callbackRegistry == null) {
             continue;
          }
-         Map<String, Step> stepsByName = new HashMap<>();
-         Map<String, Integer> executionOrder = new HashMap<>();
-         if (definition != null) {
-            for (Step step : definition.getSteps()) {
-               executionOrder.put(step.getName(), executionOrder.size());
-               stepsByName.put(step.getName(), step);
-            }
+         planRunStepOutputs(stepReports, testReportPlan, callbackRegistry, definition);
+      }
+   }
+
+   private void planRunStepOutputs(List<StepRunReport> stepReports, ItemPlan<TestReport> testReportPlan,
+                                   FutureReferenceCallbackRegistry callbackRegistry, Test definition) {
+      Map<String, Step> stepsByName = new HashMap<>();
+      Map<String, Integer> executionOrder = new HashMap<>();
+      if (definition != null) {
+         for (Step step : definition.getSteps()) {
+            executionOrder.put(step.getName(), executionOrder.size());
+            stepsByName.put(step.getName(), step);
          }
-         // Attachments must resolve before their consumers are serialized, even if reports were reordered.
-         List<StepRunReport> orderedReports = new ArrayList<>(stepReports);
-         orderedReports.sort(Comparator.comparingInt(stepReport ->
-               executionOrder.getOrDefault(stepReport.getStepName(), Integer.MAX_VALUE)));
-         for (StepRunReport stepReport : orderedReports) {
-            Step step = stepsByName.get(stepReport.getStepName());
-            Map<String, String> aliases = step != null ? step.getOutputMappings() : Map.of();
-            StepOutputPlanDissector dissector = dissectorProvider.getDissector(stepReport);
-            if (dissector != null) {
-               safeDissect(dissector, new StepOutputPlan(testReportPlan, stepReport, datahouseUrl, callbackRegistry, aliases));
-            }
+      }
+      // Attachments must resolve before their consumers are serialized, even if reports were reordered.
+      List<StepRunReport> orderedReports = new ArrayList<>(stepReports);
+      orderedReports.sort(Comparator.comparingInt(stepReport ->
+            executionOrder.getOrDefault(stepReport.getStepName(), Integer.MAX_VALUE)));
+      for (StepRunReport stepReport : orderedReports) {
+         Step step = stepsByName.get(stepReport.getStepName());
+         Map<String, String> aliases = step != null ? step.getOutputMappings() : Map.of();
+         StepOutputPlanDissector dissector = dissectorProvider.getDissector(stepReport);
+         if (dissector != null) {
+            safeDissect(dissector, new StepOutputPlan(testReportPlan, stepReport, datahouseUrl, callbackRegistry, aliases));
          }
       }
    }

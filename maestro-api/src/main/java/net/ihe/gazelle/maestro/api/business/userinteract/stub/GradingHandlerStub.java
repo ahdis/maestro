@@ -17,7 +17,6 @@
 package net.ihe.gazelle.maestro.api.business.userinteract.stub;
 
 import net.ihe.gazelle.maestro.api.business.message.GradingCompleted;
-import net.ihe.gazelle.maestro.api.business.testreport.Result;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.userinteract.GradingHandler;
 

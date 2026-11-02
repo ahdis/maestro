@@ -27,6 +27,9 @@ import net.ihe.gazelle.maestro.spi.business.recording.plan.ReferencePlan;
 
 /** Records uploaded files once and uses the same attachment in report inputs and outputs. */
 public class UserInteractionStepOutputDissector implements StepOutputPlanDissector {
+    // This relative path is fixed by the Datahouse attachment API contract.
+    @SuppressWarnings("java:S1075")
+    private static final String ATTACHMENTS_PATH = "/attachments/";
     @Override
     public void dissect(StepOutputPlan plan) {
         if (plan == null || plan.getStepRunReport() == null) {
@@ -51,8 +54,8 @@ public class UserInteractionStepOutputDissector implements StepOutputPlanDissect
     }
     private ReferencePlan attachmentPlan(ByteArrayProperty file, String referenceName) {
         if (file instanceof ByteArrayItemProperty existing && existing.getReference() != null
-                && existing.getReference().startsWith("/attachments/")) {
-            String identifier = existing.getReference().substring("/attachments/".length());
+                && existing.getReference().startsWith(ATTACHMENTS_PATH)) {
+            String identifier = existing.getReference().substring(ATTACHMENTS_PATH.length());
             if (!identifier.isBlank()) {
                 return ReferencePlan.forAttachmentId(referenceName, "BYTE_ARRAY", identifier);
             }
@@ -62,7 +65,7 @@ public class UserInteractionStepOutputDissector implements StepOutputPlanDissect
     }
 
     private ByteArrayItemProperty attachmentReference(ByteArrayProperty file, String attachmentId) {
-        ByteArrayItemProperty reference = new ByteArrayItemProperty(file).setReference("/attachments/" + attachmentId);
+        ByteArrayItemProperty reference = new ByteArrayItemProperty(file).setReference(ATTACHMENTS_PATH + attachmentId);
         reference.setValue(null);
         return reference;
     }

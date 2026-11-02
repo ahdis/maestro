@@ -16,41 +16,20 @@
 
 package net.ihe.gazelle.maestro.quarkus.factory;
 
-import io.agroal.api.AgroalDataSource;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
 import jakarta.ws.rs.Produces;
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
 import net.ihe.gazelle.maestro.engine.business.context.TestRunSession;
 import net.ihe.gazelle.maestro.engine.business.context.TestSuiteSession;
-import net.ihe.gazelle.maestro.quarkus.dao.TestRunSessionDAO;
 import technical.dao.SessionStoreCache;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 
 /**
  * Factory class responsible for producing various {@link SessionStore} instances.
  */
 @ApplicationScoped
 public class StoreFactory {
-
-    private final AgroalDataSource dataSource;
-    private final TestRunSessionDAO testRunSessionDAO;
-
-    /**
-     * Constructs a new instance of the {@code StoreFactory} class.
-     *
-     * @param dataSource the {@link AgroalDataSource} used for managing database connections
-     * @param testRunSessionDAO the {@link EntityManager} used for managing database transactions
-     */
-    @Inject
-    public StoreFactory(AgroalDataSource dataSource, TestRunSessionDAO testRunSessionDAO) {
-        this.dataSource = dataSource;
-        this.testRunSessionDAO = testRunSessionDAO;
-    }
 
     /**
      * Produces a {@link SessionStore} for {@link TestSuiteSession} instances.
@@ -74,11 +53,7 @@ public class StoreFactory {
     @TestRunStore
     public SessionStore<TestRunSession> getTestRunSessionStore() {
         return new SessionStoreCache<>();
-        /*if (isDatabaseAvailable()) {
-            return testRunSessionDAO;
-        } else {
-            return new SessionStoreCache<>();
-        }*/
+
     }
 
     /**
@@ -107,11 +82,4 @@ public class StoreFactory {
         return new SessionStoreCache<>();
     }
 
-    private boolean isDatabaseAvailable() {
-        try (Connection connection = dataSource.getConnection()) {
-            return connection.isValid(2);
-        } catch (SQLException | RuntimeException e) {
-            return false;
-        }
-    }
 }
