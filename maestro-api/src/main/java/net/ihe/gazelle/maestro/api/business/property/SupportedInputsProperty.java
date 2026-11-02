@@ -16,9 +16,12 @@
 
 package net.ihe.gazelle.maestro.api.business.property;
 
+import net.ihe.gazelle.maestro.api.business.test.SupportedInput;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.List;
 
 /**
  * Supported Inputs property
@@ -33,6 +36,10 @@ public class SupportedInputsProperty extends Property {
      */
     public SupportedInputsProperty() {
         super();
+    }
+
+    public SupportedInputsProperty(String name, List<SupportedInput> value) {
+        super(name, (Serializable) value);
     }
 
     /**

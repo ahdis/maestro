@@ -26,6 +26,7 @@ import net.ihe.gazelle.maestro.api.business.userinteract.UserInteractionHandler;
 import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 import net.ihe.gazelle.maestro.spi.business.StepRun;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,33 +35,35 @@ import java.util.List;
  */
 public class UserInteractionStepExecutor implements StepExecutor {
 
-   private final UserInteractionHandler userInteractionHandler;
+    private final UserInteractionHandler userInteractionHandler;
 
-   /**
-    * Constructor for UserInteractionStepExecutor.
-    *
-    * @param userInteractionHandler the handler to manage user interactions
-    */
-   public UserInteractionStepExecutor(UserInteractionHandler userInteractionHandler) {
-      this.userInteractionHandler = userInteractionHandler;
-   }
+    /**
+     * Constructor for UserInteractionStepExecutor.
+     *
+     * @param userInteractionHandler the handler to manage user interactions
+     */
+    public UserInteractionStepExecutor(UserInteractionHandler userInteractionHandler) {
+        this.userInteractionHandler = userInteractionHandler;
+    }
 
-   @Override
-   public StepRunReport execute(StepRun stepRun) {
-      String interactionTitle = stepRun.getPropertyValue(UserInteractionStepDefinition.INTERACTION_TITLE);
-      String message = stepRun.getPropertyValue(UserInteractionStepDefinition.MESSAGE);
-      List<SupportedInput> supportedInputs = stepRun.getPropertyValue(UserInteractionStepDefinition.INTERACTION_INPUTS);
+    @Override
+    public StepRunReport execute(StepRun stepRun) {
+        String interactionTitle = stepRun.getPropertyValue(UserInteractionStepDefinition.INTERACTION_TITLE);
+        String message = stepRun.getPropertyValue(UserInteractionStepDefinition.MESSAGE);
+        List<SupportedInput> supportedInputs = new ArrayList<>();
+        if (stepRun.hasProperty(UserInteractionStepDefinition.INTERACTION_INPUTS)) {
+            supportedInputs = stepRun.getPropertyValue(UserInteractionStepDefinition.INTERACTION_INPUTS);
+        }
+        UserInteractionCompleted interactionCompleted = userInteractionHandler.displayMessage(interactionTitle, message, stepRun.getTimeout(), supportedInputs);
+        return buildStepRunReport(stepRun, interactionCompleted.getInputs());
+    }
 
-      UserInteractionCompleted interactionCompleted = userInteractionHandler.displayMessage(interactionTitle, message, stepRun.getTimeout(), supportedInputs);
-      return buildStepRunReport(stepRun, interactionCompleted.getInputs());
-   }
-
-   private StepRunReport buildStepRunReport(StepRun stepRun,  List<Property> inputs) {
-      return new StepRunReportBuilder()
-            .setStepName(stepRun.getName())
-            .setType(UserInteractionStepDefinition.TYPE)
-            .setResult(StepResult.DONE)
-            .setInputs(inputs)
-            .build();
-   }
+    private StepRunReport buildStepRunReport(StepRun stepRun, List<Property> inputs) {
+        return new StepRunReportBuilder()
+                .setStepName(stepRun.getName())
+                .setType(UserInteractionStepDefinition.TYPE)
+                .setResult(StepResult.DONE)
+                .setInputs(inputs)
+                .build();
+    }
 }

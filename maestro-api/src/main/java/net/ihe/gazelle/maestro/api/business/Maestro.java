@@ -24,22 +24,46 @@ import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
  */
 public interface Maestro {
 
-   /**
-    * Executes a test suite.
-    *
-    * @param testSuiteRun the test suite to execute
-    * @param persist      whether to persist the results
-    * @param observer     the observer that will receive execution updates
-    */
-   void executeTestSuite(TestSuiteRun testSuiteRun, boolean persist, MaestroObserver observer);
+    /**
+     * Executes a test suite.
+     *
+     * @param testSuiteRun  the test suite to execute
+     * @param persist       whether to persist the results
+     * @param observer      the observer that will receive execution updates
+     */
+    default void executeTestSuite(TestSuiteRun testSuiteRun, boolean persist, MaestroObserver observer) {
+        executeTestSuite(null, testSuiteRun, persist, observer);
+    }
 
-   /**
-    * Executes a single test.
-    *
-    * @param testRun  the test to execute
-    * @param persist  whether to persist the results
-    * @param observer the observer that will receive execution updates
-    */
-   void executeTest(TestRun testRun, boolean persist, MaestroObserver observer);
+    /**
+     * Executes a test suite.
+     *
+     * @param testSessionId the test session id
+     * @param testSuiteRun  the test suite to execute
+     * @param persist       whether to persist the results
+     * @param observer      the observer that will receive execution updates
+     */
+    void executeTestSuite(String testSessionId, TestSuiteRun testSuiteRun, boolean persist, MaestroObserver observer);
+
+    /**
+     * Executes a single test.
+     *
+     * @param testRun       the test to execute
+     * @param persist       whether to persist the results
+     * @param observer      the observer that will receive execution updates
+     */
+    default void executeTest(TestRun testRun, boolean persist, MaestroObserver observer) {
+        executeTest(null, testRun, persist, observer);
+    }
+
+    /**
+     * Executes a single test.
+     *
+     * @param testSessionId the test session id
+     * @param testRun       the test to execute
+     * @param persist       whether to persist the results
+     * @param observer      the observer that will receive execution updates
+     */
+    void executeTest(String testSessionId, TestRun testRun, boolean persist, MaestroObserver observer);
 
 }

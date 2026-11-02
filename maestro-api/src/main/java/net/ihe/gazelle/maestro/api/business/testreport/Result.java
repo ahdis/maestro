@@ -25,30 +25,36 @@ package net.ihe.gazelle.maestro.api.business.testreport;
  */
 public enum Result {
 
-   /**
-    * Indicates that the process or operation has passed validation
-    * or met the required criteria.
-    */
-   PASSED,
+    /**
+     * Indicates that the process or operation has passed validation
+     * or met the required criteria.
+     */
+    PASSED,
 
-   /**
-    * Indicates that the process or operation has failed validation
-    * or did not meet the required criteria.
-    */
-   FAILED,
+    /**
+     * Indicates that the process or operation has failed validation
+     * or did not meet the required criteria.
+     */
+    FAILED,
 
-   /**
-    * Indicates that the outcome of the process or operation
-    * could not be determined.
-    */
-   UNDEFINED;
+    /**
+     * Indicates that the outcome of the process or operation
+     * could not be determined.
+     */
+    UNDEFINED;
 
-   /** String constant for {@link #PASSED}. */
-   public static final String RESULT_PASSED = "PASSED";
+    /**
+     * String constant for {@link #PASSED}.
+     */
+    public static final String RESULT_PASSED = "PASSED";
 
-   /** String constant for {@link #FAILED}. */
-   public static final String RESULT_FAILED = "FAILED";
+    /**
+     * String constant for {@link #FAILED}.
+     */
+    public static final String RESULT_FAILED = "FAILED";
 
-   /** String constant for {@link #UNDEFINED}. */
-   public static final String RESULT_UNDEFINED = "UNDEFINED";
+    /**
+     * String constant for {@link #UNDEFINED}.
+     */
+    public static final String RESULT_UNDEFINED = "UNDEFINED";
 }

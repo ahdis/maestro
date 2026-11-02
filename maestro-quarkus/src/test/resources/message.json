@@ -1,0 +1,108 @@
+{
+  "authorization": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJSLUVaSWF3NTVhWFpURU5kWUluRXJ2LXNyU1NQZnZRWDFfcnNXb3ctMGhzIn0.eyJleHAiOjE3OTEyMDUyMDIsImlhdCI6MTc5MTIwNDYwMiwianRpIjoib25ydHJ0OmMwNDhjZDA5LTc1ODItMTUxYS1mMmEyLThiNWQ1N2NjNTExOCIsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3QvYXV0aC9yZWFsbXMvZ2F6ZWxsZSIsImF1ZCI6Imh0dHA6Ly9sb2NhbGhvc3QiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJPSURDX0dBWkVMTEVfQ0xJRU5UIiwic2lkIjoiSi1XeGpGdzFVMWZuOE5xUDJfMVBqelR0Iiwic2NvcGUiOiJvcGVuaWQgcHJvZmlsZSBvaWRjLWNsaWVudC1zY29wZSBtaWNyb3Byb2ZpbGUtand0IiwidXBuIjoiY2xhZ29yY2UiLCJvcmdhbml6YXRpb24iOlsiL0VDX0ZSX0tFUiJdLCJuYW1lIjoiQ2zDqW1lbnQgTGFnb3JjZSIsImdyb3VwcyI6WyJyb2xlOm1vbml0b3IiLCJvcmc6RUNfRlJfS0VSIiwicm9sZTpnYXplbGxlX2FkbWluIl0sImF1dGhuX21ldGhvZCI6Ik9JREMiLCJpZCI6ImNsYWdvcmNlIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiY2xhZ29yY2UiLCJsb2NhbGUiOiJmciIsImdpdmVuX25hbWUiOiJDbMOpbWVudCIsImZhbWlseV9uYW1lIjoiTGFnb3JjZSJ9.BpuSytmvzvsD6jWhFR778nMb8aOinNcGafyi8HjC0G_4Xzniw6mZk19_o4pmv0vjd_6BYICOXijIT02TePB0Roz1ExG65xZyJ8kRAe3Dl9UWuS3t8K5ZEqzVkzXy3AeYdtShmOA8itmoaiePLSjUc8bVz497IgEZERbXyCswBZhqwZNz8sNngdLlDKWYk_qgYhuAo508WJrmaRui-tt4ygPkIxjjZt-JlH9f954qnRMt56VrzCgeGJ54qwz51g31Fuyx-IGRhmqJXR4UUi99C2WAtit4xurOEvnbuR1Eyc9caUDwx7OkYoUmOWducC_yUlyRl9uMgp3raqaUZREcuw",
+  "type": "START_TEST_RUN",
+  "testRun": {
+    "accessControlList": {
+      "owners": [
+        "clagorce"
+      ],
+      "readers": [
+        "EC_FR_KER",
+        "role:monitor",
+        "role:testing_session_manager"
+      ],
+      "isPublic": false
+    },
+    "systemsUnderTest": [],
+    "test": {
+      "id": "Demo_User_Interaction_Inputs",
+      "name": "Demo_User_Interaction_Inputs",
+      "steps": [
+        {
+          "name": "Checking mCSD request",
+          "type": "VALIDATION",
+          "properties": [
+            {
+              "name": "validationService",
+              "type": "STRING",
+              "value": "Matchbox"
+            },
+            {
+              "name": "validationProfile",
+              "type": "STRING",
+              "value": "http://fhir.ch/ig/ch-epr-fhir/StructureDefinition/CH.mCSD.Practitioner"
+            },
+            {
+              "name": "contentToValidate",
+              "type": "BYTE_ARRAY",
+              "value": "${mCSD Request file}"
+            }
+          ]
+        },
+        {
+          "name": "Test_EPR mCSD ITI-130 Directory - Add Update and Delete a Practitioner",
+          "type": "USER_INTERACTION",
+          "properties": [
+            {
+              "name": "interactionTitle",
+              "value": "User interaction test",
+              "type": "STRING"
+            },
+            {
+              "name": "message",
+              "value": "Please upload evidence from step 1",
+              "type": "STRING"
+            },
+            {
+              "name": "interactionInputs",
+              "type": "SUPPORTED_INPUTS",
+              "value": [
+                {
+                  "id": "boolean_input",
+                  "type": "BOOLEAN",
+                  "label": "Boolean input",
+                  "required": true,
+                  "description": "Test the boolean input for user interaction"
+                },
+                {
+                  "id": "drop_down_input",
+                  "type": "TEXT",
+                  "label": "Drop down input",
+                  "required": true,
+                  "description": "Test the drop down input for user interaction",
+                  "defaultValue": "value1",
+                  "possibleValues": [
+                    "value1",
+                    "value2"
+                  ]
+                },
+                {
+                  "id": "any_file_input",
+                  "type": "FILE",
+                  "label": "Any file input",
+                  "required": true,
+                  "description": "Test the file input for user interaction"
+                },
+                {
+                  "id": "text_input",
+                  "type": "TEXT",
+                  "label": "Text input",
+                  "required": true,
+                  "description": "Test the text input for user interaction"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "inputs": [
+      {
+        "name": "mCSD Request file",
+        "type": "BYTE_ARRAY",
+        "value": "ewogICJyZXNvdXJjZVR5cGUiOiAiUHJhY3RpdGlvbmVyUm9sZSIsCiAgImlkIjogIlBldGVyUGFuUHJheGlzUCIsCiAgIm1ldGEiOiB7CiAgICAicHJvZmlsZSI6IFsKICAgICAgImh0dHA6Ly9maGlyLmNoL2lnL2NoLWVwci1maGlyL1N0cnVjdHVyZURlZmluaXRpb24vQ0gubUNTRC5QcmFjdGl0aW9uZXJSb2xlIgogICAgXQogIH0sCiAgInRleHQiOiB7CiAgICAic3RhdHVzIjogImdlbmVyYXRlZCIsCiAgICAiZGl2IjogIjxkaXYgeG1sbnM9XCJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hodG1sXCI+PHAgY2xhc3M9XCJyZXMtaGVhZGVyLWlkXCI+PGI+R2VuZXJhdGVkIE5hcnJhdGl2ZTogUHJhY3RpdGlvbmVyUm9sZSBQZXRlclBhblByYXhpc1A8L2I+PC9wPjxhIG5hbWU9XCJQZXRlclBhblByYXhpc1BcIj4gPC9hPjxhIG5hbWU9XCJoY1BldGVyUGFuUHJheGlzUFwiPiA8L2E+PGEgbmFtZT1cIlBldGVyUGFuUHJheGlzUC1lbi1VU1wiPiA8L2E+PGRpdiBzdHlsZT1cImRpc3BsYXk6IGlubGluZS1ibG9jazsgYmFja2dyb3VuZC1jb2xvcjogI2Q5ZTBlNzsgcGFkZGluZzogNnB4OyBtYXJnaW46IDRweDsgYm9yZGVyOiAxcHggc29saWQgIzhkYTFiNDsgYm9yZGVyLXJhZGl1czogNXB4OyBsaW5lLWhlaWdodDogNjAlXCI+PHAgc3R5bGU9XCJtYXJnaW4tYm90dG9tOiAwcHhcIi8+PHAgc3R5bGU9XCJtYXJnaW4tYm90dG9tOiAwcHhcIj5Qcm9maWxlOiA8YSBocmVmPVwiU3RydWN0dXJlRGVmaW5pdGlvbi1DSC5tQ1NELlByYWN0aXRpb25lclJvbGUuaHRtbFwiPkNIIG1DU0QgUHJhY3RpdGlvbmVyUm9sZTwvYT48L3A+PC9kaXY+PHA+PGI+aWRlbnRpZmllcjwvYj46IDxjb2RlPnVybjppZXRmOnJmYzo0NTE0PC9jb2RlPi9DTj1Db21tdW5pdHlBOjAwMDAwMDAxMDAxLE9VPVJlbGF0aW9uc2hpcCxEQz1IUEQsTz1CQUcsQz1jaDwvcD48cD48Yj5hY3RpdmU8L2I+OiB0cnVlPC9wPjxwPjxiPnByYWN0aXRpb25lcjwvYj46IDxhIGhyZWY9XCJQcmFjdGl0aW9uZXItRHJQZXRlclBhbi5odG1sXCI+UHJhY3RpdGlvbmVyIFBldGVyIFBhbjwvYT48L3A+PHA+PGI+b3JnYW5pemF0aW9uPC9iPjogPGEgaHJlZj1cIk9yZ2FuaXphdGlvbi1QcmF4aXNQLmh0bWxcIj5Pcmdhbml6YXRpb24gUHJheGlzIFA8L2E+PC9wPjxwPjxiPmNvZGU8L2I+OiA8c3BhbiB0aXRsZT1cIkNvZGVzOntodHRwOi8vc25vbWVkLmluZm8vc2N0IDMwOTM0MzAwNn1cIj5QaHlzaWNpYW48L3NwYW4+PC9wPjxwPjxiPnNwZWNpYWx0eTwvYj46IDxzcGFuIHRpdGxlPVwiQ29kZXM6e3VybjpvaWQ6Mi4xNi43NTYuNS4zMC4xLjEyNy4zLjUgMTA1MX1cIj5HZW5lcmFsIGludGVybmFsIG1lZGljaW5lPC9zcGFuPjwvcD48L2Rpdj4iCiAgfSwKICAiaWRlbnRpZmllciI6IFsKICAgIHsKICAgICAgInN5c3RlbSI6ICJ1cm46aWV0ZjpyZmM6NDUxNCIsCiAgICAgICJ2YWx1ZSI6ICJDTj1Db21tdW5pdHlBOjAwMDAwMDAxMDAxLE9VPVJlbGF0aW9uc2hpcCxEQz1IUEQsTz1CQUcsQz1jaCIKICAgIH0KICBdLAogICJhY3RpdmUiOiB0cnVlLAogICJvcmdhbml6YXRpb24iOiB7CiAgICAicmVmZXJlbmNlIjogIk9yZ2FuaXphdGlvbi9QcmF4aXNQIgogIH0sCiAgImNvZGUiOiBbCiAgICB7CiAgICAgICJjb2RpbmciOiBbCiAgICAgICAgewogICAgICAgICAgInN5c3RlbSI6ICJodHRwOi8vc25vbWVkLmluZm8vc2N0IiwKICAgICAgICAgICJjb2RlIjogIjMwOTM0MzAwNiIsCiAgICAgICAgICAiZGlzcGxheSI6ICJQaHlzaWNpYW4iCiAgICAgICAgfQogICAgICBdCiAgICB9CiAgXSwKICAic3BlY2lhbHR5IjogWwogICAgewogICAgICAiY29kaW5nIjogWwogICAgICAgIHsKICAgICAgICAgICJzeXN0ZW0iOiAidXJuOm9pZDoyLjE2Ljc1Ni41LjMwLjEuMTI3LjMuNSIsCiAgICAgICAgICAiY29kZSI6ICIxMDUxIiwKICAgICAgICAgICJkaXNwbGF5IjogIkdlbmVyYWwgaW50ZXJuYWwgbWVkaWNpbmUiCiAgICAgICAgfQogICAgICBdCiAgICB9CiAgXQp9"
+      }
+    ]
+  },
+  "persist": true
+}

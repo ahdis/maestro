@@ -53,7 +53,6 @@ public class TestWebSocketClient {
          MessageDTO<?> message = serDes.deserialize(msg, MessageDTO.class);
          if (message instanceof ExecutionFinishedDTO executionFinishedDTO) {
             executionFuture(session.getId()).complete(executionFinishedDTO.getBusinessObject());
-
          }
       } catch (DeserializationException e) {
          // Do nothing

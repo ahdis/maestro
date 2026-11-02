@@ -115,6 +115,26 @@ public class TestReportDTO implements DTO<TestReport> {
     }
 
     @Schema(
+            name = "criteriaReport",
+            description = "The list of acceptance criterion associated to this test."
+    )
+    @JsonProperty(value = "criteriaReport")
+    public List<CriterionReportDTO> getCriterionReports() {
+        return testReport
+                .getCriteriaReport()
+                .stream()
+                .map(CriterionReportDTO::new)
+                .toList();
+    }
+
+    public void setCriterionReports(List<CriterionReportDTO> criterionReports) {
+        testReport.setCriteriaReport(
+                criterionReports.stream()
+                        .map(CriterionReportDTO::getBusinessObject)
+                        .toList());
+    }
+
+    @Schema(
             name = "dateTime",
             description = "The zoned date time of the test suite execution.",
             examples = "2025-01-01T16:30:00.387+01:00",

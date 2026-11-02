@@ -16,17 +16,17 @@
 
 package net.ihe.gazelle.maestro.userinteraction.step.business;
 
-import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.property.SupportedInputsProperty;
 import net.ihe.gazelle.maestro.api.business.test.Step;
+import net.ihe.gazelle.maestro.api.business.test.SupportedFileInput;
+import net.ihe.gazelle.maestro.api.business.test.SupportedTextInput;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.userinteract.stub.UserInteractionHandlerStub;
 import net.ihe.gazelle.maestro.spi.business.StepRun;
 import org.junit.jupiter.api.Test;
 
-import java.io.Serializable;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -51,9 +51,9 @@ class UserInteractionStepExecutorTest {
             .setProperties(List.of(
                   new StringProperty(UserInteractionStepDefinition.INTERACTION_TITLE, "title"),
                   new StringProperty(UserInteractionStepDefinition.MESSAGE, "message"),
-                  new SupportedInputsProperty(UserInteractionStepDefinition.INTERACTION_INPUTS, (Serializable) List.of(
-                        new ByteArrayProperty("MyFile input", new byte[]{1,2,3,4,5}),
-                        new StringProperty("MyString input", "MyString value")
+                  new SupportedInputsProperty(UserInteractionStepDefinition.INTERACTION_INPUTS, List.of(
+                        new SupportedFileInput().setId("MyFile input"),
+                        new SupportedTextInput().setId("MyString input")
                   ))
             ));
    }

@@ -18,10 +18,7 @@ package net.ihe.gazelle.maestro.engine.business;
 
 import net.ihe.gazelle.errorhandling.business.UnexpectedErrorBuilder;
 import net.ihe.gazelle.maestro.api.business.InvalidTestRunException;
-import net.ihe.gazelle.maestro.api.business.message.StartStepRun;
-import net.ihe.gazelle.maestro.api.business.message.StartTestRun;
-import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
-import net.ihe.gazelle.maestro.api.business.message.TestRunFinished;
+import net.ihe.gazelle.maestro.api.business.message.*;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.test.Test;
@@ -75,8 +72,8 @@ public class TestRunner {
         TestRun testRun = startTestRun.getTestRun();
         try {
             testRunValidator.validate(testRun).orThrow(InvalidTestRunException::new);
-
             TestRunSession testRunSession = new TestRunSession(testRun);
+            testRunSession.setTestSessionId(startTestRun.getTestSessionId());
             runNextStep(testRunSession, sessionId, testRun.getTest().getId());
         } catch (Exception e) {
             Test test = testRun.getTest();
@@ -87,7 +84,7 @@ public class TestRunner {
                             newTestRunReportBuilder(test)
                                     .addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e))
                                     .build()
-                    )
+                    ).setTestSessionId(startTestRun.getTestSessionId())
             );
         }
     }
@@ -120,7 +117,7 @@ public class TestRunner {
                                         .setInputs(testRun.getInputs())
                                         .addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e))
                                         .build()
-                        )
+                        ).setTestSessionId(testRunSession.getTestSessionId())
                 );
             }
         }
@@ -128,6 +125,7 @@ public class TestRunner {
 
     private void finishTest(String sessionId, TestRunSession testRunSession) {
         sessionStore.removeSession(sessionId);
+        addEvidencesToReport(testRunSession);
 
         // VLD: keep only resolvable inputs in the report (fix problem of deserialization of references)
         List<Property> inputs = testRunSession.getTestRun().getInputs()
@@ -139,14 +137,14 @@ public class TestRunner {
                                 .addStepRunReports(testRunSession.getStepReports())
                                 .setInputs(inputs)
                                 .build()
-                )
+                ).setTestSessionId(testRunSession.getTestSessionId())
         );
     }
 
     private void runNextStep(TestRunSession testRunSession, String sessionId, String testId) {
         Step nextStep = testRunSession.nextStep();
         long timeout = testRunSession.getTestRun().getTest().computeTestRunTimeout();
-        sessionStore.addSession(sessionId, testRunSession, timeout);
+        sessionStore.putSession(sessionId, testRunSession, timeout);
         testRunEventProducer.command(new StartStepRun(
                 sessionId,
                 testId,
@@ -161,12 +159,16 @@ public class TestRunner {
         testRunSession.addPropertiesToContext(
                 mapOutputs(testRunSession.currentStep(), stepRunReport)
         );
-        /*testRunSession.getEvidences().stream()
-                .filter(putEvidence -> putEvidence.getStepName().equals(stepRunReport.getStepName()))
-                .forEach(putEvidence -> {
+    }
+
+    private void addEvidencesToReport(TestRunSession testRunSession) {
+        for (PutEvidence putEvidence : testRunSession.getEvidences()) {
+            for (StepRunReport stepRunReport : testRunSession.getStepReports()) {
+                if (putEvidence.getStepName().equals(stepRunReport.getStepName())) {
                     stepRunReport.addEvidence(putEvidence.getContent());
-                    testRunSession.removeEvidence(putEvidence);
-                });*/
+                }
+            }
+        }
     }
 
     private boolean isPreviousStepSuccessful(StepRunFinished stepRunFinished) {

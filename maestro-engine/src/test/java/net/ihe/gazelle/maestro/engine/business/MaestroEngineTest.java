@@ -21,10 +21,7 @@ import net.ihe.gazelle.maestro.api.business.message.ExecutionFinished;
 import net.ihe.gazelle.maestro.api.business.message.InteractWithUser;
 import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
-import net.ihe.gazelle.maestro.api.business.test.Step;
-import net.ihe.gazelle.maestro.api.business.test.Test;
-import net.ihe.gazelle.maestro.api.business.test.TestReference;
-import net.ihe.gazelle.maestro.api.business.test.TestSuite;
+import net.ihe.gazelle.maestro.api.business.test.*;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
@@ -41,7 +38,7 @@ import net.ihe.gazelle.security.business.acl.AccessControlList;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import technical.dao.SessionStoreImpl;
+import technical.dao.SessionStoreCache;
 
 import java.time.Duration;
 import java.util.List;
@@ -55,76 +52,80 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class MaestroEngineTest {
 
-   private static ExecutorService executorService;
-   private RecordingMaestro maestro;
-   private ScriptedStepExecutorProvider stepExecutorProvider;
-   private InMemoryTestReportRecordingService reportRecordService;
+    private static ExecutorService executorService;
+    private static final String TEST_SESSION_ID = "UnitTestSession";
 
-   @BeforeAll
-   static void setUpClass() {
-       executorService = Executors.newFixedThreadPool(10);
-   }
+    private RecordingMaestro maestro;
+    private ScriptedStepExecutorProvider stepExecutorProvider;
+    private InMemoryTestReportRecordingService reportRecordService;
 
-   @BeforeEach
-   void setUp() {
-      HardWiredEventBroker broker = new HardWiredEventBroker(executorService);
-      stepExecutorProvider = new ScriptedStepExecutorProvider();
-      reportRecordService = new InMemoryTestReportRecordingService();
+    @BeforeAll
+    static void setUpClass() {
+        executorService = Executors.newFixedThreadPool(10);
+    }
 
-      SessionStoreImpl<MaestroObserver> testRunObserverStore = new SessionStoreImpl<>();
-      SessionStoreImpl<MaestroObserver> testSuiteRunObserverStore = new SessionStoreImpl<>();
-      SessionStoreImpl<TestSuiteSession> suiteSessionStore = new SessionStoreImpl<>();
-      SessionStoreImpl<TestRunSession> testRunSessionStore = new SessionStoreImpl<>();
+    @BeforeEach
+    void setUp() {
+        HardWiredEventBroker broker = new HardWiredEventBroker(executorService);
+        stepExecutorProvider = new ScriptedStepExecutorProvider();
+        reportRecordService = new InMemoryTestReportRecordingService();
 
-      TestSuiteRunner testSuiteRunner = new TestSuiteRunner(suiteSessionStore, broker);
-      TestRunner testRunner = new TestRunner(testRunSessionStore, broker);
-      StepRunner stepRunner = new StepRunner(stepExecutorProvider, broker);
+        SessionStoreCache<MaestroObserver> testRunObserverStore = new SessionStoreCache<>();
+        SessionStoreCache<MaestroObserver> testSuiteRunObserverStore = new SessionStoreCache<>();
+        SessionStoreCache<TestSuiteSession> suiteSessionStore = new SessionStoreCache<>();
+        SessionStoreCache<TestRunSession> testRunSessionStore = new SessionStoreCache<>();
 
-      MaestroFacade maestroFacade = new MaestroFacade(testRunObserverStore, testSuiteRunObserverStore, broker, new MetadataServiceMock());
-      maestro = new RecordingMaestro(maestroFacade, reportRecordService);
-      broker.setServices(maestroFacade, testSuiteRunner, testRunner, stepRunner);
-   }
+        TestSuiteRunner testSuiteRunner = new TestSuiteRunner(suiteSessionStore, broker);
+        TestRunner testRunner = new TestRunner(testRunSessionStore, broker);
+        StepRunner stepRunner = new StepRunner(stepExecutorProvider, broker);
 
-   @AfterAll
-   static void tearDown() {
-      executorService.shutdownNow();
-   }
+        MaestroFacade maestroFacade = new MaestroFacade(testRunObserverStore, testSuiteRunObserverStore, broker, new MetadataServiceMock());
+        maestro = new RecordingMaestro(maestroFacade, reportRecordService);
+        broker.setServices(maestroFacade, testSuiteRunner, testRunner, stepRunner);
+    }
 
-   @org.junit.jupiter.api.Test
-   void executeTestSuiteRunsEntireWorkflow() {
-      RecordingMaestroObserver observer = new RecordingMaestroObserver();
-      TestSuiteRun testSuiteRun = buildSuiteRun("suite-1", createTest("test-1", "step-1", "step-2"));
-      stepExecutorProvider
-            .returnsReport("step-1", passedReport("step-1"))
-            .returnsReport("step-2", passedReport("step-2"));
+    @AfterAll
+    static void tearDown() {
+        executorService.shutdownNow();
+    }
 
-      maestro.executeTestSuite(testSuiteRun, true, observer);
+    @org.junit.jupiter.api.Test
+    void executeTestSuiteRunsEntireWorkflow() {
+        RecordingMaestroObserver observer = new RecordingMaestroObserver();
+        TestSuiteRun testSuiteRun = buildSuiteRun("suite-1", createTest("test-1", "step-1", "step-2"));
+        stepExecutorProvider
+                .returnsReport("step-1", passedReport("step-1"))
+                .returnsReport("step-2", passedReport("step-2"));
 
-      ExecutionFinished finished = observer.awaitSuiteFinished(Duration.ofSeconds(5));
-      assertThat(finished.getRun(), sameInstance(testSuiteRun));
-      assertThat(reportRecordService.getRecordedReports(), hasSize(1));
-      TestReport report = reportRecordService.getRecordedReports().getFirst();
-      assertThat(report.getTestRunReports(), hasSize(1));
-      assertThat(report.getUnexpectedErrors(), empty());
-   }
+        maestro.executeTestSuite(TEST_SESSION_ID, testSuiteRun, true, observer);
+
+        ExecutionFinished finished = observer.awaitSuiteFinished(Duration.ofSeconds(5));
+        assertThat(finished.getRun(), sameInstance(testSuiteRun));
+        assertThat(reportRecordService.getRecordedReports(), hasSize(1));
+        TestReport report = reportRecordService.getRecordedReports().getFirst();
+        assertThat(report.getTestSessionId(), equalTo(TEST_SESSION_ID));
+        assertThat(report.getTestRunReports(), hasSize(1));
+        assertThat(report.getUnexpectedErrors(), empty());
+    }
 
     @org.junit.jupiter.api.Test
     void executeTestRunsEntireWorkflow() {
         RecordingMaestroObserver observer = new RecordingMaestroObserver();
         Test test = createTest("test-1", "step-1", "step-2");
         TestRun testRun = new TestRun()
-              .setTest(test)
-              .setAccessControlList(new AccessControlList().setPublic(true));
+                .setTest(test)
+                .setAccessControlList(new AccessControlList().setPublic(true));
         stepExecutorProvider
                 .returnsReport("step-1", passedReport("step-1"))
                 .returnsReport("step-2", passedReport("step-2"));
 
-        maestro.executeTest(testRun, true, observer);
+        maestro.executeTest(TEST_SESSION_ID, testRun, true, observer);
 
         ExecutionFinished finished = observer.awaitSuiteFinished(Duration.ofSeconds(5));
         assertThat(finished.getRun(), sameInstance(testRun));
         assertThat(reportRecordService.getRecordedReports(), hasSize(1));
         TestReport report = reportRecordService.getRecordedReports().getFirst();
+        assertThat(report.getTestSessionId(), equalTo(TEST_SESSION_ID));
         assertThat(report.getTestRunReports(), hasSize(1));
         assertThat(report.getUnexpectedErrors(), empty());
     }
@@ -147,45 +148,45 @@ class MaestroEngineTest {
     }
 
     @org.junit.jupiter.api.Test
-   void executeTestSuiteWithFailingStepStillCompletes() {
-      RecordingMaestroObserver observer = new RecordingMaestroObserver();
-      Step failingStep = step("Failing step");
-      Test test = createTest("test-2", "step-ok");
-      test.addStep(failingStep);
-      TestSuiteRun suiteRun = buildSuiteRun("suite-2", test);
+    void executeTestSuiteWithFailingStepStillCompletes() {
+        RecordingMaestroObserver observer = new RecordingMaestroObserver();
+        Step failingStep = step("Failing step");
+        Test test = createTest("test-2", "step-ok");
+        test.addStep(failingStep);
+        TestSuiteRun suiteRun = buildSuiteRun("suite-2", test);
 
-      stepExecutorProvider
-            .returnsReport("step-ok", passedReport("step-ok"))
-            .failsWith("step-fail", new RuntimeException("boom"));
+        stepExecutorProvider
+                .returnsReport("step-ok", passedReport("step-ok"))
+                .failsWith("step-fail", new RuntimeException("boom"));
 
-       ExecutionFinished finished = runSuite(observer, suiteRun);
+        ExecutionFinished finished = runSuite(observer, suiteRun);
 
-      TestReport recorded = reportRecordService.getRecordedReports().getFirst();
-      boolean failingStepRecorded = recorded.getTestRunReports().stream()
-            .flatMap(run -> run.getStepRunReports().stream())
-            .anyMatch(stepReport -> stepReport.getStepName().equals("Failing step")
-                                    && !stepReport.getUnexpectedErrors().isEmpty());
-      assertThat(failingStepRecorded, is(true));
-      assertThat(finished.getReport().getUnexpectedErrors(), empty());
-   }
+        TestReport recorded = reportRecordService.getRecordedReports().getFirst();
+        boolean failingStepRecorded = recorded.getTestRunReports().stream()
+                .flatMap(run -> run.getStepRunReports().stream())
+                .anyMatch(stepReport -> stepReport.getStepName().equals("Failing step")
+                        && !stepReport.getUnexpectedErrors().isEmpty());
+        assertThat(failingStepRecorded, is(true));
+        assertThat(finished.getReport().getUnexpectedErrors(), empty());
+    }
 
-   @org.junit.jupiter.api.Test
-   void executeTestSuiteRejectsInvalidDefinition() {
-      RecordingMaestroObserver observer = new RecordingMaestroObserver();
-      TestSuiteRun invalidSuite = new TestSuiteRun();
+    @org.junit.jupiter.api.Test
+    void executeTestSuiteRejectsInvalidDefinition() {
+        RecordingMaestroObserver observer = new RecordingMaestroObserver();
+        TestSuiteRun invalidSuite = new TestSuiteRun();
 
-      assertThrows(IllegalArgumentException.class, () -> maestro.executeTestSuite(invalidSuite, true, observer));
-      assertThat(reportRecordService.getRecordedReports(), empty());
-   }
+        assertThrows(IllegalArgumentException.class, () -> maestro.executeTestSuite(invalidSuite, true, observer));
+        assertThat(reportRecordService.getRecordedReports(), empty());
+    }
 
-   @org.junit.jupiter.api.Test
-   void executeTestRejectsInvalidRun() {
-      RecordingMaestroObserver observer = new RecordingMaestroObserver();
-      TestRun invalidRun = new TestRun();
+    @org.junit.jupiter.api.Test
+    void executeTestRejectsInvalidRun() {
+        RecordingMaestroObserver observer = new RecordingMaestroObserver();
+        TestRun invalidRun = new TestRun();
 
-      assertThrows(IllegalArgumentException.class, () -> maestro.executeTest(invalidRun, true, observer));
-      assertThat(reportRecordService.getRecordedReports(), empty());
-   }
+        assertThrows(IllegalArgumentException.class, () -> maestro.executeTest(invalidRun, true, observer));
+        assertThat(reportRecordService.getRecordedReports(), empty());
+    }
 
     @org.junit.jupiter.api.Test
     void executeTestSuiteWithoutPersisting() {
@@ -200,261 +201,265 @@ class MaestroEngineTest {
         RecordingMaestroObserver observer = new RecordingMaestroObserver();
         Test test = createTest("test-1", "step-1", "step-2");
         TestRun testRun = new TestRun()
-              .setTest(test)
-              .setAccessControlList(new AccessControlList().setPublic(true));
+                .setTest(test)
+                .setAccessControlList(new AccessControlList().setPublic(true));
         maestro.executeTest(testRun, false, observer);
         assertThat(reportRecordService.getRecordedReports(), empty());
     }
 
-   @org.junit.jupiter.api.Test
-   void stepOutputsArePropagatedToNextStepContext() {
-      RecordingMaestroObserver observer = new RecordingMaestroObserver();
-      Step producer = step("Producer")
-            .setOutputMappings(Map.of(
-                  "payload", "ProducerPayload"
-            ));
-      Step consumer = step("Consumer")
-            .setProperties(List.of(new StringProperty("echo", "${ProducerPayload}")));
+    @org.junit.jupiter.api.Test
+    void stepOutputsArePropagatedToNextStepContext() {
+        RecordingMaestroObserver observer = new RecordingMaestroObserver();
+        Step producer = step("Producer")
+                .setOutputMappings(Map.of(
+                        "payload", "ProducerPayload"
+                ));
+        Step consumer = step("Consumer")
+                .setProperties(List.of(new StringProperty("echo", "${ProducerPayload}")));
 
-      Test test = new Test()
-            .setId("context-test")
-            .setName("Context propagation")
-            .setSteps(List.of(producer, consumer));
+        Test test = new Test()
+                .setId("context-test")
+                .setName("Context propagation")
+                .setGradingMethod(GradingMethod.AUTOMATED)
+                .setSteps(List.of(producer, consumer));
 
-      TestSuiteRun suiteRun = buildSuiteRun("suite-context", test);
+        TestSuiteRun suiteRun = buildSuiteRun("suite-context", test);
 
-      AtomicReference<String> observedValue = new AtomicReference<>();
+        AtomicReference<String> observedValue = new AtomicReference<>();
 
-      stepExecutorProvider
-            .returnsReport("Producer", new StepRunReport()
-                  .setStepName("Producer")
-                  .setType(Instrumented4TestStepDefinition.TYPE)
-                  .setResult(StepResult.PASSED)
-                  .setOutputs(List.of(new StringProperty("payload", "HELLO-CONTEXT"))))
-            .withExecutor("Consumer", stepRun -> {
-               observedValue.set(stepRun.getPropertyValue("echo"));
-               return passedReport("Consumer");
-            });
+        stepExecutorProvider
+                .returnsReport("Producer", new StepRunReport()
+                        .setStepName("Producer")
+                        .setType(Instrumented4TestStepDefinition.TYPE)
+                        .setResult(StepResult.PASSED)
+                        .setOutputs(List.of(new StringProperty("payload", "HELLO-CONTEXT"))))
+                .withExecutor("Consumer", stepRun -> {
+                    observedValue.set(stepRun.getPropertyValue("echo"));
+                    return passedReport("Consumer");
+                });
 
-      maestro.executeTestSuite(suiteRun, true, observer);
-      observer.awaitSuiteFinished(Duration.ofSeconds(5));
+        maestro.executeTestSuite(suiteRun, true, observer);
+        observer.awaitSuiteFinished(Duration.ofSeconds(5));
 
-      assertThat(observedValue.get(), equalTo("HELLO-CONTEXT"));
-      TestReport report = reportRecordService.getRecordedReports().getFirst();
-      assertThat(report.getTestRunReports().getFirst().getStepRunReports(), hasSize(2));
-   }
+        assertThat(observedValue.get(), equalTo("HELLO-CONTEXT"));
+        TestReport report = reportRecordService.getRecordedReports().getFirst();
+        assertThat(report.getTestRunReports().getFirst().getStepRunReports(), hasSize(2));
+    }
 
-   @org.junit.jupiter.api.Test
-   void executeTestSuiteRunsAllIncludedTests() {
-      RecordingMaestroObserver observer = new RecordingMaestroObserver();
-      Test firstTest = createTest("test-alpha", "alpha-step");
-      Test secondTest = createTest("test-beta", "beta-step");
+    @org.junit.jupiter.api.Test
+    void executeTestSuiteRunsAllIncludedTests() {
+        RecordingMaestroObserver observer = new RecordingMaestroObserver();
+        Test firstTest = createTest("test-alpha", "alpha-step");
+        Test secondTest = createTest("test-beta", "beta-step");
 
-      TestSuite testSuite = new TestSuite()
-            .setId("suite-multi")
-            .setName("Multiple tests")
-            .setTestReferences(List.of(
-                  new TestReference().setTestId(firstTest.getId()),
-                  new TestReference().setTestId(secondTest.getId())
-            ));
+        TestSuite testSuite = new TestSuite()
+                .setId("suite-multi")
+                .setName("Multiple tests")
+                .setTestReferences(List.of(
+                        new TestReference().setTestId(firstTest.getId()),
+                        new TestReference().setTestId(secondTest.getId())
+                ));
 
-      TestSuiteRun suiteRun = new TestSuiteRun()
-            .setTestSuite(testSuite)
-            .setTests(List.of(firstTest, secondTest))
-            .setAccessControlList(new AccessControlList().setPublic(true));
+        TestSuiteRun suiteRun = new TestSuiteRun()
+                .setTestSuite(testSuite)
+                .setTests(List.of(firstTest, secondTest))
+                .setAccessControlList(new AccessControlList().setPublic(true));
 
-      stepExecutorProvider
-            .returnsReport("alpha-step", passedReport("alpha-step"))
-            .returnsReport("beta-step", passedReport("beta-step"));
+        stepExecutorProvider
+                .returnsReport("alpha-step", passedReport("alpha-step"))
+                .returnsReport("beta-step", passedReport("beta-step"));
 
-      maestro.executeTestSuite(suiteRun, true, observer);
-      observer.awaitSuiteFinished(Duration.ofSeconds(5));
+        maestro.executeTestSuite(suiteRun, true, observer);
+        observer.awaitSuiteFinished(Duration.ofSeconds(5));
 
-      TestReport report = reportRecordService.getRecordedReports().getFirst();
-      assertThat(report.getTestRunReports(), hasSize(2));
-   }
+        TestReport report = reportRecordService.getRecordedReports().getFirst();
+        assertThat(report.getTestRunReports(), hasSize(2));
+    }
 
-   @org.junit.jupiter.api.Test
-   void reportRecordingFailureStillReturnsSummaryWithError() {
-      RecordingMaestroObserver observer = new RecordingMaestroObserver();
-      TestSuiteRun suiteRun = buildSuiteRun("suite-record", createTest("test-record", "record-step"));
-      stepExecutorProvider.returnsReport("record-step", passedReport("record-step"));
-      reportRecordService.failNextWith(new TestReportRecordingException("datahouse unreachable"));
+    @org.junit.jupiter.api.Test
+    void reportRecordingFailureStillReturnsSummaryWithError() {
+        RecordingMaestroObserver observer = new RecordingMaestroObserver();
+        TestSuiteRun suiteRun = buildSuiteRun("suite-record", createTest("test-record", "record-step"));
+        stepExecutorProvider.returnsReport("record-step", passedReport("record-step"));
+        reportRecordService.failNextWith(new TestReportRecordingException("datahouse unreachable"));
 
-       ExecutionFinished finished = runSuite(observer, suiteRun);
+        ExecutionFinished finished = runSuite(observer, suiteRun);
 
-      assertThat(reportRecordService.getRecordedReports(), empty());
-      assertThat(finished.getReport().getUnexpectedErrors(), is(not(empty())));
-   }
+        assertThat(reportRecordService.getRecordedReports(), empty());
+        assertThat(finished.getReport().getUnexpectedErrors(), is(not(empty())));
+    }
 
-   @org.junit.jupiter.api.Test
-   void userInteractionDelaysStepCompletionUntilObserverResponds() {
-      ManualInteractionObserver observer = new ManualInteractionObserver();
-      TestSuiteRun suiteRun = buildSuiteRun("suite-interact", createTest("interaction-test", "interaction-step"));
+    @org.junit.jupiter.api.Test
+    void userInteractionDelaysStepCompletionUntilObserverResponds() {
+        ManualInteractionObserver observer = new ManualInteractionObserver();
+        TestSuiteRun suiteRun = buildSuiteRun("suite-interact", createTest("interaction-test", "interaction-step"));
 
-      stepExecutorProvider.withExecutor("interaction-step", stepRun ->
-            observer.interactWithUser(
-                  new InteractWithUser("Confirm", "Proceed?", 1L)
-            ).thenApply(done -> passedReport("interaction-step")).join()
-      );
+        stepExecutorProvider.withExecutor("interaction-step", stepRun ->
+                observer.interactWithUser(
+                        new InteractWithUser("Confirm", "Proceed?", 1L)
+                ).thenApply(done -> passedReport("interaction-step")).join()
+        );
 
-      maestro.executeTestSuite(suiteRun,true, observer);
+        maestro.executeTestSuite(suiteRun, true, observer);
 
-      observer.awaitInteraction(Duration.ofSeconds(2));
-      assertThat(reportRecordService.getRecordedReports(), empty());
+        observer.awaitInteraction(Duration.ofSeconds(2));
+        assertThat(reportRecordService.getRecordedReports(), empty());
 
-      observer.completeInteraction();
-      observer.awaitSuiteFinished(Duration.ofSeconds(5));
+        observer.completeInteraction();
+        observer.awaitSuiteFinished(Duration.ofSeconds(5));
 
-      TestRunReport runReport = reportRecordService.getRecordedReports().getFirst().getTestRunReports().getFirst();
-      assertThat(runReport.getStepRunReports().getFirst().getResult(), is(StepResult.PASSED));
-   }
+        TestRunReport runReport = reportRecordService.getRecordedReports().getFirst().getTestRunReports().getFirst();
+        assertThat(runReport.getStepRunReports().getFirst().getResult(), is(StepResult.PASSED));
+    }
 
-   @org.junit.jupiter.api.Test
-   void stepExecutorTypeMismatchProducesUndefinedStepReport() {
-      RecordingMaestroObserver observer = new RecordingMaestroObserver();
-      Step producer = step("Producer")
-            .setOutputMappings(Map.of(
-                  "payload", "ProducerPayload"
-            ));
-      Step consumer = step("Consumer")
-            .setProperties(List.of(new StringProperty("payloadRef", "${ProducerPayload}")));
+    @org.junit.jupiter.api.Test
+    void stepExecutorTypeMismatchProducesUndefinedStepReport() {
+        RecordingMaestroObserver observer = new RecordingMaestroObserver();
+        Step producer = step("Producer")
+                .setOutputMappings(Map.of(
+                        "payload", "ProducerPayload"
+                ));
+        Step consumer = step("Consumer")
+                .setProperties(List.of(new StringProperty("payloadRef", "${ProducerPayload}")));
 
-      Test test = new Test()
-            .setId("mismatch-test")
-            .setName("Mismatch Test")
-            .setSteps(List.of(producer, consumer));
+        Test test = new Test()
+                .setId("mismatch-test")
+                .setName("Mismatch Test")
+                .setGradingMethod(GradingMethod.AUTOMATED)
+                .setSteps(List.of(producer, consumer));
 
-      TestSuiteRun suiteRun = buildSuiteRun("suite-mismatch", test);
+        TestSuiteRun suiteRun = buildSuiteRun("suite-mismatch", test);
 
-      stepExecutorProvider
-            .returnsReport("Producer", new StepRunReport()
-                  .setStepName("Producer")
-                  .setType(Instrumented4TestStepDefinition.TYPE)
-                  .setResult(StepResult.PASSED)
-                  .setOutputs(List.of(new StringProperty("payload", "STRING-VALUE"))))
-            .withExecutor("Consumer", stepRun -> {
-               // Force a ClassCastException to mimic a type mismatch at execution time
-               Integer ignored = (Integer) stepRun.getPropertyValue("payloadRef");
-               return passedReport("Consumer" + ignored);
-            });
+        stepExecutorProvider
+                .returnsReport("Producer", new StepRunReport()
+                        .setStepName("Producer")
+                        .setType(Instrumented4TestStepDefinition.TYPE)
+                        .setResult(StepResult.PASSED)
+                        .setOutputs(List.of(new StringProperty("payload", "STRING-VALUE"))))
+                .withExecutor("Consumer", stepRun -> {
+                    // Force a ClassCastException to mimic a type mismatch at execution time
+                    Integer ignored = (Integer) stepRun.getPropertyValue("payloadRef");
+                    return passedReport("Consumer" + ignored);
+                });
 
-      runSuite(observer, suiteRun);
+        runSuite(observer, suiteRun);
 
-      StepRunReport failingReport = reportRecordService.getRecordedReports().getFirst()
-            .getTestRunReports().getFirst().getStepRunReports().get(1);
-      assertThat(failingReport.getResult(), is(StepResult.UNDEFINED));
-      assertThat(failingReport.getUnexpectedErrors(), is(not(empty())));
-   }
+        StepRunReport failingReport = reportRecordService.getRecordedReports().getFirst()
+                .getTestRunReports().getFirst().getStepRunReports().get(1);
+        assertThat(failingReport.getResult(), is(StepResult.UNDEFINED));
+        assertThat(failingReport.getUnexpectedErrors(), is(not(empty())));
+    }
 
-   @org.junit.jupiter.api.Test
-   void duplicateStepNamesCauseValidationError() {
-      RecordingMaestroObserver observer = new RecordingMaestroObserver();
-      Step stepA = step("duplicate");
-      Step stepB = step("duplicate");
-      Test duplicated = new Test()
-            .setId("dup-test")
-            .setName("Duplicate Steps Test")
-            .setSteps(List.of(stepA, stepB));
-      TestSuiteRun suiteRun = buildSuiteRun("suite-dup", duplicated);
+    @org.junit.jupiter.api.Test
+    void duplicateStepNamesCauseValidationError() {
+        RecordingMaestroObserver observer = new RecordingMaestroObserver();
+        Step stepA = step("duplicate");
+        Step stepB = step("duplicate");
+        Test duplicated = new Test()
+                .setId("dup-test")
+                .setName("Duplicate Steps Test")
+                .setGradingMethod(GradingMethod.AUTOMATED)
+                .setSteps(List.of(stepA, stepB));
+        TestSuiteRun suiteRun = buildSuiteRun("suite-dup", duplicated);
 
-      IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> maestro.executeTestSuite(suiteRun, true, observer));
-      assertThat(exception.getMessage(), containsString("Steps must be unique"));
-   }
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> maestro.executeTestSuite(suiteRun, true, observer));
+        assertThat(exception.getMessage(), containsString("Steps must be unique"));
+    }
 
-   @org.junit.jupiter.api.Test
-   void concurrentSuitesCompleteIndependently() {
-      RecordingMaestroObserver observerOne = new RecordingMaestroObserver();
-      RecordingMaestroObserver observerTwo = new RecordingMaestroObserver();
+    @org.junit.jupiter.api.Test
+    void concurrentSuitesCompleteIndependently() {
+        RecordingMaestroObserver observerOne = new RecordingMaestroObserver();
+        RecordingMaestroObserver observerTwo = new RecordingMaestroObserver();
 
-      TestSuiteRun suiteOne = buildSuiteRun("suite-concurrent-1", createTest("test-concurrent-1", "step-A"));
-      TestSuiteRun suiteTwo = buildSuiteRun("suite-concurrent-2", createTest("test-concurrent-2", "step-B"));
+        TestSuiteRun suiteOne = buildSuiteRun("suite-concurrent-1", createTest("test-concurrent-1", "step-A"));
+        TestSuiteRun suiteTwo = buildSuiteRun("suite-concurrent-2", createTest("test-concurrent-2", "step-B"));
 
-      stepExecutorProvider
-            .returnsReport("step-A", passedReport("step-A"))
-            .returnsReport("step-B", passedReport("step-B"));
+        stepExecutorProvider
+                .returnsReport("step-A", passedReport("step-A"))
+                .returnsReport("step-B", passedReport("step-B"));
 
-      CompletableFuture<ExecutionFinished> futureOne = CompletableFuture.supplyAsync(
-            () -> runSuite(observerOne, suiteOne), executorService);
-      CompletableFuture<ExecutionFinished> futureTwo = CompletableFuture.supplyAsync(
-            () -> runSuite(observerTwo, suiteTwo), executorService);
+        CompletableFuture<ExecutionFinished> futureOne = CompletableFuture.supplyAsync(
+                () -> runSuite(observerOne, suiteOne), executorService);
+        CompletableFuture<ExecutionFinished> futureTwo = CompletableFuture.supplyAsync(
+                () -> runSuite(observerTwo, suiteTwo), executorService);
 
-      CompletableFuture.allOf(futureOne, futureTwo).join();
+        CompletableFuture.allOf(futureOne, futureTwo).join();
 
-      List<TestReport> reports = reportRecordService.getRecordedReports();
-      assertThat(reports, hasSize(2));
-      assertThat(reports.stream()
-            .map(TestReport::getTestRunReports)
-            .flatMap(List::stream)
-            .map(tr -> tr.getTest().getName())
-            .toList(), containsInAnyOrder("Test test-concurrent-1", "Test test-concurrent-2"));
-   }
+        List<TestReport> reports = reportRecordService.getRecordedReports();
+        assertThat(reports, hasSize(2));
+        assertThat(reports.stream()
+                .map(TestReport::getTestRunReports)
+                .flatMap(List::stream)
+                .map(tr -> tr.getTest().getName())
+                .toList(), containsInAnyOrder("Test test-concurrent-1", "Test test-concurrent-2"));
+    }
 
-   private ExecutionFinished runSuite(RecordingMaestroObserver observer, TestSuiteRun suiteRun) {
-      maestro.executeTestSuite(suiteRun, true, observer);
-      return observer.awaitSuiteFinished(Duration.ofSeconds(5));
-   }
+    private ExecutionFinished runSuite(RecordingMaestroObserver observer, TestSuiteRun suiteRun) {
+        maestro.executeTestSuite(suiteRun, true, observer);
+        return observer.awaitSuiteFinished(Duration.ofSeconds(5));
+    }
 
-   private StepRunReport passedReport(String stepName) {
-      return new StepRunReport()
-            .setStepName(stepName)
-            .setType(Instrumented4TestStepDefinition.TYPE)
-            .setResult(StepResult.PASSED);
-   }
+    private StepRunReport passedReport(String stepName) {
+        return new StepRunReport()
+                .setStepName(stepName)
+                .setType(Instrumented4TestStepDefinition.TYPE)
+                .setResult(StepResult.PASSED);
+    }
 
-   private TestSuiteRun buildSuiteRun(String suiteId, Test test) {
-      TestSuite testSuite = new TestSuite()
-            .setId(suiteId)
-            .setName("Suite " + suiteId)
-            .setTestReferences(List.of(new TestReference().setTestId(test.getId())));
+    private TestSuiteRun buildSuiteRun(String suiteId, Test test) {
+        TestSuite testSuite = new TestSuite()
+                .setId(suiteId)
+                .setName("Suite " + suiteId)
+                .setTestReferences(List.of(new TestReference().setTestId(test.getId())));
 
-      return new TestSuiteRun()
-            .setTestSuite(testSuite)
-            .setTests(List.of(test))
-            .setAccessControlList(new AccessControlList().setPublic(true));
-   }
+        return new TestSuiteRun()
+                .setTestSuite(testSuite)
+                .setTests(List.of(test))
+                .setAccessControlList(new AccessControlList().setPublic(true));
+    }
 
-   private Test createTest(String testId, String... stepNames) {
-      Test test = new Test()
-            .setId(testId)
-            .setName("Test " + testId);
-      for (String stepName : stepNames) {
-         test.addStep(step(stepName));
-      }
-      return test;
-   }
+    private Test createTest(String testId, String... stepNames) {
+        Test test = new Test()
+                .setId(testId)
+                .setName("Test " + testId)
+                .setGradingMethod(GradingMethod.AUTOMATED);
+        for (String stepName : stepNames) {
+            test.addStep(step(stepName));
+        }
+        return test;
+    }
 
-   private Step step(String name) {
-      return new Step()
-            .setName(name)
-            .setType("UNIT_TEST")
-            .setTimeout(3000L);
-   }
+    private Step step(String name) {
+        return new Step()
+                .setName(name)
+                .setType("UNIT_TEST")
+                .setTimeout(3000L);
+    }
 
-   private static final class ManualInteractionObserver extends RecordingMaestroObserver {
-      private final CompletableFuture<UserInteractionCompleted> pendingInteraction = new CompletableFuture<>();
-      private final CountDownLatch interactionRequestedLatch = new CountDownLatch(1);
+    private static final class ManualInteractionObserver extends RecordingMaestroObserver {
+        private final CompletableFuture<UserInteractionCompleted> pendingInteraction = new CompletableFuture<>();
+        private final CountDownLatch interactionRequestedLatch = new CountDownLatch(1);
 
-      @Override
-      public CompletableFuture<UserInteractionCompleted> interactWithUser(InteractWithUser interactWithUser) {
-         interactionRequestedLatch.countDown();
-         return pendingInteraction;
-      }
+        @Override
+        public CompletableFuture<UserInteractionCompleted> interactWithUser(InteractWithUser interactWithUser) {
+            interactionRequestedLatch.countDown();
+            return pendingInteraction;
+        }
 
-      void completeInteraction() {
-         pendingInteraction.complete(new UserInteractionCompleted("manual-session"));
-      }
+        void completeInteraction() {
+            pendingInteraction.complete(new UserInteractionCompleted("manual-session"));
+        }
 
-      void awaitInteraction(Duration timeout) {
-         try {
-            if (!interactionRequestedLatch.await(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
-               throw new AssertionError("Interaction was not requested within " + timeout);
+        void awaitInteraction(Duration timeout) {
+            try {
+                if (!interactionRequestedLatch.await(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
+                    throw new AssertionError("Interaction was not requested within " + timeout);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new AssertionError("Interrupted while waiting for interaction request", e);
             }
-         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new AssertionError("Interrupted while waiting for interaction request", e);
-         }
-      }
-   }
+        }
+    }
 }

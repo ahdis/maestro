@@ -22,6 +22,10 @@ import net.ihe.gazelle.maestro.api.business.property.Property;
 import java.io.Serial;
 import java.util.Objects;
 
+
+/**
+ * Represents a message for adding new evidence.
+ */
 @Command
 public class PutEvidence implements Message {
 
@@ -33,37 +37,81 @@ public class PutEvidence implements Message {
     private String stepName;
     private Property content;
 
+    /**
+     * Retrieves the session ID associated with this instance.
+     *
+     * @return the session ID as a string, or null if no session ID is set.
+     */
     public String getSessionId() {
         return sessionId;
     }
 
+    /**
+     * Sets the session ID associated with this instance.
+     *
+     * @param sessionId the session ID to be set.
+     * @return the current instance of {@code PutEvidence} for method chaining.
+     */
     public PutEvidence setSessionId(String sessionId) {
         this.sessionId = sessionId;
         return this;
     }
 
+    /**
+     * Retrieves the run ID associated with this instance.
+     *
+     * @return the run ID as an {@code Integer}, or null if no run ID is set.
+     */
     public Integer getRunId() {
         return runId;
     }
 
+    /**
+     * Sets the run ID associated with this instance.
+     *
+     * @param runId the run ID to be set.
+     * @return the current instance of {@code PutEvidence} for method chaining.
+     */
     public PutEvidence setRunId(Integer runId) {
         this.runId = runId;
         return this;
     }
 
+    /**
+     * Retrieves the name of the step associated with this instance.
+     *
+     * @return the step name as a string, or null if no step name is set.
+     */
     public String getStepName() {
         return stepName;
     }
 
+    /**
+     * Sets the name of the step associated with this instance.
+     *
+     * @param stepName the name of the step to be set.
+     * @return the current instance of {@code PutEvidence} for method chaining.
+     */
     public PutEvidence setStepName(String stepName) {
         this.stepName = stepName;
         return this;
     }
 
+    /**
+     * Retrieves the content associated with this instance.
+     *
+     * @return the content as a {@code Property} instance, or null if no content is set.
+     */
     public Property getContent() {
         return content;
     }
 
+    /**
+     * Sets the content associated with this instance.
+     *
+     * @param content the content to be set as a {@code Property} instance.
+     * @return the current instance of {@code PutEvidence} for method chaining.
+     */
     public PutEvidence setContent(Property content) {
         this.content = content;
         return this;

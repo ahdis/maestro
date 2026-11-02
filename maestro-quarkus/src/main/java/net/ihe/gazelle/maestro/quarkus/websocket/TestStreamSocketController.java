@@ -21,6 +21,7 @@ import jakarta.inject.Inject;
 import jakarta.websocket.*;
 import jakarta.websocket.server.ServerEndpoint;
 import net.ihe.gazelle.maestro.api.business.Maestro;
+import net.ihe.gazelle.maestro.api.business.MaestroSessionService;
 import net.ihe.gazelle.maestro.api.technical.dto.message.*;
 import net.ihe.gazelle.maestro.quarkus.configuration.MaestroPermissions;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
@@ -67,6 +68,7 @@ public class TestStreamSocketController {
     private final WebSocketSessionService sessionService;
     private final TextSerDes serDes = new JacksonSerDes();
     private final Maestro maestro;
+    private final MaestroSessionService maestroSessionService;
 
     /**
      * Creates a new TestStreamSocketController instance.
@@ -77,11 +79,12 @@ public class TestStreamSocketController {
      * @param sessionService the WebSocket session service used to manage WebSocket sessions
      */
     @Inject
-    public TestStreamSocketController(GazelleIdentity identity, Authz authz, Maestro maestro, WebSocketSessionService sessionService) {
+    public TestStreamSocketController(GazelleIdentity identity, Authz authz, Maestro maestro, WebSocketSessionService sessionService, MaestroSessionService maestroSessionService) {
         this.identity = identity;
         this.authz = authz;
         this.maestro = maestro;
         this.sessionService = sessionService; // NOSONAR - CDI-managed service reference
+        this.maestroSessionService = maestroSessionService;
     }
 
     /**
@@ -129,29 +132,28 @@ public class TestStreamSocketController {
             switch (message) {
                 case StartTestRunDTO testRun -> {
                     authz.assertAuthorizedForIdentityOrganization(identity, MaestroPermissions.TEST_RUN);
-                    maestro.executeTest(testRun.getBusinessObject(), testRun.isPersist(), maestroCaller);
+                    maestro.executeTest(testRun.getTestSessionId(), testRun.getBusinessObject(), testRun.isPersist(), maestroCaller);
                 }
                 case StartTestSuiteRunDTO testSuiteRun -> {
                     authz.assertAuthorizedForIdentityOrganization(identity, MaestroPermissions.TEST_RUN);
-                    maestro.executeTestSuite(testSuiteRun.getBusinessObject(), testSuiteRun.isPersist(), maestroCaller);
+                    maestro.executeTestSuite(testSuiteRun.getTestSessionId(), testSuiteRun.getBusinessObject(), testSuiteRun.isPersist(), maestroCaller);
                 }
-                case UserInteractionCompletedDTO userInteractionCompleted -> {
+                case UserInteractionCompletedDTO userInteractionCompleted ->
                         maestroCaller.completeInteraction(userInteractionCompleted.getBusinessObject());
-                }
-                case PutEvidenceDTO putEvidence -> {
-                    LOG.debug("Not yet supported");
-                    //maestro.putEvidence(putEvidence.getBusinessObject());
-                }
+                case PutEvidenceDTO putEvidence ->
+                        maestroSessionService.putEvidence(putEvidence.getBusinessObject());
+                case DeleteEvidenceDTO deleteEvidence ->
+                        maestroSessionService.deleteEvidence(deleteEvidence.getBusinessObject());
                 default -> {
                     sessionService.removeSession(session.getId());
                     String error = "Unexpected message type: " + message.getClass().getName();
-                    session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, error));
+                    //session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, error));
                     LOG.debug(error);
                 }
             }
         } catch (DeserializationException e) {
             LOG.error("Unable to parse test run", e);
-            session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, "Unable to parse test run, please contact an administrator."));
+            //session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, "Unable to parse test run, please contact an administrator."));
         } catch (UnauthorizedException e) {
             LOG.error(e.getMessage());
             session.close(new CloseReason(CloseReason.CloseCodes.VIOLATED_POLICY, "Unauthenticated"));

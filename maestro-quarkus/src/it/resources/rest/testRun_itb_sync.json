@@ -2,6 +2,7 @@
   "test": {
     "id": "itb-test-1",
     "name": "itb test",
+    "gradingMethod": "AUTOMATED",
     "steps": [
       {
         "name": "itb-sync-step",

@@ -17,6 +17,7 @@
 package net.ihe.gazelle.maestro.quarkus.utils;
 
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
+import net.ihe.gazelle.maestro.api.business.test.GradingMethod;
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.test.TestReference;
 import net.ihe.gazelle.maestro.api.business.test.TestSuite;
@@ -47,6 +48,7 @@ public class ObjectFactory {
         return new net.ihe.gazelle.maestro.api.business.test.Test()
                 .setId(TEST_ID)
                 .setName("Sample test")
+                .setGradingMethod(GradingMethod.AUTOMATED)
                 .addStep(createStep());
     }
 
@@ -127,6 +129,7 @@ public class ObjectFactory {
                                 .setName("sut-1")
                                 .setVersion("2025")))
                 .setTestSuiteName("MAESTRO-SUITE")
+                .setTestSessionId("session-1")
                 .setNote("Sample test report")
                 .setUrlToTestSuiteResult("http://example.test/reports/1")
                 .addTestRunReport(testRunReportBuilder);

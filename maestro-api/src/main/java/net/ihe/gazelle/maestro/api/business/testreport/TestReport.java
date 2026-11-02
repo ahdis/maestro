@@ -100,6 +100,11 @@ public class TestReport implements ProtectedResource, Serializable {
     private Result result;
 
     /**
+     * The List of criteria report associated with the test report.
+     */
+    private List<CriterionReport> criteriaReport;
+
+    /**
      * The name of the test suite.
      */
     private String testSuiteName;
@@ -147,6 +152,7 @@ public class TestReport implements ProtectedResource, Serializable {
         dateTime = Instant.now();
         result = Result.UNDEFINED;
         systemsUnderTest = new ArrayList<>();
+        criteriaReport = new ArrayList<>();
         subReports = new ArrayList<>();
         testRunReports = new ArrayList<>();
         unexpectedErrors = new ArrayList<>();
@@ -165,6 +171,7 @@ public class TestReport implements ProtectedResource, Serializable {
         setDateTime(copy.getDateTime());
         setTestService(copy.getTestService());
         setSystemsUnderTest(copy.getSystemsUnderTest());
+        setCriteriaReport(copy.getCriteriaReport());
         setResult(copy.getResult());
         setTestSuiteName(copy.getTestSuiteName());
         setTestCounters(copy.getTestCounters());
@@ -337,6 +344,26 @@ public class TestReport implements ProtectedResource, Serializable {
      */
     public TestReport setResult(Result result) {
         this.result = result;
+        return this;
+    }
+
+    /**
+     * Retrieves the list of CriterionReport objects.
+     *
+     * @return a List of CriterionReport objects representing the criteria report.
+     */
+    public List<CriterionReport> getCriteriaReport() {
+        return new ArrayList<>(criteriaReport);
+    }
+
+    /**
+     * Sets the list of criterion reports for the test report.
+     *
+     * @param criteriaReport the list of {@link CriterionReport} objects to be set
+     * @return the current {@link TestReport} instance for method chaining
+     */
+    public TestReport setCriteriaReport(List<CriterionReport> criteriaReport) {
+        this.criteriaReport = new ArrayList<>(criteriaReport);
         return this;
     }
 
@@ -740,6 +767,7 @@ public class TestReport implements ProtectedResource, Serializable {
                 && Objects.equals(dateTime, that.dateTime)
                 && Objects.equals(testService, that.testService)
                 && Objects.equals(systemsUnderTest, that.systemsUnderTest)
+                && Objects.equals(criteriaReport, that.criteriaReport)
                 && Objects.equals(testSessionId, that.testSessionId)
                 && result == that.result
                 && Objects.equals(testSuiteName, that.testSuiteName)
@@ -754,7 +782,7 @@ public class TestReport implements ProtectedResource, Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(reportVersion, uuid, dateTime, testService,
-                testSessionId, systemsUnderTest, result, testSuiteName,
+                testSessionId, systemsUnderTest, result, criteriaReport, testSuiteName,
                 testCounters, note, urlToTestSuiteResult, subReports,
                 testRunReports, unexpectedErrors);
     }

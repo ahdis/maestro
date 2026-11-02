@@ -16,6 +16,8 @@
 
 package net.ihe.gazelle.maestro.engine.business.context;
 
+import java.util.List;
+
 /**
  * Provides access to session objects by their identifier.
  *
@@ -23,12 +25,19 @@ package net.ihe.gazelle.maestro.engine.business.context;
  */
 public interface ReadSessionStore<T> {
 
-   /**
-    * Retrieves a session object by its identifier.
-    *
-    * @param id the identifier of the session
-    * @return the session object associated with the given id, or null if not found
-    */
-   T getSession(String id);
+    /**
+     * Retrieves a session object by its identifier.
+     *
+     * @param id the identifier of the session
+     * @return the session object associated with the given id, or null if not found
+     */
+    T getSession(String id);
+
+    /**
+     * Retrieves all session objects currently stored.
+     *
+     * @return a list of all session objects, or an empty list if no sessions are stored
+     */
+    List<T> getAllSessions();
 
 }

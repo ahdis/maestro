@@ -31,50 +31,50 @@ import java.util.Map;
  */
 public class UserInteractionStepDefinition implements StepDefinition {
 
-   @Serial
-   private static final long serialVersionUID = 5740485033132348151L;
+    @Serial
+    private static final long serialVersionUID = 5740485033132348151L;
 
-   /**
-    * The type identifier for the user interaction step.
-    */
-   public static final String TYPE = "USER_INTERACTION";
+    /**
+     * The type identifier for the user interaction step.
+     */
+    public static final String TYPE = "USER_INTERACTION";
 
-   /**
-    * Input property key for the interaction title.
-    */
-   public static final String INTERACTION_TITLE = "interactionTitle";
+    /**
+     * Input property key for the interaction title.
+     */
+    public static final String INTERACTION_TITLE = "interactionTitle";
 
-   /**
-    * Input property key for the message to display to the user.
-    */
-   public static final String MESSAGE = "message";
+    /**
+     * Input property key for the message to display to the user.
+     */
+    public static final String MESSAGE = "message";
 
-   /**
-    * Input property key for the interactionInputs to display to the user.
-    */
-   public static final String INTERACTION_INPUTS = "interactionInputs";
+    /**
+     * Input property key for the interactionInputs to display to the user.
+     */
+    public static final String INTERACTION_INPUTS = "interactionInputs";
 
-   /**
-    * Default constructor.
-    */
-   public UserInteractionStepDefinition() { /* Default constructor */ }
+    /**
+     * Default constructor.
+     */
+    public UserInteractionStepDefinition() { /* Default constructor */ }
 
-   @Override
-   public String getType() {
-      return TYPE;
-   }
+    @Override
+    public String getType() {
+        return TYPE;
+    }
 
-   @Override
-   public List<SupportedInput> getSupportedInputs() {
-      return List.of(
-            new SupportedTextInput().setId(INTERACTION_TITLE).setLabel("Title").setRequired(true),
-            new SupportedTextInput().setId(MESSAGE).setLabel("Message").setRequired(true),
-            new SupportedTextInput().setId(INTERACTION_INPUTS).setLabel("Supported inputs").setRequired(false)
-      );
-   }
+    @Override
+    public List<SupportedInput> getSupportedInputs() {
+        return List.of(
+                new SupportedTextInput().setId(INTERACTION_TITLE).setLabel("Title").setRequired(true),
+                new SupportedTextInput().setId(MESSAGE).setLabel("Message").setRequired(true),
+                new SupportedTextInput().setId(INTERACTION_INPUTS).setLabel("Supported inputs").setRequired(false)
+        );
+    }
 
-   @Override
-   public Map<String, Class<? extends Property>> getOutputsDefinition() {
-      return Map.of();
-   }
+    @Override
+    public Map<String, Class<? extends Property>> getOutputsDefinition() {
+        return Map.of();
+    }
 }

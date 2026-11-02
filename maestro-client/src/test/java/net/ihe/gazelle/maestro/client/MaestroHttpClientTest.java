@@ -1,6 +1,7 @@
 package net.ihe.gazelle.maestro.client;
 
 import net.ihe.gazelle.maestro.api.business.InvalidTestRunException;
+import net.ihe.gazelle.maestro.api.business.test.GradingMethod;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 import org.apache.http.HttpHost;
@@ -30,10 +31,10 @@ class MaestroHttpClientTest {
         URI callback = new URI("http://callback.example/report?session=abc");
         RecordingHttpClient recordingClient = new RecordingHttpClient(stubResponse(202, ""));
         MaestroHttpClient client = new MaestroHttpClient(
-              new URI("http://maestro"),
-              recordingClient,
-              MaestroHttpClient.DEFAULT_CONNECT_TIMEOUT_MILLISECONDS,
-              MaestroHttpClient.DEFAULT_READ_TIMEOUT_MILLISECONDS
+                new URI("http://maestro"),
+                recordingClient,
+                MaestroHttpClient.DEFAULT_CONNECT_TIMEOUT_MILLISECONDS,
+                MaestroHttpClient.DEFAULT_READ_TIMEOUT_MILLISECONDS
         );
 
         client.executeTestAsync(simpleTestRun(), true, callback);
@@ -50,10 +51,10 @@ class MaestroHttpClientTest {
     void executeTestAsyncRejectsNullCallback() {
         RecordingHttpClient recordingClient = new RecordingHttpClient(stubResponse(202, ""));
         MaestroHttpClient client = new MaestroHttpClient(
-              URI.create("http://maestro"),
-              recordingClient,
-              MaestroHttpClient.DEFAULT_CONNECT_TIMEOUT_MILLISECONDS,
-              MaestroHttpClient.DEFAULT_READ_TIMEOUT_MILLISECONDS
+                URI.create("http://maestro"),
+                recordingClient,
+                MaestroHttpClient.DEFAULT_CONNECT_TIMEOUT_MILLISECONDS,
+                MaestroHttpClient.DEFAULT_READ_TIMEOUT_MILLISECONDS
         );
         TestRun testRun = simpleTestRun();
 
@@ -64,10 +65,10 @@ class MaestroHttpClientTest {
     void executeTestAsyncPropagatesApplicationError() throws Exception {
         RecordingHttpClient recordingClient = new RecordingHttpClient(stubResponse(400, "invalid"));
         MaestroHttpClient client = new MaestroHttpClient(
-              new URI("http://maestro"),
-              recordingClient,
-              MaestroHttpClient.DEFAULT_CONNECT_TIMEOUT_MILLISECONDS,
-              MaestroHttpClient.DEFAULT_READ_TIMEOUT_MILLISECONDS
+                new URI("http://maestro"),
+                recordingClient,
+                MaestroHttpClient.DEFAULT_CONNECT_TIMEOUT_MILLISECONDS,
+                MaestroHttpClient.DEFAULT_READ_TIMEOUT_MILLISECONDS
         );
         TestRun testRun = simpleTestRun();
         URI callback = new URI("http://callback");
@@ -151,14 +152,15 @@ class MaestroHttpClientTest {
 
     private static TestRun simpleTestRun() {
         AccessControlList acl = new AccessControlList()
-              .setOwners(Set.of("owner"))
-              .setReaders(Set.of("owner"))
-              .setEditors(Set.of("owner"))
-              .setPublic(true);
+                .setOwners(Set.of("owner"))
+                .setReaders(Set.of("owner"))
+                .setEditors(Set.of("owner"))
+                .setPublic(true);
         return new TestRun()
-              .setTest(new net.ihe.gazelle.maestro.api.business.test.Test()
-                    .setId("test-1")
-                    .setName("Test 1"))
-              .setAccessControlList(acl);
+                .setTest(new net.ihe.gazelle.maestro.api.business.test.Test()
+                        .setId("test-1")
+                        .setName("Test 1")
+                        .setGradingMethod(GradingMethod.AUTOMATED))
+                .setAccessControlList(acl);
     }
 }
