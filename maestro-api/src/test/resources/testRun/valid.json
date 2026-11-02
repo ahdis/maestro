@@ -41,6 +41,58 @@
               "name": "dateProperty",
               "value": "2024-11-08T11:19:36.385+00:00",
               "type": "DATE"
+            },
+            {
+              "name": "linkProperty",
+              "value": "http://com.example",
+              "type": "LINK"
+            },
+            {
+              "name": "stringListProperty",
+              "value": [
+                "value1",
+                "value2"
+              ],
+              "type": "STRING_LIST"
+            },
+            {
+              "name": "supportedInputProperty",
+              "value": [
+                {
+                  "id": "boolean_input",
+                  "type": "BOOLEAN",
+                  "label": "Boolean input",
+                  "required": true,
+                  "description": "Test the boolean input for user interaction",
+                  "defaultValue": "false"
+                },
+                {
+                  "id": "drop_down_input",
+                  "type": "TEXT",
+                  "label": "Drop down input",
+                  "required": true,
+                  "description": "Test the drop down input for user interaction",
+                  "defaultValue": "value1",
+                  "possibleValues": [
+                    "value1", "value2"
+                  ]
+                },
+                {
+                  "id": "any_file_input",
+                  "type": "FILE",
+                  "label": "Any file input",
+                  "required": true,
+                  "description": "Test the file input for user interaction"
+                },
+                {
+                  "id": "text_input",
+                  "type": "TEXT",
+                  "label": "Text input",
+                  "required": true,
+                  "description": "Test the text input for user interaction"
+                }
+              ],
+              "type": "SUPPORTED_INPUTS"
             }
           ]
         },
