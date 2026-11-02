@@ -16,6 +16,7 @@
 
 package net.ihe.gazelle.maestro.api.business.testreport;
 
+import java.time.Instant;
 import java.util.Objects;
 
 /**
@@ -27,6 +28,8 @@ public class CriterionReport {
 
     private String description;
     private CriterionResult criterionResult;
+    private String userId;
+    private Instant dateTime;
 
     /**
      * Default constructor.
@@ -77,6 +80,46 @@ public class CriterionReport {
     }
 
     /**
+     * Retrieves the user ID associated with this criterion.
+     *
+     * @return the user ID as a string, or null if the user ID is not set
+     */
+    public String getUserId() {
+        return userId;
+    }
+
+    /**
+     * Sets the user ID associated with the criterion report.
+     *
+     * @param userId the user ID to associate with the report, represented as a {@code String}
+     * @return the current instance of {@code CriterionReport} to allow method chaining
+     */
+    public CriterionReport setUserId(String userId) {
+        this.userId = userId;
+        return this;
+    }
+
+    /**
+     * Retrieves the date and time associated with this report.
+     *
+     * @return the date and time as an {@code Instant}
+     */
+    public Instant getDateTime() {
+        return dateTime;
+    }
+
+    /**
+     * Sets the date and time associated with this criterion report.
+     *
+     * @param dateTime the date and time to set, represented as an {@code Instant}
+     * @return the current instance of {@code CriterionReport} to allow method chaining
+     */
+    public CriterionReport setDateTime(Instant dateTime) {
+        this.dateTime = dateTime;
+        return this;
+    }
+
+    /**
      * Determines whether the name of the entity is defined and not blank.
      *
      * @return {@code true} if the name is not null and not blank, {@code false} otherwise
@@ -98,11 +141,13 @@ public class CriterionReport {
     public boolean equals(Object o) {
         if (!(o instanceof CriterionReport that)) return false;
         return Objects.equals(description, that.description)
-                && criterionResult == that.criterionResult;
+                && criterionResult == that.criterionResult
+                && Objects.equals(userId, that.userId)
+                && Objects.equals(dateTime, that.dateTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(description, criterionResult);
+        return Objects.hash(description, criterionResult, userId, dateTime);
     }
 }

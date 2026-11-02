@@ -20,6 +20,7 @@ import net.ihe.gazelle.maestro.api.business.testreport.CriterionReport;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 
 import java.io.Serial;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +51,16 @@ public class GradingCompleted implements Message {
      * The note associated with the grading to be set in the test report
      */
     private String note;
+
+    /**
+     * The id of the user who graded the test
+     */
+    private String userId;
+
+    /**
+     * The date time of the grading
+     */
+    private Instant dateTime;
 
     /**
      * Default constructor.
@@ -137,6 +148,46 @@ public class GradingCompleted implements Message {
      */
     public GradingCompleted setNote(String note) {
         this.note = note;
+        return this;
+    }
+
+    /**
+     * Retrieves the user ID associated with this grading.
+     *
+     * @return the user ID as a string, or null if the user ID is not set
+     */
+    public String getUserId() {
+        return userId;
+    }
+
+    /**
+     * Sets the user ID associated with the grading.
+     *
+     * @param userId the user ID to associate with the report, represented as a {@code String}
+     * @return the current instance of {@code GradingCompleted} to allow method chaining
+     */
+    public GradingCompleted setUserId(String userId) {
+        this.userId = userId;
+        return this;
+    }
+
+    /**
+     * Retrieves the date and time associated with this grading.
+     *
+     * @return the date and time as an {@code Instant}
+     */
+    public Instant getDateTime() {
+        return dateTime;
+    }
+
+    /**
+     * Sets the date and time associated with this grading.
+     *
+     * @param dateTime the date and time to set, represented as an {@code Instant}
+     * @return the current instance of {@code GradingCompleted} to allow method chaining
+     */
+    public GradingCompleted setDateTime(Instant dateTime) {
+        this.dateTime = dateTime;
         return this;
     }
 }

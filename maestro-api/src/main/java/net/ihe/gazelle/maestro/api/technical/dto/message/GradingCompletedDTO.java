@@ -23,6 +23,10 @@ import net.ihe.gazelle.maestro.api.technical.dto.report.CriterionReportDTO;
 import net.ihe.gazelle.oidc.common.technical.dto.SecuredMessageDTO;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Schema(
@@ -92,6 +96,41 @@ public class GradingCompletedDTO extends MessageDTO<GradingCompleted> implements
     @JsonProperty("note")
     public String getNote() {
         return message.getNote();
+    }
+
+    @Schema(
+            name = "userId",
+            description = "The id of the user who assessed the criterion."
+    )
+    @JsonProperty("userId")
+    public String getUserId() {
+        return message.getUserId();
+    }
+
+    public void setUserId(String userId) {
+        message.setUserId(userId);
+    }
+
+    @Schema(
+            name = "dateTime",
+            description = "The date time of the criterion assessment."
+    )
+    @JsonProperty("dateTime")
+    public String getDateTime() {
+        if (message.getDateTime() != null) {
+            return ZonedDateTime.ofInstant(message.getDateTime(), ZoneId.systemDefault())
+                    .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        } else {
+            return null;
+        }
+    }
+
+    public void setDateTime(String dateTime) {
+        if (dateTime != null) {
+            message.setDateTime(
+                    Instant.from(ZonedDateTime.parse(dateTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+            );
+        }
     }
 
     @Override

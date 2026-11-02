@@ -20,9 +20,7 @@ import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.api.business.message.*;
 import net.ihe.gazelle.maestro.api.business.testreport.*;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
-import net.ihe.gazelle.maestro.api.business.testrun.TestRunValidator;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
-import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRunValidator;
 import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 import net.ihe.gazelle.security.business.acl.AccessControlListBuilder;
@@ -39,8 +37,6 @@ import java.util.UUID;
  */
 public class MaestroFacade {
 
-    private final TestSuiteRunValidator testSuiteRunValidator = new TestSuiteRunValidator();
-    private final TestRunValidator testRunValidator = new TestRunValidator();
     private final SessionStore<MaestroObserver> testRunObserverStore;
     private final SessionStore<MaestroObserver> testSuiteRunObserverStore;
     private final MaestroEventProducer maestroEventProducer;
@@ -85,7 +81,6 @@ public class MaestroFacade {
         if (testSuiteRun.getAccessControlList() == null) {
             testSuiteRun.setAccessControlList(new AccessControlList().setPublic(true));
         }
-        testSuiteRunValidator.assertValid(testSuiteRun);
         String sessionId = UUID.randomUUID().toString();
         long timeout = testSuiteRun.computeTestSuiteTimeout();
         testSuiteRunObserverStore.putSession(sessionId, testSuiteRunObserver, timeout);
@@ -106,7 +101,6 @@ public class MaestroFacade {
         if (testRun.getAccessControlList() == null) {
             testRun.setAccessControlList(new AccessControlList().setPublic(true));
         }
-        testRunValidator.assertValid(testRun);
         String sessionId = UUID.randomUUID().toString();
         long timeout = testRun.getTest().computeTestRunTimeout();
         testRunObserverStore.putSession(sessionId, testRunObservers, timeout);
