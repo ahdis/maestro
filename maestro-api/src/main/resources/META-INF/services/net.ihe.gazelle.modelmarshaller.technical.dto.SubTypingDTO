@@ -23,6 +23,7 @@ net.ihe.gazelle.maestro.api.technical.dto.property.ByteArrayPropertyDTO
 net.ihe.gazelle.maestro.api.technical.dto.property.ByteArrayItemPropertyDTO
 net.ihe.gazelle.maestro.api.technical.dto.property.SupportedInputsPropertyDTO
 net.ihe.gazelle.maestro.api.technical.dto.property.LinkPropertyDTO
+net.ihe.gazelle.maestro.api.technical.dto.property.StringListPropertyDTO
 
 net.ihe.gazelle.maestro.api.technical.dto.test.SupportedTextInputDTO
 net.ihe.gazelle.maestro.api.technical.dto.test.SupportedFileInputDTO
