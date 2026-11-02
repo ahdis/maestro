@@ -19,8 +19,11 @@ package net.ihe.gazelle.maestro.api.business.test;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A structure contains in TestRun defining TestRun's steps.
@@ -251,6 +254,47 @@ public class Test implements Serializable {
             }
         }
         return true;
+    }
+
+    /**
+     * Determines whether every output alias is published once and does not shadow a supported input.
+     * Recording links a consumer to its producer by alias, so a reused alias would be ambiguous.
+     *
+     * @return true if all output aliases are distinct from each other and from supported input IDs
+     */
+    public boolean areOutputAliasesUnique() {
+        Set<String> names = new HashSet<>();
+        if (supportedInputs != null) {
+            supportedInputs.stream()
+                    .filter(Objects::nonNull)
+                    .map(SupportedInput::getId)
+                    .filter(Objects::nonNull)
+                    .forEach(names::add);
+        }
+        if (steps == null) {
+            return true;
+        }
+        for (Step step : steps) {
+            if (step == null) {
+                continue;
+            }
+            for (String alias : step.getOutputMappings().values()) {
+                if (!names.add(alias)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /** Checks output aliases against effective execution input names. */
+    public boolean areOutputAliasesDisjointFrom(Collection<String> inputNames) {
+        if (steps == null) {
+            return true;
+        }
+        return steps.stream().filter(Objects::nonNull)
+                .flatMap(step -> step.getOutputMappings().values().stream())
+                .noneMatch(inputNames::contains);
     }
 
     /**

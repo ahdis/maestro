@@ -16,6 +16,9 @@
 
 package net.ihe.gazelle.maestro.grading.step.business;
 
+import net.ihe.gazelle.maestro.api.business.message.GradingCompleted;
+import net.ihe.gazelle.maestro.api.business.testreport.CriterionReport;
+import net.ihe.gazelle.maestro.api.business.testreport.CriterionResult;
 import net.ihe.gazelle.maestro.api.business.property.StringListProperty;
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
@@ -39,6 +42,27 @@ class GradingStepExecutorTest {
         assertEquals(stepRun.getName(), report.getStepName());
         assertEquals(GradingStepDefinition.TYPE, report.getType());
         assertEquals(StepResult.PASSED, report.getResult());
+    }
+
+    @Test
+    void exposesCriterionResultsWithReviewerAndAssessmentTime() {
+        var assessmentTime = java.time.Instant.parse("2026-11-02T12:00:00Z");
+        var executor = new GradingStepExecutor(new GradingHandlerStub() {
+            @Override
+            public GradingCompleted displayMessage(List<String> criteria, long timeout) {
+                assertEquals(List.of("Check A", "Check B"), criteria);
+                return new GradingCompleted().setResult(StepResult.FAILED).setCriteriaReport(List.of(
+                        new CriterionReport().setDescription("Check A").setCriterionResult(CriterionResult.FAILED)
+                                .setUserId("reviewer").setDateTime(assessmentTime)));
+            }
+        });
+        var report = executor.execute(stepRun());
+        assertEquals(StepResult.FAILED, report.getResult());
+        assertEquals(1, report.getOutputs().size());
+        var output = report.getOutput("Check A");
+        assertEquals("FAILED", output.getValue());
+        assertEquals("reviewer", output.getUserId());
+        assertEquals(assessmentTime, output.getDateTime());
     }
 
     private Step step() {

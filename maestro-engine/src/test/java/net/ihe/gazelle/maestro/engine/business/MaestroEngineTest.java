@@ -21,6 +21,7 @@ import net.ihe.gazelle.maestro.api.business.message.ExecutionFinished;
 import net.ihe.gazelle.maestro.api.business.message.InteractWithUser;
 import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
+import net.ihe.gazelle.maestro.api.business.property.SupportedInputsProperty;
 import net.ihe.gazelle.maestro.api.business.test.*;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
@@ -28,12 +29,14 @@ import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
+import net.ihe.gazelle.maestro.api.business.userinteract.stub.UserInteractionHandlerStub;
 import net.ihe.gazelle.maestro.engine.business.context.TestRunSession;
 import net.ihe.gazelle.maestro.engine.business.context.TestSuiteSession;
 import net.ihe.gazelle.maestro.engine.business.mock.InMemoryTestReportRecordingService;
 import net.ihe.gazelle.maestro.engine.business.mock.RecordingMaestroObserver;
 import net.ihe.gazelle.maestro.engine.business.mock.ScriptedStepExecutorProvider;
 import net.ihe.gazelle.maestro.engine.business.stub.Instrumented4TestStepDefinition;
+import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionStepExecutor;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -56,6 +59,7 @@ class MaestroEngineTest {
     private static final String TEST_SESSION_ID = "UnitTestSession";
 
     private RecordingMaestro maestro;
+    private HardWiredEventBroker broker;
     private ScriptedStepExecutorProvider stepExecutorProvider;
     private InMemoryTestReportRecordingService reportRecordService;
 
@@ -66,7 +70,7 @@ class MaestroEngineTest {
 
     @BeforeEach
     void setUp() {
-        HardWiredEventBroker broker = new HardWiredEventBroker(executorService);
+        broker = new HardWiredEventBroker(executorService);
         stepExecutorProvider = new ScriptedStepExecutorProvider();
         reportRecordService = new InMemoryTestReportRecordingService();
 
@@ -243,6 +247,56 @@ class MaestroEngineTest {
         assertThat(observedValue.get(), equalTo("HELLO-CONTEXT"));
         TestReport report = reportRecordService.getRecordedReports().getFirst();
         assertThat(report.getTestRunReports().getFirst().getStepRunReports(), hasSize(2));
+    }
+
+    @org.junit.jupiter.api.Test
+    void interactionResponseIsMappedIntoNextStep() {
+        assertInteractionRecordingWithoutStepCallbacks(true);
+    }
+
+    @org.junit.jupiter.api.Test
+    void individualTestRecordingDoesNotNeedStepCallbacks() {
+        assertInteractionRecordingWithoutStepCallbacks(false);
+    }
+
+    private void assertInteractionRecordingWithoutStepCallbacks(boolean suite) {
+        // No step-finished observer callback is delivered, even before execution completion.
+        broker.suppressStepObserverNotifications();
+        RecordingMaestroObserver observer = new RecordingMaestroObserver();
+        Step producer = step("Interaction").setOutputMappings(Map.of("patientId", "selectedPatientId"))
+                .setProperties(List.of(new StringProperty("interactionTitle", "Patient"),
+                        new StringProperty("message", "Enter patient ID"),
+                        new SupportedInputsProperty("interactionInputs",
+                                List.of(new SupportedTextInput()
+                                        .setId("patientId").setLabel("Patient ID").setRequired(true)))));
+        Step consumer = step("Consumer").setProperties(List.of(new StringProperty("patientId", "${selectedPatientId}")));
+        var executor = new UserInteractionStepExecutor(
+                new UserInteractionHandlerStub() {
+                    @Override
+                    public UserInteractionCompleted displayMessage(String title, String message, long timeout,
+                            List<SupportedInput> fields) {
+                        return new UserInteractionCompleted().addInput(new StringProperty("patientId", "PATIENT-123"));
+                    }
+                });
+        AtomicReference<String> observedValue = new AtomicReference<>();
+        stepExecutorProvider.withExecutor("Interaction", executor).withExecutor("Consumer", stepRun -> {
+            observedValue.set(stepRun.getPropertyValue("patientId"));
+            return passedReport("Consumer");
+        });
+        Test test = new Test().setId("interaction-output").setName("Interaction outputs")
+                .setGradingMethod(GradingMethod.AUTOMATED).setSteps(List.of(producer, consumer));
+        if (suite) {
+            maestro.executeTestSuite(TEST_SESSION_ID, buildSuiteRun("interaction-suite", test), true, observer);
+        } else {
+            maestro.executeTest(TEST_SESSION_ID, new TestRun().setTest(test)
+                    .setAccessControlList(new AccessControlList().setPublic(true)), true, observer);
+        }
+        observer.awaitSuiteFinished(Duration.ofSeconds(5));
+        assertThat(reportRecordService.getRecordedReports().getFirst().getTestSessionId(), equalTo(TEST_SESSION_ID));
+        assertThat(observedValue.get(), equalTo("PATIENT-123"));
+        assertThat(observer.getStepRunFinishedEvents(), empty());
+        assertThat(reportRecordService.getTestDefinitions().getFirst().getSteps().getFirst().getOutputMappings(),
+                equalTo(Map.of("patientId", "selectedPatientId")));
     }
 
     @org.junit.jupiter.api.Test

@@ -149,10 +149,11 @@ class RecordingPlanTest {
             rootReportPlan,
             stepRunReport,
             "http://dh",
-            callbackRegistry
+            callbackRegistry,
+            java.util.Map.of("output-a", "alias-a")
       );
       AtomicReference<String> resolvedReferenceId = new AtomicReference<>();
-      stepOutputPlan.onFutureReferenceResolved("output-a", (referenceName, referenceId) -> resolvedReferenceId.set(referenceId));
+      stepOutputPlan.onFutureReferenceResolved("alias-a", (referenceName, referenceId) -> resolvedReferenceId.set(referenceId));
 
       stepOutputPlan.addAttachmentReferencePlan(
             "output-a",

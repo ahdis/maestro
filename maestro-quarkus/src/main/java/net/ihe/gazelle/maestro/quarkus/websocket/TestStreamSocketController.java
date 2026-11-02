@@ -147,13 +147,12 @@ public class TestStreamSocketController {
                 default -> {
                     sessionService.removeSession(session.getId());
                     String error = "Unexpected message type: " + message.getClass().getName();
-                    //session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, error));
+                    session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, error));
                     LOG.debug(error);
                 }
             }
         } catch (DeserializationException e) {
             LOG.error("Unable to parse test run", e);
-            //session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, "Unable to parse test run, please contact an administrator."));
         } catch (UnauthorizedException e) {
             LOG.error(e.getMessage());
             session.close(new CloseReason(CloseReason.CloseCodes.VIOLATED_POLICY, "Unauthenticated"));

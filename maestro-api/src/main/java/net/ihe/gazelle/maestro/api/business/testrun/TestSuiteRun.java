@@ -26,8 +26,11 @@ import net.ihe.gazelle.security.business.acl.AccessControlList;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * A TestSuiteRun is a structure containing several TestRun that will be executed iteratively. {@link TestRun} testSetId
@@ -242,4 +245,21 @@ public class TestSuiteRun implements Serializable {
       }
       return true;
    }
+
+   /** Checks each referenced test against suite inputs and that reference's additional inputs. */
+   public boolean areOutputAliasesDisjointFromInputs() {
+      if (!areAllReferencedTestsAttached()) {
+         return true;
+      }
+      for (TestReference reference : testSuite.getTestReferences()) {
+         Set<String> names = new HashSet<>();
+         inputs.stream().filter(Objects::nonNull).map(Property::getName).forEach(names::add);
+         reference.getProperties().stream().filter(Objects::nonNull).map(Property::getName).forEach(names::add);
+         if (!getTest(reference.getTestId()).areOutputAliasesDisjointFrom(names)) {
+            return false;
+         }
+      }
+      return true;
+   }
+
 }

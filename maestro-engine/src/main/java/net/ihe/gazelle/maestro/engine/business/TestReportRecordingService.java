@@ -16,7 +16,10 @@
 
 package net.ihe.gazelle.maestro.engine.business;
 
+import net.ihe.gazelle.maestro.api.business.test.Test;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+
+import java.util.List;
 
 /**
  * Service to record a TestReport and all its references.
@@ -24,12 +27,18 @@ import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 public interface TestReportRecordingService {
 
    /**
-    * Records a TestReport and all its references.
+    * Records a TestReport and its references without resolving producer output aliases.
+    * Use this for historical reports whose original test definitions are unavailable.
     *
     * @param report the TestReport to record
     * @return the location of the recorded TestReport
     * @throws TestReportRecordingException if it can't record the TestReport
     */
-   String recordTestReport(TestReport report);
+   default String recordTestReport(TestReport report) {
+      return recordTestReport(report, List.of());
+   }
+
+   /** Records using the original test definitions to resolve producer output aliases. */
+   String recordTestReport(TestReport report, List<Test> testDefinitions);
 
 }

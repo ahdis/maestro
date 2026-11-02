@@ -16,6 +16,8 @@
 
 package net.ihe.gazelle.maestro.api.business.testreport;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.Objects;
 
@@ -24,7 +26,10 @@ import java.util.Objects;
  * This class provides methods to retrieve and set the description of the criteria
  * and the grading result associated with it.
  */
-public class CriterionReport {
+public class CriterionReport implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private String description;
     private CriterionResult criterionResult;

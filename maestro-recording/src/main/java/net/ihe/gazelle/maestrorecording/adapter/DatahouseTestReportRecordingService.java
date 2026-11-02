@@ -20,6 +20,8 @@ import com.kereval.gazelle.datahouse.technical.rest.client.RecordItemClient;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
+import net.ihe.gazelle.maestro.api.business.test.Test;
+import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
@@ -40,6 +42,8 @@ import net.ihe.gazelle.security.business.acl.AccessControlList;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,16 +79,10 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
       this.recordItemService = new RecordItemService(recordItemClient);
    }
 
-   /**
-    * Pre-upload input attachments and update the report to reference them; record step outputs; persist sub-reports;
-    * then persist the main TestReport with References[] including inputs and sub-reports.
-    *
-    * @return the URL of the created item of the main TestReport
-    */
    @Override
-   public String recordTestReport(TestReport report) {
-      String id = recordTestReportWithReferences(report).id();
-      return constructUrlToItem(id);
+   public String recordTestReport(TestReport report, List<Test> testDefinitions) {
+      String identifier = recordTestReportWithReferences(report, testDefinitions).id();
+      return constructUrlToItem(identifier);
    }
 
    /**
@@ -93,9 +91,9 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
     *
     * @return the created item ID of the main TestReport
     */
-   private ItemReference recordTestReportWithReferences(TestReport report) {
+   private ItemReference recordTestReportWithReferences(TestReport report, List<Test> testDefinitions) {
       try {
-         ItemPlan<TestReport> testReportPlan = buildTestReportPlan(report, report.getAccessControlList());
+         ItemPlan<TestReport> testReportPlan = buildTestReportPlan(report, report.getAccessControlList(), testDefinitions);
          String id = recordItemService.recordPlan(testReportPlan, report.getAccessControlList());
          return new ItemReference(id, constructUrlToItem(id));
       } catch (Exception e) {
@@ -103,7 +101,7 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
       }
    }
 
-   private ItemPlan<TestReport> buildTestReportPlan(TestReport report, AccessControlList acl) {
+   private ItemPlan<TestReport> buildTestReportPlan(TestReport report, AccessControlList acl, List<Test> testDefinitions) {
       List<TestReportReferenceDTO> subReportRefs = new ArrayList<>();
       ItemPlan<TestReport> testReportPlan = new ItemPlan<>(
             TEST_REPORT_TYPE,
@@ -115,7 +113,7 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
             buildRunScopedRegistries(report.getTestRunReports(), callbackRegistry);
 
       planInputReferences(report.getTestRunReports(), testReportPlan, runScopedRegistries);
-      planStepOutputReferences(report.getTestRunReports(), testReportPlan, runScopedRegistries);
+      planStepOutputReferences(report.getTestRunReports(), testReportPlan, runScopedRegistries, testDefinitions);
       planSubReportReferences(report, subReportRefs, testReportPlan, acl);
 
       return testReportPlan;
@@ -208,28 +206,45 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
 
    private void planStepOutputReferences(List<TestRunReport> testRunReports,
                                          ItemPlan<TestReport> testReportPlan,
-                                         Map<TestRunReport, FutureReferenceCallbackRegistry> runScopedRegistries) {
+                                         Map<TestRunReport, FutureReferenceCallbackRegistry> runScopedRegistries,
+                                         List<Test> testDefinitions) {
       if (testRunReports == null) {
          return;
       }
       for (TestRunReport testRunReport : testRunReports) {
+         String testId = testRunReport.getTest() != null ? testRunReport.getTest().getId() : null;
+         Test definition = testId == null ? null : testDefinitions.stream()
+               .filter(test -> testId.equals(test.getId()))
+               .findFirst().orElse(null);
+         List<StepRunReport> stepReports = testRunReport.getStepRunReports();
          FutureReferenceCallbackRegistry callbackRegistry = runScopedRegistries.get(testRunReport);
-         if (callbackRegistry != null) {
-            List<StepRunReport> stepRunReports = testRunReport.getStepRunReports();
-            if (stepRunReports != null) {
-               planStepOutputReferencesForRun(stepRunReports, testReportPlan, callbackRegistry);
-            }
+         if (stepReports == null || callbackRegistry == null) {
+            continue;
          }
+         planRunStepOutputs(stepReports, testReportPlan, callbackRegistry, definition);
       }
    }
 
-   private void planStepOutputReferencesForRun(List<StepRunReport> stepRunReports,
-                                               ItemPlan<TestReport> testReportPlan,
-                                               FutureReferenceCallbackRegistry callbackRegistry) {
-      for (StepRunReport stepRunReport : stepRunReports) {
-         StepOutputPlanDissector dissector = dissectorProvider.getDissector(stepRunReport);
+   private void planRunStepOutputs(List<StepRunReport> stepReports, ItemPlan<TestReport> testReportPlan,
+                                   FutureReferenceCallbackRegistry callbackRegistry, Test definition) {
+      Map<String, Step> stepsByName = new HashMap<>();
+      Map<String, Integer> executionOrder = new HashMap<>();
+      if (definition != null) {
+         for (Step step : definition.getSteps()) {
+            executionOrder.put(step.getName(), executionOrder.size());
+            stepsByName.put(step.getName(), step);
+         }
+      }
+      // Attachments must resolve before their consumers are serialized, even if reports were reordered.
+      List<StepRunReport> orderedReports = new ArrayList<>(stepReports);
+      orderedReports.sort(Comparator.comparingInt(stepReport ->
+            executionOrder.getOrDefault(stepReport.getStepName(), Integer.MAX_VALUE)));
+      for (StepRunReport stepReport : orderedReports) {
+         Step step = stepsByName.get(stepReport.getStepName());
+         Map<String, String> aliases = step != null ? step.getOutputMappings() : Map.of();
+         StepOutputPlanDissector dissector = dissectorProvider.getDissector(stepReport);
          if (dissector != null) {
-            safeDissect(dissector, new StepOutputPlan(testReportPlan, stepRunReport, datahouseUrl, callbackRegistry));
+            safeDissect(dissector, new StepOutputPlan(testReportPlan, stepReport, datahouseUrl, callbackRegistry, aliases));
          }
       }
    }
@@ -242,7 +257,8 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
          return;
       }
       for (TestReport subReport : report.getSubReports()) {
-         ItemPlan<TestReport> subReportPlan = buildTestReportPlan(subReport, acl);
+         // Nested historical reports have no associated definitions; parent definitions may describe different tests.
+         ItemPlan<TestReport> subReportPlan = buildTestReportPlan(subReport, acl, List.of());
          testReportPlan.addFutureReferencePlan(
                ReferencePlan.forItem(subReport.getTestSuiteName(), subReportPlan.type(), subReportPlan),
                (testReport, refName, refId) -> {

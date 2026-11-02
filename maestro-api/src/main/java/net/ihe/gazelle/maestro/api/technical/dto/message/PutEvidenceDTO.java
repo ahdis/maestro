@@ -100,8 +100,9 @@ public class PutEvidenceDTO extends MessageDTO<PutEvidence> implements SecuredMe
             description = "The content of the evidence."
     )
     @JsonProperty("content")
-    public PropertyDTO<?> getContent() {
-        return (PropertyDTO<?>) SubTypingDTO.fromBusinessObject(message.getContent());
+    @SuppressWarnings("rawtypes")
+    public PropertyDTO getContent() {
+        return (PropertyDTO) SubTypingDTO.fromBusinessObject(message.getContent());
     }
 
     public void setContent(PropertyDTO<?> content) {
