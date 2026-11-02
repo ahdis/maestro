@@ -28,9 +28,7 @@ import net.ihe.gazelle.maestro.spi.business.recording.FutureReferenceCallbackReg
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanDissectorFactory;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.AttachmentPlan;
-import net.ihe.gazelle.maestro.spi.business.recording.plan.FutureReferencePlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemPlan;
-import net.ihe.gazelle.maestro.spi.business.recording.plan.MaestroRefType;
 import net.ihe.gazelle.modelmarshaller.technical.marshalling.MarshallingException;
 import net.ihe.gazelle.modelmarshaller.technical.marshalling.TextMarshaller;
 import org.junit.jupiter.api.Test;
