@@ -22,7 +22,7 @@ import net.ihe.gazelle.maestro.engine.business.UnknownStepException;
 import net.ihe.gazelle.maestro.quarkus.configuration.ServiceRegistryDAOImpl;
 import net.ihe.gazelle.maestro.quarkus.configuration.ServiceRegistryImpl;
 import org.junit.jupiter.api.Test;
-import technical.dao.SessionStoreImpl;
+import technical.dao.SessionStoreCache;
 import technical.provider.HandlerProviderSPI;
 import technical.provider.StepExecutorSPIProvider;
 
@@ -33,7 +33,7 @@ class StepExecutorSPIProviderTest {
     @Test
     void getExecutorNotSupportedStep(){
         Step step = new Step();
-        StepExecutorProvider provider = new StepExecutorSPIProvider(new HandlerProviderSPI(new ServiceRegistryImpl(new ServiceRegistryDAOImpl()), null, new SessionStoreImpl<>()));
+        StepExecutorProvider provider = new StepExecutorSPIProvider(new HandlerProviderSPI(new ServiceRegistryImpl(new ServiceRegistryDAOImpl()), null, new SessionStoreCache<>()));
         assertThrows(UnknownStepException.class, () -> provider.getExecutor("sessionId", step));
     }
 

@@ -75,4 +75,13 @@ public interface MaestroObserver {
     * @param executionFinished information about the finished execution
     */
    void onExecutionFinished(ExecutionFinished executionFinished);
+
+    /**
+     * Ask for manual grading during test execution.
+     *
+     * @param askGrading the grading request containing details such as description, criterion, and timeout
+     * @return a {@code CompletableFuture} that will complete with an instance of {@code GradingCompleted}
+     *         when the grading result is available
+     */
+   CompletableFuture<GradingCompleted> askGrading(AskGrading askGrading);
 }

@@ -34,254 +34,293 @@ import java.util.Set;
  */
 public class Test implements Serializable {
 
-   @Serial
-   private static final long serialVersionUID = -7394123287397209441L;
+    @Serial
+    private static final long serialVersionUID = -7394123287397209441L;
 
-   /**
-    * For each step in the test, a margin is added to the timeout of the step to prevent computation time.
-    */
-   private static final int TIMEOUT_MARGIN_OFFSET = 3000;
+    /**
+     * For each step in the test, a margin is added to the timeout of the step to prevent computation time.
+     */
+    private static final int TIMEOUT_MARGIN_OFFSET = 3000;
 
-   /**
-    * The id of the test.
-    */
-   private String id;
+    /**
+     * The id of the test.
+     */
+    private String id;
 
-   /**
-    * The name of the test.
-    */
-   private String name;
+    /**
+     * The name of the test.
+     */
+    private String name;
 
-   /**
-    * The steps of the test.
-    */
-   private List<Step> steps = new ArrayList<>();
+    /**
+     * The grading method of the test.
+     */
+    private GradingMethod gradingMethod;
 
-   /**
-    * The list of supported inputs.
-    */
-   private List<SupportedInput> supportedInputs = new ArrayList<>();
+    /**
+     * The steps of the test.
+     */
+    private List<Step> steps = new ArrayList<>();
 
-   /**
-    * Default constructor
-    */
-   public Test() {
-      // Empty
-   }
+    /**
+     * The list of supported inputs.
+     */
+    private List<SupportedInput> supportedInputs = new ArrayList<>();
 
-   /**
-    * Retrieves the identifier associated with this instance.
-    *
-    * @return the identifier of this instance as a string
-    */
-   public String getId() {
-      return id;
-   }
+    /**
+     * Default constructor
+     */
+    public Test() {
+        // Empty
+    }
 
-   /**
-    * Sets the identifier for this instance.
-    *
-    * @param id the identifier to be set for this instance
-    * @return the current instance of the Test class
-    */
-   public Test setId(String id) {
-      this.id = id;
-      return this;
-   }
+    /**
+     * Retrieves the identifier associated with this instance.
+     *
+     * @return the identifier of this instance as a string
+     */
+    public String getId() {
+        return id;
+    }
 
-   /**
-    * Retrieves the name associated with this instance.
-    *
-    * @return the name of this instance as a string
-    */
-   public String getName() {
-      return name;
-   }
+    /**
+     * Sets the identifier for this instance.
+     *
+     * @param id the identifier to be set for this instance
+     * @return the current instance of the Test class
+     */
+    public Test setId(String id) {
+        this.id = id;
+        return this;
+    }
 
-   /**
-    * Sets the name for this instance.
-    *
-    * @param name the name to be set for this instance
-    * @return the current instance of the Test class
-    */
-   public Test setName(String name) {
-      this.name = name;
-      return this;
-   }
+    /**
+     * Retrieves the name associated with this instance.
+     *
+     * @return the name of this instance as a string
+     */
+    public String getName() {
+        return name;
+    }
 
-   /**
-    * Retrieves the list of steps associated with this instance.
-    *
-    * @return a list of steps represented as {@code List<Step>}. The returned list is a copy
-    * of the internal list to ensure immutability.
-    */
-   public List<Step> getSteps() {
-      return new ArrayList<>(steps);
-   }
+    /**
+     * Sets the name for this instance.
+     *
+     * @param name the name to be set for this instance
+     * @return the current instance of the Test class
+     */
+    public Test setName(String name) {
+        this.name = name;
+        return this;
+    }
 
-   /**
-    * Sets the list of steps for this instance.
-    *
-    * @param steps the list of steps to be set for this instance. This list represents
-    *              {@code List<Step>} objects.
-    * @return the current instance of the {@code Test} class for method chaining.
-    */
-   public Test setSteps(List<Step> steps) {
-      this.steps = steps != null ? new ArrayList<>(steps) : new ArrayList<>();
-      return this;
-   }
+    /**
+     * Retrieves the grading method associated with this instance.
+     *
+     * @return the grading method of this instance as a {@code GradingMethod} enum.
+     */
+    public GradingMethod getGradingMethod() {
+        return gradingMethod;
+    }
 
-   /**
-    * Adds a step to the list of steps associated with this instance.
-    *
-    * @param step the step to be added, represented as an instance of the {@code Step} class
-    * @return the current instance of the {@code Test} class
-    */
-   public Test addStep(Step step) {
-      steps.add(step);
-      return this;
-   }
+    /**
+     * Sets the grading method for this instance.
+     *
+     * @param gradingMethod the grading method to be set for this instance
+     * @return the current instance of the Test class
+     */
+    public Test setGradingMethod(GradingMethod gradingMethod) {
+        this.gradingMethod = gradingMethod;
+        return this;
+    }
 
-   /**
-    * Retrieves the list of supported inputs for this instance.
-    *
-    * @return a new {@code List<SupportedInput>} containing the supported inputs
-    */
-   public List<SupportedInput> getSupportedInputs() {
-      return new ArrayList<>(supportedInputs);
-   }
+    /**
+     * Retrieves the list of supported inputs for this instance.
+     *
+     * @return a new {@code List<SupportedInput>} containing the supported inputs
+     */
+    public List<SupportedInput> getSupportedInputs() {
+        return new ArrayList<>(supportedInputs);
+    }
 
-   /**
-    * Sets the list of supported inputs for this instance.
-    *
-    * @param supportedInputs the list of supported inputs to be set for this instance,
-    *                        represented as {@code List<SupportedInput>}
-    * @return the current instance of the {@code Test} class for method chaining
-    */
-   public Test setSupportedInputs(List<SupportedInput> supportedInputs) {
-      this.supportedInputs = supportedInputs != null
-            ? new ArrayList<>(supportedInputs)
-            : new ArrayList<>();
-      return this;
-   }
+    /**
+     * Sets the list of supported inputs for this instance.
+     *
+     * @param supportedInputs the list of supported inputs to be set for this instance,
+     *                        represented as {@code List<SupportedInput>}
+     * @return the current instance of the {@code Test} class for method chaining
+     */
+    public Test setSupportedInputs(List<SupportedInput> supportedInputs) {
+        this.supportedInputs = supportedInputs != null
+                ? new ArrayList<>(supportedInputs)
+                : new ArrayList<>();
+        return this;
+    }
 
-   /**
-    * Adds a supported input to the list of supported inputs for the current instance.
-    *
-    * @param supportedInput the supported input to be added, represented as an instance of {@code SupportedInput}
-    * @return the current instance of the {@code Test} class for method chaining
-    */
-   public Test addSupportedInput(SupportedInput supportedInput) {
-      this.supportedInputs.add(supportedInput);
-      return this;
-   }
+    /**
+     * Adds a supported input to the list of supported inputs for the current instance.
+     *
+     * @param supportedInput the supported input to be added, represented as an instance of {@code SupportedInput}
+     * @return the current instance of the {@code Test} class for method chaining
+     */
+    public Test addSupportedInput(SupportedInput supportedInput) {
+        this.supportedInputs.add(supportedInput);
+        return this;
+    }
 
-   /**
-    * Determines whether the identifier for this instance is defined and not blank.
-    *
-    * @return true if the identifier is neither null nor blank, false otherwise
-    */
-   public boolean isIdDefined() {
-      return id != null && !id.isBlank();
-   }
+    /**
+     * Retrieves the list of steps associated with this instance.
+     *
+     * @return a list of steps represented as {@code List<Step>}. The returned list is a copy
+     * of the internal list to ensure immutability.
+     */
+    public List<Step> getSteps() {
+        return new ArrayList<>(steps);
+    }
 
-   /**
-    * Determines whether the name for this instance is defined and not blank.
-    *
-    * @return true if the name is neither null nor blank, false otherwise
-    */
-   public boolean isNameDefined() {
-      return name != null && !name.isBlank();
-   }
+    /**
+     * Sets the list of steps for this instance.
+     *
+     * @param steps the list of steps to be set for this instance. This list represents
+     *              {@code List<Step>} objects.
+     * @return the current instance of the {@code Test} class for method chaining.
+     */
+    public Test setSteps(List<Step> steps) {
+        this.steps = steps != null ? new ArrayList<>(steps) : new ArrayList<>();
+        return this;
+    }
 
-   /**
-    * Checks whether there is at least one step associated with this instance.
-    *
-    * @return true if the steps list is not null and contains at least one element, false otherwise
-    */
-   public boolean atLeastOneStep() {
-      return steps != null && !steps.isEmpty();
-   }
+    /**
+     * Adds a step to the list of steps associated with this instance.
+     *
+     * @param step the step to be added, represented as an instance of the {@code Step} class
+     * @return the current instance of the {@code Test} class
+     */
+    public Test addStep(Step step) {
+        steps.add(step);
+        return this;
+    }
 
-   /**
-    * Determines whether all steps associated with this instance have unique names.
-    *
-    * @return true if all step names are unique, false if there is any duplicate step name
-    */
-   public boolean areStepsUnique() {
-      List<String> names = new ArrayList<>();
-      for (Step step : steps) {
-         if (!names.contains(step.getName())) {
-            names.add(step.getName());
-         } else {
-            return false;
-         }
-      }
-      return true;
-   }
+    /**
+     * Determines whether the identifier for this instance is defined and not blank.
+     *
+     * @return true if the identifier is neither null nor blank, false otherwise
+     */
+    public boolean isIdDefined() {
+        return id != null && !id.isBlank();
+    }
 
-   /**
-    * Determines whether every output alias is published once and does not shadow a supported input.
-    * Recording links a consumer to its producer by alias, so a reused alias would be ambiguous.
-    *
-    * @return true if all output aliases are distinct from each other and from supported input IDs
-    */
-   public boolean areOutputAliasesUnique() {
-      Set<String> names = new HashSet<>();
-      if (supportedInputs != null) {
-         supportedInputs.stream().filter(Objects::nonNull).map(SupportedInput::getId).filter(Objects::nonNull).forEach(names::add);
-      }
-      if (steps == null) {
-         return true;
-      }
-      for (Step step : steps) {
-         if (step == null) {
-            continue;
-         }
-         for (String alias : step.getOutputMappings().values()) {
-            if (!names.add(alias)) {
-               return false;
+    /**
+     * Determines whether the name for this instance is defined and not blank.
+     *
+     * @return true if the name is neither null nor blank, false otherwise
+     */
+    public boolean isNameDefined() {
+        return name != null && !name.isBlank();
+    }
+
+    /**
+     * Checks whether the grading method for this instance is defined.
+     *
+     * @return true if the grading method is not null, false otherwise
+     */
+    public boolean isGradingMethodDefined() {
+        return gradingMethod != null;
+    }
+
+    /**
+     * Checks whether there is at least one step associated with this instance.
+     *
+     * @return true if the steps list is not null and contains at least one element, false otherwise
+     */
+    public boolean atLeastOneStep() {
+        return steps != null && !steps.isEmpty();
+    }
+
+    /**
+     * Determines whether all steps associated with this instance have unique names.
+     *
+     * @return true if all step names are unique, false if there is any duplicate step name
+     */
+    public boolean areStepsUnique() {
+        List<String> names = new ArrayList<>();
+        for (Step step : steps) {
+            if (!names.contains(step.getName())) {
+                names.add(step.getName());
+            } else {
+                return false;
             }
-         }
-      }
-      return true;
-   }
+        }
+        return true;
+    }
 
-   /** Checks output aliases against effective execution input names. */
-   public boolean areOutputAliasesDisjointFrom(Collection<String> inputNames) {
-      if (steps == null) {
-         return true;
-      }
-      return steps.stream().filter(Objects::nonNull)
-            .flatMap(step -> step.getOutputMappings().values().stream())
-            .noneMatch(inputNames::contains);
-   }
+    /**
+     * Determines whether every output alias is published once and does not shadow a supported input.
+     * Recording links a consumer to its producer by alias, so a reused alias would be ambiguous.
+     *
+     * @return true if all output aliases are distinct from each other and from supported input IDs
+     */
+    public boolean areOutputAliasesUnique() {
+        Set<String> names = new HashSet<>();
+        if (supportedInputs != null) {
+            supportedInputs.stream()
+                    .filter(Objects::nonNull)
+                    .map(SupportedInput::getId)
+                    .filter(Objects::nonNull)
+                    .forEach(names::add);
+        }
+        if (steps == null) {
+            return true;
+        }
+        for (Step step : steps) {
+            if (step == null) {
+                continue;
+            }
+            for (String alias : step.getOutputMappings().values()) {
+                if (!names.add(alias)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 
-   /**
-    * Computes the total timeout value for a test run.
-    *
-    * @return the computed timeout value for the test run as a long value in milliseconds
-    */
-   public long computeTestRunTimeout() {
-      return this.getSteps().stream()
-            .mapToLong(Step::getTimeout)
-            .sum() + TIMEOUT_MARGIN_OFFSET;
-   }
+    /** Checks output aliases against effective execution input names. */
+    public boolean areOutputAliasesDisjointFrom(Collection<String> inputNames) {
+        if (steps == null) {
+            return true;
+        }
+        return steps.stream().filter(Objects::nonNull)
+                .flatMap(step -> step.getOutputMappings().values().stream())
+                .noneMatch(inputNames::contains);
+    }
 
-   @Override
-   public boolean equals(Object o) {
-      if (!(o instanceof Test test)) {
-         return false;
-      }
-      return Objects.equals(id, test.id)
-            && Objects.equals(name, test.name)
-            && Objects.equals(steps, test.steps)
-            && Objects.equals(supportedInputs, test.supportedInputs);
-   }
+    /**
+     * Computes the total timeout value for a test run.
+     *
+     * @return the computed timeout value for the test run as a long value in milliseconds
+     */
+    public long computeTestRunTimeout() {
+        return this.getSteps().stream()
+                .mapToLong(Step::getTimeout)
+                .sum() + TIMEOUT_MARGIN_OFFSET;
+    }
 
-   @Override
-   public int hashCode() {
-      return Objects.hash(id, name, steps, supportedInputs);
-   }
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Test test)) {
+            return false;
+        }
+        return Objects.equals(id, test.id)
+                && Objects.equals(name, test.name)
+                && Objects.equals(gradingMethod, test.gradingMethod)
+                && Objects.equals(steps, test.steps)
+                && Objects.equals(supportedInputs, test.supportedInputs);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, gradingMethod, steps, supportedInputs);
+    }
 }
 

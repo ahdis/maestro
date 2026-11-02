@@ -54,7 +54,7 @@ public class SupportedInputsPropertyDTO extends PropertyDTO<SupportedInputsPrope
       return TYPE;
    }
 
-   @SuppressWarnings("rawtypes")
+   @SuppressWarnings({"unchecked", "rawtypes"})
    @Schema(
          name = "value",
          description = "The Supported input list defined by the property."

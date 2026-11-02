@@ -31,6 +31,7 @@
         <module>user-interaction-step</module>
         <module>itb-step</module>
         <module>assertion-step</module>
+        <module>grading-step</module>
     </modules>
 
 </project>

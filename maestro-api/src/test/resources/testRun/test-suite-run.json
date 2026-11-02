@@ -29,6 +29,7 @@
     {
       "id": "fixture-test",
       "name": "Fixture Test",
+      "gradingMethod": "AUTOMATED",
       "supportedInputs": [
         {
           "id": "test-input",

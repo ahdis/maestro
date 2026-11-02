@@ -1,0 +1,132 @@
+{
+  "id": "Demo_User_Interaction_Inputs",
+  "name": "Demo User Interaction Inputs",
+  "summary": "Test Case to demonstrate the user interaction with inputs",
+  "description": "This test case is there to <b>demonstrate</b> the <u>capability</u> to execute different test steps (Validation ans User interaction) in one automated test case",
+  "tags": [
+    "VALIDATION",
+    "USER_INTERACTION"
+  ],
+  "testRoles": [
+    {
+      "name": "server role",
+      "capabilities": {
+        "or": [
+          {
+            "capability": "ATNA/*"
+          },
+          {
+            "capability": "PAM/*"
+          }
+        ]
+      }
+    }
+  ],
+  "supportedInputs": [
+    {
+      "id": "mCSD Request file",
+      "type": "FILE",
+      "label": "mCSD Request",
+      "required": true
+    }
+  ],
+  "steps": [
+    {
+      "name": "Checking mCSD request",
+      "type": "VALIDATION",
+      "properties": [
+        {
+          "name": "validationService",
+          "type": "STRING",
+          "value": "Matchbox"
+        },
+        {
+          "name": "validationProfile",
+          "type": "STRING",
+          "value": "http://fhir.ch/ig/ch-epr-fhir/StructureDefinition/CH.mCSD.PractitionerRole"
+        },
+        {
+          "name": "contentToValidate",
+          "type": "BYTE_ARRAY",
+          "value": "${mCSD Request file}"
+        }
+      ]
+    },
+    {
+      "name": "User interaction inputs test",
+      "type": "USER_INTERACTION",
+      "timeout": 30,
+      "description": "Please upload evidence from step 1",
+      "outputMappings": [
+        "mCSD Request file:mCSD Request file"
+      ],
+      "properties": [
+        {
+          "name": "interactionTitle",
+          "value": "User interaction inputs test",
+          "type": "STRING"
+        },
+        {
+          "name": "message",
+          "value": "Please upload evidence from step 1",
+          "type": "STRING"
+        },
+        {
+          "name": "interactionInputs",
+          "type": "SUPPORTED_INPUTS",
+          "value": [
+            {
+              "id": "boolean_input",
+              "type": "BOOLEAN",
+              "label": "Boolean input",
+              "required": true,
+              "description": "Test the boolean input for user interaction",
+              "defaultValue": "false"
+            },
+            {
+              "id": "drop_down_input",
+              "type": "TEXT",
+              "label": "Drop down input",
+              "required": true,
+              "description": "Test the drop down input for user interaction",
+              "defaultValue": "value1",
+              "possibleValues": [
+                "value1", "value2"
+              ]
+            },
+            {
+              "id": "any_file_input",
+              "type": "FILE",
+              "label": "Any file input",
+              "required": true,
+              "description": "Test the file input for user interaction"
+            },
+            {
+              "id": "text_input",
+              "type": "TEXT",
+              "label": "Text input",
+              "required": true,
+              "description": "Test the text input for user interaction"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Final Grading",
+      "type": "GRADING",
+      "timeout": 60,
+      "description": "The purpose of this step is to provide the final grading for this test.",
+      "properties": [
+        {
+          "name": "criteria",
+          "value": [
+            "Check A",
+            "Check B"
+          ],
+          "type": "STRING_LIST"
+        }
+      ]
+    }
+  ]
+}

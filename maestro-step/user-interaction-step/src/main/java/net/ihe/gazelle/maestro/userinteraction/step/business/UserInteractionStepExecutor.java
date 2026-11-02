@@ -37,10 +37,10 @@ public class UserInteractionStepExecutor implements StepExecutor {
     private final UserInteractionHandler userInteractionHandler;
 
     /**
-    * Constructor for UserInteractionStepExecutor.
-    *
-    * @param userInteractionHandler the handler to manage user interactions
-    */
+     * Constructor for UserInteractionStepExecutor.
+     *
+     * @param userInteractionHandler the handler to manage user interactions
+     */
     public UserInteractionStepExecutor(UserInteractionHandler userInteractionHandler) {
         this.userInteractionHandler = userInteractionHandler;
     }
@@ -49,7 +49,10 @@ public class UserInteractionStepExecutor implements StepExecutor {
     public StepRunReport execute(StepRun stepRun) {
         String interactionTitle = stepRun.getPropertyValue(UserInteractionStepDefinition.INTERACTION_TITLE);
         String message = stepRun.getPropertyValue(UserInteractionStepDefinition.MESSAGE);
-        List<SupportedInput> supportedInputs = stepRun.getPropertyValue(UserInteractionStepDefinition.INTERACTION_INPUTS);
+        List<SupportedInput> supportedInputs = List.of();
+        if (stepRun.hasProperty(UserInteractionStepDefinition.INTERACTION_INPUTS)) {
+            supportedInputs = stepRun.getPropertyValue(UserInteractionStepDefinition.INTERACTION_INPUTS);
+        }
 
         UserInteractionResponseValidator responseValidator = new UserInteractionResponseValidator(supportedInputs);
         UserInteractionCompleted interactionCompleted = userInteractionHandler.displayMessage(interactionTitle, message, stepRun.getTimeout(), supportedInputs);

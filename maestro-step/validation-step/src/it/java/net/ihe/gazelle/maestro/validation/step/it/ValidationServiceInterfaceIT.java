@@ -61,7 +61,17 @@ class ValidationServiceInterfaceIT {
             serviceName, createService(serviceName, interfaceName)
       ));
       ConfigProvider configProvider = key -> null;
-      ReadSessionStore<MaestroObserver> observerStore = id -> null;
+      ReadSessionStore<MaestroObserver> observerStore = new ReadSessionStore<>() {
+          @Override
+          public MaestroObserver getSession(String id) {
+              return null;
+          }
+
+          @Override
+          public List<MaestroObserver> getAllSessions() {
+              return List.of();
+          }
+      };
       HandlerProvider handlerProvider = new HandlerProviderSPI(registry, configProvider, observerStore);
 
       Step step = new Step()

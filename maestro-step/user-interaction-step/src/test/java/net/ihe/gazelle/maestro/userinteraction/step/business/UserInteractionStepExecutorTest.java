@@ -40,7 +40,7 @@ class UserInteractionStepExecutorTest {
         return executor.execute(new StepRun(new Step().setName("Interaction").setType("USER_INTERACTION")
                 .setProperties(List.of(new StringProperty("interactionTitle", "Patient"),
                         new StringProperty("message", "Enter values"),
-                        new SupportedInputsProperty("interactionInputs", new java.util.ArrayList<>(fields)))), List.of()));
+                        new SupportedInputsProperty("interactionInputs", fields))), List.of()));
     }
 
     @Test
@@ -73,6 +73,20 @@ class UserInteractionStepExecutorTest {
                 new ByteArrayProperty("file", "${documentToValidate}"))), context);
         assertEquals("123", consumer.getPropertyValue("patientId"));
         assertArrayEquals(new byte[]{1, 2}, consumer.getPropertyValue("file"));
+    }
+
+    @Test
+    void acknowledgmentWithoutConfiguredInputsProducesNoOutputs() {
+        UserInteractionStepExecutor executor = new UserInteractionStepExecutor(new UserInteractionHandlerStub());
+        StepRunReport report = executor.execute(new StepRun(new Step()
+                .setName("Acknowledgment")
+                .setType(UserInteractionStepDefinition.TYPE)
+                .setProperties(List.of(
+                        new StringProperty(UserInteractionStepDefinition.INTERACTION_TITLE, "Information"),
+                        new StringProperty(UserInteractionStepDefinition.MESSAGE, "Continue"))), List.of()));
+        assertEquals(StepResult.DONE, report.getResult());
+        assertTrue(report.getInputs().isEmpty());
+        assertTrue(report.getOutputs().isEmpty());
     }
 
     @Test

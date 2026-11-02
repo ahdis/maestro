@@ -41,6 +41,7 @@ class TestSuiteDTOTest {
    private static final Path TEST_SUITE_JSON = Path.of("src/test/resources/test/test-suite.json");
 
    @Test
+   @SuppressWarnings("rawtypes")
    void shouldExposeNestedStateFromBusinessObject() {
       TestReference testReference = new TestReference().setTestId("test-1");
 

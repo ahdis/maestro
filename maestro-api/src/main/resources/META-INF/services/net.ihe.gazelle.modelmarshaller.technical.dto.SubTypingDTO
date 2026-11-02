@@ -39,3 +39,6 @@ net.ihe.gazelle.maestro.api.technical.dto.message.StepRunFinishedDTO
 net.ihe.gazelle.maestro.api.technical.dto.message.TestRunFinishedDTO
 net.ihe.gazelle.maestro.api.technical.dto.message.ExecutionFinishedDTO
 net.ihe.gazelle.maestro.api.technical.dto.message.PutEvidenceDTO
+net.ihe.gazelle.maestro.api.technical.dto.message.DeleteEvidenceDTO
+net.ihe.gazelle.maestro.api.technical.dto.message.AskGradingDTO
+net.ihe.gazelle.maestro.api.technical.dto.message.GradingCompletedDTO

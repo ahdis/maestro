@@ -130,6 +130,11 @@
                 <artifactId>assertion-step</artifactId>
                 <version>1.4.0-NG-02-SNAPSHOT</version>
             </dependency>
+            <dependency>
+                <groupId>net.ihe.gazelle</groupId>
+                <artifactId>grading-step</artifactId>
+                <version>1.4.0-NG-02-SNAPSHOT</version>
+            </dependency>
 
             <dependency>
                 <groupId>io.quarkus.platform</groupId>

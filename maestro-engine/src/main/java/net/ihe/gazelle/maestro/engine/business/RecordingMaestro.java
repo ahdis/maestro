@@ -48,19 +48,19 @@ public class RecordingMaestro implements Maestro {
    }
 
    @Override
-   public void executeTestSuite(TestSuiteRun testSuiteRun, boolean persist, MaestroObserver observer) {
+   public void executeTestSuite(String testSessionId, TestSuiteRun testSuiteRun, boolean persist, MaestroObserver observer) {
       if (persist) {
          observer = new RecordObserver(observer);
       }
-      maestro.executeTestSuite(testSuiteRun, observer);
+      maestro.executeTestSuite(testSessionId, testSuiteRun, observer);
    }
 
    @Override
-   public void executeTest(TestRun testRun, boolean persist, MaestroObserver observer) {
+   public void executeTest(String testSessionId, TestRun testRun, boolean persist, MaestroObserver observer) {
       if (persist) {
          observer = new RecordObserver(observer);
       }
-      maestro.executeTest(testRun, observer);
+      maestro.executeTest(testSessionId, testRun, observer);
    }
 
    private List<Test> testDefinitions(ExecutionFinished finished) {
@@ -117,5 +117,10 @@ public class RecordingMaestro implements Maestro {
          }
          delegate.onExecutionFinished(executionFinished);
       }
+
+       @Override
+       public CompletableFuture<GradingCompleted> askGrading(AskGrading askGrading) {
+           return delegate.askGrading(askGrading);
+       }
    }
 }

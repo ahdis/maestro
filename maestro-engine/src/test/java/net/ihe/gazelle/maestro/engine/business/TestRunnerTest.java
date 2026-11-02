@@ -21,6 +21,7 @@ import net.ihe.gazelle.maestro.api.business.message.StartTestRun;
 import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
 import net.ihe.gazelle.maestro.api.business.message.TestRunFinished;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
+import net.ihe.gazelle.maestro.api.business.test.GradingMethod;
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.test.Test;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
@@ -30,7 +31,7 @@ import net.ihe.gazelle.maestro.engine.business.context.TestRunSession;
 import net.ihe.gazelle.maestro.spi.business.StepRun;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 import org.junit.jupiter.api.BeforeEach;
-import technical.dao.SessionStoreImpl;
+import technical.dao.SessionStoreCache;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +41,7 @@ import static org.hamcrest.Matchers.*;
 
 class TestRunnerTest {
 
-    private SessionStoreImpl<TestRunSession> sessionStore;
+    private SessionStoreCache<TestRunSession> sessionStore;
     private RecordingTestRunEventProducer eventProducer;
     private TestRunner testRunner;
     private Step firstStep;
@@ -48,7 +49,7 @@ class TestRunnerTest {
 
     @BeforeEach
     void setUp() {
-        sessionStore = new SessionStoreImpl<>();
+        sessionStore = new SessionStoreCache<>();
         eventProducer = new RecordingTestRunEventProducer();
         testRunner = new TestRunner(sessionStore, eventProducer);
 
@@ -58,6 +59,7 @@ class TestRunnerTest {
         Test test = new Test()
                 .setId("test-1")
                 .setName("Test 1")
+                .setGradingMethod(GradingMethod.AUTOMATED)
                 .setSteps(List.of(firstStep, secondStep));
 
         testRun = new TestRun()
