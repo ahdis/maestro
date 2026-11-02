@@ -147,7 +147,7 @@ public class TestStreamSocketController {
                 default -> {
                     sessionService.removeSession(session.getId());
                     String error = "Unexpected message type: " + message.getClass().getName();
-                    //session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, error));
+                    session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, error));
                     LOG.debug(error);
                 }
             }
