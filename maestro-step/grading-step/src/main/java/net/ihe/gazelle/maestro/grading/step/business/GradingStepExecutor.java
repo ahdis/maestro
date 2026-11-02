@@ -17,7 +17,7 @@
 package net.ihe.gazelle.maestro.grading.step.business;
 
 import net.ihe.gazelle.maestro.api.business.message.GradingCompleted;
-import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
+import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.api.business.userinteract.GradingHandler;
@@ -48,14 +48,21 @@ public class GradingStepExecutor implements StepExecutor {
         List<String> criteria = stepRun.getPropertyValue(GradingStepDefinition.CRITERIA);
 
         GradingCompleted gradingCompleted = gradingHandler.displayMessage(criteria, stepRun.getTimeout());
-        return buildStepRunReport(stepRun, gradingCompleted.getResult());
+        return buildStepRunReport(stepRun, gradingCompleted);
     }
 
-    private StepRunReport buildStepRunReport(StepRun stepRun, StepResult result) {
+    private StepRunReport buildStepRunReport(StepRun stepRun, GradingCompleted gradingCompleted) {
         return new StepRunReportBuilder()
                 .setStepName(stepRun.getName())
                 .setType(GradingStepDefinition.TYPE)
-                .setResult(result)
+                .setOutputs(gradingCompleted.getCriteriaReport().stream()
+                        .map(criterion -> new StringProperty()
+                                .setName(criterion.getDescription())
+                                .setValue(criterion.getCriterionResult().name())
+                                .setUserId(criterion.getUserId())
+                                .setDateTime(criterion.getDateTime()))
+                        .toList())
+                .setResult(gradingCompleted.getResult())
                 .build();
     }
 }

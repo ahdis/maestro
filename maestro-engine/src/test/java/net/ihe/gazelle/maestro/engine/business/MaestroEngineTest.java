@@ -224,7 +224,6 @@ class MaestroEngineTest {
         Test test = new Test()
                 .setId("context-test")
                 .setName("Context propagation")
-                .setGradingMethod(GradingMethod.AUTOMATED)
                 .setSteps(List.of(producer, consumer));
 
         TestSuiteRun suiteRun = buildSuiteRun("suite-context", test);

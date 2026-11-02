@@ -18,7 +18,6 @@ package net.ihe.gazelle.maestro.grading.step.technical;
 
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.userinteract.GradingHandler;
-import net.ihe.gazelle.maestro.api.business.userinteract.UserInteractionHandler;
 import net.ihe.gazelle.maestro.grading.step.business.GradingStepDefinition;
 import net.ihe.gazelle.maestro.grading.step.business.GradingStepExecutor;
 import net.ihe.gazelle.maestro.spi.business.Handler;
@@ -47,7 +46,7 @@ public class GradingStepExecutorFactory implements StepExecutorFactory {
     @Override
     public Map<String, Class<? extends Handler>> getRequiredServices(Step step) {
         return Map.of(
-                UserInteractionHandler.SERVICE_NAME, UserInteractionHandler.class
+                GradingHandler.SERVICE_NAME, GradingHandler.class
         );
     }
 

@@ -98,4 +98,34 @@ class GradingReportTest {
         assertEquals("authorization", dto.getAuthorization());
         assertEquals(DeleteEvidence.class, dto.getBusinessObjectClass());
     }
+    @Test
+    void gradingMetadataSurvivesSerializationAndJsonTransport() {
+        var when = java.time.Instant.parse("2026-11-02T12:00:00Z");
+        var criterion = new CriterionReport().setDescription("Readable")
+                .setCriterionResult(CriterionResult.PASSED).setUserId("reviewer").setDateTime(when);
+        var serializer = new JacksonSerDes();
+        var restored = serializer.deserialize(serializer.serializeAsString(new CriterionReportDTO(criterion)),
+                CriterionReportDTO.class).getBusinessObject();
+        assertEquals(criterion, restored);
+        assertEquals(criterion.hashCode(), restored.hashCode());
+        assertEquals("reviewer", restored.getUserId());
+        assertEquals(when, restored.getDateTime());
+        var completed = new GradingCompleted().setResult(StepResult.PASSED).setCriteriaReport(List.of(criterion))
+                .setUserId("reviewer").setDateTime(when);
+        var dto = new GradingCompletedDTO(completed, "");
+        assertEquals("reviewer", dto.getUserId());
+        assertEquals(when, java.time.OffsetDateTime.parse(dto.getDateTime()).toInstant());
+        var input = new GradingCompletedDTO();
+        assertNull(input.getDateTime());
+        input.setDateTime(null);
+        assertNull(input.getBusinessObject().getDateTime());
+        input.setDateTime(dto.getDateTime());
+        input.setUserId(dto.getUserId());
+        assertEquals(when, input.getBusinessObject().getDateTime());
+        assertEquals("reviewer", input.getBusinessObject().getUserId());
+        var emptyCriterion = new CriterionReportDTO();
+        assertNull(emptyCriterion.getDateTime());
+        emptyCriterion.setDateTime(null);
+        assertNull(emptyCriterion.getBusinessObject().getDateTime());
+    }
 }

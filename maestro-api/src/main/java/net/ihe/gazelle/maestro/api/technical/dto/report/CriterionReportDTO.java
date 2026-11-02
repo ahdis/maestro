@@ -25,6 +25,11 @@ import net.ihe.gazelle.maestro.api.business.testreport.CriterionResult;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+
 @Schema(
         name = "CriterionReport",
         description = "The report for an acceptance criterion."
@@ -32,7 +37,9 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
         "description",
-        "result"
+        "result",
+        "userId",
+        "dateTime"
 })
 public class CriterionReportDTO implements DTO<CriterionReport> {
 
@@ -80,5 +87,40 @@ public class CriterionReportDTO implements DTO<CriterionReport> {
 
     public void setGradingResult(String gradingResult) {
         criterionReport.setCriterionResult(CriterionResult.valueOf(gradingResult));
+    }
+
+    @Schema(
+            name = "userId",
+            description = "The id of the user who assessed the criterion."
+    )
+    @JsonProperty("userId")
+    public String getUserId() {
+        return criterionReport.getUserId();
+    }
+
+    public void setUserId(String userId) {
+        criterionReport.setUserId(userId);
+    }
+
+    @Schema(
+            name = "dateTime",
+            description = "The date time of the criterion assessment."
+    )
+    @JsonProperty("dateTime")
+    public String getDateTime() {
+        if (criterionReport.getDateTime() != null) {
+            return ZonedDateTime.ofInstant(criterionReport.getDateTime(), ZoneId.systemDefault())
+                    .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        } else {
+            return null;
+        }
+    }
+
+    public void setDateTime(String dateTime) {
+        if (dateTime != null) {
+            criterionReport.setDateTime(
+                    Instant.from(ZonedDateTime.parse(dateTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+            );
+        }
     }
 }

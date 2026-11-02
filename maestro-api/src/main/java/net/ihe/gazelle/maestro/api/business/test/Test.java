@@ -60,18 +60,20 @@ public class Test implements Serializable {
     /**
      * The steps of the test.
      */
-    private List<Step> steps = new ArrayList<>();
+    private List<Step> steps;
 
     /**
      * The list of supported inputs.
      */
-    private List<SupportedInput> supportedInputs = new ArrayList<>();
+    private List<SupportedInput> supportedInputs;
 
     /**
      * Default constructor
      */
     public Test() {
-        // Empty
+        gradingMethod = GradingMethod.AUTOMATED;
+        steps = new ArrayList<>();
+        supportedInputs = new ArrayList<>();
     }
 
     /**

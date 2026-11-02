@@ -43,7 +43,8 @@ class GradingStepExecutorFactoryTest {
     @Test
     void getRequiredServicesOfGradingStep() {
         Step gradingStep = getGradingStep();
-        assertEquals(1, factory.getRequiredServices(gradingStep).size());
+        assertEquals(Map.of(GradingHandler.SERVICE_NAME, GradingHandler.class),
+                factory.getRequiredServices(gradingStep));
     }
 
     @Test
