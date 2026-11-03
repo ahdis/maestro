@@ -23,7 +23,7 @@ import net.ihe.gazelle.servicemetadata.api.business.HttpRestBindingBuilder;
 import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterfaceBuilder;
 import net.ihe.gazelle.servicemetadata.api.business.Service;
 import net.ihe.gazelle.servicemetadata.api.business.ServiceBuilder;
-import technical.provider.ServiceRegistry;
+import net.ihe.gazelle.maestro.engine.technical.provider.ServiceRegistry;
 
 import java.util.ArrayList;
 import java.util.List;

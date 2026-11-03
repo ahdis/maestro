@@ -25,8 +25,8 @@ import net.ihe.gazelle.maestro.engine.business.mock.InMemoryTestReportRecordingS
 import net.ihe.gazelle.maestro.quarkus.mock.HandlerProviderMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import technical.dao.SessionStoreCache;
-import technical.provider.StepExecutorSPIProvider;
+import net.ihe.gazelle.maestro.engine.technical.dao.SessionStoreCache;
+import net.ihe.gazelle.maestro.engine.technical.provider.StepExecutorSPIProvider;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

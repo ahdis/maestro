@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package technical.provider;
+package net.ihe.gazelle.maestro.engine.technical.provider;
 
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.engine.business.StepExecutorProvider;

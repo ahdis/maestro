@@ -38,8 +38,8 @@ import net.ihe.gazelle.servicemetadata.api.business.Service;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import technical.provider.HandlerProviderSPI;
-import technical.provider.ServiceRegistry;
+import net.ihe.gazelle.maestro.engine.technical.provider.HandlerProviderSPI;
+import net.ihe.gazelle.maestro.engine.technical.provider.ServiceRegistry;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;

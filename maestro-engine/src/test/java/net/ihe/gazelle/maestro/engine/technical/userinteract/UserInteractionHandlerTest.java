@@ -18,7 +18,6 @@ package net.ihe.gazelle.maestro.engine.technical.userinteract;
 
 import net.ihe.gazelle.maestro.engine.business.mock.RecordingMaestroObserver;
 import org.junit.jupiter.api.Test;
-import technical.userinteract.UserInteractionHandlerImpl;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;

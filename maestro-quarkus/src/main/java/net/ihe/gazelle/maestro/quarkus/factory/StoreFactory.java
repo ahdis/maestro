@@ -22,7 +22,7 @@ import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
 import net.ihe.gazelle.maestro.engine.business.context.TestRunSession;
 import net.ihe.gazelle.maestro.engine.business.context.TestSuiteSession;
-import technical.dao.SessionStoreCache;
+import net.ihe.gazelle.maestro.engine.technical.dao.SessionStoreCache;
 
 
 /**

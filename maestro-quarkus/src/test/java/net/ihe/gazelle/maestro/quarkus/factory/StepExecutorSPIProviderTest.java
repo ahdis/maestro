@@ -22,9 +22,9 @@ import net.ihe.gazelle.maestro.engine.business.UnknownStepException;
 import net.ihe.gazelle.maestro.quarkus.configuration.ServiceRegistryDAOImpl;
 import net.ihe.gazelle.maestro.quarkus.configuration.ServiceRegistryImpl;
 import org.junit.jupiter.api.Test;
-import technical.dao.SessionStoreCache;
-import technical.provider.HandlerProviderSPI;
-import technical.provider.StepExecutorSPIProvider;
+import net.ihe.gazelle.maestro.engine.technical.dao.SessionStoreCache;
+import net.ihe.gazelle.maestro.engine.technical.provider.HandlerProviderSPI;
+import net.ihe.gazelle.maestro.engine.technical.provider.StepExecutorSPIProvider;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

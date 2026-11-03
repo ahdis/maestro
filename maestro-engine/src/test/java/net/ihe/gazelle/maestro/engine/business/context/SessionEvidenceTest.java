@@ -23,7 +23,7 @@ import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.engine.business.MaestroSessionServiceImpl;
 import org.junit.jupiter.api.Test;
-import technical.dao.SessionStoreCache;
+import net.ihe.gazelle.maestro.engine.technical.dao.SessionStoreCache;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 

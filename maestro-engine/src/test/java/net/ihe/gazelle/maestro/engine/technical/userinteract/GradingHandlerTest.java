@@ -19,7 +19,6 @@ package net.ihe.gazelle.maestro.engine.technical.userinteract;
 import net.ihe.gazelle.maestro.engine.business.mock.RecordingMaestroObserver;
 import net.ihe.gazelle.maestro.spi.technical.stub.ConfigProviderStub;
 import org.junit.jupiter.api.Test;
-import technical.userinteract.GradingHandlerImpl;
 
 import java.util.List;
 

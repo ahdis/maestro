@@ -27,7 +27,7 @@ import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.engine.business.context.TestSuiteSession;
 import org.junit.jupiter.api.BeforeEach;
-import technical.dao.SessionStoreCache;
+import net.ihe.gazelle.maestro.engine.technical.dao.SessionStoreCache;
 
 import java.util.ArrayList;
 import java.util.List;

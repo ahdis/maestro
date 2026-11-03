@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package technical.userinteract;
+package net.ihe.gazelle.maestro.engine.technical.userinteract;
 
 import net.ihe.gazelle.lang.ExecutionRuntimeException;
 import net.ihe.gazelle.lang.InterruptedRuntimeException;

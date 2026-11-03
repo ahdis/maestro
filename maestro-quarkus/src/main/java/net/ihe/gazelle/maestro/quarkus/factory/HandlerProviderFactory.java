@@ -24,8 +24,8 @@ import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.engine.business.context.ReadSessionStore;
 import net.ihe.gazelle.maestro.spi.technical.ConfigProvider;
 import net.ihe.gazelle.maestro.spi.technical.HandlerProvider;
-import technical.provider.HandlerProviderSPI;
-import technical.provider.ServiceRegistry;
+import net.ihe.gazelle.maestro.engine.technical.provider.HandlerProviderSPI;
+import net.ihe.gazelle.maestro.engine.technical.provider.ServiceRegistry;
 
 /**
  * Factory class responsible for creating {@link HandlerProvider} instances.

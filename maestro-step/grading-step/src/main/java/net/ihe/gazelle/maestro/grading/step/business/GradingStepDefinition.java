@@ -17,6 +17,7 @@
 package net.ihe.gazelle.maestro.grading.step.business;
 
 import net.ihe.gazelle.maestro.api.business.property.Property;
+import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.test.SupportedInput;
 import net.ihe.gazelle.maestro.api.business.test.SupportedTextInput;
 import net.ihe.gazelle.maestro.spi.business.StepDefinition;
@@ -45,6 +46,11 @@ public class GradingStepDefinition implements StepDefinition {
     public static final String CRITERIA = "criteria";
 
     /**
+     * Output property key for the note.
+     */
+    public static final String NOTE = "note";
+
+    /**
      * Default constructor.
      */
     public GradingStepDefinition() { /* Default constructor */ }
@@ -63,6 +69,8 @@ public class GradingStepDefinition implements StepDefinition {
 
     @Override
     public Map<String, Class<? extends Property>> getOutputsDefinition() {
-        return Map.of();
+        return Map.of(
+                NOTE, StringProperty.class
+        );
     }
 }

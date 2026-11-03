@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package technical.dao;
+package net.ihe.gazelle.maestro.engine.technical.dao;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;

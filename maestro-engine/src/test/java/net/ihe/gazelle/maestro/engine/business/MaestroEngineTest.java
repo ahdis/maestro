@@ -40,7 +40,7 @@ import net.ihe.gazelle.security.business.acl.AccessControlList;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import technical.dao.SessionStoreCache;
+import net.ihe.gazelle.maestro.engine.technical.dao.SessionStoreCache;
 
 import java.time.Duration;
 import java.util.List;
