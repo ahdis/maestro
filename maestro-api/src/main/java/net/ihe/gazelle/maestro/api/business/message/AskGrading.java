@@ -29,45 +29,15 @@ public class AskGrading implements Message {
     private static final long serialVersionUID = -2433841356039722806L;
 
     /**
-     * Title of the interaction.
-     */
-    private String description;
-
-    /**
      * Criteria to display to the user.
      */
     private List<String> criteria;
-
-    /**
-     * Timeout in milliseconds.
-     */
-    private Long timeout;
 
     /**
      * Default constructor.
      */
     public AskGrading() {
         criteria = new ArrayList<>();
-    }
-
-    /**
-     * Retrieves the description of the interaction.
-     *
-     * @return the description as a string, or null if no description is set.
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * Sets the description of the interaction.
-     *
-     * @param description the description to be set as a string.
-     * @return the current instance of {@code AskGrading} for method chaining.
-     */
-    public AskGrading setDescription(String description) {
-        this.description = description;
-        return this;
     }
 
     /**
@@ -87,26 +57,6 @@ public class AskGrading implements Message {
      */
     public AskGrading setCriteria(List<String> criteria) {
         this.criteria = new ArrayList<>(criteria);
-        return this;
-    }
-
-    /**
-     * Retrieves the timeout value for the interaction.
-     *
-     * @return the timeout in milliseconds as a {@code Long}, or null if no timeout is set.
-     */
-    public Long getTimeout() {
-        return timeout;
-    }
-
-    /**
-     * Sets the timeout value for the interaction.
-     *
-     * @param timeout the timeout in milliseconds to be set. Can be null.
-     * @return the current instance of {@code AskGrading} for method chaining.
-     */
-    public AskGrading setTimeout(Long timeout) {
-        this.timeout = timeout;
         return this;
     }
 }

@@ -77,6 +77,9 @@ public class SessionStoreCache<T> implements SessionStore<T> {
      */
     @Override
     public synchronized T getSession(String id) {
+        if (id == null) {
+            return null;
+        }
         CacheEntry<T> entry = sessions.getIfPresent(id);
         return entry != null ? entry.value : null;
     }

@@ -52,7 +52,7 @@ class GradingStepExecutorTest {
         Instant assessmentTime = Instant.parse("2026-11-02T12:00:00Z");
         GradingStepExecutor executor = new GradingStepExecutor(new GradingHandlerStub() {
             @Override
-            public GradingCompleted displayMessage(List<String> criteria, long timeout) {
+            public GradingCompleted displayMessage(List<String> criteria) {
                 assertEquals(List.of("Check A", "Check B"), criteria);
                 return new GradingCompleted().setResult(GradingResult.FAILED).setGradingCriteria(List.of(
                         new GradingCriterion().setDescription("Check A").setCriterionResult(CriterionResult.FAILED)

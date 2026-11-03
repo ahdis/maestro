@@ -29,9 +29,7 @@ import java.util.List;
 @JsonTypeName(AskGradingDTO.TYPE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-        "type",
-        "description",
-        "criteria"
+        "type"
 })
 public class AskGradingDTO extends MessageDTO<AskGrading> {
 
@@ -44,19 +42,6 @@ public class AskGradingDTO extends MessageDTO<AskGrading> {
 
     public AskGradingDTO(AskGrading message) {
         super(message);
-    }
-
-    @Schema(
-            name = "description",
-            description = "The description of what to do for grading the test."
-    )
-    @JsonProperty("description")
-    public String getDescription() {
-        return message.getDescription();
-    }
-
-    public void setDescription(String description) {
-        message.setDescription(description);
     }
 
     @Schema(

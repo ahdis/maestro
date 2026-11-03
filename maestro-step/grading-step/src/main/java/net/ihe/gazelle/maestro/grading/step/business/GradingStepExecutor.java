@@ -47,7 +47,7 @@ public class GradingStepExecutor implements StepExecutor {
     public StepRunReport execute(StepRun stepRun) {
         List<String> criteria = stepRun.getPropertyValue(GradingStepDefinition.CRITERIA);
 
-        GradingCompleted gradingCompleted = gradingHandler.displayMessage(criteria, stepRun.getTimeout());
+        GradingCompleted gradingCompleted = gradingHandler.displayMessage(criteria);
         return buildStepRunReport(stepRun, gradingCompleted);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025-2026 IHE International.
+ * Copyright 2026 IHE International.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-package net.ihe.gazelle.maestro.simulation.step.technical.mock;
+package net.ihe.gazelle.maestro.spi.technical.stub;
 
 import net.ihe.gazelle.maestro.spi.technical.ConfigProvider;
 
-public class ConfigProviderMock implements ConfigProvider {
+public class ConfigProviderStub implements ConfigProvider {
 
     @Override
     public String getConfig(String key) {
-        return "http://localhost/maestro";
+        return switch (key) {
+            case "gzl.maestro.url" -> "http://localhost/maestro";
+            case "gzl.grading.default.timeout.minutes" -> "1";
+            default -> "";
+        };
     }
 }

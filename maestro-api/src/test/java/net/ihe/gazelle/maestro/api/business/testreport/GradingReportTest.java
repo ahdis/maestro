@@ -88,20 +88,6 @@ class GradingReportTest {
     }
 
     @Test
-    void gradingRequestDtoRoundTripPreservesInstructionsAndCriteria() {
-        AskGrading request = new AskGrading()
-                .setDescription("Review the document")
-                .setCriteria(List.of("Readable"))
-                .setTimeout(1000L);
-        TextSerDes serializer = new JacksonSerDes();
-        AskGrading restored = serializer.deserialize(serializer.serializeAsString(new AskGradingDTO(request)),
-                AskGradingDTO.class).getBusinessObject();
-        assertEquals(request.getDescription(), restored.getDescription());
-        assertEquals(request.getCriteria(), restored.getCriteria());
-        assertEquals(1000L, request.getTimeout());
-        assertEquals(AskGrading.class, new AskGradingDTO(request).getBusinessObjectClass());
-    }
-    @Test
     void evidenceDeletionWireFormatPreservesTarget() {
         DeleteEvidence deletion = new DeleteEvidence()
                 .setSessionId("execution")

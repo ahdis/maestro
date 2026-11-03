@@ -23,6 +23,7 @@ import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.api.business.message.AskGrading;
 import net.ihe.gazelle.maestro.api.business.message.GradingCompleted;
 import net.ihe.gazelle.maestro.api.business.userinteract.GradingHandler;
+import net.ihe.gazelle.maestro.spi.technical.ConfigProvider;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -37,24 +38,26 @@ import java.util.concurrent.TimeoutException;
 public class GradingHandlerImpl implements GradingHandler {
 
     private final MaestroObserver observer;
+    private final long timeoutMinutes;
 
     /**
      * Creates a new {@code GradingHandlerImpl} using the specified observer.
      *
      * @param observer the {@link MaestroObserver} that will receive user interaction events
      */
-    public GradingHandlerImpl(MaestroObserver observer) {
+    public GradingHandlerImpl(MaestroObserver observer, ConfigProvider configProvider) {
         this.observer = observer;
+        timeoutMinutes = Long.parseLong(configProvider.getConfig("gzl.grading.default.timeout.minutes"));
     }
 
     @Override
-    public GradingCompleted displayMessage(List<String> criteria, long timeout) {
+    public GradingCompleted displayMessage(List<String> criteria) {
         CompletableFuture<GradingCompleted> future = observer.askGrading(
-                new AskGrading().setCriteria(criteria).setTimeout(timeout)
+                new AskGrading().setCriteria(criteria)
         );
 
         try {
-            return future.get(timeout, TimeUnit.MILLISECONDS);
+            return future.get(timeoutMinutes, TimeUnit.MINUTES);
         } catch (TimeoutException e) {
             throw new TimeoutRuntimeException("Timeout while waiting for user", e);
         } catch (ExecutionException e) {

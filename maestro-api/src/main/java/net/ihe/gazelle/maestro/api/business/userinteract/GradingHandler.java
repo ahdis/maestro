@@ -40,10 +40,9 @@ public interface GradingHandler extends Handler {
      * Displays a message during the grading process.
      *
      * @param criteria the criteria associated with this message
-     * @param timeout the maximum time to wait before the grading completes, in milliseconds
      * @return an instance of {@code GradingCompleted} representing the result of the grading
      */
-    default GradingCompleted displayMessage(List<String> criteria, long timeout) {
+    default GradingCompleted displayMessage(List<String> criteria) {
         return null;
     }
 }

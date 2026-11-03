@@ -354,7 +354,7 @@ class MaestroEngineTest {
 
         stepExecutorProvider.withExecutor("grading-step", stepRun ->
                 observer.askGrading(
-                        new AskGrading().setDescription("Grading step").setCriteria(List.of("Check A", "Check B"))
+                        new AskGrading().setCriteria(List.of("Check A", "Check B"))
                 ).thenApply(done -> passedReport("grading-step")).join()
         );
 
