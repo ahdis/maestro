@@ -14,4 +14,4 @@
 # limitations under the License.
 #
 
-technical.net.ihe.gazelle.maestro.grading.step.GradingStepExecutorFactory
+net.ihe.gazelle.maestro.grading.step.technical.GradingStepExecutorFactory

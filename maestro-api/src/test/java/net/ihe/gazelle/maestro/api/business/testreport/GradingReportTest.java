@@ -18,32 +18,43 @@ package net.ihe.gazelle.maestro.api.business.testreport;
 
 import net.ihe.gazelle.maestro.api.business.message.*;
 import net.ihe.gazelle.maestro.api.technical.dto.message.*;
-import net.ihe.gazelle.maestro.api.technical.dto.report.CriterionReportDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.report.GradingCriterionDTO;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
+import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
 import org.junit.jupiter.api.Test;
 import java.io.*;
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class GradingReportTest {
+
     @Test
     void gradingCriteriaSurviveMessageSerialization() throws Exception {
-        var criterion = new CriterionReportBuilder().setName("Document is readable")
-                .setGradingResult(CriterionResult.PASSED).build();
-        var completed = new GradingCompleted().setSessionId("execution").setResult(StepResult.PASSED)
-                .setCriteriaReport(List.of(criterion)).setNote("Reviewed");
-        var bytes = new ByteArrayOutputStream();
-        try (var output = new ObjectOutputStream(bytes)) { output.writeObject(completed); }
+        GradingCriterion criterion = new GradingCriterionBuilder()
+                .setName("Document is readable")
+                .setGradingResult(CriterionResult.PASSED)
+                .build();
+        GradingCompleted completed = new GradingCompleted()
+                .setSessionId("execution")
+                .setResult(GradingResult.PASSED)
+                .setGradingCriteria(List.of(criterion))
+                .setNote("Reviewed");
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        try (ObjectOutputStream output = new ObjectOutputStream(bytes)) {
+            output.writeObject(completed);
+        }
         GradingCompleted restored;
-        try (var input = new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()))) {
+        try (ObjectInputStream input = new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()))) {
             restored = (GradingCompleted) input.readObject();
         }
         assertEquals("execution", restored.getSessionId());
-        assertEquals(StepResult.PASSED, restored.getResult());
+        assertEquals(GradingResult.PASSED, restored.getResult());
         assertEquals("Reviewed", restored.getNote());
-        assertEquals(List.of(criterion), restored.getCriteriaReport());
-        assertEquals(criterion.hashCode(), restored.getCriteriaReport().getFirst().hashCode());
-        var dto = new GradingCompletedDTO(restored, "authorization");
+        assertEquals(List.of(criterion), restored.getGradingCriteria());
+        assertEquals(criterion.hashCode(), restored.getGradingCriteria().getFirst().hashCode());
+        GradingCompletedDTO dto = new GradingCompletedDTO(restored, "authorization");
         assertEquals("execution", dto.getMaestroSessionId());
         assertEquals("PASSED", dto.getResult());
         assertEquals("Reviewed", dto.getNote());
@@ -51,36 +62,39 @@ class GradingReportTest {
         assertSame(restored, dto.getBusinessObject());
         assertEquals(GradingCompleted.class, dto.getBusinessObjectClass());
         assertEquals("Document is readable", dto.getCriteriaReport().getFirst().getDescription());
-        assertNotNull(new GradingCompletedDTO());
     }
 
     @Test
     void criterionDtoRoundTripPreservesResultAndBuilderRejectsIncompleteGrading() {
-        var criterion = new CriterionReport().setDescription("Criterion").setCriterionResult(CriterionResult.FAILED);
-        var serializer = new JacksonSerDes();
-        var restored = serializer.deserialize(serializer.serializeAsString(new CriterionReportDTO(criterion)),
-                CriterionReportDTO.class).getBusinessObject();
+        GradingCriterion criterion = new GradingCriterion()
+                .setDescription("Criterion")
+                .setCriterionResult(CriterionResult.FAILED);
+        TextSerDes serializer = new JacksonSerDes();
+        GradingCriterion restored = serializer.deserialize(serializer.serializeAsString(new GradingCriterionDTO(criterion)),
+                GradingCriterionDTO.class).getBusinessObject();
         assertEquals(criterion, restored);
-        assertEquals(criterion, new CriterionReportBuilder(criterion).build());
+        assertEquals(criterion, new GradingCriterionBuilder(criterion).build());
         assertNotEquals(null, criterion);
-        assertNotEquals(criterion, new CriterionReport().setDescription("Other"));
+        assertNotEquals(criterion, new GradingCriterion().setDescription("Other"));
         assertTrue(criterion.isNameDefined());
         assertTrue(criterion.isGradingResultDefined());
-        assertFalse(new CriterionReport().setDescription(" ").isNameDefined());
-        assertFalse(new CriterionReport().setCriterionResult(null).isGradingResultDefined());
-        var emptyBuilder = new CriterionReportBuilder();
+        assertFalse(new GradingCriterion().setDescription(" ").isNameDefined());
+        assertFalse(new GradingCriterion().setCriterionResult(null).isGradingResultDefined());
+        GradingCriterionBuilder emptyBuilder = new GradingCriterionBuilder();
         assertThrows(RuntimeException.class, emptyBuilder::build);
-        var nullBuilder = new CriterionReportBuilder((CriterionReport) null);
+        GradingCriterionBuilder nullBuilder = new GradingCriterionBuilder((GradingCriterion) null);
         assertThrows(RuntimeException.class, nullBuilder::build);
-        assertEquals("FAILED", new CriterionReportDTO(restored).getGradingResult());
+        assertEquals("FAILED", new GradingCriterionDTO(restored).getGradingResult());
     }
 
     @Test
     void gradingRequestDtoRoundTripPreservesInstructionsAndCriteria() {
-        var request = new AskGrading().setDescription("Review the document").setCriteria(List.of("Readable"))
+        AskGrading request = new AskGrading()
+                .setDescription("Review the document")
+                .setCriteria(List.of("Readable"))
                 .setTimeout(1000L);
-        var serializer = new JacksonSerDes();
-        var restored = serializer.deserialize(serializer.serializeAsString(new AskGradingDTO(request)),
+        TextSerDes serializer = new JacksonSerDes();
+        AskGrading restored = serializer.deserialize(serializer.serializeAsString(new AskGradingDTO(request)),
                 AskGradingDTO.class).getBusinessObject();
         assertEquals(request.getDescription(), restored.getDescription());
         assertEquals(request.getCriteria(), restored.getCriteria());
@@ -89,33 +103,42 @@ class GradingReportTest {
     }
     @Test
     void evidenceDeletionWireFormatPreservesTarget() {
-        var deletion = new DeleteEvidence().setSessionId("execution").setRunId(0)
-                .setStepName("first").setEvidenceName("note");
-        var serializer = new JacksonSerDes();
-        var dto = new DeleteEvidenceDTO(deletion, "authorization");
-        var restored = serializer.deserialize(serializer.serializeAsString(dto), DeleteEvidenceDTO.class);
+        DeleteEvidence deletion = new DeleteEvidence()
+                .setSessionId("execution")
+                .setRunId(0)
+                .setStepName("first")
+                .setEvidenceName("note");
+        TextSerDes serializer = new JacksonSerDes();
+        DeleteEvidenceDTO dto = new DeleteEvidenceDTO(deletion, "authorization");
+        DeleteEvidenceDTO restored = serializer.deserialize(serializer.serializeAsString(dto), DeleteEvidenceDTO.class);
         assertEquals(deletion, restored.getBusinessObject());
         assertEquals("authorization", dto.getAuthorization());
         assertEquals(DeleteEvidence.class, dto.getBusinessObjectClass());
     }
     @Test
     void gradingMetadataSurvivesSerializationAndJsonTransport() {
-        var when = java.time.Instant.parse("2026-11-02T12:00:00Z");
-        var criterion = new CriterionReport().setDescription("Readable")
-                .setCriterionResult(CriterionResult.PASSED).setUserId("reviewer").setDateTime(when);
-        var serializer = new JacksonSerDes();
-        var restored = serializer.deserialize(serializer.serializeAsString(new CriterionReportDTO(criterion)),
-                CriterionReportDTO.class).getBusinessObject();
+        Instant when = Instant.parse("2026-11-02T12:00:00Z");
+        GradingCriterion criterion = new GradingCriterion()
+                .setDescription("Readable")
+                .setCriterionResult(CriterionResult.PASSED)
+                .setUserId("reviewer")
+                .setDateTime(when);
+        TextSerDes serializer = new JacksonSerDes();
+        GradingCriterion restored = serializer.deserialize(serializer.serializeAsString(new GradingCriterionDTO(criterion)),
+                GradingCriterionDTO.class).getBusinessObject();
         assertEquals(criterion, restored);
         assertEquals(criterion.hashCode(), restored.hashCode());
         assertEquals("reviewer", restored.getUserId());
         assertEquals(when, restored.getDateTime());
-        var completed = new GradingCompleted().setResult(StepResult.PASSED).setCriteriaReport(List.of(criterion))
-                .setUserId("reviewer").setDateTime(when);
-        var dto = new GradingCompletedDTO(completed, "");
+        GradingCompleted completed = new GradingCompleted()
+                .setResult(GradingResult.PASSED)
+                .setGradingCriteria(List.of(criterion))
+                .setUserId("reviewer")
+                .setDateTime(when);
+        GradingCompletedDTO dto = new GradingCompletedDTO(completed, "");
         assertEquals("reviewer", dto.getUserId());
-        assertEquals(when, java.time.OffsetDateTime.parse(dto.getDateTime()).toInstant());
-        var input = new GradingCompletedDTO();
+        assertEquals(when, OffsetDateTime.parse(dto.getDateTime()).toInstant());
+        GradingCompletedDTO input = new GradingCompletedDTO();
         assertNull(input.getDateTime());
         input.setDateTime(null);
         assertNull(input.getBusinessObject().getDateTime());
@@ -123,7 +146,7 @@ class GradingReportTest {
         input.setUserId(dto.getUserId());
         assertEquals(when, input.getBusinessObject().getDateTime());
         assertEquals("reviewer", input.getBusinessObject().getUserId());
-        var emptyCriterion = new CriterionReportDTO();
+        GradingCriterionDTO emptyCriterion = new GradingCriterionDTO();
         assertNull(emptyCriterion.getDateTime());
         emptyCriterion.setDateTime(null);
         assertNull(emptyCriterion.getBusinessObject().getDateTime());

@@ -17,7 +17,9 @@
 package net.ihe.gazelle.maestro.grading.step.business;
 
 import net.ihe.gazelle.maestro.api.business.message.GradingCompleted;
-import net.ihe.gazelle.maestro.api.business.testreport.CriterionReport;
+import net.ihe.gazelle.maestro.api.business.message.GradingResult;
+import net.ihe.gazelle.maestro.api.business.property.Property;
+import net.ihe.gazelle.maestro.api.business.testreport.GradingCriterion;
 import net.ihe.gazelle.maestro.api.business.testreport.CriterionResult;
 import net.ihe.gazelle.maestro.api.business.property.StringListProperty;
 import net.ihe.gazelle.maestro.api.business.test.Step;
@@ -27,6 +29,7 @@ import net.ihe.gazelle.maestro.api.business.userinteract.stub.GradingHandlerStub
 import net.ihe.gazelle.maestro.spi.business.StepRun;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,20 +49,20 @@ class GradingStepExecutorTest {
 
     @Test
     void exposesCriterionResultsWithReviewerAndAssessmentTime() {
-        var assessmentTime = java.time.Instant.parse("2026-11-02T12:00:00Z");
-        var executor = new GradingStepExecutor(new GradingHandlerStub() {
+        Instant assessmentTime = Instant.parse("2026-11-02T12:00:00Z");
+        GradingStepExecutor executor = new GradingStepExecutor(new GradingHandlerStub() {
             @Override
             public GradingCompleted displayMessage(List<String> criteria, long timeout) {
                 assertEquals(List.of("Check A", "Check B"), criteria);
-                return new GradingCompleted().setResult(StepResult.FAILED).setCriteriaReport(List.of(
-                        new CriterionReport().setDescription("Check A").setCriterionResult(CriterionResult.FAILED)
+                return new GradingCompleted().setResult(GradingResult.FAILED).setGradingCriteria(List.of(
+                        new GradingCriterion().setDescription("Check A").setCriterionResult(CriterionResult.FAILED)
                                 .setUserId("reviewer").setDateTime(assessmentTime)));
             }
         });
-        var report = executor.execute(stepRun());
+        StepRunReport report = executor.execute(stepRun());
         assertEquals(StepResult.FAILED, report.getResult());
         assertEquals(1, report.getOutputs().size());
-        var output = report.getOutput("Check A");
+        Property output = report.getOutput("Check A");
         assertEquals("FAILED", output.getValue());
         assertEquals("reviewer", output.getUserId());
         assertEquals(assessmentTime, output.getDateTime());

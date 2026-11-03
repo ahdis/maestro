@@ -72,7 +72,7 @@ class ValidationServiceInterfaceIT {
               return List.of();
           }
       };
-      HandlerProvider handlerProvider = new HandlerProviderSPI(registry, configProvider, observerStore);
+      HandlerProvider handlerProvider = new HandlerProviderSPI(registry, configProvider, observerStore, observerStore);
 
       Step step = new Step()
             .setName("validation")

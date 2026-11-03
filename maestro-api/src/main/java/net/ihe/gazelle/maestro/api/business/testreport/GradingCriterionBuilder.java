@@ -19,12 +19,12 @@ package net.ihe.gazelle.maestro.api.business.testreport;
 import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory;
 import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractBuilder;
 import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
-import net.ihe.gazelle.maestro.api.business.testreport.validator.CriterionReportValidator;
+import net.ihe.gazelle.maestro.api.business.testreport.validator.GradingCriterionValidator;
 
 /**
- * Builder for {@link CriterionReport}.
+ * Builder for {@link GradingCriterion}.
  */
-public class CriterionReportBuilder extends AbstractBuilder<CriterionReport> {
+public class GradingCriterionBuilder extends AbstractBuilder<GradingCriterion> {
 
     private String name;
     private CriterionResult criterionResult;
@@ -32,68 +32,68 @@ public class CriterionReportBuilder extends AbstractBuilder<CriterionReport> {
     /**
      * Default constructor.
      */
-    public CriterionReportBuilder() {
+    public GradingCriterionBuilder() {
         super();
     }
 
     /**
-     * Constructs an instance of {@code CriterionReportBuilder} with a provided {@code ValidatorBuilderFactory}.
+     * Constructs an instance of {@code GradingCriterionBuilder} with a provided {@code ValidatorBuilderFactory}.
      *
      * @param validatorBuilderFactory the factory to be used for creating validators
      */
-    public CriterionReportBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
+    public GradingCriterionBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
         super(validatorBuilderFactory);
     }
 
     /**
-     * Constructs an instance of {@code CriterionReportBuilder} using an existing {@code CriteriaReport}.
+     * Constructs an instance of {@code GradingCriterionBuilder} using an existing {@code GradingCriterion}.
      *
-     * @param criterionReport the criteria report object whose values will
+     * @param gradingCriterion the criteria report object whose values will
      *                              be used to initialize this builder; can be null
      */
-    public CriterionReportBuilder(CriterionReport criterionReport) {
-        if (criterionReport != null) {
-            this.name = criterionReport.getDescription();
-            this.criterionResult = criterionReport.getCriterionResult();
+    public GradingCriterionBuilder(GradingCriterion gradingCriterion) {
+        if (gradingCriterion != null) {
+            this.name = gradingCriterion.getDescription();
+            this.criterionResult = gradingCriterion.getCriterionResult();
         }
     }
 
     /**
      * Sets the name for the criteria report.
      *
-     * @param name the name to set for the criteria report
-     * @return the current instance of {@code CriterionReportBuilder} to allow method chaining
+     * @param name the name to set for the grading criterion.
+     * @return the current instance of {@code GradingCriterionBuilder} to allow method chaining
      */
-    public CriterionReportBuilder setName(String name) {
+    public GradingCriterionBuilder setName(String name) {
         this.name = name;
         return this;
     }
 
     /**
-     * Sets the grading result for the criteria report.
+     * Sets the grading result for the grading criterion.
      *
      * @param criterionResult the grading result to set; must be a valid {@link CriterionResult} value
-     * @return the current instance of {@code CriterionReportBuilder} to allow method chaining
+     * @return the current instance of {@code GradingCriterionBuilder} to allow method chaining
      */
-    public CriterionReportBuilder setGradingResult(CriterionResult criterionResult) {
+    public GradingCriterionBuilder setGradingResult(CriterionResult criterionResult) {
         this.criterionResult = criterionResult;
         return this;
     }
 
     @Override
-    protected AbstractValidator<CriterionReport> instantiateValidator(ValidatorBuilderFactory validatorBuilderFactory) {
-        return new CriterionReportValidator(validatorBuilderFactory);
+    protected AbstractValidator<GradingCriterion> instantiateValidator(ValidatorBuilderFactory validatorBuilderFactory) {
+        return new GradingCriterionValidator(validatorBuilderFactory);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    protected CriterionReport instantiate() {
-        return new CriterionReport();
+    protected GradingCriterion instantiate() {
+        return new GradingCriterion();
     }
 
     @Override
-    protected void make(CriterionReport criterionReport) {
-        criterionReport
+    protected void make(GradingCriterion gradingCriterion) {
+        gradingCriterion
                 .setDescription(name)
                 .setCriterionResult(criterionResult);
     }

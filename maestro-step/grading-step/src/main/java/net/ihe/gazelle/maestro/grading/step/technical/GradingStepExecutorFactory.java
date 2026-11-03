@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Factory for creating UserInteractionStepExecutor instances.
+ * Factory for creating GradingStepStepExecutor instances.
  * This factory creates executors for the user interaction step type.
  */
 public class GradingStepExecutorFactory implements StepExecutorFactory {

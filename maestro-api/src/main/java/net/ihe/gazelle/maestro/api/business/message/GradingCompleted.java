@@ -16,8 +16,7 @@
 
 package net.ihe.gazelle.maestro.api.business.message;
 
-import net.ihe.gazelle.maestro.api.business.testreport.CriterionReport;
-import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
+import net.ihe.gazelle.maestro.api.business.testreport.GradingCriterion;
 
 import java.io.Serial;
 import java.time.Instant;
@@ -40,12 +39,12 @@ public class GradingCompleted implements Message {
     /**
      * The result of the grading
      */
-    private StepResult result;
+    private GradingResult result;
 
     /**
      * The criteria report associated with the grading
      */
-    private List<CriterionReport> criteriaReport;
+    private List<GradingCriterion> gradingCriteria;
 
     /**
      * The note associated with the grading to be set in the test report
@@ -66,7 +65,7 @@ public class GradingCompleted implements Message {
      * Default constructor.
      */
     public GradingCompleted() {
-        this.criteriaReport = new ArrayList<>();
+        this.gradingCriteria = new ArrayList<>();
     }
 
     /**
@@ -92,19 +91,19 @@ public class GradingCompleted implements Message {
     /**
      * Retrieves the result of the grading.
      *
-     * @return the grading result, represented as an instance of {@code StepResult}
+     * @return the grading result, represented as an instance of {@code GradingResult}
      */
-    public StepResult getResult() {
+    public GradingResult getResult() {
         return result;
     }
 
     /**
      * Sets the result of the grading.
      *
-     * @param result the result to associate with this grading, represented as an instance of {@code StepResult}
+     * @param result the result to associate with this grading, represented as an instance of {@code GradingResult}
      * @return the current instance of {@code GradingCompleted}
      */
-    public GradingCompleted setResult(StepResult result) {
+    public GradingCompleted setResult(GradingResult result) {
         this.result = result;
         return this;
     }
@@ -115,19 +114,19 @@ public class GradingCompleted implements Message {
      *
      * @return a list of {@code CriterionReport} instances representing the grading criteria and their results
      */
-    public List<CriterionReport> getCriteriaReport() {
-        return new ArrayList<>(criteriaReport);
+    public List<GradingCriterion> getGradingCriteria() {
+        return new ArrayList<>(gradingCriteria);
     }
 
     /**
      * Sets the criteria report associated with the grading.
      * This method replaces the current criteria report with a copy of the provided list.
      *
-     * @param criteriaReport the list of {@code CriterionReport} instances to associate with the grading
+     * @param gradingCriteria the list of {@code CriterionReport} instances to associate with the grading
      * @return the current instance of {@code GradingCompleted} to allow method chaining
      */
-    public GradingCompleted setCriteriaReport(List<CriterionReport> criteriaReport) {
-        this.criteriaReport = new ArrayList<>(criteriaReport);
+    public GradingCompleted setGradingCriteria(List<GradingCriterion> gradingCriteria) {
+        this.gradingCriteria = new ArrayList<>(gradingCriteria);
         return this;
     }
 

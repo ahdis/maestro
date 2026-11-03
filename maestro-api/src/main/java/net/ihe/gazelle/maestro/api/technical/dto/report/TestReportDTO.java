@@ -119,18 +119,18 @@ public class TestReportDTO implements DTO<TestReport> {
             description = "The list of acceptance criterion associated to this test."
     )
     @JsonProperty(value = "criteriaReport")
-    public List<CriterionReportDTO> getCriterionReports() {
+    public List<GradingCriterionDTO> getCriterionReports() {
         return testReport
                 .getCriteriaReport()
                 .stream()
-                .map(CriterionReportDTO::new)
+                .map(GradingCriterionDTO::new)
                 .toList();
     }
 
-    public void setCriterionReports(List<CriterionReportDTO> criterionReports) {
+    public void setCriterionReports(List<GradingCriterionDTO> criterionReports) {
         testReport.setCriteriaReport(
                 criterionReports.stream()
-                        .map(CriterionReportDTO::getBusinessObject)
+                        .map(GradingCriterionDTO::getBusinessObject)
                         .toList());
     }
 

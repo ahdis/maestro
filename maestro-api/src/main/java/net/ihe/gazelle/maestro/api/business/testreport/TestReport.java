@@ -102,7 +102,7 @@ public class TestReport implements ProtectedResource, Serializable {
     /**
      * The List of criteria report associated with the test report.
      */
-    private List<CriterionReport> criteriaReport;
+    private List<GradingCriterion> criteriaReport;
 
     /**
      * The name of the test suite.
@@ -352,17 +352,17 @@ public class TestReport implements ProtectedResource, Serializable {
      *
      * @return a List of CriterionReport objects representing the criteria report.
      */
-    public List<CriterionReport> getCriteriaReport() {
+    public List<GradingCriterion> getCriteriaReport() {
         return new ArrayList<>(criteriaReport);
     }
 
     /**
      * Sets the list of criterion reports for the test report.
      *
-     * @param criteriaReport the list of {@link CriterionReport} objects to be set
+     * @param criteriaReport the list of {@link GradingCriterion} objects to be set
      * @return the current {@link TestReport} instance for method chaining
      */
-    public TestReport setCriteriaReport(List<CriterionReport> criteriaReport) {
+    public TestReport setCriteriaReport(List<GradingCriterion> criteriaReport) {
         this.criteriaReport = new ArrayList<>(criteriaReport);
         return this;
     }

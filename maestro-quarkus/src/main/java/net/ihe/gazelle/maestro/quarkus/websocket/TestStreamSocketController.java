@@ -144,17 +144,23 @@ public class TestStreamSocketController {
                         maestroSessionService.putEvidence(putEvidence.getBusinessObject());
                 case DeleteEvidenceDTO deleteEvidence ->
                         maestroSessionService.deleteEvidence(deleteEvidence.getBusinessObject());
+                case GradingCompletedDTO gradingCompleted ->
+                        maestroCaller.completeGrading(gradingCompleted.getBusinessObject());
                 default -> {
                     sessionService.removeSession(session.getId());
                     String error = "Unexpected message type: " + message.getClass().getName();
-                    session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, error));
+                    //session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, error));
                     LOG.debug(error);
                 }
             }
         } catch (DeserializationException e) {
-            LOG.error("Unable to parse test run", e);
+            LOG.debug("Unable to parse test run", e);
+            session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, "Unable to parse test case, please contact an administrator."));
+        } catch (IllegalArgumentException e) {
+            LOG.debug("Test run is invalid", e);
+            session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, "Test case is invalid, please contact an administrator."));
         } catch (UnauthorizedException e) {
-            LOG.error(e.getMessage());
+            LOG.debug(e.getMessage());
             session.close(new CloseReason(CloseReason.CloseCodes.VIOLATED_POLICY, "Unauthenticated"));
         } catch (Exception e) {
             LOG.error("Unexpected error during websocket test execution", e);

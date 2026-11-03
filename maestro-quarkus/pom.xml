@@ -63,6 +63,10 @@
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
+            <artifactId>grading-step</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
             <artifactId>assertion-step</artifactId>
         </dependency>
         <!-- JDK21 validation service clients (SPI factories) -->

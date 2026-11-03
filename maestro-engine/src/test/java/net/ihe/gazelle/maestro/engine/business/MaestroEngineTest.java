@@ -17,16 +17,15 @@
 package net.ihe.gazelle.maestro.engine.business;
 
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
+import net.ihe.gazelle.maestro.api.business.message.AskGrading;
 import net.ihe.gazelle.maestro.api.business.message.ExecutionFinished;
 import net.ihe.gazelle.maestro.api.business.message.InteractWithUser;
 import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.property.SupportedInputsProperty;
 import net.ihe.gazelle.maestro.api.business.test.*;
-import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
-import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
-import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
+import net.ihe.gazelle.maestro.api.business.test.Test;
+import net.ihe.gazelle.maestro.api.business.testreport.*;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.api.business.userinteract.stub.UserInteractionHandlerStub;
@@ -51,7 +50,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class MaestroEngineTest {
 
@@ -345,12 +344,18 @@ class MaestroEngineTest {
     @org.junit.jupiter.api.Test
     void userInteractionDelaysStepCompletionUntilObserverResponds() {
         ManualInteractionObserver observer = new ManualInteractionObserver();
-        TestSuiteRun suiteRun = buildSuiteRun("suite-interact", createTest("interaction-test", "interaction-step"));
+        TestSuiteRun suiteRun = buildSuiteRun("suite-interact", createTest("interaction-test", "interaction-step", "grading-step"));
 
         stepExecutorProvider.withExecutor("interaction-step", stepRun ->
                 observer.interactWithUser(
                         new InteractWithUser("Confirm", "Proceed?", 1L)
                 ).thenApply(done -> passedReport("interaction-step")).join()
+        );
+
+        stepExecutorProvider.withExecutor("grading-step", stepRun ->
+                observer.askGrading(
+                        new AskGrading().setDescription("Grading step").setCriteria(List.of("Check A", "Check B"))
+                ).thenApply(done -> passedReport("grading-step")).join()
         );
 
         maestro.executeTestSuite(suiteRun, true, observer);
@@ -491,6 +496,7 @@ class MaestroEngineTest {
     }
 
     private static final class ManualInteractionObserver extends RecordingMaestroObserver {
+
         private final CompletableFuture<UserInteractionCompleted> pendingInteraction = new CompletableFuture<>();
         private final CountDownLatch interactionRequestedLatch = new CountDownLatch(1);
 

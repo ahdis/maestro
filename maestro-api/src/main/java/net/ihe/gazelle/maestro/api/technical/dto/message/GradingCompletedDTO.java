@@ -18,8 +18,8 @@ package net.ihe.gazelle.maestro.api.technical.dto.message;
 
 import com.fasterxml.jackson.annotation.*;
 import net.ihe.gazelle.maestro.api.business.message.GradingCompleted;
-import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
-import net.ihe.gazelle.maestro.api.technical.dto.report.CriterionReportDTO;
+import net.ihe.gazelle.maestro.api.business.message.GradingResult;
+import net.ihe.gazelle.maestro.api.technical.dto.report.GradingCriterionDTO;
 import net.ihe.gazelle.oidc.common.technical.dto.SecuredMessageDTO;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
@@ -39,7 +39,7 @@ import java.util.List;
         "type",
         "maestroSessionId",
         "result",
-        "criteriaReport",
+        "gradingCriteria",
         "note"
 })
 public class GradingCompletedDTO extends MessageDTO<GradingCompleted> implements SecuredMessageDTO {
@@ -67,26 +67,42 @@ public class GradingCompletedDTO extends MessageDTO<GradingCompleted> implements
         return message.getSessionId();
     }
 
+    public void setMaestroSessionId(String maestroSessionId) {
+        message.setSessionId(maestroSessionId);
+    }
+
     @Schema(
             name = "result",
             description = "The result of the grading.",
-            enumeration = {StepResult.RESULT_PASSED, StepResult.RESULT_FAILED}
+            enumeration = {GradingResult.RESULT_REQUEST_EVIDENCE, GradingResult.RESULT_PASSED, GradingResult.RESULT_FAILED}
     )
     @JsonProperty("result")
     public String getResult() {
         return message.getResult().name();
     }
 
+    public void setResult(String result) {
+        message.setResult(GradingResult.valueOf(result));
+    }
+
     @Schema(
-            name = "criteriaReport",
+            name = "gradingCriteria",
             description = "The list of acceptance criterion associated to this test."
     )
-    @JsonProperty("criteriaReport")
-    public List<CriterionReportDTO> getCriteriaReport() {
-        return message.getCriteriaReport()
+    @JsonProperty("gradingCriteria")
+    public List<GradingCriterionDTO> getCriteriaReport() {
+        return message.getGradingCriteria()
                 .stream()
-                .map(CriterionReportDTO::new)
+                .map(GradingCriterionDTO::new)
                 .toList();
+    }
+
+    public void setCriteriaReport(List<GradingCriterionDTO> criteriaReport) {
+        message.setGradingCriteria(
+                criteriaReport.stream()
+                        .map(GradingCriterionDTO::getBusinessObject)
+                        .toList()
+        );
     }
 
     @Schema(
@@ -96,6 +112,10 @@ public class GradingCompletedDTO extends MessageDTO<GradingCompleted> implements
     @JsonProperty("note")
     public String getNote() {
         return message.getNote();
+    }
+
+    public void setNote(String note) {
+        message.setNote(note);
     }
 
     @Schema(

@@ -55,14 +55,14 @@ public class GradingStepExecutor implements StepExecutor {
         return new StepRunReportBuilder()
                 .setStepName(stepRun.getName())
                 .setType(GradingStepDefinition.TYPE)
-                .setOutputs(gradingCompleted.getCriteriaReport().stream()
+                .setOutputs(gradingCompleted.getGradingCriteria().stream()
                         .map(criterion -> new StringProperty()
                                 .setName(criterion.getDescription())
                                 .setValue(criterion.getCriterionResult().name())
                                 .setUserId(criterion.getUserId())
                                 .setDateTime(criterion.getDateTime()))
                         .toList())
-                .setResult(gradingCompleted.getResult())
+                .setResult(gradingCompleted.getResult().toStepResult())
                 .build();
     }
 }

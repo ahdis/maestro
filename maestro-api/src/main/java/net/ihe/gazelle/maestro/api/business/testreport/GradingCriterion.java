@@ -26,7 +26,7 @@ import java.util.Objects;
  * This class provides methods to retrieve and set the description of the criteria
  * and the grading result associated with it.
  */
-public class CriterionReport implements Serializable {
+public class GradingCriterion implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -39,7 +39,7 @@ public class CriterionReport implements Serializable {
     /**
      * Default constructor.
      */
-    public CriterionReport() {
+    public GradingCriterion() {
         // Default constructor
         criterionResult = CriterionResult.NOT_VERIFIED;
     }
@@ -59,7 +59,7 @@ public class CriterionReport implements Serializable {
      * @param description the name of the criteria as a String
      * @return the current instance of {@code CriteriaReport} to allow method chaining
      */
-    public CriterionReport setDescription(String description) {
+    public GradingCriterion setDescription(String description) {
         this.description = description;
         return this;
     }
@@ -79,7 +79,7 @@ public class CriterionReport implements Serializable {
      * @param criterionResult the grading result to be set, represented as an instance of {@code CriterionResult}
      * @return the current instance of {@code CriteriaReport} to allow method chaining
      */
-    public CriterionReport setCriterionResult(CriterionResult criterionResult) {
+    public GradingCriterion setCriterionResult(CriterionResult criterionResult) {
         this.criterionResult = criterionResult;
         return this;
     }
@@ -99,7 +99,7 @@ public class CriterionReport implements Serializable {
      * @param userId the user ID to associate with the report, represented as a {@code String}
      * @return the current instance of {@code CriterionReport} to allow method chaining
      */
-    public CriterionReport setUserId(String userId) {
+    public GradingCriterion setUserId(String userId) {
         this.userId = userId;
         return this;
     }
@@ -119,7 +119,7 @@ public class CriterionReport implements Serializable {
      * @param dateTime the date and time to set, represented as an {@code Instant}
      * @return the current instance of {@code CriterionReport} to allow method chaining
      */
-    public CriterionReport setDateTime(Instant dateTime) {
+    public GradingCriterion setDateTime(Instant dateTime) {
         this.dateTime = dateTime;
         return this;
     }
@@ -144,7 +144,7 @@ public class CriterionReport implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof CriterionReport that)) return false;
+        if (!(o instanceof GradingCriterion that)) return false;
         return Objects.equals(description, that.description)
                 && criterionResult == that.criterionResult
                 && Objects.equals(userId, that.userId)

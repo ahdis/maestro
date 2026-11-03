@@ -136,7 +136,9 @@ final class UserInteractionResponseValidator extends AbstractValidator<UserInter
                 }
             }
         }
-        return fields.values().stream().allMatch(field -> !field.isRequired() || answered.contains(field.getId()));
+        return fields.values().stream().allMatch(
+                field -> !field.isRequired() || answered.contains(field.getId())
+        );
     }
 
     private Class<? extends Property> propertyType(SupportedInput field) {

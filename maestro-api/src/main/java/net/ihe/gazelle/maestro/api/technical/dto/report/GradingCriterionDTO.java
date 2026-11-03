@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import net.ihe.gazelle.maestro.api.business.testreport.CriterionReport;
+import net.ihe.gazelle.maestro.api.business.testreport.GradingCriterion;
 import net.ihe.gazelle.maestro.api.business.testreport.CriterionResult;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -31,33 +31,33 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Schema(
-        name = "CriterionReport",
+        name = "GradingCriterion",
         description = "The report for an acceptance criterion."
 )
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-        "description",
-        "result",
+        "criterionDescription",
+        "criterionResult",
         "userId",
         "dateTime"
 })
-public class CriterionReportDTO implements DTO<CriterionReport> {
+public class GradingCriterionDTO implements DTO<GradingCriterion> {
 
     @JsonIgnore
-    private final CriterionReport criterionReport;
+    private final GradingCriterion gradingCriterion;
 
-    public CriterionReportDTO() {
-        this(new CriterionReport());
+    public GradingCriterionDTO() {
+        this(new GradingCriterion());
     }
 
-    public CriterionReportDTO(CriterionReport criterionReport) {
-        this.criterionReport = criterionReport;
+    public GradingCriterionDTO(GradingCriterion gradingCriterion) {
+        this.gradingCriterion = gradingCriterion;
     }
 
     @Override
     @JsonIgnore
-    public CriterionReport getBusinessObject() {
-        return criterionReport;
+    public GradingCriterion getBusinessObject() {
+        return gradingCriterion;
     }
 
     @Schema(
@@ -67,11 +67,11 @@ public class CriterionReportDTO implements DTO<CriterionReport> {
     )
     @JsonProperty(value = "criterionDescription")
     public String getDescription() {
-        return criterionReport.getDescription();
+        return gradingCriterion.getDescription();
     }
 
     public void setDescription(String description) {
-        criterionReport.setDescription(description);
+        gradingCriterion.setDescription(description);
     }
 
     @Schema(
@@ -82,11 +82,11 @@ public class CriterionReportDTO implements DTO<CriterionReport> {
     )
     @JsonProperty(value = "criterionResult")
     public String getGradingResult() {
-        return criterionReport.getCriterionResult().name();
+        return gradingCriterion.getCriterionResult().name();
     }
 
     public void setGradingResult(String gradingResult) {
-        criterionReport.setCriterionResult(CriterionResult.valueOf(gradingResult));
+        gradingCriterion.setCriterionResult(CriterionResult.valueOf(gradingResult));
     }
 
     @Schema(
@@ -95,11 +95,11 @@ public class CriterionReportDTO implements DTO<CriterionReport> {
     )
     @JsonProperty("userId")
     public String getUserId() {
-        return criterionReport.getUserId();
+        return gradingCriterion.getUserId();
     }
 
     public void setUserId(String userId) {
-        criterionReport.setUserId(userId);
+        gradingCriterion.setUserId(userId);
     }
 
     @Schema(
@@ -108,8 +108,8 @@ public class CriterionReportDTO implements DTO<CriterionReport> {
     )
     @JsonProperty("dateTime")
     public String getDateTime() {
-        if (criterionReport.getDateTime() != null) {
-            return ZonedDateTime.ofInstant(criterionReport.getDateTime(), ZoneId.systemDefault())
+        if (gradingCriterion.getDateTime() != null) {
+            return ZonedDateTime.ofInstant(gradingCriterion.getDateTime(), ZoneId.systemDefault())
                     .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         } else {
             return null;
@@ -118,7 +118,7 @@ public class CriterionReportDTO implements DTO<CriterionReport> {
 
     public void setDateTime(String dateTime) {
         if (dateTime != null) {
-            criterionReport.setDateTime(
+            gradingCriterion.setDateTime(
                     Instant.from(ZonedDateTime.parse(dateTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME))
             );
         }

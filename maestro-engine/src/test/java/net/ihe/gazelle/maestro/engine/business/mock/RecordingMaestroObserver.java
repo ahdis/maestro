@@ -18,7 +18,6 @@ package net.ihe.gazelle.maestro.engine.business.mock;
 
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.api.business.message.*;
-import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 
 import java.time.Duration;
 import java.util.List;
@@ -68,7 +67,7 @@ public class RecordingMaestroObserver implements MaestroObserver {
     public CompletableFuture<GradingCompleted> askGrading(AskGrading askGrading) {
         return CompletableFuture.completedFuture(new GradingCompleted()
                 .setSessionId("observer")
-                .setResult(StepResult.PASSED));
+                .setResult(GradingResult.PASSED));
     }
 
     public ExecutionFinished awaitSuiteFinished(Duration timeout) {

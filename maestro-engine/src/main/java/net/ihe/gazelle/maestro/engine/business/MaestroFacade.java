@@ -100,16 +100,16 @@ public class MaestroFacade {
      * Executes a {@link TestRun} and registers the associated observer.
      *
      * @param testRun          the test run to execute
-     * @param testRunObservers the observer for this test run
+     * @param testRunObserver  the observer for this test run
      */
-    public void executeTest(String testSessionId, TestRun testRun, MaestroObserver testRunObservers) {
+    public void executeTest(String testSessionId, TestRun testRun, MaestroObserver testRunObserver) {
         if (testRun.getAccessControlList() == null) {
             testRun.setAccessControlList(new AccessControlList().setPublic(true));
         }
         testRunValidator.assertValid(testRun);
         String sessionId = UUID.randomUUID().toString();
         long timeout = testRun.getTest().computeTestRunTimeout();
-        testRunObserverStore.putSession(sessionId, testRunObservers, timeout);
+        testRunObserverStore.putSession(sessionId, testRunObserver, timeout);
         maestroEventProducer.command(new StartTestRun(sessionId, testRun).setTestSessionId(testSessionId));
     }
 

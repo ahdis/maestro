@@ -33,7 +33,15 @@ class StepExecutorSPIProviderTest {
     @Test
     void getExecutorNotSupportedStep(){
         Step step = new Step();
-        StepExecutorProvider provider = new StepExecutorSPIProvider(new HandlerProviderSPI(new ServiceRegistryImpl(new ServiceRegistryDAOImpl()), null, new SessionStoreCache<>()));
+        StepExecutorProvider provider = new StepExecutorSPIProvider(
+                new HandlerProviderSPI(
+                        new ServiceRegistryImpl(
+                                new ServiceRegistryDAOImpl()),
+                        null,
+                        new SessionStoreCache<>(),
+                        new SessionStoreCache<>()
+                )
+        );
         assertThrows(UnknownStepException.class, () -> provider.getExecutor("sessionId", step));
     }
 

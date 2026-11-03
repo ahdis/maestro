@@ -17,7 +17,7 @@
 package net.ihe.gazelle.maestro.api.business.userinteract.stub;
 
 import net.ihe.gazelle.maestro.api.business.message.GradingCompleted;
-import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
+import net.ihe.gazelle.maestro.api.business.message.GradingResult;
 import net.ihe.gazelle.maestro.api.business.userinteract.GradingHandler;
 
 import java.util.List;
@@ -36,7 +36,7 @@ public class GradingHandlerStub implements GradingHandler {
 
     @Override
     public GradingCompleted displayMessage(List<String> criterion, long timeout) {
-        return new GradingCompleted().setResult(StepResult.PASSED);
+        return new GradingCompleted().setResult(GradingResult.PASSED);
     }
 
     @Override

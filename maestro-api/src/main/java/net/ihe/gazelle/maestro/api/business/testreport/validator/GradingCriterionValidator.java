@@ -19,38 +19,38 @@ package net.ihe.gazelle.maestro.api.business.testreport.validator;
 import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilder;
 import net.ihe.gazelle.framework.modelvalidator.business.ValidatorBuilderFactory;
 import net.ihe.gazelle.framework.modelvalidator.business.utils.AbstractValidator;
-import net.ihe.gazelle.maestro.api.business.testreport.CriterionReport;
+import net.ihe.gazelle.maestro.api.business.testreport.GradingCriterion;
 
 /**
- * Validator implementation for {@link CriterionReport}, responsible for defining
+ * Validator implementation for {@link GradingCriterion}, responsible for defining
  */
-public class CriterionReportValidator extends AbstractValidator<CriterionReport> {
+public class GradingCriterionValidator extends AbstractValidator<GradingCriterion> {
 
     /**
      * Default constructor
      */
-    public CriterionReportValidator() {
+    public GradingCriterionValidator() {
         super();
     }
 
     /**
-     * Constructs an CriterionReportValidator using the provided ValidatorBuilderFactory.
+     * Constructs an GradingCriterionValidator using the provided ValidatorBuilderFactory.
      *
-     * @param builderFactory The factory to create ValidatorBuilder instances for validating CriterionReport objects.
+     * @param builderFactory The factory to create ValidatorBuilder instances for validating GradingCriterion objects.
      */
-    public CriterionReportValidator(ValidatorBuilderFactory builderFactory) {
+    public GradingCriterionValidator(ValidatorBuilderFactory builderFactory) {
         super(builderFactory);
     }
 
     @Override
-    protected ValidatorBuilder<? extends CriterionReport> instantiateValidatorBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
-        return validatorBuilderFactory.getBuilder(CriterionReport.class);
+    protected ValidatorBuilder<? extends GradingCriterion> instantiateValidatorBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
+        return validatorBuilderFactory.getBuilder(GradingCriterion.class);
     }
 
     @Override
-    protected void addRulesAndMembers(ValidatorBuilder<? extends CriterionReport> validatorBuilder) {
+    protected void addRulesAndMembers(ValidatorBuilder<? extends GradingCriterion> validatorBuilder) {
         validatorBuilder
-                .addRule(CriterionReport::isNameDefined, "Name must be defined and not empty.")
-                .addRule(CriterionReport::isGradingResultDefined, "Grading result must be defined.");
+                .addRule(GradingCriterion::isNameDefined, "Name must be defined and not empty.")
+                .addRule(GradingCriterion::isGradingResultDefined, "Grading result must be defined.");
     }
 }
