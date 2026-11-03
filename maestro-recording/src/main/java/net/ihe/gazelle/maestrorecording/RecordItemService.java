@@ -65,33 +65,41 @@ public class RecordItemService {
       return recordItemPlan(rootItem, acl, new History());
    }
 
-   private <T> String recordItemPlan(ItemPlan<T> itemPlan, AccessControlList acl, History history) {
+   <T> String recordItemPlan(ItemPlan<T> itemPlan, AccessControlList acl, History history) {
       if (history.items.containsKey(itemPlan)) {
          return history.items.get(itemPlan);
       }
       history.addVisited(itemPlan);
-      Item item = initItem(itemPlan, acl);
-      for (FutureReferencePlan<T> futureReferencePlan : itemPlan.futureReferencePlans()) {
-         ReferencePlan referencePlan = futureReferencePlan.referencePlan();
-         String referenceId = recordReferencedObject(referencePlan, acl, history);
-         if (futureReferencePlan.mutation() != null) {
-            futureReferencePlan.mutation().mutateReference(itemPlan.itemObject(), referencePlan.getName(), referenceId);
+      try {
+         Item item = initItem(itemPlan, acl);
+         for (FutureReferencePlan<T> futureReferencePlan : itemPlan.futureReferencePlans()) {
+            ReferencePlan referencePlan = futureReferencePlan.referencePlan();
+            String referenceId = recordReferencedObject(referencePlan, acl, history);
+            if (futureReferencePlan.mutation() != null) {
+               futureReferencePlan.mutation().mutateReference(itemPlan.itemObject(), referencePlan.getName(), referenceId);
+            }
+            Reference reference = asReference(referencePlan, referenceId);
+            if (!containsSameReference(item.getReferences(), reference)) {
+               item.addReference(reference);
+            }
          }
-         Reference reference = asReference(referencePlan, referenceId);
-         if (!containsSameReference(item.getReferences(), reference)) {
-            item.addReference(reference);
-         }
+         item.setContent(itemPlan.textMarshaller().marshallAsString(itemPlan.itemObject()));
+         String id = recordItemClient.recordItem(item);
+         history.addRecorded(itemPlan, id);
+         return id;
+      } finally {
+         history.inProgress.remove(itemPlan);
       }
-      item.setContent(itemPlan.textMarshaller().marshallAsString(itemPlan.itemObject()));
-      String id = recordItemClient.recordItem(item);
-      history.addRecorded(itemPlan, id);
-      return id;
 
    }
 
-   private String recordReferencedObject(ReferencePlan referencePlan, AccessControlList acl, History history) {
+   /** Writes dependencies without creating a parent item; state stays scoped to this recording. */
+   public RecordingWriter openWriter() { return new RecordingWriter(this); }
+
+   String recordReferencedObject(ReferencePlan referencePlan, AccessControlList acl, History history) {
       return switch (referencePlan.getRefType()) {
-         case ITEM_ID -> recordItemPlan((ItemPlan<?>) referencePlan.getTarget(), acl, history);
+         case ITEM_ID -> referencePlan.getTarget() instanceof String id ? id
+               : recordItemPlan((ItemPlan<?>) referencePlan.getTarget(), acl, history);
          case ATTACHMENT -> recordAttachmentReference(referencePlan, history);
          case URL -> (String) referencePlan.getTarget();
          default -> throw new IllegalStateException("Unexpected RefType: " + referencePlan.getRefType());
@@ -164,10 +172,10 @@ public class RecordItemService {
       };
    }
 
-   private static class History {
-      private final Map<ItemPlan<?>, String> items = new IdentityHashMap<>();
-      private final Map<AttachmentPlan, String> attachments = new HashMap<>();
-      private final Set<ItemPlan<?>> inProgress = Collections.newSetFromMap(new IdentityHashMap<>());
+   static class History {
+      final Map<ItemPlan<?>, String> items = new IdentityHashMap<>();
+      final Map<AttachmentPlan, String> attachments = new HashMap<>();
+      final Set<ItemPlan<?>> inProgress = Collections.newSetFromMap(new IdentityHashMap<>());
 
       private void addVisited(ItemPlan<?> itemPlan) {
           if(!inProgress.add(itemPlan)){

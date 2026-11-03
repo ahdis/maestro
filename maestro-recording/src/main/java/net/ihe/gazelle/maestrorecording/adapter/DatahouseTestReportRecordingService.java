@@ -52,6 +52,7 @@ import java.util.Map;
  * Implementation of {@link TestReportRecordingService} that records test reports to the Datahouse system.
  */
 public class DatahouseTestReportRecordingService implements TestReportRecordingService {
+    private final RecordingSnapshotFactory snapshots = new RecordingSnapshotFactory();
 
    static final String TEST_REPORT_TYPE = "TEST_REPORT";
    static final String INPUT_ATTACHMENT_REFERENCE_TYPE = "INPUT_ATTACHMENT";
@@ -80,6 +81,13 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
    }
 
    @Override
+   public net.ihe.gazelle.maestro.engine.business.ExecutionRecordingSession openSession(List<Test> definitions,
+         java.util.function.Supplier<AccessControlList> acl,
+         java.util.function.Supplier<List<Property>> inputs) {
+      return new DatahouseExecutionRecordingSession(this, recordItemService.openWriter(), definitions, acl, inputs, datahouseUrl);
+   }
+
+   @Override
    public String recordTestReport(TestReport report, List<Test> testDefinitions) {
       String identifier = recordTestReportWithReferences(report, testDefinitions).id();
       return constructUrlToItem(identifier);
@@ -101,7 +109,12 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
       }
    }
 
-   private ItemPlan<TestReport> buildTestReportPlan(TestReport report, AccessControlList acl, List<Test> testDefinitions) {
+   ItemPlan<TestReport> buildTestReportPlan(TestReport report, AccessControlList acl, List<Test> testDefinitions) {
+      return buildTestReportPlan(report, acl, testDefinitions, Map.of());
+   }
+
+   ItemPlan<TestReport> buildTestReportPlan(TestReport report, AccessControlList acl, List<Test> testDefinitions,
+                                           Map<RecordedStepKey, RecordedStep> recordedSteps) {
       List<TestReportReferenceDTO> subReportRefs = new ArrayList<>();
       ItemPlan<TestReport> testReportPlan = new ItemPlan<>(
             TEST_REPORT_TYPE,
@@ -113,7 +126,7 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
             buildRunScopedRegistries(report.getTestRunReports(), callbackRegistry);
 
       planInputReferences(report.getTestRunReports(), testReportPlan, runScopedRegistries);
-      planStepOutputReferences(report.getTestRunReports(), testReportPlan, runScopedRegistries, testDefinitions);
+      planStepOutputReferences(report.getTestRunReports(), testReportPlan, runScopedRegistries, testDefinitions, recordedSteps);
       planSubReportReferences(report, subReportRefs, testReportPlan, acl);
 
       return testReportPlan;
@@ -207,7 +220,7 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
    private void planStepOutputReferences(List<TestRunReport> testRunReports,
                                          ItemPlan<TestReport> testReportPlan,
                                          Map<TestRunReport, FutureReferenceCallbackRegistry> runScopedRegistries,
-                                         List<Test> testDefinitions) {
+                                         List<Test> testDefinitions, Map<RecordedStepKey, RecordedStep> recordedSteps) {
       if (testRunReports == null) {
          return;
       }
@@ -221,12 +234,12 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
          if (stepReports == null || callbackRegistry == null) {
             continue;
          }
-         planRunStepOutputs(stepReports, testReportPlan, callbackRegistry, definition);
+         planRunStepOutputs(stepReports, testReportPlan, callbackRegistry, definition, recordedSteps);
       }
    }
 
    private void planRunStepOutputs(List<StepRunReport> stepReports, ItemPlan<TestReport> testReportPlan,
-                                   FutureReferenceCallbackRegistry callbackRegistry, Test definition) {
+                                   FutureReferenceCallbackRegistry callbackRegistry, Test definition, Map<RecordedStepKey, RecordedStep> recordedSteps) {
       Map<String, Step> stepsByName = new HashMap<>();
       Map<String, Integer> executionOrder = new HashMap<>();
       if (definition != null) {
@@ -242,6 +255,19 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
       for (StepRunReport stepReport : orderedReports) {
          Step step = stepsByName.get(stepReport.getStepName());
          Map<String, String> aliases = step != null ? step.getOutputMappings() : Map.of();
+         RecordedStep recorded = recordedSteps.get(new RecordedStepKey(definition == null ? null : definition.getId(),
+               stepReport.getStepName(), stepReport.getDateTime()));
+         if (recorded != null) {
+            stepReport.setOutputs(snapshots.copy(recorded.report()).getOutputs());
+            for (ReferencePlan reference : recorded.references()) {
+               testReportPlan.addFutureReferencePlan(reference, null);
+               String alias = aliases.get(reference.getName());
+               if (alias != null && reference.getRefType() == net.ihe.gazelle.maestro.spi.business.recording.plan.MaestroRefType.ATTACHMENT) {
+                  callbackRegistry.notifyResolved(alias, (String) reference.getTarget());
+               }
+            }
+            continue;
+         }
          StepOutputPlanDissector dissector = dissectorProvider.getDissector(stepReport);
          if (dissector != null) {
             safeDissect(dissector, new StepOutputPlan(testReportPlan, stepReport, datahouseUrl, callbackRegistry, aliases));

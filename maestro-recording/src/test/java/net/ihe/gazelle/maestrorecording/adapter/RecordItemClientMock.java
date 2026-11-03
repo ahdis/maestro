@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 class RecordItemClientMock implements RecordItemClient {
+    RuntimeException uploadFailure;
+    int uploadAttempts;
     int itemSeq = 0;
     int attachSeq = 0;
     final List<Object> recordedItems = new ArrayList<>();
@@ -42,6 +44,8 @@ class RecordItemClientMock implements RecordItemClient {
 
     // New API exposed by datahouse; service calls it via reflection
     public List<String> uploadAttachments(List<Attachment> attachments) {
+        uploadAttempts++;
+        if (uploadFailure != null) throw uploadFailure;
         uploadedAttachmentsBatches.add(attachments);
         List<String> ids = new ArrayList<>();
         for (int i = 0; i < attachments.size(); i++) {

@@ -50,7 +50,7 @@ public class RecordingMaestro implements Maestro {
    @Override
    public void executeTestSuite(String testSessionId, TestSuiteRun testSuiteRun, boolean persist, MaestroObserver observer) {
       if (persist) {
-         observer = new RecordObserver(observer);
+         observer = new RecordObserver(observer, testSuiteRun.getTests(), testSuiteRun::getAccessControlList, null);
       }
       maestro.executeTestSuite(testSessionId, testSuiteRun, observer);
    }
@@ -58,27 +58,26 @@ public class RecordingMaestro implements Maestro {
    @Override
    public void executeTest(String testSessionId, TestRun testRun, boolean persist, MaestroObserver observer) {
       if (persist) {
-         observer = new RecordObserver(observer);
+         observer = new RecordObserver(observer,
+               testRun.getTest() == null ? List.of() : List.of(testRun.getTest()),
+               testRun::getAccessControlList, testRun::getInputs);
       }
       maestro.executeTest(testSessionId, testRun, observer);
-   }
-
-   private List<Test> testDefinitions(ExecutionFinished finished) {
-      if (finished.getRun() instanceof TestRun run) {
-         return List.of(run.getTest());
-      }
-      if (finished.getRun() instanceof TestSuiteRun run) {
-         return run.getTests();
-      }
-      return List.of();
    }
 
    private class RecordObserver implements MaestroObserver {
 
       private final MaestroObserver delegate;
 
-      public RecordObserver(MaestroObserver delegate) {
+      private final ExecutionRecordingSession recording;
+      private boolean recordingFinished;
+
+      public RecordObserver(MaestroObserver delegate, List<Test> definitions,
+                            java.util.function.Supplier<net.ihe.gazelle.security.business.acl.AccessControlList> acl,
+                            java.util.function.Supplier<List<net.ihe.gazelle.maestro.api.business.property.Property>> inputs) {
          this.delegate = delegate;
+         this.recording = inputs == null ? testReportRecordingService.openSession(definitions, acl)
+               : testReportRecordingService.openSession(definitions, acl, inputs);
       }
 
       @Override
@@ -99,6 +98,17 @@ public class RecordingMaestro implements Maestro {
       @Override
       public void onStepRunFinished(StepRunFinished stepRunFinished) {
          delegate.onStepRunFinished(stepRunFinished);
+         synchronized (recording) {
+            if (recordingFinished) return;
+            try {
+               StepRunFinished recorded = recording.recordStep(stepRunFinished);
+               if (recorded != null && delegate instanceof RecordedOutputsObserver outputsObserver) {
+                  outputsObserver.onOutputsRecorded(recorded);
+               }
+            } catch (Exception ignored) {
+               // The recording session retains the failure for final reporting.
+            }
+         }
       }
 
       @Override
@@ -108,14 +118,16 @@ public class RecordingMaestro implements Maestro {
 
       @Override
       public void onExecutionFinished(ExecutionFinished executionFinished) {
-         try {
-            String location = testReportRecordingService.recordTestReport(
-                  executionFinished.getReport(), testDefinitions(executionFinished));
-            executionFinished.setReportLocation(location);
-         } catch (Exception e) {
-            executionFinished.getReport().addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e).build());
+         synchronized (recording) {
+            recordingFinished = true;
+            try {
+               String location = recording.finish(executionFinished.getReport());
+               executionFinished.setReportLocation(location);
+            } catch (Exception e) {
+               executionFinished.getReport().addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e).build());
+            }
+            delegate.onExecutionFinished(executionFinished);
          }
-         delegate.onExecutionFinished(executionFinished);
       }
 
        @Override

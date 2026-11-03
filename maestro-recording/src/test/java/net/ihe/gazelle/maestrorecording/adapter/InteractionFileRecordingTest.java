@@ -201,6 +201,65 @@ class InteractionFileRecordingTest {
                         .setStepRunReports(steps));
     }
 
+    @Test
+    void incrementalRecordingKeepsRawValuesReusesWritesAndPreservesLateEvidence() throws Exception {
+        var client = new RecordItemClientMock();
+        var producer = interaction("first.xml", (byte) 1).setStepName("First interaction");
+        var consumer = validation("documentAlias").setStepName("First validation");
+        var definitions = definitions(List.of("First interaction", "First validation"),
+                List.of(Map.of("document", "documentAlias"), Map.of()));
+        var finalReport = report(List.of(producer, consumer));
+        var session = recorder(client).openSession(definitions, finalReport::getAccessControlList, List::of);
+        var first = new net.ihe.gazelle.maestro.api.business.message.StepRunFinished("session", "test", producer.getStepName(), null, producer);
+        var published = session.recordStep(first);
+        assertNotNull(published);
+        assertNotNull(producer.getOutputs().getFirst().getValue());
+        assertNull(published.getStepRunReport().getOutputs().getFirst().getValue());
+        assertNull(session.recordStep(first));
+        session.recordStep(new net.ihe.gazelle.maestro.api.business.message.StepRunFinished("session", "test", consumer.getStepName(), null, consumer));
+        assertEquals(1, validationItems(client).size());
+        assertValidationAttachment(validationItems(client).getFirst(), "att-1");
+        producer.addEvidence(new StringProperty("late", "evidence"));
+        session.finish(finalReport);
+        assertEquals(1, validationItems(client).size());
+        assertEquals(1, client.uploadedAttachmentsBatches.size());
+        var root = (Item) client.recordedItems.getLast();
+        assertTrue(root.getContent().contains("evidence"));
+        assertNotNull(consumer.getOutput(ValidationStepDefinition.REPORT).getValue());
+        assertNull(session.recordStep(first));
+    }
+
+    @Test
+    void failedIncrementalWriteIsReportedWithoutAnAutomaticRetry() {
+        var client = new RecordItemClientMock();
+        client.uploadFailure = new IllegalStateException("Upload outcome uncertain");
+        var producer = interaction("first.xml", (byte) 1).setStepName("First interaction");
+        var finalReport = report(List.of(producer));
+        var session = recorder(client).openSession(definitions(List.of("First interaction"), List.of(Map.of())),
+                finalReport::getAccessControlList, List::of);
+        assertThrows(IllegalStateException.class, () -> session.recordStep(
+                new net.ihe.gazelle.maestro.api.business.message.StepRunFinished(
+                        "session", "test", producer.getStepName(), null, producer)));
+        assertThrows(net.ihe.gazelle.maestro.engine.business.TestReportRecordingException.class,
+                () -> session.finish(finalReport));
+        assertEquals(1, client.uploadAttempts);
+        assertNotNull(producer.getOutputs().getFirst().getValue());
+    }
+
+    @Test
+    void finalizationReconcilesStepsBeforeTheirObserverCallbacksArrive() {
+        var client = new RecordItemClientMock();
+        var producer = interaction("first.xml", (byte) 1).setStepName("First interaction");
+        var finalReport = report(List.of(producer));
+        var session = recorder(client).openSession(definitions(List.of("First interaction"), List.of(Map.of())),
+                finalReport::getAccessControlList, List::of);
+        session.finish(finalReport);
+        assertEquals(1, client.uploadedAttachmentsBatches.size());
+        assertNull(session.recordStep(new net.ihe.gazelle.maestro.api.business.message.StepRunFinished(
+                "session", "test", producer.getStepName(), null, producer)));
+        assertEquals(1, client.uploadedAttachmentsBatches.size());
+    }
+
     private List<net.ihe.gazelle.maestro.api.business.test.Test> definitions(List<String> stepNames, List<Map<String, String>> aliases) {
         var steps = java.util.stream.IntStream.range(0, aliases.size())
                 .mapToObj(index -> new net.ihe.gazelle.maestro.api.business.test.Step()

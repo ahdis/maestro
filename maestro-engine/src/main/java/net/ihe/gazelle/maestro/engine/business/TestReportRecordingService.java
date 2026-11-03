@@ -26,6 +26,19 @@ import java.util.List;
  */
 public interface TestReportRecordingService {
 
+   /** Opens incremental recording with access to the validated execution inputs. */
+   default ExecutionRecordingSession openSession(List<Test> definitions,
+           java.util.function.Supplier<net.ihe.gazelle.security.business.acl.AccessControlList> acl,
+           java.util.function.Supplier<java.util.List<net.ihe.gazelle.maestro.api.business.property.Property>> inputs) {
+      return openSession(definitions, acl);
+   }
+
+   /** Opens isolated recording state; legacy implementations retain final-only recording. */
+   default ExecutionRecordingSession openSession(List<Test> definitions,
+           java.util.function.Supplier<net.ihe.gazelle.security.business.acl.AccessControlList> acl) {
+      return new FinalReportRecordingSession(this, definitions);
+   }
+
    /**
     * Records a TestReport and its references without resolving producer output aliases.
     * Use this for historical reports whose original test definitions are unavailable.
