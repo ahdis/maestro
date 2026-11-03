@@ -122,7 +122,9 @@ public class StepRunReportBuilder extends AbstractBuilder<StepRunReport> {
     * @return the current instance of {@code StepRunReportBuilder}, allowing for method chaining
     */
    public StepRunReportBuilder addOutput(Property output) {
-      this.outputs.add(output);
+       if (output != null) {
+           this.outputs.add(output);
+       }
       return this;
    }
 

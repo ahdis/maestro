@@ -19,12 +19,15 @@ package net.ihe.gazelle.maestro.userinteraction.step.business;
 import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
 import net.ihe.gazelle.maestro.api.business.property.*;
 import net.ihe.gazelle.maestro.api.business.test.*;
-import net.ihe.gazelle.maestro.api.business.testreport.*;
+import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.userinteract.stub.UserInteractionHandlerStub;
 import net.ihe.gazelle.maestro.spi.business.StepRun;
 import org.junit.jupiter.api.Test;
+
 import java.util.List;
 import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserInteractionStepExecutorTest {
@@ -97,13 +100,13 @@ class UserInteractionStepExecutorTest {
 
     @Test
     void reusesDefinitionValidatorsBeforeCollectingAnswers() {
-        assertThrows(IllegalArgumentException.class, () -> new UserInteractionResponseValidator(
-                List.of(new SupportedTextInput().setId("patientId"))));
-        assertThrows(IllegalArgumentException.class, () -> new UserInteractionResponseValidator(
-                List.of(new SupportedTextInput().setId("choice").setLabel("Choice")
-                        .setPossibleValues(List.of("")))));
-        assertThrows(IllegalArgumentException.class, () -> new UserInteractionResponseValidator(
-                List.of(new SupportedValueSetInput().setId("choice").setLabel("Choice"))));
+        List<SupportedInput> missingLabel = List.of(new SupportedTextInput().setId("patientId"));
+        List<SupportedInput> emptyPossibleValue = List.of(new SupportedTextInput().setId("choice").setLabel("Choice")
+                .setPossibleValues(List.of("")));
+        List<SupportedInput> missingValueSetId = List.of(new SupportedValueSetInput().setId("choice").setLabel("Choice"));
+        assertThrows(IllegalArgumentException.class, () -> new UserInteractionResponseValidator(missingLabel));
+        assertThrows(IllegalArgumentException.class, () -> new UserInteractionResponseValidator(emptyPossibleValue));
+        assertThrows(IllegalArgumentException.class, () -> new UserInteractionResponseValidator(missingValueSetId));
     }
 
     @Test
@@ -123,20 +126,29 @@ class UserInteractionStepExecutorTest {
     @Test
     void validatesConfiguredSelectionsAndDuplicateEmptyAnswers() {
         SupportedTextInput selection = new SupportedTextInput().setId("choice").setPossibleValues(List.of("A", "B"));
-        assertThrows(IllegalArgumentException.class, () -> execute(List.of(selection), new StringProperty("choice", "C")));
-        assertThrows(IllegalArgumentException.class, () -> execute(List.of(selection),
-                new StringProperty("choice", null), new StringProperty("choice", null)));
+        List<SupportedInput> fields = List.of(selection);
+        StringProperty unsupportedSelection = new StringProperty("choice", "C");
+        StringProperty firstEmptyAnswer = new StringProperty("choice", null);
+        StringProperty duplicateEmptyAnswer = new StringProperty("choice", null);
+        assertThrows(IllegalArgumentException.class, () -> execute(fields, unsupportedSelection));
+        assertThrows(IllegalArgumentException.class, () -> execute(fields, firstEmptyAnswer, duplicateEmptyAnswer));
         assertTrue(execute(List.of(selection), new StringProperty("choice", " ")).getOutputs().isEmpty());
     }
 
     @Test
     void rejectsMissingRequiredUnknownDuplicateAndWronglyTypedValues() {
         List<SupportedInput> fields = List.of(new SupportedTextInput().setId("patientId").setRequired(true));
+        StringProperty unknownField = new StringProperty("other", "123");
+        BooleanProperty wrongType = new BooleanProperty("patientId", true);
+        StringProperty emptyValue = new StringProperty("patientId", "");
+        StringProperty firstDuplicate = new StringProperty("patientId", "123");
+        StringProperty secondDuplicate = new StringProperty("patientId", "456");
+        List<SupportedInput> duplicateFields = List.of(fields.getFirst(), fields.getFirst());
         assertThrows(IllegalArgumentException.class, () -> execute(fields));
-        assertThrows(IllegalArgumentException.class, () -> execute(fields, new StringProperty("other", "123")));
-        assertThrows(IllegalArgumentException.class, () -> execute(fields, new BooleanProperty("patientId", true)));
-        assertThrows(IllegalArgumentException.class, () -> execute(fields, new StringProperty("patientId", "")));
-        assertThrows(IllegalArgumentException.class, () -> execute(fields, new StringProperty("patientId", "123"), new StringProperty("patientId", "456")));
-        assertThrows(IllegalArgumentException.class, () -> execute(List.of(fields.getFirst(), fields.getFirst())));
+        assertThrows(IllegalArgumentException.class, () -> execute(fields, unknownField));
+        assertThrows(IllegalArgumentException.class, () -> execute(fields, wrongType));
+        assertThrows(IllegalArgumentException.class, () -> execute(fields, emptyValue));
+        assertThrows(IllegalArgumentException.class, () -> execute(fields, firstDuplicate, secondDuplicate));
+        assertThrows(IllegalArgumentException.class, () -> execute(duplicateFields));
     }
 }

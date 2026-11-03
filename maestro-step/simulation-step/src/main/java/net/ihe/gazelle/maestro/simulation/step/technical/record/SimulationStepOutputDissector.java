@@ -17,13 +17,14 @@
 package net.ihe.gazelle.maestro.simulation.step.technical.record;
 
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
-import net.ihe.gazelle.maestro.api.business.property.PropertyBindingPayload;
 import net.ihe.gazelle.maestro.api.business.property.Property;
+import net.ihe.gazelle.maestro.api.business.property.PropertyBindingPayload;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.simulation.step.business.SimulationStepDefinition;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanDissector;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemPlan;
+import net.ihe.gazelle.maestro.validation.step.technical.record.ValidationInputReferenceBindingService;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.marshalling.MarshallingException;
 import net.ihe.gazelle.modelmarshaller.technical.marshalling.TextMarshaller;
@@ -32,7 +33,6 @@ import net.ihe.gazelle.simulation.business.callback.SimulationReport;
 import net.ihe.gazelle.simulation.business.callback.TransactionReport;
 import net.ihe.gazelle.simulation.business.callback.ValidationReport;
 import net.ihe.gazelle.simulation.jaxrs.api.technical.dto.callback.SimulationReportDTO;
-import net.ihe.gazelle.maestro.validation.step.technical.record.ValidationInputReferenceBindingService;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;

@@ -62,9 +62,13 @@ public class GradingStepExecutor implements StepExecutor {
                                 .setUserId(criterion.getUserId())
                                 .setDateTime(criterion.getDateTime()))
                         .toList())
-                .addOutput(new StringProperty()
+                .addOutput(gradingCompleted.getNote() != null
+                        ? new StringProperty()
                         .setName(GradingStepDefinition.NOTE)
-                        .setValue(gradingCompleted.getNote()))
+                        .setValue(gradingCompleted.getNote())
+                        .setUserId(gradingCompleted.getUserId())
+                        .setDateTime(gradingCompleted.getDateTime())
+                        : null)
                 .setResult(gradingCompleted.getResult().toStepResult())
                 .build();
     }

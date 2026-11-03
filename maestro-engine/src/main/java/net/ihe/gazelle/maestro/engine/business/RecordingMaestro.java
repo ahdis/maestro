@@ -63,16 +63,6 @@ public class RecordingMaestro implements Maestro {
       maestro.executeTest(testSessionId, testRun, observer);
    }
 
-   private List<Test> testDefinitions(ExecutionFinished finished) {
-      if (finished.getRun() instanceof TestRun run) {
-         return List.of(run.getTest());
-      }
-      if (finished.getRun() instanceof TestSuiteRun run) {
-         return run.getTests();
-      }
-      return List.of();
-   }
-
    private class RecordObserver implements MaestroObserver {
 
       private final MaestroObserver delegate;
@@ -121,6 +111,16 @@ public class RecordingMaestro implements Maestro {
        @Override
        public CompletableFuture<GradingCompleted> askGrading(AskGrading askGrading) {
            return delegate.askGrading(askGrading);
+       }
+
+       private List<Test> testDefinitions(ExecutionFinished finished) {
+           if (finished.getRun() instanceof TestRun run) {
+               return List.of(run.getTest());
+           }
+           if (finished.getRun() instanceof TestSuiteRun run) {
+               return run.getTests();
+           }
+           return List.of();
        }
    }
 }

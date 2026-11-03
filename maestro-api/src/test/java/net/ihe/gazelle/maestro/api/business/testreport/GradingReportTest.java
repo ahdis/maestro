@@ -16,16 +16,24 @@
 
 package net.ihe.gazelle.maestro.api.business.testreport;
 
-import net.ihe.gazelle.maestro.api.business.message.*;
-import net.ihe.gazelle.maestro.api.technical.dto.message.*;
+import net.ihe.gazelle.maestro.api.business.message.DeleteEvidence;
+import net.ihe.gazelle.maestro.api.business.message.GradingCompleted;
+import net.ihe.gazelle.maestro.api.business.message.GradingResult;
+import net.ihe.gazelle.maestro.api.technical.dto.message.DeleteEvidenceDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.message.GradingCompletedDTO;
 import net.ihe.gazelle.maestro.api.technical.dto.report.GradingCriterionDTO;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
 import org.junit.jupiter.api.Test;
-import java.io.*;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class GradingReportTest {

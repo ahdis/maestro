@@ -27,7 +27,6 @@ import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
-import java.lang.reflect.WildcardType;
 import java.util.List;
 
 @Schema(

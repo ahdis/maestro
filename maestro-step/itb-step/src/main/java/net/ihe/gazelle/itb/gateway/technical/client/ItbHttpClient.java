@@ -22,12 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.ihe.gazelle.itb.gateway.business.ItbClient;
 import net.ihe.gazelle.itb.gateway.business.reporting.ItbReporting;
 import net.ihe.gazelle.itb.gateway.business.reporting.ItbTestSession;
-import net.ihe.gazelle.itb.gateway.technical.client.model.ItbSessionCreationInformation;
-import net.ihe.gazelle.itb.gateway.technical.client.model.ItbSessionStatusInformation;
-import net.ihe.gazelle.itb.gateway.technical.client.model.ItbStartRequest;
-import net.ihe.gazelle.itb.gateway.technical.client.model.ItbStartResponse;
-import net.ihe.gazelle.itb.gateway.technical.client.model.ItbStatusRequest;
-import net.ihe.gazelle.itb.gateway.technical.client.model.ItbStatusResponse;
+import net.ihe.gazelle.itb.gateway.technical.client.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -19,13 +19,12 @@ package net.ihe.gazelle.maestro.quarkus.dao;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.ReplaceOptions;
-
-import net.ihe.gazelle.maestro.quarkus.dto.TestRunSessionDTO;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
 import net.ihe.gazelle.maestro.engine.business.context.TestRunSession;
+import net.ihe.gazelle.maestro.quarkus.dto.TestRunSessionDTO;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import org.bson.Document;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.util.ArrayList;
 import java.util.List;
