@@ -109,8 +109,8 @@ public class RecordingMaestro implements Maestro {
       @Override
       public void onExecutionFinished(ExecutionFinished executionFinished) {
          try {
-            String location = recording.finish(executionFinished.getReport());
-            executionFinished.setReportLocation(location);
+            ExecutionRecordingResult recorded = recording.finish(executionFinished.getReport());
+            executionFinished.setReport(recorded.report()).setReportLocation(recorded.location());
          } catch (Exception e) {
             executionFinished.getReport().addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e).build());
          }

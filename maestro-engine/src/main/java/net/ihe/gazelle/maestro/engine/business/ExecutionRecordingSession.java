@@ -40,15 +40,18 @@ public interface ExecutionRecordingSession {
                 observer.onOutputsRecorded(recorded);
             }
         } catch (RuntimeException retainedForFinish) {
-            // Implementations keep the failure and fall back to a complete write in finish().
+            // Implementations retain the failure for finalization.
         }
     }
 
     /**
      * Waits for pending steps, then records the final report and reuses the step outputs already stored.
-     * If an earlier step write failed, the outputs that were not stored are written with the final report.
+     * A failed incremental write must not be retried when its storage outcome is uncertain.
+     *
+     * @param report the complete execution report, including evidence collected after step completion
+     * @return the saved report location and recorded projection for completion notifications
      *
      * @throws TestReportRecordingException when the final report cannot be recorded
      */
-    String finish(TestReport report);
+    ExecutionRecordingResult finish(TestReport report);
 }

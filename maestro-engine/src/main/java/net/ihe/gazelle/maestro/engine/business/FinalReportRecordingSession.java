@@ -37,7 +37,7 @@ final class FinalReportRecordingSession implements ExecutionRecordingSession {
     }
 
     @Override
-    public String finish(TestReport report) {
-        return service.recordTestReport(report, definitions);
+    public ExecutionRecordingResult finish(TestReport report) {
+        return new ExecutionRecordingResult(service.recordTestReport(report, definitions), report);
     }
 }

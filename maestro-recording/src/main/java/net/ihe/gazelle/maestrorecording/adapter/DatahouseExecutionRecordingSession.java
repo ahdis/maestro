@@ -24,12 +24,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import net.ihe.gazelle.errorhandling.business.UnexpectedErrorBuilder;
+import net.ihe.gazelle.maestro.engine.business.ExecutionRecordingResult;
 import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.test.Test;
@@ -48,7 +49,8 @@ import net.ihe.gazelle.security.business.acl.AccessControlList;
 final class DatahouseExecutionRecordingSession implements ExecutionRecordingSession {
     private final RecordingSnapshotFactory snapshots = new RecordingSnapshotFactory();
     // One writer thread keeps step writes in completion order and off the engine's event thread.
-    private final ExecutorService stepWriter = Executors.newSingleThreadExecutor(Thread.ofVirtual().factory());
+    private final ExecutorService stepWriter = new ThreadPoolExecutor(1, 1, 0, TimeUnit.MILLISECONDS,
+            new ArrayBlockingQueue<>(64), Thread.ofVirtual().factory());
     private final DatahouseTestReportRecordingService service;
     private final RecordingWriter writer;
     private final List<Test> definitions;
@@ -58,7 +60,7 @@ final class DatahouseExecutionRecordingSession implements ExecutionRecordingSess
     private final Map<RecordedStepKey, RecordedStep> recorded = new HashMap<>();
     private List<Property> inputSnapshot;
     private boolean finished;
-    private RuntimeException recordingFailure;
+    private volatile RuntimeException recordingFailure;
 
     DatahouseExecutionRecordingSession(DatahouseTestReportRecordingService service, RecordingWriter writer,
             List<Test> definitions, Supplier<AccessControlList> acl, Supplier<List<Property>> inputs,
@@ -74,7 +76,13 @@ final class DatahouseExecutionRecordingSession implements ExecutionRecordingSess
     @Override
     public void submitStep(StepRunFinished event, RecordedOutputsObserver observer) {
         // Copy now: the engine keeps mutating its report while the write is queued.
-        StepRunReport stepSnapshot = snapshots.copy(event.getStepRunReport());
+        final StepRunReport stepSnapshot;
+        try {
+            stepSnapshot = snapshots.copy(event.getStepRunReport());
+        } catch (RuntimeException error) {
+            recordingFailure = error;
+            return;
+        }
         try {
             stepWriter.execute(() -> {
                 try {
@@ -83,11 +91,11 @@ final class DatahouseExecutionRecordingSession implements ExecutionRecordingSess
                         observer.onOutputsRecorded(published);
                     }
                 } catch (RuntimeException retainedForFinish) {
-                    // record() keeps the failure; finish() writes the missing outputs with the report.
+                    // record() retains write failures; notification failures do not trigger another write.
                 }
             });
         } catch (RejectedExecutionException alreadyFinished) {
-            // The session finished; the final report already contains this step.
+            // A full queue or a closed session leaves this step for final reconciliation.
         }
     }
 
@@ -143,7 +151,7 @@ final class DatahouseExecutionRecordingSession implements ExecutionRecordingSess
     }
 
     @Override
-    public String finish(TestReport report) {
+    public ExecutionRecordingResult finish(TestReport report) {
         awaitPendingSteps();
         return finishRecording(report);
     }
@@ -151,31 +159,30 @@ final class DatahouseExecutionRecordingSession implements ExecutionRecordingSess
     private void awaitPendingSteps() {
         stepWriter.shutdown();
         try {
-            // Pending writes are bounded by the Datahouse client timeouts.
+            // Finalization must observe completed writes before reusing their references.
             while (!stepWriter.awaitTermination(1, TimeUnit.MINUTES)) {
                 // keep waiting: finishing early would write the report without the queued steps
             }
         } catch (InterruptedException interrupted) {
             Thread.currentThread().interrupt();
             stepWriter.shutdownNow();
+            throw new TestReportRecordingException("Interrupted while awaiting incremental recording", interrupted);
         }
     }
 
-    private synchronized String finishRecording(TestReport report) {
+    private synchronized ExecutionRecordingResult finishRecording(TestReport report) {
         if (finished) throw new TestReportRecordingException("Recording session already finished");
         try {
-            TestReport snapshot = snapshots.copy(report);
             if (recordingFailure != null) {
-                // Steps stored before the failure are reused; the others are written with the report.
-                snapshot.addUnexpectedError(new UnexpectedErrorBuilder()
-                        .fromThrowable(new TestReportRecordingException(
-                                "Incremental recording failed; remaining outputs were written with the final report",
-                                recordingFailure))
-                        .build());
+                throw new TestReportRecordingException(
+                        "Incremental recording failed; storage outcome may be uncertain, so writes were not retried",
+                        recordingFailure);
             }
+            TestReport snapshot = snapshots.copy(report);
             ItemPlan<TestReport> plan = service.buildTestReportPlan(snapshot, snapshot.getAccessControlList(),
                     definitions, recorded);
-            return datahouseUrl + "/items/" + writer.record(plan, snapshot.getAccessControlList());
+            String location = datahouseUrl + "/items/" + writer.record(plan, snapshot.getAccessControlList());
+            return new ExecutionRecordingResult(location, snapshot);
         } finally {
             finished = true;
             recorded.clear();

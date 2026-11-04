@@ -25,6 +25,7 @@ import java.util.List;
 class RecordItemClientMock implements RecordItemClient {
     RuntimeException uploadFailure;
     int uploadAttempts;
+    boolean loseUploadAcknowledgement;
     int itemSeq = 0;
     int attachSeq = 0;
     final List<Object> recordedItems = new ArrayList<>();
@@ -50,6 +51,9 @@ class RecordItemClientMock implements RecordItemClient {
         List<String> ids = new ArrayList<>();
         for (int i = 0; i < attachments.size(); i++) {
             ids.add("att-" + (++attachSeq));
+        }
+        if (loseUploadAcknowledgement) {
+            throw new IllegalStateException("Upload accepted but acknowledgement lost");
         }
         return ids;
     }

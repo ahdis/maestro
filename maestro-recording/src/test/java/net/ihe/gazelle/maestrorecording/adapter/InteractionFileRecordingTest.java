@@ -272,10 +272,12 @@ class InteractionFileRecordingTest {
         assertNull(session.recordStep(first));
     }
 
-    @Test
-    void failedIncrementalWriteFallsBackToCompleteFinalWrite() {
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(booleans = {false, true})
+    void failedIncrementalWriteDoesNotRetryAnUncertainOutcome(boolean acceptedBeforeFailure) {
         var client = new RecordItemClientMock();
-        client.uploadFailure = new IllegalStateException("Upload outcome uncertain");
+        client.loseUploadAcknowledgement = acceptedBeforeFailure;
+        client.uploadFailure = acceptedBeforeFailure ? null : new IllegalStateException("Upload outcome uncertain");
         var producer = interaction("first.xml", (byte) 1).setStepName("First interaction");
         var finalReport = report(List.of(producer));
         var session = recorder(client).openSession(definitions(List.of("First interaction"), List.of(Map.of())),
@@ -288,12 +290,12 @@ class InteractionFileRecordingTest {
         assertEquals(1, client.uploadAttempts);
 
         client.uploadFailure = null;
-        String location = session.finish(finalReport);
-
-        assertNotNull(location);
-        assertEquals(2, client.uploadAttempts, "The final write stores the outputs that failed incrementally");
-        var root = (Item) client.recordedItems.getLast();
-        assertTrue(root.getContent().contains("Incremental recording failed"));
+        client.loseUploadAcknowledgement = false;
+        assertEquals(acceptedBeforeFailure ? 1 : 0, client.uploadedAttachmentsBatches.size());
+        assertThrows(net.ihe.gazelle.maestro.engine.business.TestReportRecordingException.class,
+                () -> session.finish(finalReport));
+        assertEquals(1, client.uploadAttempts, "An uncertain upload must not be retried during finalization");
+        assertTrue(client.recordedItems.isEmpty());
         assertNotNull(producer.getOutputs().getFirst().getValue());
     }
 
@@ -309,6 +311,42 @@ class InteractionFileRecordingTest {
         assertNull(session.recordStep(new net.ihe.gazelle.maestro.api.business.message.StepRunFinished(
                 "session", "test", producer.getStepName(), null, producer)));
         assertEquals(1, client.uploadedAttachmentsBatches.size());
+    }
+
+    @Test
+    void fullBackgroundQueueDefersOutputsToFinalRecordingWithoutLosingThem() throws Exception {
+        var client = new BlockingUploadRecordItemClient();
+        List<StepRunReport> steps = IntStream.range(0, 70)
+                .mapToObj(index -> interaction("file-" + index + ".xml", (byte) index)
+                        .setStepName("Interaction " + index)).toList();
+        var finalReport = report(steps);
+        var session = recorder(client).openSession(
+                definitions(steps.stream().map(StepRunReport::getStepName).toList(),
+                        steps.stream().map(step -> Map.<String, String>of()).toList()),
+                finalReport::getAccessControlList, List::of);
+        try {
+            for (int index = 0; index < steps.size(); index++) {
+                StepRunReport step = steps.get(index);
+                session.submitStep(new net.ihe.gazelle.maestro.api.business.message.StepRunFinished(
+                        "session", "test", step.getStepName(), null, step), null);
+                if (index == 0) {
+                    assertTrue(client.writing.await(5, java.util.concurrent.TimeUnit.SECONDS));
+                }
+            }
+        } finally {
+            client.release.countDown();
+        }
+        var result = session.finish(finalReport);
+        assertNotNull(result.location());
+        assertEquals(70, client.uploadAttempts, "Queued and deferred outputs must each be stored once");
+        assertEquals(1, client.recordedItems.size(), "Only the final parent item is created");
+        assertEquals(70, result.report().getTestRunReports().getFirst().getStepRunReports().size());
+        assertTrue(result.report().getTestRunReports().getFirst().getStepRunReports().stream()
+                .allMatch(step -> step.getOutput("document") instanceof
+                        net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty item
+                        && item.getReference() != null && item.getValue() == null));
+        assertTrue(finalReport.getTestRunReports().getFirst().getStepRunReports().stream()
+                .allMatch(step -> step.getOutput("document").getValue() != null));
     }
 
     private List<net.ihe.gazelle.maestro.api.business.test.Test> definitions(List<String> stepNames, List<Map<String, String>> aliases) {

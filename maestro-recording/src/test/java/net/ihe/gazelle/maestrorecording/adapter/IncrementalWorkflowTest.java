@@ -97,8 +97,7 @@ class IncrementalWorkflowTest {
             }
             observer.answer.complete(new UserInteractionCompleted());
             var finished = observer.finished.get(10, TimeUnit.SECONDS);
-            assertEquals(failStorage ? 2 : 1, client.validationWrites,
-                    "Finalization repeats the output write only after an incremental failure");
+            assertEquals(1, client.validationWrites, "Finalization must not repeat an uncertain write");
             assertEquals(StepResult.PASSED, finished.getReport().getTestRunReports().getFirst()
                     .getStepRunReports().getFirst().getResult());
             if (failStorage) {
@@ -107,6 +106,11 @@ class IncrementalWorkflowTest {
                 assertNull(finished.getReportLocation());
             } else {
                 assertTrue(finished.getReport().getUnexpectedErrors().isEmpty());
+                ByteArrayItemProperty finalOutput = finished.getReport().getTestRunReports().getFirst()
+                        .getStepRunReports().getFirst().getOutput(ValidationStepDefinition.REPORT);
+                assertEquals("http://test-datahouse/items/itm-1", finalOutput.getReference());
+                assertNull(finalOutput.getValue());
+                assertArrayEquals(bytes, validation.getOutput(ValidationStepDefinition.REPORT).getValue());
                 assertEquals("http://test-datahouse/items/itm-2", finished.getReportLocation());
                 assertEquals(2, client.recordedItems.size());
                 Item root = (Item) client.recordedItems.getLast();
