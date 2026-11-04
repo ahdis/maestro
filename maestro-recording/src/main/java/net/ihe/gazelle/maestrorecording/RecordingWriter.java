@@ -51,4 +51,3 @@ public final class RecordingWriter {
       history.inProgress.clear();
    }
 }
-

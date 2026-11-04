@@ -19,7 +19,6 @@ package net.ihe.gazelle.maestro.grading.step.business;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GradingStepDefinitionTest {
 
@@ -29,6 +28,7 @@ class GradingStepDefinitionTest {
         assertEquals(GradingStepDefinition.TYPE, definition.getType());
         assertEquals(1, definition.getSupportedInputs().size());
         assertEquals(GradingStepDefinition.CRITERIA, definition.getSupportedInputs().getFirst().getId());
-        assertTrue(definition.getOutputsDefinition().isEmpty());
+        assertEquals(java.util.Map.of(GradingStepDefinition.NOTE,
+                net.ihe.gazelle.maestro.api.business.property.StringProperty.class), definition.getOutputsDefinition());
     }
 }

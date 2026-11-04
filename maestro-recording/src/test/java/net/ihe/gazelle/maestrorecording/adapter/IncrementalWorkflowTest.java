@@ -31,7 +31,7 @@ import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition
 import net.ihe.gazelle.maestro.validation.step.technical.record.ValidationStepOutputDissector;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 import net.ihe.gazelle.servicemetadata.api.business.Service;
-import technical.dao.SessionStoreCache;
+import net.ihe.gazelle.maestro.engine.technical.dao.SessionStoreCache;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import java.util.List;
@@ -57,7 +57,7 @@ class IncrementalWorkflowTest {
                 if (step.getName().equals("Validate")) return run -> validation;
                 return run -> {
                     assertArrayEquals(bytes, run.getPropertyValue("previousReport"));
-                    return new UserInteractionStepExecutor(new technical.userinteract.UserInteractionHandlerImpl(
+                    return new UserInteractionStepExecutor(new net.ihe.gazelle.maestro.engine.technical.userinteract.UserInteractionHandlerImpl(
                             observerStore.getSession(session))).execute(run);
                 };
             };

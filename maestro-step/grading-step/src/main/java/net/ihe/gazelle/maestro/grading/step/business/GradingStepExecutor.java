@@ -52,7 +52,7 @@ public class GradingStepExecutor implements StepExecutor {
     }
 
     private StepRunReport buildStepRunReport(StepRun stepRun, GradingCompleted gradingCompleted) {
-        return new StepRunReportBuilder()
+        StepRunReportBuilder report = new StepRunReportBuilder()
                 .setStepName(stepRun.getName())
                 .setType(GradingStepDefinition.TYPE)
                 .setOutputs(gradingCompleted.getGradingCriteria().stream()
@@ -62,10 +62,10 @@ public class GradingStepExecutor implements StepExecutor {
                                 .setUserId(criterion.getUserId())
                                 .setDateTime(criterion.getDateTime()))
                         .toList())
-                .addOutput(new StringProperty()
-                        .setName(GradingStepDefinition.NOTE)
-                        .setValue(gradingCompleted.getNote()))
-                .setResult(gradingCompleted.getResult().toStepResult())
-                .build();
+                .setResult(gradingCompleted.getResult().toStepResult());
+        if (gradingCompleted.getNote() != null && !gradingCompleted.getNote().isBlank()) {
+            report.addOutput(new StringProperty(GradingStepDefinition.NOTE, gradingCompleted.getNote()));
+        }
+        return report.build();
     }
 }

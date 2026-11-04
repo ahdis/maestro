@@ -33,12 +33,13 @@ import java.util.concurrent.CompletableFuture;
  * Represents a WebSocket session that listens to Maestro events and handles user interactions.
  * Implements {@link MaestroObserver} to receive updates from test execution.
  */
-public class WebSocketSession implements MaestroObserver {
+public class WebSocketSession implements MaestroObserver, net.ihe.gazelle.maestro.engine.business.RecordedOutputsObserver {
 
     private static final Logger LOG = LoggerFactory.getLogger(WebSocketSession.class.getName());
 
     private final TextSerDes serDes = new JacksonSerDes();
     private final Session session;
+    private final boolean liveOutputsEnabled;
     private CompletableFuture<UserInteractionCompleted> interactionFuture;
     private CompletableFuture<GradingCompleted> gradingFuture;
 
@@ -48,7 +49,12 @@ public class WebSocketSession implements MaestroObserver {
      * @param session the WebSocket session to be wrapped
      */
     public WebSocketSession(Session session) {
+        this(session, false);
+    }
+
+    public WebSocketSession(Session session, boolean liveOutputsEnabled) {
         this.session = session;
+        this.liveOutputsEnabled = liveOutputsEnabled;
     }
 
     /**
@@ -103,6 +109,14 @@ public class WebSocketSession implements MaestroObserver {
         String message = serDes.serializeAsString(new StepRunFinishedDTO(stepRunFinished));
         LOG.debug("Step Run Finished: {}", message);
         this.session.getAsyncRemote().sendText(message);
+    }
+
+    @Override
+    public void onOutputsRecorded(StepRunFinished recorded) {
+        if (!liveOutputsEnabled || recorded.getStepRunReport().getOutputs().isEmpty()) return;
+        this.session.getAsyncRemote().sendText(serDes.serializeAsString(new StepOutputsAvailableDTO(
+                new StepOutputsAvailable(recorded.getTestId(), recorded.getStepName(),
+                        recorded.getStepRunReport().getDateTime(), recorded.getStepRunReport().getOutputs()))));
     }
 
     @Override

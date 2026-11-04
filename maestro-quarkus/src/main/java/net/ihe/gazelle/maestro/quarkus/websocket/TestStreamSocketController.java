@@ -50,6 +50,9 @@ import java.io.IOException;
 @RequestScoped
 @ServerEndpoint("/v1/test-stream/run")
 public class TestStreamSocketController {
+    @org.eclipse.microprofile.config.inject.ConfigProperty(name = "maestro.recording.live-outputs.enabled", defaultValue = "false")
+    boolean liveOutputsEnabled;
+
 
     /**
      * Name of the interface.
@@ -95,7 +98,8 @@ public class TestStreamSocketController {
     @OnOpen
     public void onOpen(Session session) {
         LOG.info("Test Stream Socket Connected: {}", session.getId());
-        WebSocketSession maestroCaller = new WebSocketSession(session);
+        WebSocketSession maestroCaller = new WebSocketSession(session, liveOutputsEnabled
+                && session.getRequestParameterMap().getOrDefault("liveOutputs", java.util.List.of()).contains("true"));
         sessionService.addSession(session.getId(), maestroCaller);
     }
 
