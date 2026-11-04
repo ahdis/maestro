@@ -273,7 +273,7 @@ class InteractionFileRecordingTest {
     }
 
     @Test
-    void failedIncrementalWriteIsReportedWithoutAnAutomaticRetry() {
+    void failedIncrementalWriteFallsBackToCompleteFinalWrite() {
         var client = new RecordItemClientMock();
         client.uploadFailure = new IllegalStateException("Upload outcome uncertain");
         var producer = interaction("first.xml", (byte) 1).setStepName("First interaction");
@@ -283,9 +283,17 @@ class InteractionFileRecordingTest {
         assertThrows(IllegalStateException.class, () -> session.recordStep(
                 new net.ihe.gazelle.maestro.api.business.message.StepRunFinished(
                         "session", "test", producer.getStepName(), null, producer)));
-        assertThrows(net.ihe.gazelle.maestro.engine.business.TestReportRecordingException.class,
-                () -> session.finish(finalReport));
+        assertNull(session.recordStep(new net.ihe.gazelle.maestro.api.business.message.StepRunFinished(
+                "session", "test", producer.getStepName(), null, producer)), "No incremental write after a failure");
         assertEquals(1, client.uploadAttempts);
+
+        client.uploadFailure = null;
+        String location = session.finish(finalReport);
+
+        assertNotNull(location);
+        assertEquals(2, client.uploadAttempts, "The final write stores the outputs that failed incrementally");
+        var root = (Item) client.recordedItems.getLast();
+        assertTrue(root.getContent().contains("Incremental recording failed"));
         assertNotNull(producer.getOutputs().getFirst().getValue());
     }
 

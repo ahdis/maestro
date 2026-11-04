@@ -97,7 +97,8 @@ class IncrementalWorkflowTest {
             }
             observer.answer.complete(new UserInteractionCompleted());
             var finished = observer.finished.get(10, TimeUnit.SECONDS);
-            assertEquals(1, client.validationWrites, "Finalization must not repeat the output write");
+            assertEquals(failStorage ? 2 : 1, client.validationWrites,
+                    "Finalization repeats the output write only after an incremental failure");
             assertEquals(StepResult.PASSED, finished.getReport().getTestRunReports().getFirst()
                     .getStepRunReports().getFirst().getResult());
             if (failStorage) {

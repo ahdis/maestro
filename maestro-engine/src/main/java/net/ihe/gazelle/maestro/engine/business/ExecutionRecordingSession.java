@@ -23,6 +23,32 @@ import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 public interface ExecutionRecordingSession {
     /** Records detached step outputs; returns a detached event, or null when unsupported. */
     StepRunFinished recordStep(StepRunFinished finished);
-    /** Reconciles completed steps and records a detached final report. */
+
+    /**
+     * Records a finished step and passes the detached event to the observer once its outputs are stored.
+     * Implementations may record in the background so that slow storage does not delay the execution;
+     * {@link #finish(TestReport)} then waits for pending steps first. Recording failures are not thrown here:
+     * they are retained and handled when the session finishes.
+     *
+     * @param finished the finished step event
+     * @param observer receives the recorded projection, or null when nobody listens
+     */
+    default void submitStep(StepRunFinished finished, RecordedOutputsObserver observer) {
+        try {
+            StepRunFinished recorded = recordStep(finished);
+            if (recorded != null && observer != null) {
+                observer.onOutputsRecorded(recorded);
+            }
+        } catch (RuntimeException retainedForFinish) {
+            // Implementations keep the failure and fall back to a complete write in finish().
+        }
+    }
+
+    /**
+     * Waits for pending steps, then records the final report and reuses the step outputs already stored.
+     * If an earlier step write failed, the outputs that were not stored are written with the final report.
+     *
+     * @throws TestReportRecordingException when the final report cannot be recorded
+     */
     String finish(TestReport report);
 }

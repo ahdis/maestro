@@ -70,7 +70,6 @@ public class RecordingMaestro implements Maestro {
       private final MaestroObserver delegate;
 
       private final ExecutionRecordingSession recording;
-      private boolean recordingFinished;
 
       public RecordObserver(MaestroObserver delegate, List<Test> definitions,
                             java.util.function.Supplier<net.ihe.gazelle.security.business.acl.AccessControlList> acl,
@@ -98,17 +97,8 @@ public class RecordingMaestro implements Maestro {
       @Override
       public void onStepRunFinished(StepRunFinished stepRunFinished) {
          delegate.onStepRunFinished(stepRunFinished);
-         synchronized (recording) {
-            if (recordingFinished) return;
-            try {
-               StepRunFinished recorded = recording.recordStep(stepRunFinished);
-               if (recorded != null && delegate instanceof RecordedOutputsObserver outputsObserver) {
-                  outputsObserver.onOutputsRecorded(recorded);
-               }
-            } catch (Exception ignored) {
-               // The recording session retains the failure for final reporting.
-            }
-         }
+         recording.submitStep(stepRunFinished,
+               delegate instanceof RecordedOutputsObserver outputsObserver ? outputsObserver : null);
       }
 
       @Override
@@ -118,16 +108,13 @@ public class RecordingMaestro implements Maestro {
 
       @Override
       public void onExecutionFinished(ExecutionFinished executionFinished) {
-         synchronized (recording) {
-            recordingFinished = true;
-            try {
-               String location = recording.finish(executionFinished.getReport());
-               executionFinished.setReportLocation(location);
-            } catch (Exception e) {
-               executionFinished.getReport().addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e).build());
-            }
-            delegate.onExecutionFinished(executionFinished);
+         try {
+            String location = recording.finish(executionFinished.getReport());
+            executionFinished.setReportLocation(location);
+         } catch (Exception e) {
+            executionFinished.getReport().addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e).build());
          }
+         delegate.onExecutionFinished(executionFinished);
       }
 
        @Override
