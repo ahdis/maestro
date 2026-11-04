@@ -64,7 +64,9 @@ public class GradingStepExecutor implements StepExecutor {
                         .toList())
                 .setResult(gradingCompleted.getResult().toStepResult());
         if (gradingCompleted.getNote() != null && !gradingCompleted.getNote().isBlank()) {
-            report.addOutput(new StringProperty(GradingStepDefinition.NOTE, gradingCompleted.getNote()));
+            report.addOutput(new StringProperty(GradingStepDefinition.NOTE, gradingCompleted.getNote())
+                    .setUserId(gradingCompleted.getUserId())
+                    .setDateTime(gradingCompleted.getDateTime()));
         }
         return report.build();
     }

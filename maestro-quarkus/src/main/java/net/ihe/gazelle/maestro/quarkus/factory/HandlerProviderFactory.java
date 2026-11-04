@@ -22,10 +22,10 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.Produces;
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.engine.business.context.ReadSessionStore;
-import net.ihe.gazelle.maestro.spi.technical.ConfigProvider;
-import net.ihe.gazelle.maestro.spi.technical.HandlerProvider;
 import net.ihe.gazelle.maestro.engine.technical.provider.HandlerProviderSPI;
 import net.ihe.gazelle.maestro.engine.technical.provider.ServiceRegistry;
+import net.ihe.gazelle.maestro.spi.technical.ConfigProvider;
+import net.ihe.gazelle.maestro.spi.technical.HandlerProvider;
 
 /**
  * Factory class responsible for creating {@link HandlerProvider} instances.

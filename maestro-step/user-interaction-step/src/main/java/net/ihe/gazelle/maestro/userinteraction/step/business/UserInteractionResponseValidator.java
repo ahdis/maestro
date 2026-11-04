@@ -25,23 +25,10 @@ import net.ihe.gazelle.maestro.api.business.property.BooleanProperty;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
-import net.ihe.gazelle.maestro.api.business.test.SupportedBooleanInput;
-import net.ihe.gazelle.maestro.api.business.test.SupportedBooleanInputValidator;
-import net.ihe.gazelle.maestro.api.business.test.SupportedFileInput;
-import net.ihe.gazelle.maestro.api.business.test.SupportedFileInputValidator;
-import net.ihe.gazelle.maestro.api.business.test.SupportedInput;
-import net.ihe.gazelle.maestro.api.business.test.SupportedTextInput;
-import net.ihe.gazelle.maestro.api.business.test.SupportedTextInputValidator;
-import net.ihe.gazelle.maestro.api.business.test.SupportedValueSetInput;
-import net.ihe.gazelle.maestro.api.business.test.SupportedValueSetInputValidator;
+import net.ihe.gazelle.maestro.api.business.test.*;
 import net.ihe.gazelle.maestro.api.business.testreport.validator.PropertyInReportValidator;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 /** Validates submitted answers against the configured fields using the model-validator contract. */
 final class UserInteractionResponseValidator extends AbstractValidator<UserInteractionCompleted> {

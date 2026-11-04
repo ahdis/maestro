@@ -24,8 +24,10 @@ import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.property.SupportedInputsProperty;
 import net.ihe.gazelle.maestro.api.business.test.*;
-import net.ihe.gazelle.maestro.api.business.test.Test;
-import net.ihe.gazelle.maestro.api.business.testreport.*;
+import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
+import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.api.business.userinteract.stub.UserInteractionHandlerStub;
@@ -35,12 +37,12 @@ import net.ihe.gazelle.maestro.engine.business.mock.InMemoryTestReportRecordingS
 import net.ihe.gazelle.maestro.engine.business.mock.RecordingMaestroObserver;
 import net.ihe.gazelle.maestro.engine.business.mock.ScriptedStepExecutorProvider;
 import net.ihe.gazelle.maestro.engine.business.stub.Instrumented4TestStepDefinition;
+import net.ihe.gazelle.maestro.engine.technical.dao.SessionStoreCache;
 import net.ihe.gazelle.maestro.userinteraction.step.business.UserInteractionStepExecutor;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import net.ihe.gazelle.maestro.engine.technical.dao.SessionStoreCache;
 
 import java.time.Duration;
 import java.util.List;
@@ -50,7 +52,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class MaestroEngineTest {
 

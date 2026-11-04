@@ -36,8 +36,8 @@ import net.ihe.gazelle.validation.v2.api.business.request.InputInRequestBuilder;
 import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
 import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequestBuilder;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A StepExecutor is an object used to run ValidationStep {@link ValidationStepDefinition}

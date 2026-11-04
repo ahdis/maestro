@@ -16,15 +16,18 @@
 
 package net.ihe.gazelle.maestro.engine.business.context;
 
-import net.ihe.gazelle.maestro.api.business.message.*;
+import net.ihe.gazelle.maestro.api.business.message.DeleteEvidence;
+import net.ihe.gazelle.maestro.api.business.message.PutEvidence;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.engine.business.MaestroSessionServiceImpl;
-import org.junit.jupiter.api.Test;
 import net.ihe.gazelle.maestro.engine.technical.dao.SessionStoreCache;
+import org.junit.jupiter.api.Test;
+
 import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class SessionEvidenceTest {

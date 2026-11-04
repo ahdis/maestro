@@ -19,10 +19,10 @@ package net.ihe.gazelle.maestro.grading.step.business;
 import net.ihe.gazelle.maestro.api.business.message.GradingCompleted;
 import net.ihe.gazelle.maestro.api.business.message.GradingResult;
 import net.ihe.gazelle.maestro.api.business.property.Property;
-import net.ihe.gazelle.maestro.api.business.testreport.GradingCriterion;
-import net.ihe.gazelle.maestro.api.business.testreport.CriterionResult;
 import net.ihe.gazelle.maestro.api.business.property.StringListProperty;
 import net.ihe.gazelle.maestro.api.business.test.Step;
+import net.ihe.gazelle.maestro.api.business.testreport.CriterionResult;
+import net.ihe.gazelle.maestro.api.business.testreport.GradingCriterion;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.userinteract.stub.GradingHandlerStub;
@@ -54,9 +54,14 @@ class GradingStepExecutorTest {
             @Override
             public GradingCompleted displayMessage(List<String> criteria) {
                 assertEquals(List.of("Check A", "Check B"), criteria);
-                return new GradingCompleted().setResult(GradingResult.FAILED).setGradingCriteria(List.of(
-                        new GradingCriterion().setDescription("Check A").setCriterionResult(CriterionResult.FAILED)
-                                .setUserId("reviewer").setDateTime(assessmentTime)));
+                return new GradingCompleted()
+                        .setResult(GradingResult.FAILED)
+                        .setGradingCriteria(List.of(
+                                new GradingCriterion()
+                                        .setDescription("Check A")
+                                        .setCriterionResult(CriterionResult.FAILED)
+                                        .setUserId("reviewer")
+                                        .setDateTime(assessmentTime)));
             }
         });
         StepRunReport report = executor.execute(stepRun());
@@ -75,7 +80,8 @@ class GradingStepExecutorTest {
         var executor = new GradingStepExecutor(new GradingHandlerStub() {
             @Override
             public GradingCompleted displayMessage(List<String> criteria) {
-                return new GradingCompleted().setResult(GradingResult.PASSED).setNote(note);
+                return new GradingCompleted().setResult(GradingResult.PASSED).setNote(note)
+                        .setUserId("reviewer").setDateTime(Instant.parse("2026-11-04T12:00:00Z"));
             }
         });
         var report = executor.execute(stepRun());
@@ -83,6 +89,9 @@ class GradingStepExecutorTest {
         assertEquals(note != null && !note.isBlank() ? 1 : 0, report.getOutputs().size());
         if (note != null && !note.isBlank()) {
             assertEquals(note, report.getOutput(GradingStepDefinition.NOTE).getValue());
+            assertEquals("reviewer", report.getOutput(GradingStepDefinition.NOTE).getUserId());
+            assertEquals(Instant.parse("2026-11-04T12:00:00Z"),
+                    report.getOutput(GradingStepDefinition.NOTE).getDateTime());
         }
     }
 

@@ -21,13 +21,13 @@ import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.api.business.userinteract.GradingHandler;
 import net.ihe.gazelle.maestro.api.business.userinteract.UserInteractionHandler;
 import net.ihe.gazelle.maestro.engine.business.context.ReadSessionStore;
+import net.ihe.gazelle.maestro.engine.technical.userinteract.GradingHandlerImpl;
+import net.ihe.gazelle.maestro.engine.technical.userinteract.UserInteractionHandlerImpl;
 import net.ihe.gazelle.maestro.spi.business.Handler;
 import net.ihe.gazelle.maestro.spi.technical.*;
 import net.ihe.gazelle.servicemetadata.api.business.ConsumedInterface;
 import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterface;
 import net.ihe.gazelle.servicemetadata.api.business.Service;
-import net.ihe.gazelle.maestro.engine.technical.userinteract.GradingHandlerImpl;
-import net.ihe.gazelle.maestro.engine.technical.userinteract.UserInteractionHandlerImpl;
 
 import java.util.List;
 import java.util.NoSuchElementException;

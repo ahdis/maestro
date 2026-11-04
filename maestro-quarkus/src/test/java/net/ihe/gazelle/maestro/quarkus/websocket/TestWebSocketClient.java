@@ -70,7 +70,7 @@ public class TestWebSocketClient {
                                 .map(description -> new GradingCriterion()
                                         .setDescription(description)
                                         .setCriterionResult(CriterionResult.PASSED))
-                                .collect(Collectors.toList()))
+                                .toList())
                         .setUserId("Unit Test")
                         .setSessionId(session.getId())
                         .setResult(GradingResult.PASSED)

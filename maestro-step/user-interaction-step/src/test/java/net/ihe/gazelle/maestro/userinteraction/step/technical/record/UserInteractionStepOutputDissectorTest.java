@@ -16,9 +16,6 @@
 
 package net.ihe.gazelle.maestro.userinteraction.step.technical.record;
 
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.function.BiConsumer;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
@@ -32,7 +29,13 @@ import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemPlan;
 import net.ihe.gazelle.modelmarshaller.technical.marshalling.MarshallingException;
 import net.ihe.gazelle.modelmarshaller.technical.marshalling.TextMarshaller;
 import org.junit.jupiter.api.Test;
+
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.function.BiConsumer;
+
 import static org.junit.jupiter.api.Assertions.*;
+
 class UserInteractionStepOutputDissectorTest {
 
    private static final TextMarshaller<TestReport> TEST_REPORT_MARSHALLER = new TextMarshaller<>() {

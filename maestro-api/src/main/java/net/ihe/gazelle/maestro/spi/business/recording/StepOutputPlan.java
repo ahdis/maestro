@@ -21,11 +21,7 @@ import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
-import net.ihe.gazelle.maestro.spi.business.recording.plan.AttachmentPlan;
-import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemObjectMutation;
-import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemPlan;
-import net.ihe.gazelle.maestro.spi.business.recording.plan.MaestroRefType;
-import net.ihe.gazelle.maestro.spi.business.recording.plan.ReferencePlan;
+import net.ihe.gazelle.maestro.spi.business.recording.plan.*;
 
 import java.util.List;
 import java.util.Map;

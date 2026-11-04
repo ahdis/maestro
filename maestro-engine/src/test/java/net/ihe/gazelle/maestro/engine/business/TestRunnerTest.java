@@ -28,10 +28,10 @@ import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.engine.business.context.TestRunSession;
+import net.ihe.gazelle.maestro.engine.technical.dao.SessionStoreCache;
 import net.ihe.gazelle.maestro.spi.business.StepRun;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 import org.junit.jupiter.api.BeforeEach;
-import net.ihe.gazelle.maestro.engine.technical.dao.SessionStoreCache;
 
 import java.util.ArrayList;
 import java.util.List;

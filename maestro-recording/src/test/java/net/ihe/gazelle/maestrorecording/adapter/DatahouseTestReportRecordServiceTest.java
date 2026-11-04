@@ -17,8 +17,8 @@
 package net.ihe.gazelle.maestrorecording.adapter;
 
 import com.kereval.gazelle.datahouse.api.business.record.Item;
-import com.kereval.gazelle.datahouse.api.business.record.Reference;
 import com.kereval.gazelle.datahouse.api.business.record.RefType;
+import com.kereval.gazelle.datahouse.api.business.record.Reference;
 import net.ihe.gazelle.maestro.api.business.property.*;
 import net.ihe.gazelle.maestro.api.business.testreport.Result;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;

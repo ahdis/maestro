@@ -19,11 +19,11 @@ package net.ihe.gazelle.maestro.quarkus.configuration;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import net.ihe.gazelle.maestro.api.business.userinteract.UserInteractionHandler;
+import net.ihe.gazelle.maestro.engine.technical.provider.ServiceRegistry;
 import net.ihe.gazelle.servicemetadata.api.business.HttpRestBindingBuilder;
 import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterfaceBuilder;
 import net.ihe.gazelle.servicemetadata.api.business.Service;
 import net.ihe.gazelle.servicemetadata.api.business.ServiceBuilder;
-import net.ihe.gazelle.maestro.engine.technical.provider.ServiceRegistry;
 
 import java.util.ArrayList;
 import java.util.List;

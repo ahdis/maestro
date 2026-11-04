@@ -21,8 +21,8 @@ import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Produces;
 import net.ihe.gazelle.maestro.engine.business.StepExecutorProvider;
-import net.ihe.gazelle.maestro.spi.technical.HandlerProvider;
 import net.ihe.gazelle.maestro.engine.technical.provider.StepExecutorSPIProvider;
+import net.ihe.gazelle.maestro.spi.technical.HandlerProvider;
 
 /**
  * Factory class responsible for producing service instances required by the Maestro engine,
