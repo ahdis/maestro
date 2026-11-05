@@ -38,7 +38,6 @@ import net.ihe.gazelle.security.mocks.OIDCJWTGenerator;
 import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.*;
-import java.util.stream.Collectors;
 
 @ClientEndpoint
 @ApplicationScoped
