@@ -179,10 +179,16 @@ public class TestStreamSocketController {
                 case UserInteractionCompletedDTO userInteractionCompleted ->
                         maestroCaller.completeInteraction(
                                 userInteractionCompleted.getBusinessObject());
-                case PutEvidenceDTO putEvidence ->
-                        maestroSessionService.putEvidence(putEvidence.getBusinessObject());
-                case DeleteEvidenceDTO deleteEvidence ->
-                        maestroSessionService.deleteEvidence(deleteEvidence.getBusinessObject());
+                case PutEvidenceDTO putEvidence -> {
+                    maestroCaller.assertEvidenceSession(
+                            putEvidence.getBusinessObject().getSessionId());
+                    maestroSessionService.putEvidence(putEvidence.getBusinessObject());
+                }
+                case DeleteEvidenceDTO deleteEvidence -> {
+                    maestroCaller.assertEvidenceSession(
+                            deleteEvidence.getBusinessObject().getSessionId());
+                    maestroSessionService.deleteEvidence(deleteEvidence.getBusinessObject());
+                }
                 case GradingCompletedDTO gradingCompleted ->
                         maestroCaller.completeGrading(gradingCompleted.getBusinessObject());
                 default -> {

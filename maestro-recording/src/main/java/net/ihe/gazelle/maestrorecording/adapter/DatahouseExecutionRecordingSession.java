@@ -17,6 +17,8 @@
 package net.ihe.gazelle.maestrorecording.adapter;
 
 import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.test.Test;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
@@ -81,6 +83,28 @@ final class DatahouseExecutionRecordingSession implements ExecutionRecordingSess
         this.acl = acl;
         this.inputs = inputs;
         this.datahouseUrl = datahouseUrl;
+    }
+
+    @Override
+    public synchronized Property recordEvidence(Property evidence) {
+        if (finished || recordingFailure != null) {
+            throw new TestReportRecordingException(
+                    "Evidence recording is unavailable", recordingFailure);
+        }
+        if (!(evidence instanceof ByteArrayProperty)) {
+            return evidence.copy();
+        }
+        try {
+            ItemPlan<List<Property>> plan = service.buildEvidencePlan(evidence);
+            // An attachment becomes readable only once an accessible item owns its reference.
+            String ownerId = writer.record(plan, acl.get());
+            var recordedEvidence = (ByteArrayItemProperty) plan.itemObject().getFirst().copy();
+            recordedEvidence.setReference("/items/" + ownerId + recordedEvidence.getReference());
+            return recordedEvidence;
+        } catch (RuntimeException error) {
+            recordingFailure = error;
+            throw error;
+        }
     }
 
     @Override
@@ -214,7 +238,8 @@ final class DatahouseExecutionRecordingSession implements ExecutionRecordingSess
         try {
             if (recordingFailure != null) {
                 throw new TestReportRecordingException(
-                        "Incremental recording failed; storage outcome may be uncertain, so writes were not retried",
+                        "Incremental recording failed; storage outcome may be uncertain, so writes"
+                                + " were not retried",
                         recordingFailure);
             }
             TestReport snapshot = snapshots.copy(report);

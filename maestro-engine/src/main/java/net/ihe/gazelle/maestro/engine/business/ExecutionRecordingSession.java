@@ -17,10 +17,26 @@
 package net.ihe.gazelle.maestro.engine.business;
 
 import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
+import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 
 /** Recording lifecycle owned by one execution, separate from runner state. */
 public interface ExecutionRecordingSession {
+    /**
+     * Stores a detached evidence file with an owning item and the execution ACL.
+     *
+     * @param evidence evidence to store; text and links remain inline
+     * @return detached evidence containing the attachment reference
+     * @throws TestReportRecordingException when storage fails
+     */
+    default Property recordEvidence(Property evidence) {
+        if (evidence instanceof ByteArrayProperty) {
+            throw new TestReportRecordingException("Evidence recording is unsupported");
+        }
+        return evidence.copy();
+    }
+
     /** Records detached step outputs; returns a detached event, or null when unsupported. */
     StepRunFinished recordStep(StepRunFinished finished);
 

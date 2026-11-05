@@ -23,6 +23,7 @@ import net.ihe.gazelle.maestro.api.business.message.AskGrading;
 import net.ihe.gazelle.maestro.api.business.message.ExecutionFinished;
 import net.ihe.gazelle.maestro.api.business.message.GradingCompleted;
 import net.ihe.gazelle.maestro.api.business.message.InteractWithUser;
+import net.ihe.gazelle.maestro.api.business.message.PutEvidence;
 import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
 import net.ihe.gazelle.maestro.api.business.message.StepRunStarted;
 import net.ihe.gazelle.maestro.api.business.message.TestRunFinished;
@@ -106,6 +107,16 @@ public class RecordingMaestro implements Maestro {
                     inputs == null
                             ? testReportRecordingService.openSession(definitions, acl)
                             : testReportRecordingService.openSession(definitions, acl, inputs);
+        }
+
+        @Override
+        public Property recordEvidence(Property evidence) {
+            return recording.recordEvidence(evidence);
+        }
+
+        @Override
+        public void onEvidenceRecorded(PutEvidence evidence) {
+            delegate.onEvidenceRecorded(evidence);
         }
 
         @Override

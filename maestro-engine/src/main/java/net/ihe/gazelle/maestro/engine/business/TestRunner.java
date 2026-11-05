@@ -31,6 +31,7 @@ import net.ihe.gazelle.maestro.api.business.testrun.TestRunValidator;
 import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
 import net.ihe.gazelle.maestro.engine.business.context.TestRunSession;
 import net.ihe.gazelle.maestro.spi.business.StepRun;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,7 +110,11 @@ public class TestRunner {
             } catch (Exception e) {
                 TestRun testRun = testRunSession.getTestRun();
                 LOG.atError().setCause(e).log("Error running test {}", testRun.getTest().getName());
-                sessionStore.removeSession(sessionId);
+                synchronized (testRunSession) {
+                    testRunSession.closeEvidence();
+                    sessionStore.removeSession(sessionId);
+                    addEvidencesToReport(testRunSession);
+                }
                 testRunEventProducer.notify(
                         new TestRunFinished(sessionId, testRun,
                                 newTestRunReportBuilder(testRun.getTest())
@@ -124,8 +129,11 @@ public class TestRunner {
     }
 
     private void finishTest(String sessionId, TestRunSession testRunSession) {
-        sessionStore.removeSession(sessionId);
-        addEvidencesToReport(testRunSession);
+        synchronized (testRunSession) {
+            testRunSession.closeEvidence();
+            sessionStore.removeSession(sessionId);
+            addEvidencesToReport(testRunSession);
+        }
 
         // VLD: keep only resolvable inputs in the report (fix problem of deserialization of references)
         List<Property> inputs = testRunSession.getTestRun().getInputs()
@@ -165,7 +173,12 @@ public class TestRunner {
         for (PutEvidence putEvidence : testRunSession.getEvidences()) {
             for (StepRunReport stepRunReport : testRunSession.getStepReports()) {
                 if (putEvidence.getStepName().equals(stepRunReport.getStepName())) {
-                    stepRunReport.addEvidence(putEvidence.getContent());
+                    List<Property> evidence = stepRunReport.getEvidences();
+                    evidence.removeIf(
+                            existing ->
+                                    existing.getName().equals(putEvidence.getContent().getName()));
+                    evidence.add(putEvidence.getContent());
+                    stepRunReport.setEvidences(evidence);
                 }
             }
         }
@@ -183,9 +196,13 @@ public class TestRunner {
     }
 
     private static Property mapOutput(Map.Entry<String, String> outputMapping, List<Property> outputs) {
-        return outputs.stream().filter(output -> output.getName().equals(outputMapping.getKey()))
+        return outputs.stream()
+                .filter(output -> output.getName().equals(outputMapping.getKey()))
                 .findFirst()
-                .orElseThrow(() -> new InvalidOutputMappingException("There is no output named " + outputMapping.getKey()))
+                .orElseThrow(
+                        () ->
+                                new InvalidOutputMappingException(
+                                        "There is no output named " + outputMapping.getKey()))
                 .copy()
                 .setName(outputMapping.getValue());
     }

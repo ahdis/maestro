@@ -50,6 +50,7 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -145,6 +146,7 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
                 runScopedRegistries,
                 testDefinitions,
                 recordedSteps);
+        planEvidenceReferences(report, testReportPlan);
         planSubReportReferences(report, subReportRefs, testReportPlan, acl);
 
         return testReportPlan;
@@ -349,6 +351,90 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
             if (alias != null && reference.getRefType() == MaestroRefType.ATTACHMENT) {
                 callbackRegistry.notifyResolved(alias, (String) reference.getTarget());
             }
+        }
+    }
+
+    private void planEvidenceReferences(TestReport report, ItemPlan<TestReport> plan) {
+        if (report.getTestRunReports() == null) {
+            return;
+        }
+        for (int runIndex = 0; runIndex < report.getTestRunReports().size(); runIndex++) {
+            TestRunReport run = report.getTestRunReports().get(runIndex);
+            if (run.getStepRunReports() == null) {
+                continue;
+            }
+            for (int stepIndex = 0; stepIndex < run.getStepRunReports().size(); stepIndex++) {
+                StepRunReport step = run.getStepRunReports().get(stepIndex);
+                List<Property> evidence = new ArrayList<>(step.getEvidences());
+                step.setEvidences(evidence);
+                for (int index = 0; index < evidence.size(); index++) {
+                    Property property = evidence.get(index);
+                    if (property instanceof ByteArrayProperty file) {
+                        int evidenceIndex = index;
+                        planEvidenceFile(
+                                plan,
+                                file,
+                                "evidence/" + runIndex + "/" + stepIndex + "/" + index,
+                                recorded -> {
+                                    evidence.set(evidenceIndex, recorded);
+                                    step.setEvidences(evidence);
+                                });
+                    }
+                }
+            }
+        }
+    }
+
+    ItemPlan<List<Property>> buildEvidencePlan(Property property) {
+        List<Property> evidence = new ArrayList<>(List.of(property.copy()));
+        ItemPlan<List<Property>> plan =
+                new ItemPlan<>("TEST_EVIDENCE", evidence, new EvidenceItemMarshaller());
+        planEvidenceFile(
+                plan,
+                (ByteArrayProperty) evidence.getFirst(),
+                "evidence",
+                recorded -> evidence.set(0, recorded));
+        return plan;
+    }
+
+    private <T> void planEvidenceFile(
+            ItemPlan<T> plan,
+            ByteArrayProperty file,
+            String referenceName,
+            Consumer<Property> replace) {
+        String reference = getExistingAttachmentReference(file);
+        if (reference != null) {
+            String attachmentId = extractAttachmentId(reference);
+            if (attachmentId == null || attachmentId.isBlank()) {
+                throw new TestReportRecordingException("Invalid evidence attachment reference");
+            }
+            ByteArrayItemProperty recorded =
+                    new ByteArrayItemProperty(file)
+                            .setReference(constructPathToAttachment(attachmentId));
+            recorded.setValue(null);
+            replace.accept(recorded);
+            plan.addFutureReferencePlan(
+                    ReferencePlan.forAttachmentId(
+                            referenceName, "EVIDENCE_ATTACHMENT", attachmentId),
+                    null);
+        } else {
+            if (file.getValue() == null) {
+                throw new TestReportRecordingException("Evidence file content is required");
+            }
+            AttachmentPlan attachment =
+                    new AttachmentPlan(
+                            resolveAttachmentContentType(file),
+                            file.getValue(),
+                            resolveAttachmentFilename(file));
+            plan.addFutureReferencePlan(
+                    ReferencePlan.forAttachment(referenceName, "EVIDENCE_ATTACHMENT", attachment),
+                    (item, name, id) -> {
+                        ByteArrayItemProperty recorded =
+                                new ByteArrayItemProperty(file)
+                                        .setReference(constructPathToAttachment(id));
+                        recorded.setValue(null);
+                        replace.accept(recorded);
+                    });
         }
     }
 

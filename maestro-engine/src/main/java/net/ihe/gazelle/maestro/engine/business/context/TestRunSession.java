@@ -22,9 +22,11 @@ import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
+import net.ihe.gazelle.maestro.engine.business.TestReportRecordingException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * TestRunSessionsStore is a structure used to store TestRun's context and StepRunReportBuilder of an executed step
@@ -38,6 +40,7 @@ public class TestRunSession {
     private StepCursor stepCursor;
     private List<StepRunReport> stepReports;
     private List<PutEvidence> evidences;
+    private boolean evidenceClosed;
 
     /**
      * Default constructor
@@ -218,7 +221,7 @@ public class TestRunSession {
      *
      * @return a list of {@link PutEvidence} instances representing the evidence.
      */
-    public List<PutEvidence> getEvidences() {
+    public synchronized List<PutEvidence> getEvidences() {
         return new ArrayList<>(evidences);
     }
 
@@ -236,13 +239,21 @@ public class TestRunSession {
     }
 
     /**
-     * Adds a {@link PutEvidence} instance to the list of evidence items
-     * associated with this test run session.
+     * Adds a {@link PutEvidence} instance to the list of evidence items associated with this test
+     * run session.
      *
      * @param putEvidence the {@code PutEvidence} instance to add
      * @return the current {@code TestRunSession} instance for method chaining
      */
-    public TestRunSession addEvidence(PutEvidence putEvidence) {
+    public synchronized TestRunSession addEvidence(PutEvidence putEvidence) {
+        assertAcceptingEvidence();
+        evidences.removeIf(
+                existing ->
+                        Objects.equals(existing.getRunId(), putEvidence.getRunId())
+                                && Objects.equals(existing.getStepName(), putEvidence.getStepName())
+                                && Objects.equals(
+                                        existing.getContent().getName(),
+                                        putEvidence.getContent().getName()));
         evidences.add(putEvidence);
         return this;
     }
@@ -250,10 +261,25 @@ public class TestRunSession {
     /**
      * Removes a specific piece of evidence from the list of evidences based on the given criteria.
      *
-     * @param deleteEvidence the {@code DeleteEvidence} instance containing the run ID, step name, and
-     *                       evidence name to match and remove from the list of evidences
+     * @param deleteEvidence the {@code DeleteEvidence} instance containing the run ID, step name,
+     *     and evidence name to match and remove from the list of evidences
      */
-    public void removeEvidence(DeleteEvidence deleteEvidence) {
+    /** Prevents late evidence updates from changing a finalized report. */
+    public synchronized void closeEvidence() {
+        evidenceClosed = true;
+    }
+
+    /**
+     * @throws TestReportRecordingException after finalization
+     */
+    public synchronized void assertAcceptingEvidence() {
+        if (evidenceClosed) {
+            throw new TestReportRecordingException("Evidence collection is closed");
+        }
+    }
+
+    public synchronized void removeEvidence(DeleteEvidence deleteEvidence) {
+        assertAcceptingEvidence();
         evidences.removeIf(
                 putEvidence -> putEvidence.getRunId().equals(deleteEvidence.getRunId())
                 && putEvidence.getStepName().equals(deleteEvidence.getStepName())
