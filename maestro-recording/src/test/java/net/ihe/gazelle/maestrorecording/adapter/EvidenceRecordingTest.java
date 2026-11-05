@@ -16,9 +16,6 @@
 
 package net.ihe.gazelle.maestrorecording.adapter;
 
-import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
-import net.ihe.gazelle.maestro.api.business.message.PutEvidence;
-import net.ihe.gazelle.maestro.api.technical.dto.message.EvidenceRecordedDTO;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -29,8 +26,10 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kereval.gazelle.datahouse.api.business.record.Item;
 
+import net.ihe.gazelle.maestro.api.business.message.PutEvidence;
 import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
@@ -40,7 +39,9 @@ import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
+import net.ihe.gazelle.maestro.api.technical.dto.message.EvidenceRecordedDTO;
 import net.ihe.gazelle.maestro.engine.business.TestReportRecordingException;
+import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 
 import org.junit.jupiter.api.Test;
@@ -67,9 +68,7 @@ class EvidenceRecordingTest {
                                 .setStepName("step")
                                 .setSessionId("session")
                                 .setContent(file));
-        String json =
-                new JacksonSerDes()
-                        .serializeAsString(event);
+        String json = new JacksonSerDes().serializeAsString(event);
         assertTrue(json.contains("\"type\":\"EVIDENCE_RECORDED\""));
         assertTrue(json.contains("\"type\":\"BYTE_ARRAY_ITEM\""));
         assertTrue(json.contains("/items/owner/attachments/file"));
@@ -102,7 +101,7 @@ class EvidenceRecordingTest {
     }
 
     @Test
-    void liveEvidenceHasAnOwnerAndIsReusedAfterCachedStepRecording() {
+    void liveEvidenceHasAnOwnerAndIsReusedAfterCachedStepRecording() throws Exception {
         var definition =
                 new net.ihe.gazelle.maestro.api.business.test.Test().setId("test").setName("Test");
         var session = recorder.openSession(List.of(definition), () -> acl, List::of);
@@ -115,6 +114,12 @@ class EvidenceRecordingTest {
         assertArrayEquals(new byte[] {1, 2, 3}, file.getValue());
         Item owner = (Item) client.recordedItems.getFirst();
         assertEquals("TEST_EVIDENCE", owner.getType());
+        var ownerContent = new ObjectMapper().readTree(owner.getContent());
+        assertTrue(ownerContent.isObject());
+        assertEquals(
+                "/attachments/att-1",
+                ownerContent.path("evidences").get(0).path("reference").asText());
+        assertFalse(ownerContent.path("evidences").get(0).hasNonNull("value"));
         assertSame(acl, owner.getAccessControlList());
         assertEquals("att-1", owner.getReferences().getFirst().getValue());
         step.setEvidences(List.of(live));

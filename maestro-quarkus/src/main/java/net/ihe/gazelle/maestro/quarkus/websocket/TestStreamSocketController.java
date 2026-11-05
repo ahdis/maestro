@@ -217,7 +217,7 @@ public class TestStreamSocketController {
             LOG.error("Unexpected error during websocket test execution", e);
             session.close(
                     new CloseReason(
-                            CloseReason.CloseCodes.CLOSED_ABNORMALLY,
+                            CloseReason.CloseCodes.UNEXPECTED_CONDITION,
                             "Unexpected error, please contact an administrator."));
         }
     }

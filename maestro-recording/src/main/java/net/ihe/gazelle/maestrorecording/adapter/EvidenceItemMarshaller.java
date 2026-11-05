@@ -24,6 +24,7 @@ import net.ihe.gazelle.modelmarshaller.technical.marshalling.TextMarshaller;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
 final class EvidenceItemMarshaller implements TextMarshaller<List<Property>> {
     private final JacksonSerDes serDes = new JacksonSerDes();
@@ -31,10 +32,12 @@ final class EvidenceItemMarshaller implements TextMarshaller<List<Property>> {
     @Override
     public String marshallAsString(List<Property> evidence) {
         return serDes.serializeAsString(
-                evidence.stream()
-                        .map(SubTypingDTO::fromBusinessObject)
-                        .map(PropertyDTO.class::cast)
-                        .toList());
+                Map.of(
+                        "evidences",
+                        evidence.stream()
+                                .map(SubTypingDTO::fromBusinessObject)
+                                .map(PropertyDTO.class::cast)
+                                .toList()));
     }
 
     @Override
