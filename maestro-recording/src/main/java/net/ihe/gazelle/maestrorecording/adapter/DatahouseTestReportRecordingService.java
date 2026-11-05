@@ -32,6 +32,7 @@ import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.StepOutputPlanDissector;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.AttachmentPlan;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ItemPlan;
+import net.ihe.gazelle.maestro.spi.business.recording.plan.MaestroRefType;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ReferencePlan;
 import net.ihe.gazelle.maestrorecording.RecordItemService;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
@@ -253,19 +254,26 @@ public class DatahouseTestReportRecordingService implements TestReportRecordingS
          RecordedStep recorded = recordedSteps.get(new RecordedStepKey(definition == null ? null : definition.getId(),
                stepReport.getStepName(), stepReport.getDateTime()));
          if (recorded != null) {
-            stepReport.setOutputs(snapshots.copy(recorded.report()).getOutputs());
-            for (ReferencePlan reference : recorded.references()) {
-               testReportPlan.addFutureReferencePlan(reference, null);
-               String alias = aliases.get(reference.getName());
-               if (alias != null && reference.getRefType() == net.ihe.gazelle.maestro.spi.business.recording.plan.MaestroRefType.ATTACHMENT) {
-                  callbackRegistry.notifyResolved(alias, (String) reference.getTarget());
-               }
-            }
+            reuseRecordedStepOutputs(stepReport, recorded, testReportPlan, callbackRegistry, aliases);
             continue;
          }
          StepOutputPlanDissector dissector = dissectorProvider.getDissector(stepReport);
          if (dissector != null) {
             safeDissect(dissector, new StepOutputPlan(testReportPlan, stepReport, datahouseUrl, callbackRegistry, aliases));
+         }
+      }
+   }
+
+   private void reuseRecordedStepOutputs(StepRunReport stepReport, RecordedStep recorded,
+                                         ItemPlan<TestReport> testReportPlan,
+                                         FutureReferenceCallbackRegistry callbackRegistry,
+                                         Map<String, String> aliases) {
+      stepReport.setOutputs(snapshots.copy(recorded.report()).getOutputs());
+      for (ReferencePlan reference : recorded.references()) {
+         testReportPlan.addFutureReferencePlan(reference, null);
+         String alias = aliases.get(reference.getName());
+         if (alias != null && reference.getRefType() == MaestroRefType.ATTACHMENT) {
+            callbackRegistry.notifyResolved(alias, (String) reference.getTarget());
          }
       }
    }

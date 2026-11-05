@@ -35,9 +35,13 @@ public class StepOutputsAvailableDTO extends MessageDTO<StepOutputsAvailable> {
     @JsonProperty("dateTime") public String getDateTime() {
         return message.dateTime() == null ? null : DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(message.dateTime().atOffset(ZoneOffset.UTC));
     }
-    @JsonProperty("outputs") public List<PropertyDTO<?>> getOutputs() {
-        return message.outputs().stream().map(SubTypingDTO::fromBusinessObject)
-                .map(value -> (PropertyDTO<?>) value).collect(java.util.stream.Collectors.toList());
+    @SuppressWarnings("rawtypes")
+    @JsonProperty("outputs")
+    public List<PropertyDTO> getOutputs() {
+        return message.outputs().stream()
+                .map(SubTypingDTO::fromBusinessObject)
+                .map(PropertyDTO.class::cast)
+                .toList();
     }
     @Override @JsonIgnore public Class<StepOutputsAvailable> getBusinessObjectClass() { return StepOutputsAvailable.class; }
 }
