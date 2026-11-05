@@ -402,16 +402,9 @@ class InteractionFileRecordingTest {
                                 definitions(List.of("First interaction"), List.of(Map.of())),
                                 finalReport::getAccessControlList,
                                 List::of);
-        assertThrows(
-                IllegalStateException.class,
-                () ->
-                        session.recordStep(
-                                new StepRunFinished(
-                                        "session",
-                                        "test",
-                                        producer.getStepName(),
-                                        null,
-                                        producer)));
+        var stepRunFinished =
+                new StepRunFinished("session", "test", producer.getStepName(), null, producer);
+        assertThrows(IllegalStateException.class, () -> session.recordStep(stepRunFinished));
         assertNull(
                 session.recordStep(
                         new StepRunFinished(
