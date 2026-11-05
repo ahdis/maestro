@@ -53,17 +53,11 @@ class EvidenceSessionTest {
                 new DeleteEvidence().setRunId(1).setStepName("first").setEvidenceName("proof"));
         assertEquals(2, session.getEvidences().size());
         session.closeEvidence();
-        assertThrows(
-                TestReportRecordingException.class,
-                () -> session.addEvidence(evidence(1, "first", "late")));
-        assertThrows(
-                TestReportRecordingException.class,
-                () ->
-                        session.removeEvidence(
-                                new DeleteEvidence()
-                                        .setRunId(1)
-                                        .setStepName("second")
-                                        .setEvidenceName("proof")));
+        PutEvidence late = evidence(1, "first", "late");
+        DeleteEvidence deletion =
+                new DeleteEvidence().setRunId(1).setStepName("second").setEvidenceName("proof");
+        assertThrows(TestReportRecordingException.class, () -> session.addEvidence(late));
+        assertThrows(TestReportRecordingException.class, () -> session.removeEvidence(deletion));
     }
 
     @Test
@@ -100,9 +94,8 @@ class EvidenceSessionTest {
         when(observer.recordEvidence(any()))
                 .thenThrow(new TestReportRecordingException("Storage failed"));
         var service = new MaestroSessionServiceImpl(store, facade);
-        assertThrows(
-                TestReportRecordingException.class,
-                () -> service.putEvidence(evidence(1, "step", "replacement")));
+        PutEvidence replacement = evidence(1, "step", "replacement");
+        assertThrows(TestReportRecordingException.class, () -> service.putEvidence(replacement));
         assertEquals("previous", session.getEvidences().getFirst().getContent().getValue());
         verify(observer, never()).onEvidenceRecorded(any());
     }

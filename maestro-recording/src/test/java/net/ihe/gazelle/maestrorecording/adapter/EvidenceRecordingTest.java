@@ -76,7 +76,7 @@ class EvidenceRecordingTest {
     }
 
     @Test
-    void finalRecordingExtractsFilesForAnyStepAndKeepsTextAndLinksInline() throws Exception {
+    void finalRecordingExtractsFilesForAnyStepAndKeepsTextAndLinksInline() {
         ByteArrayProperty file = file();
         StringProperty text = new StringProperty("note", "review notes");
         LinkProperty link = new LinkProperty("link", "https://example.org/evidence");
@@ -166,10 +166,10 @@ class EvidenceRecordingTest {
     void uncertainUploadFailureIsNotRetriedAtFinalization() {
         var session = recorder.openSession(List.of(), () -> acl, List::of);
         client.loseUploadAcknowledgement = true;
-        assertThrows(RuntimeException.class, () -> session.recordEvidence(file()));
-        assertThrows(
-                TestReportRecordingException.class,
-                () -> session.finish(report(step(List.of(file())))));
+        ByteArrayProperty file = file();
+        TestReport finalReport = report(step(List.of(file)));
+        assertThrows(RuntimeException.class, () -> session.recordEvidence(file));
+        assertThrows(TestReportRecordingException.class, () -> session.finish(finalReport));
         assertEquals(1, client.uploadAttempts);
         assertTrue(client.recordedItems.isEmpty());
     }

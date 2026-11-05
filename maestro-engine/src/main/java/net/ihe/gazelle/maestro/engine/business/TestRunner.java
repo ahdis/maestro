@@ -110,11 +110,9 @@ public class TestRunner {
             } catch (Exception e) {
                 TestRun testRun = testRunSession.getTestRun();
                 LOG.atError().setCause(e).log("Error running test {}", testRun.getTest().getName());
-                synchronized (testRunSession) {
-                    testRunSession.closeEvidence();
-                    sessionStore.removeSession(sessionId);
-                    addEvidencesToReport(testRunSession);
-                }
+                testRunSession.closeEvidence();
+                sessionStore.removeSession(sessionId);
+                addEvidencesToReport(testRunSession);
                 testRunEventProducer.notify(
                         new TestRunFinished(sessionId, testRun,
                                 newTestRunReportBuilder(testRun.getTest())
@@ -129,11 +127,9 @@ public class TestRunner {
     }
 
     private void finishTest(String sessionId, TestRunSession testRunSession) {
-        synchronized (testRunSession) {
-            testRunSession.closeEvidence();
-            sessionStore.removeSession(sessionId);
-            addEvidencesToReport(testRunSession);
-        }
+        testRunSession.closeEvidence();
+        sessionStore.removeSession(sessionId);
+        addEvidencesToReport(testRunSession);
 
         // VLD: keep only resolvable inputs in the report (fix problem of deserialization of references)
         List<Property> inputs = testRunSession.getTestRun().getInputs()

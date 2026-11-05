@@ -68,7 +68,7 @@ final class DatahouseExecutionRecordingSession implements ExecutionRecordingSess
     private final Map<RecordedStepKey, RecordedStep> recorded = new HashMap<>();
     private List<Property> inputSnapshot;
     private boolean finished;
-    private volatile RuntimeException recordingFailure;
+    private RuntimeException recordingFailure;
 
     DatahouseExecutionRecordingSession(
             DatahouseTestReportRecordingService service,
@@ -83,6 +83,10 @@ final class DatahouseExecutionRecordingSession implements ExecutionRecordingSess
         this.acl = acl;
         this.inputs = inputs;
         this.datahouseUrl = datahouseUrl;
+    }
+
+    private synchronized void retainFailure(RuntimeException error) {
+        recordingFailure = error;
     }
 
     @Override
@@ -102,7 +106,7 @@ final class DatahouseExecutionRecordingSession implements ExecutionRecordingSess
             recordedEvidence.setReference("/items/" + ownerId + recordedEvidence.getReference());
             return recordedEvidence;
         } catch (RuntimeException error) {
-            recordingFailure = error;
+            retainFailure(error);
             throw error;
         }
     }
@@ -114,7 +118,7 @@ final class DatahouseExecutionRecordingSession implements ExecutionRecordingSess
         try {
             stepSnapshot = snapshots.copy(event.getStepRunReport());
         } catch (RuntimeException error) {
-            recordingFailure = error;
+            retainFailure(error);
             return;
         }
         try {
@@ -198,7 +202,7 @@ final class DatahouseExecutionRecordingSession implements ExecutionRecordingSess
                     null,
                     snapshots.copy(snapshot));
         } catch (RuntimeException error) {
-            recordingFailure = error;
+            retainFailure(error);
             throw error;
         }
     }

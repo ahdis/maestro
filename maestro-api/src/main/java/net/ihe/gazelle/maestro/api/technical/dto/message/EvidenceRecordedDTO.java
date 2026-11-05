@@ -42,8 +42,9 @@ public class EvidenceRecordedDTO extends MessageDTO<PutEvidence> {
     }
 
     @JsonProperty("content")
-    public PropertyDTO<?> getContent() {
-        return (PropertyDTO<?>) SubTypingDTO.fromBusinessObject(message.getContent());
+    @SuppressWarnings("rawtypes")
+    public PropertyDTO getContent() {
+        return (PropertyDTO) SubTypingDTO.fromBusinessObject(message.getContent());
     }
 
     @Override
