@@ -16,8 +16,18 @@
 
 package net.ihe.gazelle.maestrorecording.adapter;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kereval.gazelle.datahouse.api.business.record.Item;
+
+import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
+import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.PropertyBindingPayload;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
@@ -25,20 +35,23 @@ import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
+import net.ihe.gazelle.maestro.engine.business.TestReportRecordingException;
 import net.ihe.gazelle.maestro.userinteraction.step.technical.record.UserInteractionStepOutputDissector;
 import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;
 import net.ihe.gazelle.maestro.validation.step.technical.record.ValidationStepOutputDissector;
 import net.ihe.gazelle.validation.v2.api.business.Input;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.IntStream;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class InteractionFileRecordingTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -50,16 +63,38 @@ class InteractionFileRecordingTest {
         var second = interaction("second.xml", (byte) 2).setStepName("Second interaction");
         var secondValidation = validation("secondDocument").setStepName("Second validation");
         var client = new RecordItemClientMock();
-        recorder(client).recordTestReport(report(List.of(first, firstValidation, second, secondValidation)),
-                definitions(List.of("First interaction", "First validation", "Second interaction", "Second validation"), List.of(Map.of("document", "firstDocument"), Map.of(), Map.of("document", "secondDocument"), Map.of())));
+        recorder(client)
+                .recordTestReport(
+                        report(List.of(first, firstValidation, second, secondValidation)),
+                        definitions(
+                                List.of(
+                                        "First interaction",
+                                        "First validation",
+                                        "Second interaction",
+                                        "Second validation"),
+                                List.of(
+                                        Map.of("document", "firstDocument"),
+                                        Map.of(),
+                                        Map.of("document", "secondDocument"),
+                                        Map.of())));
 
-        var validations = client.recordedItems.stream().map(Item.class::cast)
-                .filter(item -> ValidationStepDefinition.REPORT.equals(item.getType())).toList();
+        var validations =
+                client.recordedItems.stream()
+                        .map(Item.class::cast)
+                        .filter(item -> ValidationStepDefinition.REPORT.equals(item.getType()))
+                        .toList();
         assertEquals(2, validations.size());
         for (int index = 0; index < validations.size(); index++) {
             String expectedId = "att-" + (index + 1);
             Item item = validations.get(index);
-            assertEquals(expectedId, objectMapper.readTree(item.getContent()).path("inputs").get(0).path("itemId").asText());
+            assertEquals(
+                    expectedId,
+                    objectMapper
+                            .readTree(item.getContent())
+                            .path("inputs")
+                            .get(0)
+                            .path("itemId")
+                            .asText());
             assertEquals(expectedId, item.getReferences().getFirst().getValue());
         }
         assertEquals(2, client.uploadedAttachmentsBatches.size());
@@ -72,9 +107,22 @@ class InteractionFileRecordingTest {
         var second = interaction("second.xml", (byte) 2).setStepName("Second interaction");
         var secondValidation = validation("secondDocument").setStepName("Second validation");
         var client = new RecordItemClientMock();
-        var definitions = definitions(List.of("First interaction", "First validation", "Second interaction", "Second validation"),
-                List.of(Map.of("document", "firstDocument"), Map.of(), Map.of("document", "secondDocument"), Map.of()));
-        recorder(client).recordTestReport(report(List.of(secondValidation, second, firstValidation, first)), definitions);
+        var definitions =
+                definitions(
+                        List.of(
+                                "First interaction",
+                                "First validation",
+                                "Second interaction",
+                                "Second validation"),
+                        List.of(
+                                Map.of("document", "firstDocument"),
+                                Map.of(),
+                                Map.of("document", "secondDocument"),
+                                Map.of()));
+        recorder(client)
+                .recordTestReport(
+                        report(List.of(secondValidation, second, firstValidation, first)),
+                        definitions);
         var validations = validationItems(client);
         assertEquals(2, validations.size());
         assertValidationAttachment(validations.get(0), "att-1");
@@ -86,11 +134,20 @@ class InteractionFileRecordingTest {
         var producer = interaction("unknown.xml", (byte) 1).setStepName("Unknown interaction");
         var consumer = validation("sharedDocument");
         var client = new RecordItemClientMock();
-        recorder(client).recordTestReport(report(List.of(producer, consumer)),
-                definitions(List.of("Expected interaction", "Validation"), List.of(Map.of("document", "sharedDocument"), Map.of())));
+        recorder(client)
+                .recordTestReport(
+                        report(List.of(producer, consumer)),
+                        definitions(
+                                List.of("Expected interaction", "Validation"),
+                                List.of(Map.of("document", "sharedDocument"), Map.of())));
         var validationItem = validationItems(client).getFirst();
         assertTrue(validationItem.getReferences().isEmpty());
-        var attachmentId = objectMapper.readTree(validationItem.getContent()).path("inputs").get(0).path("itemId");
+        var attachmentId =
+                objectMapper
+                        .readTree(validationItem.getContent())
+                        .path("inputs")
+                        .get(0)
+                        .path("itemId");
         assertTrue(attachmentId.isMissingNode() || attachmentId.isNull());
     }
 
@@ -99,7 +156,10 @@ class InteractionFileRecordingTest {
         var producer = interaction("unknown.xml", (byte) 1);
         var report = report(List.of(producer, validation("sharedDocument")));
         report.getTestRunReports().getFirst().getTest().setId(null);
-        var definitions = definitions(List.of("Interaction", "Validation"), List.of(Map.of("document", "sharedDocument"), Map.of()));
+        var definitions =
+                definitions(
+                        List.of("Interaction", "Validation"),
+                        List.of(Map.of("document", "sharedDocument"), Map.of()));
         definitions.getFirst().setId(null);
         var client = new RecordItemClientMock();
         recorder(client).recordTestReport(report, definitions);
@@ -110,40 +170,51 @@ class InteractionFileRecordingTest {
     void partialRunUploadsProducerWithoutAConsumerReport() {
         StepRunReport producer = interaction("partial.xml", (byte) 1);
         RecordItemClientMock client = new RecordItemClientMock();
-        assertDoesNotThrow(() -> recorder(client).recordTestReport(report(List.of(producer)),
-                definitions(List.of("Interaction", "Validation"), List.of(Map.of("document", "sharedDocument"), Map.of()))));
+        assertDoesNotThrow(
+                () ->
+                        recorder(client)
+                                .recordTestReport(
+                                        report(List.of(producer)),
+                                        definitions(
+                                                List.of("Interaction", "Validation"),
+                                                List.of(
+                                                        Map.of("document", "sharedDocument"),
+                                                        Map.of()))));
         assertEquals(1, client.uploadedAttachmentsBatches.size());
-        assertEquals("att-1", ((Item) client.recordedItems.getLast()).getReferences().getFirst().getValue());
+        assertEquals(
+                "att-1",
+                ((Item) client.recordedItems.getLast()).getReferences().getFirst().getValue());
     }
 
     @Test
     void sameAliasInTwoTestsUsesEachRunsOwnFile() throws Exception {
-        TestRunReport firstRun = report(List.of(
-                interaction("first.xml", (byte) 1),
-                validation("sharedDocument"))
-        ).getTestRunReports().getFirst();
-        TestRunReport secondRun = report(List.of(
-                interaction("second.xml", (byte) 2),
-                validation("sharedDocument"))
-        ).getTestRunReports().getFirst();
+        TestRunReport firstRun =
+                report(List.of(interaction("first.xml", (byte) 1), validation("sharedDocument")))
+                        .getTestRunReports()
+                        .getFirst();
+        TestRunReport secondRun =
+                report(List.of(interaction("second.xml", (byte) 2), validation("sharedDocument")))
+                        .getTestRunReports()
+                        .getFirst();
         secondRun.setRunId("second-run");
         secondRun.getTest().setId("second-test");
         net.ihe.gazelle.maestro.api.business.test.Test firstDefinition =
                 definitions(
-                        List.of("Interaction", "Validation"),
-                        List.of(Map.of("document", "sharedDocument"), Map.of())
-                ).getFirst();
+                                List.of("Interaction", "Validation"),
+                                List.of(Map.of("document", "sharedDocument"), Map.of()))
+                        .getFirst();
         net.ihe.gazelle.maestro.api.business.test.Test secondDefinition =
                 definitions(
-                        List.of("Interaction", "Validation"),
-                        List.of(Map.of("document", "sharedDocument"),
-                                Map.of())
-                ).getFirst().setId("second-test");
-        TestReport suiteReport = new TestReport()
-                .setUuid("suite")
-                .setDateTime(Instant.now())
-                .addTestRunReport(firstRun)
-                .addTestRunReport(secondRun);
+                                List.of("Interaction", "Validation"),
+                                List.of(Map.of("document", "sharedDocument"), Map.of()))
+                        .getFirst()
+                        .setId("second-test");
+        TestReport suiteReport =
+                new TestReport()
+                        .setUuid("suite")
+                        .setDateTime(Instant.now())
+                        .addTestRunReport(firstRun)
+                        .addTestRunReport(secondRun);
         RecordItemClientMock client = new RecordItemClientMock();
         recorder(client).recordTestReport(suiteReport, List.of(firstDefinition, secondDefinition));
         List<Item> validations = validationItems(client);
@@ -153,12 +224,22 @@ class InteractionFileRecordingTest {
     }
 
     private List<Item> validationItems(RecordItemClientMock client) {
-        return client.recordedItems.stream().map(Item.class::cast)
-                .filter(item -> ValidationStepDefinition.REPORT.equals(item.getType())).toList();
+        return client.recordedItems.stream()
+                .map(Item.class::cast)
+                .filter(item -> ValidationStepDefinition.REPORT.equals(item.getType()))
+                .toList();
     }
 
-    private void assertValidationAttachment(Item validationItem, String expectedId) throws Exception {
-        assertEquals(expectedId, objectMapper.readTree(validationItem.getContent()).path("inputs").get(0).path("itemId").asText());
+    private void assertValidationAttachment(Item validationItem, String expectedId)
+            throws Exception {
+        assertEquals(
+                expectedId,
+                objectMapper
+                        .readTree(validationItem.getContent())
+                        .path("inputs")
+                        .get(0)
+                        .path("itemId")
+                        .asText());
         assertEquals(expectedId, validationItem.getReferences().getFirst().getValue());
     }
 
@@ -167,39 +248,55 @@ class InteractionFileRecordingTest {
         StepRunReport interaction = interaction("new.xml", (byte) 2);
         StepRunReport validation = validation("document");
         TestReport report = report(List.of(interaction, validation));
-        report.getTestRunReports().getFirst().addInput(
-                new ByteArrayProperty("document", new byte[]{1}).setFileName("original.xml"));
+        report.getTestRunReports()
+                .getFirst()
+                .addInput(
+                        new ByteArrayProperty("document", new byte[] {1})
+                                .setFileName("original.xml"));
         RecordItemClientMock client = new RecordItemClientMock();
         recorder(client).recordTestReport(report);
-        Item item = client.recordedItems.stream()
-                .map(Item.class::cast)
-                .filter(recorded -> ValidationStepDefinition.REPORT.equals(recorded.getType()))
-                .findFirst()
-                .orElseThrow();
-        assertEquals("att-1", objectMapper.readTree(item.getContent()).path("inputs").get(0).path("itemId").asText());
+        Item item =
+                client.recordedItems.stream()
+                        .map(Item.class::cast)
+                        .filter(
+                                recorded ->
+                                        ValidationStepDefinition.REPORT.equals(recorded.getType()))
+                        .findFirst()
+                        .orElseThrow();
+        assertEquals(
+                "att-1",
+                objectMapper
+                        .readTree(item.getContent())
+                        .path("inputs")
+                        .get(0)
+                        .path("itemId")
+                        .asText());
         assertEquals("att-1", item.getReferences().getFirst().getValue());
     }
 
     @Test
     void retryAfterUploadReusesAttachmentAndPublishesItsSource() {
         AtomicBoolean failRoot = new AtomicBoolean(true);
-        RecordItemClientMock client = new RecordItemClientMock() {
-            @Override
-            public String recordItem(Item item) {
-                if ("TEST_REPORT".equals(item.getType()) && failRoot.getAndSet(false)) {
-                    throw new IllegalStateException("Root persistence failed after attachment upload");
-                }
-                return super.recordItem(item);
-            }
-        };
+        RecordItemClientMock client =
+                new RecordItemClientMock() {
+                    @Override
+                    public String recordItem(Item item) {
+                        if ("TEST_REPORT".equals(item.getType()) && failRoot.getAndSet(false)) {
+                            throw new IllegalStateException(
+                                    "Root persistence failed after attachment upload");
+                        }
+                        return super.recordItem(item);
+                    }
+                };
         StepRunReport step = interaction("patient.xml", (byte) 1);
         TestReport report = report(List.of(step));
         DatahouseTestReportRecordingService recorder = recorder(client);
-        List<net.ihe.gazelle.maestro.api.business.test.Test> tests = definitions(
-                List.of("Interaction"),
-                List.of(Map.of("document", "sharedDocument")));
+        List<net.ihe.gazelle.maestro.api.business.test.Test> tests =
+                definitions(List.of("Interaction"), List.of(Map.of("document", "sharedDocument")));
         assertThrows(RuntimeException.class, () -> recorder.recordTestReport(report, tests));
-        recorder.recordTestReport(report, definitions(List.of("Interaction"), List.of(Map.of("document", "sharedDocument"))));
+        recorder.recordTestReport(
+                report,
+                definitions(List.of("Interaction"), List.of(Map.of("document", "sharedDocument"))));
         assertEquals(1, client.uploadedAttachmentsBatches.size());
         Item root = (Item) client.recordedItems.getLast();
         assertEquals("att-1", root.getReferences().getFirst().getValue());
@@ -207,8 +304,8 @@ class InteractionFileRecordingTest {
     }
 
     private StepRunReport interaction(String filename, byte value) {
-        ByteArrayProperty file = new ByteArrayProperty("document", new byte[]{value})
-                .setFileName(filename);
+        ByteArrayProperty file =
+                new ByteArrayProperty("document", new byte[] {value}).setFileName(filename);
         return new StepRunReport()
                 .setType("USER_INTERACTION")
                 .setStepName("Interaction")
@@ -217,31 +314,42 @@ class InteractionFileRecordingTest {
     }
 
     private StepRunReport validation(String sourceAlias) throws Exception {
-        PropertyBindingPayload bindings = new PropertyBindingPayload().addBinding(
-                new PropertyBindingPayload.Binding()
-                        .setTargetKind("validationInput")
-                        .setTargetId("file")
-                        .setReferenceName(sourceAlias)
-                        .setPropertyName("file"));
-        ValidationReport validationReport = new ValidationReport()
-                .setUuid("validation")
-                .addInput(new Input().setId("file"));
+        PropertyBindingPayload bindings =
+                new PropertyBindingPayload()
+                        .addBinding(
+                                new PropertyBindingPayload.Binding()
+                                        .setTargetKind("validationInput")
+                                        .setTargetId("file")
+                                        .setReferenceName(sourceAlias)
+                                        .setPropertyName("file"));
+        ValidationReport validationReport =
+                new ValidationReport().setUuid("validation").addInput(new Input().setId("file"));
         return new StepRunReport()
                 .setType("VALIDATION")
                 .setStepName("Validation")
-                .addOutput(new ByteArrayProperty(ValidationStepDefinition.REPORT, objectMapper.writeValueAsBytes(validationReport)))
-                .addOutput(new StringProperty(PropertyBindingPayload.PROPERTY_NAME, objectMapper.writeValueAsString(bindings)));
+                .addOutput(
+                        new ByteArrayProperty(
+                                ValidationStepDefinition.REPORT,
+                                objectMapper.writeValueAsBytes(validationReport)))
+                .addOutput(
+                        new StringProperty(
+                                PropertyBindingPayload.PROPERTY_NAME,
+                                objectMapper.writeValueAsString(bindings)));
     }
 
     private TestReport report(List<StepRunReport> steps) {
-        return new TestReport().setUuid("recording-test").setDateTime(Instant.now())
-                .addTestRunReport(new TestRunReport()
-                        .setRunId("run")
-                        .setDateTime(Instant.now())
-                        .setTest(new net.ihe.gazelle.maestro.api.business.testreport.Test()
-                                .setId("test")
-                                .setName("Test"))
-                        .setStepRunReports(steps));
+        return new TestReport()
+                .setUuid("recording-test")
+                .setDateTime(Instant.now())
+                .addTestRunReport(
+                        new TestRunReport()
+                                .setRunId("run")
+                                .setDateTime(Instant.now())
+                                .setTest(
+                                        new net.ihe.gazelle.maestro.api.business.testreport.Test()
+                                                .setId("test")
+                                                .setName("Test"))
+                                .setStepRunReports(steps));
     }
 
     @Test
@@ -249,17 +357,22 @@ class InteractionFileRecordingTest {
         var client = new RecordItemClientMock();
         var producer = interaction("first.xml", (byte) 1).setStepName("First interaction");
         var consumer = validation("documentAlias").setStepName("First validation");
-        var definitions = definitions(List.of("First interaction", "First validation"),
-                List.of(Map.of("document", "documentAlias"), Map.of()));
+        var definitions =
+                definitions(
+                        List.of("First interaction", "First validation"),
+                        List.of(Map.of("document", "documentAlias"), Map.of()));
         var finalReport = report(List.of(producer, consumer));
-        var session = recorder(client).openSession(definitions, finalReport::getAccessControlList, List::of);
-        var first = new net.ihe.gazelle.maestro.api.business.message.StepRunFinished("session", "test", producer.getStepName(), null, producer);
+        var session =
+                recorder(client)
+                        .openSession(definitions, finalReport::getAccessControlList, List::of);
+        var first = new StepRunFinished("session", "test", producer.getStepName(), null, producer);
         var published = session.recordStep(first);
         assertNotNull(published);
         assertNotNull(producer.getOutputs().getFirst().getValue());
         assertNull(published.getStepRunReport().getOutputs().getFirst().getValue());
         assertNull(session.recordStep(first));
-        session.recordStep(new net.ihe.gazelle.maestro.api.business.message.StepRunFinished("session", "test", consumer.getStepName(), null, consumer));
+        session.recordStep(
+                new StepRunFinished("session", "test", consumer.getStepName(), null, consumer));
         assertEquals(1, validationItems(client).size());
         assertValidationAttachment(validationItems(client).getFirst(), "att-1");
         producer.addEvidence(new StringProperty("late", "evidence"));
@@ -272,29 +385,48 @@ class InteractionFileRecordingTest {
         assertNull(session.recordStep(first));
     }
 
-    @org.junit.jupiter.params.ParameterizedTest
-    @org.junit.jupiter.params.provider.ValueSource(booleans = {false, true})
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
     void failedIncrementalWriteDoesNotRetryAnUncertainOutcome(boolean acceptedBeforeFailure) {
         var client = new RecordItemClientMock();
         client.loseUploadAcknowledgement = acceptedBeforeFailure;
-        client.uploadFailure = acceptedBeforeFailure ? null : new IllegalStateException("Upload outcome uncertain");
+        client.uploadFailure =
+                acceptedBeforeFailure
+                        ? null
+                        : new IllegalStateException("Upload outcome uncertain");
         var producer = interaction("first.xml", (byte) 1).setStepName("First interaction");
         var finalReport = report(List.of(producer));
-        var session = recorder(client).openSession(definitions(List.of("First interaction"), List.of(Map.of())),
-                finalReport::getAccessControlList, List::of);
-        assertThrows(IllegalStateException.class, () -> session.recordStep(
-                new net.ihe.gazelle.maestro.api.business.message.StepRunFinished(
-                        "session", "test", producer.getStepName(), null, producer)));
-        assertNull(session.recordStep(new net.ihe.gazelle.maestro.api.business.message.StepRunFinished(
-                "session", "test", producer.getStepName(), null, producer)), "No incremental write after a failure");
+        var session =
+                recorder(client)
+                        .openSession(
+                                definitions(List.of("First interaction"), List.of(Map.of())),
+                                finalReport::getAccessControlList,
+                                List::of);
+        assertThrows(
+                IllegalStateException.class,
+                () ->
+                        session.recordStep(
+                                new StepRunFinished(
+                                        "session",
+                                        "test",
+                                        producer.getStepName(),
+                                        null,
+                                        producer)));
+        assertNull(
+                session.recordStep(
+                        new StepRunFinished(
+                                "session", "test", producer.getStepName(), null, producer)),
+                "No incremental write after a failure");
         assertEquals(1, client.uploadAttempts);
 
         client.uploadFailure = null;
         client.loseUploadAcknowledgement = false;
         assertEquals(acceptedBeforeFailure ? 1 : 0, client.uploadedAttachmentsBatches.size());
-        assertThrows(net.ihe.gazelle.maestro.engine.business.TestReportRecordingException.class,
-                () -> session.finish(finalReport));
-        assertEquals(1, client.uploadAttempts, "An uncertain upload must not be retried during finalization");
+        assertThrows(TestReportRecordingException.class, () -> session.finish(finalReport));
+        assertEquals(
+                1,
+                client.uploadAttempts,
+                "An uncertain upload must not be retried during finalization");
         assertTrue(client.recordedItems.isEmpty());
         assertNotNull(producer.getOutputs().getFirst().getValue());
     }
@@ -304,33 +436,50 @@ class InteractionFileRecordingTest {
         var client = new RecordItemClientMock();
         var producer = interaction("first.xml", (byte) 1).setStepName("First interaction");
         var finalReport = report(List.of(producer));
-        var session = recorder(client).openSession(definitions(List.of("First interaction"), List.of(Map.of())),
-                finalReport::getAccessControlList, List::of);
+        var session =
+                recorder(client)
+                        .openSession(
+                                definitions(List.of("First interaction"), List.of(Map.of())),
+                                finalReport::getAccessControlList,
+                                List::of);
         session.finish(finalReport);
         assertEquals(1, client.uploadedAttachmentsBatches.size());
-        assertNull(session.recordStep(new net.ihe.gazelle.maestro.api.business.message.StepRunFinished(
-                "session", "test", producer.getStepName(), null, producer)));
+        assertNull(
+                session.recordStep(
+                        new StepRunFinished(
+                                "session", "test", producer.getStepName(), null, producer)));
         assertEquals(1, client.uploadedAttachmentsBatches.size());
     }
 
     @Test
     void fullBackgroundQueueDefersOutputsToFinalRecordingWithoutLosingThem() throws Exception {
         var client = new BlockingUploadRecordItemClient();
-        List<StepRunReport> steps = IntStream.range(0, 70)
-                .mapToObj(index -> interaction("file-" + index + ".xml", (byte) index)
-                        .setStepName("Interaction " + index)).toList();
+        List<StepRunReport> steps =
+                IntStream.range(0, 70)
+                        .mapToObj(
+                                index ->
+                                        interaction("file-" + index + ".xml", (byte) index)
+                                                .setStepName("Interaction " + index))
+                        .toList();
         var finalReport = report(steps);
-        var session = recorder(client).openSession(
-                definitions(steps.stream().map(StepRunReport::getStepName).toList(),
-                        steps.stream().map(step -> Map.<String, String>of()).toList()),
-                finalReport::getAccessControlList, List::of);
+        var session =
+                recorder(client)
+                        .openSession(
+                                definitions(
+                                        steps.stream().map(StepRunReport::getStepName).toList(),
+                                        steps.stream()
+                                                .map(step -> Map.<String, String>of())
+                                                .toList()),
+                                finalReport::getAccessControlList,
+                                List::of);
         try {
             for (int index = 0; index < steps.size(); index++) {
                 StepRunReport step = steps.get(index);
-                session.submitStep(new net.ihe.gazelle.maestro.api.business.message.StepRunFinished(
-                        "session", "test", step.getStepName(), null, step), null);
+                session.submitStep(
+                        new StepRunFinished("session", "test", step.getStepName(), null, step),
+                        null);
                 if (index == 0) {
-                    assertTrue(client.writing.await(5, java.util.concurrent.TimeUnit.SECONDS));
+                    assertTrue(client.writing.await(5, TimeUnit.SECONDS));
                 }
             }
         } finally {
@@ -338,35 +487,46 @@ class InteractionFileRecordingTest {
         }
         var result = session.finish(finalReport);
         assertNotNull(result.location());
-        assertEquals(70, client.uploadAttempts, "Queued and deferred outputs must each be stored once");
+        assertEquals(
+                70, client.uploadAttempts, "Queued and deferred outputs must each be stored once");
         assertEquals(1, client.recordedItems.size(), "Only the final parent item is created");
         assertEquals(70, result.report().getTestRunReports().getFirst().getStepRunReports().size());
-        assertTrue(result.report().getTestRunReports().getFirst().getStepRunReports().stream()
-                .allMatch(step -> step.getOutput("document") instanceof
-                        net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty item
-                        && item.getReference() != null && item.getValue() == null));
-        assertTrue(finalReport.getTestRunReports().getFirst().getStepRunReports().stream()
-                .allMatch(step -> step.getOutput("document").getValue() != null));
+        assertTrue(
+                result.report().getTestRunReports().getFirst().getStepRunReports().stream()
+                        .allMatch(
+                                step ->
+                                        step.getOutput("document")
+                                                        instanceof ByteArrayItemProperty item
+                                                && item.getReference() != null
+                                                && item.getValue() == null));
+        assertTrue(
+                finalReport.getTestRunReports().getFirst().getStepRunReports().stream()
+                        .allMatch(step -> step.getOutput("document").getValue() != null));
     }
 
-    private List<net.ihe.gazelle.maestro.api.business.test.Test> definitions(List<String> stepNames, List<Map<String, String>> aliases) {
-        List<Step> steps = IntStream.range(0, aliases.size())
-                .mapToObj(index -> new Step()
-                        .setName(stepNames.get(index))
-                        .setOutputMappings(aliases.get(index)))
-                .toList();
-        return List.of(new net.ihe.gazelle.maestro.api.business.test.Test()
-                .setId("test")
-                .setSteps(steps));
+    private List<net.ihe.gazelle.maestro.api.business.test.Test> definitions(
+            List<String> stepNames, List<Map<String, String>> aliases) {
+        List<Step> steps =
+                IntStream.range(0, aliases.size())
+                        .mapToObj(
+                                index ->
+                                        new Step()
+                                                .setName(stepNames.get(index))
+                                                .setOutputMappings(aliases.get(index)))
+                        .toList();
+        return List.of(
+                new net.ihe.gazelle.maestro.api.business.test.Test().setId("test").setSteps(steps));
     }
 
     private DatahouseTestReportRecordingService recorder(RecordItemClientMock client) {
-        return new DatahouseTestReportRecordingService(client, "http://dh", step ->
-                switch (step.getType()) {
-                    case "USER_INTERACTION" -> new UserInteractionStepOutputDissector();
-                    case "VALIDATION" -> new ValidationStepOutputDissector();
-                    default -> null;
-                }
-        );
+        return new DatahouseTestReportRecordingService(
+                client,
+                "http://dh",
+                step ->
+                        switch (step.getType()) {
+                            case "USER_INTERACTION" -> new UserInteractionStepOutputDissector();
+                            case "VALIDATION" -> new ValidationStepOutputDissector();
+                            default -> null;
+                        });
     }
 }

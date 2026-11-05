@@ -18,11 +18,22 @@ package net.ihe.gazelle.maestro.quarkus.websocket;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
-import jakarta.websocket.*;
+import jakarta.websocket.CloseReason;
+import jakarta.websocket.OnClose;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.OnOpen;
+import jakarta.websocket.Session;
 import jakarta.websocket.server.ServerEndpoint;
+
 import net.ihe.gazelle.maestro.api.business.Maestro;
 import net.ihe.gazelle.maestro.api.business.MaestroSessionService;
-import net.ihe.gazelle.maestro.api.technical.dto.message.*;
+import net.ihe.gazelle.maestro.api.technical.dto.message.DeleteEvidenceDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.message.GradingCompletedDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.message.MessageDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.message.PutEvidenceDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.message.StartTestRunDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.message.StartTestSuiteRunDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.message.UserInteractionCompletedDTO;
 import net.ihe.gazelle.maestro.quarkus.configuration.MaestroPermissions;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.DeserializationException;
@@ -31,10 +42,13 @@ import net.ihe.gazelle.oidc.websocket.technical.ProtectedWebSocket;
 import net.ihe.gazelle.security.business.Authz;
 import net.ihe.gazelle.security.business.GazelleIdentity;
 import net.ihe.gazelle.security.business.UnauthorizedException;
+
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * WebSocket controller for handling test execution streams.
@@ -50,9 +64,8 @@ import java.io.IOException;
 @RequestScoped
 @ServerEndpoint("/v1/test-stream/run")
 public class TestStreamSocketController {
-    @org.eclipse.microprofile.config.inject.ConfigProperty(name = "maestro.recording.live-outputs.enabled", defaultValue = "false")
+    @ConfigProperty(name = "maestro.recording.live-outputs.enabled", defaultValue = "false")
     boolean liveOutputsEnabled;
-
 
     /**
      * Name of the interface.
@@ -64,7 +77,8 @@ public class TestStreamSocketController {
      */
     public static final String INTERFACE_VERSION = "1.0";
 
-    private static final Logger LOG = LoggerFactory.getLogger(TestStreamSocketController.class.getName());
+    private static final Logger LOG =
+            LoggerFactory.getLogger(TestStreamSocketController.class.getName());
 
     private final GazelleIdentity identity;
     private final Authz authz;
@@ -82,7 +96,12 @@ public class TestStreamSocketController {
      * @param sessionService the WebSocket session service used to manage WebSocket sessions
      */
     @Inject
-    public TestStreamSocketController(GazelleIdentity identity, Authz authz, Maestro maestro, WebSocketSessionService sessionService, MaestroSessionService maestroSessionService) {
+    public TestStreamSocketController(
+            GazelleIdentity identity,
+            Authz authz,
+            Maestro maestro,
+            WebSocketSessionService sessionService,
+            MaestroSessionService maestroSessionService) {
         this.identity = identity;
         this.authz = authz;
         this.maestro = maestro;
@@ -98,8 +117,13 @@ public class TestStreamSocketController {
     @OnOpen
     public void onOpen(Session session) {
         LOG.info("Test Stream Socket Connected: {}", session.getId());
-        WebSocketSession maestroCaller = new WebSocketSession(session, liveOutputsEnabled
-                && session.getRequestParameterMap().getOrDefault("liveOutputs", java.util.List.of()).contains("true"));
+        WebSocketSession maestroCaller =
+                new WebSocketSession(
+                        session,
+                        liveOutputsEnabled
+                                && session.getRequestParameterMap()
+                                        .getOrDefault("liveOutputs", List.of())
+                                        .contains("true"));
         sessionService.addSession(session.getId(), maestroCaller);
     }
 
@@ -135,15 +159,26 @@ public class TestStreamSocketController {
             WebSocketSession maestroCaller = sessionService.getSession(session.getId());
             switch (message) {
                 case StartTestRunDTO testRun -> {
-                    authz.assertAuthorizedForIdentityOrganization(identity, MaestroPermissions.TEST_RUN);
-                    maestro.executeTest(testRun.getTestSessionId(), testRun.getBusinessObject(), testRun.isPersist(), maestroCaller);
+                    authz.assertAuthorizedForIdentityOrganization(
+                            identity, MaestroPermissions.TEST_RUN);
+                    maestro.executeTest(
+                            testRun.getTestSessionId(),
+                            testRun.getBusinessObject(),
+                            testRun.isPersist(),
+                            maestroCaller);
                 }
                 case StartTestSuiteRunDTO testSuiteRun -> {
-                    authz.assertAuthorizedForIdentityOrganization(identity, MaestroPermissions.TEST_RUN);
-                    maestro.executeTestSuite(testSuiteRun.getTestSessionId(), testSuiteRun.getBusinessObject(), testSuiteRun.isPersist(), maestroCaller);
+                    authz.assertAuthorizedForIdentityOrganization(
+                            identity, MaestroPermissions.TEST_RUN);
+                    maestro.executeTestSuite(
+                            testSuiteRun.getTestSessionId(),
+                            testSuiteRun.getBusinessObject(),
+                            testSuiteRun.isPersist(),
+                            maestroCaller);
                 }
                 case UserInteractionCompletedDTO userInteractionCompleted ->
-                        maestroCaller.completeInteraction(userInteractionCompleted.getBusinessObject());
+                        maestroCaller.completeInteraction(
+                                userInteractionCompleted.getBusinessObject());
                 case PutEvidenceDTO putEvidence ->
                         maestroSessionService.putEvidence(putEvidence.getBusinessObject());
                 case DeleteEvidenceDTO deleteEvidence ->
@@ -153,22 +188,33 @@ public class TestStreamSocketController {
                 default -> {
                     sessionService.removeSession(session.getId());
                     String error = "Unexpected message type: " + message.getClass().getName();
-                    //session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, error));
+                    // session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION,
+                    // error));
                     LOG.debug(error);
                 }
             }
         } catch (DeserializationException e) {
             LOG.debug("Unable to parse test run", e);
-            session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, "Unable to parse test case, please contact an administrator."));
+            session.close(
+                    new CloseReason(
+                            CloseReason.CloseCodes.UNEXPECTED_CONDITION,
+                            "Unable to parse test case, please contact an administrator."));
         } catch (IllegalArgumentException e) {
             LOG.debug("Test run is invalid", e);
-            session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, "Test case is invalid, please contact an administrator."));
+            session.close(
+                    new CloseReason(
+                            CloseReason.CloseCodes.UNEXPECTED_CONDITION,
+                            "Test case is invalid, please contact an administrator."));
         } catch (UnauthorizedException e) {
             LOG.debug(e.getMessage());
-            session.close(new CloseReason(CloseReason.CloseCodes.VIOLATED_POLICY, "Unauthenticated"));
+            session.close(
+                    new CloseReason(CloseReason.CloseCodes.VIOLATED_POLICY, "Unauthenticated"));
         } catch (Exception e) {
             LOG.error("Unexpected error during websocket test execution", e);
-            session.close(new CloseReason(CloseReason.CloseCodes.CLOSED_ABNORMALLY, "Unexpected error, please contact an administrator."));
+            session.close(
+                    new CloseReason(
+                            CloseReason.CloseCodes.CLOSED_ABNORMALLY,
+                            "Unexpected error, please contact an administrator."));
         }
     }
 }

@@ -16,8 +16,9 @@
 
 package net.ihe.gazelle.maestrorecording.adapter;
 
-import java.util.List;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.spi.business.recording.plan.ReferencePlan;
+
+import java.util.List;
 
 record RecordedStep(StepRunReport report, List<ReferencePlan> references) {}

@@ -24,5 +24,4 @@ import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
  * @param location the saved final report location
  * @param report the recorded report to publish after execution
  */
-public record ExecutionRecordingResult(String location, TestReport report) {
-}
+public record ExecutionRecordingResult(String location, TestReport report) {}

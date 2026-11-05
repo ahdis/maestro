@@ -16,23 +16,42 @@
 
 package net.ihe.gazelle.maestrorecording.adapter;
 
-import java.util.concurrent.CompletableFuture;
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
-import net.ihe.gazelle.maestro.api.business.message.*;
+import net.ihe.gazelle.maestro.api.business.message.AskGrading;
+import net.ihe.gazelle.maestro.api.business.message.ExecutionFinished;
+import net.ihe.gazelle.maestro.api.business.message.GradingCompleted;
+import net.ihe.gazelle.maestro.api.business.message.InteractWithUser;
+import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
+import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
 import net.ihe.gazelle.maestro.engine.business.RecordedOutputsObserver;
+
+import java.util.concurrent.CompletableFuture;
 
 final class WorkflowObserver implements MaestroObserver, RecordedOutputsObserver {
     final CompletableFuture<InteractWithUser> interaction = new CompletableFuture<>();
     final CompletableFuture<UserInteractionCompleted> answer = new CompletableFuture<>();
     final CompletableFuture<StepRunFinished> recorded = new CompletableFuture<>();
     final CompletableFuture<ExecutionFinished> finished = new CompletableFuture<>();
-    @Override public CompletableFuture<UserInteractionCompleted> interactWithUser(InteractWithUser request) {
+
+    @Override
+    public CompletableFuture<UserInteractionCompleted> interactWithUser(InteractWithUser request) {
         interaction.complete(request);
         return answer;
     }
-    @Override public void onOutputsRecorded(StepRunFinished event) { recorded.complete(event); }
-    @Override public void onExecutionFinished(ExecutionFinished event) { finished.complete(event); }
-    @Override public CompletableFuture<GradingCompleted> askGrading(AskGrading request) {
-        return CompletableFuture.failedFuture(new UnsupportedOperationException("No grading in this scenario"));
+
+    @Override
+    public void onOutputsRecorded(StepRunFinished event) {
+        recorded.complete(event);
+    }
+
+    @Override
+    public void onExecutionFinished(ExecutionFinished event) {
+        finished.complete(event);
+    }
+
+    @Override
+    public CompletableFuture<GradingCompleted> askGrading(AskGrading request) {
+        return CompletableFuture.failedFuture(
+                new UnsupportedOperationException("No grading in this scenario"));
     }
 }

@@ -16,14 +16,20 @@
 
 package net.ihe.gazelle.maestro.api.business.message;
 
+import net.ihe.gazelle.maestro.api.business.property.Property;
+
 import java.io.Serial;
 import java.time.Instant;
 import java.util.List;
-import net.ihe.gazelle.maestro.api.business.property.Property;
 
 /** Application notification containing available outputs of an already completed step. */
-public record StepOutputsAvailable(String testId, String stepName, Instant dateTime,
-                                   List<Property> outputs) implements Message {
-    @Serial private static final long serialVersionUID = 1L;
-    public StepOutputsAvailable { outputs = List.copyOf(outputs); }
+public record StepOutputsAvailable(
+        String testId, String stepName, Instant dateTime, List<Property> outputs)
+        implements Message {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    public StepOutputsAvailable {
+        outputs = List.copyOf(outputs);
+    }
 }

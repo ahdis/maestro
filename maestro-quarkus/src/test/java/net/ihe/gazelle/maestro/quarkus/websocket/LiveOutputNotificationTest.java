@@ -16,38 +16,64 @@
 
 package net.ihe.gazelle.maestro.quarkus.websocket;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.websocket.RemoteEndpoint;
 import jakarta.websocket.Session;
+
 import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+
+import java.util.List;
+import java.util.Map;
 
 class LiveOutputNotificationTest {
-    @org.junit.jupiter.params.ParameterizedTest
-    @org.junit.jupiter.params.provider.CsvSource({"false,false,false", "false,true,false", "true,false,false", "true,true,true"})
-    void requiresBothDeploymentEnablementAndClientOptIn(boolean enabled, boolean optedIn, boolean expected) {
+    @ParameterizedTest
+    @CsvSource({"false,false,false", "false,true,false", "true,false,false", "true,true,true"})
+    void requiresBothDeploymentEnablementAndClientOptIn(
+            boolean enabled, boolean optedIn, boolean expected) {
         Session session = mock(Session.class);
         RemoteEndpoint.Async remote = mock(RemoteEndpoint.Async.class);
         when(session.getId()).thenReturn("socket");
         when(session.getAsyncRemote()).thenReturn(remote);
-        when(session.getRequestParameterMap()).thenReturn(optedIn
-                ? java.util.Map.of("liveOutputs", java.util.List.of("true")) : java.util.Map.of());
+        when(session.getRequestParameterMap())
+                .thenReturn(optedIn ? Map.of("liveOutputs", List.of("true")) : Map.of());
         WebSocketSessionService sessions = mock(WebSocketSessionService.class);
         var controller = new TestStreamSocketController(null, null, null, sessions, null);
         controller.liveOutputsEnabled = enabled;
         controller.onOpen(session);
         var caller = ArgumentCaptor.forClass(WebSocketSession.class);
         verify(sessions).addSession(eq("socket"), caller.capture());
-        var report = new StepRunReport().setStepName("Validate")
-                .addOutput(new ByteArrayItemProperty("report", null).setReference("/items/report-1"));
-        caller.getValue().onOutputsRecorded(new StepRunFinished("session", "test", "Validate", null, report));
-        if (expected) verify(remote).sendText(anyString());
-        else verifyNoInteractions(remote);
+        var report =
+                new StepRunReport()
+                        .setStepName("Validate")
+                        .addOutput(
+                                new ByteArrayItemProperty("report", null)
+                                        .setReference("/items/report-1"));
+        caller.getValue()
+                .onOutputsRecorded(
+                        new StepRunFinished("session", "test", "Validate", null, report));
+        if (expected) {
+            verify(remote).sendText(anyString());
+        } else {
+            verifyNoInteractions(remote);
+        }
     }
 
     @Test
@@ -55,11 +81,14 @@ class LiveOutputNotificationTest {
         Session session = mock(Session.class);
         RemoteEndpoint.Async remote = mock(RemoteEndpoint.Async.class);
         when(session.getAsyncRemote()).thenReturn(remote);
-        var output = new ByteArrayItemProperty("VALIDATION_REPORT", null)
-                .setReference("/items/report-1").setItemType("VALIDATION_REPORT");
+        var output =
+                new ByteArrayItemProperty("VALIDATION_REPORT", null)
+                        .setReference("/items/report-1")
+                        .setItemType("VALIDATION_REPORT");
         var report = new StepRunReport().setStepName("Validate").addOutput(output);
-        new WebSocketSession(session, true).onOutputsRecorded(
-                new StepRunFinished("session", "test", "Validate", null, report));
+        new WebSocketSession(session, true)
+                .onOutputsRecorded(
+                        new StepRunFinished("session", "test", "Validate", null, report));
         ArgumentCaptor<String> json = ArgumentCaptor.forClass(String.class);
         verify(remote).sendText(json.capture());
         var payload = new ObjectMapper().readTree(json.getValue());

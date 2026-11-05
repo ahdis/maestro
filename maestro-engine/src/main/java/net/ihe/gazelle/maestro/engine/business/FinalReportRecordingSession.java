@@ -16,10 +16,11 @@
 
 package net.ihe.gazelle.maestro.engine.business;
 
-import java.util.List;
 import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
 import net.ihe.gazelle.maestro.api.business.test.Test;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+
+import java.util.List;
 
 /** Compatibility lifecycle for recorders that support final reports only. */
 final class FinalReportRecordingSession implements ExecutionRecordingSession {

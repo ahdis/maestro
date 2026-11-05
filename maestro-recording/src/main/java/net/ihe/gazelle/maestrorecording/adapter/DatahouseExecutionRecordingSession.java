@@ -16,27 +16,13 @@
 
 package net.ihe.gazelle.maestrorecording.adapter;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
-
-import net.ihe.gazelle.maestro.engine.business.ExecutionRecordingResult;
 import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.test.Test;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
+import net.ihe.gazelle.maestro.engine.business.ExecutionRecordingResult;
 import net.ihe.gazelle.maestro.engine.business.ExecutionRecordingSession;
 import net.ihe.gazelle.maestro.engine.business.RecordedOutputsObserver;
 import net.ihe.gazelle.maestro.engine.business.TestReportRecordingException;
@@ -45,12 +31,32 @@ import net.ihe.gazelle.maestro.spi.business.recording.plan.ReferencePlan;
 import net.ihe.gazelle.maestrorecording.RecordingWriter;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
+
 /** Serializes recording only; engine event processing remains independent. */
 final class DatahouseExecutionRecordingSession implements ExecutionRecordingSession {
     private final RecordingSnapshotFactory snapshots = new RecordingSnapshotFactory();
     // One writer thread keeps step writes in completion order and off the engine's event thread.
-    private final ExecutorService stepWriter = new ThreadPoolExecutor(1, 1, 0, TimeUnit.MILLISECONDS,
-            new ArrayBlockingQueue<>(64), Thread.ofVirtual().factory());
+    private final ExecutorService stepWriter =
+            new ThreadPoolExecutor(
+                    1,
+                    1,
+                    0,
+                    TimeUnit.MILLISECONDS,
+                    new ArrayBlockingQueue<>(64),
+                    Thread.ofVirtual().factory());
     private final DatahouseTestReportRecordingService service;
     private final RecordingWriter writer;
     private final List<Test> definitions;
@@ -62,8 +68,12 @@ final class DatahouseExecutionRecordingSession implements ExecutionRecordingSess
     private boolean finished;
     private volatile RuntimeException recordingFailure;
 
-    DatahouseExecutionRecordingSession(DatahouseTestReportRecordingService service, RecordingWriter writer,
-            List<Test> definitions, Supplier<AccessControlList> acl, Supplier<List<Property>> inputs,
+    DatahouseExecutionRecordingSession(
+            DatahouseTestReportRecordingService service,
+            RecordingWriter writer,
+            List<Test> definitions,
+            Supplier<AccessControlList> acl,
+            Supplier<List<Property>> inputs,
             String datahouseUrl) {
         this.service = service;
         this.writer = writer;
@@ -84,16 +94,18 @@ final class DatahouseExecutionRecordingSession implements ExecutionRecordingSess
             return;
         }
         try {
-            stepWriter.execute(() -> {
-                try {
-                    StepRunFinished published = record(event, stepSnapshot);
-                    if (published != null && observer != null) {
-                        observer.onOutputsRecorded(published);
-                    }
-                } catch (RuntimeException retainedForFinish) {
-                    // record() retains write failures; notification failures do not trigger another write.
-                }
-            });
+            stepWriter.execute(
+                    () -> {
+                        try {
+                            StepRunFinished published = record(event, stepSnapshot);
+                            if (published != null && observer != null) {
+                                observer.onOutputsRecorded(published);
+                            }
+                        } catch (RuntimeException retainedForFinish) {
+                            // record() retains write failures; notification failures do not trigger
+                            // another write.
+                        }
+                    });
         } catch (RejectedExecutionException alreadyFinished) {
             // A full queue or a closed session leaves this step for final reconciliation.
         }
@@ -105,37 +117,61 @@ final class DatahouseExecutionRecordingSession implements ExecutionRecordingSess
     }
 
     private synchronized StepRunFinished record(StepRunFinished event, StepRunReport snapshot) {
-        if (finished || recordingFailure != null) return null;
+        if (finished || recordingFailure != null) {
+            return null;
+        }
         try {
-            RecordedStepKey key = new RecordedStepKey(event.getTestId(), event.getStepName(), snapshot.getDateTime());
-            if (recorded.containsKey(key)) return null;
+            RecordedStepKey key =
+                    new RecordedStepKey(
+                            event.getTestId(), event.getStepName(), snapshot.getDateTime());
+            if (recorded.containsKey(key)) {
+                return null;
+            }
             // Include earlier producers for provenance without writing a provisional parent item.
-            Test definition = definitions.stream()
-                    .filter(test -> Objects.equals(test.getId(), event.getTestId()))
-                    .findFirst()
-                    .orElseThrow(() -> new TestReportRecordingException("Unknown test in recording event"));
+            Test definition =
+                    definitions.stream()
+                            .filter(test -> Objects.equals(test.getId(), event.getTestId()))
+                            .findFirst()
+                            .orElseThrow(
+                                    () ->
+                                            new TestReportRecordingException(
+                                                    "Unknown test in recording event"));
             TestRunReport run = new TestRunReport();
-            run.setTest(new net.ihe.gazelle.maestro.api.business.testreport.Test()
-                    .setId(definition.getId())
-                    .setName(definition.getName()));
+            run.setTest(
+                    new net.ihe.gazelle.maestro.api.business.testreport.Test()
+                            .setId(definition.getId())
+                            .setName(definition.getName()));
             run.setInputs(inputSnapshot());
             // Stored step snapshots are only read by the plan, which copies their outputs.
             List<StepRunReport> steps = new ArrayList<>();
-            recorded.forEach((previous, value) -> {
-                if (Objects.equals(previous.testId(), event.getTestId())) steps.add(value.report());
-            });
+            recorded.forEach(
+                    (previous, value) -> {
+                        if (Objects.equals(previous.testId(), event.getTestId())) {
+                            steps.add(value.report());
+                        }
+                    });
             steps.add(snapshot);
             run.setStepRunReports(steps);
             TestReport report = new TestReport();
             report.setTestRunReports(List.of(run));
             report.setAccessControlList(acl.get());
-            ItemPlan<TestReport> plan = service.buildTestReportPlan(report, acl.get(), definitions, recorded);
+            ItemPlan<TestReport> plan =
+                    service.buildTestReportPlan(report, acl.get(), definitions, recorded);
             List<ReferencePlan> references = writer.recordReferences(plan, acl.get());
             Set<ReferencePlan> prior = new HashSet<>();
             recorded.values().forEach(value -> prior.addAll(value.references()));
-            recorded.put(key, new RecordedStep(snapshot,
-                    references.stream().filter(reference -> !prior.contains(reference)).toList()));
-            return new StepRunFinished(event.getSessionId(), event.getTestId(), event.getStepName(), null,
+            recorded.put(
+                    key,
+                    new RecordedStep(
+                            snapshot,
+                            references.stream()
+                                    .filter(reference -> !prior.contains(reference))
+                                    .toList()));
+            return new StepRunFinished(
+                    event.getSessionId(),
+                    event.getTestId(),
+                    event.getStepName(),
+                    null,
                     snapshots.copy(snapshot));
         } catch (RuntimeException error) {
             recordingFailure = error;
@@ -166,12 +202,15 @@ final class DatahouseExecutionRecordingSession implements ExecutionRecordingSess
         } catch (InterruptedException interrupted) {
             Thread.currentThread().interrupt();
             stepWriter.shutdownNow();
-            throw new TestReportRecordingException("Interrupted while awaiting incremental recording", interrupted);
+            throw new TestReportRecordingException(
+                    "Interrupted while awaiting incremental recording", interrupted);
         }
     }
 
     private synchronized ExecutionRecordingResult finishRecording(TestReport report) {
-        if (finished) throw new TestReportRecordingException("Recording session already finished");
+        if (finished) {
+            throw new TestReportRecordingException("Recording session already finished");
+        }
         try {
             if (recordingFailure != null) {
                 throw new TestReportRecordingException(
@@ -179,9 +218,11 @@ final class DatahouseExecutionRecordingSession implements ExecutionRecordingSess
                         recordingFailure);
             }
             TestReport snapshot = snapshots.copy(report);
-            ItemPlan<TestReport> plan = service.buildTestReportPlan(snapshot, snapshot.getAccessControlList(),
-                    definitions, recorded);
-            String location = datahouseUrl + "/items/" + writer.record(plan, snapshot.getAccessControlList());
+            ItemPlan<TestReport> plan =
+                    service.buildTestReportPlan(
+                            snapshot, snapshot.getAccessControlList(), definitions, recorded);
+            String location =
+                    datahouseUrl + "/items/" + writer.record(plan, snapshot.getAccessControlList());
             return new ExecutionRecordingResult(location, snapshot);
         } finally {
             finished = true;

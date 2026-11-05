@@ -16,27 +16,35 @@
 
 package net.ihe.gazelle.maestrorecording.adapter;
 
+import com.kereval.gazelle.datahouse.api.business.record.Item;
+
+import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import com.kereval.gazelle.datahouse.api.business.record.Item;
-import net.ihe.gazelle.maestro.validation.step.business.ValidationStepDefinition;
 
 final class WorkflowRecordItemClient extends RecordItemClientMock {
     final CountDownLatch writing = new CountDownLatch(1);
     final CountDownLatch release = new CountDownLatch(1);
     boolean fail;
     int validationWrites;
-    @Override public String recordItem(Item item) {
+
+    @Override
+    public String recordItem(Item item) {
         if (ValidationStepDefinition.REPORT.equals(item.getType())) {
             validationWrites++;
             writing.countDown();
             try {
-                if (!release.await(10, TimeUnit.SECONDS)) throw new IllegalStateException("Test write gate timed out");
+                if (!release.await(10, TimeUnit.SECONDS)) {
+                    throw new IllegalStateException("Test write gate timed out");
+                }
             } catch (InterruptedException error) {
                 Thread.currentThread().interrupt();
                 throw new IllegalStateException(error);
             }
-            if (fail) throw new IllegalStateException("Simulated storage failure");
+            if (fail) {
+                throw new IllegalStateException("Simulated storage failure");
+            }
         }
         return super.recordItem(item);
     }

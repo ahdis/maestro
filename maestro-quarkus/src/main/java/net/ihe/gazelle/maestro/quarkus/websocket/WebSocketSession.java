@@ -17,12 +17,31 @@
 package net.ihe.gazelle.maestro.quarkus.websocket;
 
 import jakarta.websocket.Session;
+
 import net.ihe.gazelle.lang.IORuntimeException;
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
-import net.ihe.gazelle.maestro.api.business.message.*;
-import net.ihe.gazelle.maestro.api.technical.dto.message.*;
+import net.ihe.gazelle.maestro.api.business.message.AskGrading;
+import net.ihe.gazelle.maestro.api.business.message.ExecutionFinished;
+import net.ihe.gazelle.maestro.api.business.message.GradingCompleted;
+import net.ihe.gazelle.maestro.api.business.message.InteractWithUser;
+import net.ihe.gazelle.maestro.api.business.message.StepOutputsAvailable;
+import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
+import net.ihe.gazelle.maestro.api.business.message.StepRunStarted;
+import net.ihe.gazelle.maestro.api.business.message.TestRunFinished;
+import net.ihe.gazelle.maestro.api.business.message.TestRunStarted;
+import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
+import net.ihe.gazelle.maestro.api.technical.dto.message.AskGradingDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.message.ExecutionFinishedDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.message.InteractWithUserDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.message.StepOutputsAvailableDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.message.StepRunFinishedDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.message.StepRunStartedDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.message.TestRunFinishedDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.message.TestRunStartedDTO;
+import net.ihe.gazelle.maestro.engine.business.RecordedOutputsObserver;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +52,7 @@ import java.util.concurrent.CompletableFuture;
  * Represents a WebSocket session that listens to Maestro events and handles user interactions.
  * Implements {@link MaestroObserver} to receive updates from test execution.
  */
-public class WebSocketSession implements MaestroObserver, net.ihe.gazelle.maestro.engine.business.RecordedOutputsObserver {
+public class WebSocketSession implements MaestroObserver, RecordedOutputsObserver {
 
     private static final Logger LOG = LoggerFactory.getLogger(WebSocketSession.class.getName());
 
@@ -96,7 +115,8 @@ public class WebSocketSession implements MaestroObserver, net.ihe.gazelle.maestr
     }
 
     @Override
-    public CompletableFuture<UserInteractionCompleted> interactWithUser(InteractWithUser interactWithUser) {
+    public CompletableFuture<UserInteractionCompleted> interactWithUser(
+            InteractWithUser interactWithUser) {
         String message = serDes.serializeAsString(new InteractWithUserDTO(interactWithUser));
         LOG.debug("Interact with user: {}", message);
         this.session.getAsyncRemote().sendText(message);
@@ -113,10 +133,19 @@ public class WebSocketSession implements MaestroObserver, net.ihe.gazelle.maestr
 
     @Override
     public void onOutputsRecorded(StepRunFinished recorded) {
-        if (!liveOutputsEnabled || recorded.getStepRunReport().getOutputs().isEmpty()) return;
-        this.session.getAsyncRemote().sendText(serDes.serializeAsString(new StepOutputsAvailableDTO(
-                new StepOutputsAvailable(recorded.getTestId(), recorded.getStepName(),
-                        recorded.getStepRunReport().getDateTime(), recorded.getStepRunReport().getOutputs()))));
+        if (!liveOutputsEnabled || recorded.getStepRunReport().getOutputs().isEmpty()) {
+            return;
+        }
+        this.session
+                .getAsyncRemote()
+                .sendText(
+                        serDes.serializeAsString(
+                                new StepOutputsAvailableDTO(
+                                        new StepOutputsAvailable(
+                                                recorded.getTestId(),
+                                                recorded.getStepName(),
+                                                recorded.getStepRunReport().getDateTime(),
+                                                recorded.getStepRunReport().getOutputs()))));
     }
 
     @Override

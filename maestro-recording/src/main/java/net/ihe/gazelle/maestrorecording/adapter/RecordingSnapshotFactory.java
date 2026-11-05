@@ -16,20 +16,31 @@
 
 package net.ihe.gazelle.maestrorecording.adapter;
 
-import java.io.*;
+import net.ihe.gazelle.maestro.engine.business.TestReportRecordingException;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
 /** Detached binary snapshot preserving polymorphic model values and mutable byte arrays. */
 final class RecordingSnapshotFactory {
     <T extends Serializable> T copy(T source) {
         try {
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-            try (ObjectOutputStream output = new ObjectOutputStream(bytes)) { output.writeObject(source); }
-            try (ObjectInputStream input = new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()))) {
-                @SuppressWarnings("unchecked") T copy = (T) input.readObject();
+            try (ObjectOutputStream output = new ObjectOutputStream(bytes)) {
+                output.writeObject(source);
+            }
+            try (ObjectInputStream input =
+                    new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()))) {
+                @SuppressWarnings("unchecked")
+                T copy = (T) input.readObject();
                 return copy;
             }
         } catch (IOException | ClassNotFoundException e) {
-            throw new net.ihe.gazelle.maestro.engine.business.TestReportRecordingException("Cannot snapshot report for recording", e);
+            throw new TestReportRecordingException("Cannot snapshot report for recording", e);
         }
     }
 }
