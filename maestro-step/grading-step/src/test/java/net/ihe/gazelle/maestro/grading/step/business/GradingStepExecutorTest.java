@@ -73,6 +73,28 @@ class GradingStepExecutorTest {
         assertEquals(assessmentTime, output.getDateTime());
     }
 
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.NullAndEmptySource
+    @org.junit.jupiter.params.provider.ValueSource(strings = {" ", "Reviewed"})
+    void optionalNoteProducesAnOutputOnlyWhenItHasContent(String note) {
+        var executor = new GradingStepExecutor(new GradingHandlerStub() {
+            @Override
+            public GradingCompleted displayMessage(List<String> criteria) {
+                return new GradingCompleted().setResult(GradingResult.PASSED).setNote(note)
+                        .setUserId("reviewer").setDateTime(Instant.parse("2026-11-04T12:00:00Z"));
+            }
+        });
+        var report = executor.execute(stepRun());
+        assertEquals(StepResult.PASSED, report.getResult());
+        assertEquals(note != null && !note.isBlank() ? 1 : 0, report.getOutputs().size());
+        if (note != null && !note.isBlank()) {
+            assertEquals(note, report.getOutput(GradingStepDefinition.NOTE).getValue());
+            assertEquals("reviewer", report.getOutput(GradingStepDefinition.NOTE).getUserId());
+            assertEquals(Instant.parse("2026-11-04T12:00:00Z"),
+                    report.getOutput(GradingStepDefinition.NOTE).getDateTime());
+        }
+    }
+
     private Step step() {
         return new Step()
                 .setName("Grading step")

@@ -146,8 +146,8 @@ public class MaestroFactory {
      */
     @Produces
     @Default
-    public MaestroSessionService getMaestroSessionService() {
-        return new MaestroSessionServiceImpl(testSessionStore);
+    public MaestroSessionService getMaestroSessionService(MaestroFacade maestro) {
+        return new MaestroSessionServiceImpl(testSessionStore, maestro);
     }
 
     /**

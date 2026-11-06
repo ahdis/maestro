@@ -19,13 +19,25 @@ package net.ihe.gazelle.maestro.engine.business;
 import net.ihe.gazelle.errorhandling.business.UnexpectedErrorBuilder;
 import net.ihe.gazelle.maestro.api.business.Maestro;
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
-import net.ihe.gazelle.maestro.api.business.message.*;
+import net.ihe.gazelle.maestro.api.business.message.AskGrading;
+import net.ihe.gazelle.maestro.api.business.message.ExecutionFinished;
+import net.ihe.gazelle.maestro.api.business.message.GradingCompleted;
+import net.ihe.gazelle.maestro.api.business.message.InteractWithUser;
+import net.ihe.gazelle.maestro.api.business.message.PutEvidence;
+import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
+import net.ihe.gazelle.maestro.api.business.message.StepRunStarted;
+import net.ihe.gazelle.maestro.api.business.message.TestRunFinished;
+import net.ihe.gazelle.maestro.api.business.message.TestRunStarted;
+import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
+import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.test.Test;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
+import net.ihe.gazelle.security.business.acl.AccessControlList;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 /**
  * Maestro implementation that records test execution reports when {@code persist} is enabled.
@@ -33,94 +45,129 @@ import java.util.concurrent.CompletableFuture;
  */
 public class RecordingMaestro implements Maestro {
 
-   private final MaestroFacade maestro;
-   private final TestReportRecordingService testReportRecordingService;
+    private final MaestroFacade maestro;
+    private final TestReportRecordingService testReportRecordingService;
 
-   /**
-    * Creates a new {@code RecordingMaestro} instance with the specified facade and recording service.
-    *
-    * @param maestro                    the {@link MaestroFacade} used for executing tests
-    * @param testReportRecordingService the service used to record test reports
-    */
-   public RecordingMaestro(MaestroFacade maestro, TestReportRecordingService testReportRecordingService) {
-      this.maestro = maestro;
-      this.testReportRecordingService = testReportRecordingService;
-   }
+    /**
+     * Creates a new {@code RecordingMaestro} instance with the specified facade and recording service.
+     *
+     * @param maestro                    the {@link MaestroFacade} used for executing tests
+     * @param testReportRecordingService the service used to record test reports
+     */
+    public RecordingMaestro(
+            MaestroFacade maestro, TestReportRecordingService testReportRecordingService) {
+        this.maestro = maestro;
+        this.testReportRecordingService = testReportRecordingService;
+    }
 
-   @Override
-   public void executeTestSuite(String testSessionId, TestSuiteRun testSuiteRun, boolean persist, MaestroObserver observer) {
-      if (persist) {
-         observer = new RecordObserver(observer);
-      }
-      maestro.executeTestSuite(testSessionId, testSuiteRun, observer);
-   }
+    @Override
+    public void executeTestSuite(
+            String testSessionId,
+            TestSuiteRun testSuiteRun,
+            boolean persist,
+            MaestroObserver observer) {
+        if (persist) {
+            observer =
+                    new RecordObserver(
+                            observer,
+                            testSuiteRun.getTests(),
+                            testSuiteRun::getAccessControlList,
+                            null);
+        }
+        maestro.executeTestSuite(testSessionId, testSuiteRun, observer);
+    }
 
-   @Override
-   public void executeTest(String testSessionId, TestRun testRun, boolean persist, MaestroObserver observer) {
-      if (persist) {
-         observer = new RecordObserver(observer);
-      }
-      maestro.executeTest(testSessionId, testRun, observer);
-   }
+    @Override
+    public void executeTest(
+            String testSessionId, TestRun testRun, boolean persist, MaestroObserver observer) {
+        if (persist) {
+            observer =
+                    new RecordObserver(
+                            observer,
+                            testRun.getTest() == null ? List.of() : List.of(testRun.getTest()),
+                            testRun::getAccessControlList,
+                            testRun::getInputs);
+        }
+        maestro.executeTest(testSessionId, testRun, observer);
+    }
 
-   private class RecordObserver implements MaestroObserver {
+    private class RecordObserver implements MaestroObserver {
 
-      private final MaestroObserver delegate;
+        private final MaestroObserver delegate;
 
-      public RecordObserver(MaestroObserver delegate) {
-         this.delegate = delegate;
-      }
+        private final ExecutionRecordingSession recording;
 
-      @Override
-      public void onTestRunStarted(TestRunStarted testRunStarted) {
-         delegate.onTestRunStarted(testRunStarted);
-      }
+        public RecordObserver(
+                MaestroObserver delegate,
+                List<Test> definitions,
+                Supplier<AccessControlList> acl,
+                Supplier<List<Property>> inputs) {
+            this.delegate = delegate;
+            this.recording =
+                    inputs == null
+                            ? testReportRecordingService.openSession(definitions, acl)
+                            : testReportRecordingService.openSession(definitions, acl, inputs);
+        }
 
-      @Override
-      public void onStepRunStarted(StepRunStarted stepRunStarted) {
-         delegate.onStepRunStarted(stepRunStarted);
-      }
+        @Override
+        public Property recordEvidence(Property evidence) {
+            return recording.recordEvidence(evidence);
+        }
 
-      @Override
-      public CompletableFuture<UserInteractionCompleted> interactWithUser(InteractWithUser interactWithUser) {
-         return delegate.interactWithUser(interactWithUser);
-      }
+        @Override
+        public void onEvidenceRecorded(PutEvidence evidence) {
+            delegate.onEvidenceRecorded(evidence);
+        }
 
-      @Override
-      public void onStepRunFinished(StepRunFinished stepRunFinished) {
-         delegate.onStepRunFinished(stepRunFinished);
-      }
+        @Override
+        public void onTestRunStarted(TestRunStarted testRunStarted) {
+            delegate.onTestRunStarted(testRunStarted);
+        }
 
-      @Override
-      public void onTestRunFinished(TestRunFinished testRunFinished) {
-         delegate.onTestRunFinished(testRunFinished);
-      }
+        @Override
+        public void onStepRunStarted(StepRunStarted stepRunStarted) {
+            delegate.onStepRunStarted(stepRunStarted);
+        }
 
-      @Override
-      public void onExecutionFinished(ExecutionFinished executionFinished) {
-         try {
-            String location = testReportRecordingService.recordTestReport(
-                  executionFinished.getReport(), testDefinitions(executionFinished));
-            executionFinished.setReportLocation(location);
-         } catch (Exception e) {
-            executionFinished.getReport().addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e).build());
-         }
-         delegate.onExecutionFinished(executionFinished);
-      }
+        @Override
+        public CompletableFuture<UserInteractionCompleted> interactWithUser(
+                InteractWithUser interactWithUser) {
+            return delegate.interactWithUser(interactWithUser);
+        }
 
-       @Override
-       public CompletableFuture<GradingCompleted> askGrading(AskGrading askGrading) {
-           return delegate.askGrading(askGrading);
-       }
+        @Override
+        public void onStepRunFinished(StepRunFinished stepRunFinished) {
+            delegate.onStepRunFinished(stepRunFinished);
+            recording.submitStep(
+                    stepRunFinished,
+                    delegate instanceof RecordedOutputsObserver outputsObserver
+                            ? outputsObserver
+                            : null);
+        }
 
-       private List<Test> testDefinitions(ExecutionFinished finished) {
-           if (finished.getRun() instanceof TestRun run) {
-               return List.of(run.getTest());
-           }
-           if (finished.getRun() instanceof TestSuiteRun run) {
-               return run.getTests();
-           }
-           return List.of();
-       }
-   }
+        @Override
+        public void onTestRunFinished(TestRunFinished testRunFinished) {
+            delegate.onTestRunFinished(testRunFinished);
+        }
+
+        @Override
+        public void onExecutionFinished(ExecutionFinished executionFinished) {
+            try {
+                ExecutionRecordingResult recorded = recording.finish(executionFinished.getReport());
+                executionFinished
+                        .setReport(recorded.report())
+                        .setReportLocation(recorded.location());
+            } catch (Exception e) {
+                executionFinished
+                        .getReport()
+                        .addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e).build());
+            }
+            delegate.onExecutionFinished(executionFinished);
+        }
+
+        @Override
+        public CompletableFuture<GradingCompleted> askGrading(AskGrading askGrading) {
+            return delegate.askGrading(askGrading);
+        }
+    }
 }

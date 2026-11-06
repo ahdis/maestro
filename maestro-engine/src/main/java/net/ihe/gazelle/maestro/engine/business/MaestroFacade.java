@@ -175,6 +175,11 @@ public class MaestroFacade {
                 });
     }
 
+    /** Returns the active observer for evidence recording in an existing session. */
+    public Optional<MaestroObserver> evidenceObserver(String sessionId) {
+        return getObserver(sessionId);
+    }
+
     private ExecutionFinished asExecutionFinished(TestRunFinished testRunFinished) {
         TestRun testRun = testRunFinished.getTestRun();
         TestReportBuilder testReportBuilder = new TestReportBuilder()
@@ -222,12 +227,12 @@ public class MaestroFacade {
     private TestServiceBuilder getTestServiceBuilder() {
         return new TestServiceBuilder()
                 .setDisclaimer(
-                        "This Gazelle execution service is provided for technical compliance purposes only and does not " +
-                                "constitute legal, medical, or regulatory advice.")
+                        "This Gazelle execution service is provided for technical compliance"
+                            + " purposes only and does not constitute legal, medical, or regulatory"
+                            + " advice.")
                 .setServiceIdentification(
                         new EntityIdentificationBuilder()
                                 .setName(maestroService.getName())
-                                .setVersion(maestroService.getVersion())
-                );
+                                .setVersion(maestroService.getVersion()));
     }
 }

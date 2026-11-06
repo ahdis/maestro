@@ -28,6 +28,7 @@ class GradingStepDefinitionTest {
         assertEquals(GradingStepDefinition.TYPE, definition.getType());
         assertEquals(1, definition.getSupportedInputs().size());
         assertEquals(GradingStepDefinition.CRITERIA, definition.getSupportedInputs().getFirst().getId());
-        assertEquals(1, definition.getOutputsDefinition().size());
+        assertEquals(java.util.Map.of(GradingStepDefinition.NOTE,
+                net.ihe.gazelle.maestro.api.business.property.StringProperty.class), definition.getOutputsDefinition());
     }
 }

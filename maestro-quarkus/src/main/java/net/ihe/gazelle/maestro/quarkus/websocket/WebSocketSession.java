@@ -17,28 +17,53 @@
 package net.ihe.gazelle.maestro.quarkus.websocket;
 
 import jakarta.websocket.Session;
+
 import net.ihe.gazelle.lang.IORuntimeException;
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
-import net.ihe.gazelle.maestro.api.business.message.*;
-import net.ihe.gazelle.maestro.api.technical.dto.message.*;
+import net.ihe.gazelle.maestro.api.business.message.AskGrading;
+import net.ihe.gazelle.maestro.api.business.message.ExecutionFinished;
+import net.ihe.gazelle.maestro.api.business.message.GradingCompleted;
+import net.ihe.gazelle.maestro.api.business.message.InteractWithUser;
+import net.ihe.gazelle.maestro.api.business.message.PutEvidence;
+import net.ihe.gazelle.maestro.api.business.message.StepOutputsAvailable;
+import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
+import net.ihe.gazelle.maestro.api.business.message.StepRunStarted;
+import net.ihe.gazelle.maestro.api.business.message.TestRunFinished;
+import net.ihe.gazelle.maestro.api.business.message.TestRunStarted;
+import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
+import net.ihe.gazelle.maestro.api.technical.dto.message.AskGradingDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.message.EvidenceRecordedDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.message.ExecutionFinishedDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.message.InteractWithUserDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.message.StepOutputsAvailableDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.message.StepRunFinishedDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.message.StepRunStartedDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.message.TestRunFinishedDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.message.TestRunStartedDTO;
+import net.ihe.gazelle.maestro.engine.business.RecordedOutputsObserver;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Represents a WebSocket session that listens to Maestro events and handles user interactions.
  * Implements {@link MaestroObserver} to receive updates from test execution.
  */
-public class WebSocketSession implements MaestroObserver {
+public class WebSocketSession implements MaestroObserver, RecordedOutputsObserver {
 
     private static final Logger LOG = LoggerFactory.getLogger(WebSocketSession.class.getName());
 
     private final TextSerDes serDes = new JacksonSerDes();
     private final Session session;
+    private final boolean liveOutputsEnabled;
+    private final Set<String> evidenceSessions = ConcurrentHashMap.newKeySet();
     private CompletableFuture<UserInteractionCompleted> interactionFuture;
     private CompletableFuture<GradingCompleted> gradingFuture;
 
@@ -48,7 +73,12 @@ public class WebSocketSession implements MaestroObserver {
      * @param session the WebSocket session to be wrapped
      */
     public WebSocketSession(Session session) {
+        this(session, false);
+    }
+
+    public WebSocketSession(Session session, boolean liveOutputsEnabled) {
         this.session = session;
+        this.liveOutputsEnabled = liveOutputsEnabled;
     }
 
     /**
@@ -77,6 +107,7 @@ public class WebSocketSession implements MaestroObserver {
 
     @Override
     public void onTestRunStarted(TestRunStarted testRunStarted) {
+        evidenceSessions.add(testRunStarted.getSessionId());
         String message = serDes.serializeAsString(new TestRunStartedDTO(testRunStarted));
         LOG.debug("Test Run Started: {}", message);
         this.session.getAsyncRemote().sendText(message);
@@ -90,7 +121,8 @@ public class WebSocketSession implements MaestroObserver {
     }
 
     @Override
-    public CompletableFuture<UserInteractionCompleted> interactWithUser(InteractWithUser interactWithUser) {
+    public CompletableFuture<UserInteractionCompleted> interactWithUser(
+            InteractWithUser interactWithUser) {
         String message = serDes.serializeAsString(new InteractWithUserDTO(interactWithUser));
         LOG.debug("Interact with user: {}", message);
         this.session.getAsyncRemote().sendText(message);
@@ -103,6 +135,36 @@ public class WebSocketSession implements MaestroObserver {
         String message = serDes.serializeAsString(new StepRunFinishedDTO(stepRunFinished));
         LOG.debug("Step Run Finished: {}", message);
         this.session.getAsyncRemote().sendText(message);
+    }
+
+    public void assertEvidenceSession(String sessionId) {
+        if (sessionId == null || !evidenceSessions.contains(sessionId)) {
+            throw new IllegalArgumentException("Evidence must belong to this execution connection");
+        }
+    }
+
+    @Override
+    public void onEvidenceRecorded(PutEvidence evidence) {
+        this.session
+                .getAsyncRemote()
+                .sendText(serDes.serializeAsString(new EvidenceRecordedDTO(evidence)));
+    }
+
+    @Override
+    public void onOutputsRecorded(StepRunFinished recorded) {
+        if (!liveOutputsEnabled || recorded.getStepRunReport().getOutputs().isEmpty()) {
+            return;
+        }
+        this.session
+                .getAsyncRemote()
+                .sendText(
+                        serDes.serializeAsString(
+                                new StepOutputsAvailableDTO(
+                                        new StepOutputsAvailable(
+                                                recorded.getTestId(),
+                                                recorded.getStepName(),
+                                                recorded.getStepRunReport().getDateTime(),
+                                                recorded.getStepRunReport().getOutputs()))));
     }
 
     @Override

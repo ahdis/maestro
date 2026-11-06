@@ -81,6 +81,15 @@ public class ByteArrayItemProperty extends ByteArrayProperty {
         super.setMimeType(property.getMimeType());
     }
 
+    @Override
+    public Property copy() {
+        ByteArrayItemProperty copy = new ByteArrayItemProperty(getName(), getCopyValue(), getUserId(), getDateTime())
+                .setItemType(getItemType()).setReference(getReference());
+        copy.setFileName(getFileName());
+        copy.setMimeType(getMimeType());
+        return copy;
+    }
+
     /**
      * Retrieves the item type of this {@code ByteArrayItemProperty}.
      *
