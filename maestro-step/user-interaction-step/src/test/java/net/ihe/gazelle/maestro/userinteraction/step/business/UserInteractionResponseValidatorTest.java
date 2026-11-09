@@ -23,17 +23,19 @@ import net.ihe.gazelle.maestro.api.business.property.BooleanProperty;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.test.SupportedBooleanInput;
 import net.ihe.gazelle.maestro.api.business.test.SupportedTextInput;
+import net.ihe.gazelle.maestro.api.business.test.SupportedInput;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserInteractionResponseValidatorTest {
     @Test
     void rejectsNullFieldDefinitionsAsInvalidConfiguration() {
-        assertThrows(IllegalArgumentException.class, () -> new UserInteractionResponseValidator(
-                java.util.Collections.singletonList(null)));
+        List<SupportedInput> invalidFields = Collections.singletonList(null);
+        assertThrows(IllegalArgumentException.class, () -> new UserInteractionResponseValidator(invalidFields));
     }
 
     @Test
