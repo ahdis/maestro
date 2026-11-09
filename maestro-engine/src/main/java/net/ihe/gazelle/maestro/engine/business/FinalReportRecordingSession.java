@@ -1,0 +1,44 @@
+/*
+ * Copyright 2026 IHE International.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package net.ihe.gazelle.maestro.engine.business;
+
+import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
+import net.ihe.gazelle.maestro.api.business.test.Test;
+import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+
+import java.util.List;
+
+/** Compatibility lifecycle for recorders that support final reports only. */
+final class FinalReportRecordingSession implements ExecutionRecordingSession {
+    private final TestReportRecordingService service;
+    private final List<Test> definitions;
+
+    FinalReportRecordingSession(TestReportRecordingService service, List<Test> definitions) {
+        this.service = service;
+        this.definitions = definitions;
+    }
+
+    @Override
+    public StepRunFinished recordStep(StepRunFinished finished) {
+        return null;
+    }
+
+    @Override
+    public ExecutionRecordingResult finish(TestReport report) {
+        return new ExecutionRecordingResult(service.recordTestReport(report, definitions), report);
+    }
+}

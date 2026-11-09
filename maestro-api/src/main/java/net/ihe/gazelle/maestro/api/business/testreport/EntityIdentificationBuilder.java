@@ -86,6 +86,7 @@ public class EntityIdentificationBuilder extends AbstractBuilder<EntityIdentific
    }
 
    @Override
+   @SuppressWarnings("unchecked")
    protected EntityIdentification instantiate() {
       return new EntityIdentification();
    }

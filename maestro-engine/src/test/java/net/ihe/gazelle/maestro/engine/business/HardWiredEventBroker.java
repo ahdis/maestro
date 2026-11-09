@@ -23,6 +23,11 @@ import java.util.concurrent.ExecutorService;
 public class HardWiredEventBroker implements MaestroEventProducer, TestSuiteEventProducer, TestRunEventProducer, StepRunEventProducer {
 
    private final ExecutorService executorService;
+   private boolean notifyStepObservers = true;
+
+   public void suppressStepObserverNotifications() {
+      notifyStepObservers = false;
+   }
 
    private MaestroFacade maestro;
    private TestSuiteRunner testSuiteRunner;
@@ -48,7 +53,9 @@ public class HardWiredEventBroker implements MaestroEventProducer, TestSuiteEven
     @Override
    public void notify(StepRunFinished stepRunFinished) {
       executorService.submit(() -> testRunner.listen(stepRunFinished));
-      executorService.submit(() -> maestro.listen(stepRunFinished));
+      if (notifyStepObservers) {
+         executorService.submit(() -> maestro.listen(stepRunFinished));
+      }
    }
 
    @Override

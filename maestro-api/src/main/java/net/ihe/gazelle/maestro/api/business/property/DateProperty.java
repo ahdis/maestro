@@ -18,6 +18,7 @@ package net.ihe.gazelle.maestro.api.business.property;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.Instant;
 
 /**
  * A property containing a date
@@ -44,8 +45,20 @@ public class DateProperty extends Property {
       super(name, value);
    }
 
+    /**
+     * Constructs a new DateProperty with the specified name and value.
+     *
+     * @param name  the name of the property, which identifies it uniquely
+     * @param value the value to be assigned to the property; must be a Serializable object
+     * @param userId the user id of the property
+     * @param dateTime the date and time of the property
+     */
+    public DateProperty(String name, Serializable value, String userId, Instant dateTime) {
+        super(name, value, userId, dateTime);
+    }
+
    @Override
    public Property copy() {
-      return new DateProperty(getName(), getCopyValue());
+      return new DateProperty(getName(), getCopyValue(), getUserId(), getDateTime());
    }
 }

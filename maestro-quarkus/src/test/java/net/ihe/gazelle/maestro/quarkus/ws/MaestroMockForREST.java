@@ -28,6 +28,7 @@ import java.util.HexFormat;
 import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 public class MaestroMockForREST implements Maestro {
@@ -51,24 +52,24 @@ public class MaestroMockForREST implements Maestro {
    }
 
    @Override
-   public void executeTestSuite(TestSuiteRun testSuiteRun, boolean persist, MaestroObserver observer) {
+   public void executeTestSuite(String testSessionId, TestSuiteRun testSuiteRun, boolean persist, MaestroObserver observer) {
       if(errorSupplier != null) {
          throw errorSupplier.get();
       }
       scheduledExecutor.schedule(
             () -> pushExecutionFinished(testSuiteRun, persist, observer),
-            1, java.util.concurrent.TimeUnit.SECONDS
+            1, TimeUnit.SECONDS
       );
    }
 
    @Override
-   public void executeTest(TestRun testRun, boolean persist, MaestroObserver observer) {
+   public void executeTest(String testSessionId, TestRun testRun, boolean persist, MaestroObserver observer) {
       if(errorSupplier != null) {
          throw errorSupplier.get();
       }
       scheduledExecutor.schedule(
             () -> pushExecutionFinished(testRun, persist, observer),
-            1, java.util.concurrent.TimeUnit.SECONDS
+            1, TimeUnit.SECONDS
       );
    }
 

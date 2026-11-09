@@ -26,46 +26,73 @@ import java.io.Serial;
 @Event
 public class TestRunStarted implements Message {
 
-   @Serial
-   private static final long serialVersionUID = 1L;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-   /**
-    * The id of the test to execute
-    */
-   private String testId;
+    /**
+     * The is of the test run execution session
+     */
+    private String sessionId;
 
-   /**
-    * Default constructor
-    */
-   public TestRunStarted() {
-   }
+    /**
+     * The id of the test to execute
+     */
+    private String testId;
 
-   /**
-    * Constructs a new {@code TestRunStarted} instance with the specified test ID.
-    *
-    * @param testId the ID of the test to be executed
-    */
-   public TestRunStarted(String testId) {
-      this.testId = testId;
-   }
+    /**
+     * Default constructor
+     */
+    public TestRunStarted() {
+    }
 
-   /**
-    * Retrieves the ID of the test to be executed.
-    *
-    * @return the test ID as a string.
-    */
-   public String getTestId() {
-      return testId;
-   }
+    /**
+     * Constructs a new {@code TestRunStarted} instance with the specified test ID.
+     *
+     * @param sessionId the session ID associated with the test run execution
+     * @param testId the ID of the test to be executed
+     */
+    public TestRunStarted(String sessionId, String testId) {
+        this.sessionId = sessionId;
+        this.testId = testId;
+    }
 
-   /**
-    * Sets the ID of the test to be executed.
-    *
-    * @param testId the ID of the test to be set
-    * @return the current instance of {@code TestRunStarted} to allow method chaining
-    */
-   public TestRunStarted setTestId(String testId) {
-      this.testId = testId;
-      return this;
-   }
+    /**
+     * Retrieves the session ID associated with the test run execution.
+     *
+     * @return the session ID as a string.
+     */
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    /**
+     * Sets the session ID for the test run execution.
+     *
+     * @param sessionId the session ID to be associated with the test run execution
+     * @return the current instance of {@code TestRunStarted} to allow method chaining
+     */
+    public TestRunStarted setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+        return this;
+    }
+
+    /**
+     * Retrieves the ID of the test to be executed.
+     *
+     * @return the test ID as a string.
+     */
+    public String getTestId() {
+        return testId;
+    }
+
+    /**
+     * Sets the ID of the test to be executed.
+     *
+     * @param testId the ID of the test to be set
+     * @return the current instance of {@code TestRunStarted} to allow method chaining
+     */
+    public TestRunStarted setTestId(String testId) {
+        this.testId = testId;
+        return this;
+    }
 }

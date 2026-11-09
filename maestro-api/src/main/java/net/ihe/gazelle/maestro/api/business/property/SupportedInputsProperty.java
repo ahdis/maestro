@@ -1,0 +1,71 @@
+/*
+ * Copyright 2026 IHE International.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package net.ihe.gazelle.maestro.api.business.property;
+
+import net.ihe.gazelle.maestro.api.business.test.SupportedInput;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.Instant;
+import java.util.List;
+
+/**
+ * Supported Inputs property
+ */
+public class SupportedInputsProperty extends Property {
+
+    @Serial
+    private static final long serialVersionUID = -2488516985661313786L;
+
+    /**
+     * Default constructor
+     */
+    public SupportedInputsProperty() {
+        super();
+    }
+
+    public SupportedInputsProperty(String name, List<SupportedInput> value) {
+        super(name, (Serializable) value);
+    }
+
+    /**
+     * Constructs a new SupportedInputsProperty with the specified name and value.
+     *
+     * @param name  the name of the property, which identifies it uniquely
+     * @param value the value to be assigned to the property; must be a Serializable object
+     */
+    public SupportedInputsProperty(String name, Serializable value) {
+        super(name, value);
+    }
+
+    /**
+     * Constructs a new SupportedInputsProperty with the specified name and value.
+     *
+     * @param name  the name of the property, which identifies it uniquely
+     * @param value the value to be assigned to the property; must be a Serializable object
+     * @param userId the user id of the user who created the property
+     * @param dateTime the date and time when the property was created
+     */
+    public SupportedInputsProperty(String name, Serializable value, String userId, Instant dateTime) {
+        super(name, value, userId, dateTime);
+    }
+
+    @Override
+    public Property copy() {
+        return new SupportedInputsProperty(getName(), getCopyValue());
+    }
+}

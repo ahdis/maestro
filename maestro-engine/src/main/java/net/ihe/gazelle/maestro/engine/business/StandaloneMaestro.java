@@ -39,19 +39,19 @@ public class StandaloneMaestro implements Maestro {
    }
 
    @Override
-   public void executeTestSuite(TestSuiteRun testSuiteRun, boolean persist, MaestroObserver observer) {
+   public void executeTestSuite(String testSessionId, TestSuiteRun testSuiteRun, boolean persist, MaestroObserver observer) {
       if (persist) {
          throw new UnsupportedOperationException("Persisting test suite runs is not supported in StandaloneMaestro.");
       }
-      maestroFacade.executeTestSuite(testSuiteRun, observer);
+      maestroFacade.executeTestSuite(testSessionId, testSuiteRun, observer);
    }
 
    @Override
-   public void executeTest(TestRun testRun, boolean persist, MaestroObserver observer) {
+   public void executeTest(String testSessionId, TestRun testRun, boolean persist, MaestroObserver observer) {
       if (persist) {
          throw new UnsupportedOperationException("Persisting test runs is not supported in StandaloneMaestro.");
       }
-      maestroFacade.executeTest(testRun, observer);
+      maestroFacade.executeTest(testSessionId, testRun, observer);
    }
 
 }

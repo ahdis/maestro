@@ -16,14 +16,15 @@
 
 package net.ihe.gazelle.maestro.quarkus.utils;
 
+import net.ihe.gazelle.maestro.api.business.property.StringListProperty;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
-import net.ihe.gazelle.maestro.api.business.test.Step;
-import net.ihe.gazelle.maestro.api.business.test.TestReference;
-import net.ihe.gazelle.maestro.api.business.test.TestSuite;
+import net.ihe.gazelle.maestro.api.business.test.*;
+import net.ihe.gazelle.maestro.api.business.test.Test;
 import net.ihe.gazelle.maestro.api.business.testreport.*;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.engine.business.stub.Instrumented4TestStepDefinition;
+import net.ihe.gazelle.maestro.grading.step.business.GradingStepDefinition;
 import net.ihe.gazelle.maestro.spi.business.StepRun;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 
@@ -43,11 +44,22 @@ public class ObjectFactory {
                 ));
     }
 
-    public static net.ihe.gazelle.maestro.api.business.test.Test createTest4Run() {
-        return new net.ihe.gazelle.maestro.api.business.test.Test()
+    public static Step createGradingStep() {
+        return new Step()
+                .setName("grading")
+                .setType(GradingStepDefinition.TYPE)
+                .setProperties(List.of(
+                        new StringListProperty("criteria", List.of("Check A", "Check B"))
+                ));
+    }
+
+    public static Test createTest4Run() {
+        return new Test()
                 .setId(TEST_ID)
                 .setName("Sample test")
-                .addStep(createStep());
+                .setGradingMethod(GradingMethod.AUTOMATED)
+                .addStep(createStep())
+                .addStep(createGradingStep());
     }
 
     public static TestSuite createTestSuite() {
@@ -64,6 +76,14 @@ public class ObjectFactory {
     public static TestRun createTestRun() {
         return new TestRun()
                 .setTest(createTest4Run())
+                .setAccessControlList(new AccessControlList()
+                        .setPublic(true)
+                        .setOwners(Set.of("gazelle")));
+    }
+
+    public static TestRun createInvalidTestRun() {
+        return new TestRun()
+                .setTest(createTest4Run().addStep(createStep()))
                 .setAccessControlList(new AccessControlList()
                         .setPublic(true)
                         .setOwners(Set.of("gazelle")));
@@ -127,6 +147,7 @@ public class ObjectFactory {
                                 .setName("sut-1")
                                 .setVersion("2025")))
                 .setTestSuiteName("MAESTRO-SUITE")
+                .setTestSessionId("session-1")
                 .setNote("Sample test report")
                 .setUrlToTestSuiteResult("http://example.test/reports/1")
                 .addTestRunReport(testRunReportBuilder);

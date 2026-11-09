@@ -28,103 +28,128 @@ import java.io.Serial;
 @Event
 public class TestRunFinished implements Message {
 
-   @Serial
-   private static final long serialVersionUID = 1L;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-   /**
-    * The session id of the execution
-    */
-   private String sessionId;
+    /**
+     * The session id of the execution
+     */
+    private String sessionId;
 
-   /**
-    * The test run that has ended
-    */
-   private TestRun testRun;
+    /**
+     * The test session id of the execution
+     */
+    private String testSessionId;
 
-   /**
-    * The report of the test run
-    */
-   private TestRunReport testRunReport;
+    /**
+     * The test run that has ended
+     */
+    private TestRun testRun;
 
-   /**
-    * Default constructor
-    */
-   public TestRunFinished() {
-   }
+    /**
+     * The report of the test run
+     */
+    private TestRunReport testRunReport;
 
-   /**
-    * Creates a new instance of TestRunFinished, representing the completion of a TestRun execution,
-    * along with its associated session ID and test run report.
-    *
-    * @param sessionId     the session ID of the test run execution
-    * @param testRun       the completed TestRun instance
-    * @param testRunReport the report generated for the completed test run
-    */
-   public TestRunFinished(String sessionId, TestRun testRun, TestRunReport testRunReport) {
-      this.sessionId = sessionId;
-      this.testRun = testRun;
-      this.testRunReport = testRunReport;
-   }
+    /**
+     * Default constructor
+     */
+    public TestRunFinished() {
+    }
 
-   /**
-    * Retrieves the session ID of the test run execution.
-    *
-    * @return the session ID as a string, or null if no session ID is set.
-    */
-   public String getSessionId() {
-      return sessionId;
-   }
+    /**
+     * Creates a new instance of TestRunFinished, representing the completion of a TestRun execution,
+     * along with its associated session ID and test run report.
+     *
+     * @param sessionId     the session ID of the test run execution
+     * @param testRun       the completed TestRun instance
+     * @param testRunReport the report generated for the completed test run
+     */
+    public TestRunFinished(String sessionId, TestRun testRun, TestRunReport testRunReport) {
+        this.sessionId = sessionId;
+        this.testRun = testRun;
+        this.testRunReport = testRunReport;
+    }
 
-   /**
-    * Sets the session ID of the test run execution.
-    *
-    * @param sessionId the session ID to be set for the test run execution
-    * @return the current instance of {@code TestRunFinished} for method chaining
-    */
-   public TestRunFinished setSessionId(String sessionId) {
-      this.sessionId = sessionId;
-      return this;
-   }
+    /**
+     * Retrieves the session ID of the test run execution.
+     *
+     * @return the session ID as a string, or null if no session ID is set.
+     */
+    public String getSessionId() {
+        return sessionId;
+    }
 
-   /**
-    * Retrieves the {@code TestRun} instance associated with this object, representing
-    * an execution of a specific test with defined inputs and configurations.
-    *
-    * @return the {@code TestRun} instance, or null if no test run is currently set
-    */
-   public TestRun getTestRun() {
-      return testRun;
-   }
+    /**
+     * Sets the session ID of the test run execution.
+     *
+     * @param sessionId the session ID to be set for the test run execution
+     * @return the current instance of {@code TestRunFinished} for method chaining
+     */
+    public TestRunFinished setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+        return this;
+    }
 
-   /**
-    * Sets the {@code TestRun} instance associated with this object.
-    *
-    * @param testRun the {@code TestRun} instance to set
-    * @return the current instance of {@code TestRunFinished} for method chaining
-    */
-   public TestRunFinished setTestRun(TestRun testRun) {
-      this.testRun = testRun;
-      return this;
-   }
+    /**
+     * Retrieves the test session ID associated with this object.
+     *
+     * @return the test session ID as a string, or null if no test session ID is set.
+     */
+    public String getTestSessionId() {
+        return testSessionId;
+    }
 
-   /**
-    * Retrieves the test run report generated for the completed test run execution.
-    *
-    * @return the {@code TestRunReport} associated with the completed test run, or null if no report is set
-    */
-   public TestRunReport getTestRunReport() {
-      return testRunReport;
-   }
+    /**
+     * Sets the test session ID associated with this object.
+     *
+     * @param testSessionId the test session ID to be set
+     * @return the current instance of {@code TestRunFinished} for method chaining
+     */
+    public TestRunFinished setTestSessionId(String testSessionId) {
+        this.testSessionId = testSessionId;
+        return this;
+    }
 
-   /**
-    * Sets the {@code TestRunReport} associated with the completed test run execution.
-    * This report contains details about the results and execution of the test run.
-    *
-    * @param testRunReport the {@code TestRunReport} instance to be set
-    * @return the current instance of {@code TestRunFinished} for method chaining
-    */
-   public TestRunFinished setTestRunReport(TestRunReport testRunReport) {
-      this.testRunReport = testRunReport;
-      return this;
-   }
+    /**
+     * Retrieves the {@code TestRun} instance associated with this object, representing
+     * an execution of a specific test with defined inputs and configurations.
+     *
+     * @return the {@code TestRun} instance, or null if no test run is currently set
+     */
+    public TestRun getTestRun() {
+        return testRun;
+    }
+
+    /**
+     * Sets the {@code TestRun} instance associated with this object.
+     *
+     * @param testRun the {@code TestRun} instance to set
+     * @return the current instance of {@code TestRunFinished} for method chaining
+     */
+    public TestRunFinished setTestRun(TestRun testRun) {
+        this.testRun = testRun;
+        return this;
+    }
+
+    /**
+     * Retrieves the test run report generated for the completed test run execution.
+     *
+     * @return the {@code TestRunReport} associated with the completed test run, or null if no report is set
+     */
+    public TestRunReport getTestRunReport() {
+        return testRunReport;
+    }
+
+    /**
+     * Sets the {@code TestRunReport} associated with the completed test run execution.
+     * This report contains details about the results and execution of the test run.
+     *
+     * @param testRunReport the {@code TestRunReport} instance to be set
+     * @return the current instance of {@code TestRunFinished} for method chaining
+     */
+    public TestRunFinished setTestRunReport(TestRunReport testRunReport) {
+        this.testRunReport = testRunReport;
+        return this;
+    }
 }

@@ -39,178 +39,200 @@ import java.util.UUID;
  */
 public class MaestroFacade {
 
-   private final TestSuiteRunValidator testSuiteRunValidator = new TestSuiteRunValidator();
-   private final TestRunValidator testRunValidator = new TestRunValidator();
-   private final SessionStore<MaestroObserver> testRunObserverStore;
-   private final SessionStore<MaestroObserver> testSuiteRunObserverStore;
-   private final MaestroEventProducer maestroEventProducer;
-   private final Service maestroService;
+    private final TestSuiteRunValidator testSuiteRunValidator = new TestSuiteRunValidator();
+    private final TestRunValidator testRunValidator = new TestRunValidator();
+    private final SessionStore<MaestroObserver> testRunObserverStore;
+    private final SessionStore<MaestroObserver> testSuiteRunObserverStore;
+    private final MaestroEventProducer maestroEventProducer;
+    private final Service maestroService;
 
-   /**
-    * Creates a new {@code MaestroFacade} with the provided session stores, event producer, and metadata service.
-    *
-    * @param testRunObserverStore      the store for test run observers
-    * @param testSuiteRunObserverStore the store for test suite run observers
-    * @param maestroEventProducer      the event producer for Maestro commands
-    * @param metadataService           the service providing metadata
-    */
-   public MaestroFacade(SessionStore<MaestroObserver> testRunObserverStore,
-                        SessionStore<MaestroObserver> testSuiteRunObserverStore,
-                        MaestroEventProducer maestroEventProducer,
-                        MetadataService metadataService) {
-      this.testRunObserverStore = testRunObserverStore;
-      this.testSuiteRunObserverStore = testSuiteRunObserverStore;
-      this.maestroEventProducer = maestroEventProducer;
-      this.maestroService = metadataService.getMetadata();
-   }
+    /**
+     * Creates a new {@code MaestroFacade} with the provided session stores, event producer, and metadata service.
+     *
+     * @param testRunObserverStore      the store for test run observers
+     * @param testSuiteRunObserverStore the store for test suite run observers
+     * @param maestroEventProducer      the event producer for Maestro commands
+     * @param metadataService           the service providing metadata
+     */
+    public MaestroFacade(SessionStore<MaestroObserver> testRunObserverStore,
+                         SessionStore<MaestroObserver> testSuiteRunObserverStore,
+                         MaestroEventProducer maestroEventProducer,
+                         MetadataService metadataService) {
+        this.testRunObserverStore = testRunObserverStore;
+        this.testSuiteRunObserverStore = testSuiteRunObserverStore;
+        this.maestroEventProducer = maestroEventProducer;
+        this.maestroService = metadataService.getMetadata();
+    }
 
-   /**
-    * Executes a {@link TestSuiteRun} and registers the associated observer.
-    *
-    * @param testSuiteRun         the test suite run to execute
-    * @param testSuiteRunObserver the observer for this test suite run
-    */
-   public void executeTestSuite(TestSuiteRun testSuiteRun, MaestroObserver testSuiteRunObserver) {
-      if (testSuiteRun.getAccessControlList() == null) {
-         testSuiteRun.setAccessControlList(new AccessControlList().setPublic(true));
-      }
-      testSuiteRunValidator.assertValid(testSuiteRun);
-      String sessionId = UUID.randomUUID().toString();
-      long timeout = testSuiteRun.computeTestSuiteTimeout();
-      testSuiteRunObserverStore.addSession(sessionId, testSuiteRunObserver, timeout);
-      maestroEventProducer.command(new StartTestSuiteRun(sessionId, testSuiteRun));
-   }
+    /**
+     * Executes a {@link TestSuiteRun} and registers the associated observer.
+     *
+     * @param testSuiteRun         the test suite run to execute
+     * @param testSuiteRunObserver the observer for this test suite run
+     */
+    public void executeTestSuite(TestSuiteRun testSuiteRun, MaestroObserver testSuiteRunObserver) {
+        executeTestSuite(null, testSuiteRun, testSuiteRunObserver);
+    }
 
-   /**
-    * Executes a {@link TestRun} and registers the associated observer.
-    *
-    * @param testRun          the test run to execute
-    * @param testRunObservers the observer for this test run
-    */
-   public void executeTest(TestRun testRun, MaestroObserver testRunObservers) {
-      if (testRun.getAccessControlList() == null) {
-         testRun.setAccessControlList(new AccessControlList().setPublic(true));
-      }
-      testRunValidator.assertValid(testRun);
-      String sessionId = UUID.randomUUID().toString();
-      long timeout = testRun.getTest().computeTestRunTimeout();
-      testRunObserverStore.addSession(sessionId, testRunObservers, timeout);
-      maestroEventProducer.command(new StartTestRun(sessionId, testRun));
-   }
+    /**
+     * Executes a {@link TestSuiteRun} and registers the associated observer.
+     *
+     * @param testSessionId        the id of the test session
+     * @param testSuiteRun         the test suite run to execute
+     * @param testSuiteRunObserver the observer for this test suite run
+     */
+    public void executeTestSuite(String testSessionId, TestSuiteRun testSuiteRun, MaestroObserver testSuiteRunObserver) {
+        if (testSuiteRun.getAccessControlList() == null) {
+            testSuiteRun.setAccessControlList(new AccessControlList().setPublic(true));
+        }
+        testSuiteRunValidator.assertValid(testSuiteRun);
+        String sessionId = UUID.randomUUID().toString();
+        long timeout = testSuiteRun.computeTestSuiteTimeout();
+        testSuiteRunObserverStore.putSession(sessionId, testSuiteRunObserver, timeout);
+        maestroEventProducer.command(new StartTestSuiteRun(sessionId, testSuiteRun).setTestSessionId(testSessionId));
+    }
 
-   /**
-    * Notifies observers that a {@link StartTestRun} event has occurred.
-    *
-    * @param startTestRun the start test run event
-    */
-   public void listen(StartTestRun startTestRun) {
-      Optional.ofNullable(testSuiteRunObserverStore.getSession(startTestRun.getSessionId()))
-            .ifPresent(observer -> observer.onTestRunStarted(
-                  new TestRunStarted(startTestRun.getTestRun().getTest().getId())
-            ));
-   }
+    public void executeTest(TestRun testRun, MaestroObserver testRunObservers) {
+        executeTest(null, testRun, testRunObservers);
+    }
+
+    /**
+     * Executes a {@link TestRun} and registers the associated observer.
+     *
+     * @param testRun          the test run to execute
+     * @param testRunObserver  the observer for this test run
+     */
+    public void executeTest(String testSessionId, TestRun testRun, MaestroObserver testRunObserver) {
+        if (testRun.getAccessControlList() == null) {
+            testRun.setAccessControlList(new AccessControlList().setPublic(true));
+        }
+        testRunValidator.assertValid(testRun);
+        String sessionId = UUID.randomUUID().toString();
+        long timeout = testRun.getTest().computeTestRunTimeout();
+        testRunObserverStore.putSession(sessionId, testRunObserver, timeout);
+        maestroEventProducer.command(new StartTestRun(sessionId, testRun).setTestSessionId(testSessionId));
+    }
+
+    /**
+     * Notifies observers that a {@link StartTestRun} event has occurred.
+     *
+     * @param startTestRun the start test run event
+     */
+    public void listen(StartTestRun startTestRun) {
+        getObserver(startTestRun.getSessionId())
+                .ifPresent(observer -> observer.onTestRunStarted(
+                        new TestRunStarted(startTestRun.getSessionId(), startTestRun.getTestRun().getTest().getId())
+                ));
+    }
 
     /**
      * Notifies observers that a {@link StartStepRun} event has occurred.
      *
      * @param startStepRun the start step run event
      */
-   public void listen(StartStepRun startStepRun) {
-      getObserver(startStepRun.getSessionId())
-            .ifPresent(observer -> observer.onStepRunStarted(
-                  new StepRunStarted(startStepRun.getTestId(), startStepRun.getStepIndex())
-            ));
-   }
+    public void listen(StartStepRun startStepRun) {
+        getObserver(startStepRun.getSessionId())
+                .ifPresent(observer -> observer.onStepRunStarted(
+                        new StepRunStarted(startStepRun.getTestId(), startStepRun.getStepRun().getName())
+                ));
+    }
 
     /**
      * Notifies observers that a {@link StepRunFinished} event has occurred.
      *
      * @param stepRunFinished the finished step run event
      */
-   public void listen(StepRunFinished stepRunFinished) {
-      getObserver(stepRunFinished.getSessionId())
-            .ifPresent(observer -> observer.onStepRunFinished(stepRunFinished));
-   }
+    public void listen(StepRunFinished stepRunFinished) {
+        getObserver(stepRunFinished.getSessionId())
+                .ifPresent(observer -> observer.onStepRunFinished(stepRunFinished));
+    }
 
     /**
      * Notifies observers that a {@link TestRunFinished} event has occurred.
      *
      * @param testRunFinished the finished test run event
      */
-   public void listen(TestRunFinished testRunFinished) {
-      String sessionId = testRunFinished.getSessionId();
-      Optional.ofNullable(testSuiteRunObserverStore.getSession(sessionId))
-            .ifPresentOrElse(
-                  obs -> obs.onTestRunFinished(testRunFinished),
-                  () -> Optional.ofNullable(testRunObserverStore.getSession(sessionId))
-                        .ifPresent(obs -> obs.onExecutionFinished(asExecutionFinished(testRunFinished)))
-            );
-   }
+    public void listen(TestRunFinished testRunFinished) {
+        String sessionId = testRunFinished.getSessionId();
+        Optional.ofNullable(testSuiteRunObserverStore.getSession(sessionId))
+                .ifPresentOrElse(
+                        obs -> obs.onTestRunFinished(testRunFinished),
+                        () -> Optional.ofNullable(testRunObserverStore.getSession(sessionId))
+                                .ifPresent(obs -> obs.onExecutionFinished(asExecutionFinished(testRunFinished)))
+                );
+    }
 
     /**
      * Notifies observers that a {@link TestSuiteRunFinished} event has occurred.
      *
      * @param testSuiteRunFinished the finished test suite run event
      */
-   public void listen(TestSuiteRunFinished testSuiteRunFinished) {
-      Optional.ofNullable(testSuiteRunObserverStore.getSession(testSuiteRunFinished.getSessionId()))
-            .ifPresent(observer -> {
-               observer.onExecutionFinished(asExecutionFinished(testSuiteRunFinished));
-               testSuiteRunObserverStore.removeSession(testSuiteRunFinished.getSessionId());
-            });
-   }
+    public void listen(TestSuiteRunFinished testSuiteRunFinished) {
+        Optional.ofNullable(testSuiteRunObserverStore.getSession(testSuiteRunFinished.getSessionId()))
+                .ifPresent(observer -> {
+                    observer.onExecutionFinished(asExecutionFinished(testSuiteRunFinished));
+                    testSuiteRunObserverStore.removeSession(testSuiteRunFinished.getSessionId());
+                });
+    }
 
-   private ExecutionFinished asExecutionFinished(TestRunFinished testRunFinished) {
-      TestRun testRun = testRunFinished.getTestRun();
-      TestReportBuilder testReportBuilder = new TestReportBuilder()
-            .setTestService(getTestServiceBuilder())
-            .setAccessControlList(new AccessControlListBuilder(testRun.getAccessControlList()))
-            .setSystemsUnderTest(Optional.ofNullable(testRun.getSystemsUnderTest())
-                  .orElse(Collections.emptyList())
-                  .stream()
-                  .map(SystemUnderTestBuilder::new)
-                  .toList());
-      testReportBuilder.setTestSuiteName(testRun.getTest().getName());
-      testReportBuilder.addTestRunReport(testRunFinished.getTestRunReport());
-      TestReport testReport = testReportBuilder.build();
-      return new ExecutionFinished(testRunFinished.getSessionId(), testRunFinished.getTestRun(), testReport);
-   }
+    /** Returns the active observer for evidence recording in an existing session. */
+    public Optional<MaestroObserver> evidenceObserver(String sessionId) {
+        return getObserver(sessionId);
+    }
 
-   private ExecutionFinished asExecutionFinished(TestSuiteRunFinished testSuiteRunFinished) {
-      TestReport testReport = buildGenericTestReport(testSuiteRunFinished.getTestSuiteRun())
-            .addTestRunReports(testSuiteRunFinished.getTestRunReports())
-            .build();
-      return new ExecutionFinished(testSuiteRunFinished.getSessionId(), testSuiteRunFinished.getTestSuiteRun(), testReport);
-   }
+    private ExecutionFinished asExecutionFinished(TestRunFinished testRunFinished) {
+        TestRun testRun = testRunFinished.getTestRun();
+        TestReportBuilder testReportBuilder = new TestReportBuilder()
+                .setTestService(getTestServiceBuilder())
+                .setTestSessionId(testRunFinished.getTestSessionId())
+                .setAccessControlList(new AccessControlListBuilder(testRun.getAccessControlList()))
+                .setSystemsUnderTest(Optional.ofNullable(testRun.getSystemsUnderTest())
+                        .orElse(Collections.emptyList())
+                        .stream()
+                        .map(SystemUnderTestBuilder::new)
+                        .toList());
+        testReportBuilder.setTestSuiteName(testRun.getTest().getName());
+        testReportBuilder.addTestRunReport(testRunFinished.getTestRunReport());
+        TestReport testReport = testReportBuilder.build();
+        return new ExecutionFinished(testRunFinished.getSessionId(), testRunFinished.getTestRun(), testReport);
+    }
 
-   private Optional<MaestroObserver> getObserver(String sessionId) {
-      Optional<MaestroObserver> observer = Optional.ofNullable(testRunObserverStore.getSession(sessionId));
-      if (observer.isEmpty()) {
-         observer = Optional.ofNullable(testSuiteRunObserverStore.getSession(sessionId));
-      }
-      return observer;
-   }
+    private ExecutionFinished asExecutionFinished(TestSuiteRunFinished testSuiteRunFinished) {
+        TestReport testReport = buildGenericTestReport(testSuiteRunFinished.getTestSuiteRun())
+                .setTestSessionId(testSuiteRunFinished.getTestSessionId())
+                .addTestRunReports(testSuiteRunFinished.getTestRunReports())
+                .build();
+        return new ExecutionFinished(testSuiteRunFinished.getSessionId(), testSuiteRunFinished.getTestSuiteRun(), testReport);
+    }
 
-   private TestReportBuilder buildGenericTestReport(TestSuiteRun testSuiteRun) {
-      TestReportBuilder testReportBuilder = new TestReportBuilder()
-            .setTestService(getTestServiceBuilder())
-            .setAccessControlList(new AccessControlListBuilder(testSuiteRun.getAccessControlList()))
-            .setSystemsUnderTest(testSuiteRun.getSystemsUnderTest().stream().map(SystemUnderTestBuilder::new).toList());
-      if (testSuiteRun.getTestSuite() != null) {
-         testReportBuilder.setTestSuiteName(testSuiteRun.getTestSuite().getName());
-      }
-      return testReportBuilder;
-   }
+    private Optional<MaestroObserver> getObserver(String sessionId) {
+        Optional<MaestroObserver> observer = Optional.ofNullable(testRunObserverStore.getSession(sessionId));
+        if (observer.isEmpty()) {
+            observer = Optional.ofNullable(testSuiteRunObserverStore.getSession(sessionId));
+        }
+        return observer;
+    }
 
-   private TestServiceBuilder getTestServiceBuilder() {
-      return new TestServiceBuilder()
-            .setDisclaimer(
-                  "This Gazelle execution service is provided for technical compliance purposes only and does not " +
-                        "constitute legal, medical, or regulatory advice.")
-            .setServiceIdentification(
-                  new EntityIdentificationBuilder()
-                        .setName(maestroService.getName())
-                        .setVersion(maestroService.getVersion())
-            );
-   }
+    private TestReportBuilder buildGenericTestReport(TestSuiteRun testSuiteRun) {
+        TestReportBuilder testReportBuilder = new TestReportBuilder()
+                .setTestService(getTestServiceBuilder())
+                .setAccessControlList(new AccessControlListBuilder(testSuiteRun.getAccessControlList()))
+                .setSystemsUnderTest(testSuiteRun.getSystemsUnderTest().stream().map(SystemUnderTestBuilder::new).toList());
+        if (testSuiteRun.getTestSuite() != null) {
+            testReportBuilder.setTestSuiteName(testSuiteRun.getTestSuite().getName());
+        }
+        return testReportBuilder;
+    }
+
+    private TestServiceBuilder getTestServiceBuilder() {
+        return new TestServiceBuilder()
+                .setDisclaimer(
+                        "This Gazelle execution service is provided for technical compliance"
+                            + " purposes only and does not constitute legal, medical, or regulatory"
+                            + " advice.")
+                .setServiceIdentification(
+                        new EntityIdentificationBuilder()
+                                .setName(maestroService.getName())
+                                .setVersion(maestroService.getVersion()));
+    }
 }

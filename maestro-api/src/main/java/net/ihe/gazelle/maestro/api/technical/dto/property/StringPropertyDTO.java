@@ -32,33 +32,38 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 public class StringPropertyDTO extends PropertyDTO<StringProperty> {
 
     @JsonIgnore
-   public static final String TYPE = "STRING";
+    public static final String TYPE = "STRING";
 
-   public StringPropertyDTO() {
-      super(new StringProperty());
-   }
+    public StringPropertyDTO() {
+        super(new StringProperty());
+    }
 
-   public StringPropertyDTO(StringProperty property) {
-      super(property);
-   }
+    public StringPropertyDTO(StringProperty property) {
+        super(property);
+    }
+
+    @Override
+    public String getType() {
+        return TYPE;
+    }
 
     @Schema(
             name = "value",
             description = "The string typed value of the property.",
             examples = "any text"
     )
-   @JsonProperty(VALUE)
-   public String getValue() {
-      return property.getValue();
-   }
+    @JsonProperty(VALUE)
+    public String getValue() {
+        return property.getValue();
+    }
 
-   public void setValue(String value) {
-      property.setValue(value);
-   }
+    public void setValue(String value) {
+        property.setValue(value);
+    }
 
-   @Override
-   @JsonIgnore
-   public Class<StringProperty> getBusinessObjectClass() {
-      return StringProperty.class;
-   }
+    @Override
+    @JsonIgnore
+    public Class<StringProperty> getBusinessObjectClass() {
+        return StringProperty.class;
+    }
 }

@@ -197,6 +197,12 @@ public class TestRun implements Serializable {
       return test != null;
    }
 
+   /** Output aliases cannot replace actual inputs, including inputs not declared by the test. */
+   public boolean areOutputAliasesDisjointFromInputs() {
+      return test == null || test.areOutputAliasesDisjointFrom(inputs.stream()
+            .filter(Objects::nonNull).map(Property::getName).toList());
+   }
+
    @Override
    public boolean equals(Object o) {
       if (!(o instanceof TestRun testRun)) {

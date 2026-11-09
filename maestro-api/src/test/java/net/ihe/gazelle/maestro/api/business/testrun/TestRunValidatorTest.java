@@ -18,6 +18,7 @@ package net.ihe.gazelle.maestro.api.business.testrun;
 
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
+import net.ihe.gazelle.maestro.api.business.test.GradingMethod;
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.test.Test;
 import net.ihe.gazelle.maestro.api.business.testreport.EntityIdentification;
@@ -33,85 +34,93 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class TestRunValidatorTest {
 
-   private final TestRunValidator validator = new TestRunValidator();
+    private final TestRunValidator validator = new TestRunValidator();
 
-   @org.junit.jupiter.api.Test
-   void shouldValidateTestRunWhenMandatoryMembersPresent() {
-      TestRun testRun = buildValidTestRun();
-      Assertions.assertDoesNotThrow(() -> validator.assertValid(testRun));
-   }
+    @org.junit.jupiter.api.Test
+    void shouldValidateTestRunWhenMandatoryMembersPresent() {
+        TestRun testRun = buildValidTestRun();
+        Assertions.assertDoesNotThrow(() -> validator.assertValid(testRun));
+    }
 
-   @org.junit.jupiter.api.Test
-   void shouldRejectTestRunWithoutTest() {
-      TestRun testRun = buildValidTestRun().setTest(null);
+    @org.junit.jupiter.api.Test
+    void shouldRejectTestRunWithoutTest() {
+        TestRun testRun = buildValidTestRun().setTest(null);
 
-      var result = validator.validate(testRun);
-      assertFalse(result.isValid(), result::toString);
-      assertThat(
-            result.toString(),
-            containsString("Test must be defined => invalid")
-      );
-   }
+        var result = validator.validate(testRun);
+        assertFalse(result.isValid(), result::toString);
+        assertThat(
+                result.toString(),
+                containsString("Test must be defined => invalid")
+        );
+    }
 
-   @org.junit.jupiter.api.Test
-   void testInvalidAcl() {
-      TestRun testRun = buildValidTestRun()
-            .setAccessControlList(new AccessControlList().setPublic(false));
+    @org.junit.jupiter.api.Test
+    void testInvalidAcl() {
+        TestRun testRun = buildValidTestRun()
+                .setAccessControlList(new AccessControlList().setPublic(false));
 
-      var result = validator.validate(testRun);
-      assertFalse(result.isValid(), result::toString);
-      assertThat(
-            result.toString(),
-            containsString("[SEC-004] Owner must be set if ACL is private => invalid")
-      );
-   }
+        var result = validator.validate(testRun);
+        assertFalse(result.isValid(), result::toString);
+        assertThat(
+                result.toString(),
+                containsString("[SEC-004] Owner must be set if ACL is private => invalid")
+        );
+    }
 
-   @org.junit.jupiter.api.Test
-   void testInvalidSUT() {
-      TestRun testRun = buildValidTestRun()
-            .setSystemsUnderTest(List.of(new SystemUnderTest()));
+    @org.junit.jupiter.api.Test
+    void testInvalidSUT() {
+        TestRun testRun = buildValidTestRun()
+                .setSystemsUnderTest(List.of(new SystemUnderTest()));
 
-      var result = validator.validate(testRun);
-      assertFalse(result.isValid(), result::toString);
-      assertThat(
-            result.toString(),
-            containsString("systemsUnderTest[0] systemIdentification must be set => invalid")
-      );
-   }
+        var result = validator.validate(testRun);
+        assertFalse(result.isValid(), result::toString);
+        assertThat(
+                result.toString(),
+                containsString("systemsUnderTest[0] systemIdentification must be set => invalid")
+        );
+    }
 
-   @org.junit.jupiter.api.Test
-   void testInvalidInput() {
-      TestRun testRun = buildValidTestRun()
-            .setInputs(List.of(new StringProperty(null, "value")));
+    @org.junit.jupiter.api.Test
+    void testInvalidInput() {
+        TestRun testRun = buildValidTestRun()
+                .setInputs(List.of(new StringProperty(null, "value")));
 
-      var result = validator.validate(testRun);
-      assertFalse(result.isValid(), result::toString);
-      assertThat(
-            result.toString(),
-            containsString("inputs[0] Name must be set and not empty => invalid")
-      );
-   }
+        var result = validator.validate(testRun);
+        assertFalse(result.isValid(), result::toString);
+        assertThat(
+                result.toString(),
+                containsString("inputs[0] Name must be set and not empty => invalid")
+        );
+    }
 
-   private TestRun buildValidTestRun() {
-      Property input = new StringProperty("input-key", "value");
-      SystemUnderTest systemUnderTest = new SystemUnderTest()
-            .setSystemIdentification(new EntityIdentification("sut-1"));
+    @org.junit.jupiter.api.Test
+    void rejectsOutputAliasShadowingAnUndeclaredExecutionInput() {
+        var run = buildValidTestRun();
+        run.getTest().getSteps().getFirst().addOutputMapping("result", "input-key");
+        assertFalse(validator.validate(run).isValid());
+    }
 
-      return new TestRun()
-            .setTest(buildValidTest())
-            .setInputs(List.of(input))
-            .setSystemsUnderTest(List.of(systemUnderTest))
-            .setAccessControlList(new AccessControlList().setPublic(true));
-   }
+    private TestRun buildValidTestRun() {
+        Property input = new StringProperty("input-key", "value");
+        SystemUnderTest systemUnderTest = new SystemUnderTest()
+                .setSystemIdentification(new EntityIdentification("sut-1"));
 
-   private Test buildValidTest() {
-      Step step = new Step()
-            .setName("Validate something")
-            .setType("validation");
+        return new TestRun()
+                .setTest(buildValidTest())
+                .setInputs(List.of(input))
+                .setSystemsUnderTest(List.of(systemUnderTest))
+                .setAccessControlList(new AccessControlList().setPublic(true));
+    }
 
-      return new Test()
-            .setId("test-1")
-            .setName("Sample test")
-            .setSteps(List.of(step));
-   }
+    private Test buildValidTest() {
+        Step step = new Step()
+                .setName("Validate something")
+                .setType("validation");
+
+        return new Test()
+                .setId("test-1")
+                .setName("Sample test")
+                .setGradingMethod(GradingMethod.AUTOMATED)
+                .setSteps(List.of(step));
+    }
 }

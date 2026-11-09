@@ -23,13 +23,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class UserInteractionStepDefinitionTest {
 
-    @Test
-    void user_interaction_step_definition_test() {
-        UserInteractionStepDefinition definition = new UserInteractionStepDefinition();
-        assertEquals(UserInteractionStepDefinition.TYPE, definition.getType());
-        assertEquals(2, definition.getSupportedInputs().size());
-        assertEquals(UserInteractionStepDefinition.INTERACTION_TITLE, definition.getSupportedInputs().getFirst().getId());
-        assertEquals(UserInteractionStepDefinition.MESSAGE, definition.getSupportedInputs().get(1).getId());
-        assertTrue(definition.getOutputsDefinition().isEmpty());
-    }
+   @Test
+   void user_interaction_step_definition_test() {
+      UserInteractionStepDefinition definition = new UserInteractionStepDefinition();
+      assertEquals(UserInteractionStepDefinition.TYPE, definition.getType());
+      assertEquals(3, definition.getSupportedInputs().size());
+      assertEquals(UserInteractionStepDefinition.INTERACTION_TITLE, definition.getSupportedInputs().getFirst().getId());
+      assertEquals(UserInteractionStepDefinition.MESSAGE, definition.getSupportedInputs().get(1).getId());
+      assertEquals(UserInteractionStepDefinition.INTERACTION_INPUTS, definition.getSupportedInputs().get(2).getId());
+      assertTrue(definition.getOutputsDefinition().isEmpty());
+   }
 }

@@ -23,10 +23,7 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import jakarta.ws.rs.core.Response;
 import net.ihe.gazelle.maestro.api.business.SynchronousMaestro;
 import net.ihe.gazelle.maestro.api.business.UnsupportedPropertyTypeException;
-import net.ihe.gazelle.maestro.api.business.test.Step;
-import net.ihe.gazelle.maestro.api.business.test.Test;
-import net.ihe.gazelle.maestro.api.business.test.TestReference;
-import net.ihe.gazelle.maestro.api.business.test.TestSuite;
+import net.ihe.gazelle.maestro.api.business.test.*;
 import net.ihe.gazelle.maestro.api.business.testreport.LocalizedTestReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
@@ -451,9 +448,13 @@ class TestRunControllerTest {
    private TestRunDTO getTestRunDTO() {
       TestRun testRun = new TestRun()
             .setTest(
-                  new Test().setId("T1").setName("Test 1").addStep(
-                        new Step().setName("A step").setType("SOME_STEP_TYPE").setTimeout(10L)
-                  )
+                  new Test()
+                          .setId("T1")
+                          .setName("Test 1")
+                          .setGradingMethod(GradingMethod.AUTOMATED)
+                          .addStep(
+                                  new Step().setName("A step").setType("SOME_STEP_TYPE").setTimeout(10L)
+                          )
             )
             .setAccessControlList(new AccessControlList().setPublic(true));
       return new TestRunDTO(testRun);
@@ -471,12 +472,20 @@ class TestRunControllerTest {
                         ))
             )
             .setTests(List.of(
-                  new Test().setId("T1").setName("Test 1").addStep(
-                        new Step().setName("A step").setType("SOME_STEP_TYPE").setTimeout(10L)
-                  ),
-                  new Test().setId("T2").setName("Test 2").addStep(
-                        new Step().setName("A step").setType("SOME_STEP_TYPE").setTimeout(10L)
-                  )
+                  new Test()
+                          .setId("T1")
+                          .setName("Test 1")
+                          .setGradingMethod(GradingMethod.AUTOMATED)
+                          .addStep(
+                                  new Step().setName("A step").setType("SOME_STEP_TYPE").setTimeout(10L)
+                          ),
+                  new Test()
+                          .setId("T2")
+                          .setName("Test 2")
+                          .setGradingMethod(GradingMethod.AUTOMATED)
+                          .addStep(
+                                  new Step().setName("A step").setType("SOME_STEP_TYPE").setTimeout(10L)
+                          )
             ))
             .setAccessControlList(new AccessControlList().setPublic(true));
       return new TestSuiteRunDTO(testSuiteRun);

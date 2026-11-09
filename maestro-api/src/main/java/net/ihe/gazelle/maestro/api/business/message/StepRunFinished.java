@@ -42,9 +42,9 @@ public class StepRunFinished implements Message {
    private String testId;
 
    /**
-    * The index of the step to be executed
+    * The name of the step to be executed
     */
-   private int stepIndex;
+   private String stepName;
 
    /**
     * The step run to be executed
@@ -68,14 +68,14 @@ public class StepRunFinished implements Message {
     *
     * @param sessionId     the session ID of the execution
     * @param testId        the test ID of the step
-    * @param stepIndex     the index of the step in the test
+    * @param stepName     the index of the step in the test
     * @param stepRun       the execution information of the step
     * @param stepRunReport the report generated for the step execution
     */
-   public StepRunFinished(String sessionId, String testId, int stepIndex, StepRun stepRun, StepRunReport stepRunReport) {
+   public StepRunFinished(String sessionId, String testId, String stepName, StepRun stepRun, StepRunReport stepRunReport) {
       this.sessionId = sessionId;
       this.testId = testId;
-      this.stepIndex = stepIndex;
+      this.stepName = stepName;
       this.stepRun = stepRun;
       this.stepRunReport = stepRunReport;
    }
@@ -125,18 +125,18 @@ public class StepRunFinished implements Message {
     *
     * @return the step index as an integer.
     */
-   public int getStepIndex() {
-      return stepIndex;
+   public String getStepName() {
+      return stepName;
    }
 
    /**
     * Sets the index of the step associated with the execution.
     *
-    * @param stepIndex the index of the step to be set.
+    * @param stepName the index of the step to be set.
     * @return the current instance of {@code StepRunFinished} for method chaining.
     */
-   public StepRunFinished setStepIndex(int stepIndex) {
-      this.stepIndex = stepIndex;
+   public StepRunFinished setStepName(String stepName) {
+      this.stepName = stepName;
       return this;
    }
 

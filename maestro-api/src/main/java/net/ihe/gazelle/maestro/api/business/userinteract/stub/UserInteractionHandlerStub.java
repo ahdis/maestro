@@ -16,6 +16,7 @@
 
 package net.ihe.gazelle.maestro.api.business.userinteract.stub;
 
+import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
 import net.ihe.gazelle.maestro.api.business.userinteract.UserInteractionHandler;
 
 /**
@@ -31,8 +32,8 @@ public class UserInteractionHandlerStub implements UserInteractionHandler {
    }
 
    @Override
-   public void displayMessage(String interactionTitle, String message, long timeout) {
-      // Stub method.
+   public UserInteractionCompleted displayMessage(String interactionTitle, String message, long timeout) {
+      return new UserInteractionCompleted();
    }
 
    @Override

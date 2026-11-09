@@ -18,34 +18,47 @@ package net.ihe.gazelle.maestro.api.business.property;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.Instant;
 
 /**
  * String property
  */
 public class StringProperty extends Property {
 
-   @Serial
-   private static final long serialVersionUID = 1003640813281866135L;
+    @Serial
+    private static final long serialVersionUID = 1003640813281866135L;
 
-   /**
-    * Default constructor
-    */
-   public StringProperty() {
-      super();
-   }
+    /**
+     * Default constructor
+     */
+    public StringProperty() {
+        super();
+    }
 
-   /**
-    * Constructs a new StringProperty with the specified name and value.
-    *
-    * @param name  the name of the property, which identifies it uniquely
-    * @param value the value to be assigned to the property; must be a Serializable object
-    */
-   public StringProperty(String name, Serializable value) {
-      super(name, value);
-   }
+    /**
+     * Constructs a new StringProperty with the specified name and value.
+     *
+     * @param name  the name of the property, which identifies it uniquely
+     * @param value the value to be assigned to the property; must be a Serializable object
+     */
+    public StringProperty(String name, Serializable value) {
+        super(name, value);
+    }
 
-   @Override
-   public Property copy() {
-      return new StringProperty(getName(), getCopyValue());
-   }
+    /**
+     * Constructs a new StringProperty with the specified name and value.
+     *
+     * @param name  the name of the property, which identifies it uniquely
+     * @param value the value to be assigned to the property; must be a Serializable object
+     * @param userId the user id of the user who created the property
+     * @param dateTime the date and time when the property was created
+     */
+    public StringProperty(String name, Serializable value, String userId, Instant dateTime) {
+        super(name, value, userId, dateTime);
+    }
+
+    @Override
+    public Property copy() {
+        return new StringProperty(getName(), getCopyValue(), getUserId(), getDateTime());
+    }
 }

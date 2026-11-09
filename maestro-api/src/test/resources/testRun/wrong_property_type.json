@@ -3,6 +3,7 @@
     "test": {
       "id": "1",
       "name": "name1",
+      "gradingMethod": "AUTOMATED",
       "steps": [
         {
           "type": "MOCK",

@@ -488,6 +488,9 @@ components:
         testService:
           description: The service used as the test engine to execute the test suite.
           $ref: '#/components/schemas/TestService'
+        testSessionId:
+          description: The id of the test session in which the test report has been produced.
+          type: string
         systemsUnderTest:
           description: The list of system under test involved in the test suite.
           type: array
@@ -588,6 +591,16 @@ components:
         result:
           description: The result of the test step.
           enum: [ PASSED, FAILED, UNDEFINED ]
+        inputs:
+          description: The input of the step execution.
+          type: array
+          items:
+            $ref: '#/components/schemas/Property'
+        unsolicitedEvidences:
+          description: The unsolicited evidences of the step execution.
+          type: array
+          items:
+            $ref: '#/components/schemas/Property'
         outputs:
           description: The outputs of the step execution.
           type: array

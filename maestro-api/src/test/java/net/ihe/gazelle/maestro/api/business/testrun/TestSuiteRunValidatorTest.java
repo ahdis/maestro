@@ -19,10 +19,7 @@ package net.ihe.gazelle.maestro.api.business.testrun;
 import net.ihe.gazelle.framework.modelvalidator.business.ObjectResult;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
-import net.ihe.gazelle.maestro.api.business.test.Step;
-import net.ihe.gazelle.maestro.api.business.test.Test;
-import net.ihe.gazelle.maestro.api.business.test.TestReference;
-import net.ihe.gazelle.maestro.api.business.test.TestSuite;
+import net.ihe.gazelle.maestro.api.business.test.*;
 import net.ihe.gazelle.maestro.api.business.testreport.EntityIdentification;
 import net.ihe.gazelle.maestro.api.business.testreport.SystemUnderTest;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
@@ -36,125 +33,154 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class TestSuiteRunValidatorTest {
 
-   private final TestSuiteRunValidator validator = new TestSuiteRunValidator();
+    private final TestSuiteRunValidator validator = new TestSuiteRunValidator();
 
-   @org.junit.jupiter.api.Test
-   void testValid() {
-      TestSuiteRun testSuiteRun = buildValidTestSuiteRun();
-      assertDoesNotThrow(() -> validator.assertValid(testSuiteRun));
-   }
+    @org.junit.jupiter.api.Test
+    void testValid() {
+        TestSuiteRun testSuiteRun = buildValidTestSuiteRun();
+        assertDoesNotThrow(() -> validator.assertValid(testSuiteRun));
+    }
 
-   @org.junit.jupiter.api.Test
-   void testMissingTestSuite() {
-      TestSuiteRun testSuiteRun = buildValidTestSuiteRun()
-            .setTestSuite(null);
+    @org.junit.jupiter.api.Test
+    void testMissingTestSuite() {
+        TestSuiteRun testSuiteRun = buildValidTestSuiteRun()
+                .setTestSuite(null);
 
-      var result = validator.validate(testSuiteRun);
-      assertFailure(result, "Test Suite must be set => invalid");
-   }
+        var result = validator.validate(testSuiteRun);
+        assertFailure(result, "Test Suite must be set => invalid");
+    }
 
-   @org.junit.jupiter.api.Test
-   void testMissingReferencedTest() {
-      TestSuiteRun testSuiteRun = buildValidTestSuiteRun();
-      testSuiteRun.getTestSuite().setTestReferences(List.of(
-            new TestReference().setTestId("non-existing-test-id")
-      ));
+    @org.junit.jupiter.api.Test
+    void testMissingReferencedTest() {
+        TestSuiteRun testSuiteRun = buildValidTestSuiteRun();
+        testSuiteRun.getTestSuite().setTestReferences(List.of(
+                new TestReference().setTestId("non-existing-test-id")
+        ));
 
-      var result = validator.validate(testSuiteRun);
-      assertFailure(result,
-            "All Tests referenced in the Test Suite must be attached to the Test Suite Run => invalid");
-   }
+        var result = validator.validate(testSuiteRun);
+        assertFailure(result,
+                "All Tests referenced in the Test Suite must be attached to the Test Suite Run => invalid");
+    }
 
-   @org.junit.jupiter.api.Test
-   void testInvalidTestSuite() {
-      TestSuite invalidTestSuite = new TestSuite().setId("suite-1");
-      TestSuiteRun testSuiteRun = buildValidTestSuiteRun()
-            .setTestSuite(invalidTestSuite);
+    @org.junit.jupiter.api.Test
+    void testInvalidTestSuite() {
+        TestSuite invalidTestSuite = new TestSuite().setId("suite-1");
+        TestSuiteRun testSuiteRun = buildValidTestSuiteRun()
+                .setTestSuite(invalidTestSuite);
 
-      var result = validator.validate(testSuiteRun);
-      assertFailure(result, "testSuite Test Suite name must be set and not empty => invalid");
-   }
+        var result = validator.validate(testSuiteRun);
+        assertFailure(result, "testSuite Test Suite name must be set and not empty => invalid");
+    }
 
-   @org.junit.jupiter.api.Test
-   void testInvalidTest() {
-      Test invalidTest = new Test().setId("test-1");
-      TestSuiteRun testSuiteRun = buildValidTestSuiteRun()
-            .setTests(List.of(invalidTest));
+    @org.junit.jupiter.api.Test
+    void testInvalidTest() {
+        Test invalidTest = new Test().setId("test-1").setGradingMethod(GradingMethod.AUTOMATED);
+        TestSuiteRun testSuiteRun = buildValidTestSuiteRun()
+                .setTests(List.of(invalidTest));
 
-      var result = validator.validate(testSuiteRun);
-      assertFailure(result, "tests[0] Test must contain at least one step => invalid");
-   }
+        var result = validator.validate(testSuiteRun);
+        assertFailure(result, "tests[0] Test must contain at least one step => invalid");
+    }
 
-   @org.junit.jupiter.api.Test
-   void testInvalidInput() {
-      Property invalidInput = new StringProperty("", "value");
-      TestSuiteRun testSuiteRun = buildValidTestSuiteRun()
-            .setInputs(List.of(invalidInput));
+    @org.junit.jupiter.api.Test
+    void testInvalidInput() {
+        Property invalidInput = new StringProperty("", "value");
+        TestSuiteRun testSuiteRun = buildValidTestSuiteRun()
+                .setInputs(List.of(invalidInput));
 
-      var result = validator.validate(testSuiteRun);
-      assertFailure(result, "inputs[0] Name must be set and not empty => invalid");
-   }
+        var result = validator.validate(testSuiteRun);
+        assertFailure(result, "inputs[0] Name must be set and not empty => invalid");
+    }
 
-   @org.junit.jupiter.api.Test
-   void testInvalidSUT() {
-      SystemUnderTest invalidSUT = new SystemUnderTest();
-      TestSuiteRun testSuiteRun = buildValidTestSuiteRun()
-            .setSystemsUnderTest(List.of(invalidSUT));
+    @org.junit.jupiter.api.Test
+    void testInvalidSUT() {
+        SystemUnderTest invalidSUT = new SystemUnderTest();
+        TestSuiteRun testSuiteRun = buildValidTestSuiteRun()
+                .setSystemsUnderTest(List.of(invalidSUT));
 
-      var result = validator.validate(testSuiteRun);
-      assertFailure(result, "systemUnderTest[0] systemIdentification must be set => invalid");
-   }
+        var result = validator.validate(testSuiteRun);
+        assertFailure(result, "systemUnderTest[0] systemIdentification must be set => invalid");
+    }
 
-   @org.junit.jupiter.api.Test
-   void testInvalidACL() {
-      AccessControlList invalidACL = new AccessControlList().setPublic(false);
-      TestSuiteRun testSuiteRun = buildValidTestSuiteRun()
-            .setAccessControlList(invalidACL);
+    @org.junit.jupiter.api.Test
+    void testInvalidACL() {
+        AccessControlList invalidACL = new AccessControlList().setPublic(false);
+        TestSuiteRun testSuiteRun = buildValidTestSuiteRun()
+                .setAccessControlList(invalidACL);
 
-      var result = validator.validate(testSuiteRun);
-      assertFailure(result, "[SEC-004] Owner must be set if ACL is private => invalid");
-   }
+        var result = validator.validate(testSuiteRun);
+        assertFailure(result, "[SEC-004] Owner must be set if ACL is private => invalid");
+    }
 
-   private static void assertFailure(ObjectResult result, String expectedError) {
-      assertFalse(result.isValid(), result::toString);
-      assertThat(
-            result.toString(),
-            containsString(expectedError)
-      );
-   }
+    private static void assertFailure(ObjectResult result, String expectedError) {
+        assertFalse(result.isValid(), result::toString);
+        assertThat(
+                result.toString(),
+                containsString(expectedError)
+        );
+    }
 
-   private TestSuiteRun buildValidTestSuiteRun() {
-      Property input = new StringProperty("suite-input", "value");
-      SystemUnderTest systemUnderTest = new SystemUnderTest()
-            .setSystemIdentification(new EntityIdentification("sut-1"));
+    @org.junit.jupiter.api.Test
+    void rejectsAliasShadowingAnActualSuiteInput() {
+        var run = buildValidTestSuiteRun();
+        run.getTests().getFirst().getSteps().getFirst().addOutputMapping("result", "suite-input");
+        assertFalse(validator.validate(run).isValid());
+    }
 
-      Test test = buildValidTest();
+    @org.junit.jupiter.api.Test
+    void rejectsAliasShadowingAReferenceInput() {
+        var run = buildValidTestSuiteRun();
+        run.getTestSuite().getTestReferences().getFirst()
+                .setProperties(List.of(new StringProperty("reference-input", "value")));
+        run.getTests().getFirst().getSteps().getFirst().addOutputMapping("result", "reference-input");
+        assertFalse(validator.validate(run).isValid());
+    }
 
-      TestSuite testSuite = new TestSuite()
-            .setId("suite-1")
-            .setName("Suite")
-            .setTestReferences(List.of(new TestReference().setTestId(test.getId())));
+    @org.junit.jupiter.api.Test
+    void permitsSameAliasInSeparateTests() {
+        var run = buildValidTestSuiteRun();
+        var first = run.getTests().getFirst();
+        var second = buildValidTest().setId("test-2");
+        first.getSteps().getFirst().addOutputMapping("result", "shared-alias");
+        second.getSteps().getFirst().addOutputMapping("result", "shared-alias");
+        run.setTests(List.of(first, second));
+        run.getTestSuite().setTestReferences(List.of(new TestReference().setTestId(first.getId()),
+                new TestReference().setTestId(second.getId())));
+        assertDoesNotThrow(() -> validator.assertValid(run));
+    }
 
-      return new TestSuiteRun()
-            .setTestSuite(testSuite)
-            .setTests(List.of(test))
-            .setInputs(List.of(input))
-            .setSystemsUnderTest(List.of(systemUnderTest))
-            .setAccessControlList(new AccessControlList().setPublic(true));
-   }
+    private TestSuiteRun buildValidTestSuiteRun() {
+        Property input = new StringProperty("suite-input", "value");
+        SystemUnderTest systemUnderTest = new SystemUnderTest()
+                .setSystemIdentification(new EntityIdentification("sut-1"));
 
-   private Test buildValidTest() {
+        Test test = buildValidTest();
 
-      return new Test()
-            .setId("test-1")
-            .setName("Sample test")
-            .setSteps(List.of(
-                  new Step()
-                        .setName("Validate something")
-                        .setType("validation"),
-                  new Step()
-                        .setName("Send message")
-                        .setType("send")
-            ));
-   }
+        TestSuite testSuite = new TestSuite()
+                .setId("suite-1")
+                .setName("Suite")
+                .setTestReferences(List.of(new TestReference().setTestId(test.getId())));
+
+        return new TestSuiteRun()
+                .setTestSuite(testSuite)
+                .setTests(List.of(test))
+                .setInputs(List.of(input))
+                .setSystemsUnderTest(List.of(systemUnderTest))
+                .setAccessControlList(new AccessControlList().setPublic(true));
+    }
+
+    private Test buildValidTest() {
+        return new Test()
+                .setId("test-1")
+                .setName("Sample test")
+                .setGradingMethod(GradingMethod.AUTOMATED)
+                .setSteps(List.of(
+                        new Step()
+                                .setName("Validate something")
+                                .setType("validation"),
+                        new Step()
+                                .setName("Send message")
+                                .setType("send")
+                ));
+    }
 }

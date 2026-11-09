@@ -19,7 +19,7 @@
     <parent>
         <groupId>net.ihe.gazelle</groupId>
         <artifactId>maestro</artifactId>
-        <version>1.3.2-SNAPSHOT</version>
+        <version>2.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>maestro-step</artifactId>
@@ -31,6 +31,7 @@
         <module>user-interaction-step</module>
         <module>itb-step</module>
         <module>assertion-step</module>
+        <module>grading-step</module>
     </modules>
 
 </project>

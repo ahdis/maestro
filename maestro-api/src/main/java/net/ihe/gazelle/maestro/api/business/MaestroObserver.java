@@ -17,6 +17,7 @@
 package net.ihe.gazelle.maestro.api.business;
 
 import net.ihe.gazelle.maestro.api.business.message.*;
+import net.ihe.gazelle.maestro.api.business.property.Property;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -24,6 +25,25 @@ import java.util.concurrent.CompletableFuture;
  * Observer interface for receiving updates during test execution.
  */
 public interface MaestroObserver {
+
+    /**
+     * Records an accepted evidence value before it is added to the execution report.
+     *
+     * @param evidence detached evidence supplied by the caller
+     * @return detached recorded value, or the original representation when recording is disabled
+     */
+    default Property recordEvidence(Property evidence) {
+        return evidence.copy();
+    }
+
+    /**
+     * Publishes an evidence reference after the session has accepted it.
+     *
+     * @param evidence accepted evidence, including its original revision timestamp
+     */
+    default void onEvidenceRecorded(PutEvidence evidence) {
+        // Override when recorded evidence notifications are supported.
+    }
 
    /**
     * Called when a test run starts.
@@ -75,4 +95,13 @@ public interface MaestroObserver {
     * @param executionFinished information about the finished execution
     */
    void onExecutionFinished(ExecutionFinished executionFinished);
+
+    /**
+     * Ask for manual grading during test execution.
+     *
+     * @param askGrading the grading request containing details such as description, criterion, and timeout
+     * @return a {@code CompletableFuture} that will complete with an instance of {@code GradingCompleted}
+     *         when the grading result is available
+     */
+   CompletableFuture<GradingCompleted> askGrading(AskGrading askGrading);
 }

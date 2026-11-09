@@ -50,6 +50,12 @@ public class ReferencePlan {
       return new ReferencePlan(MaestroRefType.ITEM_ID, name, targetType, target);
    }
 
+   /** References an item that has already been recorded. */
+   public static ReferencePlan forItemId(String name, String targetType, String itemId) {
+      return new ReferencePlan(MaestroRefType.ITEM_ID, name, targetType,
+            Objects.requireNonNull(itemId, "itemId"));
+   }
+
    /**
     * Creates an attachment reference.
     *

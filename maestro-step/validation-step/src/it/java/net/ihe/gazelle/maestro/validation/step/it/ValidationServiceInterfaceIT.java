@@ -23,6 +23,8 @@ import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.engine.business.context.ReadSessionStore;
+import net.ihe.gazelle.maestro.engine.technical.provider.HandlerProviderSPI;
+import net.ihe.gazelle.maestro.engine.technical.provider.ServiceRegistry;
 import net.ihe.gazelle.maestro.spi.business.Handler;
 import net.ihe.gazelle.maestro.spi.technical.ConfigProvider;
 import net.ihe.gazelle.maestro.spi.technical.HandlerContext;
@@ -38,8 +40,6 @@ import net.ihe.gazelle.servicemetadata.api.business.Service;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import technical.provider.HandlerProviderSPI;
-import technical.provider.ServiceRegistry;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -61,8 +61,18 @@ class ValidationServiceInterfaceIT {
             serviceName, createService(serviceName, interfaceName)
       ));
       ConfigProvider configProvider = key -> null;
-      ReadSessionStore<MaestroObserver> observerStore = id -> null;
-      HandlerProvider handlerProvider = new HandlerProviderSPI(registry, configProvider, observerStore);
+      ReadSessionStore<MaestroObserver> observerStore = new ReadSessionStore<>() {
+          @Override
+          public MaestroObserver getSession(String id) {
+              return null;
+          }
+
+          @Override
+          public List<MaestroObserver> getAllSessions() {
+              return List.of();
+          }
+      };
+      HandlerProvider handlerProvider = new HandlerProviderSPI(registry, configProvider, observerStore, observerStore);
 
       Step step = new Step()
             .setName("validation")

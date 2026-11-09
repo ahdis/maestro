@@ -16,6 +16,7 @@
 
 package net.ihe.gazelle.maestro.engine.business.mock;
 
+import net.ihe.gazelle.maestro.api.business.test.Test;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.engine.business.TestReportRecordingException;
 import net.ihe.gazelle.maestro.engine.business.TestReportRecordingService;
@@ -26,13 +27,20 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class InMemoryTestReportRecordingService implements TestReportRecordingService {
 
+   private List<Test> testDefinitions = List.of();
+
+   @Override
+   public String recordTestReport(TestReport report, List<Test> definitions) {
+      testDefinitions = List.copyOf(definitions);
+      return recordTestReportWithReferences(report);
+   }
+
+   public List<Test> getTestDefinitions() {
+      return testDefinitions;
+   }
+
    private final List<TestReport> recordedReports = new CopyOnWriteArrayList<>();
    private final AtomicReference<TestReportRecordingException> nextFailure = new AtomicReference<>();
-
-    @Override
-    public String recordTestReport(TestReport report) {
-        return recordTestReportWithReferences(report);
-    }
 
    private synchronized String recordTestReportWithReferences(TestReport report) {
       TestReportRecordingException failure = nextFailure.getAndSet(null);

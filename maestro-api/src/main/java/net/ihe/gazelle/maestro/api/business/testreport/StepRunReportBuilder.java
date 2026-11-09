@@ -34,6 +34,7 @@ public class StepRunReportBuilder extends AbstractBuilder<StepRunReport> {
    private String stepName;
    private String type;
    private StepResult result;
+   private List<Property> inputs;
    private List<Property> outputs;
    private List<UnexpectedErrorBuilder> unexpectedErrors;
 
@@ -42,6 +43,7 @@ public class StepRunReportBuilder extends AbstractBuilder<StepRunReport> {
     */
    public StepRunReportBuilder() {
       super();
+      inputs = new ArrayList<>();
       outputs = new ArrayList<>();
       unexpectedErrors = new ArrayList<>();
    }
@@ -53,6 +55,7 @@ public class StepRunReportBuilder extends AbstractBuilder<StepRunReport> {
     */
    public StepRunReportBuilder(ValidatorBuilderFactory validatorBuilderFactory) {
       super(validatorBuilderFactory);
+      inputs = new ArrayList<>();
       outputs = new ArrayList<>();
       unexpectedErrors = new ArrayList<>();
    }
@@ -91,6 +94,17 @@ public class StepRunReportBuilder extends AbstractBuilder<StepRunReport> {
    }
 
    /**
+    * Sets the list of input properties for the step run report being built.
+    *
+    * @param inputs the list of {@code Property} objects representing the inputs to be set
+    * @return the current instance of {@code StepRunReportBuilder}, enabling method chaining
+    */
+   public StepRunReportBuilder setInputs(List<Property> inputs) {
+      this.inputs = new ArrayList<>(inputs);
+      return this;
+   }
+
+   /**
     * Sets the list of outputs for the step run report being built.
     *
     * @param outputs the list of {@code Property} objects representing the outputs to be set
@@ -108,7 +122,9 @@ public class StepRunReportBuilder extends AbstractBuilder<StepRunReport> {
     * @return the current instance of {@code StepRunReportBuilder}, allowing for method chaining
     */
    public StepRunReportBuilder addOutput(Property output) {
-      this.outputs.add(output);
+       if (output != null) {
+           this.outputs.add(output);
+       }
       return this;
    }
 
@@ -185,6 +201,7 @@ public class StepRunReportBuilder extends AbstractBuilder<StepRunReport> {
             .setStepName(stepName)
             .setType(type)
             .setResult(result)
+            .setInputs(inputs)
             .setOutputs(outputs)
             .setUnexpectedErrors(
                   !unexpectedErrors.isEmpty() ? unexpectedErrors.stream()

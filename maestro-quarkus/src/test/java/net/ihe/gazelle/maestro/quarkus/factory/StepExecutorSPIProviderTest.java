@@ -19,12 +19,12 @@ package net.ihe.gazelle.maestro.quarkus.factory;
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.engine.business.StepExecutorProvider;
 import net.ihe.gazelle.maestro.engine.business.UnknownStepException;
+import net.ihe.gazelle.maestro.engine.technical.dao.SessionStoreCache;
+import net.ihe.gazelle.maestro.engine.technical.provider.HandlerProviderSPI;
+import net.ihe.gazelle.maestro.engine.technical.provider.StepExecutorSPIProvider;
 import net.ihe.gazelle.maestro.quarkus.configuration.ServiceRegistryDAOImpl;
 import net.ihe.gazelle.maestro.quarkus.configuration.ServiceRegistryImpl;
 import org.junit.jupiter.api.Test;
-import technical.dao.SessionStoreImpl;
-import technical.provider.HandlerProviderSPI;
-import technical.provider.StepExecutorSPIProvider;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -33,7 +33,15 @@ class StepExecutorSPIProviderTest {
     @Test
     void getExecutorNotSupportedStep(){
         Step step = new Step();
-        StepExecutorProvider provider = new StepExecutorSPIProvider(new HandlerProviderSPI(new ServiceRegistryImpl(new ServiceRegistryDAOImpl()), null, new SessionStoreImpl<>()));
+        StepExecutorProvider provider = new StepExecutorSPIProvider(
+                new HandlerProviderSPI(
+                        new ServiceRegistryImpl(
+                                new ServiceRegistryDAOImpl()),
+                        null,
+                        new SessionStoreCache<>(),
+                        new SessionStoreCache<>()
+                )
+        );
         assertThrows(UnknownStepException.class, () -> provider.getExecutor("sessionId", step));
     }
 

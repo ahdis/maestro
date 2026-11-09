@@ -24,13 +24,14 @@ package net.ihe.gazelle.maestro.engine.business.context;
 public interface SessionStore<T> extends ReadSessionStore<T> {
 
    /**
-    * Adds a session object with the specified identifier and timeout.
+    * Put a session object with the specified identifier and timeout.
+    * If a session already exists for the given identifier, it will be replaced.
     *
     * @param id the identifier for the session
     * @param session the session object to store
     * @param timeout the time in milliseconds after which the session expires
     */
-   void addSession(String id, T session, long timeout);
+   void putSession(String id, T session, long timeout);
 
    /**
     * Checks whether a session exists for the given identifier.

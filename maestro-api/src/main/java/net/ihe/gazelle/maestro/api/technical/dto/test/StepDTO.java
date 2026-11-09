@@ -77,7 +77,7 @@ public class StepDTO implements DTO<Step> {
    @Schema(
          name = "type",
          description = "The type of the test step.",
-         enumeration = {"SIMULATION", "VALIDATION", "USER_INTERACTION", "ITB", "ASSERT_CONTAINS", "ASSERT_EQUALS"},
+         enumeration = {"SIMULATION", "VALIDATION", "USER_INTERACTION", "ITB", "ASSERT_CONTAINS", "ASSERT_EQUALS", "GRADING"},
          required = true
    )
    @JsonProperty("type")

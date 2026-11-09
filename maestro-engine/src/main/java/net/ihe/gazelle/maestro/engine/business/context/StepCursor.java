@@ -24,82 +24,93 @@ import java.util.NoSuchElementException;
 /**
  * Tracks iteration over the ordered list of {@link Step}.
  */
-final class StepCursor {
+public final class StepCursor {
 
-   private final List<Step> steps;
-   private int index;
+    private final List<Step> steps;
+    private int index;
 
-   /**
-    * Creates a new {@code StepCursor} for the given ordered list of steps.
-    *
-    * @param orderedSteps the ordered list of steps to iterate
-    */
-   private StepCursor(List<Step> orderedSteps) {
-      this.steps = List.copyOf(orderedSteps);
-      this.index = -1;
-   }
+    /**
+     * Creates a new {@code StepCursor} for the given ordered list of steps.
+     *
+     * @param orderedSteps the ordered list of steps to iterate
+     */
+    private StepCursor(List<Step> orderedSteps) {
+        this.steps = List.copyOf(orderedSteps);
+        this.index = -1;
+    }
 
-   /**
-    * Creates a {@code StepCursor} from the given list of ordered steps.
-    *
-    * @param orderedSteps the ordered list of steps
-    * @return a new {@code StepCursor} instance
-    */
-   static StepCursor from(List<Step> orderedSteps) {
-      return new StepCursor(orderedSteps);
-   }
+    /**
+     * Creates a {@code StepCursor} from the given list of ordered steps.
+     *
+     * @param orderedSteps the ordered list of steps
+     * @return a new {@code StepCursor} instance
+     */
+    static StepCursor from(List<Step> orderedSteps) {
+        return new StepCursor(orderedSteps);
+    }
 
-   /**
-    * Indicates whether there is a next step available.
-    *
-    * @return {@code true} if a next step exists, {@code false} otherwise
-    */
-   boolean hasNext() {
-      return index < steps.size() - 1;
-   }
+    /**
+     * Updates the index of the cursor to the specified value.
+     *
+     * @param index the new index value to be set
+     * @return the {@code StepCursor} instance with the updated index
+     */
+    public StepCursor setIndex(int index) {
+        this.index = index;
+        return this;
+    }
 
-   /**
-    * Advances to the next step and returns it.
-    *
-    * @return the next {@link Step}
-    * @throws NoSuchElementException if there are no more steps
-    */
-   Step next() {
-      if (!hasNext()) {
-         throw new NoSuchElementException("No more steps to execute");
-      }
-      return steps.get(++index);
-   }
+    /**
+     * Indicates whether there is a next step available.
+     *
+     * @return {@code true} if a next step exists, {@code false} otherwise
+     */
+    boolean hasNext() {
+        return index < steps.size() - 1;
+    }
 
-   /**
-    * Indicates whether the cursor is currently pointing to a step.
-    *
-    * @return {@code true} if a current step exists, {@code false} otherwise
-    */
-   boolean hasCurrent() {
-      return index > -1;
-   }
+    /**
+     * Advances to the next step and returns it.
+     *
+     * @return the next {@link Step}
+     * @throws NoSuchElementException if there are no more steps
+     */
+    Step next() {
+        if (!hasNext()) {
+            throw new NoSuchElementException("No more steps to execute");
+        }
+        return steps.get(++index);
+    }
 
-   /**
-    * Returns the current step that the cursor points to.
-    *
-    * @return the current {@link Step}
-    * @throws IllegalStateException if no step has been executed yet
-    */
-   Step current() {
-      if (!hasCurrent()) {
-         throw new IllegalStateException("No step has been executed yet");
-      }
-      return steps.get(index);
-   }
+    /**
+     * Indicates whether the cursor is currently pointing to a step.
+     *
+     * @return {@code true} if a current step exists, {@code false} otherwise
+     */
+    boolean hasCurrent() {
+        return index > -1;
+    }
 
-   /**
-    * Returns the index of the current step.
-    *
-    * @return the current step index
-    */
-   int currentIndex() {
-      return index;
-   }
+    /**
+     * Returns the current step that the cursor points to.
+     *
+     * @return the current {@link Step}
+     * @throws IllegalStateException if no step has been executed yet
+     */
+    Step current() {
+        if (!hasCurrent()) {
+            throw new IllegalStateException("No step has been executed yet");
+        }
+        return steps.get(index);
+    }
+
+    /**
+     * Returns the index of the current step.
+     *
+     * @return the current step index
+     */
+    int currentIndex() {
+        return index;
+    }
 }
 

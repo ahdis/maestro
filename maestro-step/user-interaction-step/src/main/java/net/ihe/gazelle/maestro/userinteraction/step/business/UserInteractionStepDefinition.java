@@ -50,6 +50,11 @@ public class UserInteractionStepDefinition implements StepDefinition {
     public static final String MESSAGE = "message";
 
     /**
+     * Input property key for the interactionInputs to display to the user.
+     */
+    public static final String INTERACTION_INPUTS = "interactionInputs";
+
+    /**
      * Default constructor.
      */
     public UserInteractionStepDefinition() { /* Default constructor */ }
@@ -63,10 +68,15 @@ public class UserInteractionStepDefinition implements StepDefinition {
     public List<SupportedInput> getSupportedInputs() {
         return List.of(
                 new SupportedTextInput().setId(INTERACTION_TITLE).setLabel("Title").setRequired(true),
-                new SupportedTextInput().setId(MESSAGE).setLabel("Message").setRequired(true)
+                new SupportedTextInput().setId(MESSAGE).setLabel("Message").setRequired(true),
+                new SupportedTextInput().setId(INTERACTION_INPUTS).setLabel("Supported inputs").setRequired(false)
         );
     }
 
+    /**
+     * Interaction outputs are dynamic: each configured interactionInputs field supplies its ID and type.
+     * This static definition intentionally does not enumerate instance-specific fields.
+     */
     @Override
     public Map<String, Class<? extends Property>> getOutputsDefinition() {
         return Map.of();

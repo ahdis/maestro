@@ -22,11 +22,11 @@ import net.ihe.gazelle.maestro.engine.business.MetadataServiceMock;
 import net.ihe.gazelle.maestro.engine.business.RecordingMaestro;
 import net.ihe.gazelle.maestro.engine.business.StepExecutorProvider;
 import net.ihe.gazelle.maestro.engine.business.mock.InMemoryTestReportRecordingService;
+import net.ihe.gazelle.maestro.engine.technical.dao.SessionStoreCache;
+import net.ihe.gazelle.maestro.engine.technical.provider.StepExecutorSPIProvider;
 import net.ihe.gazelle.maestro.quarkus.mock.HandlerProviderMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import technical.dao.SessionStoreImpl;
-import technical.provider.StepExecutorSPIProvider;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -48,10 +48,10 @@ class FactoryTest {
         );
 
         maestroFactory = new MaestroFactory(
-                new SessionStoreImpl<>(),
-                new SessionStoreImpl<>(),
-                new SessionStoreImpl<>(),
-                new SessionStoreImpl<>(),
+                new SessionStoreCache<>(),
+                new SessionStoreCache<>(),
+                new SessionStoreCache<>(),
+                new SessionStoreCache<>(),
                 new HardWiredEventBroker(executorService),
                 new HardWiredEventBroker(executorService),
                 new HardWiredEventBroker(executorService),
@@ -59,8 +59,8 @@ class FactoryTest {
                 new InMemoryTestReportRecordingService(),
                 servicesFactory.getStepRunnerProvider(),
                 new MetadataServiceMock(),
-              true
-                );
+                true
+        );
 
     }
 

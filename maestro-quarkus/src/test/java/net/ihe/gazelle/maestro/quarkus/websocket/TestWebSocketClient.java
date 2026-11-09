@@ -21,13 +21,21 @@ import jakarta.websocket.*;
 import net.ihe.gazelle.lang.ExecutionRuntimeException;
 import net.ihe.gazelle.lang.TimeoutRuntimeException;
 import net.ihe.gazelle.maestro.api.business.message.ExecutionFinished;
+import net.ihe.gazelle.maestro.api.business.message.GradingCompleted;
+import net.ihe.gazelle.maestro.api.business.message.GradingResult;
+import net.ihe.gazelle.maestro.api.business.testreport.CriterionResult;
+import net.ihe.gazelle.maestro.api.business.testreport.GradingCriterion;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
-import net.ihe.gazelle.maestro.quarkus.websocket.dto.ExecutionFinishedDTO;
-import net.ihe.gazelle.maestro.quarkus.websocket.dto.MessageDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.message.AskGradingDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.message.ExecutionFinishedDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.message.GradingCompletedDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.message.MessageDTO;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.DeserializationException;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
+import net.ihe.gazelle.security.mocks.OIDCJWTGenerator;
 
+import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.*;
 
@@ -35,79 +43,94 @@ import java.util.concurrent.*;
 @ApplicationScoped
 public class TestWebSocketClient {
 
-   private static final int TIMEOUT_SECONDS = 15;
+    private static final int TIMEOUT_SECONDS = 15;
 
-   private final TextSerDes serDes = new JacksonSerDes();
-   private static final Map<String, CompletableFuture<ExecutionFinished>> EXECUTIONS = new ConcurrentHashMap<>();
-   private static final Map<String, CompletableFuture<String>> ERRORS = new ConcurrentHashMap<>();
+    private final TextSerDes serDes = new JacksonSerDes();
+    private static final Map<String, CompletableFuture<ExecutionFinished>> EXECUTIONS = new ConcurrentHashMap<>();
+    private static final Map<String, CompletableFuture<String>> ERRORS = new ConcurrentHashMap<>();
 
-   @OnOpen
-   public void onOpen(Session session) {
-      EXECUTIONS.put(session.getId(), new CompletableFuture<>());
-      ERRORS.put(session.getId(), new CompletableFuture<>());
-   }
+    @OnOpen
+    public void onOpen(Session session) {
+        EXECUTIONS.put(session.getId(), new CompletableFuture<>());
+        ERRORS.put(session.getId(), new CompletableFuture<>());
+    }
 
-   @OnMessage
-   public void onMessage(Session session, String msg) {
-      try {
-         MessageDTO<?> message = serDes.deserialize(msg, MessageDTO.class);
-         if (message instanceof ExecutionFinishedDTO executionFinishedDTO) {
-            executionFuture(session.getId()).complete(executionFinishedDTO.getBusinessObject());
+    @OnMessage
+    public void onMessage(Session session, String msg) {
+        try {
+            MessageDTO<?> message = serDes.deserialize(msg, MessageDTO.class);
+            if (message instanceof ExecutionFinishedDTO executionFinishedDTO) {
+                executionFuture(session.getId()).complete(executionFinishedDTO.getBusinessObject());
+            }
+            if (message instanceof AskGradingDTO askGradingDTO) {
+                GradingCompleted gradingCompleted = new GradingCompleted()
+                        .setGradingCriteria(askGradingDTO.getBusinessObject()
+                                .getCriteria().stream()
+                                .map(description -> new GradingCriterion()
+                                        .setDescription(description)
+                                        .setCriterionResult(CriterionResult.PASSED))
+                                .toList())
+                        .setUserId("Unit Test")
+                        .setSessionId(session.getId())
+                        .setResult(GradingResult.PASSED)
+                        .setDateTime(Instant.now());
+                String token = OIDCJWTGenerator.getValidJwt();
+                String response = serDes.serializeAsString(new GradingCompletedDTO(gradingCompleted, token));
+                session.getAsyncRemote().sendText(response);
+            }
+        } catch (DeserializationException e) {
+            // Do nothing
+        }
+    }
 
-         }
-      } catch (DeserializationException e) {
-         // Do nothing
-      }
-   }
+    @OnClose
+    public void onClose(Session session, CloseReason reason) {
+        errorFuture(session.getId()).complete(reason.getReasonPhrase());
+    }
 
-   @OnClose
-   public void onClose(Session session, CloseReason reason) {
-      errorFuture(session.getId()).complete(reason.getReasonPhrase());
-   }
+    @OnError
+    public void onError(Session session, Throwable error) {
+        if (session != null) {
+            errorFuture(session.getId()).complete(error.getMessage());
+        }
+    }
 
-   @OnError
-   public void onError(Session session, Throwable error) {
-      if (session != null) {
-         errorFuture(session.getId()).complete(error.getMessage());
-      }
-   }
+    public TestReport getTestReport(String sessionId) {
+        try {
+            return executionFuture(sessionId).get(TIMEOUT_SECONDS, TimeUnit.SECONDS).getReport();
+        } catch (TimeoutException e) {
+            throw new TimeoutRuntimeException(e);
+        } catch (ExecutionException e) {
+            throw new ExecutionRuntimeException(e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return null;
+        }
+    }
 
-   public TestReport getTestReport(String sessionId) {
-      try {
-         return executionFuture(sessionId).get(TIMEOUT_SECONDS, TimeUnit.SECONDS).getReport();
-      } catch (TimeoutException e) {
-         throw new TimeoutRuntimeException(e);
-      } catch (ExecutionException e) {
-         throw new ExecutionRuntimeException(e);
-      } catch (InterruptedException e) {
-         Thread.currentThread().interrupt();
-         return null;
-      }
-   }
+    public String getError(String sessionId) {
+        try {
+            return errorFuture(sessionId).get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        } catch (TimeoutException e) {
+            throw new TimeoutRuntimeException(e);
+        } catch (ExecutionException e) {
+            throw new ExecutionRuntimeException(e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return null;
+        }
+    }
 
-   public String getError(String sessionId) {
-      try {
-         return errorFuture(sessionId).get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
-      } catch (TimeoutException e) {
-         throw new TimeoutRuntimeException(e);
-      } catch (ExecutionException e) {
-         throw new ExecutionRuntimeException(e);
-      } catch (InterruptedException e) {
-         Thread.currentThread().interrupt();
-         return null;
-      }
-   }
+    public static void clear(String sessionId) {
+        EXECUTIONS.remove(sessionId);
+        ERRORS.remove(sessionId);
+    }
 
-   public static void clear(String sessionId) {
-      EXECUTIONS.remove(sessionId);
-      ERRORS.remove(sessionId);
-   }
+    private static CompletableFuture<ExecutionFinished> executionFuture(String sessionId) {
+        return EXECUTIONS.computeIfAbsent(sessionId, ignored -> new CompletableFuture<>());
+    }
 
-   private static CompletableFuture<ExecutionFinished> executionFuture(String sessionId) {
-      return EXECUTIONS.computeIfAbsent(sessionId, ignored -> new CompletableFuture<>());
-   }
-
-   private static CompletableFuture<String> errorFuture(String sessionId) {
-      return ERRORS.computeIfAbsent(sessionId, ignored -> new CompletableFuture<>());
-   }
+    private static CompletableFuture<String> errorFuture(String sessionId) {
+        return ERRORS.computeIfAbsent(sessionId, ignored -> new CompletableFuture<>());
+    }
 }

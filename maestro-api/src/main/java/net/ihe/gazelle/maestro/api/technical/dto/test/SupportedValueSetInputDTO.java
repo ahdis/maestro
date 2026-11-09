@@ -30,6 +30,8 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
       "id",
       "type",
       "label",
+      "groupName",
+      "description",
       "required",
       "valueSetId",
       "defaultValue"

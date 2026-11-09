@@ -218,7 +218,7 @@ public class Step implements Serializable {
     * @return the value of the property
     * @throws MissingPropertyException if no property with the given name is found
     */
-   public synchronized <T> T getPropertyValue(String name) {
+   public synchronized <T extends Serializable> T getPropertyValue(String name) {
       return getProperty(name).getValue();
    }
 

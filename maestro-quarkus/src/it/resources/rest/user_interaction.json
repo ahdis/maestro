@@ -2,6 +2,7 @@
   "test": {
     "id": "1",
     "name": "name1",
+    "gradingMethod": "AUTOMATED",
     "steps": [
       {
         "name": "step1",
@@ -16,6 +17,11 @@
             "name": "message",
             "value": "message",
             "type": "STRING"
+          },
+          {
+            "name": "interactionInputs",
+            "value": [],
+            "type": "SUPPORTED_INPUTS"
           }
         ]
       }

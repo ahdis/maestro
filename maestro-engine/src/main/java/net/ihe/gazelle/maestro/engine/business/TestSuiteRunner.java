@@ -72,14 +72,17 @@ public class TestSuiteRunner {
 
          TestRunCursor testRunCursor = TestRunCursor.from(consolidateTestRuns(testSuiteRun));
          long timeout = testSuiteRun.computeTestSuiteTimeout();
-         sessionStore.addSession(startTestSuiteRun.getSessionId(), new TestSuiteSession(testSuiteRun, testRunCursor), timeout);
-         testSuiteEventProducer.command(new StartTestRun(startTestSuiteRun.getSessionId(), testRunCursor.next()));
+         sessionStore.putSession(startTestSuiteRun.getSessionId(), new TestSuiteSession(testSuiteRun, testRunCursor), timeout);
+         testSuiteEventProducer.command(new StartTestRun(startTestSuiteRun.getSessionId(), testRunCursor.next())
+                 .setTestSessionId(startTestSuiteRun.getTestSessionId())
+         );
       } catch (Exception e) {
          LOG.atError().setCause(e).log("Error when starting test suite for session {}", startTestSuiteRun.getSessionId());
          sessionStore.removeSession(startTestSuiteRun.getSessionId());
          testSuiteEventProducer.notify(
                new TestSuiteRunFinished()
                        .setSessionId(startTestSuiteRun.getSessionId())
+                       .setTestSessionId(startTestSuiteRun.getTestSessionId())
                        .setTestSuiteRun(testSuiteRun)
                        .setUnexpectedErrors(List.of(new UnexpectedErrorBuilder().fromThrowable(e).build())));
       }
@@ -101,7 +104,9 @@ public class TestSuiteRunner {
                TestRunCursor testRunCursor = testSuiteSession.getTestRunCursor();
                if (!testRunCursor.hasNext()) {
                   testSuiteEventProducer.notify(
-                        new TestSuiteRunFinished(sessionId, testSuiteSession.getTestSuiteRun(), testSuiteSession.getTestRunReports()));
+                        new TestSuiteRunFinished(sessionId, testSuiteSession.getTestSuiteRun(), testSuiteSession.getTestRunReports())
+                                .setTestSessionId(testRunFinished.getTestSessionId())
+                  );
                    sessionStore.removeSession(sessionId);
                } else {
                   testSuiteEventProducer.command(new StartTestRun(sessionId, testRunCursor.next()));
@@ -112,6 +117,7 @@ public class TestSuiteRunner {
              testSuiteEventProducer.notify(
                      new TestSuiteRunFinished()
                              .setSessionId(sessionId)
+                             .setTestSessionId(testRunFinished.getTestSessionId())
                              .setTestSuiteRun(testSuiteSession.getTestSuiteRun())
                              .setTestRunReports(testSuiteSession.getTestRunReports())
                              .setUnexpectedErrors(List.of(new UnexpectedErrorBuilder().fromThrowable(e).build())));

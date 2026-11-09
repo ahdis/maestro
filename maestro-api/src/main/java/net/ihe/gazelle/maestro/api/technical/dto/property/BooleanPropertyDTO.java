@@ -42,6 +42,11 @@ public class BooleanPropertyDTO extends PropertyDTO<BooleanProperty> {
       super(property);
    }
 
+   @Override
+   public String getType() {
+      return TYPE;
+   }
+
    @Schema(
          name = "value",
          description = "The boolean typed value of the property."

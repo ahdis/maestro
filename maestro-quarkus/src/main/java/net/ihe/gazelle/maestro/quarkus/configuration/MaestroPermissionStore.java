@@ -24,11 +24,24 @@ import net.ihe.gazelle.security.business.rbac.RBACPolicy;
 
 import java.util.Set;
 
+/**
+ * A permission store implementation for the Maestro application that provides
+ * predefined permissions based on a Role-Based Access Control (RBAC) matrix.
+ *
+ * @see PermissionStore
+ * @see RBACMatrixProvider
+ * @see MaestroPermissions
+ */
 @ApplicationScoped
 public class MaestroPermissionStore implements PermissionStore {
 
    private final RBACMatrixProvider rbacMatrixProvider;
 
+   /**
+    * Constructs a new instance of MaestroPermissionStore with the specified RBACMatrixProvider.
+    *
+    * @param rbacMatrixProvider The RBACMatrixProvider used to retrieve RBAC matrix data.
+    */
    public MaestroPermissionStore(RBACMatrixProvider rbacMatrixProvider) {
       this.rbacMatrixProvider = rbacMatrixProvider;
    }

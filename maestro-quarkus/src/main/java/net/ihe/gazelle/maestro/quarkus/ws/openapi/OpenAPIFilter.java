@@ -32,7 +32,7 @@ import java.util.List;
  * This class is used to modify the openapi file generated during the build on runtime.
  * It allows us to set variable that we can only get during runtime (ex: environment variable)
  */
-@OpenApiFilter(OpenApiFilter.RunStage.RUN)
+@OpenApiFilter()
 public class OpenAPIFilter implements OASFilter {
 
    private static final String TAG_TO_REMOVE = "Simulation Callback API";

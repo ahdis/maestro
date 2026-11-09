@@ -76,7 +76,7 @@ class MaestroTestRunControllerIT {
       WireMockSingleton.stop();
       try {
          MockDatahouseServer.stop();
-      } catch (IOException e) {
+      } catch (IOException _) {
          // log and ignore in teardown
       }
    }

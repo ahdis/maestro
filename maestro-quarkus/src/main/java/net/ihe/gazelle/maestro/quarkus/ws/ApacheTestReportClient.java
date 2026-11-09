@@ -19,9 +19,7 @@ package net.ihe.gazelle.maestro.quarkus.ws;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.HttpHeaders;
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
-import net.ihe.gazelle.maestro.api.business.message.ExecutionFinished;
-import net.ihe.gazelle.maestro.api.business.message.InteractWithUser;
-import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
+import net.ihe.gazelle.maestro.api.business.message.*;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.technical.dto.report.TestReportDTO;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
@@ -80,7 +78,12 @@ public class ApacheTestReportClient implements MaestroObserver {
       sendTestReport(executionFinished.getReport(), executionFinished.getReportLocation());
    }
 
-   private void sendTestReport(TestReport testReport, String reportLocation) {
+    @Override
+    public CompletableFuture<GradingCompleted> askGrading(AskGrading askGrading) {
+        throw new UnsupportedOperationException("Manual grading is not supported via REST API.");
+    }
+
+    private void sendTestReport(TestReport testReport, String reportLocation) {
       try (CloseableHttpClient client = HttpClients.createDefault()) {
          HttpPost httpPost = new HttpPost(callBackUrl);
          if (callBackAuthorization != null) {

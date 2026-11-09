@@ -16,20 +16,45 @@
 
 package net.ihe.gazelle.maestro.engine.business;
 
+import net.ihe.gazelle.maestro.api.business.property.Property;
+import net.ihe.gazelle.maestro.api.business.test.Test;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
+import net.ihe.gazelle.security.business.acl.AccessControlList;
+
+import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Service to record a TestReport and all its references.
  */
 public interface TestReportRecordingService {
 
-   /**
-    * Records a TestReport and all its references.
-    *
-    * @param report the TestReport to record
-    * @return the location of the recorded TestReport
-    * @throws TestReportRecordingException if it can't record the TestReport
-    */
-   String recordTestReport(TestReport report);
+    /** Opens incremental recording with access to the validated execution inputs. */
+    default ExecutionRecordingSession openSession(
+            List<Test> definitions,
+            Supplier<AccessControlList> acl,
+            Supplier<List<Property>> inputs) {
+        return openSession(definitions, acl);
+    }
 
+    /** Opens isolated recording state; legacy implementations retain final-only recording. */
+    default ExecutionRecordingSession openSession(
+            List<Test> definitions, Supplier<AccessControlList> acl) {
+        return new FinalReportRecordingSession(this, definitions);
+    }
+
+    /**
+     * Records a TestReport and its references without resolving producer output aliases.
+     * Use this for historical reports whose original test definitions are unavailable.
+     *
+     * @param report the TestReport to record
+     * @return the location of the recorded TestReport
+     * @throws TestReportRecordingException if it can't record the TestReport
+     */
+    default String recordTestReport(TestReport report) {
+        return recordTestReport(report, List.of());
+    }
+
+    /** Records using the original test definitions to resolve producer output aliases. */
+    String recordTestReport(TestReport report, List<Test> testDefinitions);
 }

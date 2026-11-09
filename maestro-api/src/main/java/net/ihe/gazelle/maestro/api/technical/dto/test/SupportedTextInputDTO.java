@@ -32,6 +32,8 @@ import java.util.List;
       "id",
       "type",
       "label",
+      "groupName",
+      "description",
       "required",
       "possibleValues",
       "defaultValue"

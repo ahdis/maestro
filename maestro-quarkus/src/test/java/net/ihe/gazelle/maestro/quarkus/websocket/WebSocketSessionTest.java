@@ -23,8 +23,8 @@ import jakarta.websocket.ContainerProvider;
 import jakarta.websocket.DeploymentException;
 import jakarta.websocket.Session;
 import net.ihe.gazelle.maestro.api.business.message.*;
+import net.ihe.gazelle.maestro.api.technical.dto.message.*;
 import net.ihe.gazelle.maestro.quarkus.utils.ObjectFactory;
-import net.ihe.gazelle.maestro.quarkus.websocket.dto.*;
 import org.junit.jupiter.api.*;
 
 import java.io.IOException;
@@ -67,7 +67,7 @@ class WebSocketSessionTest {
     @Test
     void should_send_test_run_started_message() throws InterruptedException {
         WebSocketSession ws = new WebSocketSession(session);
-        ws.onTestRunStarted(new TestRunStarted("testId"));
+        ws.onTestRunStarted(new TestRunStarted("sessionId", "testId"));
 
         String messageString = TestWebSocketServer.pollLastMessage();
         assertNotNull(messageString);
@@ -80,7 +80,7 @@ class WebSocketSessionTest {
     @Test
     void should_send_step_run_started_message() throws InterruptedException {
         WebSocketSession ws = new WebSocketSession(session);
-        ws.onStepRunStarted(new StepRunStarted("testId", 3));
+        ws.onStepRunStarted(new StepRunStarted("testId", "myStepName"));
 
         String messageString = TestWebSocketServer.pollLastMessage();
         assertNotNull(messageString);
@@ -112,7 +112,7 @@ class WebSocketSessionTest {
         WebSocketSession ws = new WebSocketSession(session);
         ws.onStepRunFinished(new StepRunFinished(
                 session.getId(),
-                "testId", 3,
+                "testId", "myStepName",
                 ObjectFactory.createStepRun(),
                 ObjectFactory.createStepRunReport())
         );
