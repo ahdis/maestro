@@ -44,6 +44,12 @@
         </dependency>
         <dependency>
             <groupId>net.ihe.gazelle</groupId>
+            <artifactId>lang</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
             <artifactId>security</artifactId>
             <scope>test</scope>
         </dependency>

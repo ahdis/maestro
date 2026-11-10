@@ -41,121 +41,128 @@ import java.util.List;
  */
 public class TestSuiteRunner {
 
-   private static final Logger LOG = LoggerFactory.getLogger(TestSuiteRunner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TestSuiteRunner.class);
 
-   private final SessionStore<TestSuiteSession> sessionStore;
-   private final TestSuiteEventProducer testSuiteEventProducer;
-   private final TestSuiteRunValidator testSuiteRunValidator = new TestSuiteRunValidator();
+    private final SessionStore<TestSuiteSession> sessionStore;
+    private final TestSuiteEventProducer testSuiteEventProducer;
+    private final TestSuiteRunValidator testSuiteRunValidator = new TestSuiteRunValidator();
 
-   /**
-    * Creates a new {@code TestSuiteRunner} with the specified session store and event producer.
-    *
-    * @param sessionStore the store used to manage {@link TestSuiteSession} instances
-    * @param testSuiteEventProducer the producer used to send test suite events
-    */
-   public TestSuiteRunner(SessionStore<TestSuiteSession> sessionStore, TestSuiteEventProducer testSuiteEventProducer) {
-      this.sessionStore = sessionStore;
-      this.testSuiteEventProducer = testSuiteEventProducer;
-   }
+    /**
+     * Creates a new {@code TestSuiteRunner} with the specified session store and event producer.
+     *
+     * @param sessionStore           the store used to manage {@link TestSuiteSession} instances
+     * @param testSuiteEventProducer the producer used to send test suite events
+     */
+    public TestSuiteRunner(SessionStore<TestSuiteSession> sessionStore, TestSuiteEventProducer testSuiteEventProducer) {
+        this.sessionStore = sessionStore;
+        this.testSuiteEventProducer = testSuiteEventProducer;
+    }
 
-   /**
-    * Execute a TestSuite with given inputs.
-    *
-    * @param startTestSuiteRun the start test suite run command. Must not be null.
-    *
-    * @throws NullPointerException if startTestSuiteRun is null
-    */
-   public void run(StartTestSuiteRun startTestSuiteRun) {
-      TestSuiteRun testSuiteRun = startTestSuiteRun.getTestSuiteRun();
-      try {
-         testSuiteRunValidator.validate(testSuiteRun).orThrow(InvalidTestSuiteException::new);
+    /**
+     * Execute a TestSuite with given inputs.
+     *
+     * @param startTestSuiteRun the start test suite run command. Must not be null.
+     * @throws NullPointerException if startTestSuiteRun is null
+     */
+    public void run(StartTestSuiteRun startTestSuiteRun) {
+        TestSuiteRun testSuiteRun = startTestSuiteRun.getTestSuiteRun();
+        try {
+            testSuiteRunValidator.validate(testSuiteRun).orThrow(InvalidTestSuiteException::new);
+            TestRunCursor testRunCursor = TestRunCursor.from(consolidateTestRuns(testSuiteRun));
+            sessionStore.putSession(
+                    startTestSuiteRun.getSessionId(),
+                    new TestSuiteSession(testSuiteRun, testRunCursor),
+                    startTestSuiteRun.getExpirationTimestamp()
+            );
+            testSuiteEventProducer.command(
+                    new StartTestRun(startTestSuiteRun.getSessionId(), testRunCursor.next())
+                            .setTestSessionId(startTestSuiteRun.getTestSessionId())
+                            .setExpirationTimestamp(startTestSuiteRun.getExpirationTimestamp())
+            );
+        } catch (Exception e) {
+            LOG.atError().setCause(e).log("Error when starting test suite for session {}", startTestSuiteRun.getSessionId());
+            sessionStore.removeSession(startTestSuiteRun.getSessionId());
+            testSuiteEventProducer.notify(
+                    new TestSuiteRunFinished()
+                            .setSessionId(startTestSuiteRun.getSessionId())
+                            .setTestSessionId(startTestSuiteRun.getTestSessionId())
+                            .setTestSuiteRun(testSuiteRun)
+                            .setUnexpectedErrors(List.of(new UnexpectedErrorBuilder().fromThrowable(e).build())));
+        }
+    }
 
-         TestRunCursor testRunCursor = TestRunCursor.from(consolidateTestRuns(testSuiteRun));
-         long timeout = testSuiteRun.computeTestSuiteTimeout();
-         sessionStore.putSession(startTestSuiteRun.getSessionId(), new TestSuiteSession(testSuiteRun, testRunCursor), timeout);
-         testSuiteEventProducer.command(new StartTestRun(startTestSuiteRun.getSessionId(), testRunCursor.next())
-                 .setTestSessionId(startTestSuiteRun.getTestSessionId())
-         );
-      } catch (Exception e) {
-         LOG.atError().setCause(e).log("Error when starting test suite for session {}", startTestSuiteRun.getSessionId());
-         sessionStore.removeSession(startTestSuiteRun.getSessionId());
-         testSuiteEventProducer.notify(
-               new TestSuiteRunFinished()
-                       .setSessionId(startTestSuiteRun.getSessionId())
-                       .setTestSessionId(startTestSuiteRun.getTestSessionId())
-                       .setTestSuiteRun(testSuiteRun)
-                       .setUnexpectedErrors(List.of(new UnexpectedErrorBuilder().fromThrowable(e).build())));
-      }
-   }
-
-   /**
-    * Handles a {@link TestRunFinished} event by updating the session state,
-    * sending the next test run command, or finishing the test suite.
-    *
-    * @param testRunFinished the finished test run event to process
-    */
-   public void listen(TestRunFinished testRunFinished) {
-      String sessionId = testRunFinished.getSessionId();
-      if (sessionId != null && sessionStore.hasSession(sessionId)) {
-         TestSuiteSession testSuiteSession = sessionStore.getSession(sessionId);
-         try {
-            if (testSuiteSession != null) {
-               testSuiteSession.addTestRunReport(testRunFinished.getTestRunReport());
-               TestRunCursor testRunCursor = testSuiteSession.getTestRunCursor();
-               if (!testRunCursor.hasNext()) {
-                  testSuiteEventProducer.notify(
-                        new TestSuiteRunFinished(sessionId, testSuiteSession.getTestSuiteRun(), testSuiteSession.getTestRunReports())
+    /**
+     * Handles a {@link TestRunFinished} event by updating the session state,
+     * sending the next test run command, or finishing the test suite.
+     *
+     * @param testRunFinished the finished test run event to process
+     */
+    public void listen(TestRunFinished testRunFinished) {
+        String sessionId = testRunFinished.getSessionId();
+        if (sessionId != null && sessionStore.hasSession(sessionId)) {
+            TestSuiteSession testSuiteSession = sessionStore.getSession(sessionId);
+            try {
+                if (testSuiteSession != null) {
+                    testSuiteSession.addTestRunReport(testRunFinished.getTestRunReport());
+                    TestRunCursor testRunCursor = testSuiteSession.getTestRunCursor();
+                    if (!testRunCursor.hasNext()) {
+                        testSuiteEventProducer.notify(
+                                new TestSuiteRunFinished(
+                                        sessionId,
+                                        testSuiteSession.getTestSuiteRun(),
+                                        testSuiteSession.getTestRunReports()
+                                ).setTestSessionId(testRunFinished.getTestSessionId())
+                        );
+                        sessionStore.removeSession(sessionId);
+                    } else {
+                        testSuiteEventProducer.command(
+                                new StartTestRun(sessionId, testRunCursor.next())
+                                        .setExpirationTimestamp(testSuiteSession.getExpirationTimestamp())
+                        );
+                    }
+                }
+            } catch (Exception e) {
+                LOG.atError().setCause(e).log("Error listening testRun finished on session {}", sessionId);
+                testSuiteEventProducer.notify(
+                        new TestSuiteRunFinished()
+                                .setSessionId(sessionId)
                                 .setTestSessionId(testRunFinished.getTestSessionId())
-                  );
-                   sessionStore.removeSession(sessionId);
-               } else {
-                  testSuiteEventProducer.command(new StartTestRun(sessionId, testRunCursor.next()));
-               }
+                                .setTestSuiteRun(testSuiteSession.getTestSuiteRun())
+                                .setTestRunReports(testSuiteSession.getTestRunReports())
+                                .setUnexpectedErrors(List.of(new UnexpectedErrorBuilder().fromThrowable(e).build())));
+                sessionStore.removeSession(sessionId);
             }
-         } catch (Exception e) {
-            LOG.atError().setCause(e).log("Error listening testRun finished on session {}", sessionId);
-             testSuiteEventProducer.notify(
-                     new TestSuiteRunFinished()
-                             .setSessionId(sessionId)
-                             .setTestSessionId(testRunFinished.getTestSessionId())
-                             .setTestSuiteRun(testSuiteSession.getTestSuiteRun())
-                             .setTestRunReports(testSuiteSession.getTestRunReports())
-                             .setUnexpectedErrors(List.of(new UnexpectedErrorBuilder().fromThrowable(e).build())));
-             sessionStore.removeSession(sessionId);
-         }
-      }
-   }
+        }
+    }
 
-   /**
-    * Create an ordered list of TestRuns from the TestSuiteRun definition, and with consolidated inputs.
-    *
-    * @param testSuiteRun the test suite run
-    *
-    * @return a list of ordered TestRuns to execute, with propagated inputs
-    */
-   private List<TestRun> consolidateTestRuns(TestSuiteRun testSuiteRun) {
-      List<TestRun> testRuns = new ArrayList<>();
-      for (TestReference testRef : testSuiteRun.getTestSuite().getTestReferences()) {
-         String testId = testRef.getTestId();
-         testRuns.add(new TestRun()
-               .setTest(testSuiteRun.getTest(testId))
-               .setInputs(consolidateInputs(testSuiteRun, testRef))
-               .setAccessControlList(testSuiteRun.getAccessControlList()));
-      }
-      return testRuns;
-   }
+    /**
+     * Create an ordered list of TestRuns from the TestSuiteRun definition, and with consolidated inputs.
+     *
+     * @param testSuiteRun the test suite run
+     * @return a list of ordered TestRuns to execute, with propagated inputs
+     */
+    private List<TestRun> consolidateTestRuns(TestSuiteRun testSuiteRun) {
+        List<TestRun> testRuns = new ArrayList<>();
+        for (TestReference testRef : testSuiteRun.getTestSuite().getTestReferences()) {
+            String testId = testRef.getTestId();
+            testRuns.add(new TestRun()
+                    .setTest(testSuiteRun.getTest(testId))
+                    .setInputs(consolidateInputs(testSuiteRun, testRef))
+                    .setAccessControlList(testSuiteRun.getAccessControlList()));
+        }
+        return testRuns;
+    }
 
-   /**
-    * Propagate test suite run inputs to test run inputs.
-    *
-    * @param testSuiteRun the test suite run
-    * @param testRef the test reference
-    *
-    * @return a merged list of properties to be consumed by the concerned test run
-    */
-   private List<Property> consolidateInputs(TestSuiteRun testSuiteRun, TestReference testRef) {
-      List<Property> consolidatedInputs = new ArrayList<>(testSuiteRun.getInputs());
-      consolidatedInputs.addAll(testRef.getProperties());
-      return consolidatedInputs;
-   }
+    /**
+     * Propagate test suite run inputs to test run inputs.
+     *
+     * @param testSuiteRun the test suite run
+     * @param testRef      the test reference
+     * @return a merged list of properties to be consumed by the concerned test run
+     */
+    private List<Property> consolidateInputs(TestSuiteRun testSuiteRun, TestReference testRef) {
+        List<Property> consolidatedInputs = new ArrayList<>(testSuiteRun.getInputs());
+        consolidatedInputs.addAll(testRef.getProperties());
+        return consolidatedInputs;
+    }
 }

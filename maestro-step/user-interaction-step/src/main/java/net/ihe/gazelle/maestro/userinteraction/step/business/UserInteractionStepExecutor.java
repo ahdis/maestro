@@ -55,7 +55,10 @@ public class UserInteractionStepExecutor implements StepExecutor {
         }
 
         UserInteractionResponseValidator responseValidator = new UserInteractionResponseValidator(supportedInputs);
-        UserInteractionCompleted interactionCompleted = userInteractionHandler.displayMessage(interactionTitle, message, stepRun.getTimeout(), supportedInputs);
+        UserInteractionCompleted interactionCompleted = userInteractionHandler.displayMessage(
+                interactionTitle, message,
+                stepRun.getTimeout(), supportedInputs
+        );
         List<Property> inputs = interactionCompleted.getInputs();
         responseValidator.validate(interactionCompleted).orThrow(IllegalArgumentException::new);
         return buildStepRunReport(stepRun, inputs);

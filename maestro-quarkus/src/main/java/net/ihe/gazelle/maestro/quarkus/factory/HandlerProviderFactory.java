@@ -18,8 +18,8 @@ package net.ihe.gazelle.maestro.quarkus.factory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
+import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.Produces;
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.engine.business.context.ReadSessionStore;
 import net.ihe.gazelle.maestro.engine.technical.provider.HandlerProviderSPI;

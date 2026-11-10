@@ -17,10 +17,7 @@
 package net.ihe.gazelle.maestro.engine.business;
 
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
-import net.ihe.gazelle.maestro.api.business.message.AskGrading;
-import net.ihe.gazelle.maestro.api.business.message.ExecutionFinished;
-import net.ihe.gazelle.maestro.api.business.message.InteractWithUser;
-import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
+import net.ihe.gazelle.maestro.api.business.message.*;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.property.SupportedInputsProperty;
 import net.ihe.gazelle.maestro.api.business.test.*;
@@ -102,7 +99,11 @@ class MaestroEngineTest {
                 .returnsReport("step-1", passedReport("step-1"))
                 .returnsReport("step-2", passedReport("step-2"));
 
-        maestro.executeTestSuite(TEST_SESSION_ID, testSuiteRun, true, observer);
+        StartTestSuiteRun startTestSuiteRun = new StartTestSuiteRun()
+                .setTestSessionId(TEST_SESSION_ID)
+                .setTestSuiteRun(testSuiteRun)
+                .setPersist(true);
+        maestro.executeTestSuite(startTestSuiteRun, observer);
 
         ExecutionFinished finished = observer.awaitSuiteFinished(Duration.ofSeconds(5));
         assertThat(finished.getRun(), sameInstance(testSuiteRun));
@@ -124,7 +125,11 @@ class MaestroEngineTest {
                 .returnsReport("step-1", passedReport("step-1"))
                 .returnsReport("step-2", passedReport("step-2"));
 
-        maestro.executeTest(TEST_SESSION_ID, testRun, true, observer);
+        StartTestRun startTestRun = new StartTestRun()
+                .setTestSessionId(TEST_SESSION_ID)
+                .setTestRun(testRun)
+                .setPersist(true);
+        maestro.executeTest(startTestRun, observer);
 
         ExecutionFinished finished = observer.awaitSuiteFinished(Duration.ofSeconds(5));
         assertThat(finished.getRun(), sameInstance(testRun));
@@ -144,7 +149,10 @@ class MaestroEngineTest {
                 .returnsReport("step-2", passedReport("step-2"));
 
         reportRecordService.failNextWith(new TestReportRecordingException("down"));
-        maestro.executeTestSuite(testSuiteRun, true, observer);
+        StartTestSuiteRun startTestSuiteRun = new StartTestSuiteRun()
+                .setTestSuiteRun(testSuiteRun)
+                .setPersist(true);
+        maestro.executeTestSuite(startTestSuiteRun, observer);
 
         ExecutionFinished finished = observer.awaitSuiteFinished(Duration.ofSeconds(5));
         assertThat(finished.getRun(), sameInstance(testSuiteRun));
@@ -178,18 +186,22 @@ class MaestroEngineTest {
     @org.junit.jupiter.api.Test
     void executeTestSuiteRejectsInvalidDefinition() {
         RecordingMaestroObserver observer = new RecordingMaestroObserver();
-        TestSuiteRun invalidSuite = new TestSuiteRun();
+        StartTestSuiteRun invalidSuite = new StartTestSuiteRun()
+                .setTestSuiteRun(new TestSuiteRun())
+                .setPersist(true);
 
-        assertThrows(IllegalArgumentException.class, () -> maestro.executeTestSuite(invalidSuite, true, observer));
+        assertThrows(IllegalArgumentException.class, () -> maestro.executeTestSuite(invalidSuite, observer));
         assertThat(reportRecordService.getRecordedReports(), empty());
     }
 
     @org.junit.jupiter.api.Test
     void executeTestRejectsInvalidRun() {
         RecordingMaestroObserver observer = new RecordingMaestroObserver();
-        TestRun invalidRun = new TestRun();
+        StartTestRun invalidRun = new StartTestRun()
+                .setTestRun(new TestRun())
+                .setPersist(true);
 
-        assertThrows(IllegalArgumentException.class, () -> maestro.executeTest(invalidRun, true, observer));
+        assertThrows(IllegalArgumentException.class, () -> maestro.executeTest(invalidRun, observer));
         assertThat(reportRecordService.getRecordedReports(), empty());
     }
 
@@ -197,7 +209,10 @@ class MaestroEngineTest {
     void executeTestSuiteWithoutPersisting() {
         RecordingMaestroObserver observer = new RecordingMaestroObserver();
         TestSuiteRun testSuiteRun = buildSuiteRun("suite-1", createTest("test-1", "step-1", "step-2"));
-        maestro.executeTestSuite(testSuiteRun, false, observer);
+        StartTestSuiteRun startTestSuiteRun = new StartTestSuiteRun()
+                .setTestSuiteRun(testSuiteRun)
+                .setPersist(false);
+        maestro.executeTestSuite(startTestSuiteRun, observer);
         assertThat(reportRecordService.getRecordedReports(), empty());
     }
 
@@ -208,7 +223,10 @@ class MaestroEngineTest {
         TestRun testRun = new TestRun()
                 .setTest(test)
                 .setAccessControlList(new AccessControlList().setPublic(true));
-        maestro.executeTest(testRun, false, observer);
+        StartTestRun startTestRun = new StartTestRun()
+                .setTestRun(testRun)
+                .setPersist(true);
+        maestro.executeTest(startTestRun, observer);
         assertThat(reportRecordService.getRecordedReports(), empty());
     }
 
@@ -242,7 +260,10 @@ class MaestroEngineTest {
                     return passedReport("Consumer");
                 });
 
-        maestro.executeTestSuite(suiteRun, true, observer);
+        StartTestSuiteRun startTestSuiteRun = new StartTestSuiteRun()
+                .setTestSuiteRun(suiteRun)
+                .setPersist(true);
+        maestro.executeTestSuite(startTestSuiteRun, observer);
         observer.awaitSuiteFinished(Duration.ofSeconds(5));
 
         assertThat(observedValue.get(), equalTo("HELLO-CONTEXT"));
@@ -271,7 +292,7 @@ class MaestroEngineTest {
                                 List.of(new SupportedTextInput()
                                         .setId("patientId").setLabel("Patient ID").setRequired(true)))));
         Step consumer = step("Consumer").setProperties(List.of(new StringProperty("patientId", "${selectedPatientId}")));
-        var executor = new UserInteractionStepExecutor(
+        UserInteractionStepExecutor executor = new UserInteractionStepExecutor(
                 new UserInteractionHandlerStub() {
                     @Override
                     public UserInteractionCompleted displayMessage(String title, String message, long timeout,
@@ -287,10 +308,19 @@ class MaestroEngineTest {
         Test test = new Test().setId("interaction-output").setName("Interaction outputs")
                 .setGradingMethod(GradingMethod.AUTOMATED).setSteps(List.of(producer, consumer));
         if (suite) {
-            maestro.executeTestSuite(TEST_SESSION_ID, buildSuiteRun("interaction-suite", test), true, observer);
+            StartTestSuiteRun startTestSuiteRun = new StartTestSuiteRun()
+                    .setTestSessionId(TEST_SESSION_ID)
+                    .setTestSuiteRun(buildSuiteRun("interaction-suite", test))
+                    .setPersist(true);
+            maestro.executeTestSuite(startTestSuiteRun, observer);
         } else {
-            maestro.executeTest(TEST_SESSION_ID, new TestRun().setTest(test)
-                    .setAccessControlList(new AccessControlList().setPublic(true)), true, observer);
+            StartTestRun startTestRun = new StartTestRun()
+                    .setTestSessionId(TEST_SESSION_ID)
+                    .setTestRun(new TestRun()
+                            .setTest(test)
+                            .setAccessControlList(new AccessControlList().setPublic(true)))
+                    .setPersist(true);
+            maestro.executeTest(startTestRun, observer);
         }
         observer.awaitSuiteFinished(Duration.ofSeconds(5));
         assertThat(reportRecordService.getRecordedReports().getFirst().getTestSessionId(), equalTo(TEST_SESSION_ID));
@@ -323,7 +353,10 @@ class MaestroEngineTest {
                 .returnsReport("alpha-step", passedReport("alpha-step"))
                 .returnsReport("beta-step", passedReport("beta-step"));
 
-        maestro.executeTestSuite(suiteRun, true, observer);
+        StartTestSuiteRun startTestSuiteRun = new StartTestSuiteRun()
+                .setTestSuiteRun(suiteRun)
+                .setPersist(true);
+        maestro.executeTestSuite(startTestSuiteRun, observer);
         observer.awaitSuiteFinished(Duration.ofSeconds(5));
 
         TestReport report = reportRecordService.getRecordedReports().getFirst();
@@ -360,7 +393,10 @@ class MaestroEngineTest {
                 ).thenApply(done -> passedReport("grading-step")).join()
         );
 
-        maestro.executeTestSuite(suiteRun, true, observer);
+        StartTestSuiteRun startTestSuiteRun = new StartTestSuiteRun()
+                .setTestSuiteRun(suiteRun)
+                .setPersist(true);
+        maestro.executeTestSuite(startTestSuiteRun, observer);
 
         observer.awaitInteraction(Duration.ofSeconds(2));
         assertThat(reportRecordService.getRecordedReports(), empty());
@@ -422,8 +458,11 @@ class MaestroEngineTest {
                 .setSteps(List.of(stepA, stepB));
         TestSuiteRun suiteRun = buildSuiteRun("suite-dup", duplicated);
 
+        StartTestSuiteRun startTestSuiteRun = new StartTestSuiteRun()
+                .setTestSuiteRun(suiteRun)
+                .setPersist(true);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> maestro.executeTestSuite(suiteRun, true, observer));
+                () -> maestro.executeTestSuite(startTestSuiteRun, observer));
         assertThat(exception.getMessage(), containsString("Steps must be unique"));
     }
 
@@ -456,7 +495,10 @@ class MaestroEngineTest {
     }
 
     private ExecutionFinished runSuite(RecordingMaestroObserver observer, TestSuiteRun suiteRun) {
-        maestro.executeTestSuite(suiteRun, true, observer);
+        StartTestSuiteRun startTestSuiteRun = new StartTestSuiteRun()
+                .setTestSuiteRun(suiteRun)
+                .setPersist(true);
+        maestro.executeTestSuite(startTestSuiteRun, observer);
         return observer.awaitSuiteFinished(Duration.ofSeconds(5));
     }
 

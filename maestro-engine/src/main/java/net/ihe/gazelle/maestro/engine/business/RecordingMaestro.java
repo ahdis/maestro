@@ -19,16 +19,7 @@ package net.ihe.gazelle.maestro.engine.business;
 import net.ihe.gazelle.errorhandling.business.UnexpectedErrorBuilder;
 import net.ihe.gazelle.maestro.api.business.Maestro;
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
-import net.ihe.gazelle.maestro.api.business.message.AskGrading;
-import net.ihe.gazelle.maestro.api.business.message.ExecutionFinished;
-import net.ihe.gazelle.maestro.api.business.message.GradingCompleted;
-import net.ihe.gazelle.maestro.api.business.message.InteractWithUser;
-import net.ihe.gazelle.maestro.api.business.message.PutEvidence;
-import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
-import net.ihe.gazelle.maestro.api.business.message.StepRunStarted;
-import net.ihe.gazelle.maestro.api.business.message.TestRunFinished;
-import net.ihe.gazelle.maestro.api.business.message.TestRunStarted;
-import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
+import net.ihe.gazelle.maestro.api.business.message.*;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.test.Test;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
@@ -61,34 +52,29 @@ public class RecordingMaestro implements Maestro {
     }
 
     @Override
-    public void executeTestSuite(
-            String testSessionId,
-            TestSuiteRun testSuiteRun,
-            boolean persist,
-            MaestroObserver observer) {
-        if (persist) {
-            observer =
-                    new RecordObserver(
-                            observer,
-                            testSuiteRun.getTests(),
-                            testSuiteRun::getAccessControlList,
-                            null);
+    public void executeTestSuite(StartTestSuiteRun startTestSuiteRun, MaestroObserver observer) {
+        if (startTestSuiteRun.isPersist()) {
+            TestSuiteRun testSuiteRun = startTestSuiteRun.getTestSuiteRun();
+            observer = new RecordObserver(
+                    observer,
+                    testSuiteRun.getTests(),
+                    testSuiteRun::getAccessControlList,
+                    null);
         }
-        maestro.executeTestSuite(testSessionId, testSuiteRun, observer);
+        maestro.executeTestSuite(startTestSuiteRun, observer);
     }
 
     @Override
-    public void executeTest(
-            String testSessionId, TestRun testRun, boolean persist, MaestroObserver observer) {
-        if (persist) {
-            observer =
-                    new RecordObserver(
-                            observer,
-                            testRun.getTest() == null ? List.of() : List.of(testRun.getTest()),
-                            testRun::getAccessControlList,
-                            testRun::getInputs);
+    public void executeTest(StartTestRun startTestRun, MaestroObserver observer) {
+        if (startTestRun.isPersist()) {
+            TestRun testRun = startTestRun.getTestRun();
+            observer = new RecordObserver(
+                    observer,
+                    testRun.getTest() == null ? List.of() : List.of(testRun.getTest()),
+                    testRun::getAccessControlList,
+                    testRun::getInputs);
         }
-        maestro.executeTest(testSessionId, testRun, observer);
+        maestro.executeTest(startTestRun, observer);
     }
 
     private class RecordObserver implements MaestroObserver {

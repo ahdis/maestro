@@ -23,6 +23,7 @@ import jakarta.transaction.Transactional;
 import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
 import net.ihe.gazelle.maestro.engine.business.context.TestRunSession;
 
+import java.time.Instant;
 import java.util.List;
 
 @ApplicationScoped
@@ -37,10 +38,10 @@ public class TestRunSessionDAO implements SessionStore<TestRunSession> {
 
     @Override
     @Transactional
-    public void putSession(String sessionId, TestRunSession session, long timeout) {
+    public void putSession(String sessionId, TestRunSession session, Instant expirationDateTime) {
         TestRunSessionEntity testRunSessionEntity = entityManager.find(TestRunSessionEntity.class, sessionId);
         if (testRunSessionEntity == null) {
-            entityManager.persist(new TestRunSessionEntity(sessionId, session));
+            entityManager.persist(new TestRunSessionEntity(sessionId, expirationDateTime, session));
         } else {
             testRunSessionEntity.setSession(session);
             entityManager.merge(testRunSessionEntity);
@@ -61,6 +62,19 @@ public class TestRunSessionDAO implements SessionStore<TestRunSession> {
             entityManager.remove(testRunSessionEntity);
             entityManager.flush();
         }
+    }
+
+    @Override
+    @Transactional
+    public void removeExpiredSessions() {
+        entityManager.createQuery(
+                        """
+                        DELETE FROM TestRunSessionEntity s
+                        WHERE s.expirationDateTime <= :now
+                        """
+                )
+                .setParameter("now", Instant.now())
+                .executeUpdate();
     }
 
     @Override

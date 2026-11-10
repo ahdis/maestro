@@ -17,10 +17,13 @@
 package net.ihe.gazelle.maestro.api.technical.dto.message;
 
 import com.fasterxml.jackson.annotation.*;
-import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
+import net.ihe.gazelle.maestro.api.business.message.StartTestRun;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestRunDTO;
 import net.ihe.gazelle.oidc.common.technical.dto.SecuredMessageDTO;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
+import java.time.Duration;
+import java.time.Instant;
 
 @Schema(
         name = "StartTestRun",
@@ -32,24 +35,22 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
         "type",
         "testRun",
         "testSessionId",
+        "timeoutSeconds",
         "persist",
 })
-public class StartTestRunDTO extends MessageDTO<TestRun> implements SecuredMessageDTO {
+public class StartTestRunDTO extends MessageDTO<StartTestRun> implements SecuredMessageDTO {
 
     @JsonIgnore
     public static final String TYPE = "START_TEST_RUN";
 
-    private String testSessionId;
-    private boolean persist;
     private String authorization;
 
     public StartTestRunDTO() {
-        this(new TestRun(), "");
+        this(new StartTestRun(), "");
     }
 
-    public StartTestRunDTO(TestRun testRun, String authorization) {
-        super(testRun);
-        this.persist = true;
+    public StartTestRunDTO(StartTestRun startTestRun, String authorization) {
+        super(startTestRun);
         this.authorization = authorization;
     }
 
@@ -59,11 +60,11 @@ public class StartTestRunDTO extends MessageDTO<TestRun> implements SecuredMessa
     )
     @JsonProperty("testRun")
     public TestRunDTO getTestRun() {
-        return new TestRunDTO(message);
+        return new TestRunDTO(message.getTestRun());
     }
 
     public void setTestRun(TestRunDTO testRun) {
-        this.message = testRun.getBusinessObject();
+        message.setTestRun(testRun.getBusinessObject());
     }
 
     @Schema(
@@ -72,11 +73,24 @@ public class StartTestRunDTO extends MessageDTO<TestRun> implements SecuredMessa
     )
     @JsonProperty("testSessionId")
     public String getTestSessionId() {
-        return testSessionId;
+        return message.getTestSessionId();
     }
 
     public void setTestSessionId(String testSessionId) {
-        this.testSessionId = testSessionId;
+        message.setTestSessionId(testSessionId);
+    }
+
+    @Schema(
+            name = "timeoutSeconds",
+            description = "The timeout in seconds for the test run."
+    )
+    @JsonProperty("timeoutSeconds")
+    public Long getTimeoutSeconds() {
+        return Duration.between(Instant.now(), message.getExpirationTimestamp()).toSeconds();
+    }
+
+    public void setTimeoutSeconds(Long timeoutSeconds) {
+        message.setExpirationTimestamp(timeoutSeconds);
     }
 
     @Schema(
@@ -85,11 +99,11 @@ public class StartTestRunDTO extends MessageDTO<TestRun> implements SecuredMessa
     )
     @JsonProperty("persist")
     public boolean isPersist() {
-        return persist;
+        return message.isPersist();
     }
 
     public void setPersist(boolean persist) {
-        this.persist = persist;
+        message.setPersist(persist);
     }
 
     @Override
@@ -103,7 +117,7 @@ public class StartTestRunDTO extends MessageDTO<TestRun> implements SecuredMessa
 
     @Override
     @JsonIgnore
-    public Class<TestRun> getBusinessObjectClass() {
-        return TestRun.class;
+    public Class<StartTestRun> getBusinessObjectClass() {
+        return StartTestRun.class;
     }
 }

@@ -23,6 +23,8 @@ import jakarta.inject.Inject;
 import jakarta.websocket.ContainerProvider;
 import jakarta.websocket.DeploymentException;
 import jakarta.websocket.Session;
+import net.ihe.gazelle.maestro.api.business.message.StartTestRun;
+import net.ihe.gazelle.maestro.api.business.message.StartTestSuiteRun;
 import net.ihe.gazelle.maestro.api.business.testreport.Result;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.technical.dto.message.StartTestRunDTO;
@@ -38,6 +40,7 @@ import org.junit.jupiter.api.TestInstance;
 
 import java.io.IOException;
 import java.net.URI;
+import java.time.Instant;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -67,7 +70,10 @@ class TestStreamSocketControllerTest {
                 .getWebSocketContainer()
                 .connectToServer(client, uri)) {
             String token = OIDCJWTGenerator.getValidJwt();
-            StartTestRunDTO message = new StartTestRunDTO(ObjectFactory.createTestRun(), token);
+            StartTestRun startTestRun = new StartTestRun()
+                    .setTestRun(ObjectFactory.createTestRun())
+                    .setExpirationTimestamp(Instant.now().plusSeconds(10));
+            StartTestRunDTO message = new StartTestRunDTO(startTestRun, token);
             message.setPersist(false);
             String messageString = serDes.serializeAsString(message);
             session.getAsyncRemote().sendText(messageString);
@@ -83,7 +89,9 @@ class TestStreamSocketControllerTest {
         try (Session session = ContainerProvider
                 .getWebSocketContainer()
                 .connectToServer(client, uri)) {
-            StartTestRunDTO message = new StartTestRunDTO(ObjectFactory.createTestRun(), "");
+            StartTestRun startTestRun = new StartTestRun()
+                    .setTestRun(ObjectFactory.createTestRun());
+            StartTestRunDTO message = new StartTestRunDTO(startTestRun, "");
             message.setPersist(false);
             session.getAsyncRemote().sendText(serDes.serializeAsString(message));
 
@@ -100,7 +108,9 @@ class TestStreamSocketControllerTest {
                 .getWebSocketContainer()
                 .connectToServer(client, uri)) {
             String token = OIDCJWTGenerator.getValidJwt();
-            StartTestSuiteRunDTO message = new StartTestSuiteRunDTO(ObjectFactory.createTestSuiteRun(), token);
+            StartTestSuiteRun startTestSuiteRun = new StartTestSuiteRun()
+                    .setTestSuiteRun(ObjectFactory.createTestSuiteRun());
+            StartTestSuiteRunDTO message = new StartTestSuiteRunDTO(startTestSuiteRun, token);
             message.setPersist(false);
             String messageString = serDes.serializeAsString(message);
             session.getAsyncRemote().sendText(messageString);
@@ -118,7 +128,9 @@ class TestStreamSocketControllerTest {
                 .getWebSocketContainer()
                 .connectToServer(client, uri)) {
             String token = OIDCJWTGenerator.getValidJwt();
-            StartTestRunDTO message = new StartTestRunDTO(ObjectFactory.createInvalidTestRun(), token);
+            StartTestRun startTestRun = new StartTestRun()
+                    .setTestRun(ObjectFactory.createInvalidTestRun());
+            StartTestRunDTO message = new StartTestRunDTO(startTestRun, token);
             message.setPersist(false);
             String messageString = serDes.serializeAsString(message);
             session.getAsyncRemote().sendText(messageString);

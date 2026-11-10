@@ -17,12 +17,7 @@
 package net.ihe.gazelle.maestrorecording.adapter;
 
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
-import net.ihe.gazelle.maestro.api.business.message.AskGrading;
-import net.ihe.gazelle.maestro.api.business.message.ExecutionFinished;
-import net.ihe.gazelle.maestro.api.business.message.GradingCompleted;
-import net.ihe.gazelle.maestro.api.business.message.InteractWithUser;
-import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
-import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
+import net.ihe.gazelle.maestro.api.business.message.*;
 import net.ihe.gazelle.maestro.engine.business.RecordedOutputsObserver;
 
 import java.util.concurrent.CompletableFuture;

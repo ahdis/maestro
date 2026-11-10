@@ -27,7 +27,9 @@ import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestRunDTO;
 import net.ihe.gazelle.maestro.engine.business.context.TestRunSession;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 import net.ihe.gazelle.modelmarshaller.technical.dto.SubTypingDTO;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
+import java.time.Instant;
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -37,7 +39,8 @@ import java.util.List;
         "context",
         "stepCursor",
         "stepReports",
-        "evidences"
+        "evidences",
+        "expirationTimestamp"
 })
 public class TestRunSessionDTO implements DTO<TestRunSession> {
 
@@ -125,6 +128,29 @@ public class TestRunSessionDTO implements DTO<TestRunSession> {
                         .map(PutEvidenceDTO::getBusinessObject)
                         .toList()
         );
+    }
+
+    @Schema(
+            name = "expirationTimestamp",
+            description = "The zoned date time of the step execution expiration.",
+            examples = "2025-01-01T16:30:00.387+01:00",
+            required = true
+    )
+    @JsonProperty("expirationTimestamp")
+    public String getExpirationTimestamp() {
+        if (testRunSession.getExpirationTimestamp() != null) {
+            return testRunSession.getExpirationTimestamp().toString();
+        } else {
+            return null;
+        }
+    }
+
+    public void setExpirationTimestamp(String expirationTimestamp) {
+        if (expirationTimestamp != null) {
+            testRunSession.setExpirationTimestamp(
+                    Instant.parse(expirationTimestamp)
+            );
+        }
     }
 
     @Override

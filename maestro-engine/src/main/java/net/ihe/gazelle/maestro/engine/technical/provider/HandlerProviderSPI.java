@@ -71,7 +71,7 @@ public class HandlerProviderSPI implements HandlerProvider {
             return new UserInteractionHandlerImpl(observer);
         }
         if (requestedHandlerType.equals(GradingHandler.class)) {
-            return new GradingHandlerImpl(observer, configProvider);
+            return new GradingHandlerImpl(observer);
         }
         ServiceLoader<HandlerFactory> serviceLoader = ServiceLoader.load(HandlerFactory.class);
         Service service = serviceRegistry.getService(handlerContext.serviceName());

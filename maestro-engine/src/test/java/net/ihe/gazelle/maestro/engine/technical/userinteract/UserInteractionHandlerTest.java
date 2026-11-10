@@ -28,6 +28,6 @@ class UserInteractionHandlerTest {
     void test_display_message() {
         UserInteractionHandlerImpl handler = new UserInteractionHandlerImpl(new RecordingMaestroObserver());
         assertTrue(handler.isAvailable());
-        assertDoesNotThrow(() ->handler.displayMessage("title", "message", 10));
+        assertDoesNotThrow(() -> handler.displayMessage("title", "message", 10));
     }
 }

@@ -18,22 +18,11 @@ package net.ihe.gazelle.maestro.quarkus.websocket;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
-import jakarta.websocket.CloseReason;
-import jakarta.websocket.OnClose;
-import jakarta.websocket.OnMessage;
-import jakarta.websocket.OnOpen;
-import jakarta.websocket.Session;
+import jakarta.websocket.*;
 import jakarta.websocket.server.ServerEndpoint;
-
 import net.ihe.gazelle.maestro.api.business.Maestro;
 import net.ihe.gazelle.maestro.api.business.MaestroSessionService;
-import net.ihe.gazelle.maestro.api.technical.dto.message.DeleteEvidenceDTO;
-import net.ihe.gazelle.maestro.api.technical.dto.message.GradingCompletedDTO;
-import net.ihe.gazelle.maestro.api.technical.dto.message.MessageDTO;
-import net.ihe.gazelle.maestro.api.technical.dto.message.PutEvidenceDTO;
-import net.ihe.gazelle.maestro.api.technical.dto.message.StartTestRunDTO;
-import net.ihe.gazelle.maestro.api.technical.dto.message.StartTestSuiteRunDTO;
-import net.ihe.gazelle.maestro.api.technical.dto.message.UserInteractionCompletedDTO;
+import net.ihe.gazelle.maestro.api.technical.dto.message.*;
 import net.ihe.gazelle.maestro.quarkus.configuration.MaestroPermissions;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.DeserializationException;
@@ -42,12 +31,13 @@ import net.ihe.gazelle.oidc.websocket.technical.ProtectedWebSocket;
 import net.ihe.gazelle.security.business.Authz;
 import net.ihe.gazelle.security.business.GazelleIdentity;
 import net.ihe.gazelle.security.business.UnauthorizedException;
-
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -64,6 +54,7 @@ import java.util.List;
 @RequestScoped
 @ServerEndpoint("/v1/test-stream/run")
 public class TestStreamSocketController {
+
     @ConfigProperty(name = "maestro.recording.live-outputs.enabled", defaultValue = "false")
     boolean liveOutputsEnabled;
 
@@ -77,14 +68,13 @@ public class TestStreamSocketController {
      */
     public static final String INTERFACE_VERSION = "1.0";
 
-    private static final Logger LOG =
-            LoggerFactory.getLogger(TestStreamSocketController.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(TestStreamSocketController.class.getName());
 
+    private final TextSerDes serDes = new JacksonSerDes();
     private final GazelleIdentity identity;
     private final Authz authz;
-    private final WebSocketSessionService sessionService;
-    private final TextSerDes serDes = new JacksonSerDes();
     private final Maestro maestro;
+    private final WebSocketSessionService sessionService;
     private final MaestroSessionService maestroSessionService;
 
     /**
@@ -118,12 +108,12 @@ public class TestStreamSocketController {
     public void onOpen(Session session) {
         LOG.info("Test Stream Socket Connected: {}", session.getId());
         WebSocketSession maestroCaller =
-                new WebSocketSession(
-                        session,
-                        liveOutputsEnabled
+                new WebSocketSession(session,
+                liveOutputsEnabled
                                 && session.getRequestParameterMap()
                                         .getOrDefault("liveOutputs", List.of())
-                                        .contains("true"));
+                                        .contains("true"))
+                        .setExpirationTime(Instant.now().plus(Duration.ofDays(7)));
         sessionService.addSession(session.getId(), maestroCaller);
     }
 
@@ -158,41 +148,29 @@ public class TestStreamSocketController {
             MessageDTO<?> message = serDes.deserialize(messageString, MessageDTO.class);
             WebSocketSession maestroCaller = sessionService.getSession(session.getId());
             switch (message) {
-                case StartTestRunDTO testRun -> {
-                    authz.assertAuthorizedForIdentityOrganization(
-                            identity, MaestroPermissions.TEST_RUN);
-                    maestro.executeTest(
-                            testRun.getTestSessionId(),
-                            testRun.getBusinessObject(),
-                            testRun.isPersist(),
-                            maestroCaller);
+                case StartTestRunDTO startTestRun -> {
+                    authz.assertAuthorizedForIdentityOrganization(identity, MaestroPermissions.TEST_RUN);
+                    maestroCaller.setExpirationTime(startTestRun.getBusinessObject().getExpirationTimestamp());
+                    maestro.executeTest(startTestRun.getBusinessObject(), maestroCaller);
                 }
-                case StartTestSuiteRunDTO testSuiteRun -> {
-                    authz.assertAuthorizedForIdentityOrganization(
-                            identity, MaestroPermissions.TEST_RUN);
-                    maestro.executeTestSuite(
-                            testSuiteRun.getTestSessionId(),
-                            testSuiteRun.getBusinessObject(),
-                            testSuiteRun.isPersist(),
-                            maestroCaller);
+                case StartTestSuiteRunDTO startTestSuiteRun -> {
+                    authz.assertAuthorizedForIdentityOrganization(identity, MaestroPermissions.TEST_RUN);
+                    maestroCaller.setExpirationTime(startTestSuiteRun.getBusinessObject().getExpirationTimestamp());
+                    maestro.executeTestSuite(startTestSuiteRun.getBusinessObject(), maestroCaller);
                 }
                 case UserInteractionCompletedDTO userInteractionCompleted ->
-                        maestroCaller.completeInteraction(
-                                userInteractionCompleted.getBusinessObject());
+                        maestroCaller.completeInteraction(userInteractionCompleted.getBusinessObject());
                 case PutEvidenceDTO putEvidence -> {
-                    maestroCaller.assertEvidenceSession(
-                            putEvidence.getBusinessObject().getSessionId());
+                    maestroCaller.assertEvidenceSession(putEvidence.getBusinessObject().getSessionId());
                     maestroSessionService.putEvidence(putEvidence.getBusinessObject());
                 }
                 case DeleteEvidenceDTO deleteEvidence -> {
-                    maestroCaller.assertEvidenceSession(
-                            deleteEvidence.getBusinessObject().getSessionId());
+                    maestroCaller.assertEvidenceSession(deleteEvidence.getBusinessObject().getSessionId());
                     maestroSessionService.deleteEvidence(deleteEvidence.getBusinessObject());
                 }
                 case GradingCompletedDTO gradingCompleted ->
                         maestroCaller.completeGrading(gradingCompleted.getBusinessObject());
                 default -> {
-                    sessionService.removeSession(session.getId());
                     String error = "Unexpected message type: " + message.getClass().getName();
                     LOG.debug(error);
                 }

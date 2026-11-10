@@ -27,6 +27,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -59,7 +60,10 @@ class StepRunnerTest {
 
       executorProvider.withExecutor("Step 1", stepRun -> report);
 
-      stepRunner.run(new StartStepRun("123456", "abc123", 4, new StepRun(step, step.getProperties())));
+      stepRunner.run(new StartStepRun(
+              "123456", "abc123", 4,
+              new StepRun(step, step.getProperties()))
+              .setExpirationTimestamp(Instant.now().minusMillis(10)));
 
       StepRunFinished finished = eventProducer.awaitFinishedEvent(Duration.ofSeconds(2));
       assertEquals("Step 1", finished.getStepName());

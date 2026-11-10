@@ -31,7 +31,6 @@ import net.ihe.gazelle.maestro.api.business.testrun.TestRunValidator;
 import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
 import net.ihe.gazelle.maestro.engine.business.context.TestRunSession;
 import net.ihe.gazelle.maestro.spi.business.StepRun;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,8 +72,10 @@ public class TestRunner {
         TestRun testRun = startTestRun.getTestRun();
         try {
             testRunValidator.validate(testRun).orThrow(InvalidTestRunException::new);
-            TestRunSession testRunSession = new TestRunSession(testRun);
-            testRunSession.setTestSessionId(startTestRun.getTestSessionId());
+            TestRunSession testRunSession = new TestRunSession(testRun)
+                    .setTestSessionId(startTestRun.getTestSessionId())
+                    .setExpirationTimestamp(startTestRun.getExpirationTimestamp());
+            sessionStore.putSession(sessionId, testRunSession, startTestRun.getExpirationTimestamp());
             runNextStep(testRunSession, sessionId, testRun.getTest().getId());
         } catch (Exception e) {
             Test test = testRun.getTest();
@@ -132,8 +133,9 @@ public class TestRunner {
         addEvidencesToReport(testRunSession);
 
         // VLD: keep only resolvable inputs in the report (fix problem of deserialization of references)
-        List<Property> inputs = testRunSession.getTestRun().getInputs()
-                .stream().filter(property -> !property.isReference()).toList();
+        List<Property> inputs = testRunSession.getTestRun().getInputs().stream()
+                .filter(property -> !property.isReference())
+                .toList();
 
         testRunEventProducer.notify(
                 new TestRunFinished(sessionId, testRunSession.getTestRun(),
@@ -147,14 +149,13 @@ public class TestRunner {
 
     private void runNextStep(TestRunSession testRunSession, String sessionId, String testId) {
         Step nextStep = testRunSession.nextStep();
-        long timeout = testRunSession.getTestRun().getTest().computeTestRunTimeout();
-        sessionStore.putSession(sessionId, testRunSession, timeout);
+        sessionStore.putSession(sessionId, testRunSession, testRunSession.getExpirationTimestamp());
         testRunEventProducer.command(new StartStepRun(
                 sessionId,
                 testId,
                 testRunSession.currentStepIndex(),
                 new StepRun(nextStep, testRunSession.getContext())
-        ));
+        ).setExpirationTimestamp(testRunSession.getExpirationTimestamp()));
     }
 
     private void updateSessionState(StepRunFinished stepRunFinished, TestRunSession testRunSession) {
@@ -170,9 +171,8 @@ public class TestRunner {
             for (StepRunReport stepRunReport : testRunSession.getStepReports()) {
                 if (putEvidence.getStepName().equals(stepRunReport.getStepName())) {
                     List<Property> evidence = stepRunReport.getEvidences();
-                    evidence.removeIf(
-                            existing ->
-                                    existing.getName().equals(putEvidence.getContent().getName()));
+                    evidence.removeIf(existing ->
+                            existing.getName().equals(putEvidence.getContent().getName()));
                     evidence.add(putEvidence.getContent());
                     stepRunReport.setEvidences(evidence);
                 }
@@ -196,9 +196,7 @@ public class TestRunner {
                 .filter(output -> output.getName().equals(outputMapping.getKey()))
                 .findFirst()
                 .orElseThrow(
-                        () ->
-                                new InvalidOutputMappingException(
-                                        "There is no output named " + outputMapping.getKey()))
+                        () -> new InvalidOutputMappingException("There is no output named " + outputMapping.getKey()))
                 .copy()
                 .setName(outputMapping.getValue());
     }

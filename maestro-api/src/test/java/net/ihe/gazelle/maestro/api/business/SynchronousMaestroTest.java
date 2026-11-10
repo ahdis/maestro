@@ -17,6 +17,8 @@
 package net.ihe.gazelle.maestro.api.business;
 
 import net.ihe.gazelle.maestro.api.business.message.ExecutionFinished;
+import net.ihe.gazelle.maestro.api.business.message.StartTestRun;
+import net.ihe.gazelle.maestro.api.business.message.StartTestSuiteRun;
 import net.ihe.gazelle.maestro.api.business.test.GradingMethod;
 import net.ihe.gazelle.maestro.api.business.test.Step;
 import net.ihe.gazelle.maestro.api.business.test.TestReference;
@@ -24,11 +26,11 @@ import net.ihe.gazelle.maestro.api.business.test.TestSuite;
 import net.ihe.gazelle.maestro.api.business.testreport.LocalizedTestReport;
 import net.ihe.gazelle.maestro.api.business.testreport.Result;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
-import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
@@ -50,7 +52,11 @@ class SynchronousMaestroTest {
         CapturingMaestro maestro = new CapturingMaestro(expectedReport);
         SynchronousMaestro synchronousMaestro = new SynchronousMaestro(maestro);
 
-        LocalizedTestReport localizedTestReport = (LocalizedTestReport) synchronousMaestro.executeTestSuite(testSuiteRun, false);
+        LocalizedTestReport localizedTestReport = (LocalizedTestReport) synchronousMaestro.executeTestSuite(
+                new StartTestSuiteRun()
+                        .setTestSuiteRun(testSuiteRun)
+                        .setPersist(false)
+        );
 
         assertEquals(expectedLocalizedReport, localizedTestReport);
         assertSame(testSuiteRun, maestro.lastTestSuiteRun);
@@ -61,8 +67,12 @@ class SynchronousMaestroTest {
         BlockingMaestro maestro = new BlockingMaestro();
         SynchronousMaestro synchronousMaestro = new SynchronousMaestro(maestro);
         TestSuiteRun testSuiteRun = getTestSuiteRun();
+        StartTestSuiteRun startTestSuiteRun = new StartTestSuiteRun()
+                .setTestSuiteRun(testSuiteRun)
+                .setPersist(false)
+                .setExpirationTimestamp(Duration.ofMillis(1));
 
-        assertThrows(TimeoutException.class, () -> synchronousMaestro.executeTestSuite(testSuiteRun, false));
+        assertThrows(TimeoutException.class, () -> synchronousMaestro.executeTestSuite(startTestSuiteRun));
     }
 
     private static final class CapturingMaestro implements Maestro {
@@ -75,15 +85,15 @@ class SynchronousMaestroTest {
         }
 
         @Override
-        public void executeTestSuite(String testSessionId, TestSuiteRun testSuiteRun, boolean persist, MaestroObserver observer) {
-            this.lastTestSuiteRun = testSuiteRun;
+        public void executeTestSuite(StartTestSuiteRun startTestSuiteRun, MaestroObserver observer) {
+            this.lastTestSuiteRun = startTestSuiteRun.getTestSuiteRun();
             observer.onExecutionFinished(new ExecutionFinished()
-                    .setRun(testSuiteRun)
+                    .setRun(lastTestSuiteRun)
                     .setReport(report));
         }
 
         @Override
-        public void executeTest(String testSessionId, TestRun testRun, boolean persist, MaestroObserver observer) {
+        public void executeTest(StartTestRun startTestRun, MaestroObserver observer) {
             // Not needed for this test
         }
     }
@@ -127,12 +137,12 @@ class SynchronousMaestroTest {
     private static final class BlockingMaestro implements Maestro {
 
         @Override
-        public void executeTestSuite(String testSessionId, TestSuiteRun testSuiteRun, boolean persist, MaestroObserver observer) {
+        public void executeTestSuite(StartTestSuiteRun startTestSuiteRun, MaestroObserver observer) {
             // Intentionally left blank to trigger timeout
         }
 
         @Override
-        public void executeTest(String testSessionId, TestRun testRun, boolean persist, MaestroObserver observer) {
+        public void executeTest(StartTestRun startTestRun, MaestroObserver observer) {
             // Not needed for this test
         }
     }

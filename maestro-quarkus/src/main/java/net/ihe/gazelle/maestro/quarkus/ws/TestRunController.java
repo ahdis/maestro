@@ -57,6 +57,8 @@ public interface TestRunController {
      */
     String INTERFACE_VERSION = "1.0";
 
+    String DEFAULT_TIMEOUT = "300";
+
     /**
      * Execute a Gazelle test suite.
      *
@@ -124,8 +126,13 @@ public interface TestRunController {
             @Parameter(
                     in = ParameterIn.QUERY,
                     name = "persist",
-                    description = "Choose whether to persist the test report or not"
+                    description = "Choose whether to persist the test report or not."
             ) @QueryParam("persist") @DefaultValue("true") boolean persist,
+            @Parameter(
+                    in = ParameterIn.QUERY,
+                    name = "timeoutSeconds",
+                    description = "The timeout in seconds for the test run."
+            ) @QueryParam("timeoutSeconds") @DefaultValue(DEFAULT_TIMEOUT) Long timeoutSeconds,
             @Parameter(
                     in = ParameterIn.QUERY,
                     name = "callback",
@@ -201,6 +208,11 @@ public interface TestRunController {
                     name = "persist",
                     description = "Choose whether to persist the test report or not"
             ) @QueryParam("persist") @DefaultValue("true") boolean persist,
+            @Parameter(
+                    in = ParameterIn.QUERY,
+                    name = "timeoutSeconds",
+                    description = "The timeout in seconds for the test run."
+            ) @QueryParam("timeoutSeconds") @DefaultValue(DEFAULT_TIMEOUT) Long timeoutSeconds,
             @Parameter(
                     in = ParameterIn.QUERY,
                     name = "callback",

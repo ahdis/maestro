@@ -20,6 +20,7 @@ import net.ihe.gazelle.lang.Command;
 import net.ihe.gazelle.maestro.spi.business.StepRun;
 
 import java.io.Serial;
+import java.time.Instant;
 
 /**
  * Step message used by the producer to notify a subscriber to launch step execution
@@ -27,130 +28,156 @@ import java.io.Serial;
 @Command
 public class StartStepRun implements Message {
 
-   @Serial
-   private static final long serialVersionUID = 1L;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-   /**
-    * The session id of the execution
-    */
-   private String sessionId; // internal
+    /**
+     * The session id of the execution
+     */
+    private String sessionId; // internal
 
-   /**
-    * The test id of the step to be executed
-    */
-   private String testId;
+    /**
+     * The test id of the step to be executed
+     */
+    private String testId;
 
-   /**
-    * The index of the step to be executed
-    */
-   private int stepIndex;
+    /**
+     * The index of the step to be executed
+     */
+    private int stepIndex;
 
-   /**
-    * The step run to be executed
-    */
-   private StepRun stepRun;
+    /**
+     * The step run to be executed
+     */
+    private StepRun stepRun;
 
-   /**
-    * Default constructor
-    */
-   public StartStepRun() {
-      this(null, null, -1, null);
-   }
+    /**
+     * The expiration timestamp for the step run execution
+     */
+    private Instant expirationTimestamp;
 
-   /**
-    * Constructs a new StartStepRun instance with the specified parameters.
-    *
-    * @param sessionId the session ID associated with the execution.
-    * @param testId the ID of the test linked to the step to be executed.
-    * @param stepIndex the index of the step in the test.
-    * @param stepRun the StepRun instance representing the step to be executed.
-    */
-   public StartStepRun(String sessionId, String testId, int stepIndex, StepRun stepRun) {
-      this.sessionId = sessionId;
-      this.testId = testId;
-      this.stepIndex = stepIndex;
-      this.stepRun = stepRun;
-   }
+    /**
+     * Default constructor
+     */
+    public StartStepRun() {
+        this(null, null, -1, null);
+    }
 
-   /**
-    * Retrieves the session ID associated with the execution.
-    *
-    * @return the session ID as a string, or null if no session ID is set.
-    */
-   public String getSessionId() {
-      return sessionId;
-   }
+    /**
+     * Constructs a new StartStepRun instance with the specified parameters.
+     *
+     * @param sessionId the session ID associated with the execution.
+     * @param testId    the ID of the test linked to the step to be executed.
+     * @param stepIndex the index of the step in the test.
+     * @param stepRun   the StepRun instance representing the step to be executed.
+     */
+    public StartStepRun(String sessionId, String testId, int stepIndex, StepRun stepRun) {
+        this.sessionId = sessionId;
+        this.testId = testId;
+        this.stepIndex = stepIndex;
+        this.stepRun = stepRun;
+    }
 
-   /**
-    * Sets the session ID associated with the execution.
-    *
-    * @param sessionId the session ID to be set.
-    * @return the current instance of {@code StartStepRun} for method chaining.
-    */
-   public StartStepRun setSessionId(String sessionId) {
-      this.sessionId = sessionId;
-      return this;
-   }
+    /**
+     * Retrieves the session ID associated with the execution.
+     *
+     * @return the session ID as a string, or null if no session ID is set.
+     */
+    public String getSessionId() {
+        return sessionId;
+    }
 
-   /**
-    * Retrieves the test ID of the step to be executed.
-    *
-    * @return the test ID as a string, or null if no test ID is set.
-    */
-   public String getTestId() {
-      return testId;
-   }
+    /**
+     * Sets the session ID associated with the execution.
+     *
+     * @param sessionId the session ID to be set.
+     * @return the current instance of {@code StartStepRun} for method chaining.
+     */
+    public StartStepRun setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+        return this;
+    }
 
-   /**
-    * Sets the test ID of the step to be executed.
-    *
-    * @param testId the ID of the test linked to the step execution.
-    * @return the current instance of {@code StartStepRun} for method chaining.
-    */
-   public StartStepRun setTestId(String testId) {
-      this.testId = testId;
-      return this;
-   }
+    /**
+     * Retrieves the test ID of the step to be executed.
+     *
+     * @return the test ID as a string, or null if no test ID is set.
+     */
+    public String getTestId() {
+        return testId;
+    }
 
-   /**
-    * Retrieves the index of the step to be executed.
-    *
-    * @return the step index as an integer.
-    */
-   public int getStepIndex() {
-      return stepIndex;
-   }
+    /**
+     * Sets the test ID of the step to be executed.
+     *
+     * @param testId the ID of the test linked to the step execution.
+     * @return the current instance of {@code StartStepRun} for method chaining.
+     */
+    public StartStepRun setTestId(String testId) {
+        this.testId = testId;
+        return this;
+    }
 
-   /**
-    * Sets the index of the step to be executed.
-    *
-    * @param stepIndex the index of the step to be executed.
-    * @return the current instance of {@code StartStepRun} for method chaining.
-    */
-   public StartStepRun setStepIndex(int stepIndex) {
-      this.stepIndex = stepIndex;
-      return this;
-   }
+    /**
+     * Retrieves the index of the step to be executed.
+     *
+     * @return the step index as an integer.
+     */
+    public int getStepIndex() {
+        return stepIndex;
+    }
 
-   /**
-    * Retrieves the StepRun instance associated with the current execution.
-    *
-    * @return the StepRun instance representing the step to be executed, or null if no StepRun is set.
-    */
-   public StepRun getStepRun() {
-      return stepRun;
-   }
+    /**
+     * Sets the index of the step to be executed.
+     *
+     * @param stepIndex the index of the step to be executed.
+     * @return the current instance of {@code StartStepRun} for method chaining.
+     */
+    public StartStepRun setStepIndex(int stepIndex) {
+        this.stepIndex = stepIndex;
+        return this;
+    }
 
-   /**
-    * Sets the {@link StepRun} instance associated with the current execution.
-    * This method allows configuring the step to be executed and supports method chaining.
-    *
-    * @param stepRun the {@link StepRun} instance representing the step to be executed.
-    * @return the current instance of {@code StartStepRun} for method chaining.
-    */
-   public StartStepRun setStepRun(StepRun stepRun) {
-      this.stepRun = stepRun;
-      return this;
-   }
+    /**
+     * Retrieves the StepRun instance associated with the current execution.
+     *
+     * @return the StepRun instance representing the step to be executed, or null if no StepRun is set.
+     */
+    public StepRun getStepRun() {
+        return stepRun;
+    }
+
+    /**
+     * Sets the {@link StepRun} instance associated with the current execution.
+     * This method allows configuring the step to be executed and supports method chaining.
+     *
+     * @param stepRun the {@link StepRun} instance representing the step to be executed.
+     * @return the current instance of {@code StartStepRun} for method chaining.
+     */
+    public StartStepRun setStepRun(StepRun stepRun) {
+        this.stepRun = stepRun;
+        return this;
+    }
+
+    /**
+     * Retrieves the expiration timestamp for the test run execution.
+     *
+     * @return the expiration timestamp as an {@code Instant}, or null if no expiration timestamp is set.
+     */
+    public Instant getExpirationTimestamp() {
+        return expirationTimestamp;
+    }
+
+    /**
+     * Sets the expiration timestamp for the test run execution.
+     *
+     * @param expirationTimestamp the expiration timestamp to be set as an {@code Instant}.
+     *                            It can be null to indicate no expiration timestamp is specified.
+     * @return the current instance of {@code StartStepRun} for method chaining.
+     */
+    public StartStepRun setExpirationTimestamp(Instant expirationTimestamp) {
+        this.expirationTimestamp = expirationTimestamp;
+        return this;
+    }
 
 }

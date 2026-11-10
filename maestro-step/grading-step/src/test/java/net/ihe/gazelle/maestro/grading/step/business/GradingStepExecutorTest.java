@@ -52,7 +52,7 @@ class GradingStepExecutorTest {
         Instant assessmentTime = Instant.parse("2026-11-02T12:00:00Z");
         GradingStepExecutor executor = new GradingStepExecutor(new GradingHandlerStub() {
             @Override
-            public GradingCompleted displayMessage(List<String> criteria) {
+            public GradingCompleted displayMessage(List<String> criteria, long timeout) {
                 assertEquals(List.of("Check A", "Check B"), criteria);
                 return new GradingCompleted()
                         .setResult(GradingResult.FAILED)
@@ -79,7 +79,7 @@ class GradingStepExecutorTest {
     void optionalNoteProducesAnOutputOnlyWhenItHasContent(String note) {
         var executor = new GradingStepExecutor(new GradingHandlerStub() {
             @Override
-            public GradingCompleted displayMessage(List<String> criteria) {
+            public GradingCompleted displayMessage(List<String> criteria, long timeout) {
                 return new GradingCompleted().setResult(GradingResult.PASSED).setNote(note)
                         .setUserId("reviewer").setDateTime(Instant.parse("2026-11-04T12:00:00Z"));
             }

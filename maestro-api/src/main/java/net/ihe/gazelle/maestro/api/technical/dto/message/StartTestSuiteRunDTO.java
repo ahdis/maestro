@@ -17,10 +17,13 @@
 package net.ihe.gazelle.maestro.api.technical.dto.message;
 
 import com.fasterxml.jackson.annotation.*;
-import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
+import net.ihe.gazelle.maestro.api.business.message.StartTestSuiteRun;
 import net.ihe.gazelle.maestro.api.technical.dto.testrun.TestSuiteRunDTO;
 import net.ihe.gazelle.oidc.common.technical.dto.SecuredMessageDTO;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
+import java.time.Duration;
+import java.time.Instant;
 
 @Schema(
         name = "StartTestSuiteRun",
@@ -32,24 +35,22 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
         "type",
         "testSuiteRun",
         "testSessionId",
+        "timeoutSeconds",
         "persist"
 })
-public class StartTestSuiteRunDTO extends MessageDTO<TestSuiteRun> implements SecuredMessageDTO {
+public class StartTestSuiteRunDTO extends MessageDTO<StartTestSuiteRun> implements SecuredMessageDTO {
 
     @JsonIgnore
     public static final String TYPE = "START_TEST_SUITE_RUN";
 
-    private String testSessionId;
-    private boolean persist;
     private String authorization;
 
     public StartTestSuiteRunDTO() {
-        this(new TestSuiteRun(), "");
+        this(new StartTestSuiteRun(), "");
     }
 
-    public StartTestSuiteRunDTO(TestSuiteRun testSuiteRun, String authorization) {
-        super(testSuiteRun);
-        this.persist = true;
+    public StartTestSuiteRunDTO(StartTestSuiteRun startTestSuiteRun, String authorization) {
+        super(startTestSuiteRun);
         this.authorization = authorization;
     }
 
@@ -59,11 +60,11 @@ public class StartTestSuiteRunDTO extends MessageDTO<TestSuiteRun> implements Se
     )
     @JsonProperty("testSuiteRun")
     public TestSuiteRunDTO getTestSuiteRun() {
-        return new TestSuiteRunDTO(getBusinessObject());
+        return new TestSuiteRunDTO(message.getTestSuiteRun());
     }
 
     public void setTestSuiteRun(TestSuiteRunDTO testSuiteRun) {
-        this.message = testSuiteRun.getBusinessObject();
+        message.setTestSuiteRun(testSuiteRun.getBusinessObject());
     }
 
     @Schema(
@@ -72,11 +73,24 @@ public class StartTestSuiteRunDTO extends MessageDTO<TestSuiteRun> implements Se
     )
     @JsonProperty("testSessionId")
     public String getTestSessionId() {
-        return testSessionId;
+        return message.getTestSessionId();
     }
 
     public void setTestSessionId(String testSessionId) {
-        this.testSessionId = testSessionId;
+        message.setTestSessionId(testSessionId);
+    }
+
+    @Schema(
+            name = "timeoutSeconds",
+            description = "The timeout in seconds for the test suite run."
+    )
+    @JsonProperty("timeoutSeconds")
+    public Long getTimeoutSeconds() {
+        return Duration.between(Instant.now(), message.getExpirationTimestamp()).toSeconds();
+    }
+
+    public void setTimeoutSeconds(Long timeoutSeconds) {
+        message.setExpirationTimestamp(Duration.ofSeconds(timeoutSeconds));
     }
 
     @Schema(
@@ -85,11 +99,11 @@ public class StartTestSuiteRunDTO extends MessageDTO<TestSuiteRun> implements Se
     )
     @JsonProperty("persist")
     public boolean isPersist() {
-        return persist;
+        return message.isPersist();
     }
 
     public void setPersist(boolean persist) {
-        this.persist = persist;
+        message.setPersist(persist);
     }
 
     @Override
@@ -103,8 +117,8 @@ public class StartTestSuiteRunDTO extends MessageDTO<TestSuiteRun> implements Se
 
     @Override
     @JsonIgnore
-    public Class<TestSuiteRun> getBusinessObjectClass() {
-        return TestSuiteRun.class;
+    public Class<StartTestSuiteRun> getBusinessObjectClass() {
+        return StartTestSuiteRun.class;
     }
 }
 

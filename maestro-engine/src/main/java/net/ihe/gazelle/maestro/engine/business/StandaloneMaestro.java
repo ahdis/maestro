@@ -18,8 +18,8 @@ package net.ihe.gazelle.maestro.engine.business;
 
 import net.ihe.gazelle.maestro.api.business.Maestro;
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
-import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
-import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
+import net.ihe.gazelle.maestro.api.business.message.StartTestRun;
+import net.ihe.gazelle.maestro.api.business.message.StartTestSuiteRun;
 
 /**
  * Standalone implementation of {@link Maestro} that executes tests without persisting results.
@@ -39,19 +39,19 @@ public class StandaloneMaestro implements Maestro {
    }
 
    @Override
-   public void executeTestSuite(String testSessionId, TestSuiteRun testSuiteRun, boolean persist, MaestroObserver observer) {
-      if (persist) {
+   public void executeTestSuite(StartTestSuiteRun startTestSuiteRun, MaestroObserver observer) {
+      if (startTestSuiteRun.isPersist()) {
          throw new UnsupportedOperationException("Persisting test suite runs is not supported in StandaloneMaestro.");
       }
-      maestroFacade.executeTestSuite(testSessionId, testSuiteRun, observer);
+      maestroFacade.executeTestSuite(startTestSuiteRun, observer);
    }
 
    @Override
-   public void executeTest(String testSessionId, TestRun testRun, boolean persist, MaestroObserver observer) {
-      if (persist) {
+   public void executeTest(StartTestRun startTestRun, MaestroObserver observer) {
+      if (startTestRun.isPersist()) {
          throw new UnsupportedOperationException("Persisting test runs is not supported in StandaloneMaestro.");
       }
-      maestroFacade.executeTest(testSessionId, testRun, observer);
+      maestroFacade.executeTest(startTestRun, observer);
    }
 
 }

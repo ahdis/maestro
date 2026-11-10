@@ -17,7 +17,6 @@
 package net.ihe.gazelle.maestro.engine.technical.userinteract;
 
 import net.ihe.gazelle.maestro.engine.business.mock.RecordingMaestroObserver;
-import net.ihe.gazelle.maestro.spi.technical.stub.ConfigProviderStub;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -29,9 +28,9 @@ class GradingHandlerTest {
 
     @Test
     void test_display_message() {
-        GradingHandlerImpl handler = new GradingHandlerImpl(new RecordingMaestroObserver(), new ConfigProviderStub());
+        GradingHandlerImpl handler = new GradingHandlerImpl(new RecordingMaestroObserver());
         assertTrue(handler.isAvailable());
-        assertDoesNotThrow(() ->handler.displayMessage(List.of("Check A", "Check B")));
+        assertDoesNotThrow(() ->handler.displayMessage(List.of("Check A", "Check B"), 100));
     }
 
 }

@@ -45,6 +45,11 @@
             <artifactId>error-handling</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>net.ihe.gazelle</groupId>
+            <artifactId>lang</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
 </project>

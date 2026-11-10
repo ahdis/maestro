@@ -23,7 +23,6 @@ import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.api.business.message.AskGrading;
 import net.ihe.gazelle.maestro.api.business.message.GradingCompleted;
 import net.ihe.gazelle.maestro.api.business.userinteract.GradingHandler;
-import net.ihe.gazelle.maestro.spi.technical.ConfigProvider;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -38,33 +37,31 @@ import java.util.concurrent.TimeoutException;
 public class GradingHandlerImpl implements GradingHandler {
 
     private final MaestroObserver observer;
-    private final long timeoutMinutes;
 
     /**
      * Creates a new {@code GradingHandlerImpl} using the specified observer.
      *
      * @param observer the {@link MaestroObserver} that will receive user interaction events
      */
-    public GradingHandlerImpl(MaestroObserver observer, ConfigProvider configProvider) {
+    public GradingHandlerImpl(MaestroObserver observer) {
         this.observer = observer;
-        timeoutMinutes = Long.parseLong(configProvider.getConfig("gzl.grading.default.timeout.minutes"));
     }
 
     @Override
-    public GradingCompleted displayMessage(List<String> criteria) {
+    public GradingCompleted displayMessage(List<String> criteria, long timeout) {
         CompletableFuture<GradingCompleted> future = observer.askGrading(
                 new AskGrading().setCriteria(criteria)
         );
 
         try {
-            return future.get(timeoutMinutes, TimeUnit.MINUTES);
+            return future.get(timeout, TimeUnit.MILLISECONDS);
         } catch (TimeoutException e) {
-            throw new TimeoutRuntimeException("Timeout while waiting for user", e);
+            throw new TimeoutRuntimeException("Timeout while waiting for grading", e);
         } catch (ExecutionException e) {
             throw new ExecutionRuntimeException(e);
         } catch (InterruptedException _) {
             Thread.currentThread().interrupt();
-            throw new InterruptedRuntimeException("Interrupted while waiting for user");
+            throw new InterruptedRuntimeException("Interrupted while waiting for grading");
         }
     }
 

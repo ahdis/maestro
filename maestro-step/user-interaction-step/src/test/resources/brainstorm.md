@@ -1,15 +1,25 @@
 # Tasks
 
+- Timeout handling improvement
+  - step without timeout -> full test session timeout -> if no test session timeout is provided -> 3min
+  - Timeout defined in steps is priority
+      - Timeout defined in startTestRun message is then priority
+      - Default Timeout is used if nothing is provided
+- Migrate SQL to mongoDB
+- Fix REST controller to align with websocket controller
+- reconnect message to restore websocket connection between test exec and maestro
+- Add Optional steps -> an optional step cannot have outputmappings in test model validation
+
+
 - Add userId and dateTime in Property OK
 - Create LINK property type OK
-- Create Evidence concept
+- Create Evidence concept OK
 - Create PUT_EVIDENCE message type OK
-- Add gradingMethod in Test model
+- Add gradingMethod in Test model OK
 - Handle stop execution for gradingMethod "monitored" at the end of the execution, 
 waiting for the user to set the status to completed or if there is at least one step
-that accept unsolicited evidence
-- Add a new evaluation step in maestro that is always in a test and maestro has to wait this step is over to terminate the test
-- Add reconnect message to restore websocket connection between test exec and maestro
+that accept unsolicited evidence OK
+- Add a new evaluation step in maestro that is always in a test and maestro has to wait this step is over to terminate the test OK
 
 # Brainstorming asynchronous step
 

@@ -43,7 +43,7 @@ import java.util.concurrent.*;
 @ApplicationScoped
 public class TestWebSocketClient {
 
-    private static final int TIMEOUT_SECONDS = 15;
+    private static final int TIMEOUT_SECONDS = 150;
 
     private final TextSerDes serDes = new JacksonSerDes();
     private static final Map<String, CompletableFuture<ExecutionFinished>> EXECUTIONS = new ConcurrentHashMap<>();
@@ -78,7 +78,7 @@ public class TestWebSocketClient {
                 String response = serDes.serializeAsString(new GradingCompletedDTO(gradingCompleted, token));
                 session.getAsyncRemote().sendText(response);
             }
-        } catch (DeserializationException e) {
+        } catch (DeserializationException _) {
             // Do nothing
         }
     }
@@ -102,7 +102,7 @@ public class TestWebSocketClient {
             throw new TimeoutRuntimeException(e);
         } catch (ExecutionException e) {
             throw new ExecutionRuntimeException(e);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException _) {
             Thread.currentThread().interrupt();
             return null;
         }
@@ -115,7 +115,7 @@ public class TestWebSocketClient {
             throw new TimeoutRuntimeException(e);
         } catch (ExecutionException e) {
             throw new ExecutionRuntimeException(e);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException _) {
             Thread.currentThread().interrupt();
             return null;
         }

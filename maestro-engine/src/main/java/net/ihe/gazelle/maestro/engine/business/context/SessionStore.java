@@ -16,6 +16,8 @@
 
 package net.ihe.gazelle.maestro.engine.business.context;
 
+import java.time.Instant;
+
 /**
  * Stores session objects and provides access to them by their identifier.
  *
@@ -23,29 +25,34 @@ package net.ihe.gazelle.maestro.engine.business.context;
  */
 public interface SessionStore<T> extends ReadSessionStore<T> {
 
-   /**
-    * Put a session object with the specified identifier and timeout.
-    * If a session already exists for the given identifier, it will be replaced.
-    *
-    * @param id the identifier for the session
-    * @param session the session object to store
-    * @param timeout the time in milliseconds after which the session expires
-    */
-   void putSession(String id, T session, long timeout);
+    /**
+     * Put a session object with the specified identifier and timeout.
+     * If a session already exists for the given identifier, it will be replaced.
+     *
+     * @param id                 the identifier for the session
+     * @param session            the session object to store
+     * @param expirationDateTime the instant when the session expires
+     */
+    void putSession(String id, T session, Instant expirationDateTime);
 
-   /**
-    * Checks whether a session exists for the given identifier.
-    *
-    * @param id the identifier of the session
-    * @return {@code true} if a session exists, {@code false} otherwise
-    */
-   boolean hasSession(String id);
+    /**
+     * Checks whether a session exists for the given identifier.
+     *
+     * @param id the identifier of the session
+     * @return {@code true} if a session exists, {@code false} otherwise
+     */
+    boolean hasSession(String id);
 
-   /**
-    * Removes the session associated with the given identifier.
-    *
-    * @param id the identifier of the session to remove
-    */
-   void removeSession(String id);
+    /**
+     * Removes the session associated with the given identifier.
+     *
+     * @param id the identifier of the session to remove
+     */
+    void removeSession(String id);
+
+    /**
+     * Removes all sessions whose expiration date and time has passed.
+     */
+    void removeExpiredSessions();
 
 }

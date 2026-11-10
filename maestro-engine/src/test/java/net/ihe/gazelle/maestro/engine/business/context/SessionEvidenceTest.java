@@ -26,6 +26,7 @@ import net.ihe.gazelle.maestro.engine.business.MaestroSessionServiceImpl;
 import net.ihe.gazelle.maestro.engine.technical.dao.SessionStoreCache;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -40,7 +41,7 @@ class SessionEvidenceTest {
     void removesOnlyEvidenceMatchingRunStepAndName() {
         var session = new TestRunSession();
         var store = new SessionStoreCache<TestRunSession>();
-        store.putSession("execution", session, 10000);
+        store.putSession("execution", session, Instant.now().plusSeconds(10));
         var service = new MaestroSessionServiceImpl(store);
         var matching = evidence(0, "first", "note");
         service.putEvidence(matching);
