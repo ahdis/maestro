@@ -29,7 +29,9 @@ import org.junit.jupiter.api.*;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.concurrent.TimeUnit;
 
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -156,6 +158,7 @@ class WebSocketSessionTest {
               messageString,
               containsString(ExecutionFinishedDTO.TYPE)
         );
+        await().during(100, TimeUnit.MILLISECONDS);
         assertFalse(internal.isOpen());
     }
 }
