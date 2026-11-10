@@ -91,7 +91,7 @@ final class DatahouseExecutionRecordingSession implements ExecutionRecordingSess
         try {
             ItemPlan<List<Property>> plan = service.buildEvidencePlan(evidence);
             // An attachment becomes readable only once an accessible item owns its reference.
-            String ownerId = writer.record(plan, acl.get());
+            String ownerId = writer.recordItemPlan(plan, acl.get());
             var recordedEvidence = (ByteArrayItemProperty) plan.itemObject().getFirst().copy();
             recordedEvidence.setReference("/items/" + ownerId + recordedEvidence.getReference());
             return recordedEvidence;
@@ -115,26 +115,26 @@ final class DatahouseExecutionRecordingSession implements ExecutionRecordingSess
             stepWriter.execute(
                     () -> {
                         try {
-                            StepRunFinished published = record(event, stepSnapshot);
+                            StepRunFinished published = recordStepRunReport(event, stepSnapshot);
                             if (published != null && observer != null) {
                                 observer.onOutputsRecorded(published);
                             }
-                        } catch (RuntimeException retainedForFinish) {
+                        } catch (RuntimeException _) {
                             // record() retains write failures; notification failures do not trigger
                             // another write.
                         }
                     });
-        } catch (RejectedExecutionException alreadyFinished) {
+        } catch (RejectedExecutionException _) {
             // A full queue or a closed session leaves this step for final reconciliation.
         }
     }
 
     @Override
     public StepRunFinished recordStep(StepRunFinished event) {
-        return record(event, snapshots.copy(event.getStepRunReport()));
+        return recordStepRunReport(event, snapshots.copy(event.getStepRunReport()));
     }
 
-    private synchronized StepRunFinished record(StepRunFinished event, StepRunReport snapshot) {
+    private synchronized StepRunFinished recordStepRunReport(StepRunFinished event, StepRunReport snapshot) {
         if (finished || recordingFailure != null) {
             return null;
         }
@@ -241,7 +241,7 @@ final class DatahouseExecutionRecordingSession implements ExecutionRecordingSess
                     service.buildTestReportPlan(
                             snapshot, snapshot.getAccessControlList(), definitions, recorded);
             String location =
-                    datahouseUrl + "/items/" + writer.record(plan, snapshot.getAccessControlList());
+                    datahouseUrl + "/items/" + writer.recordItemPlan(plan, snapshot.getAccessControlList());
             return new ExecutionRecordingResult(location, snapshot);
         } finally {
             finished = true;

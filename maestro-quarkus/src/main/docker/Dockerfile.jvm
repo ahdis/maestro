@@ -88,6 +88,14 @@ USER root
 # Install required packages
 RUN microdnf update -y && microdnf install -y wget libicu && microdnf clean all
 
+# Install postgresql client
+ADD https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm  /tmp/pg_repo.rpm
+
+RUN rpm -i /tmp/pg_repo.rpm && \
+    microdnf install -y systemd postgresql17-libs postgresql17 lz4
+
+ENV PATH="/usr/pgsql-17/bin:${PATH}"
+
 # We make four distinct layers so if there are application changes the library layers can be re-used
 COPY --chown=185 target/quarkus-app/lib/ /deployments/lib/
 COPY --chown=185 target/quarkus-app/*.jar /deployments/

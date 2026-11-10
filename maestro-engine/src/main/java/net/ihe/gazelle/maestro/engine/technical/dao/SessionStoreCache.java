@@ -20,8 +20,6 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Expiry;
 import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -37,8 +35,6 @@ import java.util.List;
  * @param <T> The type of object cached in the store
  */
 public class SessionStoreCache<T> implements SessionStore<T> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(SessionStoreCache.class);
 
     private final Cache<String, CacheEntry<T>> sessions;
 

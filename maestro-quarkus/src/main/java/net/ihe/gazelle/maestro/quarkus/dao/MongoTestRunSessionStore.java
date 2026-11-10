@@ -118,7 +118,7 @@ public class MongoTestRunSessionStore implements SessionStore<TestRunSession> {
 
     @Override
     public void removeExpiredSessions() {
-
+        // Nothing to do
     }
 
     /**

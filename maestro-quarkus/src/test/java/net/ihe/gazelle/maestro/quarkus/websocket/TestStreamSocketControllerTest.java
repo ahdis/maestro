@@ -171,19 +171,4 @@ class TestStreamSocketControllerTest {
         }
     }
 
-    /*@Test
-    void should_throw_unexpected_message_type() throws DeploymentException, IOException {
-        TestWebSocketServer.clear();
-        try (Session session = ContainerProvider
-                .getWebSocketContainer()
-                .connectToServer(client, uri)) {
-            String messageString = "{\"type\":\"" + StepRunFinishedDTO.TYPE + "\"}";
-            session.getAsyncRemote().sendText(messageString);
-
-            String error = client.getError(session.getId());
-            assertNotNull(error);
-            assertThat(error, containsString("Unexpected message type: " + StepRunFinishedDTO.class.getName()));
-            TestWebSocketClient.clear(session.getId());
-        }
-    }*/
 }

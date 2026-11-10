@@ -55,7 +55,7 @@ public interface ExecutionRecordingSession {
             if (recorded != null && observer != null) {
                 observer.onOutputsRecorded(recorded);
             }
-        } catch (RuntimeException retainedForFinish) {
+        } catch (RuntimeException _) {
             // Implementations retain the failure for finalization.
         }
     }
