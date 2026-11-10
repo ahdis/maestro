@@ -17,6 +17,7 @@
 package net.ihe.gazelle.maestro.api.business.message;
 
 import net.ihe.gazelle.lang.Command;
+import net.ihe.gazelle.maestro.api.business.test.Test;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 
 import java.io.Serial;
@@ -179,7 +180,7 @@ public class StartTestSuiteRun implements Message {
         if (duration != null) {
             return Instant.now().plus(duration);
         } else {
-            return Instant.now().plusMillis(getTestSuiteRun().computeTestSuiteTimeout());
+            return Instant.now().plusMillis(Test.TEST_DEFAULT_TIMEOUT_MILLIS);
         }
     }
 }

@@ -35,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.*;
 
 class LiveOutputNotificationTest {
+
     @ParameterizedTest
     @CsvSource({"false,false,false", "false,true,false", "true,false,false", "true,true,true"})
     void requiresBothDeploymentEnablementAndClientOptIn(
@@ -46,7 +47,7 @@ class LiveOutputNotificationTest {
         when(session.getRequestParameterMap())
                 .thenReturn(optedIn ? Map.of("liveOutputs", List.of("true")) : Map.of());
         WebSocketSessionService sessions = mock(WebSocketSessionService.class);
-        var controller = new TestStreamSocketController(null, null, null, sessions, null);
+        var controller = new TestStreamSocketController(null, null, null, null, sessions, null);
         controller.liveOutputsEnabled = enabled;
         controller.onOpen(session);
         var caller = ArgumentCaptor.forClass(WebSocketSession.class);

@@ -36,11 +36,6 @@ public class Step implements Serializable {
    private static final long serialVersionUID = 4126739543481925460L;
 
    /**
-    * Default timeout for step runs in milliseconds.
-    */
-   public static final long STEP_DEFAULT_TIMEOUT = 180 * 1000L;
-
-   /**
     * The name of the step.
     */
    private String name;
@@ -53,7 +48,7 @@ public class Step implements Serializable {
    /**
     * The timeout for the step in milliseconds.
     */
-   private long timeout = STEP_DEFAULT_TIMEOUT;
+   private long timeout = Test.TEST_DEFAULT_TIMEOUT_MILLIS;
 
    /**
     * The properties of the step.
@@ -156,10 +151,8 @@ public class Step implements Serializable {
     * @param timeout the timeout value in milliseconds; can be null to apply the default timeout
     * @return the current {@code Step} instance
     */
-   public Step setTimeout(Long timeout) {
-      this.timeout = timeout != null
-            ? timeout
-            : STEP_DEFAULT_TIMEOUT;
+   public Step setTimeout(long timeout) {
+      this.timeout = timeout;
       return this;
    }
 

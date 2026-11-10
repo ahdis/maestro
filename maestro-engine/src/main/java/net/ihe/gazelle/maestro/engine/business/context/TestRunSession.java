@@ -20,6 +20,7 @@ import net.ihe.gazelle.maestro.api.business.message.DeleteEvidence;
 import net.ihe.gazelle.maestro.api.business.message.PutEvidence;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.test.Step;
+import net.ihe.gazelle.maestro.api.business.test.Test;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.engine.business.TestReportRecordingException;
@@ -42,7 +43,7 @@ public class TestRunSession {
     private List<StepRunReport> stepReports;
     private List<PutEvidence> evidences;
     private boolean evidenceClosed;
-    private Instant expirationTimestamp;
+    private Instant expirationTimestamp = Instant.ofEpochMilli(Test.TEST_DEFAULT_TIMEOUT_MILLIS);
 
     /**
      * Default constructor

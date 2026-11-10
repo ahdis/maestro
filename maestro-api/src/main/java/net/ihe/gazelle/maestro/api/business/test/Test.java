@@ -18,6 +18,7 @@ package net.ihe.gazelle.maestro.api.business.test;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.*;
 
 /**
@@ -33,9 +34,9 @@ public class Test implements Serializable {
     private static final long serialVersionUID = -7394123287397209441L;
 
     /**
-     * For each step in the test, a margin is added to the timeout of the step to prevent computation time.
+     * Default timeout for step runs in milliseconds.
      */
-    private static final int TIMEOUT_MARGIN_OFFSET = 3000;
+    public static final long TEST_DEFAULT_TIMEOUT_MILLIS = Duration.ofDays(7).toMillis();
 
     /**
      * The id of the test.
@@ -295,17 +296,6 @@ public class Test implements Serializable {
         return steps.stream().filter(Objects::nonNull)
                 .flatMap(step -> step.getOutputMappings().values().stream())
                 .noneMatch(inputNames::contains);
-    }
-
-    /**
-     * Computes the total timeout value for a test run.
-     *
-     * @return the computed timeout value for the test run as a long value in milliseconds
-     */
-    public long computeTestRunTimeout() {
-        return this.getSteps().stream()
-                .mapToLong(Step::getTimeout)
-                .sum() + TIMEOUT_MARGIN_OFFSET;
     }
 
     @Override

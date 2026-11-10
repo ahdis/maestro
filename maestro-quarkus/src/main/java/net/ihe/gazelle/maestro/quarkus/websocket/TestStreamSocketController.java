@@ -16,12 +16,16 @@
 
 package net.ihe.gazelle.maestro.quarkus.websocket;
 
+import io.vertx.core.Vertx;
 import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
 import jakarta.websocket.*;
 import jakarta.websocket.server.ServerEndpoint;
 import net.ihe.gazelle.maestro.api.business.Maestro;
 import net.ihe.gazelle.maestro.api.business.MaestroSessionService;
+import net.ihe.gazelle.maestro.api.business.message.DeleteEvidence;
+import net.ihe.gazelle.maestro.api.business.message.PutEvidence;
 import net.ihe.gazelle.maestro.api.technical.dto.message.*;
 import net.ihe.gazelle.maestro.quarkus.configuration.MaestroPermissions;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
@@ -72,6 +76,7 @@ public class TestStreamSocketController {
 
     private final TextSerDes serDes = new JacksonSerDes();
     private final GazelleIdentity identity;
+    private final Vertx vertx;
     private final Authz authz;
     private final Maestro maestro;
     private final WebSocketSessionService sessionService;
@@ -89,11 +94,13 @@ public class TestStreamSocketController {
     @Inject
     public TestStreamSocketController(
             GazelleIdentity identity,
+            Vertx vertx,
             Authz authz,
             Maestro maestro,
             WebSocketSessionService sessionService,
             MaestroSessionService maestroSessionService) {
         this.identity = identity;
+        this.vertx = vertx;
         this.authz = authz;
         this.maestro = maestro;
         this.sessionService = sessionService; // NOSONAR - CDI-managed service reference
@@ -162,12 +169,22 @@ public class TestStreamSocketController {
                 case UserInteractionCompletedDTO userInteractionCompleted ->
                         maestroCaller.completeInteraction(userInteractionCompleted.getBusinessObject());
                 case PutEvidenceDTO putEvidence -> {
-                    maestroCaller.assertEvidenceSession(putEvidence.getBusinessObject().getSessionId());
-                    maestroSessionService.putEvidence(putEvidence.getBusinessObject());
+                    PutEvidence evidence = putEvidence.getBusinessObject();
+
+                    vertx.executeBlocking(() -> {
+                        maestroCaller.assertEvidenceSession(evidence.getSessionId());
+                        maestroSessionService.putEvidence(evidence);
+                        return null;
+                    }, true).onFailure(error -> closeOnUnexpectedError(session, error));
                 }
                 case DeleteEvidenceDTO deleteEvidence -> {
-                    maestroCaller.assertEvidenceSession(deleteEvidence.getBusinessObject().getSessionId());
-                    maestroSessionService.deleteEvidence(deleteEvidence.getBusinessObject());
+                    DeleteEvidence evidence = deleteEvidence.getBusinessObject();
+
+                    vertx.executeBlocking(() -> {
+                        maestroCaller.assertEvidenceSession(evidence.getSessionId());
+                        maestroSessionService.deleteEvidence(evidence);
+                        return null;
+                    }, true).onFailure(error -> closeOnUnexpectedError(session, error));
                 }
                 case GradingCompletedDTO gradingCompleted ->
                         maestroCaller.completeGrading(gradingCompleted.getBusinessObject());
@@ -198,6 +215,17 @@ public class TestStreamSocketController {
                     new CloseReason(
                             CloseReason.CloseCodes.UNEXPECTED_CONDITION,
                             "Unexpected error, please contact an administrator."));
+        }
+    }
+
+    private void closeOnUnexpectedError(Session session, Throwable error) {
+        LOG.error("Unexpected error during websocket test execution", error);
+        try {
+            session.close(new CloseReason(
+                    CloseReason.CloseCodes.UNEXPECTED_CONDITION,
+                    "Unexpected error, please contact an administrator."));
+        } catch (IOException closeError) {
+            LOG.debug("Unable to close websocket session", closeError);
         }
     }
 }
