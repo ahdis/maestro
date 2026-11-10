@@ -23,6 +23,14 @@ import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 
 import java.time.Instant;
 
+/**
+ * JPA entity representing a persisted test run session.
+ *
+ * Stores the session identifier, expiration date and serialized session payload
+ * in the test_run_session table. The serialized payload is converted to and
+ * from the {@code TestRunSession} domain object through {@code TestRunSessionDTO}
+ * using Jackson-based serialization.
+ */
 @Entity
 @Table(name = "test_run_session")
 public class TestRunSessionEntity {

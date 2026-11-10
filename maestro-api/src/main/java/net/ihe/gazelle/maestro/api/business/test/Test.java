@@ -282,7 +282,12 @@ public class Test implements Serializable {
         return true;
     }
 
-    /** Checks output aliases against effective execution input names. */
+    /**
+     * Determines whether the output aliases produced by this test's steps are disjoint from the specified input names.
+     *
+     * @param inputNames the collection of input names to compare against the step output aliases
+     * @return true if there are no steps, or if none of the step output aliases are contained in the specified input names; false otherwise
+     */
     public boolean areOutputAliasesDisjointFrom(Collection<String> inputNames) {
         if (steps == null) {
             return true;

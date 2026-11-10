@@ -16,8 +16,6 @@
 
 package net.ihe.gazelle.maestro.quarkus;
 
-import io.quarkus.scheduler.Scheduled;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
@@ -59,6 +57,4 @@ public class MaestroSessionScheduler {
         testSuiteObserverStore.removeExpiredSessions();
         webSocketSessionService.removeExpiredSessions();
     }
-
-
 }

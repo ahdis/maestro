@@ -57,7 +57,10 @@ public interface TestRunController {
      */
     String INTERFACE_VERSION = "1.0";
 
-    String DEFAULT_TIMEOUT = "300";
+    /**
+     * Default timeout for synchronous test runs, in seconds.
+     */
+    String DEFAULT_TIMEOUT_SECONDS = "300";
 
     /**
      * Execute a Gazelle test suite.
@@ -132,7 +135,7 @@ public interface TestRunController {
                     in = ParameterIn.QUERY,
                     name = "timeoutSeconds",
                     description = "The timeout in seconds for the test run."
-            ) @QueryParam("timeoutSeconds") @DefaultValue(DEFAULT_TIMEOUT) Long timeoutSeconds,
+            ) @QueryParam("timeoutSeconds") @DefaultValue(DEFAULT_TIMEOUT_SECONDS) Long timeoutSeconds,
             @Parameter(
                     in = ParameterIn.QUERY,
                     name = "callback",
@@ -212,7 +215,7 @@ public interface TestRunController {
                     in = ParameterIn.QUERY,
                     name = "timeoutSeconds",
                     description = "The timeout in seconds for the test run."
-            ) @QueryParam("timeoutSeconds") @DefaultValue(DEFAULT_TIMEOUT) Long timeoutSeconds,
+            ) @QueryParam("timeoutSeconds") @DefaultValue(DEFAULT_TIMEOUT_SECONDS) Long timeoutSeconds,
             @Parameter(
                     in = ParameterIn.QUERY,
                     name = "callback",
