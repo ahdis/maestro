@@ -16,12 +16,32 @@
 
 package net.ihe.gazelle.maestro.quarkus.dao;
 
+import java.io.Serial;
+
+/**
+ * Runtime exception thrown when a required connection to an external data store
+ * or service cannot be established, retrieved, or used.
+ */
 public class ConnectionException extends RuntimeException {
 
+    @Serial
+    private static final long serialVersionUID = 7577756477953420956L;
+
+    /**
+     * Creates a new connection exception with the specified detail message.
+     *
+     * @param message the detail message describing the connection failure
+     */
     public ConnectionException(String message) {
         super(message);
     }
 
+    /**
+     * Creates a new connection exception with the specified detail message and cause.
+     *
+     * @param message the detail message describing the connection failure
+     * @param cause the underlying cause of the connection failure
+     */
     public ConnectionException(String message, Throwable cause) {
         super(message, cause);
     }

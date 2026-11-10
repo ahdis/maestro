@@ -79,9 +79,10 @@ public class WebSocketSession implements MaestroObserver, RecordedOutputsObserve
     }
 
     /**
-     * Sets the expiration time of this WebSocket session.
+     * Sets the expiration time for this WebSocket session.
      *
      * @param expirationTime the instant at which this WebSocket session expires
+     * @return this WebSocket session
      */
     public WebSocketSession setExpirationTime(Instant expirationTime) {
         this.expirationTime = expirationTime;

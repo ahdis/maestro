@@ -84,6 +84,7 @@ public class TestStreamSocketController {
      * @param authz          the authorization service
      * @param maestro        the Maestro engine used to execute tests and test suites
      * @param sessionService the WebSocket session service used to manage WebSocket sessions
+     * @param maestroSessionService the Maestro session service used to manage Maestro sessions
      */
     @Inject
     public TestStreamSocketController(

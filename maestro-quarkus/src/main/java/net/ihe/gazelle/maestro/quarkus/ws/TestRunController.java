@@ -65,9 +65,10 @@ public interface TestRunController {
     /**
      * Execute a Gazelle test suite.
      *
-     * @param testSuiteRun the test suite to execute
-     * @param persist      whether to persist the test report
-     * @param callback     optional callback URL for asynchronous execution
+     * @param testSuiteRun   the test suite to execute
+     * @param persist        whether to persist the test report
+     * @param timeoutSeconds the timeout for synchronous test runs, in seconds
+     * @param callback       optional callback URL for asynchronous execution
      * @return a {@link Response} containing the {@link TestReportDTO} or HTTP status depending on execution mode
      */
     @POST
@@ -149,6 +150,7 @@ public interface TestRunController {
      *
      * @param testRun  the test to execute
      * @param persist  whether to persist the test report
+     * @param timeoutSeconds the timeout for synchronous test runs, in seconds
      * @param callback optional callback URL for asynchronous execution
      * @return a {@link Response} containing the {@link TestReportDTO} or HTTP status depending on execution mode
      */

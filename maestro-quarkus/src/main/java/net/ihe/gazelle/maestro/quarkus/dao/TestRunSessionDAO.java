@@ -50,6 +50,7 @@ public class TestRunSessionDAO implements SessionStore<TestRunSession> {
     }
 
     @Override
+    @Transactional
     public boolean hasSession(String sessionId) {
         return entityManager.find(TestRunSessionEntity.class, sessionId) != null;
     }
@@ -78,6 +79,7 @@ public class TestRunSessionDAO implements SessionStore<TestRunSession> {
     }
 
     @Override
+    @Transactional
     public TestRunSession getSession(String sessionId) {
         TestRunSessionEntity testRunSessionEntity = entityManager.find(TestRunSessionEntity.class, sessionId);
         if (testRunSessionEntity != null) {
@@ -87,6 +89,7 @@ public class TestRunSessionDAO implements SessionStore<TestRunSession> {
     }
 
     @Override
+    @Transactional
     public List<TestRunSession> getAllSessions() {
         return entityManager
                 .createQuery("SELECT t FROM TestRunSessionEntity t", TestRunSessionEntity.class)

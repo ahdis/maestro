@@ -42,7 +42,6 @@ public class TestRunSessionEntity {
     @Column(name = "expirationDateTime")
     private Instant expirationDateTime;
 
-    @Lob
     @Column(name = "session", columnDefinition = "TEXT")
     private String session;
 
