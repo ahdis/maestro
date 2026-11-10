@@ -16,6 +16,8 @@
 
 package net.ihe.gazelle.maestro.quarkus;
 
+import io.quarkus.scheduler.Scheduled;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
@@ -27,6 +29,7 @@ import net.ihe.gazelle.maestro.quarkus.factory.TestSuiteRunObserverStore;
 import net.ihe.gazelle.maestro.quarkus.factory.TestSuiteStore;
 import net.ihe.gazelle.maestro.quarkus.websocket.WebSocketSessionService;
 
+@ApplicationScoped
 public class MaestroSessionScheduler {
 
     private final SessionStore<TestRunSession> sessionStore;
@@ -50,6 +53,7 @@ public class MaestroSessionScheduler {
         this.webSocketSessionService = webSocketSessionService;
     }
 
+    @Scheduled(every = "30s")
     void cleanupExpiredSessions() {
         sessionStore.removeExpiredSessions();
         testSuiteSessionStore.removeExpiredSessions();

@@ -56,7 +56,7 @@ public class StartTestSuiteRun implements Message {
     /**
      * The expiration timestamp for the test suite run execution
      */
-    private Instant expirationTimestamp;
+    private Instant expirationTimestamp = Instant.now().plusMillis(Test.TEST_DEFAULT_TIMEOUT_MILLIS);
 
     /**
      * Default constructor
