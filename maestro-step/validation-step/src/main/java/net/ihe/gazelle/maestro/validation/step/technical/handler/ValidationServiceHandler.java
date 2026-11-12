@@ -22,10 +22,12 @@ import net.ihe.gazelle.validation.v2.api.business.ValidationService;
 import net.ihe.gazelle.validation.v2.api.business.profile.ValidationProfile;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
 import net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest;
+import net.ihe.gazelle.validation.v2.client.HttpError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Handler for validation services resolved through service metadata.
@@ -74,13 +76,15 @@ public final class ValidationServiceHandler implements ValidationHandler {
    public List<ValidationProfile> getValidationProfiles() {
        return call(validationService::getValidationProfiles);
    }
-   private static <T> T call(java.util.function.Supplier<T> operation) {
+
+   private static <T> T call(Supplier<T> operation) {
       try {
          return operation.get();
-      } catch (net.ihe.gazelle.validation.v2.client.HttpError failure) {
-         throw new ValidationHttpException(failure.getStatus(), failure);
-      } catch (net.ihe.gazelle.validation.v1.client.HttpError failure) {
-         throw new ValidationHttpException(failure.getStatus(), failure);
+      } catch (HttpError | net.ihe.gazelle.validation.v1.client.HttpError failure) {
+         int status = failure instanceof HttpError currentError
+               ? currentError.getStatus()
+               : ((net.ihe.gazelle.validation.v1.client.HttpError) failure).getStatus();
+         throw new ValidationHttpException(status, failure);
       }
    }
 }
