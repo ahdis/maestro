@@ -30,6 +30,7 @@ import net.ihe.gazelle.validation.v2.client.SPIValidationServiceFactoryProvider;
 import net.ihe.gazelle.validation.v2.client.ValidationServiceClientFactory;
 import net.ihe.gazelle.validation.v2.client.ValidationServiceFactoryProvider;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Objects;
 
@@ -66,7 +67,9 @@ public class ValidationServiceHandlerFactory implements HandlerFactory {
      }
      ValidationServiceClientFactory factory = resolveFactory(providedInterface);
      try {
-          ValidationService validationService = factory.create(providedInterface);
+          ValidationService validationService = createClient(factory, providedInterface,
+                  timeout(configProvider, "gzl.validation.connectTimeoutMs", 10000),
+                  timeout(configProvider, "gzl.validation.readTimeoutMs", 120000));
           return new ValidationServiceHandler(validationService);
      } catch (RuntimeException e) {
           throw new IllegalArgumentException("Can't initiate validation handler due to exception while creating client from server url", e);
@@ -89,6 +92,32 @@ public class ValidationServiceHandlerFactory implements HandlerFactory {
                     .build());
         }
         return consumedInterfaces;
+    }
+
+    private static ValidationService createClient(ValidationServiceClientFactory factory, ProvidedInterface providedInterface,
+                                                  int connectTimeoutMs, int readTimeoutMs) {
+        // Configure the standard HTTP transport using constructors available in the released SDK.
+        // Custom SPI factories retain control over their own transport and timeout policy.
+        if (factory.getClass() != net.ihe.gazelle.validation.v2.client.ValidationServiceApiClientFactory.class) {
+            return factory.create(providedInterface);
+        }
+        HttpRestBinding binding = factory.getBindingOfType(providedInterface, HttpRestBinding.class);
+        if (binding == null) throw new IllegalArgumentException("No HTTP REST binding found for validation service");
+        URI serviceUri = URI.create(binding.getServiceUrl());
+        var version = net.ihe.gazelle.validation.v2.client.ValidationServiceApiVersion
+                .fromInterfaceVersion(providedInterface.getInterfaceVersion());
+        if (version == net.ihe.gazelle.validation.v2.client.ValidationServiceApiVersion.V2) {
+            return new net.ihe.gazelle.validation.v2.client.ValidationServiceHttpClient(serviceUri, connectTimeoutMs, readTimeoutMs);
+        }
+        return new net.ihe.gazelle.validation.v1.api.domain.wrapper.ValidationServiceV1Adapter(
+                new net.ihe.gazelle.validation.v1.client.ValidationServiceHttpClient(serviceUri, connectTimeoutMs, readTimeoutMs));
+    }
+
+    private static int timeout(ConfigProvider configProvider, String key, int defaultValue) {
+        String value = configProvider == null ? null : configProvider.getConfig(key);
+        int timeout = value == null || value.isBlank() ? defaultValue : Integer.parseInt(value);
+        if (timeout < 1 || timeout > 600000) throw new IllegalArgumentException(key + " must be between 1 and 600000 milliseconds");
+        return timeout;
     }
 
     private ValidationServiceClientFactory resolveFactory(ProvidedInterface providedInterface) {

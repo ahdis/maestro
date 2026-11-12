@@ -17,6 +17,7 @@
 package net.ihe.gazelle.maestro.engine.business;
 
 import net.ihe.gazelle.errorhandling.business.UnexpectedErrorBuilder;
+import net.ihe.gazelle.lang.TimeoutRuntimeException;
 import net.ihe.gazelle.maestro.api.business.message.StartStepRun;
 import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
 import net.ihe.gazelle.maestro.api.business.property.MissingPropertyException;
@@ -30,6 +31,8 @@ import org.slf4j.Logger;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * A stepRunnerJob receive a message from producer to execute Step, launch execution and send a result to Maestro Listener
@@ -59,36 +62,40 @@ public class StepRunner {
      * @param startStepRun Message containing a step to run
      */
     public void run(StartStepRun startStepRun) {
+        long started = System.nanoTime();
         StepRun stepRun = startStepRun.getStepRun();
         try {
             StepExecutor executor = stepExecutorProvider.getExecutor(startStepRun.getSessionId(), stepRun);
-            long timeoutMillis = Duration.between(Instant.now(), startStepRun.getExpirationTimestamp()).toMillis();
-            stepRun.setTimeout(timeoutMillis);
+            Instant expirationTimestamp = startStepRun.getExpirationTimestamp();
+            if (expirationTimestamp != null) {
+                long timeoutMillis = Duration.between(Instant.now(), expirationTimestamp).toMillis();
+                if (timeoutMillis <= 0) {
+                    String message = "Session expired before executing step " + stepRun.getName();
+                    throw new TimeoutRuntimeException(message, new TimeoutException(message));
+                }
+                stepRun.setTimeout(timeoutMillis);
+            }
             StepRunReport report = executor.execute(stepRun);
             stepRunReportValidator.validate(report).orThrow(IllegalStateException::new);
             stepRunEventProducer.notify(
-                    new StepRunFinished(
-                            startStepRun.getSessionId(), startStepRun.getTestId(),
-                            stepRun.getName(), stepRun, report
-                    )
+                    new StepRunFinished(startStepRun.getSessionId(), startStepRun.getTestId(), stepRun.getName(),
+                            stepRun, report)
             );
         } catch (UnknownStepException | MissingPropertyException | ClassCastException e) {
             // User error, due to bad test definition
             logger.atDebug().setCause(e).log("Unable to run step");
             stepRunEventProducer.notify(
-                    new StepRunFinished(
-                            startStepRun.getSessionId(), startStepRun.getTestId(),
-                            stepRun.getName(), stepRun, buildErrorReport(stepRun, e)
-                    )
+                    new StepRunFinished(startStepRun.getSessionId(), startStepRun.getTestId(), stepRun.getName(),
+                            stepRun, buildErrorReport(stepRun, e))
             );
         } catch (Exception e) {
             // Unexpected error
-            logger.atError().setCause(e).log("Unexpected error while running step");
+            logger.error("Unexpected error while running step: sessionId={}, testId={}, stepIndex={}, elapsedMs={}",
+                    startStepRun.getSessionId(), startStepRun.getTestId(), startStepRun.getStepIndex(),
+                    TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - started), e);
             stepRunEventProducer.notify(
-                    new StepRunFinished(
-                            startStepRun.getSessionId(), startStepRun.getTestId(),
-                            stepRun.getName(), stepRun, buildErrorReport(stepRun, e)
-                    )
+                    new StepRunFinished(startStepRun.getSessionId(), startStepRun.getTestId(), stepRun.getName(),
+                            stepRun, buildErrorReport(stepRun, e))
             );
         }
     }

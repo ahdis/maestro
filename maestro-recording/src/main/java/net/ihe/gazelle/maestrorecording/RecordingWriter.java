@@ -56,7 +56,7 @@ public final class RecordingWriter {
         return List.copyOf(recorded);
     }
 
-    public synchronized <T> String recordItemPlan(ItemPlan<T> plan, AccessControlList acl) {
+    public synchronized <T> String writeItemPlan(ItemPlan<T> plan, AccessControlList acl) {
         return service.recordItemPlan(plan, acl, history);
     }
 

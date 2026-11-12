@@ -15,8 +15,8 @@
 - Create LINK property type OK
 - Create Evidence concept OK
 - Create PUT_EVIDENCE message type OK
-- Add gradingMethod in Test model OK
-- Handle stop execution for gradingMethod "monitored" at the end of the execution, 
+- Add gradingMethod in Test model
+- Handle stop execution for gradingMethod "monitored" at the end of the execution,
 waiting for the user to set the status to completed or if there is at least one step
 that accept unsolicited evidence OK
 - Add a new evaluation step in maestro that is always in a test and maestro has to wait this step is over to terminate the test OK
@@ -82,7 +82,7 @@ through the display message, explaining him to search the right input in the tes
 
 - Add a defensive code in frontend that solve input references if we are in a user interaction step.
 - Instead of displaying those inputs in the Test level, we take them out from the List<SupportedInput> of the test
-and put them in the user interaction step level. 
+and put them in the user interaction step level.
 - When user interface send the test run command, the property is already resolved with its actual content.
 - This should have low impact in backend models (TMR / maestro)
 

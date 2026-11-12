@@ -151,7 +151,7 @@ public class TestStreamSocketController {
     @OnMessage
     @ProtectedWebSocket
     public void onMessage(Session session, String messageString) throws IOException {
-        LOG.debug("Received message: {}", messageString);
+        LOG.debug("Received message from session {}, characters={}", session.getId(), messageString.length());
         try {
             MessageDTO<?> message = serDes.deserialize(messageString, MessageDTO.class);
             WebSocketSession maestroCaller = sessionService.getSession(session.getId());

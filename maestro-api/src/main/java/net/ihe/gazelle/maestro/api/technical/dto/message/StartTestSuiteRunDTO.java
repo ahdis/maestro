@@ -121,4 +121,3 @@ public class StartTestSuiteRunDTO extends MessageDTO<StartTestSuiteRun> implemen
         return StartTestSuiteRun.class;
     }
 }
-
