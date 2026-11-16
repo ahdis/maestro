@@ -77,7 +77,7 @@ public class MaestroFacade {
         }
         testSuiteRunValidator.assertValid(testSuiteRun);
         String sessionId = UUID.randomUUID().toString();
-        testSuiteRunObserverStore.putSession(sessionId, testSuiteRunObserver, startTestSuiteRun.getExpirationTimestamp());
+        testSuiteRunObserverStore.putSession(sessionId, testSuiteRunObserver, startTestSuiteRun.getExpirationTimestamp().plusSeconds(30));
         maestroEventProducer.command(startTestSuiteRun
                 .setSessionId(sessionId)
                 .setTestSessionId(startTestSuiteRun.getTestSessionId())
@@ -97,7 +97,7 @@ public class MaestroFacade {
         }
         testRunValidator.assertValid(testRun);
         String sessionId = UUID.randomUUID().toString();
-        testRunObserverStore.putSession(sessionId, testRunObserver, startTestRun.getExpirationTimestamp());
+        testRunObserverStore.putSession(sessionId, testRunObserver, startTestRun.getExpirationTimestamp().plusSeconds(30));
         maestroEventProducer.command(startTestRun
                 .setSessionId(sessionId)
                 .setTestSessionId(startTestRun.getTestSessionId())
