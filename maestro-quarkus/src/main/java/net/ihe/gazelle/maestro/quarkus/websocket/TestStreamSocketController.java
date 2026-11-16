@@ -18,7 +18,6 @@ package net.ihe.gazelle.maestro.quarkus.websocket;
 
 import io.vertx.core.Vertx;
 import jakarta.enterprise.context.RequestScoped;
-import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
 import jakarta.websocket.*;
 import jakarta.websocket.server.ServerEndpoint;
