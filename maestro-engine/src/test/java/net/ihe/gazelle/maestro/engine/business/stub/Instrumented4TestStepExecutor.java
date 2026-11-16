@@ -21,19 +21,29 @@ import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.spi.business.StepExecutor;
 import net.ihe.gazelle.maestro.spi.business.StepRun;
 
+import java.util.concurrent.TimeUnit;
+
 import static net.ihe.gazelle.maestro.api.business.testreport.StepResult.PASSED;
+import static org.awaitility.Awaitility.await;
 
 public class Instrumented4TestStepExecutor implements StepExecutor {
 
     @Override
     public StepRunReport execute(StepRun stepRun) {
-        stepRun.getPropertyValue(Instrumented4TestStepDefinition.REQUIRED_INPUT);
+        try {
+            if (stepRun.getName().contains("timeout")) {
+                await().during(10, TimeUnit.MILLISECONDS);
+            }
+            stepRun.getPropertyValue(Instrumented4TestStepDefinition.REQUIRED_INPUT);
 
-        StepRunReportBuilder reportBuilder = new StepRunReportBuilder()
-                .setStepName(stepRun.getName())
-                .setType(stepRun.getType())
-                .setResult(PASSED);
+            StepRunReportBuilder reportBuilder = new StepRunReportBuilder()
+                    .setStepName(stepRun.getName())
+                    .setType(stepRun.getType())
+                    .setResult(PASSED);
 
-        return reportBuilder.build();
+            return reportBuilder.build();
+        } catch (Exception _) {
+            return null;
+        }
     }
 }

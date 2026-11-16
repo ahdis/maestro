@@ -8,8 +8,11 @@ import net.ihe.gazelle.servicemetadata.api.business.HttpRestBinding;
 import net.ihe.gazelle.servicemetadata.api.business.ProvidedInterface;
 import net.ihe.gazelle.validation.v2.client.ValidationServiceApiClientFactory;
 import org.junit.jupiter.api.Test;
+
 import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class ReleasedValidationClientTest {
@@ -36,15 +39,15 @@ class ReleasedValidationClientTest {
         server.start();
         try {
             for (String version : List.of("1.0.0", "2.0.0")) {
-                var failure = assertThrows(ValidationHttpException.class,
-                        () -> handler(server, version, 1000).getValidationProfiles());
+                var client = handler(server, version, 1000);
+                var failure = assertThrows(ValidationHttpException.class, client::getValidationProfiles);
                 assertEquals("Validation service returned HTTP 504", failure.getMessage());
                 assertNotNull(failure.getCause());
                 if (version.equals("2.0.0")) {
                     var request = new net.ihe.gazelle.validation.v2.api.business.request.ValidationRequest()
                             .setValidationProfileId("test-profile");
                     var validationFailure = assertThrows(ValidationHttpException.class,
-                            () -> handler(server, version, 1000).validate(request));
+                            () -> client.validate(request));
                     assertEquals("Validation service returned HTTP 504", validationFailure.getMessage());
                 }
             }
@@ -54,15 +57,25 @@ class ReleasedValidationClientTest {
     @Test
     void appliesConfiguredReadTimeoutUsingReleasedClientConstructors() throws Exception {
         var server = HttpServer.create(new InetSocketAddress("localhost", 0), 0);
+        var releaseResponse = new CountDownLatch(1);
         server.createContext("/", exchange -> {
-            try { Thread.sleep(250); } catch (InterruptedException failure) { Thread.currentThread().interrupt(); }
-            exchange.close();
+            try {
+                releaseResponse.await();
+            } catch (InterruptedException _) {
+                Thread.currentThread().interrupt();
+            } finally {
+                exchange.close();
+            }
         });
         server.start();
         try {
+            var client = handler(server, "2.0.0", 30);
             var failure = assertThrows(net.ihe.gazelle.validation.v2.client.TimeoutException.class,
-                    () -> handler(server, "2.0.0", 30).getValidationProfiles());
+                    client::getValidationProfiles);
             assertTrue(failure.getMessage().contains("30"));
-        } finally { server.stop(0); }
+        } finally {
+            releaseResponse.countDown();
+            server.stop(0);
+        }
     }
 }

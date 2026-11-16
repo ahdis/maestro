@@ -19,6 +19,7 @@ package net.ihe.gazelle.maestro.engine.business.context;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -29,71 +30,95 @@ import java.util.Objects;
  */
 public class TestSuiteSession {
 
-   private final TestSuiteRun testSuiteRun;
-   private final TestRunCursor testRunCursor;
-   private final List<TestRunReport> testRunReports;
+    private final TestSuiteRun testSuiteRun;
+    private final TestRunCursor testRunCursor;
+    private final List<TestRunReport> testRunReports;
+    private Instant expirationTimestamp;
 
-   /**
-    * Creates a new {@code TestSuiteSession} for the specified {@link TestSuiteRun} and {@link TestRunCursor}.
-    *
-    * @param testSuiteRun the test suite run associated with this session
-    * @param testRunCursor the cursor for iterating over the test runs in this suite
-    */
-   public TestSuiteSession(TestSuiteRun testSuiteRun, TestRunCursor testRunCursor) {
-      this.testSuiteRun = testSuiteRun;
-      this.testRunCursor = testRunCursor;
-      this.testRunReports = new ArrayList<>();
-   }
+    /**
+     * Creates a new {@code TestSuiteSession} for the specified {@link TestSuiteRun} and {@link TestRunCursor}.
+     *
+     * @param testSuiteRun  the test suite run associated with this session
+     * @param testRunCursor the cursor for iterating over the test runs in this suite
+     */
+    public TestSuiteSession(TestSuiteRun testSuiteRun, TestRunCursor testRunCursor) {
+        this.testSuiteRun = testSuiteRun;
+        this.testRunCursor = testRunCursor;
+        this.testRunReports = new ArrayList<>();
+    }
 
-   /**
-    * Retrieves the {@link TestSuiteRun} associated with this session.
-    *
-    * @return the test suite run
-    */
-   public TestSuiteRun getTestSuiteRun() {
-      return testSuiteRun;
-   }
+    /**
+     * Retrieves the {@link TestSuiteRun} associated with this session.
+     *
+     * @return the test suite run
+     */
+    public TestSuiteRun getTestSuiteRun() {
+        return testSuiteRun;
+    }
 
-   /**
-    * Returns a copy of the list of executed test run reports.
-    *
-    * @return a list of {@link TestRunReport} instances
-    */
-   public List<TestRunReport> getTestRunReports() {
-      return new ArrayList<>(testRunReports);
-   }
+    /**
+     * Returns a copy of the list of executed test run reports.
+     *
+     * @return a list of {@link TestRunReport} instances
+     */
+    public List<TestRunReport> getTestRunReports() {
+        return new ArrayList<>(testRunReports);
+    }
 
-   /**
-    * Adds a {@link TestRunReport} to the list of executed test run reports.
-    *
-    * @param report the test run report to add
-    */
-   public void addTestRunReport(TestRunReport report) {
-      testRunReports.add(report);
-   }
+    /**
+     * Adds the specified test run report to this session.
+     *
+     * @param report the test run report to add
+     * @return this test suite session
+     */
+    public TestSuiteSession addTestRunReport(TestRunReport report) {
+        testRunReports.add(report);
+        return this;
+    }
 
-   /**
-    * Returns the {@link TestRunCursor} for iterating over the test runs in this suite.
-    *
-    * @return the test run cursor
-    */
-   public TestRunCursor getTestRunCursor() {
-      return testRunCursor;
-   }
+    /**
+     * Returns the {@link TestRunCursor} for iterating over the test runs in this suite.
+     *
+     * @return the test run cursor
+     */
+    public TestRunCursor getTestRunCursor() {
+        return testRunCursor;
+    }
 
-   @Override
-   public boolean equals(Object o) {
-      if (!(o instanceof TestSuiteSession store)) {
-         return false;
-      }
-      return Objects.equals(testSuiteRun, store.testSuiteRun)
-            && Objects.equals(testRunReports, store.testRunReports)
-            && Objects.equals(testRunCursor, store.testRunCursor);
-   }
+    /**
+     * Returns the expiration timestamp for this test suite session.
+     *
+     * @return the instant at which this session expires, or {@code null} if no expiration timestamp has been set
+     */
+    public Instant getExpirationTimestamp() {
+        return expirationTimestamp;
+    }
 
-   @Override
-   public int hashCode() {
-      return Objects.hash(testSuiteRun, testRunReports, testRunCursor);
-   }
+    /**
+     * Sets the expiration timestamp for this test suite session.
+     *
+     * @param expirationTimestamp the instant at which this session expires, or {@code null} to clear the expiration timestamp
+     * @return this test suite session
+     */
+    public TestSuiteSession setExpirationTimestamp(Instant expirationTimestamp) {
+        this.expirationTimestamp = expirationTimestamp;
+        return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof TestSuiteSession store)) {
+            return false;
+        }
+        return Objects.equals(testSuiteRun, store.testSuiteRun)
+                && Objects.equals(testRunReports, store.testRunReports)
+                && Objects.equals(testRunCursor, store.testRunCursor)
+                && Objects.equals(expirationTimestamp, store.expirationTimestamp);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(testSuiteRun, testRunReports, testRunCursor, expirationTimestamp);
+    }
 }
 

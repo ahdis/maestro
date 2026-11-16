@@ -31,6 +31,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserInteractionStepExecutorTest {
+
     private StepRunReport execute(List<SupportedInput> fields, Property... values) {
         fields.forEach(field -> field.setLabel(field.getId()));
         UserInteractionStepExecutor executor = new UserInteractionStepExecutor(new UserInteractionHandlerStub() {
@@ -40,10 +41,14 @@ class UserInteractionStepExecutorTest {
                 return new UserInteractionCompleted().addInputs(List.of(values));
             }
         });
-        return executor.execute(new StepRun(new Step().setName("Interaction").setType("USER_INTERACTION")
-                .setProperties(List.of(new StringProperty("interactionTitle", "Patient"),
-                        new StringProperty("message", "Enter values"),
-                        new SupportedInputsProperty("interactionInputs", fields))), List.of()));
+        return executor.execute(new StepRun(
+                new Step()
+                        .setName("Interaction")
+                        .setType("USER_INTERACTION")
+                        .setProperties(List.of(
+                                new StringProperty("interactionTitle", "Patient"),
+                                new StringProperty("message", "Enter values"),
+                                new SupportedInputsProperty("interactionInputs", fields))), List.of()));
     }
 
     @Test

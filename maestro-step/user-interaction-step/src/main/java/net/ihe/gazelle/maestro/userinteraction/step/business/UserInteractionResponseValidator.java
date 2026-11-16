@@ -32,6 +32,7 @@ import java.util.*;
 
 /** Validates submitted answers against the configured fields using the model-validator contract. */
 final class UserInteractionResponseValidator extends AbstractValidator<UserInteractionCompleted> {
+
     private final Map<String, SupportedInput> fields;
     private final PropertyInReportValidator propertyValidator;
 

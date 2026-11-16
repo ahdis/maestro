@@ -17,15 +17,18 @@
 package net.ihe.gazelle.maestro.quarkus.dao;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
 import net.ihe.gazelle.maestro.engine.business.context.TestRunSession;
 
+import java.time.Instant;
 import java.util.List;
 
 @ApplicationScoped
+@ActivateRequestContext
 public class TestRunSessionDAO implements SessionStore<TestRunSession> {
 
     private final EntityManager entityManager;
@@ -37,10 +40,11 @@ public class TestRunSessionDAO implements SessionStore<TestRunSession> {
 
     @Override
     @Transactional
-    public void putSession(String sessionId, TestRunSession session, long timeout) {
+    @ActivateRequestContext
+    public void putSession(String sessionId, TestRunSession session, Instant expirationDateTime) {
         TestRunSessionEntity testRunSessionEntity = entityManager.find(TestRunSessionEntity.class, sessionId);
         if (testRunSessionEntity == null) {
-            entityManager.persist(new TestRunSessionEntity(sessionId, session));
+            entityManager.persist(new TestRunSessionEntity(sessionId, expirationDateTime, session));
         } else {
             testRunSessionEntity.setSession(session);
             entityManager.merge(testRunSessionEntity);
@@ -49,12 +53,14 @@ public class TestRunSessionDAO implements SessionStore<TestRunSession> {
     }
 
     @Override
+    @ActivateRequestContext
     public boolean hasSession(String sessionId) {
         return entityManager.find(TestRunSessionEntity.class, sessionId) != null;
     }
 
     @Override
     @Transactional
+    @ActivateRequestContext
     public void removeSession(String sessionId) {
         TestRunSessionEntity testRunSessionEntity = entityManager.find(TestRunSessionEntity.class, sessionId);
         if (testRunSessionEntity != null) {
@@ -64,6 +70,21 @@ public class TestRunSessionDAO implements SessionStore<TestRunSession> {
     }
 
     @Override
+    @Transactional
+    @ActivateRequestContext
+    public void removeExpiredSessions() {
+        entityManager.createQuery(
+                        """
+                        DELETE FROM TestRunSessionEntity s
+                        WHERE s.expirationDateTime <= :now
+                        """
+                )
+                .setParameter("now", Instant.now())
+                .executeUpdate();
+    }
+
+    @Override
+    @ActivateRequestContext
     public TestRunSession getSession(String sessionId) {
         TestRunSessionEntity testRunSessionEntity = entityManager.find(TestRunSessionEntity.class, sessionId);
         if (testRunSessionEntity != null) {
@@ -73,6 +94,7 @@ public class TestRunSessionDAO implements SessionStore<TestRunSession> {
     }
 
     @Override
+    @ActivateRequestContext
     public List<TestRunSession> getAllSessions() {
         return entityManager
                 .createQuery("SELECT t FROM TestRunSessionEntity t", TestRunSessionEntity.class)

@@ -18,8 +18,8 @@ package net.ihe.gazelle.maestro.quarkus.factory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
+import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.Produces;
 import net.ihe.gazelle.maestro.api.business.Maestro;
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.api.business.MaestroSessionService;
@@ -141,6 +141,7 @@ public class MaestroFactory {
     /**
      * Produces a configured {@link MaestroSessionService} instance that interacts with
      * the session store for managing test run sessions.
+     * @param maestro the {@link MaestroFacade} instance to use for test run orchestration
      *
      * @return a new {@link MaestroSessionService} implementation instance
      */

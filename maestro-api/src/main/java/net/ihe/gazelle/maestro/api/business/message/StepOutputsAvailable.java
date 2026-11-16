@@ -22,7 +22,19 @@ import java.io.Serial;
 import java.time.Instant;
 import java.util.List;
 
-/** Application notification containing available outputs of an already completed step. */
+/**
+ * Message indicating that output properties produced by a step are available.
+ *
+ * This message identifies the test and step that produced the outputs, records
+ * the time at which the outputs became available, and carries the resulting
+ * properties. The output list is defensively copied during construction and
+ * stored as an unmodifiable list.
+ *
+ * @param testId the identifier of the test associated with the step outputs
+ * @param stepName the name of the step that produced the outputs
+ * @param dateTime the date and time when the outputs became available
+ * @param outputs the output properties produced by the step
+ */
 public record StepOutputsAvailable(
         String testId, String stepName, Instant dateTime, List<Property> outputs)
         implements Message {

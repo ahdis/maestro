@@ -94,7 +94,7 @@ class TestRunControllerTest {
       TestReport testReport = ObjectFactory.createTestReport();
       maestroMock.setTestReportSupplier(() -> testReport);
 
-      try (Response response = controller.executeTestSuite(getTestSuiteRunDTO(), false, null)) {
+      try (Response response = controller.executeTestSuite(getTestSuiteRunDTO(), false, 1L, null)) {
          assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
          TestReportDTO entity = (TestReportDTO) response.getEntity();
          assertNotNull(entity);
@@ -107,7 +107,7 @@ class TestRunControllerTest {
       TestReport testReport = ObjectFactory.createTestReport();
       maestroMock.setTestReportSupplier(() -> testReport);
 
-      try (Response response = controller.executeTest(getTestRunDTO(), false, null)) {
+      try (Response response = controller.executeTest(getTestRunDTO(), false, 1L, null)) {
          assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
          TestReportDTO entity = (TestReportDTO) response.getEntity();
          assertNotNull(entity);
@@ -123,7 +123,7 @@ class TestRunControllerTest {
             authzForTestRunRoles(Set.of("role:anonymous")),
             new SynchronousMaestro(maestroMock), maestroMock);
 
-      try (Response response = controller.executeTestSuite(getTestSuiteRunDTO(), false, null)) {
+      try (Response response = controller.executeTestSuite(getTestSuiteRunDTO(), false, 1L, null)) {
          assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
       }
    }
@@ -136,7 +136,7 @@ class TestRunControllerTest {
             authzForTestRunRoles(Set.of("role:anonymous")),
             new SynchronousMaestro(maestroMock), maestroMock);
 
-      try (Response response = controller.executeTest(getTestRunDTO(), false, null)) {
+      try (Response response = controller.executeTest(getTestRunDTO(), false, 1L, null)) {
          assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
       }
    }
@@ -147,7 +147,7 @@ class TestRunControllerTest {
             authzForTestRunRoles(Set.of("role:gazelle_admin")),
             new SynchronousMaestro(maestroMock), maestroMock);
 
-      try (Response response = controller.executeTest(getTestRunDTO(), false, null)) {
+      try (Response response = controller.executeTest(getTestRunDTO(), false, 1L, null)) {
          assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), response.getStatus());
       }
    }
@@ -161,7 +161,7 @@ class TestRunControllerTest {
             authzForTestRunRoles(Set.of("org-adm:{}")),
             new SynchronousMaestro(maestroMock), maestroMock);
 
-      try (Response response = controller.executeTest(getTestRunDTO(), false, null)) {
+      try (Response response = controller.executeTest(getTestRunDTO(), false, 1L, null)) {
          assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
       }
    }
@@ -171,7 +171,7 @@ class TestRunControllerTest {
       controller = new TestRunControllerImpl(new IdentityMock(Set.of("role:vendor_user")), authz,
             new SynchronousMaestro(maestroMock), maestroMock);
 
-      try (Response response = controller.executeTestSuite(getTestSuiteRunDTO(), false, null)) {
+      try (Response response = controller.executeTestSuite(getTestSuiteRunDTO(), false, 1L, null)) {
          assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), response.getStatus());
       }
    }
@@ -181,7 +181,7 @@ class TestRunControllerTest {
       controller = new TestRunControllerImpl(new IdentityMock(Set.of("role:vendor_user")), authz,
             new SynchronousMaestro(maestroMock), maestroMock);
 
-      try (Response response = controller.executeTest(getTestRunDTO(), false, null)) {
+      try (Response response = controller.executeTest(getTestRunDTO(), false, 1L, null)) {
          assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), response.getStatus());
       }
    }
@@ -191,7 +191,7 @@ class TestRunControllerTest {
       TestReport testReport = ObjectFactory.createTestReport();
       maestroMock.setTestReportSupplier(() -> testReport);
 
-      try (Response response = controller.executeTest(getTestRunDTO(), true, null)) {
+      try (Response response = controller.executeTest(getTestRunDTO(), true, 1L, null)) {
          assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
          TestReportDTO entity = (TestReportDTO) response.getEntity();
          assertNotNull(entity);
@@ -211,7 +211,7 @@ class TestRunControllerTest {
                   .willReturn(WireMock.ok())
       );
 
-      try (Response response = controller.executeTestSuite(getTestSuiteRunDTO(), false, callbackUrl)) {
+      try (Response response = controller.executeTestSuite(getTestSuiteRunDTO(), false, 1L, callbackUrl)) {
          assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus());
          assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus());
          Awaitility.await().atMost(3, TimeUnit.SECONDS).untilAsserted(
@@ -241,7 +241,7 @@ class TestRunControllerTest {
                   .willReturn(WireMock.ok())
       );
 
-      try (Response response = controller.executeTest(getTestRunDTO(), false, callbackUrl)) {
+      try (Response response = controller.executeTest(getTestRunDTO(), false, 1L, callbackUrl)) {
          assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus());
          assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus());
          Awaitility.await().atMost(10, TimeUnit.SECONDS).untilAsserted(
@@ -265,7 +265,7 @@ class TestRunControllerTest {
                   .willReturn(WireMock.ok())
       );
 
-      try (Response response = controller.executeTestSuite(getTestSuiteRunDTO(), true, callbackUrl)) {
+      try (Response response = controller.executeTestSuite(getTestSuiteRunDTO(), true, 1L, callbackUrl)) {
          assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus());
          Awaitility.await().atMost(3, TimeUnit.SECONDS).untilAsserted(
                () -> wireMockServer.verify(
@@ -288,9 +288,9 @@ class TestRunControllerTest {
                   .willReturn(WireMock.ok())
       );
 
-      try (Response response = controller.executeTest(getTestRunDTO(), true, callbackUrl)) {
+      try (Response response = controller.executeTest(getTestRunDTO(), true, 1L, callbackUrl)) {
          assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus());
-         Awaitility.await().atMost(3, TimeUnit.SECONDS).untilAsserted(
+         Awaitility.await().atMost(1, TimeUnit.SECONDS).untilAsserted(
                () -> wireMockServer.verify(
                      1,
                      postRequestedFor(urlEqualTo("/callback/testTestRunAsyncPersist"))
@@ -311,11 +311,11 @@ class TestRunControllerTest {
                   .willReturn(WireMock.ok())
       );
 
-      try (Response response = controller.executeTestSuite(getTestSuiteRunDTO(), false, callbackUrl)) {
+      try (Response response = controller.executeTestSuite(getTestSuiteRunDTO(), false, 1L, callbackUrl)) {
          assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
          assertTrue(response.getEntity().toString().contains("bad format"));
          // Verify that no call back was made
-         Awaitility.await().during(3, TimeUnit.SECONDS).untilAsserted(
+         Awaitility.await().during(100, TimeUnit.MILLISECONDS).untilAsserted(
                () -> wireMockServer.verify(
                      0,
                      postRequestedFor(urlEqualTo("/callback/testInvalidTestSuiteRunAsync"))
@@ -334,11 +334,11 @@ class TestRunControllerTest {
                   .willReturn(WireMock.ok())
       );
 
-      try (Response response = controller.executeTest(getTestRunDTO(), false, callbackUrl)) {
+      try (Response response = controller.executeTest(getTestRunDTO(), false, 1L, callbackUrl)) {
          assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
          assertTrue(response.getEntity().toString().contains("bad format"));
          // Verify that no call back was made
-         Awaitility.await().during(3, TimeUnit.SECONDS).untilAsserted(
+         Awaitility.await().during(100, TimeUnit.MILLISECONDS).untilAsserted(
                () -> wireMockServer.verify(
                      0,
                      postRequestedFor(urlEqualTo("/callback/testInvalidTestRunAsync"))
@@ -355,7 +355,7 @@ class TestRunControllerTest {
          return null;
       });
 
-      try (Response response = controller.executeTestSuite(getTestSuiteRunDTO(), false, null)) {
+      try (Response response = controller.executeTestSuite(getTestSuiteRunDTO(), false, 1L, null)) {
          assertEquals(Response.Status.GATEWAY_TIMEOUT.getStatusCode(), response.getStatus());
          assertEquals(SynchronousMaestro.TIMEOUT_MESSAGE, response.getEntity());
       }
@@ -369,7 +369,7 @@ class TestRunControllerTest {
          return null;
       });
 
-      try (Response response = controller.executeTest(getTestRunDTO(), false, null)) {
+      try (Response response = controller.executeTest(getTestRunDTO(), false, 1L, null)) {
          assertEquals(Response.Status.GATEWAY_TIMEOUT.getStatusCode(), response.getStatus());
          assertEquals(SynchronousMaestro.TIMEOUT_MESSAGE, response.getEntity());
       }
@@ -379,7 +379,7 @@ class TestRunControllerTest {
    void testTestSuiteRunInternalServerError() {
       maestroMock.setErrorSupplier(() -> new RuntimeException("boom boom"));
 
-      try (Response response = controller.executeTestSuite(getTestSuiteRunDTO(), false, null)) {
+      try (Response response = controller.executeTestSuite(getTestSuiteRunDTO(), false, 1L, null)) {
          assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
          assertTrue(Thread.currentThread().isInterrupted());
          assertTrue(response.getEntity().toString().contains("an error occurred"));
@@ -390,7 +390,7 @@ class TestRunControllerTest {
    void testTestRunInternalServerError() {
       maestroMock.setErrorSupplier(() -> new RuntimeException("boom"));
 
-      try (Response response = controller.executeTest(getTestRunDTO(), false, null)) {
+      try (Response response = controller.executeTest(getTestRunDTO(), false, 1L, null)) {
          assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
          assertTrue(Thread.currentThread().isInterrupted());
          assertTrue(response.getEntity().toString().contains("an error occurred"));

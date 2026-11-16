@@ -18,6 +18,8 @@ package net.ihe.gazelle.maestro.quarkus.dao;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.IndexOptions;
+import com.mongodb.client.model.Indexes;
 import com.mongodb.client.model.ReplaceOptions;
 import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
 import net.ihe.gazelle.maestro.engine.business.context.TestRunSession;
@@ -26,9 +28,12 @@ import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import org.bson.Document;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Projections.include;
@@ -54,6 +59,11 @@ public class MongoTestRunSessionStore implements SessionStore<TestRunSession> {
                 .getDatabase(databaseName)
                 .getCollection(COLLECTION_NAME);
 
+        this.collection.createIndex(
+                Indexes.ascending("expiresAt"),
+                new IndexOptions().expireAfter(0L, TimeUnit.SECONDS)
+        );
+
         this.serDes = new JacksonSerDes();
     }
 
@@ -64,13 +74,13 @@ public class MongoTestRunSessionStore implements SessionStore<TestRunSession> {
      *
      * @param sessionId the unique session identifier
      * @param session the session to persist
-     * @param timeout the session timeout, currently unused
+     * @param expirationTimestamp the session expiration timestamp
      */
     @Override
-    public void putSession(String sessionId, TestRunSession session, long timeout) {
+    public void putSession(String sessionId, TestRunSession session, Instant expirationTimestamp) {
         Objects.requireNonNull(sessionId, SESSION_ID_REQUIRED);
         Objects.requireNonNull(session, "session must not be null");
-        Document document = toMongoDocument(sessionId, session);
+        Document document = toMongoDocument(sessionId, session, expirationTimestamp);
         collection.replaceOne(
                 eq("_id", sessionId),
                 document,
@@ -106,6 +116,11 @@ public class MongoTestRunSessionStore implements SessionStore<TestRunSession> {
         collection.deleteOne(eq("_id", sessionId));
     }
 
+    @Override
+    public void removeExpiredSessions() {
+        // Nothing to do
+    }
+
     /**
      * Retrieves a session by its identifier.
      *
@@ -132,9 +147,9 @@ public class MongoTestRunSessionStore implements SessionStore<TestRunSession> {
     @Override
     public List<TestRunSession> getAllSessions() {
         List<TestRunSession> sessions = new ArrayList<>();
-        for (Document document : collection.find()) {
-            sessions.add(toDomain(document));
-        }
+        collection.find().forEach(
+                document -> sessions.add(toDomain(document))
+        );
         return sessions;
     }
 
@@ -143,10 +158,15 @@ public class MongoTestRunSessionStore implements SessionStore<TestRunSession> {
      * The DTO is serialized to JSON using the existing serialization
      * mechanism. Document.parse converts the JSON payload to BSON.
      */
-    private Document toMongoDocument(String sessionId, TestRunSession session) {
+    private Document toMongoDocument(String sessionId, TestRunSession session, Instant expirationTimestamp) {
         String json = serDes.serializeAsString(new TestRunSessionDTO(session));
         Document payload = Document.parse(json);
-        return new Document("_id", sessionId).append("payload", payload);
+
+        Date expiresAt = Date.from(expirationTimestamp);
+
+        return new Document("_id", sessionId)
+                .append("payload", payload)
+                .append("expiresAt", expiresAt);
     }
 
     /**

@@ -38,6 +38,12 @@ public class SupportedInputsProperty extends Property {
         super();
     }
 
+    /**
+     * Constructs a new SupportedInputsProperty with the specified name and supported input values.
+     *
+     * @param name the name of the property, which identifies it uniquely
+     * @param value the list of supported inputs to be assigned to the property
+     */
     public SupportedInputsProperty(String name, List<SupportedInput> value) {
         super(name, (Serializable) value);
     }

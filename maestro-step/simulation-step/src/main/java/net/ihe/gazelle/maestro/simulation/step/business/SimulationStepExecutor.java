@@ -178,12 +178,14 @@ public class SimulationStepExecutor implements StepExecutor {
       };
    }
 
-   private SimulationReport waitSimulationReport(SimulationRequest simulationRequest,
-                                                 CompletableFuture<SimulationReport> futureReport) {
+   private SimulationReport waitSimulationReport(
+           SimulationRequest simulationRequest,
+           CompletableFuture<SimulationReport> futureReport
+   ) {
       long timeout = simulationRequest.getTimeoutSeconds() + 3L;
       try {
          return futureReport.get(timeout, TimeUnit.SECONDS);
-      } catch (TimeoutException e) {
+      } catch (TimeoutException _) {
          LOG.error("Simulation timed out after {} seconds", timeout);
          throw new TimeoutRuntimeException("Simulation timed out after " + timeout + " seconds");
       } catch (InterruptedException e) {

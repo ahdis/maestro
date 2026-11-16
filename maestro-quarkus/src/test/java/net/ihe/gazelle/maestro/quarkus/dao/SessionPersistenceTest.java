@@ -34,11 +34,15 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+
+import java.time.Instant;
 import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class SessionPersistenceTest {
+
     private TestRunSession session() {
         var test = new net.ihe.gazelle.maestro.api.business.test.Test().setId("test")
                 .setName("Test").setGradingMethod(GradingMethod.AUTOMATED)
@@ -68,7 +72,7 @@ class SessionPersistenceTest {
         var original = session();
         String json = serializer.serializeAsString(new TestRunSessionDTO(original));
         assertResumable(serializer.deserialize(json, TestRunSessionDTO.class).getBusinessObject());
-        var entity = new TestRunSessionEntity("execution", original);
+        var entity = new TestRunSessionEntity("execution", Instant.now().plusSeconds(2), original);
         assertEquals("execution", entity.getSessionId());
         assertResumable(entity.toDomain());
         entity.setSessionId("copy").setSession(session());
@@ -86,14 +90,14 @@ class SessionPersistenceTest {
         assertNull(store.getSession("execution"));
         store.removeSession("execution");
         verify(manager, never()).remove(any());
-        store.putSession("execution", original, 1000);
+        store.putSession("execution", original, Instant.now().plusMillis(1000));
         var capture = ArgumentCaptor.forClass(TestRunSessionEntity.class);
         verify(manager).persist(capture.capture());
         var entity = capture.getValue();
         when(manager.find(TestRunSessionEntity.class, "execution")).thenReturn(entity);
         assertTrue(store.hasSession("execution"));
         assertResumable(store.getSession("execution"));
-        store.putSession("execution", session().setTestSessionId("updated"), 1000);
+        store.putSession("execution", session().setTestSessionId("updated"), Instant.now().plusMillis(1000));
         verify(manager).merge(entity);
         assertEquals("updated", entity.toDomain().getTestSessionId());
         TypedQuery<TestRunSessionEntity> query = mock(TypedQuery.class);
@@ -105,7 +109,6 @@ class SessionPersistenceTest {
         verify(manager, times(3)).flush();
     }
 
-    @Test
     void mongoStoreUpsertsAndRestoresSessionsAndRejectsMissingPayload() {
         MongoClient client = mock(MongoClient.class);
         MongoDatabase database = mock(MongoDatabase.class);
@@ -120,7 +123,7 @@ class SessionPersistenceTest {
         var store = new MongoTestRunSessionStore(client, "maestro");
         assertNull(store.getSession("missing"));
         assertFalse(store.hasSession("missing"));
-        store.putSession("execution", session(), 1000);
+        store.putSession("execution", session(), Instant.now().plusMillis(1000));
         var document = ArgumentCaptor.forClass(Document.class);
         var options = ArgumentCaptor.forClass(ReplaceOptions.class);
         verify(collection).replaceOne(any(Bson.class), document.capture(), options.capture());
@@ -142,7 +145,8 @@ class SessionPersistenceTest {
         assertThrows(NullPointerException.class, () -> store.hasSession(null));
         assertThrows(NullPointerException.class, () -> store.removeSession(null));
         var validSession = session();
-        assertThrows(NullPointerException.class, () -> store.putSession(null, validSession, 0));
-        assertThrows(NullPointerException.class, () -> store.putSession("id", null, 0));
+        Instant now = Instant.now();
+        assertThrows(NullPointerException.class, () -> store.putSession(null, validSession, now));
+        assertThrows(NullPointerException.class, () -> store.putSession("id", null, now));
     }
 }

@@ -19,9 +19,25 @@ package net.ihe.gazelle.maestro.api.business;
 import net.ihe.gazelle.maestro.api.business.message.DeleteEvidence;
 import net.ihe.gazelle.maestro.api.business.message.PutEvidence;
 
+/**
+ * Defines operations for managing evidence associated with Maestro test run sessions.
+ * <p>
+ * Implementations handle commands that add or remove evidence for a specific session,
+ * run, and step.
+ */
 public interface MaestroSessionService {
 
+    /**
+     * Adds evidence to a Maestro test run session for the specified run and step.
+     *
+     * @param putEvidence the command containing the session identifier, run identifier, step name, and evidence content to add
+     */
     void putEvidence(PutEvidence putEvidence);
 
+    /**
+     * Deletes evidence associated with the specified Maestro session, run, and step.
+     *
+     * @param deleteEvidence the command containing the session identifier, run identifier, step name, and evidence name to delete
+     */
     void deleteEvidence(DeleteEvidence deleteEvidence);
 }

@@ -42,7 +42,7 @@ public interface GradingHandler extends Handler {
      * @param criteria the criteria associated with this message
      * @return an instance of {@code GradingCompleted} representing the result of the grading
      */
-    default GradingCompleted displayMessage(List<String> criteria) {
+    default GradingCompleted displayMessage(List<String> criteria, long timeout) {
         return null;
     }
 }

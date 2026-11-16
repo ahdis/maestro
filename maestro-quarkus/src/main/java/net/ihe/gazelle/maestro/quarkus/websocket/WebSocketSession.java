@@ -17,37 +17,18 @@
 package net.ihe.gazelle.maestro.quarkus.websocket;
 
 import jakarta.websocket.Session;
-
 import net.ihe.gazelle.lang.IORuntimeException;
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
-import net.ihe.gazelle.maestro.api.business.message.AskGrading;
-import net.ihe.gazelle.maestro.api.business.message.ExecutionFinished;
-import net.ihe.gazelle.maestro.api.business.message.GradingCompleted;
-import net.ihe.gazelle.maestro.api.business.message.InteractWithUser;
-import net.ihe.gazelle.maestro.api.business.message.PutEvidence;
-import net.ihe.gazelle.maestro.api.business.message.StepOutputsAvailable;
-import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
-import net.ihe.gazelle.maestro.api.business.message.StepRunStarted;
-import net.ihe.gazelle.maestro.api.business.message.TestRunFinished;
-import net.ihe.gazelle.maestro.api.business.message.TestRunStarted;
-import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
-import net.ihe.gazelle.maestro.api.technical.dto.message.AskGradingDTO;
-import net.ihe.gazelle.maestro.api.technical.dto.message.EvidenceRecordedDTO;
-import net.ihe.gazelle.maestro.api.technical.dto.message.ExecutionFinishedDTO;
-import net.ihe.gazelle.maestro.api.technical.dto.message.InteractWithUserDTO;
-import net.ihe.gazelle.maestro.api.technical.dto.message.StepOutputsAvailableDTO;
-import net.ihe.gazelle.maestro.api.technical.dto.message.StepRunFinishedDTO;
-import net.ihe.gazelle.maestro.api.technical.dto.message.StepRunStartedDTO;
-import net.ihe.gazelle.maestro.api.technical.dto.message.TestRunFinishedDTO;
-import net.ihe.gazelle.maestro.api.technical.dto.message.TestRunStartedDTO;
+import net.ihe.gazelle.maestro.api.business.message.*;
+import net.ihe.gazelle.maestro.api.technical.dto.message.*;
 import net.ihe.gazelle.maestro.engine.business.RecordedOutputsObserver;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.modelmarshaller.technical.serialization.TextSerDes;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -62,6 +43,7 @@ public class WebSocketSession implements MaestroObserver, RecordedOutputsObserve
 
     private final TextSerDes serDes = new JacksonSerDes();
     private final Session session;
+    private Instant expirationTime;
     private final boolean liveOutputsEnabled;
     private final Set<String> evidenceSessions = ConcurrentHashMap.newKeySet();
     private CompletableFuture<UserInteractionCompleted> interactionFuture;
@@ -76,9 +58,35 @@ public class WebSocketSession implements MaestroObserver, RecordedOutputsObserve
         this(session, false);
     }
 
+    /**
+     * Constructs a new WebSocketSession for the given WebSocket session and live output setting.
+     *
+     * @param session the WebSocket session to be wrapped
+     * @param liveOutputsEnabled whether live output recording and forwarding is enabled for this session
+     */
     public WebSocketSession(Session session, boolean liveOutputsEnabled) {
         this.session = session;
         this.liveOutputsEnabled = liveOutputsEnabled;
+    }
+
+    /**
+     * Returns the expiration time of this WebSocket session.
+     *
+     * @return the instant at which this WebSocket session expires
+     */
+    public Instant getExpirationTime() {
+        return expirationTime;
+    }
+
+    /**
+     * Sets the expiration time for this WebSocket session.
+     *
+     * @param expirationTime the instant at which this WebSocket session expires
+     * @return this WebSocket session
+     */
+    public WebSocketSession setExpirationTime(Instant expirationTime) {
+        this.expirationTime = expirationTime;
+        return this;
     }
 
     /**
@@ -137,6 +145,12 @@ public class WebSocketSession implements MaestroObserver, RecordedOutputsObserve
         this.session.getAsyncRemote().sendText(message);
     }
 
+    /**
+     * Verifies that the specified evidence session is associated with this execution connection.
+     *
+     * @param sessionId the identifier of the evidence session to validate
+     * @throws IllegalArgumentException if the session ID is null or is not associated with this execution connection
+     */
     public void assertEvidenceSession(String sessionId) {
         if (sessionId == null || !evidenceSessions.contains(sessionId)) {
             throw new IllegalArgumentException("Evidence must belong to this execution connection");

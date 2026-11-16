@@ -39,8 +39,6 @@ public class TestSuiteRun implements Serializable {
    @Serial
    private static final long serialVersionUID = -4027777114820632058L;
 
-   private static final int TIMEOUT_MARGIN_OFFSET = 3000;
-
    /**
     * Timeout margin added to the computed test suite timeout.
     */
@@ -73,25 +71,6 @@ public class TestSuiteRun implements Serializable {
       this.tests = new ArrayList<>();
       this.inputs = new ArrayList<>();
       this.systemsUnderTest = new ArrayList<>();
-   }
-
-   /**
-    * Computes the total timeout for this test suite run.
-    *
-    * @return the computed timeout including a safety margin
-    */
-   public long computeTestSuiteTimeout() {
-      return testSuite.getTestReferences().stream()
-            .map(testReference -> getTestById(testReference.getTestId()))
-            .mapToLong(Test::computeTestRunTimeout)
-            .sum() + TIMEOUT_MARGIN_OFFSET;
-   }
-
-   private Test getTestById(String testId) {
-      return tests.stream()
-            .filter(test -> testId.equals(test.getId()))
-            .findFirst()
-            .orElseThrow(() -> new NoSuchElementException("No test with id " + testId + " found."));
    }
 
    /**

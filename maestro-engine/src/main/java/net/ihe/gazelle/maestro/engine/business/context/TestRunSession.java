@@ -20,10 +20,12 @@ import net.ihe.gazelle.maestro.api.business.message.DeleteEvidence;
 import net.ihe.gazelle.maestro.api.business.message.PutEvidence;
 import net.ihe.gazelle.maestro.api.business.property.Property;
 import net.ihe.gazelle.maestro.api.business.test.Step;
+import net.ihe.gazelle.maestro.api.business.test.Test;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.engine.business.TestReportRecordingException;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -41,6 +43,7 @@ public class TestRunSession {
     private List<StepRunReport> stepReports;
     private List<PutEvidence> evidences;
     private boolean evidenceClosed;
+    private Instant expirationTimestamp = Instant.ofEpochMilli(Test.TEST_DEFAULT_TIMEOUT_MILLIS);
 
     /**
      * Default constructor
@@ -260,11 +263,8 @@ public class TestRunSession {
 
     /**
      * Removes a specific piece of evidence from the list of evidences based on the given criteria.
-     *
-     * @param deleteEvidence the {@code DeleteEvidence} instance containing the run ID, step name,
-     *     and evidence name to match and remove from the list of evidences
+     * Prevents late evidence updates from changing a finalized report.
      */
-    /** Prevents late evidence updates from changing a finalized report. */
     public synchronized void closeEvidence() {
         evidenceClosed = true;
     }
@@ -285,5 +285,14 @@ public class TestRunSession {
                 && putEvidence.getStepName().equals(deleteEvidence.getStepName())
                 && putEvidence.getContent().getName().equals(deleteEvidence.getEvidenceName())
         );
+    }
+
+    public Instant getExpirationTimestamp() {
+        return expirationTimestamp;
+    }
+
+    public TestRunSession setExpirationTimestamp(Instant expirationTimestamp) {
+        this.expirationTimestamp = expirationTimestamp;
+        return this;
     }
 }

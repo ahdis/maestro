@@ -16,20 +16,8 @@
 
 package net.ihe.gazelle.maestrorecording.adapter;
 
-import net.ihe.gazelle.maestro.api.business.message.StartStepRun;
-import net.ihe.gazelle.maestro.api.business.message.StartTestRun;
-import net.ihe.gazelle.maestro.api.business.message.StartTestSuiteRun;
-import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
-import net.ihe.gazelle.maestro.api.business.message.TestRunFinished;
-import net.ihe.gazelle.maestro.api.business.message.TestSuiteRunFinished;
-import net.ihe.gazelle.maestro.engine.business.MaestroEventProducer;
-import net.ihe.gazelle.maestro.engine.business.MaestroFacade;
-import net.ihe.gazelle.maestro.engine.business.StepRunEventProducer;
-import net.ihe.gazelle.maestro.engine.business.StepRunner;
-import net.ihe.gazelle.maestro.engine.business.TestRunEventProducer;
-import net.ihe.gazelle.maestro.engine.business.TestRunner;
-import net.ihe.gazelle.maestro.engine.business.TestSuiteEventProducer;
-import net.ihe.gazelle.maestro.engine.business.TestSuiteRunner;
+import net.ihe.gazelle.maestro.api.business.message.*;
+import net.ihe.gazelle.maestro.engine.business.*;
 
 import java.util.concurrent.ExecutorService;
 

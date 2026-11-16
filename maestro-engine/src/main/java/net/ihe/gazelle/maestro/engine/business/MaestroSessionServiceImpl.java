@@ -33,8 +33,7 @@ public class MaestroSessionServiceImpl implements MaestroSessionService {
         this(sessionStore, null);
     }
 
-    public MaestroSessionServiceImpl(
-            SessionStore<TestRunSession> sessionStore, MaestroFacade maestro) {
+    public MaestroSessionServiceImpl(SessionStore<TestRunSession> sessionStore, MaestroFacade maestro) {
         this.sessionStore = sessionStore;
         this.maestro = maestro;
     }
@@ -75,6 +74,7 @@ public class MaestroSessionServiceImpl implements MaestroSessionService {
                                             : observer.recordEvidence(
                                                     putEvidence.getContent().copy()));
             session.addEvidence(accepted);
+            sessionStore.putSession(putEvidence.getSessionId(), session, session.getExpirationTimestamp());
             if (observer != null) {
                 observer.onEvidenceRecorded(accepted);
             }
@@ -88,6 +88,7 @@ public class MaestroSessionServiceImpl implements MaestroSessionService {
             throw new TestReportRecordingException("Evidence session is no longer active");
         }
         session.removeEvidence(deleteEvidence);
+        sessionStore.putSession(deleteEvidence.getSessionId(), session, session.getExpirationTimestamp());
     }
 
 }

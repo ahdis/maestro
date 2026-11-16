@@ -18,6 +18,7 @@ package net.ihe.gazelle.maestro.quarkus.websocket;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
+import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -29,42 +30,49 @@ import java.util.concurrent.ConcurrentHashMap;
 @ApplicationScoped
 public class WebSocketSessionService {
 
-   private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
+    private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
 
-   /**
-    * Default constructor.
-    */
-   public WebSocketSessionService() {
-      // Empty
-   }
+    /**
+     * Default constructor.
+     */
+    public WebSocketSessionService() {
+        // Empty
+    }
 
-   /**
-    * Adds a WebSocket session to the managed collection of sessions.
-    *
-    * @param sessionId the unique identifier for the WebSocket session
-    * @param session the WebSocketSession instance to be associated with the provided sessionId
-    */
-   public void addSession(String sessionId, WebSocketSession session) {
-      sessions.put(sessionId, session);
-   }
+    /**
+     * Adds a WebSocket session to the managed collection of sessions.
+     *
+     * @param sessionId the unique identifier for the WebSocket session
+     * @param session   the WebSocketSession instance to be associated with the provided sessionId
+     */
+    public void addSession(String sessionId, WebSocketSession session) {
+        sessions.put(sessionId, session);
+    }
 
-   /**
-    * Retrieves a WebSocket session associated with the specified session ID.
-    *
-    * @param sessionId the unique identifier of the WebSocket session to retrieve
-    * @return the WebSocketSession instance associated with the provided session ID,
-    *         or null if no session is found for the given ID
-    */
-   public WebSocketSession getSession(String sessionId) {
-      return sessions.get(sessionId);
-   }
+    /**
+     * Retrieves a WebSocket session associated with the specified session ID.
+     *
+     * @param sessionId the unique identifier of the WebSocket session to retrieve
+     * @return the WebSocketSession instance associated with the provided session ID,
+     * or null if no session is found for the given ID
+     */
+    public WebSocketSession getSession(String sessionId) {
+        return sessions.get(sessionId);
+    }
 
-   /**
-    * Removes a WebSocket session from the managed collection of sessions.
-    *
-    * @param sessionId the unique identifier for the WebSocket session to be removed
-    */
-   public void removeSession(String sessionId) {
-      sessions.remove(sessionId);
-   }
+    /**
+     * Removes a WebSocket session from the managed collection of sessions.
+     *
+     * @param sessionId the unique identifier for the WebSocket session to be removed
+     */
+    public void removeSession(String sessionId) {
+        sessions.remove(sessionId);
+    }
+
+    /**
+     * Removes managed WebSocket sessions whose expiration time is after the current instant.
+     */
+    public void removeExpiredSessions() {
+        sessions.values().removeIf(session -> session.getExpirationTime().isBefore(Instant.now()));
+    }
 }

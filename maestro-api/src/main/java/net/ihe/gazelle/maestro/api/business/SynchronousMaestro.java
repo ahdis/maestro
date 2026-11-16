@@ -20,11 +20,11 @@ import net.ihe.gazelle.lang.ExecutionRuntimeException;
 import net.ihe.gazelle.maestro.api.business.message.*;
 import net.ihe.gazelle.maestro.api.business.testreport.LocalizedTestReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
-import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRunValidator;
-import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRunValidator;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -59,26 +59,24 @@ public class SynchronousMaestro {
      * Execute a Test Suite. This method will block the current thread until the test execution is finished or timeout
      * occurs.
      *
-     * @param testSuiteRun the test suite to execute
-     * @param persist      whether to persist the test report after execution
+     * @param startTestSuiteRun   the test suite to execute
      * @return A test report summary.
      * @throws IllegalArgumentException  if testSuiteRun is invalid
      * @throws TimeoutException          if the timeout expires before the test execution is finished.
      * @throws InterruptedException      if the current thread is interrupted while waiting.
      * @throws ExecutionRuntimeException if an unexpected error occurs during the execution.
      */
-    public TestReport executeTestSuite(TestSuiteRun testSuiteRun, boolean persist) throws TimeoutException, InterruptedException {
+    public TestReport executeTestSuite(StartTestSuiteRun startTestSuiteRun) throws TimeoutException, InterruptedException {
+        testSuiteRunValidator.assertValid(startTestSuiteRun.getTestSuiteRun());
         CompletableFuture<LocalizedTestReport> future = new CompletableFuture<>();
         maestro.executeTestSuite(
-                testSuiteRun,
-                persist,
+                startTestSuiteRun,
                 new SynchronousObserver(future)
         );
 
         try {
-            testSuiteRunValidator.assertValid(testSuiteRun);
-            long timeout = testSuiteRun.computeTestSuiteTimeout();
-            return future.get(timeout, TimeUnit.MILLISECONDS);
+            Duration remaining = Duration.between(Instant.now(), startTestSuiteRun.getExpirationTimestamp());
+            return future.get(remaining.toMillis(), TimeUnit.MILLISECONDS);
         } catch (ExecutionException e) {
             throw new ExecutionRuntimeException(e);
         }
@@ -88,26 +86,24 @@ public class SynchronousMaestro {
      * Execute a single Test. This method will block the current thread until the test execution is finished or timeout
      * occurs.
      *
-     * @param testRun the test to execute
-     * @param persist whether to persist the test report after execution
+     * @param startTestRun the test to execute
      * @return A test report summary.
      * @throws IllegalArgumentException  if testRun is invalid
      * @throws TimeoutException          if the timeout expires before the test execution is finished.
      * @throws InterruptedException      if the current thread is interrupted while waiting.
      * @throws ExecutionRuntimeException if an unexpected error occurs during the execution.
      */
-    public TestReport executeTest(TestRun testRun, boolean persist) throws TimeoutException, InterruptedException {
+    public TestReport executeTest(StartTestRun startTestRun) throws TimeoutException, InterruptedException {
+        testRunValidator.assertValid(startTestRun.getTestRun());
         CompletableFuture<LocalizedTestReport> future = new CompletableFuture<>();
         maestro.executeTest(
-                testRun,
-                persist,
+                startTestRun,
                 new SynchronousObserver(future)
         );
 
         try {
-            testRunValidator.assertValid(testRun);
-            long timeout = testRun.getTest().computeTestRunTimeout();
-            return future.get(timeout, TimeUnit.MILLISECONDS);
+            Duration remaining = Duration.between(Instant.now(), startTestRun.getExpirationTimestamp());
+            return future.get(remaining.toMillis(), TimeUnit.MILLISECONDS);
         } catch (ExecutionException e) {
             throw new ExecutionRuntimeException(e);
         }

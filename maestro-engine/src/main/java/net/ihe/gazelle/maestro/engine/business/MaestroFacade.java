@@ -67,50 +67,41 @@ public class MaestroFacade {
     /**
      * Executes a {@link TestSuiteRun} and registers the associated observer.
      *
-     * @param testSuiteRun         the test suite run to execute
+     * @param startTestSuiteRun    the test suite run message
      * @param testSuiteRunObserver the observer for this test suite run
      */
-    public void executeTestSuite(TestSuiteRun testSuiteRun, MaestroObserver testSuiteRunObserver) {
-        executeTestSuite(null, testSuiteRun, testSuiteRunObserver);
-    }
-
-    /**
-     * Executes a {@link TestSuiteRun} and registers the associated observer.
-     *
-     * @param testSessionId        the id of the test session
-     * @param testSuiteRun         the test suite run to execute
-     * @param testSuiteRunObserver the observer for this test suite run
-     */
-    public void executeTestSuite(String testSessionId, TestSuiteRun testSuiteRun, MaestroObserver testSuiteRunObserver) {
+    public void executeTestSuite(StartTestSuiteRun startTestSuiteRun, MaestroObserver testSuiteRunObserver) {
+        TestSuiteRun testSuiteRun = startTestSuiteRun.getTestSuiteRun();
         if (testSuiteRun.getAccessControlList() == null) {
             testSuiteRun.setAccessControlList(new AccessControlList().setPublic(true));
         }
         testSuiteRunValidator.assertValid(testSuiteRun);
         String sessionId = UUID.randomUUID().toString();
-        long timeout = testSuiteRun.computeTestSuiteTimeout();
-        testSuiteRunObserverStore.putSession(sessionId, testSuiteRunObserver, timeout);
-        maestroEventProducer.command(new StartTestSuiteRun(sessionId, testSuiteRun).setTestSessionId(testSessionId));
-    }
-
-    public void executeTest(TestRun testRun, MaestroObserver testRunObservers) {
-        executeTest(null, testRun, testRunObservers);
+        testSuiteRunObserverStore.putSession(sessionId, testSuiteRunObserver, startTestSuiteRun.getExpirationTimestamp());
+        maestroEventProducer.command(startTestSuiteRun
+                .setSessionId(sessionId)
+                .setTestSessionId(startTestSuiteRun.getTestSessionId())
+        );
     }
 
     /**
      * Executes a {@link TestRun} and registers the associated observer.
      *
-     * @param testRun          the test run to execute
+     * @param startTestRun     the test run message
      * @param testRunObserver  the observer for this test run
      */
-    public void executeTest(String testSessionId, TestRun testRun, MaestroObserver testRunObserver) {
+    public void executeTest(StartTestRun startTestRun, MaestroObserver testRunObserver) {
+        TestRun testRun = startTestRun.getTestRun();
         if (testRun.getAccessControlList() == null) {
             testRun.setAccessControlList(new AccessControlList().setPublic(true));
         }
         testRunValidator.assertValid(testRun);
         String sessionId = UUID.randomUUID().toString();
-        long timeout = testRun.getTest().computeTestRunTimeout();
-        testRunObserverStore.putSession(sessionId, testRunObserver, timeout);
-        maestroEventProducer.command(new StartTestRun(sessionId, testRun).setTestSessionId(testSessionId));
+        testRunObserverStore.putSession(sessionId, testRunObserver, startTestRun.getExpirationTimestamp());
+        maestroEventProducer.command(startTestRun
+                .setSessionId(sessionId)
+                .setTestSessionId(startTestRun.getTestSessionId())
+        );
     }
 
     /**

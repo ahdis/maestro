@@ -16,25 +16,12 @@
 
 package net.ihe.gazelle.maestro.quarkus.websocket;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import jakarta.websocket.RemoteEndpoint;
 import jakarta.websocket.Session;
-
 import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -43,7 +30,12 @@ import org.mockito.ArgumentCaptor;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.Mockito.*;
+
 class LiveOutputNotificationTest {
+
     @ParameterizedTest
     @CsvSource({"false,false,false", "false,true,false", "true,false,false", "true,true,true"})
     void requiresBothDeploymentEnablementAndClientOptIn(
@@ -55,7 +47,7 @@ class LiveOutputNotificationTest {
         when(session.getRequestParameterMap())
                 .thenReturn(optedIn ? Map.of("liveOutputs", List.of("true")) : Map.of());
         WebSocketSessionService sessions = mock(WebSocketSessionService.class);
-        var controller = new TestStreamSocketController(null, null, null, sessions, null);
+        var controller = new TestStreamSocketController(null, null, null, null, sessions, null);
         controller.liveOutputsEnabled = enabled;
         controller.onOpen(session);
         var caller = ArgumentCaptor.forClass(WebSocketSession.class);

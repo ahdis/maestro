@@ -20,6 +20,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
 
 public class MongoConnectionProviderImpl implements MongoConnectionProvider {
+
     @Override
     public MongoDatabase getMongoConnection() throws ConnectionException {
         return null;

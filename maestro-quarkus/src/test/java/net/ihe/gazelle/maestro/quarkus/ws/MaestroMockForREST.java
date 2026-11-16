@@ -19,9 +19,9 @@ package net.ihe.gazelle.maestro.quarkus.ws;
 import net.ihe.gazelle.maestro.api.business.Maestro;
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.api.business.message.ExecutionFinished;
+import net.ihe.gazelle.maestro.api.business.message.StartTestRun;
+import net.ihe.gazelle.maestro.api.business.message.StartTestSuiteRun;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
-import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
-import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 
 import java.io.Serializable;
 import java.util.HexFormat;
@@ -52,24 +52,24 @@ public class MaestroMockForREST implements Maestro {
    }
 
    @Override
-   public void executeTestSuite(String testSessionId, TestSuiteRun testSuiteRun, boolean persist, MaestroObserver observer) {
+   public void executeTestSuite(StartTestSuiteRun startTestSuiteRun, MaestroObserver observer) {
       if(errorSupplier != null) {
          throw errorSupplier.get();
       }
       scheduledExecutor.schedule(
-            () -> pushExecutionFinished(testSuiteRun, persist, observer),
-            1, TimeUnit.SECONDS
+            () -> pushExecutionFinished(startTestSuiteRun.getTestSuiteRun(), startTestSuiteRun.isPersist(), observer),
+            10, TimeUnit.MILLISECONDS
       );
    }
 
    @Override
-   public void executeTest(String testSessionId, TestRun testRun, boolean persist, MaestroObserver observer) {
+   public void executeTest(StartTestRun startTestRun, MaestroObserver observer) {
       if(errorSupplier != null) {
          throw errorSupplier.get();
       }
       scheduledExecutor.schedule(
-            () -> pushExecutionFinished(testRun, persist, observer),
-            1, TimeUnit.SECONDS
+            () -> pushExecutionFinished(startTestRun.getTestRun(), startTestRun.isPersist(), observer),
+              10, TimeUnit.MILLISECONDS
       );
    }
 

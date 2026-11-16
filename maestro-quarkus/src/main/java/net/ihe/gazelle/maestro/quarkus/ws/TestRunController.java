@@ -58,11 +58,17 @@ public interface TestRunController {
     String INTERFACE_VERSION = "1.0";
 
     /**
+     * Default timeout for synchronous test runs, in seconds.
+     */
+    String DEFAULT_TIMEOUT_SECONDS = "300";
+
+    /**
      * Execute a Gazelle test suite.
      *
-     * @param testSuiteRun the test suite to execute
-     * @param persist      whether to persist the test report
-     * @param callback     optional callback URL for asynchronous execution
+     * @param testSuiteRun   the test suite to execute
+     * @param persist        whether to persist the test report
+     * @param timeoutSeconds the timeout for synchronous test runs, in seconds
+     * @param callback       optional callback URL for asynchronous execution
      * @return a {@link Response} containing the {@link TestReportDTO} or HTTP status depending on execution mode
      */
     @POST
@@ -124,8 +130,13 @@ public interface TestRunController {
             @Parameter(
                     in = ParameterIn.QUERY,
                     name = "persist",
-                    description = "Choose whether to persist the test report or not"
+                    description = "Choose whether to persist the test report or not."
             ) @QueryParam("persist") @DefaultValue("true") boolean persist,
+            @Parameter(
+                    in = ParameterIn.QUERY,
+                    name = "timeoutSeconds",
+                    description = "The timeout in seconds for the test run."
+            ) @QueryParam("timeoutSeconds") @DefaultValue(DEFAULT_TIMEOUT_SECONDS) Long timeoutSeconds,
             @Parameter(
                     in = ParameterIn.QUERY,
                     name = "callback",
@@ -139,6 +150,7 @@ public interface TestRunController {
      *
      * @param testRun  the test to execute
      * @param persist  whether to persist the test report
+     * @param timeoutSeconds the timeout for synchronous test runs, in seconds
      * @param callback optional callback URL for asynchronous execution
      * @return a {@link Response} containing the {@link TestReportDTO} or HTTP status depending on execution mode
      */
@@ -201,6 +213,11 @@ public interface TestRunController {
                     name = "persist",
                     description = "Choose whether to persist the test report or not"
             ) @QueryParam("persist") @DefaultValue("true") boolean persist,
+            @Parameter(
+                    in = ParameterIn.QUERY,
+                    name = "timeoutSeconds",
+                    description = "The timeout in seconds for the test run."
+            ) @QueryParam("timeoutSeconds") @DefaultValue(DEFAULT_TIMEOUT_SECONDS) Long timeoutSeconds,
             @Parameter(
                     in = ParameterIn.QUERY,
                     name = "callback",

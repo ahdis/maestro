@@ -16,8 +16,10 @@
 
 package net.ihe.gazelle.maestro.api.business.property;
 
-import java.time.Instant;
 import org.junit.jupiter.api.Test;
+
+import java.time.Instant;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class ByteArrayItemPropertyTest {

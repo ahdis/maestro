@@ -27,6 +27,8 @@ import net.ihe.gazelle.lang.TimeoutRuntimeException;
 import net.ihe.gazelle.maestro.api.business.Maestro;
 import net.ihe.gazelle.maestro.api.business.SynchronousMaestro;
 import net.ihe.gazelle.maestro.api.business.UnsupportedPropertyTypeException;
+import net.ihe.gazelle.maestro.api.business.message.StartTestRun;
+import net.ihe.gazelle.maestro.api.business.message.StartTestSuiteRun;
 import net.ihe.gazelle.maestro.api.business.testreport.LocalizedTestReport;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
@@ -41,6 +43,7 @@ import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 
@@ -50,147 +53,165 @@ import java.util.function.Supplier;
 @RequestScoped
 public class TestRunControllerImpl implements TestRunController {
 
-   private static final Logger LOG = LoggerFactory.getLogger(TestRunControllerImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TestRunControllerImpl.class);
 
-   private final GazelleIdentity identity;
-   private final Authz authz;
-   private final SynchronousMaestro synchronousMaestro;
-   private final Maestro maestro;
+    private final GazelleIdentity identity;
+    private final Authz authz;
+    private final SynchronousMaestro synchronousMaestro;
+    private final Maestro maestro;
 
-   /**
-    * Creates a new instance of {@code TestRunControllerImpl}.
-    *
-    * @param identity           the authenticated user identity
-    * @param authz              the authorization service
-    * @param synchronousMaestro the synchronous Maestro engine for executing tests
-    * @param maestro            the generic Maestro engine for asynchronous test execution
-    */
-   @Inject
-   public TestRunControllerImpl(GazelleIdentity identity, Authz authz, SynchronousMaestro synchronousMaestro, Maestro maestro) {
-      this.identity = identity;
-      this.authz = authz;
-      this.synchronousMaestro = synchronousMaestro;
-      this.maestro = maestro;
-   }
+    /**
+     * Creates a new instance of {@code TestRunControllerImpl}.
+     *
+     * @param identity           the authenticated user identity
+     * @param authz              the authorization service
+     * @param synchronousMaestro the synchronous Maestro engine for executing tests
+     * @param maestro            the generic Maestro engine for asynchronous test execution
+     */
+    @Inject
+    public TestRunControllerImpl(GazelleIdentity identity, Authz authz, SynchronousMaestro synchronousMaestro, Maestro maestro) {
+        this.identity = identity;
+        this.authz = authz;
+        this.synchronousMaestro = synchronousMaestro;
+        this.maestro = maestro;
+    }
 
-   @Override
-   public Response executeTestSuite(TestSuiteRunDTO testSuite, boolean persist, String callback) {
-      TestSuiteRun testSuiteRun = testSuite.getBusinessObject();
-      if (callback != null) {
-         return handleErrors(() -> runTestSuiteAsynchronously(testSuiteRun, persist, callback));
-      } else {
-         return handleErrors(() -> runTestSuiteSynchronously(testSuiteRun, persist));
-      }
-   }
+    @Override
+    public Response executeTestSuite(TestSuiteRunDTO testSuite, boolean persist, Long timeoutSeconds, String callback) {
+        TestSuiteRun testSuiteRun = testSuite.getBusinessObject();
+        if (callback != null) {
+            return handleErrors(() -> runTestSuiteAsynchronously(testSuiteRun, persist, timeoutSeconds, callback));
+        } else {
+            return handleErrors(() -> runTestSuiteSynchronously(testSuiteRun, persist, timeoutSeconds));
+        }
+    }
 
-   @Override
-   public Response executeTest(TestRunDTO testRunDTO, boolean persist, String callback) {
-      TestRun testRun = testRunDTO.getBusinessObject();
-      if (callback != null) {
-         return handleErrors(() -> runTestAsynchronously(testRun, persist, callback));
-      } else {
-         return handleErrors(() -> runTestSynchronously(testRun, persist));
-      }
-   }
+    @Override
+    public Response executeTest(TestRunDTO testRunDTO, boolean persist, Long timeoutSeconds, String callback) {
+        TestRun testRun = testRunDTO.getBusinessObject();
+        if (callback != null) {
+            return handleErrors(() -> runTestAsynchronously(testRun, persist, timeoutSeconds, callback));
+        } else {
+            return handleErrors(() -> runTestSynchronously(testRun, persist, timeoutSeconds));
+        }
+    }
 
-   private Response handleErrors(Supplier<Response> serviceCall) {
-      try {
-         return serviceCall.get();
-      } catch (UnauthorizedException e) {
-         return Response.status(Response.Status.UNAUTHORIZED).build();
-      } catch (IllegalArgumentException e) {
-         LOG.debug("TestRun format Exception", e);
-         return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
-               .entity("The request contains a testRun with bad format" + e).build();
-      } catch (TimeoutRuntimeException e) {
-         return Response.status(Response.Status.GATEWAY_TIMEOUT.getStatusCode())
-               .entity(SynchronousMaestro.TIMEOUT_MESSAGE).build();
-      } catch (Exception e) {
-         LOG.error("Unknown error", e);
-         Thread.currentThread().interrupt();
-         return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
-               .entity("an error occurred during execution: " + e).build();
-      }
-   }
+    private Response handleErrors(Supplier<Response> serviceCall) {
+        try {
+            return serviceCall.get();
+        } catch (UnauthorizedException _) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        } catch (IllegalArgumentException e) {
+            LOG.debug("TestRun format Exception", e);
+            return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
+                    .entity("The request contains a testRun with bad format" + e).build();
+        } catch (TimeoutRuntimeException _) {
+            return Response.status(Response.Status.GATEWAY_TIMEOUT.getStatusCode())
+                    .entity(SynchronousMaestro.TIMEOUT_MESSAGE).build();
+        } catch (Exception e) {
+            LOG.error("Unknown error", e);
+            Thread.currentThread().interrupt();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
+                    .entity("an error occurred during execution: " + e).build();
+        }
+    }
 
-   private Response runTestSuiteSynchronously(TestSuiteRun testSuiteRun, boolean persist) {
-      try {
-         authz.assertAuthorizedForIdentityOrganization(identity, MaestroPermissions.TEST_RUN);
-         LocalizedTestReport report = (LocalizedTestReport) synchronousMaestro.executeTestSuite(testSuiteRun, persist);
-         return Response
-               .ok(new TestReportDTO(report))
-               .header(HttpHeaders.LOCATION, report.getLocation()).build();
-      } catch (TimeoutException e) {
-         throw new TimeoutRuntimeException(e);
-      } catch (InterruptedException e) {
-         Thread.currentThread().interrupt();
-         throw new ExecutionInterruptedException("Interrupted while running test suite", e);
-      }
-   }
+    private Response runTestSuiteSynchronously(TestSuiteRun testSuiteRun, boolean persist, Long timeoutSeconds) {
+        try {
+            authz.assertAuthorizedForIdentityOrganization(identity, MaestroPermissions.TEST_RUN);
+            LocalizedTestReport report = (LocalizedTestReport) synchronousMaestro.executeTestSuite(
+                    new StartTestSuiteRun()
+                            .setTestSuiteRun(testSuiteRun)
+                            .setPersist(persist)
+                            .setExpirationTimestamp(Duration.ofSeconds(timeoutSeconds))
+            );
+            return Response
+                    .ok(new TestReportDTO(report))
+                    .header(HttpHeaders.LOCATION, report.getLocation()).build();
+        } catch (TimeoutException e) {
+            throw new TimeoutRuntimeException(e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new ExecutionInterruptedException("Interrupted while running test suite", e);
+        }
+    }
 
-   private Response runTestSuiteAsynchronously(TestSuiteRun testSuiteRun, boolean persist, String callback) {
-      authz.assertAuthorizedForIdentityOrganization(identity, MaestroPermissions.TEST_RUN);
-      maestro.executeTestSuite(testSuiteRun, persist, new ApacheTestReportClient(callback));
-      return Response.accepted().build();
-   }
+    private Response runTestSuiteAsynchronously(TestSuiteRun testSuiteRun, boolean persist, Long timeoutSeconds, String callback) {
+        authz.assertAuthorizedForIdentityOrganization(identity, MaestroPermissions.TEST_RUN);
+        StartTestSuiteRun startTestSuiteRun = new StartTestSuiteRun()
+                .setTestSuiteRun(testSuiteRun)
+                .setPersist(persist)
+                .setExpirationTimestamp(Duration.ofSeconds(timeoutSeconds));
+        maestro.executeTestSuite(startTestSuiteRun, new ApacheTestReportClient(callback));
+        return Response.accepted().build();
+    }
 
-   private Response runTestSynchronously(TestRun testRun, boolean persist) {
-      try {
-         authz.assertAuthorizedForIdentityOrganization(identity, MaestroPermissions.TEST_RUN);
-         LocalizedTestReport report = (LocalizedTestReport) synchronousMaestro.executeTest(testRun, persist);
-         return Response
-               .ok(new TestReportDTO(report))
-               .header(HttpHeaders.LOCATION, report.getLocation()).build();
-      } catch (TimeoutException e) {
-         throw new TimeoutRuntimeException(e);
-      } catch (InterruptedException e) {
-         Thread.currentThread().interrupt();
-         throw new ExecutionInterruptedException("Interrupted while running test", e);
-      }
-   }
+    private Response runTestSynchronously(TestRun testRun, boolean persist, Long timeoutSeconds) {
+        try {
+            authz.assertAuthorizedForIdentityOrganization(identity, MaestroPermissions.TEST_RUN);
+            LocalizedTestReport report = (LocalizedTestReport) synchronousMaestro.executeTest(
+                    new StartTestRun()
+                            .setTestRun(testRun)
+                            .setPersist(persist)
+                            .setExpirationTimestamp(timeoutSeconds)
+            );
+            return Response
+                    .ok(new TestReportDTO(report))
+                    .header(HttpHeaders.LOCATION, report.getLocation()).build();
+        } catch (TimeoutException e) {
+            throw new TimeoutRuntimeException(e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new ExecutionInterruptedException("Interrupted while running test", e);
+        }
+    }
 
-   private Response runTestAsynchronously(TestRun testRun, boolean persist, String callback) {
-      authz.assertAuthorizedForIdentityOrganization(identity, MaestroPermissions.TEST_RUN);
-      maestro.executeTest(testRun, persist, new ApacheTestReportClient(callback));
-      return Response.accepted().build();
-   }
+    private Response runTestAsynchronously(TestRun testRun, boolean persist, Long timeoutSeconds, String callback) {
+        authz.assertAuthorizedForIdentityOrganization(identity, MaestroPermissions.TEST_RUN);
+        StartTestRun startTestRun = new StartTestRun()
+                .setTestRun(testRun)
+                .setPersist(persist)
+                .setExpirationTimestamp(timeoutSeconds);
+        maestro.executeTest(startTestRun, new ApacheTestReportClient(callback));
+        return Response.accepted().build();
+    }
 
-   /**
-    * This method is automatically triggered by Jakarta Jackson if the received JSON couldn't be deserialized into
-    * TestRunDTO object
-    *
-    * @param exception The exception Jakarta Jackson thrown while deserializing received JSON
-    * @return A Bad Request status code with error message from Jackson
-    */
-   @ServerExceptionMapper
-   public Response handleJsonProcessingException(Exception exception) {
-      String message;
-      if (exception instanceof AuthenticationFailedException) {
-         return Response.status(Response.Status.UNAUTHORIZED).build();
-      }
+    /**
+     * This method is automatically triggered by Jakarta Jackson if the received JSON couldn't be deserialized into
+     * TestRunDTO object
+     *
+     * @param exception The exception Jakarta Jackson thrown while deserializing received JSON
+     * @return A Bad Request status code with error message from Jackson
+     */
+    @ServerExceptionMapper
+    public Response handleJsonProcessingException(Exception exception) {
+        String message;
+        if (exception instanceof AuthenticationFailedException) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
 
-      if (exception.getCause() != null && exception.getCause().getCause() != null) {
-         if (exception.getCause().getCause() instanceof IllegalArgumentException illegalArgumentException) {
-            message = illegalArgumentException.getMessage();
-         } else if (exception.getCause()
-               .getCause() instanceof UnsupportedPropertyTypeException unsupportedPropertyTypeException) {
-            message = unsupportedPropertyTypeException.getMessage();
-         } else {
-            LOG.error(exception.getMessage(), exception);
-            message = "Unable to parse TestSuite structure.";
-         }
-      } else {
-         if (exception instanceof InvalidTypeIdException invalidTypeIdException) {
-            message = invalidTypeIdException.getOriginalMessage();
-         } else {
-            LOG.error(exception.getMessage(), exception);
-            message = "Unable to parse TestSuite structure.";
-         }
-      }
+        if (exception.getCause() != null && exception.getCause().getCause() != null) {
+            if (exception.getCause().getCause() instanceof IllegalArgumentException illegalArgumentException) {
+                message = illegalArgumentException.getMessage();
+            } else if (exception.getCause()
+                    .getCause() instanceof UnsupportedPropertyTypeException unsupportedPropertyTypeException) {
+                message = unsupportedPropertyTypeException.getMessage();
+            } else {
+                LOG.error(exception.getMessage(), exception);
+                message = "Unable to parse TestSuite structure.";
+            }
+        } else {
+            if (exception instanceof InvalidTypeIdException invalidTypeIdException) {
+                message = invalidTypeIdException.getOriginalMessage();
+            } else {
+                LOG.error(exception.getMessage(), exception);
+                message = "Unable to parse TestSuite structure.";
+            }
+        }
 
-      return Response.status(Response.Status.BAD_REQUEST)
-            .entity(message)
-            .type(MediaType.APPLICATION_JSON)
-            .build();
-   }
+        return Response.status(Response.Status.BAD_REQUEST)
+                .entity(message)
+                .type(MediaType.APPLICATION_JSON)
+                .build();
+    }
 }

@@ -35,7 +35,7 @@ public class GradingHandlerStub implements GradingHandler {
     }
 
     @Override
-    public GradingCompleted displayMessage(List<String> criterion) {
+    public GradingCompleted displayMessage(List<String> criterion, long timeout) {
         return new GradingCompleted().setResult(GradingResult.PASSED);
     }
 

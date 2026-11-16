@@ -21,6 +21,16 @@ import net.ihe.gazelle.maestro.engine.business.context.TestRunSession;
 import net.ihe.gazelle.maestro.quarkus.dto.TestRunSessionDTO;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 
+import java.time.Instant;
+
+/**
+ * JPA entity representing a persisted test run session.
+ *
+ * Stores the session identifier, expiration date and serialized session payload
+ * in the test_run_session table. The serialized payload is converted to and
+ * from the {@code TestRunSession} domain object through {@code TestRunSessionDTO}
+ * using Jackson-based serialization.
+ */
 @Entity
 @Table(name = "test_run_session")
 public class TestRunSessionEntity {
@@ -29,7 +39,9 @@ public class TestRunSessionEntity {
     @Column(name = "session_id")
     private String sessionId;
 
-    @Lob
+    @Column(name = "expirationDateTime")
+    private Instant expirationDateTime;
+
     @Column(name = "session", columnDefinition = "TEXT")
     private String session;
 
@@ -40,8 +52,9 @@ public class TestRunSessionEntity {
         // for JPA
     }
 
-    public TestRunSessionEntity(String sessionId, TestRunSession testRunSession) {
+    public TestRunSessionEntity(String sessionId, Instant expirationDateTime, TestRunSession testRunSession) {
        this.sessionId = sessionId;
+       this.expirationDateTime = expirationDateTime;
        this.session = new JacksonSerDes().serializeAsString(new TestRunSessionDTO(testRunSession));
     }
 
@@ -51,6 +64,15 @@ public class TestRunSessionEntity {
 
     public TestRunSessionEntity setSessionId(String sessionId) {
         this.sessionId = sessionId;
+        return this;
+    }
+
+    public Instant getExpirationDateTime() {
+        return expirationDateTime;
+    }
+
+    public TestRunSessionEntity setExpirationDateTime(Instant expirationDateTime) {
+        this.expirationDateTime = expirationDateTime;
         return this;
     }
 

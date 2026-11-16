@@ -17,9 +17,11 @@
 package net.ihe.gazelle.maestro.api.business.message;
 
 import net.ihe.gazelle.lang.Command;
+import net.ihe.gazelle.maestro.api.business.test.Test;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 
 import java.io.Serial;
+import java.time.Instant;
 
 /**
  * A message to start TestRun Execution
@@ -44,6 +46,16 @@ public class StartTestRun implements Message {
      * The test session id of the execution
      */
     private String testSessionId;
+
+    /**
+     * Whether to persist the test run execution or not
+     */
+    private boolean persist;
+
+    /**
+     * The expiration timestamp for the test run execution
+     */
+    private Instant expirationTimestamp = Instant.now().plusMillis(Test.TEST_DEFAULT_TIMEOUT_MILLIS);
 
     /**
      * Default constructor
@@ -123,4 +135,64 @@ public class StartTestRun implements Message {
         return this;
     }
 
+    /**
+     * Indicates whether persistence is enabled for the current test run configuration.
+     *
+     * @return true if persistence is enabled, false otherwise.
+     */
+    public boolean isPersist() {
+        return persist;
+    }
+
+    /**
+     * Sets whether persistence is enabled for the current test run configuration.
+     *
+     * @param persist a boolean indicating whether persistence should be enabled (true) or disabled (false).
+     * @return the current instance of {@code StartTestRun} for method chaining.
+     */
+    public StartTestRun setPersist(boolean persist) {
+        this.persist = persist;
+        return this;
+    }
+
+    /**
+     * Retrieves the expiration timestamp for the test run execution.
+     *
+     * @return the expiration timestamp as an {@code Instant}, or null if no expiration timestamp is set.
+     */
+    public Instant getExpirationTimestamp() {
+        return expirationTimestamp != null ? expirationTimestamp : getTimeout(null);
+    }
+
+    /**
+     * Sets the expiration timestamp for the test run execution.
+     *
+     * @param timeoutSeconds the expiration timestamp to be set as an {@code Instant}.
+     *                            It can be null to indicate no expiration timestamp is specified.
+     * @return the current instance of {@code StartTestRun} for method chaining.
+     */
+    public StartTestRun setExpirationTimestamp(Long timeoutSeconds) {
+        this.expirationTimestamp = getTimeout(timeoutSeconds);
+        return this;
+    }
+
+    /**
+     * Sets the expiration timestamp for the test run execution.
+     *
+     * @param expirationTimestamp the expiration timestamp to be set as an {@code Instant}.
+     *                            It can be null to indicate no expiration timestamp is specified.
+     * @return the current instance of {@code StartTestRun} for method chaining.
+     */
+    public StartTestRun setExpirationTimestamp(Instant expirationTimestamp) {
+        this.expirationTimestamp = expirationTimestamp;
+        return this;
+    }
+
+    private Instant getTimeout(Long timeoutSeconds) {
+        if (timeoutSeconds != null) {
+            return Instant.now().plusSeconds(timeoutSeconds);
+        } else {
+            return Instant.now().plusMillis(Test.TEST_DEFAULT_TIMEOUT_MILLIS);
+        }
+    }
 }

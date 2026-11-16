@@ -27,6 +27,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -34,6 +35,7 @@ import java.util.concurrent.TimeUnit;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class StepRunnerTest {
 
@@ -57,9 +59,15 @@ class StepRunnerTest {
             .setType("SIMULATION")
             .setResult(StepResult.PASSED);
 
-      executorProvider.withExecutor("Step 1", stepRun -> report);
+      executorProvider.withExecutor("Step 1", stepRun -> {
+         assertThat(stepRun.getTimeout(), allOf(greaterThan(0L), lessThanOrEqualTo(60_000L)));
+         return report;
+      });
 
-      stepRunner.run(new StartStepRun("123456", "abc123", 4, new StepRun(step, step.getProperties())));
+      stepRunner.run(new StartStepRun(
+              "123456", "abc123", 4,
+              new StepRun(step, step.getProperties()))
+              .setExpirationTimestamp(Instant.now().plusSeconds(60)));
 
       StepRunFinished finished = eventProducer.awaitFinishedEvent(Duration.ofSeconds(2));
       assertEquals("Step 1", finished.getStepName());
@@ -71,13 +79,27 @@ class StepRunnerTest {
    @Test
    void runHonorsTimeoutProperty() {
       step.setTimeout(50L);
-      executorProvider.withExecutor("Step 1", stepRun -> new StepRunReport());
+      executorProvider.withExecutor("Step 1", stepRun -> {
+         assertEquals(50L, stepRun.getTimeout());
+         return new StepRunReport().setStepName("Step 1").setType("SIMULATION").setResult(StepResult.PASSED);
+      });
 
       stepRunner.run(new StartStepRun("session-timeout", "test", 0, new StepRun(step, step.getProperties())));
 
       StepRunFinished finished = eventProducer.awaitFinishedEvent(Duration.ofSeconds(2));
-      assertThat(finished.getStepRunReport().getResult(), is(StepResult.UNDEFINED));
-      assertThat(finished.getStepRunReport().getUnexpectedErrors(), is(not(empty())));
+      assertEquals(StepResult.PASSED, finished.getStepRunReport().getResult());
+   }
+
+   @Test
+   void runSkipsExecutionWhenSessionHasExpired() {
+      executorProvider.withExecutor("Step 1", stepRun -> fail("Expired steps must not execute"));
+
+      stepRunner.run(new StartStepRun("expired-session", "test", 0, new StepRun(step, step.getProperties()))
+              .setExpirationTimestamp(Instant.now().minusSeconds(1)));
+
+      StepRunFinished finished = eventProducer.awaitFinishedEvent(Duration.ofSeconds(2));
+      assertEquals(StepResult.UNDEFINED, finished.getStepRunReport().getResult());
+      assertThat(finished.getStepRunReport().getUnexpectedErrors(), hasSize(1));
    }
 
    @Test

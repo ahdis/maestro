@@ -21,8 +21,9 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Expiry;
 import net.ihe.gazelle.maestro.engine.business.context.SessionStore;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * The purpose of this class is to being able to access any TestRunSession or TestSuiteSession from any Maestro
@@ -46,35 +47,16 @@ public class SessionStoreCache<T> implements SessionStore<T> {
                 .build();
     }
 
-    /**
-     * Adds a session to the store with a specified timeout.
-     *
-     * @param id            the unique session ID
-     * @param session       the session object to store
-     * @param timeoutMillis the timeout in milliseconds for the session
-     */
     @Override
-    public synchronized void putSession(String id, T session, long timeoutMillis) {
-        sessions.put(id, new CacheEntry<>(session, timeoutMillis));
+    public synchronized void putSession(String id, T session, Instant expirationDateTime) {
+        sessions.put(id, new CacheEntry<>(session, Duration.between(Instant.now(), expirationDateTime)));
     }
 
-    /**
-     * Checks if a session with the given ID exists in the store.
-     *
-     * @param id the session ID to check
-     * @return {@code true} if a session exists for the given ID, {@code false} otherwise
-     */
     @Override
     public synchronized boolean hasSession(String id) {
         return sessions.getIfPresent(id) != null;
     }
 
-    /**
-     * Retrieves the session associated with the given ID.
-     *
-     * @param id the session ID
-     * @return the session object if found, or {@code null} if no session exists for the ID
-     */
     @Override
     public synchronized T getSession(String id) {
         if (id == null) {
@@ -84,13 +66,6 @@ public class SessionStoreCache<T> implements SessionStore<T> {
         return entry != null ? entry.value : null;
     }
 
-    /**
-     * Retrieves all session objects currently stored in the cache.
-     * This method collects all available session objects from the internal cache
-     * and returns them as an immutable list.
-     *
-     * @return a list of all session objects, or an empty list if no sessions are currently stored
-     */
     @Override
     public List<T> getAllSessions() {
         return sessions.asMap().values().stream()
@@ -98,21 +73,21 @@ public class SessionStoreCache<T> implements SessionStore<T> {
                 .toList();
     }
 
-    /**
-     * Removes the session associated with the given ID from the store.
-     *
-     * @param id the session ID to remove
-     */
     @Override
     public synchronized void removeSession(String id) {
         sessions.invalidate(id);
+    }
+
+    @Override
+    public synchronized void removeExpiredSessions() {
+        // Nothing to remove
     }
 
     private final class SessionExpiry implements Expiry<String, CacheEntry<T>> {
 
         @Override
         public long expireAfterCreate(String key, CacheEntry<T> entry, long now) {
-            return entry.ttlNanos;
+            return entry.duration.toNanos();
         }
 
         @Override
@@ -126,10 +101,5 @@ public class SessionStoreCache<T> implements SessionStore<T> {
         }
     }
 
-    private record CacheEntry<T>(T value, long ttlNanos) {
-        private CacheEntry(T value, long ttlNanos) {
-            this.value = value;
-            this.ttlNanos = TimeUnit.MILLISECONDS.toNanos(ttlNanos);
-        }
-    }
+    private record CacheEntry<T>(T value, Duration duration) {}
 }

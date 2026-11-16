@@ -16,16 +16,10 @@
 
 package net.ihe.gazelle.maestrorecording.adapter;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kereval.gazelle.datahouse.api.business.record.Item;
-
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
+import net.ihe.gazelle.maestro.api.business.message.StartTestRun;
 import net.ihe.gazelle.maestro.api.business.message.UserInteractionCompleted;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
@@ -35,12 +29,7 @@ import net.ihe.gazelle.maestro.api.business.test.Test;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
-import net.ihe.gazelle.maestro.engine.business.MaestroFacade;
-import net.ihe.gazelle.maestro.engine.business.RecordingMaestro;
-import net.ihe.gazelle.maestro.engine.business.StepExecutorProvider;
-import net.ihe.gazelle.maestro.engine.business.StepRunner;
-import net.ihe.gazelle.maestro.engine.business.TestRunner;
-import net.ihe.gazelle.maestro.engine.business.TestSuiteRunner;
+import net.ihe.gazelle.maestro.engine.business.*;
 import net.ihe.gazelle.maestro.engine.business.context.TestRunSession;
 import net.ihe.gazelle.maestro.engine.business.context.TestSuiteSession;
 import net.ihe.gazelle.maestro.engine.technical.dao.SessionStoreCache;
@@ -51,7 +40,6 @@ import net.ihe.gazelle.maestro.validation.step.technical.record.ValidationStepOu
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 import net.ihe.gazelle.servicemetadata.api.business.Service;
 import net.ihe.gazelle.validation.v2.api.business.report.ValidationReport;
-
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -61,7 +49,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 class IncrementalWorkflowTest {
+
     @ParameterizedTest
     @ValueSource(booleans = {false, true})
     void recordsWhileAnotherStepWaitsWithoutChangingMappedBytes(boolean failStorage)
@@ -147,10 +138,12 @@ class IncrementalWorkflowTest {
                                                                             "previousReport",
                                                                             "${reportBytes}")))));
             maestro.executeTest(
-                    new TestRun()
-                            .setTest(definition)
-                            .setAccessControlList(new AccessControlList().setPublic(true)),
-                    true,
+                    new StartTestRun()
+                            .setTestRun(new TestRun()
+                                    .setTest(definition)
+                                    .setAccessControlList(new AccessControlList().setPublic(true)))
+                            .setPersist(true)
+                    ,
                     observer);
             assertTrue(client.writing.await(10, TimeUnit.SECONDS));
             observer.interaction.get(10, TimeUnit.SECONDS);

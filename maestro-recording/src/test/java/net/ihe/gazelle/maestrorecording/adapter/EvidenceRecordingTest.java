@@ -16,26 +16,11 @@
 
 package net.ihe.gazelle.maestrorecording.adapter;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kereval.gazelle.datahouse.api.business.record.Item;
-
 import net.ihe.gazelle.maestro.api.business.message.PutEvidence;
 import net.ihe.gazelle.maestro.api.business.message.StepRunFinished;
-import net.ihe.gazelle.maestro.api.business.property.ByteArrayItemProperty;
-import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
-import net.ihe.gazelle.maestro.api.business.property.LinkProperty;
-import net.ihe.gazelle.maestro.api.business.property.Property;
-import net.ihe.gazelle.maestro.api.business.property.StringProperty;
+import net.ihe.gazelle.maestro.api.business.property.*;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
 import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
@@ -43,12 +28,13 @@ import net.ihe.gazelle.maestro.api.technical.dto.message.EvidenceRecordedDTO;
 import net.ihe.gazelle.maestro.engine.business.TestReportRecordingException;
 import net.ihe.gazelle.modelmarshaller.technical.jackson.JacksonSerDes;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
-
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class EvidenceRecordingTest {
     private final RecordItemClientMock client = new RecordItemClientMock();

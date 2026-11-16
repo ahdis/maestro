@@ -27,9 +27,11 @@ import net.ihe.gazelle.maestro.spi.business.recording.plan.ReferencePlan;
 
 /** Records uploaded files once and uses the same attachment in report inputs and outputs. */
 public class UserInteractionStepOutputDissector implements StepOutputPlanDissector {
+
     // This relative path is fixed by the Datahouse attachment API contract.
     @SuppressWarnings("java:S1075")
     private static final String ATTACHMENTS_PATH = "/attachments/";
+
     @Override
     public void dissect(StepOutputPlan plan) {
         if (plan == null || plan.getStepRunReport() == null) {
