@@ -1,0 +1,51 @@
+# Mirrors the upstream Gazelle Maestro repository into this one.
+#
+#   upstream  https://gitlab.inria.fr/gazelle/public/core/maestro
+#
+# Every upstream branch and tag is copied here under the same name and is never committed to:
+# an upstream branch is overwritten by the next sync. Our own work lives on branches below
+# `ahdis/`, which upstream does not use, so the sync never touches it. `ahdis/main` is the
+# default branch and the target of our pull requests; a newer upstream is merged into it
+# deliberately, by a pull request, never by this workflow.
+#
+# Branches deleted upstream are kept here.
+name: Sync upstream
+
+on:
+  schedule:
+    - cron: '17 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-upstream
+  cancel-in-progress: false
+
+env:
+  UPSTREAM_URL: https://gitlab.inria.fr/gazelle/public/core/maestro.git
+
+jobs:
+  sync:
+    if: github.repository == 'ahdis/maestro'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fetch upstream
+        run: |
+          git remote add upstream "$UPSTREAM_URL"
+          git fetch --no-tags upstream '+refs/heads/*:refs/remotes/upstream/*'
+          git fetch upstream '+refs/tags/*:refs/upstream-tags/*'
+      - name: Refuse an upstream branch in our namespace
+        run: |
+          if git for-each-ref --format='%(refname)' 'refs/remotes/upstream/ahdis/' | grep -q .; then
+            echo "::error::upstream now has branches below ahdis/ - the sync would overwrite ours"
+            exit 1
+          fi
+      - name: Push branches and tags
+        run: |
+          git push origin '+refs/remotes/upstream/*:refs/heads/*'
+          git push origin 'refs/upstream-tags/*:refs/tags/*'
