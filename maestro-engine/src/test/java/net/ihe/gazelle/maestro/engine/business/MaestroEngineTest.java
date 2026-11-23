@@ -225,8 +225,9 @@ class MaestroEngineTest {
                 .setAccessControlList(new AccessControlList().setPublic(true));
         StartTestRun startTestRun = new StartTestRun()
                 .setTestRun(testRun)
-                .setPersist(true);
+                .setPersist(false);
         maestro.executeTest(startTestRun, observer);
+        observer.awaitSuiteFinished(Duration.ofSeconds(5));
         assertThat(reportRecordService.getRecordedReports(), empty());
     }
 
