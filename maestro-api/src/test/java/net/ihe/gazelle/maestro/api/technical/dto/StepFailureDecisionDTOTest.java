@@ -17,6 +17,7 @@
 package net.ihe.gazelle.maestro.api.technical.dto;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import net.ihe.gazelle.maestro.api.technical.dto.message.StartTestRunDTO;
 import net.ihe.gazelle.maestro.api.business.message.StepFailureDecision;
 import net.ihe.gazelle.maestro.api.business.message.StepFailureDecisionRequested;
 import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
@@ -31,6 +32,14 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 class StepFailureDecisionDTOTest {
     private final JacksonSerDes serDes = new JacksonSerDes();
+
+    @Test
+    void promptsOnlyWhenTheClientOptsIn() {
+        StartTestRunDTO run = new StartTestRunDTO();
+        assertEquals(false, run.isPromptOnStepFailure());
+        run.setPromptOnStepFailure(true);
+        assertEquals(true, run.getBusinessObject().isPromptOnStepFailure());
+    }
 
     @Test
     void roundTripsRequestAndAuthenticatedAnswerWithTheSameStepAndRun() {

@@ -194,6 +194,21 @@ class TestRunnerTest {
     }
 
     @org.junit.jupiter.api.Test
+    void completesWithAnUnexpectedErrorIfTheDecisionCannotBeRequested() throws Exception {
+        testRunner = new TestRunner(sessionStore, eventProducer, request -> {
+            throw new IllegalStateException("Cannot request decision");
+        });
+        testRunner.run(new StartTestRun("unavailable", testRun).setPromptOnStepFailure(true));
+        testRunner.listen(new StepRunFinished("unavailable", "test-1", "First",
+                eventProducer.getCommands().getFirst().getStepRun(),
+                new StepRunReport().setStepName("First").setType("SIM").setResult(StepResult.FAILED)));
+        var finished = eventProducer.notificationReady.get(4, TimeUnit.SECONDS);
+        assertThat(finished.getTestRunReport().getUnexpectedErrors(), hasSize(1));
+        assertThat(finished.getTestRunReport().getStepRunReports().getFirst().getResult(), equalTo(StepResult.FAILED));
+        assertThat(sessionStore.hasSession("unavailable"), is(false));
+    }
+
+    @org.junit.jupiter.api.Test
     void aDecisionForARemovedRunCannotRestartIt() throws Exception {
         CompletableFuture<Void> observedMissingSession = new CompletableFuture<>();
         sessionStore = new SessionStoreCache<>() {
