@@ -30,6 +30,10 @@ channels:
         $ref: '#/components/messages/testRunStarted'
       stepRunStarted:
         $ref: '#/components/messages/stepRunStarted'
+      stepFailureDecisionRequested:
+        $ref: '#/components/messages/stepFailureDecisionRequested'
+      stepFailureDecision:
+        $ref: '#/components/messages/stepFailureDecision'
       interactWithUser:
         $ref: '#/components/messages/interactWithUser'
       userInteractionCompleted:
@@ -80,6 +84,18 @@ operations:
         - $ref: '#/channels/test-execution/messages/stepRunStarted'
         - $ref: '#/channels/test-execution/messages/stepRunFinished'
         - $ref: '#/channels/test-execution/messages/executionFinished'
+  decideAfterStepFailure:
+    title: Decide whether to continue after an unsuccessful step
+    action: receive
+    channel:
+      $ref: '#/channels/test-execution'
+    messages:
+      - $ref: '#/channels/test-execution/messages/stepFailureDecisionRequested'
+    reply:
+      channel:
+        $ref: '#/channels/test-execution'
+      messages:
+        - $ref: '#/channels/test-execution/messages/stepFailureDecision'
   interactWithUser:
     title: User interaction
     action: receive
@@ -114,6 +130,14 @@ components:
       summary: Notification that a step run has started
       payload:
         $ref: '#/components/schemas/StepRunStarted'
+    stepFailureDecisionRequested:
+      title: Step failure decision requested
+      payload:
+        $ref: '#/components/schemas/StepFailureDecisionRequested'
+    stepFailureDecision:
+      title: Step failure decision
+      payload:
+        $ref: '#/components/schemas/StepFailureDecision'
     interactWithUser:
       title: Interact with User
       summary: Message sent when a step is asking for user interaction.
@@ -167,6 +191,10 @@ components:
         type:
           type: string
           const: START_TEST_RUN
+        promptOnStepFailure:
+          description: Ask whether to continue after a failed or undefined step when another step remains.
+          type: boolean
+          default: false
         testRun:
           description: Test run to execute.
           $ref: '#/components/schemas/TestRun'
@@ -174,6 +202,36 @@ components:
           description: Whether the test suite report should be persisted.
           type: boolean
           default: true
+    StepFailureDecisionRequested:
+      type: object
+      required: [type, maestroSessionId, stepIndex, stepName, result]
+      properties:
+        type:
+          const: STEP_FAILURE_DECISION_REQUESTED
+        maestroSessionId:
+          type: string
+        stepIndex:
+          type: integer
+          minimum: 0
+        stepName:
+          type: string
+        result:
+          enum: [FAILED, UNDEFINED]
+    StepFailureDecision:
+      type: object
+      required: [type, maestroSessionId, stepIndex, continueExecution, authorization]
+      properties:
+        type:
+          const: STEP_FAILURE_DECISION
+        maestroSessionId:
+          type: string
+        stepIndex:
+          type: integer
+          minimum: 0
+        continueExecution:
+          type: boolean
+        authorization:
+          type: string
     TestRunStarted:
       description: Notification that a test run has started
       type: object

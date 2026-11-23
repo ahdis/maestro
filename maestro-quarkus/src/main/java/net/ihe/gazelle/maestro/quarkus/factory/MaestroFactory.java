@@ -16,6 +16,8 @@
 
 package net.ihe.gazelle.maestro.quarkus.factory;
 
+import java.util.concurrent.CompletableFuture;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.enterprise.inject.Produces;
@@ -172,7 +174,10 @@ public class MaestroFactory {
     @Produces
     @Default
     public TestRunner getTestRunner() {
-        return new TestRunner(testSessionStore, testRunEventProducer);
+        return new TestRunner(testSessionStore, testRunEventProducer, request -> {
+            MaestroObserver observer = testRunObserverStore.getSession(request.maestroSessionId());
+            return observer == null ? CompletableFuture.completedFuture(false) : observer.decideAfterStepFailure(request);
+        });
     }
 
     /**

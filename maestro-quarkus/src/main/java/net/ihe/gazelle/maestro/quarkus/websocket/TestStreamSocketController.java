@@ -165,6 +165,8 @@ public class TestStreamSocketController {
                     maestroCaller.setExpirationTime(startTestSuiteRun.getBusinessObject().getExpirationTimestamp());
                     maestro.executeTestSuite(startTestSuiteRun.getBusinessObject(), maestroCaller);
                 }
+                case StepFailureDecisionDTO decision ->
+                        maestroCaller.completeFailureDecision(decision.getBusinessObject());
                 case UserInteractionCompletedDTO userInteractionCompleted ->
                         maestroCaller.completeInteraction(userInteractionCompleted.getBusinessObject());
                 case PutEvidenceDTO putEvidence -> {

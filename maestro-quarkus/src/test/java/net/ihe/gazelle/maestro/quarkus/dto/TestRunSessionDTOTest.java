@@ -34,9 +34,11 @@ class TestRunSessionDTOTest {
         TestRunSession testRunSession = new TestRunSession()
                 .setTestRun(ObjectFactory.createTestRun())
                 .setStepCursor(0)
+                .setPromptOnStepFailure(true)
                 .setExpirationTimestamp(Instant.now().plusMillis(100));
         String message = serDes.serializeAsString(new TestRunSessionDTO(testRunSession));
         TestRunSession serialized = serDes.deserialize(message, TestRunSessionDTO.class).getBusinessObject();
+        assertEquals(testRunSession.isPromptOnStepFailure(), serialized.isPromptOnStepFailure());
         assertEquals(testRunSession.getExpirationTimestamp(), serialized.getExpirationTimestamp());
     }
 }

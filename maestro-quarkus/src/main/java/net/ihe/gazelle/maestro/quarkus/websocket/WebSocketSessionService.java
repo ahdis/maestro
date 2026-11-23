@@ -66,7 +66,8 @@ public class WebSocketSessionService {
      * @param sessionId the unique identifier for the WebSocket session to be removed
      */
     public void removeSession(String sessionId) {
-        sessions.remove(sessionId);
+        WebSocketSession removed = sessions.remove(sessionId);
+        if (removed != null) removed.closeFailureDecisions();
     }
 
     /**

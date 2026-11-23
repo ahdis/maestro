@@ -33,8 +33,13 @@ import net.ihe.gazelle.maestro.spi.business.StepRun;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 import org.junit.jupiter.api.BeforeEach;
 
+import java.time.Instant;
+import java.util.concurrent.TimeUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -153,19 +158,99 @@ class TestRunnerTest {
         assertThat(eventProducer.getNotifications(), empty());
     }
 
+    @ParameterizedTest
+    @CsvSource({"FAILED,true", "FAILED,false", "UNDEFINED,true", "UNDEFINED,false"})
+    void waitsForDecisionAndPreservesUnsuccessfulStep(StepResult result, boolean proceed) throws Exception {
+        CompletableFuture<Boolean> answer = new CompletableFuture<>();
+        testRun.getTest().getSteps().getLast().setType("GRADING");
+        testRunner = new TestRunner(sessionStore, eventProducer, request -> {
+            assertThat(request.result(), equalTo(result));
+            assertThat(request.stepName(), equalTo("First"));
+            return answer;
+        });
+        testRunner.run(new StartTestRun("decision", testRun).setPromptOnStepFailure(true));
+        StepRunReport firstReport = new StepRunReport().setStepName("First").setType("SIM").setResult(result);
+        testRunner.listen(new StepRunFinished("decision", "test-1", "First",
+                eventProducer.getCommands().getFirst().getStepRun(), firstReport));
+        assertThat(eventProducer.getCommands(), hasSize(1));
+        assertThat(eventProducer.getNotifications(), empty());
+        answer.complete(proceed);
+        if (proceed) {
+            eventProducer.nextStepReady.get(4, TimeUnit.SECONDS);
+            assertThat(eventProducer.getCommands(), hasSize(2));
+            StepRunReport secondReport = new StepRunReport().setStepName("Second").setType("GRADING").setResult(StepResult.PASSED);
+            testRunner.listen(new StepRunFinished("decision", "test-1", "Second",
+                    eventProducer.getCommands().getLast().getStepRun(), secondReport));
+        } else {
+            assertThat(eventProducer.getCommands(), hasSize(1));
+        }
+        eventProducer.notificationReady.get(4, TimeUnit.SECONDS);
+        assertThat(eventProducer.getNotifications(), hasSize(1));
+        var reports = eventProducer.getNotifications().getFirst().getTestRunReport().getStepRunReports();
+        assertThat(reports, hasSize(proceed ? 2 : 1));
+        assertThat(reports.getFirst().getResult(), equalTo(result));
+        assertThat(eventProducer.getNotifications().getFirst().getTestRunReport().getResult().name(),
+                equalTo(result.name()));
+    }
+
+    @org.junit.jupiter.api.Test
+    void aDecisionForARemovedRunCannotRestartIt() throws Exception {
+        CompletableFuture<Void> observedMissingSession = new CompletableFuture<>();
+        sessionStore = new SessionStoreCache<>() {
+            @Override
+            public synchronized TestRunSession getSession(String id) {
+                TestRunSession found = super.getSession(id);
+                if (found == null) observedMissingSession.complete(null);
+                return found;
+            }
+        };
+        CompletableFuture<Boolean> answer = new CompletableFuture<>();
+        testRunner = new TestRunner(sessionStore, eventProducer, request -> answer);
+        testRunner.run(new StartTestRun("removed", testRun).setPromptOnStepFailure(true));
+        testRunner.listen(new StepRunFinished("removed", "test-1", "First",
+                eventProducer.getCommands().getFirst().getStepRun(),
+                new StepRunReport().setStepName("First").setType("SIM").setResult(StepResult.FAILED)));
+        sessionStore.removeSession("removed");
+        answer.complete(true);
+        observedMissingSession.get(4, TimeUnit.SECONDS);
+        assertThat(eventProducer.getCommands(), hasSize(1));
+        assertThat(eventProducer.getNotifications(), empty());
+    }
+
+    @org.junit.jupiter.api.Test
+    void expiryFinishesTheRunAndALateChoiceCannotStartAnotherStep() throws Exception {
+        CompletableFuture<Boolean> answer = new CompletableFuture<>();
+        testRunner = new TestRunner(sessionStore, eventProducer, request -> answer);
+        testRunner.run(new StartTestRun("expiry", testRun).setPromptOnStepFailure(true)
+                .setExpirationTimestamp(Instant.now().plusMillis(500)));
+        testRunner.listen(new StepRunFinished("expiry", "test-1", "First",
+                eventProducer.getCommands().getFirst().getStepRun(),
+                new StepRunReport().setStepName("First").setType("SIM").setResult(StepResult.UNDEFINED)));
+        org.junit.jupiter.api.Assertions.assertTimeoutPreemptively(java.time.Duration.ofSeconds(4), () ->
+                eventProducer.notificationReady.get());
+        assertThat(answer.complete(true), is(false));
+        assertThat(eventProducer.getNotifications(), hasSize(1));
+        assertThat(eventProducer.getCommands(), hasSize(1));
+        assertThat(sessionStore.hasSession("expiry"), is(false));
+    }
+
     private static final class RecordingTestRunEventProducer implements TestRunEventProducer {
 
+        private final CompletableFuture<StartStepRun> nextStepReady = new CompletableFuture<>();
+        private final CompletableFuture<TestRunFinished> notificationReady = new CompletableFuture<>();
         private final List<StartStepRun> commands = new ArrayList<>();
         private final List<TestRunFinished> notifications = new ArrayList<>();
 
         @Override
         public void command(StartStepRun startStepRun) {
             commands.add(startStepRun);
+            if (commands.size() == 2) nextStepReady.complete(startStepRun);
         }
 
         @Override
         public void notify(TestRunFinished testRunFinished) {
             notifications.add(testRunFinished);
+            notificationReady.complete(testRunFinished);
         }
 
         List<StartStepRun> getCommands() {

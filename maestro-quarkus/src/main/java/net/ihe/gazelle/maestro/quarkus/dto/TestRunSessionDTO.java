@@ -64,6 +64,15 @@ public class TestRunSessionDTO implements DTO<TestRunSession> {
         testRunSession.setTestSessionId(testSessionId);
     }
 
+    @JsonProperty("promptOnStepFailure")
+    public boolean isPromptOnStepFailure() {
+        return testRunSession.isPromptOnStepFailure();
+    }
+
+    public void setPromptOnStepFailure(boolean promptOnStepFailure) {
+        testRunSession.setPromptOnStepFailure(promptOnStepFailure);
+    }
+
     @JsonProperty("testRun")
     public TestRunDTO getTestRun() {
         return new TestRunDTO(testRunSession.getTestRun());

@@ -26,6 +26,12 @@ import java.util.concurrent.CompletableFuture;
  */
 public interface MaestroObserver {
 
+    /** Interactive observers can pause a run at an unsuccessful step. */
+    default CompletableFuture<Boolean> decideAfterStepFailure(StepFailureDecisionRequested request) {
+        return CompletableFuture.completedFuture(false);
+    }
+
+
     /**
      * Records an accepted evidence value before it is added to the execution report.
      *

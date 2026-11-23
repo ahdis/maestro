@@ -96,6 +96,11 @@ public class RecordingMaestro implements Maestro {
         }
 
         @Override
+        public CompletableFuture<Boolean> decideAfterStepFailure(StepFailureDecisionRequested request) {
+            return delegate.decideAfterStepFailure(request);
+        }
+
+        @Override
         public Property recordEvidence(Property evidence) {
             return recording.recordEvidence(evidence);
         }

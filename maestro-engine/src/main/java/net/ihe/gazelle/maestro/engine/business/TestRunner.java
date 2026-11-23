@@ -35,6 +35,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serial;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.List;
 import java.util.Map;
 
@@ -48,6 +53,7 @@ public class TestRunner {
 
     private final SessionStore<TestRunSession> sessionStore;
     private final TestRunEventProducer testRunEventProducer;
+    private final Function<StepFailureDecisionRequested, CompletableFuture<Boolean>> failureDecision;
     private final TestRunValidator testRunValidator = new TestRunValidator();
 
     /**
@@ -57,6 +63,12 @@ public class TestRunner {
      * @param testRunEventProducer the producer used to send test run events
      */
     public TestRunner(SessionStore<TestRunSession> sessionStore, TestRunEventProducer testRunEventProducer) {
+        this(sessionStore, testRunEventProducer, request -> CompletableFuture.completedFuture(false));
+    }
+
+    public TestRunner(SessionStore<TestRunSession> sessionStore, TestRunEventProducer testRunEventProducer,
+                      Function<StepFailureDecisionRequested, CompletableFuture<Boolean>> failureDecision) {
+        this.failureDecision = failureDecision;
         this.sessionStore = sessionStore;
         this.testRunEventProducer = testRunEventProducer;
     }
@@ -74,6 +86,7 @@ public class TestRunner {
             testRunValidator.validate(testRun).orThrow(InvalidTestRunException::new);
             TestRunSession testRunSession = new TestRunSession(testRun)
                     .setTestSessionId(startTestRun.getTestSessionId())
+                    .setPromptOnStepFailure(startTestRun.isPromptOnStepFailure())
                     .setExpirationTimestamp(startTestRun.getExpirationTimestamp());
             sessionStore.putSession(sessionId, testRunSession, startTestRun.getExpirationTimestamp());
             runNextStep(testRunSession, sessionId, testRun.getTest().getId());
@@ -103,28 +116,74 @@ public class TestRunner {
         if (testRunSession != null) {
             try {
                 updateSessionState(stepRunFinished, testRunSession);
-                if (isPreviousStepSuccessful(stepRunFinished) && testRunSession.hasNextStep()) {
+                if (!testRunSession.hasNextStep()) {
+                    finishTest(sessionId, testRunSession);
+                } else if (isPreviousStepSuccessful(stepRunFinished)) {
                     runNextStep(testRunSession, sessionId, stepRunFinished.getTestId());
+                } else if (testRunSession.isPromptOnStepFailure()) {
+                    awaitFailureDecision(stepRunFinished, testRunSession);
                 } else {
                     finishTest(sessionId, testRunSession);
                 }
             } catch (Exception e) {
-                TestRun testRun = testRunSession.getTestRun();
-                LOG.atError().setCause(e).log("Error running test {}", testRun.getTest().getName());
-                testRunSession.closeEvidence();
-                sessionStore.removeSession(sessionId);
-                addEvidencesToReport(testRunSession);
-                testRunEventProducer.notify(
-                        new TestRunFinished(sessionId, testRun,
-                                newTestRunReportBuilder(testRun.getTest())
-                                        .addStepRunReports(testRunSession.getStepReports())
-                                        .setInputs(testRun.getInputs())
-                                        .addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e))
-                                        .build()
-                        ).setTestSessionId(testRunSession.getTestSessionId())
-                );
+                finishWithError(sessionId, testRunSession, e);
             }
         }
+    }
+
+    private void finishWithError(String sessionId, TestRunSession testRunSession, Exception e) {
+        TestRun testRun = testRunSession.getTestRun();
+        LOG.atError().setCause(e).log("Error running test {}", testRun.getTest().getName());
+        testRunSession.closeEvidence();
+        sessionStore.removeSession(sessionId);
+        addEvidencesToReport(testRunSession);
+        testRunEventProducer.notify(
+                new TestRunFinished(sessionId, testRun,
+                        newTestRunReportBuilder(testRun.getTest())
+                                .addStepRunReports(testRunSession.getStepReports())
+                                .setInputs(testRun.getInputs())
+                                .addUnexpectedError(new UnexpectedErrorBuilder().fromThrowable(e))
+                                .build()
+                ).setTestSessionId(testRunSession.getTestSessionId())
+        );
+    }
+
+    private void awaitFailureDecision(StepRunFinished finished, TestRunSession session) {
+        String sessionId = finished.getSessionId();
+        StepFailureDecisionRequested request = new StepFailureDecisionRequested(sessionId, session.currentStepIndex(),
+                finished.getStepName(), finished.getStepRunReport().getResult());
+        long remaining = Duration.between(Instant.now(), session.getExpirationTimestamp()).toMillis();
+        if (remaining <= 0) {
+            finishTest(sessionId, session);
+            return;
+        }
+        sessionStore.putSession(sessionId, session, session.getExpirationTimestamp());
+        failureDecision.apply(request).completeOnTimeout(false, remaining, TimeUnit.MILLISECONDS)
+                .whenCompleteAsync((proceed, error) -> {
+                    // The answer arrives on a WebSocket event loop. Session and report persistence may block.
+                    TestRunSession current = sessionStore.getSession(sessionId);
+                    if (current == null) {
+                        // The cache may expire first. Complete the report without re-adding an expired run.
+                        if (!Instant.now().isBefore(session.getExpirationTimestamp())) {
+                            finishTest(sessionId, session);
+                        }
+                        return;
+                    }
+                    if (current.currentStepIndex() != request.stepIndex()) return;
+                    try {
+                        if (error == null && Boolean.TRUE.equals(proceed)
+                                && Instant.now().isBefore(current.getExpirationTimestamp())) {
+                            runNextStep(current, sessionId, finished.getTestId());
+                        } else {
+                            finishTest(sessionId, current);
+                        }
+                    } catch (RuntimeException exception) {
+                        finishWithError(sessionId, current, exception);
+                    }
+                }, Thread::startVirtualThread).exceptionally(error -> {
+                    LOG.atError().setCause(error).log("Unable to resolve step {} in test {}", request.stepIndex(), finished.getTestId());
+                    return null;
+                });
     }
 
     private void finishTest(String sessionId, TestRunSession testRunSession) {
@@ -162,7 +221,8 @@ public class TestRunner {
         StepRunReport stepRunReport = stepRunFinished.getStepRunReport();
         testRunSession.addStepRunReport(stepRunReport);
         testRunSession.addPropertiesToContext(
-                mapOutputs(testRunSession.currentStep(), stepRunReport)
+                mapOutputs(testRunSession.currentStep(), stepRunReport,
+                        testRunSession.isPromptOnStepFailure() && !isPreviousStepSuccessful(stepRunFinished))
         );
     }
 
@@ -185,8 +245,10 @@ public class TestRunner {
                 || StepResult.DONE.equals(stepRunFinished.getStepRunReport().getResult());
     }
 
-    private static List<Property> mapOutputs(Step step, StepRunReport stepRunReport) {
+    private static List<Property> mapOutputs(Step step, StepRunReport stepRunReport, boolean allowMissing) {
         return step.getOutputMappings().entrySet().stream()
+                .filter(entry -> !allowMissing || stepRunReport.getOutputs().stream()
+                        .anyMatch(output -> output.getName().equals(entry.getKey())))
                 .map(entry -> mapOutput(entry, stepRunReport.getOutputs()))
                 .toList();
     }

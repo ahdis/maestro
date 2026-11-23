@@ -43,6 +43,17 @@ public class TestRunSession {
     private List<StepRunReport> stepReports;
     private List<PutEvidence> evidences;
     private boolean evidenceClosed;
+    private boolean promptOnStepFailure;
+
+    public boolean isPromptOnStepFailure() {
+        return promptOnStepFailure;
+    }
+
+    public TestRunSession setPromptOnStepFailure(boolean promptOnStepFailure) {
+        this.promptOnStepFailure = promptOnStepFailure;
+        return this;
+    }
+
     private Instant expirationTimestamp = Instant.ofEpochMilli(Test.TEST_DEFAULT_TIMEOUT_MILLIS);
 
     /**

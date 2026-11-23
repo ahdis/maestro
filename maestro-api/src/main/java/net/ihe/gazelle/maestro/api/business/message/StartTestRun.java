@@ -51,6 +51,17 @@ public class StartTestRun implements Message {
      * Whether to persist the test run execution or not
      */
     private boolean persist;
+    private boolean promptOnStepFailure;
+
+    public boolean isPromptOnStepFailure() {
+        return promptOnStepFailure;
+    }
+
+    public StartTestRun setPromptOnStepFailure(boolean promptOnStepFailure) {
+        this.promptOnStepFailure = promptOnStepFailure;
+        return this;
+    }
+
 
     /**
      * The expiration timestamp for the test run execution

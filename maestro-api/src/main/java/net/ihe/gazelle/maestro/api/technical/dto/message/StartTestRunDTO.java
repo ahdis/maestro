@@ -106,6 +106,16 @@ public class StartTestRunDTO extends MessageDTO<StartTestRun> implements Secured
         message.setPersist(persist);
     }
 
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    @JsonProperty("promptOnStepFailure")
+    public boolean isPromptOnStepFailure() {
+        return message.isPromptOnStepFailure();
+    }
+
+    public void setPromptOnStepFailure(boolean promptOnStepFailure) {
+        message.setPromptOnStepFailure(promptOnStepFailure);
+    }
+
     @Override
     public String getAuthorization() {
         return authorization;

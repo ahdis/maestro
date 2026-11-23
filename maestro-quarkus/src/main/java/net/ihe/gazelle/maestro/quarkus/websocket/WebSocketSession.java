@@ -46,6 +46,8 @@ public class WebSocketSession implements MaestroObserver, RecordedOutputsObserve
     private Instant expirationTime;
     private final boolean liveOutputsEnabled;
     private final Set<String> evidenceSessions = ConcurrentHashMap.newKeySet();
+    private final ConcurrentHashMap<StepFailureDecisionRequested, CompletableFuture<Boolean>> failureDecisions =
+            new ConcurrentHashMap<>();
     private CompletableFuture<UserInteractionCompleted> interactionFuture;
     private CompletableFuture<GradingCompleted> gradingFuture;
 
@@ -111,6 +113,32 @@ public class WebSocketSession implements MaestroObserver, RecordedOutputsObserve
         if (gradingFuture != null && !gradingFuture.isDone()) {
             gradingFuture.complete(gradingCompleted);
         }
+    }
+
+    @Override
+    public CompletableFuture<Boolean> decideAfterStepFailure(StepFailureDecisionRequested request) {
+        CompletableFuture<Boolean> decision = new CompletableFuture<>();
+        CompletableFuture<Boolean> pending = failureDecisions.putIfAbsent(request, decision);
+        if (pending != null) return pending;
+        decision.whenComplete((answer, error) -> failureDecisions.remove(request, decision));
+        session.getAsyncRemote().sendText(serDes.serializeAsString(new StepFailureDecisionRequestedDTO(request)),
+                sent -> { if (!sent.isOK()) decision.complete(false); });
+        return decision;
+    }
+
+    public void completeFailureDecision(StepFailureDecision answer) {
+        failureDecisions.forEach((request, pending) -> {
+            if (request.maestroSessionId().equals(answer.maestroSessionId()) && request.stepIndex() == answer.stepIndex()) {
+                if (pending.complete(answer.continueExecution())) {
+                    LOG.info("Received {} decision for step index {}", answer.continueExecution() ? "Continue" : "Stop",
+                            answer.stepIndex());
+                }
+            }
+        });
+    }
+
+    public void closeFailureDecisions() {
+        failureDecisions.values().forEach(pending -> pending.complete(false));
     }
 
     @Override

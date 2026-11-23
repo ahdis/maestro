@@ -44,3 +44,5 @@ net.ihe.gazelle.maestro.api.technical.dto.message.DeleteEvidenceDTO
 net.ihe.gazelle.maestro.api.technical.dto.message.AskGradingDTO
 net.ihe.gazelle.maestro.api.technical.dto.message.GradingCompletedDTO
 net.ihe.gazelle.maestro.api.technical.dto.message.StepOutputsAvailableDTO
+net.ihe.gazelle.maestro.api.technical.dto.message.StepFailureDecisionRequestedDTO
+net.ihe.gazelle.maestro.api.technical.dto.message.StepFailureDecisionDTO
