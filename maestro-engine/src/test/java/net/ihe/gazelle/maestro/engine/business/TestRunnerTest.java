@@ -195,7 +195,7 @@ class TestRunnerTest {
 
     @org.junit.jupiter.api.Test
     void completesWithAnUnexpectedErrorIfTheDecisionCannotBeRequested() throws Exception {
-        testRunner = new TestRunner(sessionStore, eventProducer, request -> {
+        testRunner = new TestRunner(sessionStore, eventProducer, _ -> {
             throw new IllegalStateException("Cannot request decision");
         });
         testRunner.run(new StartTestRun("unavailable", testRun).setPromptOnStepFailure(true));
@@ -220,7 +220,7 @@ class TestRunnerTest {
             }
         };
         CompletableFuture<Boolean> answer = new CompletableFuture<>();
-        testRunner = new TestRunner(sessionStore, eventProducer, request -> answer);
+        testRunner = new TestRunner(sessionStore, eventProducer, _ -> answer);
         testRunner.run(new StartTestRun("removed", testRun).setPromptOnStepFailure(true));
         testRunner.listen(new StepRunFinished("removed", "test-1", "First",
                 eventProducer.getCommands().getFirst().getStepRun(),
@@ -235,14 +235,13 @@ class TestRunnerTest {
     @org.junit.jupiter.api.Test
     void expiryFinishesTheRunAndALateChoiceCannotStartAnotherStep() throws Exception {
         CompletableFuture<Boolean> answer = new CompletableFuture<>();
-        testRunner = new TestRunner(sessionStore, eventProducer, request -> answer);
+        testRunner = new TestRunner(sessionStore, eventProducer, _ -> answer);
         testRunner.run(new StartTestRun("expiry", testRun).setPromptOnStepFailure(true)
                 .setExpirationTimestamp(Instant.now().plusMillis(500)));
         testRunner.listen(new StepRunFinished("expiry", "test-1", "First",
                 eventProducer.getCommands().getFirst().getStepRun(),
                 new StepRunReport().setStepName("First").setType("SIM").setResult(StepResult.UNDEFINED)));
-        org.junit.jupiter.api.Assertions.assertTimeoutPreemptively(java.time.Duration.ofSeconds(4), () ->
-                eventProducer.notificationReady.get());
+        eventProducer.notificationReady.get(4, TimeUnit.SECONDS);
         assertThat(answer.complete(true), is(false));
         assertThat(eventProducer.getNotifications(), hasSize(1));
         assertThat(eventProducer.getCommands(), hasSize(1));

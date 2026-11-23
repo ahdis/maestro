@@ -63,7 +63,7 @@ public class TestRunner {
      * @param testRunEventProducer the producer used to send test run events
      */
     public TestRunner(SessionStore<TestRunSession> sessionStore, TestRunEventProducer testRunEventProducer) {
-        this(sessionStore, testRunEventProducer, request -> CompletableFuture.completedFuture(false));
+        this(sessionStore, testRunEventProducer, _ -> CompletableFuture.completedFuture(false));
     }
 
     public TestRunner(SessionStore<TestRunSession> sessionStore, TestRunEventProducer testRunEventProducer,
@@ -170,20 +170,23 @@ public class TestRunner {
                         return;
                     }
                     if (current.currentStepIndex() != request.stepIndex()) return;
-                    try {
-                        if (error == null && Boolean.TRUE.equals(proceed)
-                                && Instant.now().isBefore(current.getExpirationTimestamp())) {
-                            runNextStep(current, sessionId, finished.getTestId());
-                        } else {
-                            finishTest(sessionId, current);
-                        }
-                    } catch (RuntimeException exception) {
-                        finishWithError(sessionId, current, exception);
-                    }
+                    applyFailureDecision(current, sessionId, finished.getTestId(), error == null && Boolean.TRUE.equals(proceed));
                 }, Thread::startVirtualThread).exceptionally(error -> {
                     LOG.atError().setCause(error).log("Unable to resolve step {} in test {}", request.stepIndex(), finished.getTestId());
                     return null;
                 });
+    }
+
+    private void applyFailureDecision(TestRunSession session, String sessionId, String testId, boolean proceed) {
+        try {
+            if (proceed && Instant.now().isBefore(session.getExpirationTimestamp())) {
+                runNextStep(session, sessionId, testId);
+            } else {
+                finishTest(sessionId, session);
+            }
+        } catch (RuntimeException cause) {
+            finishWithError(sessionId, session, cause);
+        }
     }
 
     private void finishTest(String sessionId, TestRunSession testRunSession) {

@@ -128,11 +128,10 @@ public class WebSocketSession implements MaestroObserver, RecordedOutputsObserve
 
     public void completeFailureDecision(StepFailureDecision answer) {
         failureDecisions.forEach((request, pending) -> {
-            if (request.maestroSessionId().equals(answer.maestroSessionId()) && request.stepIndex() == answer.stepIndex()) {
-                if (pending.complete(answer.continueExecution())) {
-                    LOG.info("Received {} decision for step index {}", answer.continueExecution() ? "Continue" : "Stop",
-                            answer.stepIndex());
-                }
+            if (request.maestroSessionId().equals(answer.maestroSessionId())
+                    && request.stepIndex() == answer.stepIndex() && pending.complete(answer.continueExecution())) {
+                LOG.info("Received {} decision for step index {}", answer.continueExecution() ? "Continue" : "Stop",
+                        answer.stepIndex());
             }
         });
     }
