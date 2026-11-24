@@ -16,6 +16,8 @@
 
 package net.ihe.gazelle.maestro.api.business.testreport;
 
+import net.ihe.gazelle.maestro.api.business.test.GradingMethod;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
@@ -27,172 +29,197 @@ import java.util.Objects;
  */
 public class Test implements Serializable {
 
-   @Serial
-   private static final long serialVersionUID = -1682879799680526090L;
+    @Serial
+    private static final long serialVersionUID = -1682879799680526090L;
 
-   /**
-    * The id of the test.
-    */
-   private String id;
+    /**
+     * The id of the test.
+     */
+    private String id;
 
-   /**
-    * The name of the test.
-    */
-   private String name;
+    /**
+     * The name of the test.
+     */
+    private String name;
 
-   /**
-    * The version of the test.
-    */
-   private String version;
+    /**
+     * The version of the test.
+     */
+    private String version;
 
-   /**
-    * The description of the test.
-    */
-   private String description;
+    /**
+     * The description of the test.
+     */
+    private String description;
 
-   /**
-    * Default constructor.
-    */
-   public Test() {
-   }
+    /**
+     * The grading method of the test.
+     */
+    private GradingMethod gradingMethod;
 
-   /**
-    * Constructs a new Test instance with the specified id.
-    *
-    * @param id the unique identifier for the test; must not be null or blank
-    */
-   public Test(String id) {
-      this.id = id;
-   }
+    /**
+     * Default constructor.
+     */
+    public Test() {
+    }
 
-   /**
-    * Retrieves the ID of the test.
-    *
-    * @return the ID of the test as a String
-    */
-   public String getId() {
-      return id;
-   }
+    /**
+     * Constructs a new Test instance with the specified id.
+     *
+     * @param id the unique identifier for the test; must not be null or blank
+     */
+    public Test(String id) {
+        this.id = id;
+    }
 
-   /**
-    * Sets the ID of the test.
-    *
-    * @param id the unique identifier for the test; must not be null or blank
-    * @return the current instance of {@code Test} to allow method chaining
-    */
-   public Test setId(String id) {
-      this.id = id;
-      return this;
-   }
+    /**
+     * Retrieves the ID of the test.
+     *
+     * @return the ID of the test as a String
+     */
+    public String getId() {
+        return id;
+    }
 
-   /**
-    * Retrieves the name of the test.
-    *
-    * @return the name of the test as a String
-    */
-   public String getName() {
-      return name;
-   }
+    /**
+     * Sets the ID of the test.
+     *
+     * @param id the unique identifier for the test; must not be null or blank
+     * @return the current instance of {@code Test} to allow method chaining
+     */
+    public Test setId(String id) {
+        this.id = id;
+        return this;
+    }
 
-   /**
-    * Sets the name of the test.
-    *
-    * @param name the name of the test
-    * @return the current instance of {@code Test} to allow method chaining
-    */
-   public Test setName(String name) {
-      this.name = name;
-      return this;
-   }
+    /**
+     * Retrieves the name of the test.
+     *
+     * @return the name of the test as a String
+     */
+    public String getName() {
+        return name;
+    }
 
-   /**
-    * Retrieves the version of the test.
-    *
-    * @return the version of the test as a String
-    */
-   public String getVersion() {
-      return version;
-   }
+    /**
+     * Sets the name of the test.
+     *
+     * @param name the name of the test
+     * @return the current instance of {@code Test} to allow method chaining
+     */
+    public Test setName(String name) {
+        this.name = name;
+        return this;
+    }
 
-   /**
-    * Sets the version of the test.
-    *
-    * @param version the version of the test as a String
-    * @return the current instance of {@code Test} to allow method chaining
-    */
-   public Test setVersion(String version) {
-      this.version = version;
-      return this;
-   }
+    /**
+     * Retrieves the version of the test.
+     *
+     * @return the version of the test as a String
+     */
+    public String getVersion() {
+        return version;
+    }
 
-   /**
-    * Retrieves the description of the current instance.
-    *
-    * @return the description as a String
-    */
-   public String getDescription() {
-      return description;
-   }
+    /**
+     * Sets the version of the test.
+     *
+     * @param version the version of the test as a String
+     * @return the current instance of {@code Test} to allow method chaining
+     */
+    public Test setVersion(String version) {
+        this.version = version;
+        return this;
+    }
 
-   /**
-    * Sets the description of the test.
-    *
-    * @param description the description of the test
-    * @return the current instance of {@code Test} to allow method chaining
-    */
-   public Test setDescription(String description) {
-      this.description = description;
-      return this;
-   }
+    /**
+     * Retrieves the description of the current instance.
+     *
+     * @return the description as a String
+     */
+    public String getDescription() {
+        return description;
+    }
 
-   /**
-    * Checks if the ID is defined for this instance.
-    *
-    * @return true if the ID is defined, false otherwise
-    */
-   public boolean isIdDefined() {
-      return id != null && !id.isBlank();
-   }
+    /**
+     * Sets the description of the test.
+     *
+     * @param description the description of the test
+     * @return the current instance of {@code Test} to allow method chaining
+     */
+    public Test setDescription(String description) {
+        this.description = description;
+        return this;
+    }
 
-   /**
-    * Checks whether the name is defined if it is present.
-    *
-    * @return true if the name is either null or non-blank; false if the name is blank
-    */
-   public boolean isNameDefinedIfPresent() {
-      return name == null || !name.isBlank();
-   }
+    /**
+     * Retrieves the grading method used to evaluate the test.
+     *
+     * @return the grading method of the test
+     */
+    public GradingMethod getGradingMethod() {
+        return gradingMethod;
+    }
 
-   /**
-    * Checks whether the version is defined if it is present.
-    *
-    * @return true if the version is either null or non-blank; false otherwise
-    */
-   public boolean isVersionDefinedIfPresent() {
-      return version == null || !version.isBlank();
-   }
+    /**
+     * Sets the grading method used to evaluate the test.
+     *
+     * @param gradingMethod the grading method to assign to the test
+     * @return the current instance of {@code Test} to allow method chaining
+     */
+    public Test setGradingMethod(GradingMethod gradingMethod) {
+        this.gradingMethod = gradingMethod;
+        return this;
+    }
 
-   /**
-    * Checks whether the description is considered defined if it is present.
-    *
-    * @return true if the description is null or non-blank; false if the description is blank
-    */
-   public boolean isDescriptionDefinedIfPresent() {
-      return description == null || !description.isBlank();
-   }
+    /**
+     * Checks if the ID is defined for this instance.
+     *
+     * @return true if the ID is defined, false otherwise
+     */
+    public boolean isIdDefined() {
+        return id != null && !id.isBlank();
+    }
 
-   @Override
-   public boolean equals(Object o) {
-      if (this == o) return true;
-      if (!(o instanceof Test test)) return false;
-      return Objects.equals(id, test.id)
-            && Objects.equals(name, test.name)
-            && Objects.equals(version, test.version)
-            && Objects.equals(description, test.description);
-   }
+    /**
+     * Checks whether the name is defined if it is present.
+     *
+     * @return true if the name is either null or non-blank; false if the name is blank
+     */
+    public boolean isNameDefinedIfPresent() {
+        return name == null || !name.isBlank();
+    }
 
-   @Override
-   public int hashCode() {
-      return Objects.hash(id, name, version, description);
-   }
+    /**
+     * Checks whether the version is defined if it is present.
+     *
+     * @return true if the version is either null or non-blank; false otherwise
+     */
+    public boolean isVersionDefinedIfPresent() {
+        return version == null || !version.isBlank();
+    }
+
+    /**
+     * Checks whether the description is considered defined if it is present.
+     *
+     * @return true if the description is null or non-blank; false if the description is blank
+     */
+    public boolean isDescriptionDefinedIfPresent() {
+        return description == null || !description.isBlank();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Test test)) return false;
+        return Objects.equals(id, test.id)
+                && Objects.equals(name, test.name)
+                && Objects.equals(version, test.version)
+                && Objects.equals(description, test.description);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, version, description);
+    }
 }

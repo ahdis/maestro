@@ -205,7 +205,8 @@ public class TestRunner {
         return new TestRunReportBuilder()
                 .setTest(new TestBuilder()
                         .setId(test.getId())
-                        .setName(test.getName()));
+                        .setName(test.getName())
+                        .setGradingMethod(test.getGradingMethod()));
     }
 
     /**

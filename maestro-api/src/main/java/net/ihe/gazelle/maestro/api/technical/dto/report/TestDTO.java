@@ -20,90 +20,107 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import net.ihe.gazelle.maestro.api.business.test.GradingMethod;
 import net.ihe.gazelle.maestro.api.business.testreport.Test;
 import net.ihe.gazelle.modelmarshaller.technical.dto.DTO;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 @Schema(
-      name = "Test",
-      description = "The test that has been executed."
+        name = "Test",
+        description = "The test that has been executed."
 )
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-      "id",
-      "name",
-      "version",
-      "description"
+        "id",
+        "name",
+        "version",
+        "description",
+        "gradingMethod"
 })
 public class TestDTO implements DTO<Test> {
 
-   @JsonIgnore
-   private final Test test;
+    @JsonIgnore
+    private final Test test;
 
-   public TestDTO() {
-      this(new Test());
-   }
+    public TestDTO() {
+        this(new Test());
+    }
 
-   public TestDTO(Test test) {
-      this.test = test;
-   }
+    public TestDTO(Test test) {
+        this.test = test;
+    }
 
-   @Override
-   @JsonIgnore
-   public Test getBusinessObject() {
-      return test;
-   }
+    @Override
+    @JsonIgnore
+    public Test getBusinessObject() {
+        return test;
+    }
 
-   @Schema(
-         name = "id",
-         description = "The unique identifier of the test.",
-         required = true
-   )
-   @JsonProperty(value = "id")
-   public String getId() {
-      return test.getId();
-   }
+    @Schema(
+            name = "id",
+            description = "The unique identifier of the test.",
+            required = true
+    )
+    @JsonProperty(value = "id")
+    public String getId() {
+        return test.getId();
+    }
 
-   public void setId(String id) {
-      test.setId(id);
-   }
+    public void setId(String id) {
+        test.setId(id);
+    }
 
-   @Schema(
-         name = "name",
-         description = "The name of the test."
-   )
-   @JsonProperty(value = "name")
-   public String getName() {
-      return test.getName();
-   }
+    @Schema(
+            name = "name",
+            description = "The name of the test."
+    )
+    @JsonProperty(value = "name")
+    public String getName() {
+        return test.getName();
+    }
 
-   public void setName(String name) {
-      test.setName(name);
-   }
+    public void setName(String name) {
+        test.setName(name);
+    }
 
-   @Schema(
-         name = "version",
-         description = "The version of the test."
-   )
-   @JsonProperty(value = "version")
-   public String getVersion() {
-      return test.getVersion();
-   }
+    @Schema(
+            name = "version",
+            description = "The version of the test."
+    )
+    @JsonProperty(value = "version")
+    public String getVersion() {
+        return test.getVersion();
+    }
 
-   public void setVersion(String version) {
-      test.setVersion(version);
-   }
+    public void setVersion(String version) {
+        test.setVersion(version);
+    }
 
-   @Schema(
-         name = "description",
-         description = "The description of the test."
-   )
-   @JsonProperty(value = "description")
-   public String getDescription() {
-      return test.getDescription();
-   }
+    @Schema(
+            name = "description",
+            description = "The description of the test."
+    )
+    @JsonProperty(value = "description")
+    public String getDescription() {
+        return test.getDescription();
+    }
 
-   public void setDescription(String description) {
-      test.setDescription(description);
-   }
+    public void setDescription(String description) {
+        test.setDescription(description);
+    }
+
+    @Schema(
+            name = "gradingMethod",
+            description = "The grading method used for this test.",
+            enumeration = {GradingMethod.GRADING_AUTOMATED, GradingMethod.GRADING_SELF_ASSESSED, GradingMethod.GRADING_MONITORED},
+            required = true
+    )
+    @JsonProperty(value = "gradingMethod")
+    public String getGradingMethod() {
+        return test.getGradingMethod().name();
+    }
+
+    public void setGradingMethod(String gradingMethod) {
+        test.setGradingMethod(GradingMethod.valueOf(gradingMethod));
+    }
 }
