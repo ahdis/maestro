@@ -21,6 +21,7 @@ import net.ihe.gazelle.errorhandling.business.UnexpectedErrorValidator;
 import net.ihe.gazelle.errorhandling.technical.UnexpectedErrorDTO;
 import net.ihe.gazelle.maestro.api.business.property.ByteArrayProperty;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
+import net.ihe.gazelle.maestro.api.business.test.GradingMethod;
 import net.ihe.gazelle.maestro.api.business.testreport.*;
 import net.ihe.gazelle.maestro.api.business.testreport.validator.SystemUnderTestValidator;
 import net.ihe.gazelle.maestro.api.business.testreport.validator.TestReportValidator;
@@ -125,7 +126,8 @@ class TestReportDTOTest {
                 .setTest(new net.ihe.gazelle.maestro.api.business.testreport.Test()
                         .setId("test-1")
                         .setName("Sample test")
-                        .setVersion("1.0"))
+                        .setVersion("1.0")
+                        .setGradingMethod(GradingMethod.AUTOMATED))
                 .addInput(new StringProperty("payload", "value"))
                 .addOutput(new ByteArrayProperty("document", "content".getBytes(StandardCharsets.UTF_8)))
                 .addStepRunReport(stepRunReport)
