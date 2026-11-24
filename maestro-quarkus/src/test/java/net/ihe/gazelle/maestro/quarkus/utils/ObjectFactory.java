@@ -132,7 +132,8 @@ public class ObjectFactory {
                 .setRunId("run-42")
                 .setTest(new TestBuilder()
                         .setId("test-1")
-                        .setName("Sample test"))
+                        .setName("Sample test")
+                        .setGradingMethod(GradingMethod.AUTOMATED))
                 .addStepRunReport(stepRunReportBuilder);
 
         TestReportBuilder builder = new TestReportBuilder()

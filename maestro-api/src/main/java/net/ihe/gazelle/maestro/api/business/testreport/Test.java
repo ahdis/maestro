@@ -55,7 +55,7 @@ public class Test implements Serializable {
     /**
      * The grading method of the test.
      */
-    private GradingMethod gradingMethod;
+    private GradingMethod gradingMethod = GradingMethod.AUTOMATED;
 
     /**
      * Default constructor.

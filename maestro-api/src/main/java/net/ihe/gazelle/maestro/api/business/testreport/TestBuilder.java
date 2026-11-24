@@ -31,7 +31,7 @@ public class TestBuilder extends AbstractBuilder<Test> {
     private String name;
     private String version;
     private String description;
-    private GradingMethod gradingMethod;
+    private GradingMethod gradingMethod = GradingMethod.AUTOMATED;
 
     /**
      * Default constructor.
