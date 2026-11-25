@@ -21,10 +21,8 @@ import net.ihe.gazelle.maestro.api.business.message.*;
 import net.ihe.gazelle.maestro.api.business.property.StringProperty;
 import net.ihe.gazelle.maestro.api.business.property.SupportedInputsProperty;
 import net.ihe.gazelle.maestro.api.business.test.*;
-import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
-import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
-import net.ihe.gazelle.maestro.api.business.testreport.TestReport;
-import net.ihe.gazelle.maestro.api.business.testreport.TestRunReport;
+import net.ihe.gazelle.maestro.api.business.test.Test;
+import net.ihe.gazelle.maestro.api.business.testreport.*;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestSuiteRun;
 import net.ihe.gazelle.maestro.api.business.userinteract.stub.UserInteractionHandlerStub;
@@ -138,6 +136,33 @@ class MaestroEngineTest {
         assertThat(report.getTestSessionId(), equalTo(TEST_SESSION_ID));
         assertThat(report.getTestRunReports(), hasSize(1));
         assertThat(report.getUnexpectedErrors(), empty());
+    }
+
+    @org.junit.jupiter.api.Test
+    void executeTestRunsWithOnlyDoneResult() {
+        RecordingMaestroObserver observer = new RecordingMaestroObserver();
+        Test test = createTest("test-1", "done");
+        TestRun testRun = new TestRun()
+                .setTest(test)
+                .setAccessControlList(new AccessControlList().setPublic(true));
+        stepExecutorProvider
+                .returnsReport("done", doneReport("done"));
+
+        StartTestRun startTestRun = new StartTestRun()
+                .setTestSessionId(TEST_SESSION_ID)
+                .setTestRun(testRun)
+                .setPersist(true);
+        maestro.executeTest(startTestRun, observer);
+
+        ExecutionFinished finished = observer.awaitSuiteFinished(Duration.ofSeconds(5));
+        assertThat(finished.getRun(), sameInstance(testRun));
+        assertThat(reportRecordService.getRecordedReports(), hasSize(1));
+        TestReport report = reportRecordService.getRecordedReports().getFirst();
+        assertThat(report.getTestSessionId(), equalTo(TEST_SESSION_ID));
+        assertThat(report.getTestRunReports(), hasSize(1));
+        assertThat(report.getUnexpectedErrors(), empty());
+        assertThat(report.getResult(), equalTo(Result.UNDEFINED));
+        assertThat(report.getNote(), equalTo("This test does not contain any step with a result from which a PASSED or FAILED conclusion can be drawn."));
     }
 
     @org.junit.jupiter.api.Test
@@ -509,6 +534,13 @@ class MaestroEngineTest {
                 .setResult(StepResult.PASSED);
     }
 
+    private StepRunReport doneReport(String stepName) {
+        return new StepRunReport()
+                .setStepName(stepName)
+                .setType(Instrumented4TestStepDefinition.TYPE)
+                .setResult(StepResult.DONE);
+    }
+
     private TestSuiteRun buildSuiteRun(String suiteId, Test test) {
         TestSuite testSuite = new TestSuite()
                 .setId(suiteId)
@@ -535,7 +567,7 @@ class MaestroEngineTest {
     private Step step(String name) {
         return new Step()
                 .setName(name)
-                .setType("UNIT_TEST")
+                .setType(Instrumented4TestStepDefinition.TYPE)
                 .setTimeout(3000L);
     }
 

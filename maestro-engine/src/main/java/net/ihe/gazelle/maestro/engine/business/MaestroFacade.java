@@ -18,6 +18,7 @@ package net.ihe.gazelle.maestro.engine.business;
 
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.api.business.message.*;
+import net.ihe.gazelle.maestro.api.business.test.GradingMethod;
 import net.ihe.gazelle.maestro.api.business.testreport.*;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRun;
 import net.ihe.gazelle.maestro.api.business.testrun.TestRunValidator;
@@ -185,7 +186,19 @@ public class MaestroFacade {
         testReportBuilder.setTestSuiteName(testRun.getTest().getName());
         testReportBuilder.addTestRunReport(testRunFinished.getTestRunReport());
         TestReport testReport = testReportBuilder.build();
+        addUndefinedNote(testRun, testRunFinished.getTestRunReport(), testReport);
         return new ExecutionFinished(testRunFinished.getSessionId(), testRunFinished.getTestRun(), testReport);
+    }
+
+    private void addUndefinedNote(TestRun testRun, TestRunReport testRunReport, TestReport testReport) {
+        if (GradingMethod.AUTOMATED.equals(testRun.getTest().getGradingMethod())) {
+            for (StepRunReport stepRunReport : testRunReport.getStepRunReports()) {
+                if (!StepResult.DONE.equals(stepRunReport.getResult())) {
+                    return;
+                }
+            }
+            testReport.setNote("This test does not contain any step with a result from which a PASSED or FAILED conclusion can be drawn.");
+        }
     }
 
     private ExecutionFinished asExecutionFinished(TestSuiteRunFinished testSuiteRunFinished) {

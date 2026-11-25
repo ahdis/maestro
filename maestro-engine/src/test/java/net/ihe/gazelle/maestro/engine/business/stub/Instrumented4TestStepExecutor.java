@@ -16,6 +16,7 @@
 
 package net.ihe.gazelle.maestro.engine.business.stub;
 
+import net.ihe.gazelle.maestro.api.business.testreport.StepResult;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReport;
 import net.ihe.gazelle.maestro.api.business.testreport.StepRunReportBuilder;
 import net.ihe.gazelle.maestro.spi.business.StepExecutor;
@@ -23,6 +24,7 @@ import net.ihe.gazelle.maestro.spi.business.StepRun;
 
 import java.util.concurrent.TimeUnit;
 
+import static net.ihe.gazelle.maestro.api.business.testreport.StepResult.DONE;
 import static net.ihe.gazelle.maestro.api.business.testreport.StepResult.PASSED;
 import static org.awaitility.Awaitility.await;
 
@@ -36,10 +38,15 @@ public class Instrumented4TestStepExecutor implements StepExecutor {
             }
             stepRun.getPropertyValue(Instrumented4TestStepDefinition.REQUIRED_INPUT);
 
+            StepResult result = PASSED;
+            if ("done".equals(stepRun.getName())) {
+                result = DONE;
+            }
+
             StepRunReportBuilder reportBuilder = new StepRunReportBuilder()
                     .setStepName(stepRun.getName())
                     .setType(stepRun.getType())
-                    .setResult(PASSED);
+                    .setResult(result);
 
             return reportBuilder.build();
         } catch (Exception _) {

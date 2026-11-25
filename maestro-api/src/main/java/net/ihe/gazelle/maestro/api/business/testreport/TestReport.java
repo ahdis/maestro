@@ -17,6 +17,7 @@
 package net.ihe.gazelle.maestro.api.business.testreport;
 
 import net.ihe.gazelle.errorhandling.business.UnexpectedError;
+import net.ihe.gazelle.maestro.api.business.test.GradingMethod;
 import net.ihe.gazelle.security.business.ProtectedResource;
 import net.ihe.gazelle.security.business.acl.AccessControlList;
 
