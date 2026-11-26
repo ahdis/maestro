@@ -16,6 +16,7 @@
 
 package net.ihe.gazelle.maestro.engine.business;
 
+import net.ihe.gazelle.errorhandling.business.UnexpectedError;
 import net.ihe.gazelle.maestro.api.business.MaestroObserver;
 import net.ihe.gazelle.maestro.api.business.message.*;
 import net.ihe.gazelle.maestro.api.business.test.GradingMethod;
@@ -184,20 +185,22 @@ public class MaestroFacade {
                         .map(SystemUnderTestBuilder::new)
                         .toList());
         testReportBuilder.setTestSuiteName(testRun.getTest().getName());
+        addOnlyDONEResultError(testRun, testRunFinished.getTestRunReport());
         testReportBuilder.addTestRunReport(testRunFinished.getTestRunReport());
         TestReport testReport = testReportBuilder.build();
-        addUndefinedNote(testRun, testRunFinished.getTestRunReport(), testReport);
         return new ExecutionFinished(testRunFinished.getSessionId(), testRunFinished.getTestRun(), testReport);
     }
 
-    private void addUndefinedNote(TestRun testRun, TestRunReport testRunReport, TestReport testReport) {
+    private void addOnlyDONEResultError(TestRun testRun, TestRunReport testRunReport) {
         if (GradingMethod.AUTOMATED.equals(testRun.getTest().getGradingMethod())) {
             for (StepRunReport stepRunReport : testRunReport.getStepRunReports()) {
                 if (!StepResult.DONE.equals(stepRunReport.getResult())) {
                     return;
                 }
             }
-            testReport.setNote("This test does not contain any step with a result from which a PASSED or FAILED conclusion can be drawn.");
+            testRunReport.addUnexpectedError(new UnexpectedError()
+                    .setName("Test with only DONE results error")
+                    .setMessage("This test does not contain any step with a result from which a PASSED or FAILED conclusion can be drawn."));
         }
     }
 

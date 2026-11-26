@@ -161,8 +161,11 @@ class MaestroEngineTest {
         assertThat(report.getTestSessionId(), equalTo(TEST_SESSION_ID));
         assertThat(report.getTestRunReports(), hasSize(1));
         assertThat(report.getUnexpectedErrors(), empty());
+        assertThat(report.getTestRunReports().getFirst().getUnexpectedErrors(), hasItem(allOf(
+                hasProperty("name", equalTo("Test with only DONE results error")),
+                hasProperty("message", equalTo("This test does not contain any step with a result from which a PASSED or FAILED conclusion can be drawn."))
+        )));
         assertThat(report.getResult(), equalTo(Result.UNDEFINED));
-        assertThat(report.getNote(), equalTo("This test does not contain any step with a result from which a PASSED or FAILED conclusion can be drawn."));
     }
 
     @org.junit.jupiter.api.Test
